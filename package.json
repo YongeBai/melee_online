@@ -6,6 +6,7 @@
     "start": "node scripts/start-local.mjs",
     "setup": "node scripts/setup-engine.mjs",
     "setup:native": "node scripts/native/setup-native.mjs",
-    "test": "node --test scripts/engine/*.test.mjs scripts/native/*.test.mjs"
+    "test": "node --test scripts/engine/*.test.mjs scripts/native/*.test.mjs scripts/assets/*.test.mjs",
+    "serve": "node --env-file-if-exists=.env scripts/serve.mjs"
   }
 }

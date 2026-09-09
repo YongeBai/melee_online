@@ -1,0 +1,17 @@
+{
+  "mode": "production server, no Vite",
+  "date": "2026-09-09",
+  "seconds": 30.00117999994755,
+  "startFrame": 431,
+  "endFrame": 2231,
+  "startTimer": 474,
+  "endTimer": 444,
+  "resolution": [1280, 720],
+  "simulationFps": 59.99764009292791,
+  "renderFps": 59.93097604838021,
+  "decodedFps": 59.89764402610636,
+  "presentedFps": 59.89764402610636,
+  "captureFps": 59.89764402610636,
+  "encodedFps": 59.89764402610636,
+  "dropped": 0
+}

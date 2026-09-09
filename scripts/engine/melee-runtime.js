@@ -1,9 +1,10 @@
-import { EmulatorHost } from "/engine/src/core-host.js";
 import { AudioController } from "/engine/src/audio.js";
 import { readGamepadInput, selectPreferredGamepad } from "/engine/src/input.js";
 
 const params = new URLSearchParams(location.search);
 const nativeEngine = params.get("engine") !== "wasm";
+document.getElementById("gameViewport").classList.toggle("native", nativeEngine);
+document.body.classList.toggle("native-engine", nativeEngine);
 if (!nativeEngine && !params.has("video")) {
   params.set("video", "software");
   params.set("presenter", "webgl");
@@ -42,11 +43,14 @@ let sceneSample,
   measuredRenderFps = 0,
   previousSceneFrame = 0;
 const actions = [];
+let testForms = [false, false];
 let nativeSceneKey = "",
   nativeSceneSince = 0;
 const audio = new AudioController();
 if (nativeEngine) audio.targetLeadSeconds = 0.08;
-const Host = nativeEngine ? (await import("./native-host.js")).NativeHost : EmulatorHost;
+const Host = nativeEngine
+  ? (await import("./native-host.js")).NativeHost
+  : (await import("/engine/src/core-host.js")).EmulatorHost;
 const host = new Host({
   canvas: $("screen"),
   onStatus: (message) => {
@@ -75,7 +79,7 @@ const neutral = () => ({
   analogA: 0,
   analogB: 0,
 });
-const mapping = { KeyP: 1, KeyO: 2, Space: 4, Enter: 16, KeyI: 32, KeyU: 128 };
+const mapping = { KeyP: 1, KeyO: 2, Space: 4, Enter: 16, KeyI: 32, KeyL: 64, KeyU: 128 };
 const relevant = new Set([
   ...Object.keys(mapping),
   "KeyW",
@@ -101,6 +105,7 @@ function sample() {
   pad.cStickX = 128 + 96 * (Number(keys.has("Period")) - Number(keys.has("KeyM")));
   pad.cStickY = 128 + 96 * (Number(keys.has("KeyK")) - Number(keys.has("Comma")));
   pad.triggerLeft = keys.has("KeyI") ? 255 : 0;
+  pad.triggerRight = keys.has("KeyL") ? 255 : 0;
   pad.analogA = keys.has("KeyP") ? 255 : 0;
   pad.analogB = keys.has("KeyO") ? 255 : 0;
   if (gamepadState) {
@@ -147,7 +152,7 @@ function pollGamepad() {
     const start = Boolean(pad.buttons[9]?.pressed);
     if (start && !padStartHeld && ready) {
       if (gameState?.minor === 0 && !paused) void control("start").then(() => pulse(16));
-      else void setPaused(!paused);
+      else if (!paused) pulse(16);
     }
     padStartHeld = start;
   } else padStartHeld = false;
@@ -159,15 +164,54 @@ function pollGamepad() {
   requestAnimationFrame(pollGamepad);
 }
 requestAnimationFrame(pollGamepad);
+let keyboardModel;
+let controlsChanging = false;
 async function setPaused(value) {
-  if (!ready) return;
+  // Only the keyboard dialog suspends the host. Battle pause belongs to Melee.
+  if (!ready || controlsChanging || value === paused) return;
+  if (value && !(gameState?.major === 2 && gameState.minor === 0 && gameState.sceneKind === 8))
+    return;
+  controlsChanging = true;
   paused = value;
   keys.clear();
+  clearTimeout(pulseTimer);
+  pulseUntil = 0;
   host.setInputState(neutral());
-  if (paused) host.pause();
-  else host.start();
-  await audio.setMuted(paused);
-  $("pause").hidden = !paused;
+  try {
+    if (value) {
+      await host.pause();
+      await audio.setMuted(true);
+      $("controls").showModal();
+      document.body.classList.add("controls-open");
+      if (!keyboardModel) {
+        const { createKeyboardModel } = await import("./keyboard-model.js");
+        keyboardModel = createKeyboardModel($("keyboardModel"));
+      }
+      keyboardModel.setVisible(true);
+      $("closeControls").focus();
+    } else {
+      keyboardModel?.setVisible(false);
+      $("controls").close();
+      document.body.classList.remove("controls-open");
+      await host.start();
+      await audio.setMuted(false);
+      $("screen").focus();
+    }
+  } catch (error) {
+    console.error("Keyboard controls:", error);
+    paused = false;
+    $("controls").close();
+    document.body.classList.remove("controls-open");
+    await host.start();
+    await audio.setMuted(false);
+  } finally {
+    controlsChanging = false;
+  }
+}
+async function startButton() {
+  if (!ready || paused) return;
+  if (gameState?.major === 2 && gameState.minor === 0) await control("start");
+  pulse(16);
 }
 async function quitMatch() {
   if (paused) await setPaused(false);
@@ -175,17 +219,24 @@ async function quitMatch() {
 }
 window.addEventListener("keydown", (event) => {
   if (!relevant.has(event.code)) return;
+  if (
+    ["Enter", "Space"].includes(event.code) &&
+    event.target instanceof Element &&
+    event.target.closest("button, input, select")
+  )
+    return;
   if (event.code === "Escape") {
     event.preventDefault();
-    if (!event.repeat) void setPaused(!paused);
+    if (!event.repeat) {
+      if (paused) void setPaused(false);
+      else if (gameState?.major === 2 && gameState.minor === 2) pulse(16);
+    }
     return;
   }
   if (paused) return;
   event.preventDefault();
   if (event.code === "Enter" && ready) {
-    if (!event.repeat && gameState?.minor === 0) {
-      void control("start").then(() => pulse(16));
-    }
+    if (!event.repeat) void startButton();
     return;
   }
   if (!paused) {
@@ -195,7 +246,16 @@ window.addEventListener("keydown", (event) => {
 });
 window.addEventListener("keyup", (event) => {
   if (!relevant.has(event.code) || paused) return;
+  if (
+    ["Enter", "Space"].includes(event.code) &&
+    event.target instanceof Element &&
+    event.target.closest("button, input, select")
+  )
+    return;
   event.preventDefault();
+  // Start is a bounded pulse. A quick key release must not cancel it before
+  // Dolphin samples a frame (especially for Escape and accessibility tools).
+  if (event.code === "Enter" || event.code === "Escape") return;
   keys.delete(event.code);
   host.setInputState(sample());
 });
@@ -203,9 +263,12 @@ window.addEventListener("blur", () => {
   keys.clear();
   host.setInputState(neutral());
 });
-$("pauseButton").onclick = () => setPaused(!paused);
-$("resume").onclick = () => setPaused(false);
-$("quit").onclick = () => quitMatch();
+$("keyboardButton").onclick = () => setPaused(true);
+$("closeControls").onclick = () => setPaused(false);
+$("controls").addEventListener("cancel", (event) => {
+  event.preventDefault();
+  void setPaused(false);
+});
 $("fullscreen").onclick = () =>
   document.fullscreenElement
     ? document.exitFullscreen()
@@ -214,10 +277,7 @@ $("metrics").onclick = () => {
   $("stats").hidden = !$("stats").hidden;
 };
 $("tapJump").checked = localStorage.getItem("melee.tapJump") !== "false";
-for (const id of ["playerSheik", "cpuSheik"]) {
-  $(id).checked = localStorage.getItem("melee." + id) === "true";
-  $(id).onchange = () => localStorage.setItem("melee." + id, String($(id).checked));
-}
+
 $("tapJump").onchange = () => {
   localStorage.setItem("melee.tapJump", String($("tapJump").checked));
   void host.adapter.request("meleeControl", { action: "tapJump", enabled: $("tapJump").checked });
@@ -226,10 +286,7 @@ async function control(action) {
   const result = await host.adapter.request("meleeControl", {
     action,
     tapJump: $("tapJump").checked,
-    startingSheik:
-      action === "start" && !params.has("qa")
-        ? [$("playerSheik").checked, $("cpuSheik").checked]
-        : undefined,
+    startingSheik: params.has("qa") ? testForms : undefined,
   });
   actions.push({ action, major: result.major, minor: result.minor, frame: result.sceneFrame });
   return result;
@@ -290,9 +347,7 @@ async function tick() {
         clearTimeout(pulseTimer);
         host.setInputState(neutral());
       }
-      $("hint").hidden = state.minor !== 0;
-      $("forms").hidden = state.minor !== 0;
-      $("quit").hidden = state.minor !== 2;
+      $("keyboardButton").hidden = state.minor !== 0 || state.sceneKind !== 8;
       if (state.minor === 0 && state.sceneFrame > 20 && lastScene !== scene) {
         await control("lockCss");
         lastScene = scene;
@@ -351,7 +406,7 @@ begin.onclick = async () => {
   }
 };
 begin.hidden = false;
-status.textContent = "Your local copy · 4 stocks · 8 minutes · Battlefield · No items";
+status.textContent = "Your local copy · 4 stocks · 8 minutes · No items";
 if (params.has("qa")) {
   const panel = document.createElement("div");
   panel.id = "qa";
@@ -364,7 +419,7 @@ if (params.has("qa")) {
   ]) {
     const b = document.createElement("button");
     b.textContent = `GC ${name}`;
-    b.onclick = () => (mask === 16 ? control("start").then(() => pulse(mask)) : pulse(mask));
+    b.onclick = () => (mask === 16 ? startButton() : pulse(mask));
     panel.append(b);
   }
   for (const [label, code] of [
@@ -427,6 +482,7 @@ if (params.has("qa")) {
   choose.textContent = "Choose fighters";
   choose.onclick = async () => {
     try {
+      testForms = selectors.map((select) => Number(select.value) === 19);
       await host.adapter.request("meleeControl", {
         action: "select",
         player: Number(selectors[0].value),
@@ -473,6 +529,29 @@ if (params.has("qa")) {
       return state.sceneFrame - baseline >= 60 && performance.now() - since >= 1000;
     });
   }
+  async function waitForSss() {
+    let previous,
+      baseline,
+      since = performance.now();
+    return waitForGame((state) => {
+      const valid =
+        state.major === 2 && state.minor === 1 && state.sceneKind === 9 && state.sceneFrame > 45;
+      if (!valid || !previous || state.sceneFrame < previous.sceneFrame) {
+        baseline = undefined;
+        since = performance.now();
+      }
+      previous = state;
+      if (!valid) return false;
+      if (baseline === undefined) baseline = state.sceneFrame;
+      return state.sceneFrame - baseline >= 60 && performance.now() - since >= 1000;
+    });
+  }
+  async function startTestMatch() {
+    await control("start");
+    pulse(16);
+    await waitForSss();
+    await host.adapter.request("meleeControl", { action: "selectStage", stage: 31 });
+  }
   verify.onclick = async () => {
     verify.disabled = true;
     try {
@@ -483,11 +562,11 @@ if (params.has("qa")) {
         await waitForCss();
         selectors[0].value = String(p);
         selectors[1].value = String(p + 1);
+        testForms = [p === 19, p + 1 === 19];
         await host.adapter.request("meleeControl", { action: "select", player: p, cpu: p + 1 });
         await delay(800);
         await waitForCss();
-        await control("start");
-        pulse(16);
+        await startTestMatch();
         const start = await waitForGame(
           (s) =>
             s.major === 2 &&
@@ -552,11 +631,11 @@ if (params.has("qa")) {
       if (gameState?.minor === 2) await quitMatch();
       await waitForCss();
       // Fox lasers do not cause hitstun, allowing a clean input probe with the level-9 CPU active.
+      testForms = [false, false];
       await host.adapter.request("meleeControl", { action: "select", player: 2, cpu: 2 });
       await delay(800);
       await waitForCss();
-      await control("start");
-      pulse(16);
+      await startTestMatch();
       await waitForGame(
         (s) =>
           s.major === 2 &&
@@ -573,8 +652,8 @@ if (params.has("qa")) {
       const pauseStart = await host.adapter.request("meleeInspect", {});
       await delay(700);
       const pauseEnd = await host.adapter.request("meleeInspect", {});
-      if (pauseStart.sceneFrame !== pauseEnd.sceneFrame)
-        throw new Error("Pause did not stop native simulation");
+      if (pauseStart.match.elapsed !== pauseEnd.match.elapsed || pauseEnd.match.pauser !== 0)
+        throw new Error("Melee pause did not freeze the match");
       press("Escape", true);
       press("Escape", false);
       await delay(100);
@@ -593,7 +672,8 @@ if (params.has("qa")) {
       press("KeyW", false);
       output.textContent = JSON.stringify(
         {
-          pauseFrames: [pauseStart.sceneFrame, pauseEnd.sceneFrame],
+          pauseFrames: [pauseStart.match.elapsed, pauseEnd.match.elapsed],
+          nativePauser: pauseEnd.match.pauser,
           tapFlags: [off.tapJump, on.tapJump],
           hooks: off.tapJumpHooks,
           tapOff: off.fighters[0],
@@ -606,7 +686,7 @@ if (params.has("qa")) {
       if (off.fighters[0]?.air !== 0 || on.fighters[0]?.air !== 1)
         throw new Error("Jump assertion failed; inspect native states");
       progress.textContent =
-        "PASS: Escape freezes/resumes native frames; W stays grounded with tap jump off and jumps with it on.";
+        "PASS: Escape pauses/resumes the native match; W stays grounded with tap jump off and jumps with it on.";
     } catch (error) {
       progress.textContent = "FAILED: " + error.message;
     } finally {
@@ -637,8 +717,7 @@ if (params.has("qa")) {
         await control("quit");
       }
       await waitForCss();
-      await control("start");
-      pulse(16);
+      await startTestMatch();
       await waitForGame(
         (s) =>
           s.major === 2 && s.minor === 2 && s.sceneKind === 2 && s.match?.timeRemaining === 480,
@@ -692,6 +771,115 @@ if (params.has("qa")) {
     }
   };
   panel.append(bench);
+  const menuCheck = document.createElement("button");
+  menuCheck.textContent = "Verify menu flow";
+  menuCheck.onclick = async () => {
+    menuCheck.disabled = true;
+    const savedTap = $("tapJump").checked;
+    const press = (code, down) =>
+      window.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", { code, bubbles: true }));
+    try {
+      if (paused) await setPaused(false);
+      if (gameState?.minor === 2) await quitMatch();
+      if (gameState?.minor === 1) pulse(2);
+      await waitForCss();
+      testForms = [false, false];
+      await host.adapter.request("meleeControl", { action: "select", player: 18, cpu: 2 });
+      await delay(800);
+      const original = await waitForCss();
+      progress.textContent = "Checking keyboard view…";
+      await setPaused(true);
+      $("tapJump").checked = !savedTap;
+      $("tapJump").dispatchEvent(new Event("change"));
+      await delay(300);
+      const frozen = await host.adapter.request("meleeInspect", {});
+      press("KeyP", true);
+      press("KeyW", true);
+      await delay(350);
+      press("KeyP", false);
+      press("KeyW", false);
+      const stillFrozen = await host.adapter.request("meleeInspect", {});
+      if (frozen.sceneFrame !== stillFrozen.sceneFrame || stillFrozen.tapJump === savedTap)
+        throw Error("Keyboard view did not isolate game input and apply tap jump");
+      await setPaused(false);
+      await waitForCss();
+      await control("start");
+      pulse(16);
+      await waitForSss();
+      progress.textContent = "Checking stage-select Back…";
+      pulse(2);
+      const returned = await waitForCss();
+      if (String(returned.cssCharacters) !== String(original.cssCharacters))
+        throw Error("Stage-select Back lost the chosen fighters");
+      await control("start");
+      pulse(16);
+      await waitForSss();
+      progress.textContent = "Checking native Sheik hold-A on Fountain of Dreams…";
+      press("KeyP", true); // Original Zelda hold-A behavior, no starting-form override.
+      await host.adapter.request("meleeControl", { action: "selectStage", stage: 2 });
+      const fountain = await waitForGame(
+        (s) => s.minor === 2 && s.sceneKind === 2 && s.sceneFrame > 140 && s.fighters.length === 2,
+      );
+      press("KeyP", false);
+      if (fountain.match.stage !== 2 || fountain.fighters[0].character !== 19)
+        throw Error(
+          "Native stage selection or Zelda hold-A differs: " + JSON.stringify(fountain.fighters),
+        );
+      press("Escape", true);
+      press("Escape", false);
+      await delay(400);
+      progress.textContent = "Checking native quit chord…";
+      for (const code of ["KeyI", "KeyL", "KeyP"]) press(code, true);
+      press("Escape", true);
+      press("Escape", false);
+      await delay(300);
+      for (const code of ["KeyI", "KeyL", "KeyP"]) press(code, false);
+      await waitForCss();
+      await startTestMatch();
+      const battlefield = await waitForGame(
+        (s) => s.minor === 2 && s.sceneKind === 2 && s.sceneFrame > 140 && s.fighters.length === 2,
+      );
+      if (battlefield.match.stage !== 31 || battlefield.fighters[0].character !== 18)
+        throw Error("Stage or Zelda selection did not reset normally");
+      for (const s of [fountain, battlefield]) {
+        if (
+          s.match.timeLimit !== 480 ||
+          s.match.items !== -1 ||
+          s.match.cpuLevel !== 9 ||
+          s.match.teams !== 0 ||
+          s.fighters.some((f) => f.stocks !== 4)
+        )
+          throw Error("Match rules changed across stages");
+      }
+      await quitMatch();
+      await waitForCss();
+      output.textContent = JSON.stringify(
+        {
+          controlsFrozen: [frozen.sceneFrame, stillFrozen.sceneFrame],
+          tapJumpApplied: stillFrozen.tapJump,
+          retainedCharacters: returned.cssCharacters,
+          fountain: { rules: fountain.match, fighter: fountain.fighters[0] },
+          battlefield: { rules: battlefield.match, fighter: battlefield.fighters[0] },
+          nativeQuit: true,
+          returnedToCss: true,
+        },
+        null,
+        2,
+      );
+      progress.textContent =
+        "PASS: keyboard input isolation, tap jump, stage Back, two stages, native Sheik hold-A, native quit chord, and return to character select.";
+    } catch (error) {
+      progress.textContent = "FAILED: " + error.message;
+    } finally {
+      keys.clear();
+      host.setInputState(neutral());
+      if (paused) await setPaused(false);
+      $("tapJump").checked = savedTap;
+      $("tapJump").dispatchEvent(new Event("change"));
+      menuCheck.disabled = false;
+    }
+  };
+  panel.append(menuCheck);
   const inspect = document.createElement("button");
   inspect.textContent = "Inspect game";
   inspect.onclick = async () => {

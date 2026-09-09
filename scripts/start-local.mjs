@@ -23,10 +23,11 @@ function run(command, args, cwd = root) {
   });
 }
 try {
-  if (!existsSync(new URL("../web/node_modules", import.meta.url)))
+  if (!existsSync(new URL("../web/node_modules/three/build/three.module.js", import.meta.url)))
     await run("npm", ["ci"], root + "web");
   await run(process.execPath, ["scripts/setup-engine.mjs"]);
   await run(process.execPath, ["scripts/native/setup-native.mjs"]);
+  await run(process.execPath, ["scripts/assets/extract-menu.mjs"]);
   if (!stopping) {
     console.log("Melee Online: http://localhost:3000/ · local GPU · 720p60");
     await Promise.race([

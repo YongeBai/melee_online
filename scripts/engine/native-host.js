@@ -53,11 +53,13 @@ export class NativeHost {
     this.audio = [];
     this.audioLength = 0;
     this.onStatus("Starting the local GPU renderer…");
-    this.socket = new WebSocket("ws://127.0.0.1:3002");
+    const endpoint = new URL("/engine-session", location.href);
+    endpoint.protocol = location.protocol === "https:" ? "wss:" : "ws:";
+    this.socket = new WebSocket(endpoint);
     this.socket.binaryType = "arraybuffer";
     await new Promise((resolve, reject) => {
       this.socket.onopen = resolve;
-      this.socket.onerror = () => reject(Error("Local GPU bridge is unavailable. Run npm start."));
+      this.socket.onerror = () => reject(Error("The game server is unavailable."));
     });
     this.socket.onmessage = (event) => {
       if (typeof event.data === "string") {
@@ -138,9 +140,9 @@ export class NativeHost {
     this.socket.onclose = () => {
       this.mode = "error";
       for (const request of this.pending.values())
-        request.reject(Error("Local GPU bridge disconnected"));
+        request.reject(Error("Game server disconnected. Reload this page to reconnect."));
       this.pending.clear();
-      this.onStatus("Local GPU bridge disconnected. Run npm start, then reload this page.");
+      this.onStatus("Game server disconnected. Reload this page to reconnect.");
     };
     await this.request("boot");
     this.mode = "dolphin";

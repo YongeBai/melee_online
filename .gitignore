@@ -19,3 +19,5 @@
 # Independent reference repositories (their own Git history remains intact).
 /melee/
 /opensmash/
+# UI textures decoded from the user's local disc; regenerated at startup.
+/.melee-assets/

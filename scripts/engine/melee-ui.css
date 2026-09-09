@@ -1,0 +1,314 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+main {
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+}
+#gameViewport {
+  position: relative;
+  line-height: 0;
+}
+#screen {
+  display: block;
+  width: min(100vw, 133.333dvh);
+  height: min(75vw, 100dvh);
+  object-fit: contain;
+  background: #000;
+  outline: none;
+}
+[hidden] {
+  display: none !important;
+}
+button {
+  font: inherit;
+  color: white;
+  background: linear-gradient(#283049, #131726);
+  border: 1px solid #98a3bd;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+button:focus-visible {
+  outline: 3px solid #ffda76;
+  outline-offset: 3px;
+}
+#loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: #000e;
+  text-align: center;
+  gap: 16px;
+  line-height: 1.3;
+}
+#loading h1 {
+  font-style: italic;
+  letter-spacing: 0.08em;
+  font-size: clamp(24px, 5vw, 50px);
+}
+#loading p {
+  max-width: 600px;
+  color: #bbc7e2;
+}
+#keyboardButton {
+  position: absolute;
+  left: 21.333%;
+  top: 86.6%;
+  width: 4.267%;
+  height: 4.5%;
+  padding: 0.3%;
+  line-height: 0;
+  border: 1px solid #ddbbc0;
+  border-radius: 3px;
+  background: linear-gradient(#8e465d, #3a1626);
+  box-shadow: 0 1px 2px #000b;
+  transition: filter 0.12s;
+}
+.native #keyboardButton {
+  left: 28.5%;
+  width: 3.2%;
+}
+#keyboardButton:hover {
+  filter: brightness(1.5);
+}
+#keyboardButton svg {
+  width: 100%;
+  height: 100%;
+  fill: #2a2438;
+  stroke: #ede7df;
+  stroke-width: 1.7;
+}
+#toolbar {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0.15;
+  transition: opacity 0.2s;
+}
+#toolbar:hover,
+#toolbar:focus-within {
+  opacity: 1;
+}
+#toolbar button {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+#stats {
+  position: fixed;
+  bottom: 4px;
+  left: 6px;
+  font-size: 11px;
+  color: #ddd;
+  background: #000a;
+  pointer-events: none;
+}
+#controls {
+  border: 0;
+  padding: 0;
+  max-width: none;
+  max-height: none;
+  width: min(100vw, 133.333dvh);
+  height: min(75vw, 100dvh);
+  margin: auto;
+  background: #080914;
+  color: #ecebe6;
+  overflow: hidden;
+}
+.native-engine #controls {
+  width: min(75vw, 133.333dvh);
+  height: min(56.25vw, 100dvh);
+}
+#controls::backdrop {
+  background: #000d;
+}
+/* These textures and the label glyphs are decoded from Melee's own HSD archives. */
+.controls-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    linear-gradient(0deg, #090921e8, #141430d9),
+    url("/play/assets/MnSlMap-860.png") center/100% 100%;
+  border-top: 2px solid #69738a;
+  border-bottom: 2px solid #45485e;
+}
+.controls-surface:before {
+  content: "";
+  position: absolute;
+  left: -18%;
+  top: 2%;
+  width: 100%;
+  aspect-ratio: 1;
+  opacity: 0.13;
+  background: url("/play/assets/MnMaAll-18580.png") center/contain no-repeat;
+  pointer-events: none;
+}
+.controls-surface:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background: url("/play/assets/MnMaAll-f2c0.png") repeat-x center/auto 100%;
+}
+#keyboardModel {
+  position: absolute;
+  inset: 12% 1% 20%;
+  touch-action: none;
+}
+#keyboardModel canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.keyboard-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.tap-setting {
+  position: absolute;
+  z-index: 2;
+  bottom: 5.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 7px 28px 7px 24px;
+  min-width: 40%;
+  cursor: pointer;
+  background: linear-gradient(90deg, #454854, #202230);
+  border-top: 2px solid #9b9ba4;
+  border-bottom: 2px solid #646572;
+  clip-path: polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%);
+  filter: drop-shadow(2px 2px 1px #000);
+}
+.tap-label {
+  width: auto;
+  height: clamp(21px, 2.5vw, 30px);
+  filter: drop-shadow(2px 2px 0 #000);
+}
+.tap-setting input {
+  position: absolute;
+  right: 18px;
+  top: 0;
+  width: 38%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.toggle {
+  position: relative;
+  display: block;
+  min-width: 78px;
+  width: 27%;
+  height: 32px;
+  background: #151620;
+  clip-path: polygon(12% 0, 88% 0, 100% 50%, 88% 100%, 12% 100%, 0 50%);
+}
+.toggle:after {
+  content: "";
+  position: absolute;
+  inset: 2px 14px;
+  background: #e9e9e8;
+  mask: url("/play/assets/off.png") center/contain no-repeat;
+}
+.tap-setting input:checked + .toggle {
+  background: #171627;
+}
+.tap-setting input:checked + .toggle:after {
+  background: #ffe073;
+  mask-image: url("/play/assets/on.png");
+}
+.tap-setting:focus-within {
+  background: linear-gradient(90deg, #766440, #332c24);
+}
+.menu-button {
+  position: absolute;
+  z-index: 3;
+  top: 4%;
+  right: 0;
+  width: 19%;
+  height: 6%;
+  padding: 0 20px 0 30px;
+  border: 0;
+  background: #e8c52f;
+  clip-path: polygon(17% 0, 100% 0, 100% 100%, 17% 100%, 0 50%);
+}
+.menu-button:before {
+  content: "";
+  position: absolute;
+  inset: 3px 0 3px 5px;
+  background: #151722;
+  clip-path: polygon(16% 0, 100% 0, 100% 100%, 16% 100%, 0 50%);
+}
+.menu-button img {
+  position: relative;
+  width: auto;
+  height: 43%;
+  max-width: 90%;
+  object-fit: contain;
+  filter: sepia(1) saturate(4) drop-shadow(1px 1px #000);
+}
+.menu-button:hover,
+.menu-button:focus-visible {
+  background: #fff1a3;
+  filter: brightness(1.2);
+}
+#qa {
+  position: fixed;
+  bottom: 30px;
+  left: 8px;
+  max-width: 96vw;
+  background: #102035ed;
+  font-size: 11px;
+  z-index: 3;
+}
+#qa pre {
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+@media (max-width: 640px) {
+  .tap-setting {
+    padding: 4px 14px;
+    gap: 8px;
+    min-width: 55%;
+  }
+  .tap-label {
+    height: 18px;
+  }
+  .toggle {
+    height: 23px;
+    min-width: 60px;
+  }
+  .menu-button {
+    padding: 0 5px 0 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+.controls-open #toolbar,
+.controls-open #stats {
+  display: none;
+}

@@ -1,62 +1,62 @@
 # Browser controls
 
-| Key | GameCube input / action |
-| --- | --- |
-| W A S D | Main analog stick: up, left, down, right |
-| P | A / attack |
-| O | B / special |
-| Space | X / jump |
-| I | L / shield |
-| U | Z / grab |
-| K | C-stick up |
-| M | C-stick left |
-| Comma | C-stick down |
-| Period | C-stick right |
-| Left Shift + WASD | 50% analog magnitude for walking/tilts |
-| Enter | Start the match from character select |
-| Escape | Host pause/unpause on the press edge |
+| Key               | GameCube input / action                            |
+| ----------------- | -------------------------------------------------- |
+| W A S D           | Main analog stick: up, left, down, right           |
+| P                 | A / attack / select                                |
+| O                 | B / special / menu back                            |
+| Space             | X / jump                                           |
+| I                 | L / shield                                         |
+| L                 | R / shield                                         |
+| U                 | Z / grab                                           |
+| K                 | C-stick up                                         |
+| M                 | C-stick left                                       |
+| Comma             | C-stick down                                       |
+| Period            | C-stick right                                      |
+| Left Shift + WASD | 50% analog magnitude for walking/tilts             |
+| Enter             | GameCube Start; advances from character select     |
+| Escape            | GameCube Start during battle: native pause/unpause |
 
-The C-stick keys form an inverted T: K above M/comma/period, below the
-U/I/O/P action row. Opposing directions cancel, and main-stick diagonals are
-normalized to the unit circle. Shift is a simple analog modifier, not an exact
-implementation of B0XX-specific modifiers, input timing, or tournament rules.
+The C-stick keys form an inverted T below the U/I/O/P action row. Opposing
+directions cancel, and main-stick diagonals are normalized. Shift is a simple
+analog modifier, not an implementation of B0XX-specific tournament modifiers.
 
-Hax's controller was the B0XX; Smash Box is a separate product. The inspiration
-here is a dedicated C-stick cluster and analog modifier separate from the
-attack/jump inputs. Primary manufacturer resources:
-https://b0xx.com/pages/resources and https://b0xx.com/pages/b0xx-button-holds.
-The manufacturer's linked quickstart manual was also consulted.
+## Game flow
 
-## Native game integration
+The home URL opens `/play/`. Start Melee enables audio and boots the local disc
+into the original character-select screen. Move the hand with WASD; press P to
+pick up/place the human and CPU tokens. Enter advances to the original stage
+select, WASD moves the stage cursor, P confirms, and O goes back. Match settings
+stay at four stocks, eight minutes, no items, one human and one level-9 CPU.
 
-Tap jump defaults on and is saved under `melee.tapJump`. Four checked PowerPC
-hooks in the original jump routines disable stick-triggered jumps for the human
-fighter while retaining the normal button checks, jump limits, and all upward
-analog input. The CPU and Nana partner retain their normal jump handling.
-The hooks are version-specific and reject unexpected original instructions.
+Zelda and Sheik share the original Zelda tile. Hold P (A) while the selected
+stage loads to use Melee’s own Sheik-start behavior. There is no separate form
+selector. Esc invokes the native pause camera and help graphic. To quit, pause,
+then hold I + L + P and press Esc: Melee’s L + R + A + Start combination.
+Results return automatically to character select.
 
-Esc pauses the actual Dolphin core and audio, clears held inputs, and resumes
-without repeating on key autorepeat. Enter sends GameCube Start from character
-select after enforcing the match rules. P remains held across Start, supporting
-the original Zelda hold-A starting-form behavior. The pause menu also offers
-explicit Zelda/Sheik starting-form choices for the human and CPU. Zelda stays
-the shared tile in the original character-select screen.
+## Keyboard view
 
-The controls screen's input preview is separate from the running game's pad.
-Move the native character-select hand with WASD; press P to pick up/place a
-human or CPU selection token. Use O for the native menu back action. The
-local integration returns to VS character select if the native menu is exited.
+Click the keyboard icon beside P1 to open the controls dialog. A procedural
+Three.js keyboard shows physical GameCube button caps, shoulder triggers, and
+grooved analog/C-stick parts above their key anchors. Key presses light the caps; pointer movement gently tilts the model.
+Leader arrows project from the 3D anchors, following OpenSmash’s approach in
+`opensmash/web-prototype/visual/game-launcher.js`. The model is authored here;
+there is no downloaded keyboard asset or external iframe. Three.js is MIT-licensed.
+Back uses original menu lettering; Tap jump and ON/OFF use the original SIS
+font decoded from the executable. Background textures come from the original
+menu archives. The controls frame matches the game’s 4:3 picture.
 
-## Controller model
+Tap jump is the only setting. It defaults on and persists under `melee.tapJump`.
+Seven checked PowerPC hooks disable stick-triggered jumps for the human while
+preserving button jumps, upward aiming, CPU input and Nana’s behavior. The
+hooks verify the USA 1.02 executable before writing anything.
 
-The malformed custom diagram was replaced by the creator-enabled Sketchfab 3D
-embed for **Gamecube Controller** by **CoryRichards**:
-https://sketchfab.com/3d-models/gamecube-controller-21983501bac64993ac09cdc7936ffdf2
+The keyboard view suspends the core, mutes audio and isolates game input. Back
+or Esc closes it, clears held keys and restores character select. The native
+pause screen is independent and does not open this view. Native Gamepad API
+input support remains in the runtime, but the UI currently represents keyboard
+input; no physical controller was connected for verification.
 
-The source reports CC Attribution 4.0:
-https://creativecommons.org/licenses/by/4.0/
-
-The model is not downloaded or rehosted. The official viewer is interactive,
-requires an internet connection and WebGL, and is removed when leaving the
-controls screen. Attribution remains visible. Clicking the viewer focuses its
-iframe; click the input tester to send keyboard input to the page again.
+Rendering of the keyboard is demand-driven and stops when the dialog closes.
+It adds no animation loop or model rendering to live matches.

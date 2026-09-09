@@ -13,6 +13,7 @@ export function localMelee(): Plugin {
     '.css': 'text/css',
     '.wasm': 'application/wasm',
     '.json': 'application/json',
+    '.png': 'image/png',
   };
   return {
     name: 'local-melee',
@@ -47,7 +48,19 @@ export function localMelee(): Plugin {
         res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
         res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
         let file: string;
-        if (path === '/local-disc') {
+        if (path === '/play/vendor/three.module.js') {
+          file = resolve(root, 'web/node_modules/three/build/three.module.js');
+          res.setHeader('Cache-Control', 'no-cache');
+        } else if (path.startsWith('/play/assets/')) {
+          const base = resolve(root, '.melee-assets');
+          file = resolve(base, path.slice('/play/assets/'.length));
+          if (!file.startsWith(base + sep)) {
+            res.writeHead(403);
+            res.end();
+            return;
+          }
+          res.setHeader('Cache-Control', 'private, no-cache');
+        } else if (path === '/local-disc') {
           const discs = readdirSync(root).filter((name) =>
             /\.(iso|gcm)$/i.test(name),
           );

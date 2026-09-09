@@ -3,9 +3,10 @@
 The website runs the original **Super Smash Bros. Melee USA 1.02** through
 a local GPU-accelerated Dolphin renderer, using your local disc. Video and audio
 play in the browser at **720p / 60 FPS**. Character select, character models,
-animations, attacks, CPU AI, Battlefield, sound, and match results come from
+animations, attacks, CPU AI, stage select, sound, and match results come from
 Melee itself. The browser integration fixes the match to one human against one
-level-9 CPU, four stocks, eight minutes, no items, and Battlefield.
+level-9 CPU, four stocks, eight minutes, and no items. Choose your stage in
+Melee’s original stage-select screen.
 
 ## Play
 
@@ -18,30 +19,34 @@ npm start
 Open **http://localhost:3000/**. The supplied `.iso` stays in this directory.
 The start script builds/reuses the pinned local renderer and installs frontend
 dependencies if needed. A first source build takes several minutes. Choose
-**Character select**, then **Start Melee** to enable audio and
+**Start Melee** to enable audio and
 boot your disc. Loading can take a little while; leave the tab open.
 
 Use **WASD** to move the original menu's hand and **P** to pick up/place tokens.
-Move the CPU token to choose its fighter. **Enter** starts the match. All 25
+Move the CPU token to choose its fighter. **Enter** advances to stage select; **WASD** moves the stage cursor and **P**
+selects a stage. **O** returns to character select. All 25
 original character tiles are unlocked; Zelda and Sheik share the Zelda tile.
-The pause menu includes starting-form options for both players. The game
-returns to character select after results; Esc → Character select ends a match
-early through Melee's normal no-contest cleanup.
+Hold **P** (GameCube A) while loading the stage as Zelda to start as Sheik.
+The game returns to character select after results. **Esc** uses Melee’s
+original pause screen. To quit early, pause, then hold **I + L + P** and press
+**Esc** (the original L + R + A + Start combination).
 
-| Key | Action |
-| --- | --- |
-| WASD | Move / aim |
-| P | A / attack / menu select |
-| O | B / special / menu back |
-| Space | Jump |
-| I | Shield |
-| U | Grab |
+| Key                    | Action                           |
+| ---------------------- | -------------------------------- |
+| WASD                   | Move / aim                       |
+| P                      | A / attack / menu select         |
+| O                      | B / special / menu back          |
+| Space                  | Jump                             |
+| I / L                  | L / R shield                     |
+| U                      | Grab                             |
 | K / M / comma / period | C-stick up / left / down / right |
-| Left Shift + WASD | Walk / tilt |
-| Enter | Start match |
-| Esc | Pause / resume |
+| Left Shift + WASD      | Walk / tilt                      |
+| Enter                  | GameCube Start                   |
+| Esc                    | Pause / resume                   |
 
-Tap jump is saved locally and can be changed before playing or while paused.
+Click the **keyboard icon beside P1** on character select for the local 3D
+keyboard and its colored GameCube button mappings. **Tap jump** is the only
+setting in this view and is saved locally. Close with **Back** or **Esc**.
 Turning it off preserves upward aiming, DI, up-specials, and button jumps.
 Standard browser gamepads are mapped too; physical adapters need their own
 browser-compatible driver/mapping. A connected physical controller has not
@@ -77,10 +82,13 @@ slower (roughly 14–24 rendered FPS in previous tests). See the
 - `web/local-melee.ts`: localhost-only game/engine/disc middleware, with byte ranges
   and cross-origin isolation for WASM threads.
 
-The game disc is not included in Git or the production website build. This is
-a localhost application; it does not publish your ISO, provide remote hosting,
-or implement human-versus-human rollback netplay. The 3D controller uses the
-creator's Sketchfab embed and needs internet; actual gameplay uses local files.
+The game disc is not included in Git or the production website build. The default development command binds to localhost. **`npm run serve`** adds a
+production server that can sit behind HTTPS on a GPU host; see
+[deployment](docs/DEPLOYMENT.md). A public host has not been provisioned.
+Human-versus-human rollback and room matchmaking are future work; see
+[the implementation plan](docs/ROLLBACK-AND-ROOMS.md). The keyboard and physical GameCube button parts are procedural Three.js models.
+Menu artwork and SIS font labels are extracted from the disc at startup and stay
+in the ignored `.melee-assets/` directory. Controls need no external embeds.
 
 ## Checks
 
@@ -94,5 +102,6 @@ node scripts/audit-disc.mjs '/absolute/path/to/melee.iso'
 
 See [validation](docs/VALIDATION.md), [status](docs/PORT-STATUS.md), and
 [controls/model attribution](web/docs/CONTROLS.md). The normal `web` production
-build covers the controls frontend; run `npm start` from the root for the local
-engine and disc routes.
+build covers the web entry route; use root `npm start` for development or
+`npm run serve` for the production game server. The production server does not
+expose a disc-download route.

@@ -35,7 +35,7 @@ const localBindingConfig = {
     : [],
 };
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command }) => {
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= 'false';
@@ -49,6 +49,9 @@ export default defineConfig(async () => {
     css: { postcss: { plugins: [tailwindcss()] } },
     server: {
       strictPort: true,
+      proxy: {
+        '/engine-session': { target: 'ws://127.0.0.1:3002', ws: true },
+      },
       ...(isCodexSeatbeltSandbox
         ? { watch: { useFsEvents: false, usePolling: true } }
         : {}),
@@ -57,10 +60,14 @@ export default defineConfig(async () => {
       localMelee(),
       vinext(),
       sites(),
-      cloudflare({
-        viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },
-        config: localBindingConfig,
-      }),
+      // The Workers dev upgrade handler also claims proxied WebSockets and
+      // destroys the native video connection. Use vinext's Node dev server;
+      // retain Workers output for the separate frontend build.
+      command === 'build' &&
+        cloudflare({
+          viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },
+          config: localBindingConfig,
+        }),
     ],
   };
 });

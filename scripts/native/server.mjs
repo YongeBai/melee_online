@@ -5,9 +5,26 @@ import { createServer } from "node:http";
 import { WebSocketServer } from "../../web/node_modules/ws/wrapper.mjs";
 import { H264Frames, videoPacket } from "./video.mjs";
 import { inspectMelee, controlMelee } from "../engine/melee-memory.js";
+import { createWebHandler, webAccess } from "./web-server.mjs";
 const root = path.resolve(import.meta.dirname, "../..");
 const user = path.join(root, ".melee-native");
 const backend = process.env.MELEE_NATIVE_BACKEND || "OGL";
+const serveWeb = process.env.MELEE_WEB === "1";
+const bindHost = process.env.MELEE_BIND_HOST || "127.0.0.1";
+const port = Number(process.env.MELEE_PORT || (serveWeb ? 3000 : 3002));
+const publicOrigin = process.env.MELEE_PUBLIC_ORIGIN;
+const accessKey = process.env.MELEE_ACCESS_KEY || "";
+if (publicOrigin && new URL(publicOrigin).origin !== publicOrigin)
+  throw Error("MELEE_PUBLIC_ORIGIN must be an origin without a trailing slash");
+const external =
+  !["127.0.0.1", "localhost", "::1"].includes(bindHost) ||
+  (publicOrigin && !["localhost", "127.0.0.1", "[::1]"].includes(new URL(publicOrigin).hostname));
+if (external && (!publicOrigin?.startsWith("https://") || accessKey.length < 24))
+  throw Error(
+    "A public server requires an HTTPS MELEE_PUBLIC_ORIGIN and a 24+ character MELEE_ACCESS_KEY",
+  );
+const origins = publicOrigin ? [publicOrigin] : ["http://localhost:3000", "http://127.0.0.1:3000"];
+const access = webAccess({ key: accessKey, secure: publicOrigin?.startsWith("https://") });
 for (const d of ["Config", "Pipes", "Cache", "Logs"])
   fs.mkdirSync(path.join(user, d), { recursive: true });
 const pipe = path.join(user, "Pipes", "Melee");
@@ -38,14 +55,27 @@ for (const b of ["L", "R"])
   padConfig += `Triggers/${b} = \`Button ${b}\`\nTriggers/${b}-Analog = \`Axis ${b} +\`\n`;
 padConfig += "Main Stick/Radius = 100\nC-Stick/Radius = 100\n";
 fs.writeFileSync(path.join(user, "Config", "GCPadNew.ini"), padConfig);
-const http = createServer((req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({ running: !!dolphin, width: 1280, height: 720, backend, ...stats }));
-});
+const http = createServer(
+  serveWeb
+    ? createWebHandler({
+        root,
+        access,
+        health: () => ({ running: !!dolphin, width: 1280, height: 720, backend, ...stats }),
+      })
+    : (req, res) => {
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({ running: !!dolphin, width: 1280, height: 720, backend, ...stats }),
+        );
+      },
+);
 const wss = new WebSocketServer({
   server: http,
   maxPayload: 65536,
-  verifyClient: (info) => ["http://localhost:3000", "http://127.0.0.1:3000"].includes(info.origin),
+  verifyClient: (info) =>
+    info.req.url === "/engine-session" &&
+    origins.includes(info.origin) &&
+    access.authorized(info.req),
 });
 let dolphin,
   encoder,
@@ -357,6 +387,10 @@ async function boot() {
   return bootPromise;
 }
 wss.on("connection", (ws) => {
+  if (serveWeb && [...wss.clients].some((peer) => peer !== ws && peer.readyState === 1)) {
+    ws.close(1013, "This private worker already has an active player");
+    return;
+  }
   ws.needsKey = true;
   ws.on("close", () => {
     if (wss.clients.size === 0) {
@@ -403,7 +437,9 @@ wss.on("connection", (ws) => {
     }
   });
 });
-http.listen(3002, "127.0.0.1", () => console.log("Native GPU bridge on localhost:3002"));
+http.listen(port, bindHost, () =>
+  console.log(`Melee ${serveWeb ? "production server" : "GPU bridge"} on ${bindHost}:${port}`),
+);
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {
     stop();

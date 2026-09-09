@@ -12,14 +12,14 @@ A 2× internal-resolution render is resolved to a 960×720 game picture inside a
 
 The first valid 30.001-second Fox/Falco match benchmark recorded:
 
-| Stage | Frames/second |
-| --- | ---: |
-| Native simulation | 59.964 |
-| Native rendering | 59.931 |
-| GPU frame capture | 59.931 |
-| H.264 encoding | 59.964 |
-| Browser decoding | 59.931 |
-| Distinct browser presentations | 59.997 |
+| Stage                          | Frames/second |
+| ------------------------------ | ------------: |
+| Native simulation              |        59.964 |
+| Native rendering               |        59.931 |
+| GPU frame capture              |        59.931 |
+| H.264 encoding                 |        59.964 |
+| Browser decoding               |        59.931 |
+| Distinct browser presentations |        59.997 |
 
 Zero decoded frames were dropped. The native match timer went from 7:54 to 7:24.
 The benchmark waits for a fresh match and the actual game timer; earlier samples
@@ -106,3 +106,34 @@ apply to the fallback, not the new local GPU default.
 No physical gamepad was connected, end-to-end streaming latency was not measured,
 and audible quality was not separately assessed by listening. No remote
 multiplayer, public deployment or game-data upload was performed.
+
+## Native UI and production-server revision
+
+The earlier pause-overlay checks above describe the committed MVP. The current
+revision replaces that overlay with Melee's own pause, restores stage select,
+and moves tap jump into the keyboard view beside P1.
+
+- Browser screenshots reviewed the icon placement, 3D keyboard, physical
+  GameCube button/trigger/stick shapes, native Back artwork, original SIS font,
+  ON/OFF option row and matching 4:3 frame. Flat badges, a generic switch and
+  the external controller iframe were removed after visual review.
+- Native pause passed: match elapsed frame 5 stayed 5, with pauser 0, across
+  700 ms. Unpause resumed gameplay. W with tap jump off retained stick Y=80 and
+  grounded action 14; with it on, Fox entered airborne jump action 25.
+- The keyboard view preserved native frame 111 while test keys were pressed.
+  Its toggle updated the actual native flag. Stage-select Back retained Zelda
+  and Fox. Holding P while Fountain of Dreams loaded produced Sheik, with no
+  starting-form override. A subsequent Battlefield start produced Zelda.
+- Both stages retained four stocks, 480 seconds, no items, non-team mode and
+  CPU level 9. The native I+L+P+Esc quit chord returned through results to CSS.
+- The production server (no Vite/Workers) booted Melee in the same browser.
+  A 30.00118-second sample measured 59.93 rendered FPS, 59.90 presented FPS,
+  60.00 simulation FPS, 1280×720, and zero dropped decoded frames.
+- The regular `npm start` path also booted through `/engine-session`. Development
+  uses vinext's Node server: the Workers development upgrade listener conflicts
+  with Vite's native WebSocket proxy. Workers output remains build-only.
+- Root tests now include GX tiling/alpha/channel-layout fixtures, PNG roundtrip
+  scanlines, private HTTP serving, cookie tampering, traversal and blocked ISO
+  routes, in addition to the existing emulator-memory and video checks.
+- An external TLS host, WAN input latency, a physical controller, room joining,
+  and rollback between independent clients have not been verified or claimed.

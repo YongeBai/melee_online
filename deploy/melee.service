@@ -1,0 +1,19 @@
+[Unit]
+Description=Melee browser game worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Install the checkout at /opt/melee and use a dedicated account with GPU access.
+User=melee
+WorkingDirectory=/opt/melee
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node --env-file-if-exists=.env scripts/serve.mjs
+Restart=on-failure
+RestartSec=5
+KillMode=control-group
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

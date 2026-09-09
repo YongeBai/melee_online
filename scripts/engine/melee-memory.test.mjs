@@ -29,7 +29,7 @@ test("native CSS lock restores fixed match rules and only one human and CPU", ()
     api = { setCorePaused: (value) => pauses.push(value) };
   controlMelee(module, api, "lockCss");
   assert.deepEqual(pauses, [1, 0]);
-  assert.equal(view.getUint16(at(css + 30)), 31);
+  assert.equal(view.getUint16(at(css + 30)), 0x7f7f, "stage is chosen by native stage select");
   assert.equal(heap[at(css + 24)], 0);
   assert.equal(heap[at(main + 0x1850 + 2)], 1);
   assert.equal(heap[at(main + 0x1850 + 4)], 4);
@@ -43,7 +43,7 @@ test("native CSS lock restores fixed match rules and only one human and CPU", ()
     assert.equal(heap[p], 127, "chosen character stays unchanged");
   }
   assert.equal(heap[at(css + 16 + 0x60 + 0x24 + 15)], 9);
-  assert.equal(heap[at(0x80479d35)], 3, "native router skips stage selection");
+  assert.equal(heap[at(0x80479d35)], 2, "native router enters stage selection");
   b(0x80479d33, 2);
   assert.throws(() => controlMelee(module, api, "lockCss"), /Not at VS/);
   assert.deepEqual(pauses.slice(-2), [1, 0], "core resumes even on rejected changes");
