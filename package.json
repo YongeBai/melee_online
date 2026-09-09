@@ -1,0 +1,11 @@
+{
+  "name": "melee-online-local",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/start-local.mjs",
+    "setup": "node scripts/setup-engine.mjs",
+    "setup:native": "node scripts/native/setup-native.mjs",
+    "test": "node --test scripts/engine/*.test.mjs scripts/native/*.test.mjs"
+  }
+}

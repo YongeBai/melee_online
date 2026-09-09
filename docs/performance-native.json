@@ -1,0 +1,45 @@
+{
+  "machine": "AMD Ryzen AI 9 HX PRO 370 / Radeon 890M / Mesa 25.2.8 / Linux Mint 22.3",
+  "browser": "Codex in-app Chromium",
+  "renderer": "Dolphin native x64 JIT, headless OpenGL/EGL, 2x internal resolution",
+  "scene": "Fox versus level-9 Falco, Battlefield, 4 stocks, 8 minutes, no items",
+  "streamResolution": [
+    1280,
+    720
+  ],
+  "pictureResolution": [
+    960,
+    720
+  ],
+  "samples": [
+    {
+      "seconds": 30.00138500010967,
+      "startFrame": 429,
+      "endFrame": 2228,
+      "startTimer": 474,
+      "endTimer": 444,
+      "simulationFps": 59.963898333141074,
+      "renderFps": 59.93056653862571,
+      "captureFps": 59.93056653862571,
+      "encodedFps": 59.963898333141074,
+      "decodedFps": 59.93056653862571,
+      "presentedFps": 59.997230127656444,
+      "dropped": 0
+    },
+    {
+      "scene": "Ice Climbers versus level-9 Jigglypuff",
+      "seconds": 60.00893999993801,
+      "startFrame": 432,
+      "endFrame": 4032,
+      "startTimer": 474,
+      "endTimer": 414,
+      "simulationFps": 59.991061331923525,
+      "renderFps": 59.94106878081359,
+      "captureFps": 59.94106878081359,
+      "encodedFps": 59.94106878081359,
+      "decodedFps": 59.924404597110275,
+      "presentedFps": 59.9577329645169,
+      "dropped": 0
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+diff --git a/src/upstream-discio-worker.js b/src/upstream-discio-worker.js
+index 5ff41f5..1672f4c 100644
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -943,6 +943,13 @@ async function handleMessage(type, payload) {
+         inputGeneration: payload.inputGeneration
+       }, payload.inputSentAtEpochMs, "post");
+       return {};
++    // Local fix: the adapter sends these messages, but upstream omitted them.
++    case "start":
++    case "pause": {
++      if (!api?.setCorePaused) throw new Error("SetCorePaused export unavailable");
++      api.setCorePaused(type === "pause" ? 1 : 0);
++      return framePayload();
++    }
+     case "runFrame":
+       if (!presentationLoopActive) {
+         api?.pumpHostJobs?.();

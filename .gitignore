@@ -1,0 +1,21 @@
+# User-supplied game data and generated binaries stay local.
+*.iso
+*.gcm
+*.rvz
+*.z64
+*.dol
+*.raw
+*.sav
+.env
+.env.*
+!.env.example
+# Pinned third-party engine checkouts; recreate with scripts/setup-engine.mjs.
+/engines/gecko/
+/engines/wasm-dolphin/
+# Local native renderer and build toolchain.
+/engines/dolphin-native/
+/.local-tools/
+/.melee-native/
+# Independent reference repositories (their own Git history remains intact).
+/melee/
+/opensmash/
