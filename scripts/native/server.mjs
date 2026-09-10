@@ -125,6 +125,11 @@ function readMemory(full = false) {
       valid = (p) => p >= 0x80003100 && p < 0x81800000;
     const scene = v.getUint32(0x4d6720);
     if (valid(scene)) read(scene - 0x80000000, 16);
+    if (heap[0x479d30] === 2 && heap[0x479d33] === 0) {
+      const cursor = v.getUint32(0x4a0bc0);
+      if (valid(cursor) && cursor + 0x14 <= 0x81800000)
+        read(cursor - 0x80000000, 0x14);
+    }
     for (let i = 0; i < 2; i++) {
       const slot = 0x453080 + i * 0xe90,
         index = heap[slot + 0xc];

@@ -29,6 +29,14 @@ export function inspectMelee(module) {
   const sceneKind = ptr >= 0x80000000 && ptr < 0x81800000 ? read(ptr, 1)[0] : -1;
   const valid = (p) => p >= 0x80003100 && p < 0x81800000;
   const fighters = [];
+  const cursor = major === 2 && minor === 0 && sceneKind === 8 ? u32(0x804a0bc0) : 0;
+  const cssCursor =
+    valid(cursor) && cursor + 0x14 <= 0x81800000
+      ? {
+          x: view.getFloat32(mem1 + cursor + 0xc - 0x80000000),
+          y: view.getFloat32(mem1 + cursor + 0x10 - 0x80000000),
+        }
+      : undefined;
   let match;
   if (major === 2 && minor === 2 && sceneKind === 2) {
     const rules = 0x8046b6a0 + 0x24c8;
@@ -66,6 +74,7 @@ export function inspectMelee(module) {
     minor,
     mainPointer: u32(0x804d3ee0).toString(16),
     sceneKind,
+    cssCursor,
     cssCharacters:
       major === 2 && minor === 0
         ? [0, 1].map((i) => read(0x804807b0 + 16 + 0x60 + i * 0x24, 1)[0])

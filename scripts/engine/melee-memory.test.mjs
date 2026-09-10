@@ -58,4 +58,18 @@ test("native CSS lock restores fixed match rules and only one human and CPU", ()
   w(0x80479d5c, 45);
   assert.equal(inspectMelee(module).sceneFrame, 123);
   assert.equal(inspectMelee(module).renderFrame, 45);
+  const cursor = 0x81000100;
+  w(0x804a0bc0, cursor);
+  view.setFloat32(at(cursor + 0xc), -20);
+  view.setFloat32(at(cursor + 0x10), -21.5);
+  assert.deepEqual(inspectMelee(module).cssCursor, { x: -20, y: -21.5 });
+  b(0x80479d33, 2);
+  assert.equal(
+    inspectMelee(module).cssCursor,
+    undefined,
+    "stale CSS pointers are ignored outside CSS",
+  );
+  b(0x80479d33, 0);
+  w(0x804a0bc0, 0x817ffffc);
+  assert.equal(inspectMelee(module).cssCursor, undefined, "cursor structure must fit within MEM1");
 });

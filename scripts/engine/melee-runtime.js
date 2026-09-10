@@ -167,7 +167,7 @@ requestAnimationFrame(pollGamepad);
 let keyboardModel;
 let controlsChanging = false;
 async function setPaused(value) {
-  // Only the keyboard dialog suspends the host. Battle pause belongs to Melee.
+  // Isolate menu input; keep native CSS/audio running behind the keyboard view.
   if (!ready || controlsChanging || value === paused) return;
   if (value && !(gameState?.major === 2 && gameState.minor === 0 && gameState.sceneKind === 8))
     return;
@@ -179,8 +179,6 @@ async function setPaused(value) {
   host.setInputState(neutral());
   try {
     if (value) {
-      await host.pause();
-      await audio.setMuted(true);
       $("controls").showModal();
       document.body.classList.add("controls-open");
       if (!keyboardModel) {
@@ -188,13 +186,11 @@ async function setPaused(value) {
         keyboardModel = createKeyboardModel($("keyboardModel"));
       }
       keyboardModel.setVisible(true);
-      $("closeControls").focus();
+      $("tapJump").focus();
     } else {
       keyboardModel?.setVisible(false);
       $("controls").close();
       document.body.classList.remove("controls-open");
-      await host.start();
-      await audio.setMuted(false);
       $("screen").focus();
     }
   } catch (error) {
@@ -202,8 +198,6 @@ async function setPaused(value) {
     paused = false;
     $("controls").close();
     document.body.classList.remove("controls-open");
-    await host.start();
-    await audio.setMuted(false);
   } finally {
     controlsChanging = false;
   }
@@ -217,8 +211,64 @@ async function quitMatch() {
   if (paused) await setPaused(false);
   if (gameState?.minor === 2) await control("quit");
 }
+// Native CSS cursor origins sit below/left of the fingertip. These bounds
+// match the icon in the original 640×480 picture, independent of browser size.
+function keyboardHovered(state) {
+  const c = state?.cssCursor;
+  return Boolean(
+    c &&
+    Number.isFinite(c.x) &&
+    Number.isFinite(c.y) &&
+    c.x >= -24.6 &&
+    c.x <= -21.6 &&
+    c.y >= -22 &&
+    c.y <= -20,
+  );
+}
+async function cssAttack() {
+  // Inspect at activation time rather than trusting the slower HUD sample.
+  const state = await host.adapter.request("meleeInspect", {});
+  gameState = state;
+  if (keyboardHovered(state)) await setPaused(true);
+  else if (!paused) pulse(1);
+}
+function toggleTapJump(value = !$("tapJump").checked) {
+  $("tapJump").checked = value;
+  $("tapJump").dispatchEvent(new Event("change"));
+}
 window.addEventListener("keydown", (event) => {
   if (!relevant.has(event.code)) return;
+  if (!ready && !$("begin").hidden && ["KeyP", "Enter"].includes(event.code)) {
+    event.preventDefault();
+    if (!event.repeat) $("begin").click();
+    return;
+  }
+  if (paused && ["KeyP", "KeyO", "KeyW", "KeyS", "KeyA", "KeyD"].includes(event.code)) {
+    event.preventDefault();
+    if (event.repeat) return;
+    if (event.code === "KeyO") void setPaused(false);
+    else if (["KeyW", "KeyS"].includes(event.code))
+      (document.activeElement === $("tapJump") ? $("closeControls") : $("tapJump")).focus();
+    else if (event.code === "KeyP") {
+      if (document.activeElement === $("closeControls")) void setPaused(false);
+      else toggleTapJump();
+    } else {
+      $("tapJump").focus();
+      toggleTapJump(event.code === "KeyD");
+    }
+    return;
+  }
+  if (
+    !paused &&
+    ready &&
+    event.code === "KeyP" &&
+    gameState?.major === 2 &&
+    gameState.minor === 0
+  ) {
+    event.preventDefault();
+    if (!event.repeat) void cssAttack().catch(console.error);
+    return;
+  }
   if (
     ["Enter", "Space"].includes(event.code) &&
     event.target instanceof Element &&
@@ -255,7 +305,12 @@ window.addEventListener("keyup", (event) => {
   event.preventDefault();
   // Start is a bounded pulse. A quick key release must not cancel it before
   // Dolphin samples a frame (especially for Escape and accessibility tools).
-  if (event.code === "Enter" || event.code === "Escape") return;
+  if (
+    event.code === "Enter" ||
+    event.code === "Escape" ||
+    (event.code === "KeyP" && performance.now() < pulseUntil)
+  )
+    return;
   keys.delete(event.code);
   host.setInputState(sample());
 });
@@ -263,7 +318,7 @@ window.addEventListener("blur", () => {
   keys.clear();
   host.setInputState(neutral());
 });
-$("keyboardButton").onclick = () => setPaused(true);
+
 $("closeControls").onclick = () => setPaused(false);
 $("controls").addEventListener("cancel", (event) => {
   event.preventDefault();
@@ -348,6 +403,7 @@ async function tick() {
         host.setInputState(neutral());
       }
       $("keyboardButton").hidden = state.minor !== 0 || state.sceneKind !== 8;
+      $("keyboardButton").classList.toggle("hand-hover", keyboardHovered(state));
       if (state.minor === 0 && state.sceneFrame > 20 && lastScene !== scene) {
         await control("lockCss");
         lastScene = scene;
@@ -793,13 +849,17 @@ if (params.has("qa")) {
       $("tapJump").dispatchEvent(new Event("change"));
       await delay(300);
       const frozen = await host.adapter.request("meleeInspect", {});
-      press("KeyP", true);
-      press("KeyW", true);
+      press("Space", true);
+      press("KeyI", true);
       await delay(350);
-      press("KeyP", false);
-      press("KeyW", false);
+      press("Space", false);
+      press("KeyI", false);
       const stillFrozen = await host.adapter.request("meleeInspect", {});
-      if (frozen.sceneFrame !== stillFrozen.sceneFrame || stillFrozen.tapJump === savedTap)
+      if (
+        stillFrozen.sceneFrame <= frozen.sceneFrame ||
+        JSON.stringify(frozen.cssCursor) !== JSON.stringify(stillFrozen.cssCursor) ||
+        stillFrozen.tapJump === savedTap
+      )
         throw Error("Keyboard view did not isolate game input and apply tap jump");
       await setPaused(false);
       await waitForCss();
@@ -855,7 +915,7 @@ if (params.has("qa")) {
       await waitForCss();
       output.textContent = JSON.stringify(
         {
-          controlsFrozen: [frozen.sceneFrame, stillFrozen.sceneFrame],
+          controlsFrames: [frozen.sceneFrame, stillFrozen.sceneFrame],
           tapJumpApplied: stillFrozen.tapJump,
           retainedCharacters: returned.cssCharacters,
           fountain: { rules: fountain.match, fighter: fountain.fighters[0] },
@@ -880,6 +940,124 @@ if (params.has("qa")) {
     }
   };
   panel.append(menuCheck);
+  const handCheck = document.createElement("button");
+  handCheck.textContent = "Move hand to keyboard";
+  handCheck.onclick = async () => {
+    handCheck.disabled = true;
+    try {
+      if (paused) await setPaused(false);
+      for (let i = 0; i < 120; i++) {
+        const state = await host.adapter.request("meleeInspect", {});
+        const c = state.cssCursor;
+        if (!c) throw Error("Hand navigation requires character select");
+        const dx = -23.1 - c.x,
+          dy = -21 - c.y;
+        if (Math.abs(dx) < 0.4 && Math.abs(dy) < 0.4) break;
+        keys.clear();
+        keys.add("ShiftLeft");
+        if (Math.abs(dx) >= 0.4) keys.add(dx > 0 ? "KeyD" : "KeyA");
+        if (Math.abs(dy) >= 0.4) keys.add(dy > 0 ? "KeyW" : "KeyS");
+        host.setInputState(sample());
+        await delay(35);
+        keys.clear();
+        host.setInputState(neutral());
+        await delay(35);
+      }
+      const state = await host.adapter.request("meleeInspect", {});
+      output.textContent = JSON.stringify({
+        hand: state.cssCursor,
+        hovered: keyboardHovered(state),
+      });
+    } catch (e) {
+      output.textContent = e.stack;
+    } finally {
+      keys.clear();
+      host.setInputState(neutral());
+      handCheck.disabled = false;
+    }
+  };
+  panel.append(handCheck);
+  const keyboardCheck = document.createElement("button");
+  keyboardCheck.textContent = "Verify keyboard navigation";
+  keyboardCheck.onclick = async () => {
+    keyboardCheck.disabled = true;
+    const saved = $("tapJump").checked;
+    const source = audio.source;
+    let nonzeroPcmChunks = 0;
+    const press = (code) => {
+      for (const type of ["keydown", "keyup"])
+        window.dispatchEvent(new KeyboardEvent(type, { code, bubbles: true }));
+    };
+    try {
+      await handCheck.onclick();
+      press("KeyP");
+      for (let i = 0; i < 60 && (!paused || controlsChanging); i++) await delay(50);
+      if (!paused || controlsChanging) throw Error("Hand + P did not open keyboard controls");
+      const before = await host.adapter.request("meleeInspect", {});
+      const audioBefore = audio.nextPlayTime;
+      audio.source = async (frames) => {
+        const chunk = await source(frames);
+        if (chunk.samples?.some((sample) => sample !== 0)) nonzeroPcmChunks++;
+        return chunk;
+      };
+      press("KeyD");
+      if (!$("tapJump").checked) throw Error("D did not enable tap jump");
+      press("KeyA");
+      if ($("tapJump").checked) throw Error("A did not disable tap jump");
+      press("KeyP");
+      if (!$("tapJump").checked) throw Error("P did not toggle tap jump");
+      press("KeyS");
+      if (document.activeElement !== $("closeControls")) throw Error("S did not select Back");
+      press("KeyW");
+      if (document.activeElement !== $("tapJump")) throw Error("W did not select Tap jump");
+      await delay(1000);
+      const after = await host.adapter.request("meleeInspect", {});
+      if (
+        after.sceneFrame <= before.sceneFrame ||
+        JSON.stringify(before.cssCursor) !== JSON.stringify(after.cssCursor) ||
+        JSON.stringify(before.cssCharacters) !== JSON.stringify(after.cssCharacters)
+      )
+        throw Error("Controls must isolate input while keeping native CSS running");
+      if (
+        audio.muted ||
+        audio.context?.state !== "running" ||
+        audio.nextPlayTime <= audioBefore ||
+        nonzeroPcmChunks === 0
+      )
+        throw Error("Menu music did not keep playing");
+      const result = {
+        passed: true,
+        cursor: after.cssCursor,
+        nativeFrames: [before.sceneFrame, after.sceneFrame],
+        audioScheduledSeconds: audio.nextPlayTime - audioBefore,
+        audioState: audio.context.state,
+        nonzeroPcmChunks,
+      };
+      press("KeyS");
+      press("KeyP");
+      await delay(100);
+      if (paused) throw Error("P on Back did not close the controls");
+      press("KeyP");
+      await delay(200);
+      press("KeyO");
+      await delay(100);
+      if (paused) throw Error("O did not close the controls");
+      press("KeyP");
+      await delay(200);
+      press("Escape");
+      await delay(100);
+      if (paused) throw Error("Escape did not close the controls");
+      output.textContent = JSON.stringify(result, null, 2);
+    } catch (e) {
+      output.textContent = e.stack;
+    } finally {
+      audio.source = source;
+      if (paused) await setPaused(false);
+      toggleTapJump(saved);
+      keyboardCheck.disabled = false;
+    }
+  };
+  panel.append(keyboardCheck);
   const inspect = document.createElement("button");
   inspect.textContent = "Inspect game";
   inspect.onclick = async () => {
@@ -890,6 +1068,7 @@ if (params.has("qa")) {
         minor: s.minor,
         scene: s.sceneKind,
         frame: s.sceneFrame,
+        cursor: s.cssCursor,
         renderFrame: s.renderFrame,
         match: s.match,
         tapJump: s.tapJump,

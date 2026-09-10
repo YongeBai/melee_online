@@ -137,3 +137,20 @@ and moves tap jump into the keyboard view beside P1.
   routes, in addition to the existing emulator-memory and video checks.
 - An external TLS host, WAN input latency, a physical controller, room joining,
   and rollback between independent clients have not been verified or claimed.
+
+## Keyboard-only controls revision
+
+The keyboard model now has a fixed angle. Melee's native hand cursor activates
+its icon with P; mouse hit testing is disabled on that icon. W/S selects Tap jump
+or Back, P activates, A/D sets off/on, and O/Esc closes the view. P/Enter also
+starts the game from the initial audio-activation screen.
+
+The browser navigation probe moved the actual native cursor using stick input
+(no cursor teleport), opened the view with P and verified all menu paths. Its
+music check advanced native CSS from frame 38595 to 38646 while preserving the
+hand position and selected fighters. Web Audio stayed running, scheduled
+1.029 seconds more audio and received 62 non-silent PCM chunks during the check.
+The view isolates input without pausing or muting the emulator. The earlier
+frozen-frame keyboard-view checks are superseded; native battle pause is unchanged.
+Nine targeted memory/input/video/asset tests passed, including the new cursor
+structure bounds and rejection of stale cursor data outside character select.

@@ -44,7 +44,7 @@ original pause screen. To quit early, pause, then hold **I + L + P** and press
 | Enter                  | GameCube Start                   |
 | Esc                    | Pause / resume                   |
 
-Click the **keyboard icon beside P1** on character select for the local 3D
+Point Melee’s hand at the **keyboard icon beside P1** and press **P** for the local 3D
 keyboard and its colored GameCube button mappings. **Tap jump** is the only
 setting in this view and is saved locally. Close with **Back** or **Esc**.
 Turning it off preserves upward aiming, DI, up-specials, and button jumps.

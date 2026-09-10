@@ -222,17 +222,6 @@ export function createKeyboardModel(container) {
     for (const code of keys.keys()) key(code, false);
   });
   new ResizeObserver(render).observe(container);
-  container.addEventListener("pointermove", (event) => {
-    if (!visible) return;
-    const rect = container.getBoundingClientRect();
-    keyboard.rotation.y = ((event.clientX - rect.left) / rect.width - 0.5) * 0.12;
-    keyboard.rotation.x = ((event.clientY - rect.top) / rect.height - 0.5) * 0.04;
-    render();
-  });
-  container.addEventListener("pointerleave", () => {
-    keyboard.rotation.set(0, 0, 0);
-    render();
-  });
   return {
     setVisible(value) {
       visible = value;

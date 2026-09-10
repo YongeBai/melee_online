@@ -23,7 +23,7 @@ analog modifier, not an implementation of B0XX-specific tournament modifiers.
 
 ## Game flow
 
-The home URL opens `/play/`. Start Melee enables audio and boots the local disc
+The home URL opens `/play/`. Press P or Enter to enable audio and boot the local disc
 into the original character-select screen. Move the hand with WASD; press P to
 pick up/place the human and CPU tokens. Enter advances to the original stage
 select, WASD moves the stage cursor, P confirms, and O goes back. Match settings
@@ -37,9 +37,9 @@ Results return automatically to character select.
 
 ## Keyboard view
 
-Click the keyboard icon beside P1 to open the controls dialog. A procedural
+Move Melee’s hand onto the keyboard icon beside P1 and press P to open the controls dialog. The icon highlights when the hand points at it; it is not a mouse button. A procedural
 Three.js keyboard shows physical GameCube button caps, shoulder triggers, and
-grooved analog/C-stick parts above their key anchors. Key presses light the caps; pointer movement gently tilts the model.
+grooved analog/C-stick parts above their key anchors. Key presses light the caps; the model stays at a fixed viewing angle.
 Leader arrows project from the 3D anchors, following OpenSmash’s approach in
 `opensmash/web-prototype/visual/game-launcher.js`. The model is authored here;
 there is no downloaded keyboard asset or external iframe. Three.js is MIT-licensed.
@@ -52,8 +52,11 @@ Seven checked PowerPC hooks disable stick-triggered jumps for the human while
 preserving button jumps, upward aiming, CPU input and Nana’s behavior. The
 hooks verify the USA 1.02 executable before writing anything.
 
-The keyboard view suspends the core, mutes audio and isolates game input. Back
-or Esc closes it, clears held keys and restores character select. The native
+The keyboard view isolates game input while the native menu and music continue.
+W/S selects Tap jump or Back; P activates the selection. A turns tap jump off,
+D turns it on. O or Esc closes the view; selecting Back and pressing P also
+returns to character select. Tab, Enter and Space remain available for standard
+keyboard accessibility. Closing clears held keys. The native
 pause screen is independent and does not open this view. Native Gamepad API
 input support remains in the runtime, but the UI currently represents keyboard
 input; no physical controller was connected for verification.
