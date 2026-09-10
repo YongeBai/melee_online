@@ -51,6 +51,7 @@ export default defineConfig(async ({ command }) => {
       strictPort: true,
       proxy: {
         '/engine-session': { target: 'ws://127.0.0.1:3002', ws: true },
+        '/room-session': { target: 'ws://127.0.0.1:3002', ws: true },
       },
       ...(isCodexSeatbeltSandbox
         ? { watch: { useFsEvents: false, usePolling: true } }

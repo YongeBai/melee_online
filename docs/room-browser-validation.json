@@ -1,0 +1,168 @@
+{
+  "date": "2026-09-09",
+  "backend": "OGL",
+  "clients": "Two independent in-app Chromium tabs with separate sessionStorage",
+  "room": "Y58KQC",
+  "ownerSeat": 0,
+  "guestSeat": 1,
+  "workload": "Both clients send jump, attack, shield and neutral changes every 180 ms through their assigned room sockets",
+  "inputDelayMsGuest": 80,
+  "owner": {
+    "seconds": 60.00074499988556,
+    "resolution": [
+      1280,
+      720
+    ],
+    "simulationFps": 60.04925438853921,
+    "presentedFps": 59.74925811349238,
+    "decodedFps": 59.765924573217205,
+    "droppedFrames": 0,
+    "decodeErrors": 0,
+    "meanPresentationQueueMs": 78.25374895445638,
+    "maxPresentationQueueMs": 89.49500012397766,
+    "inputDelayMs": 0,
+    "rollbacks": 333,
+    "resimulatedFrames": 2254,
+    "maxDepth": 13,
+    "lateRejected": 0
+  },
+  "guest": {
+    "seconds": 60.00060500001907,
+    "resolution": [
+      1280,
+      720
+    ],
+    "simulationFps": 60.099393997758085,
+    "presentedFps": 59.74939752688928,
+    "decodedFps": 59.76606402550208,
+    "droppedFrames": 0,
+    "decodeErrors": 0,
+    "meanPresentationQueueMs": 78.17712692023986,
+    "maxPresentationQueueMs": 83.64499998092651,
+    "inputDelayMs": 80,
+    "rollbacks": 333,
+    "resimulatedFrames": 2259,
+    "maxDepth": 13,
+    "lateRejected": 0
+  },
+  "pacing": {
+    "deadlineResets": 0,
+    "maxBehindMs": 302.07617999537615
+  },
+  "rules": {
+    "stage": 31,
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0,
+    "stocks": [
+      4,
+      4
+    ],
+    "controllerIndices": [
+      0,
+      1
+    ]
+  },
+  "guestRefresh": {
+    "sameRoom": true,
+    "seat": 1,
+    "resumedMatch": true
+  },
+  "beforePacingFix": {
+    "simulationFps": 59.09672998077198,
+    "presentedFps": 49.26394072847208,
+    "droppedFrames": 578,
+    "seconds": 60.00332000017166,
+    "guestDelayMs": 80
+  },
+  "limits": "Server-side emulation and rollback with video streaming. Artificial input delay only; no WAN loss/jitter or input-to-photon latency measurement. Rates are workload and host specific. Video buffering adds measured latency.",
+  "highDelay": {
+    "guestDelayMs": 150,
+    "owner": {
+      "seconds": 60.00060500001907,
+      "simulationFps": 60.032728003306886,
+      "presentedFps": 59.94939551024288,
+      "decodedFps": 59.96606200885569,
+      "droppedFrames": 0,
+      "decodeErrors": 0,
+      "meanPresentationQueueMs": 78.5402251914504,
+      "rollbacks": 330,
+      "resimulatedFrames": 3404
+    },
+    "guest": {
+      "seconds": 60.00103500008583,
+      "simulationFps": 60.06563053445402,
+      "presentedFps": 59.78230208853679,
+      "decodedFps": 59.8489676052232,
+      "droppedFrames": 0,
+      "decodeErrors": 0,
+      "meanPresentationQueueMs": 75.78253136147754,
+      "rollbacks": 332,
+      "resimulatedFrames": 3425
+    },
+    "maxDepth": 15,
+    "lateRejected": 11,
+    "pacing": {
+      "deadlineResets": 0,
+      "maxBehindMs": 222.12161895178724
+    }
+  },
+  "finalBuffer": {
+    "startupFrames": 3,
+    "maxFrames": 8,
+    "guestDelayMs": 80,
+    "owner": {
+      "seconds": 60.004,
+      "simulationFps": 60.079328044797016,
+      "presentedFps": 59.862675821611894,
+      "decodedFps": 59.9293380441304,
+      "droppedFrames": 0,
+      "decodeErrors": 0,
+      "meanPresentationQueueMs": 73.93830178010968,
+      "maxPresentationQueueMs": 93.90500020980835,
+      "rollbacks": 333,
+      "resimulatedFrames": 2636
+    },
+    "guest": {
+      "seconds": 60.00322499990463,
+      "simulationFps": 60.09676979871884,
+      "presentedFps": 59.91344631902225,
+      "decodedFps": 59.96344363166678,
+      "droppedFrames": 0,
+      "decodeErrors": 0,
+      "meanPresentationQueueMs": 74.06765785761105,
+      "maxPresentationQueueMs": 82.70000004768372,
+      "rollbacks": 333,
+      "resimulatedFrames": 2636
+    },
+    "maxDepth": 12,
+    "lateRejected": 0,
+    "pacing": {
+      "deadlineResets": 0,
+      "maxBehindMs": 137.46215458330698
+    }
+  },
+  "rematch": {
+    "sameRoom": true,
+    "room": "Y58KQC",
+    "priorEpoch": "73a7e7cc2bc88789",
+    "epoch": "d41b25217626aeb0",
+    "stage": 31,
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0,
+    "stocks": [
+      4,
+      4
+    ],
+    "controllerIndices": [
+      0,
+      1
+    ],
+    "playerIds": [
+      0,
+      1
+    ],
+    "error": null
+  }
+}

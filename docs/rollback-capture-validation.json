@@ -1,0 +1,206 @@
+{
+  "backend": "OGL",
+  "kind": "Full Dolphin state rollback",
+  "resolution": [
+    1280,
+    720
+  ],
+  "requestedCharacters": [
+    14,
+    12
+  ],
+  "frameCount": 600,
+  "inputEvents": 60,
+  "checkpointInterval": 4,
+  "trials": [
+    {
+      "delayFrames": 0,
+      "hash": "01c7b850240779d0068c277f1f57d36d836eb7fc5d3213027545d2b7dcfd18f8",
+      "elapsedMs": 5208.497781000002,
+      "simulationFps": 115.19636279557048,
+      "rollbacks": 0,
+      "resimulatedFrames": 0,
+      "maxDepth": 0,
+      "lateRejected": 0,
+      "fighters": [
+        {
+          "port": 0,
+          "playerId": 0,
+          "controllerIndex": 0,
+          "character": 14,
+          "stocks": 3,
+          "action": 12,
+          "x": 7.800000190734863,
+          "y": 108.93328857421875,
+          "air": 1
+        },
+        {
+          "port": 1,
+          "playerId": 1,
+          "controllerIndex": 1,
+          "character": 12,
+          "stocks": 4,
+          "action": 14,
+          "x": -24.75999641418457,
+          "y": 27.20009994506836,
+          "air": 0
+        }
+      ]
+    },
+    {
+      "delayFrames": 1,
+      "hash": "01c7b850240779d0068c277f1f57d36d836eb7fc5d3213027545d2b7dcfd18f8",
+      "elapsedMs": 6425.812072000001,
+      "simulationFps": 93.3734123060423,
+      "rollbacks": 60,
+      "resimulatedFrames": 120,
+      "maxDepth": 3,
+      "lateRejected": 0,
+      "fighters": [
+        {
+          "port": 0,
+          "playerId": 0,
+          "controllerIndex": 0,
+          "character": 14,
+          "stocks": 3,
+          "action": 12,
+          "x": 7.800000190734863,
+          "y": 108.93328857421875,
+          "air": 1
+        },
+        {
+          "port": 1,
+          "playerId": 1,
+          "controllerIndex": 1,
+          "character": 12,
+          "stocks": 4,
+          "action": 14,
+          "x": -24.75999641418457,
+          "y": 27.20009994506836,
+          "air": 0
+        }
+      ]
+    },
+    {
+      "delayFrames": 3,
+      "hash": "01c7b850240779d0068c277f1f57d36d836eb7fc5d3213027545d2b7dcfd18f8",
+      "elapsedMs": 6945.9609800000035,
+      "simulationFps": 86.38113599077542,
+      "rollbacks": 60,
+      "resimulatedFrames": 240,
+      "maxDepth": 5,
+      "lateRejected": 0,
+      "fighters": [
+        {
+          "port": 0,
+          "playerId": 0,
+          "controllerIndex": 0,
+          "character": 14,
+          "stocks": 3,
+          "action": 12,
+          "x": 7.800000190734863,
+          "y": 108.93328857421875,
+          "air": 1
+        },
+        {
+          "port": 1,
+          "playerId": 1,
+          "controllerIndex": 1,
+          "character": 12,
+          "stocks": 4,
+          "action": 14,
+          "x": -24.75999641418457,
+          "y": 27.20009994506836,
+          "air": 0
+        }
+      ]
+    },
+    {
+      "delayFrames": 5,
+      "hash": "01c7b850240779d0068c277f1f57d36d836eb7fc5d3213027545d2b7dcfd18f8",
+      "elapsedMs": 7392.282221000001,
+      "simulationFps": 81.16573232222107,
+      "rollbacks": 60,
+      "resimulatedFrames": 360,
+      "maxDepth": 7,
+      "lateRejected": 0,
+      "fighters": [
+        {
+          "port": 0,
+          "playerId": 0,
+          "controllerIndex": 0,
+          "character": 14,
+          "stocks": 3,
+          "action": 12,
+          "x": 7.800000190734863,
+          "y": 108.93328857421875,
+          "air": 1
+        },
+        {
+          "port": 1,
+          "playerId": 1,
+          "controllerIndex": 1,
+          "character": 12,
+          "stocks": 4,
+          "action": 14,
+          "x": -24.75999641418457,
+          "y": 27.20009994506836,
+          "air": 0
+        }
+      ]
+    },
+    {
+      "delayFrames": 9,
+      "hash": "01c7b850240779d0068c277f1f57d36d836eb7fc5d3213027545d2b7dcfd18f8",
+      "elapsedMs": 9283.688304000003,
+      "simulationFps": 64.62948564758274,
+      "rollbacks": 60,
+      "resimulatedFrames": 600,
+      "maxDepth": 11,
+      "lateRejected": 0,
+      "fighters": [
+        {
+          "port": 0,
+          "playerId": 0,
+          "controllerIndex": 0,
+          "character": 14,
+          "stocks": 3,
+          "action": 12,
+          "x": 7.800000190734863,
+          "y": 108.93328857421875,
+          "air": 1
+        },
+        {
+          "port": 1,
+          "playerId": 1,
+          "controllerIndex": 1,
+          "character": 12,
+          "stocks": 4,
+          "action": 14,
+          "x": -24.75999641418457,
+          "y": 27.20009994506836,
+          "air": 0
+        }
+      ]
+    }
+  ],
+  "afterRollbackVideo": {
+    "receivedFrames": 3903,
+    "decodedFrames": 3,
+    "nonBlackFraction": 0.09932834201388889
+  },
+  "codeInvalidation": "Passed: changed compiled instruction forced a cache clear before execution",
+  "rematch": {
+    "stage": 31,
+    "controllers": [
+      0,
+      1
+    ]
+  },
+  "finalVideo": {
+    "receivedFrames": 5149,
+    "decodedFrames": 49,
+    "nonBlackFraction": 0.1527126736111111
+  },
+  "minimumSimulationFps": 60
+}

@@ -41,6 +41,8 @@ copyFileSync(
   new URL("./engine/melee-memory.js", import.meta.url),
   join(target, "src/melee-memory.js"),
 );
+copyFileSync(new URL('./engine/melee-css-layout.js',import.meta.url),join(target,'src/melee-css-layout.js'));
+copyFileSync(new URL('./engine/melee-foreground.js',import.meta.url),join(target,'src/melee-foreground.js'));
 copyFileSync(
   new URL("./engine/melee-tap-jump.js", import.meta.url),
   join(target, "src/melee-tap-jump.js"),

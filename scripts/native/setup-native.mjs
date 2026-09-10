@@ -46,6 +46,9 @@ if (!fs.existsSync(cmake)) {
 }
 const patchHash = createHash("sha256")
   .update(fs.readFileSync(path.join(root, "scripts/native/patch-native.mjs")))
+  .update(fs.readFileSync(path.join(root, "scripts/native/rollback-bridge.h")))
+  .update(fs.readFileSync(path.join(root, "scripts/native/rollback-code-cache.h")))
+  .update(fs.readFileSync(path.join(root, "scripts/native/menu-frame-gate.h")))
   .update(fs.readFileSync(import.meta.filename))
   .digest("hex");
 const stamp = path.join(source, "build/melee-bridge-version");

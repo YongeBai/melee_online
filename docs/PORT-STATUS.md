@@ -1,27 +1,31 @@
 # Current port status
 
-The localhost website plays original Melee through a pinned local Dolphin GPU
-renderer. The browser receives 1280×720 video and stereo audio, and sends the
-requested keyboard/gamepad controls. Original character select, stage select, battles and
-results use the supplied USA 1.02 disc. The default is a local native engine
-streamed to the browser; `/play/?engine=wasm` retains the slower WASM engine.
+The website plays original Melee through a pinned native Dolphin GPU renderer.
+The browser receives a 1280×720 video stream and stereo audio and sends controller
+input. Original character select, stage select, battles and results use the supplied
+USA 1.02 disc. `/play/?engine=wasm` retains the slower browser-only engine.
 
-Implemented: automatic local-disc boot, original roster, human versus level-9
-CPU, native stage selection, four stocks, eight minutes, no items, results/return to character
-select, keyboard/gamepad mapping, native pause, adjustable tap jump, full-detail 720p.
-A keyboard icon beside P1 opens the local 3D keyboard mapping view; tap jump
-is configured there. No custom pause menu or starting-form controls are shown.
+The default `/play/` creates a two-player invite room. The owner is P1 on the
+left and the joining player is P2 on the right, with separate native controller
+ports. Both players ready up before P1 selects a stage. The rules are four stocks,
+eight minutes, no items and no teams. The keyboard icon beside each player's card
+opens the 3D keyboard mapping view and that player's tap-jump setting.
+`/play/?solo=1` retains human-versus-level-9-CPU play.
 
-A valid 60-second browser benchmark measured 59.94 native rendered FPS and
-59.96 displayed FPS with zero dropped decoded frames on this machine. Native
-OpenGL/EGL replaced the software rasterizer. Vulkan was rejected after a driver
-crash during longer tests. See NATIVE-RENDERER.md and VALIDATION.md for the
-architecture, measured evidence and test limits.
+Rooms use authoritative server-side rollback: complete Dolphin snapshots,
+last-input prediction and corrected resimulation for late inputs. This is not
+Slippi, peer-to-peer rollback, or immediate browser-side prediction. The real-game
+integration test compares final memory hashes with on-time and delayed inputs,
+checks separate P1/P2 controllers, and verifies rendering and a rematch. See
+[rollback details](ROLLBACK-AND-ROOMS.md) and [validation](VALIDATION.md).
 
-The implemented game remains human-versus-CPU. A same-origin production
-server, private-session authentication and deployment configuration are included.
-A public GPU host has not been provisioned. Matchmaking, multi-user worker
-allocation and rollback multiplayer are not implemented; their plan is in
-ROLLBACK-AND-ROOMS.md. Streaming adds latency; this has not been measured or certified
-for competitive play. The decompiled Melee and OpenSmash repositories remain
-independent and unchanged.
+The optimized simulation completed five 3,600-frame workloads at 720p, with
+on-time input and input delayed 1/3/5/9 frames. The nine-frame trial performed
+400 corrections and 4,000 replayed frames at 68.54 simulation FPS; every final
+memory hash matched the reference. Video streaming still adds latency.
+Competitive WAN latency and public multiplayer deployment remain unverified.
+
+The same-origin production server includes private-session authentication and
+per-room GPU workers. Static hosting alone cannot run the native engine. A public
+GPU host has not been provisioned. The decompiled Melee and OpenSmash repositories
+remain independent and unchanged.

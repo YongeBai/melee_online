@@ -54,6 +54,22 @@ test("native CSS lock restores fixed match rules and only one human and CPU", ()
   controlMelee(module, api, "start", { startingSheik: [true, true] });
   assert.equal(heap[at(css + 16 + 0x60)], 19, "human starting form changes at Start");
   assert.equal(heap[at(css + 16 + 0x60 + 0x24)], 19, "CPU starting form changes at Start");
+  controlMelee(module, api, "lockCss", { online: true });
+  for (let i = 0; i < 2; i++) {
+    const p = at(css + 16 + 0x60 + i * 0x24);
+    assert.equal(heap[p + 1], 0, "both online players are human");
+    assert.equal(heap[p + 4], 0, "native player identity follows its own slot");
+    assert.equal(heap[p + 7], i, "owner uses P1 controller/color and guest P2");
+  }
+  controlMelee(module, api, 'lockCss', {online:true,cpu:true});
+  assert.equal(heap[at(0x80480820+1)],0);
+  assert.equal(heap[at(0x80480820+0x24+1)],1,'Room CPU is a native CPU');
+  assert.equal(heap[at(0x80480820+0x24+15)],9);
+  const chars=[heap[at(0x80480820)],heap[at(0x80480820+0x24)]];
+  controlMelee(module,api,'opponent',{cpu:false});
+  assert.equal(heap[at(0x80480820+0x24+1)],0);
+  assert.equal(heap[at(0x80479d35)],1,'Changing opponent reloads CSS');
+  assert.deepEqual([heap[at(0x80480820)],heap[at(0x80480820+0x24)]],chars);
   w(0x80479d58, 123);
   w(0x80479d5c, 45);
   assert.equal(inspectMelee(module).sceneFrame, 123);

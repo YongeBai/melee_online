@@ -125,6 +125,13 @@ try {
   renderText("ON", "on");
   renderText("OFF", "off");
   renderText("BACK", "back");
+  for(const char of 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+    renderText(char,`glyph-${char.charCodeAt(0)}`);
+  for(const [name,text] of Object.entries({
+    'room-code':'Your code','room-join':'Join room','room-ready':'Ready',
+    'room-wait':'Waiting for player','room-leave':'Leave room','room-title':'2 player Versus',
+    'room-connected':'Player connected','room-copy':'Copy','room-back':'Back','room-kick':'Kick player'
+  }))renderText(text,name);
 
   console.log(`Extracted ${catalog.length} local menu textures to .melee-assets/`);
 } finally {

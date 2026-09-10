@@ -2,15 +2,15 @@
 
 `npm run serve` is the production entry point. It serves the original game shell,
 local menu textures, keyboard model, audio and same-origin WebSocket endpoint
-without Vite or Wrangler. The browser connects to `/engine-session`, using WSS
+without Vite or Wrangler. The browser connects to `/room-session` (or `/engine-session` for solo play), using WSS
 when the page uses HTTPS. There is no hardcoded browser-side localhost address.
 
 This version needs a **Linux x64 GPU host**. A static-site or Cloudflare Workers
 deployment alone cannot run its native Dolphin process. The verified hardware
 is a Radeon 890M with Mesa EGL/OpenGL; another server needs its own performance
-and input-latency validation. This production mode serves one private human/CPU
-session per worker. A second active client is rejected rather than controlling
-the first player's game. Rooms and rollback are not implemented by this mode.
+and input-latency validation. The default mode allocates one worker per two-player room, with server-side
+rollback. Solo mode retains one human/CPU session with exclusive controller
+ownership. Room capacity must be sized to available CPU/GPU and memory.
 
 ## Host setup
 
@@ -53,7 +53,9 @@ serving, cross-origin isolation, traversal rejection and ISO-route absence.
 An external domain/TLS deployment has not been provisioned or measured here.
 No hosting credentials or remote machine were supplied in this task.
 
-A public multi-user release needs a session allocator, one isolated worker per
-session, quotas, reconnect handling and appropriate game-data provisioning.
-The private worker is a deployment foundation, not a shared global multiplayer
-room server. See [rollback and rooms](ROLLBACK-AND-ROOMS.md) for the next steps.
+The room allocator provides isolated workers, two assigned seats, reconnect
+tokens, idle expiry and a four-room limit. Full rollback snapshots consume about
+383 MB per active room in addition to emulator/video memory. A public release
+still needs capacity/load testing, appropriate game-data provisioning and WAN
+latency validation. See [rollback and rooms](ROLLBACK-AND-ROOMS.md) for the exact
+rollback architecture and limitations.

@@ -66,6 +66,30 @@ const host = new Host({
       `${measuredRenderFps} rendered FPS · ${measuredGameFps} simulation FPS${nativeEngine ? " · 1280×720" : ""}`;
   },
 });
+if(host.online){
+  const {createRoomUI}=await import('./room-ui.js');
+  createRoomUI(host);
+  document.body.classList.add('online-room');
+  window.addEventListener('melee-room-kicked', () => {
+    paused = false;
+    controlsChanging = false;
+    keyboardModel?.setVisible(false);
+    $('controls').close();
+    document.body.classList.remove('controls-open');
+    keys.clear();
+    clearTimeout(pulseTimer);
+    $('keyboardButton').hidden = true;
+    $('peerKeyboard').hidden = true;
+    $('kickMatch').hidden = true;
+    ready = false;
+    loading.hidden = false;
+    status.textContent = 'The room owner removed you. Start a new room to play again.';
+    $('begin').hidden = false;
+    $('begin').disabled = false;
+    $('roomPanel').hidden = true;
+    host.room = null;
+  });
+}
 audio.setSource((frames) => host.mixAudio(frames));
 audio.setTransportBridge((config) => host.configureAudioWorklet(config));
 const neutral = () => ({
@@ -204,6 +228,10 @@ async function setPaused(value) {
 }
 async function startButton() {
   if (!ready || paused) return;
+  if(host.online && gameState?.minor===0){
+    try {await control('start');}catch(error){window.dispatchEvent(new CustomEvent('melee-room-error',{detail:error.message}));}
+    return;
+  }
   if (gameState?.major === 2 && gameState.minor === 0) await control("start");
   pulse(16);
 }
@@ -215,21 +243,39 @@ async function quitMatch() {
 // match the icon in the original 640×480 picture, independent of browser size.
 function keyboardHovered(state) {
   const c = state?.cssCursor;
+  const shift=host.online&&host.room?.seat===1?44.75:0;
   return Boolean(
     c &&
     Number.isFinite(c.x) &&
     Number.isFinite(c.y) &&
-    c.x >= -24.6 &&
-    c.x <= -21.6 &&
-    c.y >= -22 &&
-    c.y <= -20,
+    c.x >= -25.0+shift &&
+    c.x <= -22.0+shift &&
+    c.y >= -23.1 &&
+    c.y <= -20.4,
   );
+}
+function activateRoomControl(state) {
+  const cursor = state?.cssCursor, panel = $('roomPanel');
+  if (!cursor || !panel || panel.hidden) return false;
+  const rect = $('screen').getBoundingClientRect();
+  const x = rect.left + rect.width * (.5 + (cursor.x + 5.0) * .01073);
+  const y = rect.top + rect.height * (.5 - (cursor.y - .75) * .01725);
+  for (const control of panel.querySelectorAll('button,input')) {
+    if (control.hidden || control.disabled || !control.getClientRects().length) continue;
+    const box = control.getBoundingClientRect();
+    if (x >= box.left && x <= box.right && y >= box.top && y <= box.bottom) {
+      if (control.tagName === 'INPUT') control.focus(); else control.click();
+      return true;
+    }
+  }
+  return false;
 }
 async function cssAttack() {
   // Inspect at activation time rather than trusting the slower HUD sample.
   const state = await host.adapter.request("meleeInspect", {});
   gameState = state;
   if (keyboardHovered(state)) await setPaused(true);
+  else if (host.online && activateRoomControl(state)) return;
   else if (!paused) pulse(1);
 }
 function toggleTapJump(value = !$("tapJump").checked) {
@@ -237,6 +283,7 @@ function toggleTapJump(value = !$("tapJump").checked) {
   $("tapJump").dispatchEvent(new Event("change"));
 }
 window.addEventListener("keydown", (event) => {
+  if(event.target instanceof Element && event.target.closest('#roomPanel input'))return;
   if (!relevant.has(event.code)) return;
   if (!ready && !$("begin").hidden && ["KeyP", "Enter"].includes(event.code)) {
     event.preventDefault();
@@ -376,7 +423,7 @@ async function tick() {
       menuSeenAt = 0;
     }
     if (state.major === 1 && state.sceneKind === 1 && !menuSeenAt) menuSeenAt = performance.now();
-    if (
+    if (!host.online &&
       state.major === 1 &&
       state.sceneKind === 1 &&
       state.sceneFrame > 60 &&
@@ -385,7 +432,7 @@ async function tick() {
     ) {
       await control("enterCss");
       bootStep = 3;
-    } else if (
+    } else if (!host.online &&
       [0, 24].includes(state.major) &&
       state.sceneFrame > 10 &&
       state.mainPointer !== "0" &&
@@ -404,11 +451,11 @@ async function tick() {
       }
       $("keyboardButton").hidden = state.minor !== 0 || state.sceneKind !== 8;
       $("keyboardButton").classList.toggle("hand-hover", keyboardHovered(state));
-      if (state.minor === 0 && state.sceneFrame > 20 && lastScene !== scene) {
+      if (!host.online && state.minor === 0 && state.sceneFrame > 20 && lastScene !== scene) {
         await control("lockCss");
         lastScene = scene;
       }
-      if (
+      if (!host.online &&
         state.minor === 4 &&
         state.sceneKind === 5 &&
         state.sceneFrame > 180 &&
@@ -419,7 +466,7 @@ async function tick() {
         lastScene = scene;
       }
       if (state.minor !== 0 && state.minor !== 4) lastScene = scene;
-    } else if (
+    } else if (!host.online &&
       !ready &&
       state.major !== 1 &&
       bootStep < 2 &&
@@ -497,6 +544,10 @@ if (params.has("qa")) {
       window.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", { code, bubbles: true }));
     };
     panel.append(b);
+  }
+  for(const key of ["W","A","S","D"]){
+    const b=document.createElement("button");b.textContent=`Step ${key}`;
+    b.onclick=()=>{const code=`Key${key}`;window.dispatchEvent(new KeyboardEvent("keydown",{code,bubbles:true}));setTimeout(()=>window.dispatchEvent(new KeyboardEvent("keyup",{code,bubbles:true})),120);};panel.append(b);
   }
   const names = [
     "Captain Falcon",
@@ -950,7 +1001,7 @@ if (params.has("qa")) {
         const state = await host.adapter.request("meleeInspect", {});
         const c = state.cssCursor;
         if (!c) throw Error("Hand navigation requires character select");
-        const dx = -23.1 - c.x,
+        const dx = -23.5 + (host.online&&host.room?.seat===1?44.75:0) - c.x,
           dy = -21 - c.y;
         if (Math.abs(dx) < 0.4 && Math.abs(dy) < 0.4) break;
         keys.clear();
@@ -993,6 +1044,9 @@ if (params.has("qa")) {
       press("KeyP");
       for (let i = 0; i < 60 && (!paused || controlsChanging); i++) await delay(50);
       if (!paused || controlsChanging) throw Error("Hand + P did not open keyboard controls");
+      // Allow the neutral input and the room's sampled cursor to catch up before
+      // comparing positions, including the QA client's artificial input delay.
+      if (host.online) await delay(host.inputDelayMs + 200);
       const before = await host.adapter.request("meleeInspect", {});
       const audioBefore = audio.nextPlayTime;
       audio.source = async (frames) => {
