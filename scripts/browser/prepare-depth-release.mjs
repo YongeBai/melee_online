@@ -1,0 +1,51 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {correctWebGLDepthLoader, WEBGL_DEPTH_CORE} from './webgl-depth-loader.mjs';
+const [baseArg,outArg]=process.argv.slice(2);
+if(!baseArg||!outArg)throw Error('Usage: node prepare-depth-release.mjs BASE OUTPUT');
+const base=path.resolve(baseArg),out=path.resolve(outArg),root=path.resolve(import.meta.dirname,'../..');
+if(!out.startsWith(path.join(root,'dist')+'/')||fs.existsSync(out))throw Error('Choose a new directory under dist');
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const read=(dir,f)=>fs.readFileSync(path.join(dir,f),'utf8');
+const files=JSON.parse(read(base,'files.json'));
+const live=await fetch('https://playmelee.com/files.json',{cache:'no-store'});
+if(!live.ok||JSON.stringify(await live.json())!==JSON.stringify(files))throw Error('Base differs from production');
+for(const f of files){
+  if(path.isAbsolute(f.path)||f.path.split('/').includes('..'))throw Error('Unsafe inventory');
+  const b=fs.readFileSync(path.join(base,f.path));
+  if(b.length!==f.bytes||hash(b)!==f.sha256)throw Error('Base mismatch: '+f.path);
+}
+const paths=new Set(files.map(f=>f.path));
+const write=(f,b)=>{fs.mkdirSync(path.dirname(path.join(out,f)),{recursive:true});fs.writeFileSync(path.join(out,f),b);paths.add(f);};
+for(const f of files)write(f.path,fs.readFileSync(path.join(base,f.path)));
+const coreDir=`play/build/core-candidates/${WEBGL_DEPTH_CORE}`;
+const loader=correctWebGLDepthLoader(read(base,coreDir+'/dolphin-core-upstream.js'));
+const loaderName=`dolphin-core-depth-${hash(loader)}.js`;
+write(coreDir+'/'+loaderName,loader);
+const protocolPath='engine/src/upstream-worker-protocol.js';
+let protocol=read(base,protocolPath);
+const needle='coreUrl: `./build/core-candidates/${requested}/dolphin-core-upstream.js`,';
+if(protocol.split(needle).length!==2)throw Error('Unexpected protocol');
+protocol=protocol.replace(needle,'coreUrl: `./build/core-candidates/${requested}/${requested === "'+WEBGL_DEPTH_CORE+'" ? "'+loaderName+'" : "dolphin-core-upstream.js"}`,');
+write(protocolPath,protocol);
+// Force revalidation of entry modules; the original immutable loader remains
+// byte-for-byte available, while corrected GL bindings get a unique URL.
+const config=JSON.parse(read(base,'vercel.json'));
+config.headers.push({source:'/engine/(.*)',headers:[{key:'Cache-Control',value:'no-cache'}]});
+config.headers.push({source:'/play/:file',headers:[{key:'Cache-Control',value:'no-cache'}]});
+write('vercel.json',JSON.stringify(config,null,2));
+let bootstrap=read(base,'play/release-bootstrap.js');
+bootstrap='// WebGL depth release '+hash(loader)+'\n'+bootstrap;
+write('play/release-bootstrap.js',bootstrap);
+let html=read(base,'play/index.html');
+html=html.replace(/release-bootstrap\.js\?v=[a-f0-9]+/,'release-bootstrap.js?v='+hash(bootstrap));
+write('play/index.html',html);
+const release=JSON.parse(read(base,'release.json'));
+release.createdAt=new Date().toISOString();
+release.webglDepthCorrection={core:WEBGL_DEPTH_CORE,loader:loaderName,sha256:hash(loader)};
+write('release.json',JSON.stringify(release,null,2));
+write('files.json',JSON.stringify([...paths].map(f=>{const b=fs.readFileSync(path.join(out,f));return{path:f,bytes:b.length,sha256:hash(b)};}),null,2));
+fs.mkdirSync(path.join(out,'.vercel'),{recursive:true});
+fs.copyFileSync(path.join(base,'.vercel/project.json'),path.join(out,'.vercel/project.json'));
+console.log(out);

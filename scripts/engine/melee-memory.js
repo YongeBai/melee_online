@@ -48,8 +48,23 @@ export function inspectMelee(module) {
         }
       : undefined;
   });
-  let match;
+  let match, camera;
   if (major === 2 && minor === 2 && sceneKind === 2) {
+    // Original USA 1.02 game_camera (cm/types.h). Read-only diagnostics:
+    // distinguish native camera movement from renderer/projection faults.
+    const cam = 0x80452c68;
+    const float = (a) => view.getFloat32(mem1 + a - 0x80000000);
+    const vec = (a) => [float(a), float(a + 4), float(a + 8)];
+    camera = {
+      mode: u32(cam + 4),
+      interest: vec(cam + 0x14),
+      targetInterest: vec(cam + 0x20),
+      position: vec(cam + 0x2c),
+      targetPosition: vec(cam + 0x38),
+      fov: float(cam + 0x44),
+      pitchOffset: float(cam + 0x2c8),
+      yawOffset: float(cam + 0x2cc),
+    };
     const rules = 0x8046b6a0 + 0x24c8;
     match = {
       pauser: view.getInt8(mem1 + 0x46b6a1),
@@ -106,6 +121,7 @@ export function inspectMelee(module) {
     ].map((a) => u32(a).toString(16)),
     fighters,
     match,
+    camera,
     master: read(0x804c1fac, 68),
     copy: read(0x804c20bc, 68),
     game: read(0x804c21cc, 68),

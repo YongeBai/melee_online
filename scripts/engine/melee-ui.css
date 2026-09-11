@@ -107,6 +107,16 @@ button:focus-visible {
   padding: 6px 10px;
   font-size: 12px;
 }
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.volume-control input {
+  width: 80px;
+  accent-color: #bbc7e2;
+}
 #stats {
   position: fixed;
   bottom: 4px;

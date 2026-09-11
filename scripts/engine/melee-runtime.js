@@ -1,4 +1,5 @@
 import { AudioController } from "/engine/src/audio.js";
+import { characterSelectReady } from "./melee-startup.js";
 import { readGamepadInput, selectPreferredGamepad } from "/engine/src/input.js";
 
 const params = new URLSearchParams(location.search);
@@ -46,7 +47,23 @@ const actions = [];
 let testForms = [false, false];
 let nativeSceneKey = "",
   nativeSceneSince = 0;
-const audio = new AudioController();
+const audio = new AudioController({ outputEnabled: nativeEngine });
+// Start quietly, before the first user gesture enables the audio context.
+let volume = 0.25;
+try {
+  const saved = localStorage.getItem("melee.volume");
+  if (saved !== null && saved.trim() !== "" && Number.isFinite(Number(saved)))
+    volume = Math.max(0, Math.min(1, Number(saved)));
+} catch { /* Audio controls also work when browser storage is unavailable. */ }
+audio.volume = volume;
+const volumeControl = $("volume");
+if (volumeControl) {
+  volumeControl.value = String(Math.round(volume * 100));
+  volumeControl.addEventListener("input", () => {
+    audio.setVolume(Number(volumeControl.value) / 100);
+    try { localStorage.setItem("melee.volume", String(audio.volume)); } catch {}
+  });
+}
 const browserStatus = [];
 if (nativeEngine) audio.targetLeadSeconds = 0.08;
 const Host = nativeEngine
@@ -453,8 +470,9 @@ async function tick() {
     }
     if (state.major === 2) {
       bootStep = 2;
-      if (!ready) {
+      if (!ready && (nativeEngine || characterSelectReady(state))) {
         ready = true;
+        audio.setOutputEnabled(true);
         loading.hidden = true;
         clearTimeout(pulseTimer);
         host.setInputState(neutral());
@@ -1446,6 +1464,7 @@ if (params.has("qa")) {
         cursor: s.cssCursor,
         renderFrame: s.renderFrame,
         match: s.match,
+        camera: s.camera,
         tapJump: s.tapJump,
         fighters: s.fighters,
         pad: s.master.slice(0, 32),

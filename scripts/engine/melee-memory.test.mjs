@@ -2,6 +2,30 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { controlMelee, inspectMelee } from "./melee-memory.js";
 
+test("camera diagnostics read native transforms without changing game memory", () => {
+  const heap = new Uint8Array(0x1800000), view = new DataView(heap.buffer);
+  heap.set(new TextEncoder().encode("GALE01"));
+  heap.set([124,8,2,166,60,96,128,76,144,1,0,4,148,33,255,40,219,225,0,208,219,193,0,200,219,161,0,192,190,225,0,156], 0x37750c);
+  view.setUint32(0x4d6720, 0x80400000);
+  heap[0x400000] = 2;
+  heap[0x479d30] = 2;
+  heap[0x479d33] = 2;
+  const camera = 0x452c68;
+  view.setUint32(camera + 4, 0);
+  for (const [offset, values] of [[0x14,[1,10,0]], [0x20,[2,11,0]],
+    [0x2c,[3,30,170]], [0x38,[4,31,171]]])
+    values.forEach((v, i) => view.setFloat32(camera + offset + i * 4, v));
+  view.setFloat32(camera + 0x44, 30);
+  const before = heap.slice();
+  assert.deepEqual(inspectMelee({HEAPU8: heap}).camera, {
+    mode: 0, interest: [1,10,0], targetInterest: [2,11,0], position: [3,30,170],
+    targetPosition: [4,31,171], fov: 30, pitchOffset: 0, yawOffset: 0,
+  });
+  assert.deepEqual(heap, before);
+  heap[0x479d33] = 0;
+  assert.equal(inspectMelee({HEAPU8: heap}).camera, undefined);
+});
+
 test("native CSS lock restores fixed match rules and only one human and CPU", () => {
   const heap = new Uint8Array(0x1800000),
     view = new DataView(heap.buffer);

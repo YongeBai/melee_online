@@ -1190,3 +1190,81 @@ index 0c240e4..6aa4afc 100644
    invariant(existsSync(clangxx), `Emscripten clang++ is missing at ${clangxx}`);
    invariant(sha256File(clangxx) === lock.emscripten.clangxxSha256, "Emscripten clang++ hash mismatch");
  
+diff --git a/src/audio.js b/src/audio.js
+index 473b437..4aea8a3 100644
+--- a/src/audio.js
++++ b/src/audio.js
+@@ -4,11 +4,12 @@ import {
+ } from "./audio-pcm-ring.js";
+ 
+ export class AudioController {
+-  constructor() {
++  constructor({ outputEnabled = true } = {}) {
+     this.context = null;
+     this.gain = null;
+     this.source = null;
+     this.muted = true;
++    this.outputEnabled = outputEnabled;
+     // 0..1, driven by the volume dial. Mute is kept separate so the dial
+     // position survives a mute/unmute round trip.
+     this.volume = 1;
+@@ -126,7 +127,7 @@ export class AudioController {
+       this.context = new AudioContext();
+     }
+     this.gain = this.context.createGain();
+-    this.gain.gain.value = this.muted ? 0 : this.volume;
++    this.gain.gain.value = this.muted || !this.outputEnabled ? 0 : this.volume;
+     this.gain.connect(this.context.destination);
+     if (this.requestedTransport === "worklet") {
+       await this.tryEnableWorkletTransport();
+@@ -204,7 +205,14 @@ export class AudioController {
+     }
+ 
+     const now = this.context.currentTime;
+-    this.gain.gain.setTargetAtTime(this.muted ? 0 : this.volume, now, 0.01);
++    this.gain.gain.setTargetAtTime(this.muted || !this.outputEnabled ? 0 : this.volume, now, 0.01);
++  }
++
++  setOutputEnabled(enabled) {
++    // Keep consuming emulator audio while boot is hidden. User mute/volume
++    // and autoplay activation remain independent of this presentation gate.
++    this.outputEnabled = Boolean(enabled);
++    this.update();
+   }
+ 
+   startPump() {
+@@ -275,13 +283,14 @@ export class AudioController {
+         // profiler can attribute slow chunks to a busy worker vs. main-thread
+         // starvation (which shows up as pump-gap, recorded above).
+         const mixT0 = performance.now();
++        const silent = !this.outputEnabled;
+         const chunk = await this.source(this.chunkFrames);
+         const mixMs = performance.now() - mixT0;
+         const p = this.profile;
+         p.sumMixMs += mixMs;
+         p.mixSamples += 1;
+         if (mixMs > p.maxMixMs) p.maxMixMs = mixMs;
+-        if (!this.scheduleChunk(chunk)) {
++        if (!this.scheduleChunk(chunk, silent)) {
+           break;
+         }
+         scheduled += 1;
+@@ -294,7 +303,7 @@ export class AudioController {
+     }
+   }
+ 
+-  scheduleChunk(chunk) {
++  scheduleChunk(chunk, silent = !this.outputEnabled) {
+     if (!chunk?.available || !chunk.samples || !this.context || !this.gain) {
+       this.available = false;
+       this.stats = chunk?.stats || "audio:unavailable";
+@@ -316,7 +325,8 @@ export class AudioController {
+     for (let channel = 0; channel < channels; channel += 1) {
+       const output = buffer.getChannelData(channel);
+       for (let frame = 0; frame < usableFrames; frame += 1) {
+-        output[frame] = samples[frame * channels + channel] / 32768;
++        // Queued boot chunks must stay silent even after the gate opens.
++        output[frame] = silent ? 0 : samples[frame * channels + channel] / 32768;
+       }
+     }
+ 
