@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 export const metadata: Metadata = {
   title: 'Melee Online',
+  icons: { icon: { url: '/favicon.svg', type: 'image/svg+xml' } },
   description:
     'Play your local copy of Melee in the browser: choose your fighters and stage, four stocks, eight minutes, no items, versus a level-9 CPU.',
 };

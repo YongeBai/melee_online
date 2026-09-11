@@ -7,6 +7,7 @@ const mime = {
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".png": "image/png",
+  ".svg": "image/svg+xml",
   ".wasm": "application/wasm",
   ".json": "application/json",
 };
@@ -87,7 +88,10 @@ export function createWebHandler({ root, access = webAccess(), health = () => ({
       return;
     }
     let base, relative;
-    if (url.pathname === "/play/vendor/three.module.js") {
+    if (url.pathname === "/favicon.svg") {
+      base = path.join(root, "web/public");
+      relative = "favicon.svg";
+    } else if (url.pathname === "/play/vendor/three.module.js") {
       base = path.join(root, "web/node_modules/three/build");
       relative = "three.module.js";
     } else if (url.pathname.startsWith("/play/assets/")) {
