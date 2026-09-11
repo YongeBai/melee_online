@@ -205,7 +205,7 @@ async function control(payload) {
       fs.writeSync(memfd, heap, start, i - start, memBase + start);
       // The low-memory toggle is data; only executable writes need to discard JIT blocks.
       if (
-        (start >= 0x1c00 && start < 0x1d00) ||
+        (start >= 0x1800 && start < 0x1d00) ||
         (start >= 0x2800 && start < 0x2f00) ||
         (start >= 0x3000 && start < 0x400000)
       )

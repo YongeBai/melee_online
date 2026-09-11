@@ -20,11 +20,11 @@ patch("VideoCommon/FrameDumper.cpp", (s) =>
   s
     .replace(
       '#include "VideoCommon/FrameDumper.h"',
-      '#include "VideoCommon/FrameDumper.h"\n#include <cstdlib>\n#include <unistd.h>\n#include <cerrno>\n#include <vector>\n#include <cstring>\n#include "Core/MeleeRollback.h"',
+      '#include "VideoCommon/FrameDumper.h"\n#include <cstdlib>\n#include <unistd.h>\n#include <cerrno>\n#include <vector>\n#include <cstring>\n#include "Core/MeleeRollback.h"\n#include "Core/MeleeMenuFrameGate.h"\n#include "Core/System.h"\n#include "Core/HW/Memmap.h"',
     )
     .replace(
       "int target_height = target_rect.GetHeight();",
-      'int target_height = target_rect.GetHeight();\n  if (MeleeBridge::suppress_output) return;\n  if (std::getenv("MELEE_STREAM")) { target_width = 960; target_height = 720; }',
+      'int target_height = target_rect.GetHeight();\n  if (MeleeBridge::suppress_output) return;\n  if (std::getenv("MELEE_ROOM_WORKER") && !MeleeBridge::MenuFrameReady(Core::System::GetInstance().GetMemory().GetRAM())) return;\n  if (std::getenv("MELEE_STREAM")) { target_width = 960; target_height = 720; }',
     )
     .replace(
       "auto frame = m_frame_dump_data;",
@@ -142,6 +142,7 @@ patch("VideoCommon/ShaderCache.cpp", (s) =>
 );
 
 // MELEE_STREAM rollback: use Dolphin's complete serializer, never RAM-only saves.
+fs.copyFileSync(new URL('./menu-frame-gate.h', import.meta.url), path.join(root, 'Core/MeleeMenuFrameGate.h'));
 fs.copyFileSync(new URL('./rollback-bridge.h', import.meta.url), path.join(root, 'Core/MeleeRollback.h'));
 fs.copyFileSync(new URL('./rollback-code-cache.h', import.meta.url), path.join(root, 'Core/MeleeCodeCache.h'));
 patch('Core/State.h', s => s.replace('void Init(Core::System& system);', `// MELEE_STREAM: caller holds CPUThreadGuard while paused.

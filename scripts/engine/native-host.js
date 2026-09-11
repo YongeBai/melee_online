@@ -1,3 +1,4 @@
+import { createNativePresenter } from './native-presenter.js';
 // Local native GPU renderer. The browser receives real encoded frames, not interpolation.
 export class NativeHost {
   constructor({ canvas, onStatus, onFrame }) {
@@ -24,7 +25,7 @@ export class NativeHost {
         const queueMs = performance.now() - this.decodedAt.get(frame);
         this.metrics.presentationQueueMs += queueMs;
         this.metrics.maxPresentationQueueMs = Math.max(this.metrics.maxPresentationQueueMs, queueMs);
-        this.ctx.drawImage(frame, 0, 0, 1280, 720);
+        this.presenter.draw(frame, !["match", "stage"].includes(this.room?.phase));
         frame.close();
         this.metrics.presented++;
         this.onFrame({ native: true, ...this.metrics });
@@ -51,10 +52,11 @@ export class NativeHost {
     canvas.height = 720;
     canvas.style.width = "min(100vw,177.777dvh)";
     canvas.style.height = "min(56.25vw,100dvh)";
-    this.ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
+    this.presenter = createNativePresenter(canvas, this.online);
     this.adapter = { request: (type, payload) => this.request(type, payload) };
   }
   async mountFile() {
+    this.kicked = false;
     if (!globalThis.VideoDecoder)
       throw Error(
         "This browser needs WebCodecs video decoding. Open this site in Chrome, Edge, or the Codex browser.",
@@ -79,6 +81,11 @@ export class NativeHost {
     this.socket.onmessage = (event) => {
       if (typeof event.data === "string") {
         const m = JSON.parse(event.data);
+        if (m.type === "kicked") {
+          this.kicked = true;
+          sessionStorage.removeItem("melee.roomToken");
+          return;
+        }
         if (m.type === "room") {
           if (m.token) sessionStorage.setItem("melee.roomToken", m.token);
           if (this.room && this.room.code !== m.room.code) {
@@ -186,6 +193,7 @@ export class NativeHost {
         request.reject(Error("Game server disconnected. Reload this page to reconnect."));
       this.pending.clear();
       this.onStatus("Game server disconnected. Reload this page to reconnect.");
+      if (this.kicked) window.dispatchEvent(new Event("melee-room-kicked"));
     };
     await this.request(
       "boot",

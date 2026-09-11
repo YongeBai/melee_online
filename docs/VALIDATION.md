@@ -300,3 +300,19 @@ Restored video, compiled-code invalidation and rematch checks passed. See
 `rollback-capture-validation.json`. The selection probe now waits for Melee's
 CSS reload and fighter-archive preload before issuing Start, avoiding a test-only
 race when changing characters through the QA memory interface.
+
+## CPU, kick, and native hand foreground (September 9)
+
+Browser-tested room V88Q8A with two clients:
+
+- P1 enabled native level 9 CPU mode, entered native stage select and Battlefield; inspected stage 31, 480-second time limit, items -1, teams 0 and CPU level 9. The CPU fought autonomously. Stock loss/results returned to the customized CSS with CPU mode retained.
+- Joining during CPU mode was rejected. Removing CPU reopened the seat; the second browser joined as P2. P2 had no Kick control.
+- The original animated hand visibly covered the keyboard icon, panel border, Ready and Remove CPU controls. Pointing at Ready and pressing P entered stage select.
+- P1 kicked P2 during a human match. P2 received the removal message and Start Melee; P1 returned to the same room’s CSS with an empty guest seat and CPU action available.
+- A 20.007-second human-match regression measured 60.130 simulation FPS and 59.980 presented FPS at 1280×720, with zero dropped frames or decoder errors. This sample had no delayed corrections; sustained rollback evidence remains in the earlier reports.
+
+Protocol tests cover owner-only CPU/kick authorization, native CPU start without a guest, CPU join exclusion, disconnected guest removal and private-token revocation. Native code tests exercise the foreground callback order and the capture gate that rejects CSS frames until the customized layout and foreground have actually rendered.
+
+After the native capture-gate rebuild, fresh rooms B68A9R and XRDJQV booted into the customized CSS. CPU on/off transitions retained the customized layout. Unpatched CSS frames are rejected before GPU readback/encoding, including the interval after callback installation but before the first foreground draw; a compiled C++ test checks this boundary and invalid/stale pointers.
+
+P2 refreshed and retained its seat, navigated the native hand to its keyboard indicator, and opened controls using P. P1 then kicked P2 from character select while that dialog was open; removal closes the dialog and exposes the new-room start action.

@@ -203,3 +203,86 @@ test("a stale CSS scene number cannot enable Ready before menu frames advance", 
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+test("owner can use a CPU, reopen the room, and revoke a guest seat", async () => {
+  const server = createServer(),
+    workers = [];
+  const service = attachRooms(server, {
+    access: { authorized: () => true },
+    origins: ["http://localhost:3000"],
+    makeWorker: () => {
+      const w = new FakeWorker();
+      workers.push(w);
+      return w;
+    },
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const clients = [];
+  try {
+    for (let i = 0; i < 3; i++) {
+      const c = await connect(server.address().port);
+      clients.push(c);
+      await c.request("boot");
+    }
+    const [owner, guest, other] = clients,
+      code = owner.room.code,
+      worker = workers[0];
+    service.rooms.get(code).joining = true;
+    await assert.rejects(owner.request('roomCpu', {enabled:true}), /Change opponent/);
+    service.rooms.get(code).joining = false;
+    await owner.request("roomCpu", { enabled: true });
+    assert.equal(owner.room.cpu, true);
+    assert.deepEqual(worker.calls.find((c) => c.payload?.action === "opponent").payload, {
+      action: "opponent",
+      cpu: true,
+    });
+    await assert.rejects(guest.request("roomJoin", { code }), /full/);
+    worker.state.sceneFrame += 120;
+    await new Promise((r) => setTimeout(r, 1700));
+    await owner.request("meleeControl", { action: "start" });
+    assert.equal(worker.calls.find((c) => c.payload?.action === "start").payload.cpu, true);
+    worker.state = { major: 2, minor: 2, sceneKind: 2, sceneFrame: 100, match: { elapsed: 2 } };
+    await new Promise((r) => setTimeout(r, 150));
+    assert.equal(owner.room.phase, "match");
+    assert.equal(owner.room.rollback, null, "CPU mode does not allocate rollback checkpoints");
+    worker.state = { major: 2, minor: 0, sceneKind: 8, sceneFrame: 300, cssReady: true };
+    await new Promise((r) => setTimeout(r, 150));
+    worker.state.sceneFrame += 120;
+    await new Promise((r) => setTimeout(r, 1700));
+    await owner.request("roomCpu", { enabled: false });
+    worker.state.sceneFrame += 120;
+    await new Promise((r) => setTimeout(r, 1700));
+    await guest.request("roomJoin", { code });
+    assert.equal(guest.room.seat, 1);
+    const token = guest.token;
+    service.rooms.get(code).changing = true;
+    await assert.rejects(guest.request('roomLeave'), /transition/);
+    service.rooms.get(code).changing = false;
+    await guest.request('roomPing'); // A rejected transition must retain membership.
+    await assert.rejects(guest.request("roomKick"), /Only the room owner/);
+    await assert.rejects(guest.request("roomCpu", { enabled: true }), /Only the room owner/);
+    await assert.rejects(owner.request("roomCpu", { enabled: true }), /Remove the other player/);
+    const closed = once(guest, "close");
+    await owner.request("roomKick");
+    await closed;
+    assert.equal(owner.room.hasGuest, false);
+    assert.equal(owner.room.phase, "selecting");
+    const resumed = await connect(server.address().port);
+    clients.push(resumed);
+    await resumed.request("boot", { token });
+    assert.notEqual(resumed.room.code, code, "Kicked token cannot reclaim the room");
+    await other.request("roomJoin", { code });
+    assert.equal(other.room.seat, 1);
+    other.close();
+    await once(other, "close");
+    await new Promise((r) => setTimeout(r, 30));
+    await owner.request("roomKick");
+    assert.equal(owner.room.hasGuest, false, "Disconnected guest can be removed");
+    assert.equal(owner.room.phase, "selecting");
+  } finally {
+    for (const c of clients) c.close();
+    service.close();
+    await new Promise((r) => server.close(r));
+  }
+});

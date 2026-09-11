@@ -28,6 +28,8 @@ export function attachRooms(
       seat,
       connected: room.seats.map((s) => !!s?.ws && s.ws.readyState === 1),
       ready: room.seats.map((s) => !!s?.ready),
+      cpu: !!room.cpu,
+      hasGuest: !!room.seats[1],
       phase: room.phase,
       epoch: room.epoch,
       frame: room.rollback?.frame ?? 0,
@@ -79,6 +81,7 @@ export function attachRooms(
       running: false,
       scene: "",
       emptySince: 0,
+      cpu: false,
     };
     rooms.set(code, room);
     bind(room, 0, ws);
@@ -138,7 +141,13 @@ export function attachRooms(
         return;
       }
       room.emptySince = 0;
-      if (room.rollback || room.starting || ["disconnected", "error"].includes(room.phase)) return;
+      if (
+        room.rollback ||
+        room.starting ||
+        room.changing ||
+        ["disconnected", "error"].includes(room.phase)
+      )
+        return;
       const state = await room.worker.request("meleeInspect");
       room.state = state;
       const scene = `${state.major}:${state.minor}:${state.sceneKind}`;
@@ -149,6 +158,11 @@ export function attachRooms(
       }
       room.lastSceneFrame = state.sceneFrame;
       const sceneProgress = state.sceneFrame - room.sceneFirstFrame;
+      if (room.cpu && state.major === 2 && state.minor === 2 && state.sceneKind === 2) {
+        room.phase = "match";
+        publish(room);
+        return;
+      }
       if (
         state.major === 2 &&
         state.minor === 2 &&
@@ -179,7 +193,11 @@ export function attachRooms(
           room.layoutAt = Date.now();
         }
         if (settled && room.lockedScene !== room.sceneAt) {
-          await room.worker.request("meleeControl", { action: "lockCss", online: true });
+          await room.worker.request("meleeControl", {
+            action: "lockCss",
+            online: true,
+            cpu: room.cpu,
+          });
           room.lockedScene = room.sceneAt;
           for (const s of room.seats) if (s) s.ready = false;
         }
@@ -236,8 +254,9 @@ export function attachRooms(
   async function leave(ws) {
     const m = ws.membership;
     if (!m) return;
-    delete ws.membership;
     const { room, index } = m;
+    if (index === 1 && room.seats[0]) return kick(room, 0, false);
+    delete ws.membership;
     const seat = room.seats[index];
     if (seat?.ws !== ws) return;
     tokens.delete(seat.token);
@@ -251,6 +270,43 @@ export function attachRooms(
     await room.worker.request("pause");
     room.phase = "disconnected";
     publish(room);
+  }
+  async function kick(room, index, notify = true) {
+    if (index !== 0) throw Error("Only the room owner can kick a player");
+    if (room.starting || room.changing || room.joining) throw Error("Wait for the room transition");
+    const guest = room.seats[1];
+    if (!guest) throw Error("There is no player to kick");
+    room.changing = true;
+    try {
+      tokens.delete(guest.token);
+      room.seats[1] = null;
+      room.pads = [neutralPad(), neutralPad()];
+      room.seats[0].ready = false;
+      if (guest.ws) {
+        delete guest.ws.membership;
+        if (notify) {
+          send(guest.ws, { type: "kicked" });
+          guest.ws.close(4003, "Removed by room owner");
+        }
+      }
+      await stopRollback(room);
+      await room.worker.rollback("pads", { pads: room.pads });
+      const state = await room.worker.request("meleeInspect");
+      if (state.major === 2 && state.minor === 2) {
+        await room.worker.request("meleeControl", { action: "quit" });
+        room.phase = "returning";
+      } else if (state.major === 2 && state.minor === 1) {
+        await room.worker.rollback("pads", { pads: [{ ...neutralPad(), mask: 2 }, neutralPad()] });
+        await room.worker.request("start");
+        await sleep(180);
+        await room.worker.rollback("pads", { pads: room.pads });
+        room.phase = "loading";
+      } else room.phase = "selecting";
+      await room.worker.request("start");
+      publish(room);
+    } finally {
+      room.changing = false;
+    }
   }
   wss.on("connection", (ws) => {
     ws.needsKey = true;
@@ -281,9 +337,13 @@ export function attachRooms(
           room.seats[index].lastInput = Date.now();
           if (room.rollback) {
             if (msg.epoch === room.epoch) room.rollback.input(index, msg.frame, pad);
-          } else if (room.phase === "selecting" || room.phase === "stage") {
+          } else if (
+            room.phase === "selecting" ||
+            room.phase === "stage" ||
+            (room.cpu && room.phase === "match")
+          ) {
             if (room.phase === "stage" && index !== 0) return;
-            pad.mask &= ~16;
+            if (room.phase !== "match") pad.mask &= ~16;
             void room.worker.rollback("pads", { pads: room.pads }).catch(() => {});
           }
         } catch (e) {
@@ -312,6 +372,7 @@ export function attachRooms(
               if (
                 m.room.phase === "disconnected" &&
                 (m.room.seats.every((s) => s?.ws?.readyState === 1) ||
+                  (m.room.cpu && m.index === 0) ||
                   (m.room.state?.minor === 0 &&
                     m.room.seats.every((s) => !s || s.ws?.readyState === 1)))
               ) {
@@ -331,6 +392,8 @@ export function attachRooms(
               } else {
                 if (
                   target.joining ||
+                  target.cpu ||
+                  target.changing ||
                   target.seats[1] ||
                   !["selecting", "loading"].includes(target.phase)
                 )
@@ -359,7 +422,7 @@ export function attachRooms(
                   ...result,
                   cssCursor: result.cssCursors?.[index] || result.cssCursor,
                   tapJump: result.tapJumpByPort?.[index] ?? result.tapJump,
-                  netplay: { mode: "server-rollback", ...view(room, index) },
+                  netplay: { mode: room.cpu ? "cpu" : "server-rollback", ...view(room, index) },
                 };
               } else if (msg.type === "start" || msg.type === "pause") {
               } // UI never suspends another player.
@@ -367,19 +430,49 @@ export function attachRooms(
                 await leave(ws);
                 await create(ws);
                 result = view(ws.membership.room, 0);
+              } else if (msg.type === "roomKick") {
+                await kick(room, index);
+              } else if (msg.type === "roomCpu") {
+                if (index !== 0) throw Error("Only the room owner can change the opponent");
+                if (room.phase !== "selecting" || room.starting || room.changing || room.joining)
+                  throw Error("Change opponent at character select");
+                if (room.seats[1]) throw Error("Remove the other player before adding a CPU");
+                if (typeof p.enabled !== "boolean") throw Error("Invalid CPU setting");
+                room.changing = true;
+                try {
+                  await room.worker.request("meleeControl", { action: "opponent", cpu: p.enabled });
+                  room.cpu = p.enabled;
+                  room.sceneAt = Date.now();
+                  room.sceneFirstFrame = room.state.sceneFrame;
+                  room.pads = [neutralPad(), neutralPad()];
+                  await room.worker.rollback("pads", { pads: room.pads });
+                  room.seats[0].ready = false;
+                  room.phase = "loading";
+                  publish(room);
+                } finally {
+                  room.changing = false;
+                }
               } else if (msg.type === "meleeControl") {
                 if (p.action === "start") {
                   if (room.phase !== "selecting") throw Error("Not at character select");
-                  if (!room.seats.every((s) => s?.ws?.readyState === 1))
+                  if (!room.cpu && !room.seats.every((s) => s?.ws?.readyState === 1))
                     throw Error("Waiting for the other player");
                   room.seats[index].ready = !room.seats[index].ready;
                   publish(room);
-                  if (room.seats.every((s) => s.ready) && !room.starting) {
+                  if (
+                    (room.cpu || room.seats.every((s) => s.ready)) &&
+                    !room.starting &&
+                    !room.changing
+                  ) {
                     room.starting = true;
                     room.phase = "starting";
                     publish(room);
                     try {
-                      await room.worker.request("meleeControl", { action: "start", online: true });
+                      await room.worker.request("meleeControl", {
+                        action: "start",
+                        online: true,
+                        cpu: room.cpu,
+                      });
                       await room.worker.rollback("pads", {
                         pads: [{ ...room.pads[0], mask: 16 }, room.pads[1]],
                       });

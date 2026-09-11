@@ -25,3 +25,6 @@
 
 # Reproducible browser release artifacts.
 /dist/
+# User-supplied Slippi reference distributions.
+/Slippi-Launcher-*.AppImage
+/Slippi-Nintendont-*.zip

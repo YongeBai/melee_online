@@ -130,3 +130,8 @@ See [validation](docs/VALIDATION.md), [status](docs/PORT-STATUS.md), and
 build covers the web entry route; use root `npm start` for development or
 `npm run serve` for the production game server. The production server does not
 expose a disc-download route.
+
+## Engineering handoff
+
+Read [engineering notes](docs/ENGINEERING-NOTES.md) for the native UI layering,
+asset style, code-hook pitfalls, room lifecycle, and performance findings to preserve.

@@ -75,6 +75,25 @@ if(host.online){
   const {createRoomUI}=await import('./room-ui.js');
   createRoomUI(host);
   document.body.classList.add('online-room');
+  window.addEventListener('melee-room-kicked', () => {
+    paused = false;
+    controlsChanging = false;
+    keyboardModel?.setVisible(false);
+    $('controls').close();
+    document.body.classList.remove('controls-open');
+    keys.clear();
+    clearTimeout(pulseTimer);
+    $('keyboardButton').hidden = true;
+    $('peerKeyboard').hidden = true;
+    $('kickMatch').hidden = true;
+    ready = false;
+    loading.hidden = false;
+    status.textContent = 'The room owner removed you. Start a new room to play again.';
+    $('begin').hidden = false;
+    $('begin').disabled = false;
+    $('roomPanel').hidden = true;
+    host.room = null;
+  });
 }
 audio.setSource((frames) => host.mixAudio(frames));
 audio.setTransportBridge((config) => host.configureAudioWorklet(config));
@@ -229,22 +248,39 @@ async function quitMatch() {
 // match the icon in the original 640×480 picture, independent of browser size.
 function keyboardHovered(state) {
   const c = state?.cssCursor;
-  const shift=host.online&&host.room?.seat===1?46.2:0;
+  const shift=host.online&&host.room?.seat===1?44.75:0;
   return Boolean(
     c &&
     Number.isFinite(c.x) &&
     Number.isFinite(c.y) &&
-    c.x >= -24.6+shift &&
-    c.x <= -21.6+shift &&
-    c.y >= -22 &&
-    c.y <= -20,
+    c.x >= -25.0+shift &&
+    c.x <= -22.0+shift &&
+    c.y >= -23.1 &&
+    c.y <= -20.4,
   );
+}
+function activateRoomControl(state) {
+  const cursor = state?.cssCursor, panel = $('roomPanel');
+  if (!cursor || !panel || panel.hidden) return false;
+  const rect = $('screen').getBoundingClientRect();
+  const x = rect.left + rect.width * (.5 + (cursor.x + 5.0) * .01073);
+  const y = rect.top + rect.height * (.5 - (cursor.y - .75) * .01725);
+  for (const control of panel.querySelectorAll('button,input')) {
+    if (control.hidden || control.disabled || !control.getClientRects().length) continue;
+    const box = control.getBoundingClientRect();
+    if (x >= box.left && x <= box.right && y >= box.top && y <= box.bottom) {
+      if (control.tagName === 'INPUT') control.focus(); else control.click();
+      return true;
+    }
+  }
+  return false;
 }
 async function cssAttack() {
   // Inspect at activation time rather than trusting the slower HUD sample.
   const state = await host.adapter.request("meleeInspect", {});
   gameState = state;
   if (keyboardHovered(state)) await setPaused(true);
+  else if (host.online && activateRoomControl(state)) return;
   else if (!paused) pulse(1);
 }
 function toggleTapJump(value = !$("tapJump").checked) {
@@ -1250,7 +1286,7 @@ if (params.has("qa")) {
         const state = await host.adapter.request("meleeInspect", {});
         const c = state.cssCursor;
         if (!c) throw Error("Hand navigation requires character select");
-        const dx = -23.1 + (host.online&&host.room?.seat===1?46.2:0) - c.x,
+        const dx = -23.5 + (host.online&&host.room?.seat===1?44.75:0) - c.x,
           dy = -21 - c.y;
         if (Math.abs(dx) < 0.4 && Math.abs(dy) < 0.4) break;
         keys.clear();

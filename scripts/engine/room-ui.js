@@ -14,6 +14,7 @@ function glyph(c) {
   return glyphs.get(c);
 }
 async function text(canvas, value) {
+  if (canvas.dataset.text === value) return;
   canvas.setAttribute("aria-label", value);
   const version = (canvas.dataset.text = value);
   const images = await Promise.all([...value].map(glyph));
@@ -36,11 +37,23 @@ export function createRoomUI(host) {
  <div class="room-code"><img src="/play/assets/room-code.png" alt="Your code"><button id="copyRoom" aria-label="Copy room code"><canvas id="ownCode"></canvas></button></div>
  <form id="joinRoom"><label for="joinCode"><img src="/play/assets/room-join.png" alt="Join room"></label><div class="code-entry"><input id="joinCode" aria-label="Room code" maxlength="6" autocomplete="off" spellcheck="false"><canvas id="typedCode" aria-hidden="true"></canvas></div><button id="joinSubmit" aria-label="Join room"><span aria-hidden="true">▶</span></button></form>
  <button id="readyRoom" class="room-action"><img src="/play/assets/room-ready.png" alt="Ready"></button>
+ <button id="cpuRoom" class="room-action"><canvas></canvas></button>
+ <button id="kickRoom" class="room-action"><img src="/play/assets/room-kick.png" alt="Kick player"></button>
  <button id="leaveRoom" class="room-action"><img src="/play/assets/room-leave.png" alt="Leave room"></button>`;
   document.getElementById("gameViewport").append(panel);
   const $ = (id) => document.getElementById(id);
+  const peerKeyboard = $("keyboardButton").cloneNode(true);
+  peerKeyboard.id = "peerKeyboard";
+  peerKeyboard.hidden = true;
+  peerKeyboard.setAttribute("aria-label", "Other player keyboard");
+  $("gameViewport").append(peerKeyboard);
   let busy = false,
     error = "";
+  const matchKick = document.createElement("button");
+  matchKick.id = "kickMatch";
+  matchKick.hidden = true;
+  matchKick.innerHTML = '<img src="/play/assets/room-kick.png" alt="Kick player">';
+  document.getElementById("toolbar").append(matchKick);
   const announce = (message) => {
     error = message;
     text($("roomStatus"), message.replace(/[^A-Za-z0-9 ]/g, ""));
@@ -48,14 +61,26 @@ export function createRoomUI(host) {
   window.addEventListener("melee-room-error", (e) => announce(e.detail));
   window.addEventListener("melee-room", ({ detail: r }) => {
     document.body.dataset.seat = r.seat;
+    $("controls").setAttribute("aria-label", `Player ${r.seat + 1} keyboard controls`);
+    peerKeyboard.hidden = !["selecting", "disconnected", "error"].includes(r.phase);
+    peerKeyboard.classList.toggle("cpu", r.cpu);
     $("keyboardButton")?.setAttribute("aria-label", `Player ${r.seat + 1} keyboard controls`);
-    panel.hidden = !["selecting", "disconnected", "error"].includes(r.phase);
+    panel.hidden =
+      !["selecting", "disconnected", "error"].includes(r.phase) &&
+      !(r.phase === "loading" && !panel.hidden);
+    peerKeyboard.hidden = panel.hidden;
     if (r.code !== $("ownCode").dataset.text) text($("ownCode"), r.code);
     $("copyRoom").setAttribute("aria-label", `Copy room code ${r.code}`);
     const connected = r.connected.every(Boolean);
-    $("joinRoom").hidden = connected;
+    $("joinRoom").hidden = connected || r.cpu;
     $("leaveRoom").hidden = !connected && r.seat === 0 && r.phase !== "disconnected";
-    $("readyRoom").hidden = !connected;
+    $("readyRoom").hidden = !connected && !r.cpu;
+    $("cpuRoom").hidden = r.seat !== 0 || r.hasGuest || r.phase !== "selecting";
+    $("cpuRoom").setAttribute("aria-label", r.cpu ? "Remove CPU" : "Add level 9 CPU");
+    text($("cpuRoom").querySelector("canvas"), r.cpu ? "Remove CPU" : "Play CPU Lv 9");
+    $("kickRoom").hidden = r.seat !== 0 || !r.hasGuest;
+    matchKick.hidden = r.seat !== 0 || !r.hasGuest || !["match", "stage"].includes(r.phase);
+    for (const b of panel.querySelectorAll("button")) b.disabled = busy || r.phase === "loading";
     $("readyRoom").disabled = busy || r.phase !== "selecting";
     $("readyRoom").classList.toggle("selected", r.ready[r.seat]);
     $("readyRoom").setAttribute("aria-label", r.ready[r.seat] ? "Cancel ready" : "Ready");
@@ -63,13 +88,15 @@ export function createRoomUI(host) {
       text(
         $("roomStatus"),
         r.error ||
-          (!connected
-            ? "Waiting for player"
-            : r.ready.every(Boolean)
-              ? "Starting"
-              : r.ready[r.seat]
-                ? "Waiting for ready"
-                : "Player connected"),
+          (r.cpu
+            ? "CPU Level 9"
+            : !connected
+              ? "Waiting for player"
+              : r.ready.every(Boolean)
+                ? "Starting"
+                : r.ready[r.seat]
+                  ? "Waiting for ready"
+                  : "Player connected"),
       );
   });
   async function action(fn) {
@@ -82,7 +109,7 @@ export function createRoomUI(host) {
       announce(e.message);
     } finally {
       busy = false;
-      $("readyRoom").disabled = false;
+      $("readyRoom").disabled = host.room?.phase !== "selecting";
     }
   }
   $("copyRoom").onclick = () =>
@@ -108,6 +135,8 @@ export function createRoomUI(host) {
   };
   $("readyRoom").onclick = () => action(() => host.request("meleeControl", { action: "start" }));
   $("leaveRoom").onclick = () => action(() => host.request("roomLeave"));
+  $("cpuRoom").onclick = () => action(() => host.request("roomCpu", { enabled: !host.room.cpu }));
+  $("kickRoom").onclick = matchKick.onclick = () => action(() => host.request("roomKick"));
   if (new URLSearchParams(location.search).has("qa")) {
     const probe = document.createElement("aside");
     probe.id = "roomProbe";
@@ -126,8 +155,14 @@ export function createRoomUI(host) {
       if (host.room?.phase !== "match") return;
       // Real controller changes travel through this client's socket and its
       // configured packet delay. Stay in place so a stock loss cannot end a run.
-      const pads = [{ mask: 4 }, { mask: 0 }, { mask: 1, analogA: 255 },
-        { mask: 0 }, { mask: 32, triggerLeft: 255 }, { mask: 0 }];
+      const pads = [
+        { mask: 4 },
+        { mask: 0 },
+        { mask: 1, analogA: 255 },
+        { mask: 0 },
+        { mask: 32, triggerLeft: 255 },
+        { mask: 0 },
+      ];
       let step = host.room.seat * 3;
       const end = performance.now() + 90000;
       stressTimer = setInterval(() => {
@@ -149,14 +184,20 @@ export function createRoomUI(host) {
           epoch = host.room.epoch,
           at = performance.now();
         host.metrics.maxPresentationQueueMs = 0;
-        const duration = Math.max(20, Math.min(120,
-          Number(new URLSearchParams(location.search).get("benchmarkSeconds")) || 20));
+        const duration = Math.max(
+          20,
+          Math.min(120, Number(new URLSearchParams(location.search).get("benchmarkSeconds")) || 20),
+        );
         $("roomReport").textContent = `Measuring ${duration} seconds of room play`;
         await new Promise((r) => setTimeout(r, duration * 1000));
         const after = await host.request("meleeInspect"),
           seconds = (performance.now() - at) / 1000;
-        if (host.room.phase !== "match" || host.room.epoch !== epoch ||
-            after.sceneFrame < before.sceneFrame) throw Error("Match changed during measurement");
+        if (
+          host.room.phase !== "match" ||
+          host.room.epoch !== epoch ||
+          after.sceneFrame < before.sceneFrame
+        )
+          throw Error("Match changed during measurement");
         $("roomReport").textContent = JSON.stringify(
           {
             seconds,
@@ -166,12 +207,13 @@ export function createRoomUI(host) {
             decodedFps: (host.metrics.decoded - metrics.decoded) / seconds,
             droppedFrames: (host.metrics.dropped || 0) - (metrics.dropped || 0),
             decodeErrors: host.metrics.decodeErrors - metrics.decodeErrors,
-            meanPresentationQueueMs: (host.metrics.presentationQueueMs - metrics.presentationQueueMs) /
+            meanPresentationQueueMs:
+              (host.metrics.presentationQueueMs - metrics.presentationQueueMs) /
               (host.metrics.presented - metrics.presented),
             maxPresentationQueueMs: host.metrics.maxPresentationQueueMs,
             inputDelayMs: host.inputDelayMs,
-            rollbacks: host.room.rollback.rollbacks - rollback.rollbacks,
-            resimulatedFrames: host.room.rollback.resimulatedFrames - rollback.resimulatedFrames,
+            rollbacks: (host.room.rollback?.rollbacks ?? 0) - (rollback.rollbacks ?? 0),
+            resimulatedFrames: (host.room.rollback?.resimulatedFrames ?? 0) - (rollback.resimulatedFrames ?? 0),
             rollback: host.room.rollback,
             pacing: host.room.pacing,
           },

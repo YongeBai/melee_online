@@ -1,5 +1,6 @@
 import { installTapJumpHooks, TAP_JUMP_FLAG } from "./melee-tap-jump.js";
 import { applyCssLayout } from "./melee-css-layout.js";
+import { applyCssForeground } from "./melee-foreground.js";
 // GALE01 revision 1.02. MEM1 is located by matching original executable bytes.
 const signature = [
   124, 8, 2, 166, 60, 96, 128, 76, 144, 1, 0, 4, 148, 33, 255, 40, 219, 225, 0, 208, 219, 193, 0,
@@ -89,6 +90,7 @@ export function inspectMelee(module) {
     cssCursor,
     cssCursors,
     cssReady: major === 2 && minor === 0 && sceneKind === 8 && valid(u32(0x804d6cc0)),
+    cssPlayerKinds: major === 2 && minor === 0 ? [0, 1].map((i) => read(0x80480820 + i * 0x24 + 1, 1)[0]) : undefined,
     cssCharacters:
       major === 2 && minor === 0
         ? [0, 1].map((i) => read(0x804807b0 + 16 + 0x60 + i * 0x24, 1)[0])
@@ -134,7 +136,10 @@ export function controlMelee(module, api, action, options = {}) {
     vs = main + 0x590;
   if (action === "inspect") return state;
   if (action === "roomLayout") {
-    if (state.major === 2 && state.minor === 0 && state.sceneKind === 8) applyCssLayout(heap);
+    if (state.major === 2 && state.minor === 0 && state.sceneKind === 8) {
+      applyCssLayout(heap);
+      applyCssForeground(heap);
+    }
     return state;
   }
   if (action === "tapJump") {
@@ -164,7 +169,7 @@ export function controlMelee(module, api, action, options = {}) {
       h(vs + 8 + 14, 0x1f);
       for (let i = 0; i < 6; i++) {
         const p = vs + 8 + 0x60 + i * 0x24;
-        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online ? 0 : 1) : 3);
+        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online && !options.cpu ? 0 : 1) : 3);
         b(p + 2, 4);
         b(p + 4, 0); // Native automatic player ID uses the fighter slot.
         b(p + 7, i); // Controller/color index: owner P1, guest P2.
@@ -200,7 +205,7 @@ export function controlMelee(module, api, action, options = {}) {
       w(main + 0x1cbc, 0);
       for (let i = 0; i < 6; i++) {
         const p = 0x804807b0 + 16 + 0x60 + i * 0x24;
-        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online ? 0 : 1) : 3);
+        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online && !options.cpu ? 0 : 1) : 3);
         b(p + 2, 4);
         if (options.online) {
           b(p + 4, 0);
@@ -233,6 +238,13 @@ export function controlMelee(module, api, action, options = {}) {
         const p = vs + 8 + 0x60 + i * 0x24;
         if (heap[at(p)] === 19) b(p, 18);
       }
+      b(0x80479d35, 1);
+      w(0x80479d64, 1);
+    } else if (action === "opponent") {
+      if (state.major !== 2 || state.minor !== 0 || state.sceneKind !== 8)
+        throw new Error("Change opponent at character select");
+      b(0x80480820 + 0x24 + 1, options.cpu ? 1 : 0);
+      b(0x80480820 + 0x24 + 15, 9);
       b(0x80479d35, 1);
       w(0x80479d64, 1);
     } else if (action === "select") {

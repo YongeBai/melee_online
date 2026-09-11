@@ -136,3 +136,13 @@ remain useful references for a future client-side engine integration:
 [Launcher](https://github.com/project-slippi/slippi-launcher),
 [Ishiiruka](https://github.com/project-slippi/Ishiiruka),
 [mainline Dolphin](https://github.com/project-slippi/dolphin).
+
+### CPU opponents, removal, and native cursor foreground
+
+The room owner can choose **Play CPU Lv 9** while the guest seat is empty. This reloads the native character-select scene with P2 marked CPU, preserving both character selections. Ready then opens native stage selection without waiting for another browser. CPU matches run normally without allocating network rollback checkpoints. Remove CPU reopens the room to a human guest.
+
+Only P1 can kick a guest, including a disconnected reserved seat. Removal revokes the private reconnect token, clears both controllers, stops rollback if active, and returns a running match to character select. The guest receives a new-room start screen. A guest leaving voluntarily uses the same cleanup without the kicked notification.
+
+Added room controls and controller indicators sit beneath the real rendered Melee hands. A checked RAM hook uses Melee's GX rectangle and original hand callbacks to create keyed menu apertures; a WebGL video presenter reveals the HTML controls through those apertures. The animated hand pixels remain in the same encoded video frame, so there is no separately tracked cursor or coordinate lag. Keying is restricted to the reserved menu rectangles and disabled during matches. The ISO is unchanged.
+
+The native room capture path also withholds unmodified character-select frames. It checks both layout callbacks and a marker written by the foreground render pass before copying a CSS frame to the encoder. The browser retains the previous frame during this short scene setup, and CPU-mode changes retain the room panel beneath it. This prevents a flash of the stock four-player layout at boot, rematch, or opponent changes.
