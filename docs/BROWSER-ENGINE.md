@@ -86,6 +86,15 @@ not add another optimization. Neither optional setting is promoted from this
 single sample. Detailed probes can add `samplegrid=96` to check a larger canvas
 sample; the default remains 32×24 and the acceptance thresholds are unchanged.
 
+Repeating with warm caches and the larger image probe measured 59.906 simulation,
+58.906 canvas submissions, and 56.806 distinct visible FPS (29.997 seconds;
+59.073 sampling callbacks/sec). Thus simulation speed alone does not explain
+the visible-frame deficit. A two-frame pixel-queue experiment measured only
+55.837 visible FPS while adding latency; its code was removed. The next work
+must reduce lost/late frame delivery and readback/composition overhead, while
+preserving the independently verified replay state and bounded memory use.
+Neither repeated images nor buffered-frame counters count as target completion.
+
 `batchadvance=1` adds a one-request rollback step containing input installation,
 completed simulation, and inspection. The reference retains the original three
 requests, while delayed correction uses the batch. The real browser comparison

@@ -37,8 +37,9 @@ export function createBrowserPixelPresenter(canvas) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  let width = 0, height = 0;
+  let width = 0, height = 0, framesDrawn = 0;
   return {
+    get framesDrawn() { return framesDrawn; },
     draw(pixels, w, h) {
       if (gl.isContextLost()) throw Error('Browser pixel presenter lost its graphics context');
       if (pixels.byteLength !== w * h * 4) throw Error('Pixel dimensions do not match the frame');
@@ -49,6 +50,7 @@ export function createBrowserPixelPresenter(canvas) {
       }
       gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      framesDrawn++;
     },
   };
 }

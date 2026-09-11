@@ -93,7 +93,7 @@ export async function measureBrowserGameplay(host, seconds, inspect, {sampleWidt
 // Diagnostic control run: quantify whether synchronous pixel inspection itself
 // limits emulation. Delivery counters do not prove distinct rendered images.
 export function browserDeliveryCounter(host) {
-  return host.oglSabEnabled ? host.oglSabFramesDrawn || 0 : host.adapter.detachedOglFramesDrawn || 0;
+  return host.oglSabEnabled ? host.oglPixelPresenter?.framesDrawn ?? host.oglSabFramesDrawn ?? 0 : host.adapter.detachedOglFramesDrawn || 0;
 }
 export async function measureBrowserDelivery(host, seconds, inspect) {
   if (document.hidden) throw Error("Keep the game tab visible during measurement");

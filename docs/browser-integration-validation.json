@@ -100,5 +100,45 @@
     "correctTimeDrift": false,
     "interpreterDisableMask": 532807680,
     "passed": false
+  },
+  "warmImageProbe": {
+    "configuration": "WebGL pixel presenter and fastmemhoist=1, second match in same browser process",
+    "seconds": 29.996844999999738,
+    "simulationFps": 59.9063001458992,
+    "gameRenderFps": 59.83962646738401,
+    "visibleFps": 56.80597409494281,
+    "p95GapMs": 22.415000000037253,
+    "maxGapMs": 121.82500000018626,
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "imageProbe": [
+      96,
+      72
+    ],
+    "canvasSubmissionFps": 58.906194968171334,
+    "sampleCallbackFps": 59.072879164459316,
+    "passed": false
+  },
+  "rejectedBufferExperiment": {
+    "configuration": "Two queued frames, three reusable pixel buffers; code removed after failed measurement",
+    "seconds": 29.997890000000595,
+    "simulationFps": 58.17075800997888,
+    "gameRenderFps": 58.17075800997888,
+    "visibleFps": 55.83726055399119,
+    "p95GapMs": 20.059999999590218,
+    "maxGapMs": 134.06499999947846,
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "imageProbe": [
+      32,
+      24
+    ],
+    "canvasSubmissionFps": 55.903931909876555,
+    "sampleCallbackFps": 59.337506737972724,
+    "passed": false
   }
 }
