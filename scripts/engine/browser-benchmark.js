@@ -50,18 +50,21 @@ export function summarizeBrowserRun(samples, before, after) {
   };
 }
 
-export async function measureBrowserGameplay(host, seconds, inspect) {
+export async function measureBrowserGameplay(host, seconds, inspect, {sampleWidth = 32} = {}) {
   if (document.hidden) throw Error("Keep the game tab visible during measurement");
-  const probe = new OffscreenCanvas(32, 24);
+  if (![32, 64, 96, 128].includes(sampleWidth)) throw Error("Unsupported image probe size");
+  const sampleHeight = sampleWidth * 3 / 4;
+  const probe = new OffscreenCanvas(sampleWidth, sampleHeight);
   const ctx = probe.getContext("2d", { willReadFrequently: true });
   const before = await inspect();
+  const deliveryBefore = browserDeliveryCounter(host);
   const samples = [], started = performance.now();
   await new Promise((resolve, reject) => {
     const sample = () => {
       try {
         if (document.hidden) throw Error("Game tab became hidden during measurement");
-        ctx.drawImage(host.canvas, 0, 0, 32, 24);
-        const pixels = ctx.getImageData(0, 0, 32, 24).data;
+        ctx.drawImage(host.canvas, 0, 0, sampleWidth, sampleHeight);
+        const pixels = ctx.getImageData(0, 0, sampleWidth, sampleHeight).data;
         let hash = 2166136261, nonblack = false;
         for (let i = 0; i < pixels.length; i += 4) {
           for (let channel = 0; channel < 3; channel++) {
@@ -79,21 +82,29 @@ export async function measureBrowserGameplay(host, seconds, inspect) {
     };
     requestAnimationFrame(sample);
   });
-  return summarizeBrowserRun(samples, before, await inspect());
+  const result = summarizeBrowserRun(samples, before, await inspect());
+  // Counts are diagnostics only; they cannot override the visible-image gate.
+  result.imageProbe = [sampleWidth, sampleHeight];
+  result.canvasSubmissionFps = (browserDeliveryCounter(host) - deliveryBefore) / result.seconds;
+  result.sampleCallbackFps = (samples.length - 1) / result.seconds;
+  return result;
 }
 
 // Diagnostic control run: quantify whether synchronous pixel inspection itself
 // limits emulation. Delivery counters do not prove distinct rendered images.
+export function browserDeliveryCounter(host) {
+  return host.oglSabEnabled ? host.oglSabFramesDrawn || 0 : host.adapter.detachedOglFramesDrawn || 0;
+}
 export async function measureBrowserDelivery(host, seconds, inspect) {
   if (document.hidden) throw Error("Keep the game tab visible during measurement");
   const before = await inspect(), started = performance.now();
-  const firstCount = host.adapter.detachedOglFramesDrawn || 0;
+  const firstCount = browserDeliveryCounter(host);
   let lastCount = firstCount, rafCount = 0, changedTicks = 0;
   await new Promise((resolve, reject) => {
     function sample() {
       if (document.hidden) return reject(Error("Game tab became hidden during measurement"));
       rafCount++;
-      const count = host.adapter.detachedOglFramesDrawn || 0;
+      const count = browserDeliveryCounter(host);
       if (count !== lastCount) changedTicks++;
       lastCount = count;
       if (performance.now() - started >= seconds * 1000) resolve();
@@ -106,6 +117,7 @@ export async function measureBrowserDelivery(host, seconds, inspect) {
   return { seconds: elapsed, simulationFps: (after.sceneFrame - before.sceneFrame) / elapsed,
     deliveryFps: (lastCount - firstCount) / elapsed, rafFps: rafCount / elapsed,
     changedPresentationTicksFps: changedTicks / elapsed,
-    sourceResolution: [host.adapter.presentedWidth, host.adapter.presentedHeight],
+    sourceResolution: host.oglSabEnabled ? [host.oglSabWidth, host.oglSabHeight] :
+      [host.adapter.presentedWidth, host.adapter.presentedHeight],
     diagnosticOnly: true, passed: false };
 }

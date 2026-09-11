@@ -52,8 +52,11 @@ if (nativeEngine) audio.targetLeadSeconds = 0.08;
 const Host = nativeEngine
   ? (await import("./native-host.js")).NativeHost
   : (await import("/engine/src/core-host.js")).EmulatorHost;
+const pixelPresenterFactory = nativeEngine ? undefined :
+  (await import("./browser-pixel-presenter.js")).createBrowserPixelPresenter;
 const host = new Host({
   canvas: $("screen"),
+  pixelPresenterFactory,
   onStatus: (message) => {
     if (!nativeEngine) {
       browserStatus.push(String(message));
@@ -908,7 +911,7 @@ if (params.has("qa")) {
         const profileBefore = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
         const measure = params.get("probe") === "delivery" ? measureBrowserDelivery : measureBrowserGameplay;
         const result = await measure(host, duration,
-          () => host.adapter.request("meleeInspect", {}));
+          () => host.adapter.request("meleeInspect", {}), {sampleWidth:Number(params.get("samplegrid") || 32)});
         const profileAfter = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
         result.coreProfile = summarizeCoreProfile(profileBefore, profileAfter, result.seconds);
         if (capacityProbe) { result.diagnosticOnly = true; result.passed = false; }
@@ -920,8 +923,10 @@ if (params.has("qa")) {
           proxy: host.oglProxyMode,
           presentationPacing: host.adapter.bitmapPresentationPacing,
           bitmapPresenter: typeof host.adapter.detachedOglContext?.transferFromImageBitmap === "function",
+          pixelPresenter: host.oglSabEnabled ? (host.oglPixelPresenter ? "webgl" : "2d") : null,
           presentationQueue: host.adapter.presentationQueue?.stats,
           timing: host.timingProfile,
+          correctTimeDrift: host.correctTimeDrift,
           jitRequested: host.ppcWasmJit,
           jitTier: host.ppcWasmJitTier,
           interpreterDisableMask: host.cachedInterpreterDisableMask,
@@ -1045,6 +1050,7 @@ if (params.has("qa")) {
             {frames:Number(params.get("timelineframes") || 40),
               delay:Number(params.get("timelinedelay") || 3),
               checkpointPolicy:params.get("checkpoints") || "periodic",
+              batchAdvance:params.get("batchadvance") === "1",
               cacheFastPathComparison:params.get("cachecompare") === "1",
               cacheLoopComparison:params.get("batchcompare") === "1",
               inlineDispatchComparison:params.get("dispatchcompare") === "1",

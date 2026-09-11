@@ -1,6 +1,7 @@
 # Browser engine investigation
 
-Work is isolated on `codex/browser-dolphin`, outside the checkout used by the
+The browser preview and validation tools are merged into `master` at `62d3a01`.
+Further experiments remain isolated on `codex/browser-dolphin`, outside the checkout used by the
 native-streaming agent. The preview is `node scripts/browser/serve.mjs` (port
 3003). This server only serves files; it does not start Dolphin or an encoder.
 Open `/play/?engine=wasm&qa=1` and select the local USA 1.02 disc. The browser
@@ -23,7 +24,31 @@ The release uses bounded shared pixels and same-frame readback. Candidate
 46's ImageBitmap path accumulates graphics memory and is rejected for release.
 For packaging and measured validation,
 see BROWSER-DEPLOYMENT.md. Live peer transport is not implemented.
-The original checkout/server is untouched.
+The native engine build and running server are unchanged by this integration.
+
+## Recreate the browser engine source
+
+In a fresh worktree without `engines/wasm-dolphin`, run
+`npm run setup:browser-source`. It checks out the pinned upstream engine,
+fetches and applies its locked Dolphin patches, then applies the two checked
+integration patches in `scripts/browser/source-integration.json`. It also copies
+the current Melee input/menu modules. Existing engine directories are refused;
+the setup never repatches a live native engine or overwrites local experiments.
+An explicit `--out` supports inspecting a separate source checkout.
+
+`engine-integration.patch` includes the browser workers, presentation transport,
+rollback shim, and Linux build configuration that previously existed only in the
+ignored engine checkout. `dolphin-integration.patch` is the cumulative delta from
+the upstream locked vendor tree. These replace, rather than precede, the historical
+incremental patch sequence. Tests apply both patches to temporary Git indexes and
+require exact recorded result-tree hashes; the working engine and its index are
+never changed by those tests. No compiled engine or disc data is committed.
+
+Configure the pinned local compiler toolchain described below, run
+`node scripts/browser/lock-linux-toolchain.mjs`, then
+`node scripts/browser/build-candidate.mjs`. The existing candidate 49 source
+archive remains available in `dist/browser-source/solo-preview`; its fully
+patched source does not need either integration patch applied again.
 
 Use `engine=wasm&video=ogl&oglproxy=worker&renderheight=720&qa=1&wasmjit=2&forcejit=1&jitwarmup=900&shortprefix=1&smearcompile=0&determinism=1&icache=0`
 plus the candidate `coreid`. Add `inputprobe=1&timelineprobe=1&timelineframes=240`
@@ -36,6 +61,45 @@ records source dimensions separately from CSS dimensions, checks simulation
 progress, and rejects hidden-tab measurements. Use a fresh match and at least
 30 seconds. Compile jobs must be idle for final performance acceptance.
 The small readback probe itself adds overhead; it is only enabled during QA.
+
+## Master integration follow-up (September 11)
+
+The cumulative source patches reproduce their complete recorded Git trees from
+the pinned upstream sources. Main/native tests pass (59); the expanded browser
+suite passes 71 tests with one optional local-disc test skipped.
+
+An opt-in `sabpresenter=webgl` paints the bounded shared pixels through one
+persistent WebGL2 texture. Native character select, Battlefield, and the hand/P
+keyboard menu render correctly. Keyboard navigation also passed the music check:
+54 advancing native menu frames and 50 nonzero PCM chunks while controls were
+open. The initial WebGL performance sample measured 50.037 simulation / 49.370
+visible FPS; the clock-drift experiment measured 35.764 / 35.631. Other browser
+activity varied substantially, so neither establishes a speedup or regression
+against the earlier quiet-machine result. Both fail acceptance. The existing
+Canvas2D release default remains unchanged.
+
+A subsequent run with the WebGL presenter and `fastmemhoist=1` reached 59.905
+simulation/render FPS, but only 56.504 distinct visible FPS (p95 gap 23.06 ms,
+maximum 110.24 ms) over 29.998 seconds at 960×720. It still fails smoothness.
+Register caching was already enabled by default; `regalloc=1` in that URL did
+not add another optimization. Neither optional setting is promoted from this
+single sample. Detailed probes can add `samplegrid=96` to check a larger canvas
+sample; the default remains 32×24 and the acceptance thresholds are unchanged.
+
+`batchadvance=1` adds a one-request rollback step containing input installation,
+completed simulation, and inspection. The reference retains the original three
+requests, while delayed correction uses the batch. The real browser comparison
+passed all 113,188,634 bytes across 29 sections after 98 corrections and 409
+replayed frames. It suppressed 409 obsolete video exports and 546,304 audio
+samples, and resumed ordinary output afterward. Mean delayed advance was
+15.99 ms, capture 6.38 ms, and restore 11.96 ms in this correctness trial; this
+does not establish enough headroom for 60 FPS corrections. It remains a local
+test, without peer transport. See `browser-integration-validation.json`.
+
+Shared-pixel delivery diagnostics now use their own completed-paint counter
+instead of the inactive detached-bitmap counter. Acceptance still requires actual
+changing canvas images, normal-speed simulation, 720-line output, and bounded
+frame gaps. Delivery counters alone cannot pass it.
 
 ## Initial evidence (2026-09-09 PDT)
 

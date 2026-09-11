@@ -1,0 +1,20 @@
+{
+  "engineCommit": "6ef689cf3956c3208c0966b8123d91c21d1f5ca4",
+  "dolphinCommit": "e22551eae1c84a7e4d0b6a5c519ef4ed4ef69df1",
+  "patches": [
+    {
+      "name": "engine-integration.patch",
+      "sha256": "feba266ac2016a24815640f011c942f6bdf0186068bfa5fdcdd11d92cc168407",
+      "bytes": 59051,
+      "baseTree": "e2962f338e7800904a69cbc74066ef3f3745ee47",
+      "resultTree": "ea0bf52f611edda99d54bf16f4d725c0f8ed7ad8"
+    },
+    {
+      "name": "dolphin-integration.patch",
+      "sha256": "f89674b358401dba61cf0245d50c7216df5dd528411372e3eedbe070f85893e4",
+      "bytes": 108912,
+      "baseTree": "e550aecf0d9194ae37f0428ae3b6f10ae11cf5db",
+      "resultTree": "1bb5a1de09d49d18552efe9be1d0e005c4f47fd2"
+    }
+  ]
+}

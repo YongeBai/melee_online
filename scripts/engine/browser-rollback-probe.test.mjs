@@ -6,6 +6,11 @@ function fixture() {
   const saves=new Map(),output={videoSkipped:0,audioSamplesSkipped:0};
   const inspect=async()=>({sceneFrame:state.frame,fighters:state.x.map((x,port)=>({port,controllerIndex:port,slotType:0,x}))});
   const command=async(action,p={})=>{
+    if(action==='advance'){
+      await command('pads',p);
+      const timing=await command('step',p);
+      return {...timing,game:await inspect()};
+    }
     if(action==='clear'){saves.clear();return {};}
     if(action==='release'){saves.delete(p.slot);return {};}
     if(action==='capture'){saves.set(p.slot,structuredClone(state));return {};}
@@ -26,6 +31,16 @@ function fixture() {
   };
   return {command,inspect};
 }
+test('batched correction is compared against the unbatched reference including final replay',async()=>{
+  const f=fixture(),r=await verifyBrowserRollbackTimeline(f.command,f.inspect,
+    {frames:240,checkpointPolicy:'prediction',batchAdvance:true});
+  assert.equal(r.passed,true);
+  assert.equal(r.commandTimings['reference:step'].count,240);
+  assert.equal(r.commandTimings['reference:advance'],undefined);
+  assert.equal(r.commandTimings['delayed:step'],undefined);
+  assert.ok(r.commandTimings['delayed:advance'].count>=240);
+  assert.ok(r.commandTimings['final correction:advance'].count>0);
+});
 test('real-engine probe preserves independent snapshots across checkpoint ring wraps',async()=>{
   const f=fixture(),r=await verifyBrowserRollbackTimeline(f.command,f.inspect);
   assert.equal(r.passed,true);assert.equal(r.fullMachineBytesEqual,true);

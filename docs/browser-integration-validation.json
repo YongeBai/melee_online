@@ -1,0 +1,104 @@
+{
+  "date": "2026-09-11",
+  "coreSha256": "b041332554a42918a67b72e58c171ffbacb3c4fff2acd1c0186f95e1b9e20b52",
+  "masterIntegration": "62d3a01",
+  "batchedRollback": {
+    "passed": true,
+    "kind": "local-browser-late-input-correction",
+    "networkTest": false,
+    "performanceTest": false,
+    "frames": 240,
+    "delay": 3,
+    "checkpointPolicy": "prediction",
+    "batchAdvance": true,
+    "reference": "Original separate pads, step, and inspection requests",
+    "corrected": "One advance request including pads, step, and inspection",
+    "fullMachineBytesEqual": true,
+    "comparedBytes": 113188634,
+    "comparedSections": 29,
+    "differingSections": 0,
+    "rollbacks": 98,
+    "resimulatedFrames": 409,
+    "maxDepth": 6,
+    "stalls": 1,
+    "videoExportsSuppressed": 409,
+    "audioSamplesSuppressed": 546304,
+    "suppressionOffAfterReplay": true,
+    "meanDelayedAdvanceMs": 15.988062015479041,
+    "meanFastCaptureMs": 6.383469387717849,
+    "meanRestoreMs": 11.955876288647504,
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "profilerEnabled": false
+  },
+  "keyboardNavigation": {
+    "passed": true,
+    "hand": {
+      "x": -23.37116813659668,
+      "y": -20.60395622253418
+    },
+    "nativeFrames": [
+      5195,
+      5249
+    ],
+    "audioState": "running",
+    "audioScheduledSeconds": 1.0986666666665599,
+    "nonzeroPcmChunks": 50
+  },
+  "contendedPerformanceSamples": [
+    {
+      "configuration": "Candidate 49 defaults plus timedrift=1, Canvas2D pixels",
+      "seconds": 30.00206499999948,
+      "simulationFps": 35.764204897230194,
+      "gameRenderFps": 35.764204897230194,
+      "visibleFps": 35.630880741042944,
+      "p95GapMs": 45.325000000186265,
+      "maxGapMs": 96.23500000033528,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "configuration": "Candidate 49 defaults plus sabpresenter=webgl",
+      "seconds": 29.997790000000037,
+      "simulationFps": 50.037019393761945,
+      "gameRenderFps": 50.037019393761945,
+      "visibleFps": 49.37030361236605,
+      "p95GapMs": 37.06500000040978,
+      "maxGapMs": 77.46499999985099,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    }
+  ],
+  "performanceLimit": "Other browser activity varied across these runs. They are not an uncontended A/B comparison or a replacement for the earlier 58.876 simulation / 56.144 visible FPS measurement. No 720p60 or network rollback certification.",
+  "combinedPerformance": {
+    "configuration": "Candidate 49 plus sabpresenter=webgl, regalloc=1 (already the default), fastmemhoist=1",
+    "seconds": 29.997615000000224,
+    "simulationFps": 59.90476242861263,
+    "gameRenderFps": 59.90476242861263,
+    "visibleFps": 56.5044921071221,
+    "p95GapMs": 23.059999999590218,
+    "maxGapMs": 110.23500000033528,
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "nonblackFraction": 1,
+    "profiler": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "pixelPresenter": "webgl",
+    "correctTimeDrift": false,
+    "interpreterDisableMask": 532807680,
+    "passed": false
+  }
+}

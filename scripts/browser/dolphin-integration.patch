@@ -1,0 +1,2564 @@
+diff --git a/Source/Core/AudioCommon/Mixer.cpp b/Source/Core/AudioCommon/Mixer.cpp
+index 1229d8faa1..3cecffc143 100644
+--- a/Source/Core/AudioCommon/Mixer.cpp
++++ b/Source/Core/AudioCommon/Mixer.cpp
+@@ -1,6 +1,9 @@
+ // Copyright 2008 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#ifdef __EMSCRIPTEN__
++#include "Common/BrowserRollbackOutput.h"
++#endif
+ #include "AudioCommon/Mixer.h"
+ 
+ #include <algorithm>
+@@ -210,6 +213,13 @@ std::size_t Mixer::MixSurround(float* samples, std::size_t num_samples)
+ 
+ void Mixer::PushSamples(const s16* samples, std::size_t num_samples)
+ {
++#ifdef __EMSCRIPTEN__
++  if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++  {
++    DolphinWeb::RollbackOutput::audio_skipped.fetch_add(num_samples, std::memory_order_relaxed);
++    return;
++  }
++#endif
+   if (IsOutputSampleRateValid())
+   {
+     // Big-endian RL-orderered stereo samples.
+@@ -233,6 +243,13 @@ void Mixer::PushSamples(const s16* samples, std::size_t num_samples)
+ 
+ void Mixer::PushStreamingSamples(const s16* samples, std::size_t num_samples)
+ {
++#ifdef __EMSCRIPTEN__
++  if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++  {
++    DolphinWeb::RollbackOutput::audio_skipped.fetch_add(num_samples, std::memory_order_relaxed);
++    return;
++  }
++#endif
+   if (IsOutputSampleRateValid())
+   {
+     // Big-endian RL-orderered stereo samples.
+diff --git a/Source/Core/Common/BrowserCopyBytes.h b/Source/Core/Common/BrowserCopyBytes.h
+new file mode 100644
+index 0000000000..8dfccb340b
+--- /dev/null
++++ b/Source/Core/Common/BrowserCopyBytes.h
+@@ -0,0 +1,40 @@
++// Private snapshot copies occur with emulation paused and disjoint buffers.
++#pragma once
++#include <cstddef>
++#include <cstring>
++#ifdef __wasm_simd128__
++#include <wasm_simd128.h>
++#endif
++namespace DolphinWeb {
++inline void CopySnapshotBytes(void* destination, const void* source, std::size_t bytes)
++{
++#ifdef __wasm_simd128__
++  // Volatile packed vector accesses preserve explicit SIMD transfers rather
++  // than folding the loop back into shared-memory memory.copy.
++  struct __attribute__((packed, may_alias)) Vector { v128_t value; };
++  auto* out = static_cast<unsigned char*>(destination);
++  auto* in = static_cast<const unsigned char*>(source);
++  while (bytes >= 64)
++  {
++    const auto a = reinterpret_cast<const volatile Vector*>(in)->value;
++    const auto b = reinterpret_cast<const volatile Vector*>(in+16)->value;
++    const auto c = reinterpret_cast<const volatile Vector*>(in+32)->value;
++    const auto d = reinterpret_cast<const volatile Vector*>(in+48)->value;
++    reinterpret_cast<volatile Vector*>(out)->value = a;
++    reinterpret_cast<volatile Vector*>(out+16)->value = b;
++    reinterpret_cast<volatile Vector*>(out+32)->value = c;
++    reinterpret_cast<volatile Vector*>(out+48)->value = d;
++    in += 64; out += 64; bytes -= 64;
++  }
++  while (bytes >= 16)
++  {
++    reinterpret_cast<volatile Vector*>(out)->value =
++        reinterpret_cast<const volatile Vector*>(in)->value;
++    in += 16; out += 16; bytes -= 16;
++  }
++  while (bytes--) *out++ = *in++;
++#else
++  std::memcpy(destination, source, bytes);
++#endif
++}
++}
+diff --git a/Source/Core/Common/BrowserProfile.h b/Source/Core/Common/BrowserProfile.h
+new file mode 100644
+index 0000000000..66cc2652bb
+--- /dev/null
++++ b/Source/Core/Common/BrowserProfile.h
+@@ -0,0 +1,52 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++
++#include <array>
++#include <atomic>
++#include <chrono>
++#include <cstdint>
++
++namespace DolphinWeb::BrowserProfile
++{
++enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, Count };
++constexpr std::array<const char*, 9> names{
++    "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent",
++    "cpuGpuSync", "cpuGpuDecode", "cpuVideoWait"};
++struct Counter
++{
++  std::atomic<std::uint64_t> count{0};
++  std::atomic<std::uint64_t> total_us{0};
++  std::atomic<std::uint64_t> max_us{0};
++};
++inline std::atomic<bool> enabled{false};
++inline std::array<Counter, static_cast<std::size_t>(Stage::Count)> counters;
++
++inline void Record(Stage stage, std::uint64_t us)
++{
++  if (!enabled.load(std::memory_order_relaxed))
++    return;
++  auto& counter = counters[static_cast<std::size_t>(stage)];
++  counter.count.fetch_add(1, std::memory_order_relaxed);
++  counter.total_us.fetch_add(us, std::memory_order_relaxed);
++  auto old = counter.max_us.load(std::memory_order_relaxed);
++  while (us > old && !counter.max_us.compare_exchange_weak(old, us, std::memory_order_relaxed)) {}
++}
++
++// CPU wall time of GL calls, not GPU execution time. Nested scopes overlap.
++class Scope
++{
++public:
++  explicit Scope(Stage stage) : m_stage(stage), m_active(enabled.load(std::memory_order_relaxed)),
++    m_start(m_active ? Clock::now() : Clock::time_point{}) {}
++  ~Scope()
++  {
++    if (m_active)
++      Record(m_stage, std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - m_start).count());
++  }
++private:
++  using Clock = std::chrono::steady_clock;
++  Stage m_stage;
++  bool m_active;
++  Clock::time_point m_start;
++};
++}  // namespace DolphinWeb::BrowserProfile
+diff --git a/Source/Core/Common/BrowserRollbackOutput.h b/Source/Core/Common/BrowserRollbackOutput.h
+new file mode 100644
+index 0000000000..eeb8618f4f
+--- /dev/null
++++ b/Source/Core/Common/BrowserRollbackOutput.h
+@@ -0,0 +1,13 @@
++// Copyright 2026
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++#include <atomic>
++#include <cstdint>
++namespace DolphinWeb::RollbackOutput {
++// Host presentation only. Game DSP/GX execution and serialized state still run.
++inline std::atomic<bool> suppressed{false};
++// Invalidates queued host images when replay starts; never serialized.
++inline std::atomic<std::uint32_t> presentation_epoch{0};
++inline std::atomic<std::uint64_t> video_skipped{0};
++inline std::atomic<std::uint64_t> audio_skipped{0};
++}
+diff --git a/Source/Core/Common/BrowserStateCopy.h b/Source/Core/Common/BrowserStateCopy.h
+new file mode 100644
+index 0000000000..fb783ba1cc
+--- /dev/null
++++ b/Source/Core/Common/BrowserStateCopy.h
+@@ -0,0 +1,29 @@
++#pragma once
++#include <atomic>
++#include "Common/BrowserCopyBytes.h"
++#include "Common/ChunkFile.h"
++namespace DolphinWeb {
++inline std::atomic<bool> browser_state_transfer_active{false};
++struct BrowserStateTransferScope {
++  BrowserStateTransferScope() { browser_state_transfer_active.store(true, std::memory_order_release); }
++  ~BrowserStateTransferScope() { browser_state_transfer_active.store(false, std::memory_order_release); }
++};
++inline void TransferSnapshotMemory(PointerWrap& p, u8* data, u32 bytes)
++{
++  if (!browser_state_transfer_active.load(std::memory_order_acquire))
++  {
++    p.DoArray(data, bytes);
++    return;
++  }
++  // This length-prefixed form is private to browser in-memory checkpoints.
++  // Disk savestates keep Dolphin's original serialization format.
++  u32 stored_size = bytes;
++  u8* storage = p.DoExternal(stored_size);
++  if (p.IsReadMode())
++  {
++    if (stored_size != bytes) { p.SetVerifyMode(); return; }
++    CopySnapshotBytes(data, storage, bytes);
++  }
++  else if (p.IsWriteMode()) CopySnapshotBytes(storage, data, bytes);
++}
++}
+diff --git a/Source/Core/Common/GL/GLInterface/Emscripten.cpp b/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+index 13d05a5d4d..b8e0da7560 100644
+--- a/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -1,10 +1,15 @@
+ // Copyright 2026 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserRollbackOutput.h"
++#include "Common/BrowserProfile.h"
++
+ #include "Common/GL/GLInterface/Emscripten.h"
+ 
++#include <array>
+ #include <chrono>
+ #include <cstdint>
++#include <cstring>
+ #include <thread>
+ #include <vector>
+ #include <emscripten/console.h>
+@@ -13,7 +18,9 @@
+ #include <emscripten/html5_webgl.h>
+ #include <GLES3/gl3.h>
+ 
++extern "C" void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, void* data);
+ extern "C" int DolphinWeb_UseWorkerOwnedWebGL();
++extern "C" std::uint32_t DolphinWeb_GetCachedInterpreterDisableMask();
+ extern "C" int DolphinWeb_UseDiagnosticOglClear();
+ extern "C" int DolphinWeb_UseOglReadbackPresent();
+ extern "C" void DolphinWeb_OnGlBackbuffer(const std::uint8_t* rgba, std::uint32_t width,
+@@ -24,6 +31,7 @@ extern "C" void DolphinWeb_OnOglSwap(int worker_owned, int commit_result, std::u
+ 
+ namespace
+ {
++int s_readback_error = 0;
+ bool DolphinWebUseDiagnosticClear()
+ {
+   return DolphinWeb_UseDiagnosticOglClear() != 0;
+@@ -63,37 +71,111 @@ std::uint32_t DolphinWebOglDebugBits()
+   });
+ }
+ 
+-std::uint32_t DolphinWebPublishAsyncReadback(std::uint32_t width, std::uint32_t height)
++// Two reusable pixel buffers bound graphics memory. Read the preceding
++// frame after the GPU has had a frame of work to complete the transfer.
++// getBufferSubData remains a synchronization point; this is not a promise
++// of zero stalls. WebGL fences cannot signal inside this long-running task.
++std::array<GLuint, 2> s_readbacks{};
++std::vector<std::uint8_t> s_readback_data;
++std::uint32_t s_readback_width = 0, s_readback_height = 0, s_readback_epoch = 0;
++std::size_t s_readback_next = 0;
++bool s_readback_pending = false;
++
++void ClearReadbacks()
+ {
+-  static std::vector<std::uint8_t> s_readback_data;
+-
+-  if (width == 0 || height == 0)
+-    return 0;
++  glDeleteBuffers(s_readbacks.size(), s_readbacks.data());
++  s_readbacks = {};
++  s_readback_next = 0;
++  s_readback_pending = false;
++}
+ 
+-  const std::size_t byte_count = static_cast<std::size_t>(width) * height * 4;
+-  if (byte_count == 0)
++std::uint32_t DolphinWebPublishAsyncReadback(std::uint32_t width, std::uint32_t height)
++{
++  if (!width || !height || width > 4096 || height > 4096) return 0;
++  const auto epoch = DolphinWeb::RollbackOutput::presentation_epoch.load(std::memory_order_acquire);
++  if (epoch != s_readback_epoch || width != s_readback_width || height != s_readback_height)
++  {
++    ClearReadbacks();
++    s_readback_epoch = epoch;
++    s_readback_width = width;
++    s_readback_height = height;
++    s_readback_data.resize(static_cast<std::size_t>(width) * height * 4);
++  }
++  if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++  {
++    DolphinWeb::RollbackOutput::video_skipped.fetch_add(1, std::memory_order_relaxed);
+     return 0;
+-
+-  s_readback_data.resize(byte_count);
+-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+-  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
++  }
++  GLint previous_pack = 0, previous_framebuffer = 0, previous_alignment = 0;
++  glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &previous_pack);
++  glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previous_framebuffer);
++  glGetIntegerv(GL_PACK_ALIGNMENT, &previous_alignment);
++  const int prior_error = static_cast<int>(glGetError());
++  // Same-frame bounded readback is useful on integrated GPUs where the
++  // transfer is cheap. Keep a controlled comparison with the delayed PBO
++  // path; neither changes emulated clocks or game state.
++  if (DolphinWeb_GetCachedInterpreterDisableMask() & (1u << 28))
++  {
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
++    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
++    glPixelStorei(GL_PACK_ALIGNMENT, 1);
++    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, s_readback_data.data());
++    const int read_error = static_cast<int>(glGetError());
++    if (!read_error) DolphinWeb_OnGlBackbuffer(s_readback_data.data(), width, height);
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, previous_pack);
++    glBindFramebuffer(GL_READ_FRAMEBUFFER, previous_framebuffer);
++    glPixelStorei(GL_PACK_ALIGNMENT, previous_alignment);
++    s_readback_pending = false;
++    s_readback_error = read_error ? (0x20000 | read_error) : prior_error ? (0x10000 | prior_error) : 0;
++    std::uint32_t pixel = 0;
++    if (!read_error) std::memcpy(&pixel, s_readback_data.data(), sizeof(pixel));
++    return pixel;
++  }
++  // Queue this frame before waiting for the preceding frame.
++  auto& write_buffer = s_readbacks[s_readback_next];
++  if (!write_buffer)
++  {
++    glGenBuffers(1, &write_buffer);
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, write_buffer);
++    glBufferData(GL_PIXEL_PACK_BUFFER, s_readback_data.size(), nullptr, GL_STREAM_READ);
++  }
++  else glBindBuffer(GL_PIXEL_PACK_BUFFER, write_buffer);
++  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+   glPixelStorei(GL_PACK_ALIGNMENT, 1);
+-  glReadPixels(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height), GL_RGBA,
+-               GL_UNSIGNED_BYTE, s_readback_data.data());
+-  if (glGetError() != GL_NO_ERROR)
+-    return 0;
+-
+-  const std::uint32_t published_rgba = static_cast<std::uint32_t>(s_readback_data[0]) |
+-                                       (static_cast<std::uint32_t>(s_readback_data[1]) << 8) |
+-                                       (static_cast<std::uint32_t>(s_readback_data[2]) << 16) |
+-                                       (static_cast<std::uint32_t>(s_readback_data[3]) << 24);
+-  DolphinWeb_OnGlBackbuffer(s_readback_data.data(), width, height);
++  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
++  glFlush();
++  const int write_error = static_cast<int>(glGetError());
++  std::uint32_t published_rgba = 0;
++  int read_error = 0;
++  if (s_readback_pending)
++  {
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, s_readbacks[1 - s_readback_next]);
++    glGetBufferSubData(GL_PIXEL_PACK_BUFFER, 0, s_readback_data.size(), s_readback_data.data());
++    read_error = static_cast<int>(glGetError());
++    if (!read_error)
++    {
++      published_rgba = static_cast<std::uint32_t>(s_readback_data[0]) |
++                       (static_cast<std::uint32_t>(s_readback_data[1]) << 8) |
++                       (static_cast<std::uint32_t>(s_readback_data[2]) << 16) |
++                       (static_cast<std::uint32_t>(s_readback_data[3]) << 24);
++      DolphinWeb_OnGlBackbuffer(s_readback_data.data(), width, height);
++    }
++  }
++  s_readback_pending = write_error == GL_NO_ERROR;
++  s_readback_next = 1 - s_readback_next;
++  glBindBuffer(GL_PIXEL_PACK_BUFFER, previous_pack);
++  glBindFramebuffer(GL_READ_FRAMEBUFFER, previous_framebuffer);
++  glPixelStorei(GL_PACK_ALIGNMENT, previous_alignment);
++  s_readback_error = read_error ? (0x20000 | read_error) :
++                     write_error ? (0x30000 | write_error) : prior_error ? (0x10000 | prior_error) : 0;
+   return published_rgba;
+ }
++
+ }  // namespace
+ 
+ GLContextEmscripten::~GLContextEmscripten()
+ {
++  ClearReadbacks();
+   if (m_context)
+     emscripten_webgl_destroy_context(m_context);
+ }
+@@ -302,6 +384,9 @@ void GLContextEmscripten::Update()
+ 
+ void GLContextEmscripten::Swap()
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlPresent);
++#endif
+   static std::uint32_t s_diagnostic_clear_frame = 0;
+   std::uint32_t readback_rgba = 0;
+   if (DolphinWebUseDiagnosticClear())
+@@ -329,7 +414,8 @@ void GLContextEmscripten::Swap()
+     readback_rgba = DolphinWebPublishAsyncReadback(m_backbuffer_width, m_backbuffer_height);
+ 
+   const std::uint32_t debug_bits = DolphinWebOglDebugBits();
+-  const int gl_error = static_cast<int>(glGetError());
++  const int swap_error = static_cast<int>(glGetError());
++  const int gl_error = s_readback_error ? s_readback_error : swap_error;
+   glFlush();
+   // For direct-JS-created contexts (worker-mode patch 0009), commit_frame
+   // returns -3 INVALID_TARGET because explicitSwapControl isn't on the
+@@ -401,19 +487,40 @@ void GLContextEmscripten::Swap()
+   // own pacing reached this far in the wasm build.
+   if (worker_owned_webgl && !DolphinWebUseOglReadbackPresent())
+   {
++    if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++    {
++      DolphinWeb::RollbackOutput::video_skipped.fetch_add(1, std::memory_order_relaxed);
++      return;
++    }
+     EM_ASM({
+       if (typeof GL === 'undefined' || !GL.currentContext) return;
+       const ctx = GL.currentContext.GLctx;
+       const canvas = ctx ? ctx.canvas : null;
+       if (!canvas || typeof canvas.transferToImageBitmap !== 'function') return;
++      // BEGIN BOUNDED BITMAP EXPORT
++      // Bound images even when the main event loop cannot receive messages.
++      // [outstanding, exported, skipped]. Main acknowledges upon receipt;
++      // its optional local presentation queue has its own separate bound.
++      const credit = Module._detachedOglCredit ||
++        (Module._detachedOglCredit = new Int32Array(new SharedArrayBuffer(12)));
++      if (Atomics.load(credit, 0) >= 4) {
++        Atomics.add(credit, 2, 1);
++        return;
++      }
++      Atomics.add(credit, 0, 1);
++      let bitmap;
+       try {
+-        const bitmap = canvas.transferToImageBitmap();
+-        if (!bitmap) return;
++        bitmap = canvas.transferToImageBitmap();
++        if (!bitmap) { Atomics.sub(credit, 0, 1); return; }
+         self.postMessage(
+-          { type: 'detachedOglFrame', bitmap: bitmap, width: bitmap.width, height: bitmap.height },
++          { type: 'detachedOglFrame', bitmap: bitmap, width: bitmap.width, height: bitmap.height, credit },
+           [bitmap]
+         );
++        Atomics.add(credit, 1, 1);
+       } catch (e) {
++        Atomics.sub(credit, 0, 1);
++        try { if (bitmap) bitmap.close(); } catch (_) {}
++        // END BOUNDED BITMAP EXPORT
+         if (typeof Module !== 'undefined' && !Module._detachedOglPostErr) {
+           Module._detachedOglPostErr = true;
+           console.log('[ogl-detached] postMessage failed: ' + (e && e.message ? e.message : e));
+diff --git a/Source/Core/Core/CMakeLists.txt b/Source/Core/Core/CMakeLists.txt
+index a36d60d81d..42ca089017 100644
+--- a/Source/Core/Core/CMakeLists.txt
++++ b/Source/Core/Core/CMakeLists.txt
+@@ -962,3 +962,14 @@ if(EMSCRIPTEN AND DOLPHIN_WASM_CORE_SOURCE)
+     "${DOLPHIN_WASM_JIT_CACHE_PRE_JS}"
+   )
+ endif()
++
++# Browser experiment: direct calls for generated WASM blocks, scoped to the
++# interpreter translation unit so the rest of the engine keeps its build flags.
++if(EMSCRIPTEN)
++  set_property(SOURCE PowerPC/CachedInterpreter/CachedInterpreter.cpp APPEND
++    PROPERTY COMPILE_OPTIONS
++      -UDOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH
++      -DDOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH=1
++      -UDOLPHIN_WEB_HOT_COUNTERS
++      -DDOLPHIN_WEB_HOT_COUNTERS=0)
++endif()
+diff --git a/Source/Core/Core/HW/DSP.cpp b/Source/Core/Core/HW/DSP.cpp
+index ae46113e79..f00dc9cc4f 100644
+--- a/Source/Core/Core/HW/DSP.cpp
++++ b/Source/Core/Core/HW/DSP.cpp
+@@ -1,3 +1,4 @@
++#include "Common/BrowserStateCopy.h"
+ // Copyright 2008 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+@@ -79,7 +80,7 @@ constexpr int DSP_MAIL_SLICE = 72;
+ void DSPManager::DoState(PointerWrap& p)
+ {
+   if (!m_aram.wii_mode)
+-    p.DoArray(m_aram.ptr, m_aram.size);
++    DolphinWeb::TransferSnapshotMemory(p, m_aram.ptr, m_aram.size);
+   p.Do(m_dsp_control);
+   p.Do(m_audio_dma);
+   p.Do(m_aram_dma);
+diff --git a/Source/Core/Core/HW/HW.cpp b/Source/Core/Core/HW/HW.cpp
+index 58b4beac03..1c92070658 100644
+--- a/Source/Core/Core/HW/HW.cpp
++++ b/Source/Core/Core/HW/HW.cpp
+@@ -87,26 +87,37 @@ void DoState(Core::System& system, PointerWrap& p)
+ {
+   system.GetMemory().DoState(p);
+   p.DoMarker("Memory");
++  State::BrowserRecordSection(p, "HW Memory");
+   system.GetMemoryInterface().DoState(p);
+   p.DoMarker("MemoryInterface");
++  State::BrowserRecordSection(p, "HW MemoryInterface");
+   system.GetVideoInterface().DoState(p);
+   p.DoMarker("VideoInterface");
++  State::BrowserRecordSection(p, "HW VideoInterface");
+   system.GetSerialInterface().DoState(p);
+   p.DoMarker("SerialInterface");
++  State::BrowserRecordSection(p, "HW SerialInterface");
+   system.GetProcessorInterface().DoState(p);
+   p.DoMarker("ProcessorInterface");
++  State::BrowserRecordSection(p, "HW ProcessorInterface");
+   system.GetDSP().DoState(p);
+   p.DoMarker("DSP");
++  State::BrowserRecordSection(p, "HW DSP");
+   system.GetDVDInterface().DoState(p);
+   p.DoMarker("DVDInterface");
++  State::BrowserRecordSection(p, "HW DVDInterface");
+   system.GetGPFifo().DoState(p);
+   p.DoMarker("GPFifo");
++  State::BrowserRecordSection(p, "HW GPFifo");
+   system.GetExpansionInterface().DoState(p);
+   p.DoMarker("ExpansionInterface");
++  State::BrowserRecordSection(p, "HW ExpansionInterface");
+   system.GetAudioInterface().DoState(p);
+   p.DoMarker("AudioInterface");
++  State::BrowserRecordSection(p, "HW AudioInterface");
+   system.GetHSP().DoState(p);
+   p.DoMarker("HSP");
++  State::BrowserRecordSection(p, "HW HSP");
+ 
+   if (system.IsWii())
+   {
+diff --git a/Source/Core/Core/HW/Memmap.cpp b/Source/Core/Core/HW/Memmap.cpp
+index e6d8fd56a5..0b16de36f8 100644
+--- a/Source/Core/Core/HW/Memmap.cpp
++++ b/Source/Core/Core/HW/Memmap.cpp
+@@ -1,3 +1,5 @@
++#include "Core/State.h"
++#include "Common/BrowserStateCopy.h"
+ // Copyright 2008 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+@@ -530,15 +532,18 @@ void MemoryManager::DoState(PointerWrap& p)
+     return;
+   }
+ 
+-  p.DoArray(m_ram, current_ram_size);
+-  p.DoArray(m_l1_cache, current_l1_cache_size);
++  DolphinWeb::TransferSnapshotMemory(p, m_ram, current_ram_size);
++  DolphinWeb::TransferSnapshotMemory(p, m_l1_cache, current_l1_cache_size);
+   p.DoMarker("Memory RAM");
++  State::BrowserRecordSection(p, "HW Memory RAM");
+   if (current_have_fake_vmem)
+-    p.DoArray(m_fake_vmem, current_fake_vmem_size);
++    DolphinWeb::TransferSnapshotMemory(p, m_fake_vmem, current_fake_vmem_size);
+   p.DoMarker("Memory FakeVMEM");
++  State::BrowserRecordSection(p, "HW Memory FakeVMEM");
+   if (current_have_exram)
+-    p.DoArray(m_exram, current_exram_size);
++    DolphinWeb::TransferSnapshotMemory(p, m_exram, current_exram_size);
+   p.DoMarker("Memory EXRAM");
++  State::BrowserRecordSection(p, "HW Memory EXRAM");
+ }
+ 
+ void MemoryManager::Shutdown()
+diff --git a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+index 6fcbd84dcd..f6b81d7b4d 100644
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2014 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "Core/PowerPC/CachedInterpreter/CachedInterpreter.h"
+ 
+ #include <algorithm>
+@@ -10,6 +12,7 @@
+ #include <chrono>
+ #include <cmath>
+ #include <cstdint>
++#include <cstring>
+ #include <initializer_list>
+ #include <limits>
+ #include <optional>
+@@ -33,6 +36,7 @@
+ #include "Core/CoreTiming.h"
+ #ifdef __EMSCRIPTEN__
+ #include "Core/WasmTimingProfile.h"
++#include <emscripten/threading.h>
+ #endif
+ #include "Core/HLE/HLE.h"
+ #include "Core/HW/CPU.h"
+@@ -123,6 +127,38 @@ EM_JS(int, DolphinWeb_CachedInterpreterCompileWasmBlock,
+        int fp_index, int fctiwz_index, int interpret_index, int fastcheck_gpfifo_index,
+        int fast_os_interrupt_call_index, int fast_melee_input_status_call_index,
+        int fast_melee_status_call_index, int fast_melee_service_poll_call_index), {
++  // Runtime-local instance reuse: regenerated block descriptors should not
++  // consume a new function-table entry or a lifetime compilation allowance.
++  // The digest covers exact code bytes. Imports and memory/table identity
++  // must also agree before reusing a callable instance.
++  const importIndices = [read_u32_index, write_u32_index, read_u8_index, write_u8_index,
++    read_u16_index, write_u16_index, lfs_index, stfs_index, lfd_index, fmr_index,
++    system_index, fp_index, fctiwz_index, interpret_index, fastcheck_gpfifo_index,
++    fast_os_interrupt_call_index, fast_melee_input_status_call_index,
++    fast_melee_status_call_index, fast_melee_service_poll_call_index];
++  const bindings = importIndices.map(index => wasmTable.get(index));
++  if (!Module._dolphinJitInstances || Module._dolphinJitInstanceMemory !== wasmMemory ||
++      Module._dolphinJitInstanceTable !== wasmTable) {
++    if (Module._dolphinJitInstanceTable !== wasmTable) {
++      Module._dolphinJitInstanceBytes = 0;
++      Module._dolphinJitInstanceCount = 0;
++    }
++    Module._dolphinJitInstances = new Map();
++    Module._dolphinJitInstanceMemory = wasmMemory;
++    Module._dolphinJitInstanceTable = wasmTable;
++  }
++  const codeKey = UTF8ToString(cache_key_ptr);
++  if (!codeKey) return 0;
++  const instanceKey = codeKey + ':' + importIndices.join(',');
++  const previous = Module._dolphinJitInstances.get(instanceKey);
++  if (previous && previous.bindings.every((fn, i) => fn === bindings[i]) &&
++      wasmTable.get(previous.index) === previous.fn) {
++    _DolphinWeb_RecordInstanceReuse();
++    return previous.index;
++  }
++  // Limits apply to unique executable instances, not repeated descriptors.
++  if (bytes_len <= 0 || bytes_len > 1048576 || Module._dolphinJitInstanceCount >= 65536 ||
++      Module._dolphinJitInstanceBytes + bytes_len > 67108864) return 0;
+   // Day-7 Phase B: cache lookup before WebAssembly.Module compilation.
+   // Module._dolphinJitCache is populated on each pthread by the pre-js
+   // receiver (tools/jit-cache-prejs.js) when the discio worker sends a
+@@ -201,9 +237,26 @@ EM_JS(int, DolphinWeb_CachedInterpreterCompileWasmBlock,
+   const index = wasmTable.length;
+   wasmTable.grow(1);
+   wasmTable.set(index, fn);
++  Module._dolphinJitInstances.set(instanceKey, { index, fn, bindings });
++  Module._dolphinJitInstanceBytes += bytes_len;
++  Module._dolphinJitInstanceCount += 1;
++  _DolphinWeb_RecordUniqueInstance();
+   return index | 0;
+ });
+ 
++EM_JS(int, DolphinWeb_CompileWasmDispatchLoop, (const u8* ptr, int length, int perfmon_index), {
++  try {
++    const module = new WebAssembly.Module(HEAPU8.slice(ptr, ptr + length));
++    const f = new WebAssembly.Instance(module, {env: {memory: wasmMemory, table: wasmTable,
++      perfmon: wasmTable.get(perfmon_index)}}).exports.f;
++    const index = wasmTable.length; wasmTable.grow(1); wasmTable.set(index, f);
++    return index;
++  } catch (error) { console.warn("WASM dispatcher unavailable:", String(error)); return 0; }
++});
++static int s_wasm_dispatch_loop_handle = 0;
++static bool s_wasm_dispatch_loop_attempted = false;
++static std::atomic<u32> s_wasm_dispatch_loop_calls{0};
++
+ static std::array<char, 86> DolphinWeb_MakeWasmBlockCacheKey(std::span<const u8> bytes)
+ {
+   static constexpr std::string_view prefix = "wasm-block-sha256-v1:";
+@@ -303,6 +356,11 @@ u32 s_wasm_block_emit_fail_count = 0;
+ u32 s_wasm_block_full_compile_count = 0;
+ u32 s_wasm_block_partial_compile_count = 0;
+ u32 s_wasm_block_mixed_compile_count = 0;
++std::atomic<u32> s_wasm_instance_reuse_count{0}, s_wasm_unique_instance_count{0};
++extern "C" EMSCRIPTEN_KEEPALIVE void DolphinWeb_RecordInstanceReuse()
++{ s_wasm_instance_reuse_count.fetch_add(1, std::memory_order_relaxed); }
++extern "C" EMSCRIPTEN_KEEPALIVE void DolphinWeb_RecordUniqueInstance()
++{ s_wasm_unique_instance_count.fetch_add(1, std::memory_order_relaxed); }
+ u32 s_wasm_block_too_short_count = 0;
+ u32 s_wasm_block_too_short_end_count = 0;
+ u32 s_wasm_prefix_instruction_sum = 0;
+@@ -365,6 +423,12 @@ std::atomic<u32> s_wasm_cache_hit_count{0};
+ std::atomic<u32> s_wasm_cache_miss_count{0};
+ // §28ce per-slice budget tracking. Plain non-atomic because read+written
+ // only from the CPU pthread (TryWriteWasmBlock, Record*, Run()).
++struct DeferredWasmBlock { u32 pc; CPUEmuFeatureFlags flags; };
++std::array<DeferredWasmBlock, 1024> s_wasm_deferred_blocks{};
++u32 s_wasm_deferred_count = 0;
++bool s_wasm_deferred_overflow = false;
++std::atomic<u32> s_wasm_deferred_retries{0};
++std::atomic<u32> s_wasm_deferred_full_flushes{0};
+ u32 s_wasm_compiles_this_slice = 0;
+ u32 s_wasm_compile_us_this_slice = 0;
+ // §28ce stats: cumulative throttle rejects, peak burst (max compiles
+@@ -432,6 +496,10 @@ extern "C" void DolphinWeb_RecordCacheMiss()
+ 
+ namespace
+ {
++// Requested from the JS worker; applied only at a CPU slice boundary.
++std::atomic<int> s_wasm_jit_requested_mode{0};
++std::atomic<int> s_wasm_jit_applied_mode{0};
++std::atomic<u32> s_wasm_jit_mode_flushes{0};
+ bool s_wasm_jit_enabled = false;
+ bool s_wasm_jit_direct_only = true;
+ u32 s_wasm_direct_tier_reject_count = 0;
+@@ -443,7 +511,6 @@ u32 s_wasm_direct_tier_reject_count = 0;
+ // whole-block reject, so an adequate cap should eliminate the
+ // §28bh short-block interpreter fallback that is the ~3× drain.
+ // JIT cache cap is already 49152 (§28u) so memory headroom exists.
+-constexpr u32 MAX_WASM_MIXED_COMPILED_BLOCKS = 32768;
+ bool s_ppc_block_profile_enabled = false;
+ u32 s_ppc_profile_total_blocks = 0;
+ u32 s_ppc_profile_sample_blocks = 0;
+@@ -454,6 +521,8 @@ u32 s_ppc_profile_window_total_us = 0;
+ u32 s_ppc_profile_window_max_us = 0;
+ u32 s_ppc_profile_window_collision_count = 0;
+ constexpr u32 PPC_PROFILE_SAMPLE_MASK = 1023;
++std::atomic<u32> s_ppc_profile_lookup_samples{0};
++std::atomic<u32> s_ppc_profile_lookup_misses{0};
+ std::array<u32, 64 * 1024> s_wasm_direct_reject_key_counts{};
+ std::array<u32, 64 * 1024> s_wasm_emit_fail_key_counts{};
+ std::array<u32, 64 * 1024> s_wasm_emit_fail_sample_pcs{};
+@@ -605,7 +674,8 @@ constexpr u32 MELEE_INPUT_POLL_STATE_BASE = 0x804329f0;
+ constexpr u32 MELEE_IDLE_POLL_LOOP_PC = 0x801a4da8;
+ constexpr u32 MELEE_IDLE_POLL_LOOP_END_PC = 0x801a4db8;
+ constexpr u32 MELEE_IDLE_POLL_LOOP_MAX_BATCH = 256;
+-constexpr u32 MELEE_IDLE_POLL_LOOP_NO_EXIT_THROTTLE_BLOCKS = 8192;
++constexpr u32 MELEE_IDLE_POLL_LOOP_FALLBACK_INTERVAL = 8192;
++u32 s_fast_melee_idle_batches_since_fallback = 0;
+ constexpr u32 MELEE_STATUS_COMMON_CYCLES = 28;
+ constexpr u32 OS_INTERRUPT_DISABLE_CYCLES = 5;
+ constexpr u32 OS_INTERRUPT_ENABLE_CYCLES = 5;
+@@ -748,6 +818,14 @@ void UpdatePerformanceMonitorIfNeeded(u32 cycles, u32 num_load_stores, u32 num_f
+     PowerPC::UpdatePerformanceMonitor(cycles, num_load_stores, num_fp_inst, ppc_state);
+ }
+ 
++#ifdef __EMSCRIPTEN__
++extern "C" void DolphinWeb_DispatchPerfmon(int pointer, u32 cycles, u32 loads, u32 fp)
++{
++  auto& state = *reinterpret_cast<PowerPC::PowerPCState*>(static_cast<std::uintptr_t>(pointer));
++  UpdatePerformanceMonitorIfNeeded(cycles, loads, fp, state);
++}
++#endif
++
+ bool ExecuteFastOsInterruptInline(PowerPC::PowerPCState& ppc_state,
+                                   PowerPC::PowerPCManager& power_pc, u32 function_pc,
+                                   u32 return_pc, u32 mode, u32 cycles_primary,
+@@ -1570,6 +1648,8 @@ u32 ElapsedMicros(std::chrono::steady_clock::time_point start,
+ 
+ void ResetPpcBlockProfile()
+ {
++  s_ppc_profile_lookup_samples.store(0, std::memory_order_relaxed);
++  s_ppc_profile_lookup_misses.store(0, std::memory_order_relaxed);
+   s_ppc_profile_total_blocks = 0;
+   s_ppc_profile_sample_blocks = 0;
+   s_ppc_profile_total_us = 0;
+@@ -2074,7 +2154,7 @@ bool TryFastPairedQuantizedMemory(Core::System& system, PowerPC::PowerPCState& p
+ extern "C" int DolphinWeb_CachedInterpreterFpOp(int state_ptr, u32 inst_hex, u32 current_pc,
+                                                  u32 downcount, u32 unused)
+ {
+-  ++s_wasm_fp_call_count;
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_fp_call_count);
+   (void)unused;
+   auto& system = Core::System::GetInstance();
+   auto& interpreter = system.GetInterpreter();
+@@ -2084,7 +2164,7 @@ extern "C" int DolphinWeb_CachedInterpreterFpOp(int state_ptr, u32 inst_hex, u32
+     return 1;
+ 
+   const UGeckoInstruction inst{inst_hex};
+-  ++s_wasm_fp_key_counts[(inst.OPCD << 10) | inst.SUBOP10];
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_fp_key_counts[(inst.OPCD << 10) | inst.SUBOP10]);
+   if (inst.OPCD == 56 || inst.OPCD == 57 || inst.OPCD == 60 || inst.OPCD == 61)
+   {
+     auto reason = PsqFallbackReason::ShouldHaveInlined;
+@@ -2129,13 +2209,13 @@ extern "C" int DolphinWeb_CachedInterpreterFpOp(int state_ptr, u32 inst_hex, u32
+ extern "C" int DolphinWeb_CachedInterpreterSystem(int state_ptr, u32 inst_hex, u32 current_pc,
+                                                    u32 downcount, u32 unused)
+ {
+-  ++s_wasm_system_call_count;
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_system_call_count);
+   (void)unused;
+   auto& system = Core::System::GetInstance();
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+       static_cast<std::uintptr_t>(state_ptr));
+   const UGeckoInstruction inst{inst_hex};
+-  ++s_wasm_system_key_counts[(inst.OPCD << 10) | inst.SUBOP10];
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_system_key_counts[(inst.OPCD << 10) | inst.SUBOP10]);
+ 
+   if (inst.OPCD == 46 || inst.OPCD == 47)
+   {
+@@ -2349,8 +2429,8 @@ extern "C" int DolphinWeb_CachedInterpreterInterpret(int state_ptr, u32 current_
+       static_cast<std::uintptr_t>(state_ptr));
+   const UGeckoInstruction inst{inst_hex};
+   const GekkoOPInfo* opinfo = PPCTables::GetOpInfo(inst, current_pc);
+-  ++s_wasm_helper_call_count;
+-  ++s_wasm_helper_key_counts[(inst.OPCD << 10) | inst.SUBOP10];
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_helper_call_count);
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_helper_key_counts[(inst.OPCD << 10) | inst.SUBOP10]);
+   if (inst.OPCD == 31 && inst.SUBOP10 == 339)
+     ++s_wasm_helper_mfspr_counts[DecodeMfsprIndex(inst)];
+   else if (inst.OPCD == 31 && inst.SUBOP10 == 467)
+@@ -2469,6 +2549,8 @@ struct WasmStateLayout
+   u32 ram_size_real;
+   u32 l1_base;
+   u32 l1_size;
++  u32 ibat_base = 0;
++  u32 valid_blocks_base = 0;
+ };
+ 
+ constexpr u32 WASM_IMPORT_FASTCHECK_GPFIFO_INDEX = 14;
+@@ -5413,6 +5495,84 @@ void EmitDcbz(std::vector<u8>& body, const WasmStateLayout& layout, const PPCAna
+   body.push_back(0x0b);
+ }
+ 
++// Match Jit64::dcbx's empty-code-line fast path. Unknown translations,
++// privileged dcbi, accurate data caching, and live code all use the original
++// helper. Read the live IBAT and bitmap, never assume MEM1 aliases or retain
++// a cached mapping across a restore. Bit 24 is an opt-in runtime QA gate.
++void EmitDcbx(std::vector<u8>& body, const WasmStateLayout& layout,
++              const PPCAnalyst::CodeOp& op, u32 downcount)
++{
++  if (!layout.ibat_base || !layout.valid_blocks_base)
++  {
++    EmitSystemCall(body, op, downcount);
++    return;
++  }
++  body.insert(body.end(), {0x02, 0x40, 0x02, 0x40}); // done { slow {
++  EmitI32Const(body, static_cast<u32>(reinterpret_cast<std::uintptr_t>(&s_dolphin_web_disable_mask)));
++  body.insert(body.end(), {0xfe, 0x10, 0x02, 0x00}); // i32.atomic.load
++  EmitI32Const(body, 1u << 24);
++  body.push_back(0x71);
++  body.push_back(0x45);
++  body.insert(body.end(), {0x0d, 0x00}); // disabled -> slow
++  EmitStateLoadU8(body, layout.dcache_enabled_offset);
++  body.insert(body.end(), {0x0d, 0x00});
++  if (op.inst.SUBOP10 == 470)
++  {
++    EmitStateLoadU32(body, layout.msr_offset);
++    EmitI32Const(body, 1u << 14); // MSR.PR
++    body.push_back(0x71);
++    body.insert(body.end(), {0x0d, 0x00});
++  }
++  EmitEffectiveAddressX(body, layout, op.inst);
++  EmitLocalSet(body, 1);
++  EmitLocalGet(body, 1);
++  EmitLocalSet(body, 2);
++  EmitStateLoadU32(body, layout.msr_offset);
++  EmitI32Const(body, 1u << 5); // MSR.IR
++  body.push_back(0x71);
++  body.insert(body.end(), {0x04, 0x40});
++  EmitI32Const(body, layout.ibat_base);
++  EmitLocalGet(body, 1);
++  EmitI32Const(body, PowerPC::BAT_INDEX_SHIFT);
++  body.push_back(0x76);
++  EmitI32Const(body, 2);
++  body.push_back(0x74);
++  body.push_back(0x6a);
++  body.insert(body.end(), {0x28, 0x02, 0x00});
++  EmitLocalSet(body, 3);
++  EmitLocalGet(body, 3);
++  EmitI32Const(body, PowerPC::BAT_MAPPED_BIT);
++  body.push_back(0x71);
++  body.push_back(0x45);
++  body.insert(body.end(), {0x0d, 0x01}); // exit if + slow, keep done
++  EmitLocalGet(body, 3);
++  EmitI32Const(body, ~(PowerPC::BAT_PAGE_SIZE - 1u));
++  body.push_back(0x71);
++  EmitLocalGet(body, 1);
++  EmitI32Const(body, PowerPC::BAT_PAGE_SIZE - 1u);
++  body.push_back(0x71);
++  body.push_back(0x72);
++  EmitLocalSet(body, 2);
++  body.push_back(0x0b);
++  EmitI32Const(body, layout.valid_blocks_base);
++  EmitLocalGet(body, 2);
++  EmitI32Const(body, 10); // 32-byte lines, 32 lines per bitmap word
++  body.push_back(0x76);
++  EmitI32Const(body, 2);
++  body.push_back(0x74);
++  body.push_back(0x6a);
++  body.insert(body.end(), {0x28, 0x02, 0x00});
++  EmitI32Const(body, 1);
++  EmitLocalGet(body, 2);
++  EmitI32Const(body, 5);
++  body.push_back(0x76);
++  body.push_back(0x74); // WASM shift masks to five bits
++  body.push_back(0x71);
++  body.insert(body.end(), {0x0d, 0x00, 0x0c, 0x01, 0x0b});
++  EmitSystemCall(body, op, downcount);
++  body.push_back(0x0b);
++}
++
+ void LogWasmBlockReject(const char* reason, const GekkoOPInfo* opinfo, u32 inst_hex, u32 address,
+                         u32 instruction_count)
+ {
+@@ -6285,7 +6445,7 @@ bool EmitWasmSupportedIntegerInstruction(std::vector<u8>& body, const WasmStateL
+     }
+     if (inst.SUBOP10 == 54 || inst.SUBOP10 == 86 || inst.SUBOP10 == 470)
+     {
+-      EmitSystemCall(body, op, downcount);
++      EmitDcbx(body, layout, op, downcount);
+       return true;
+     }
+     if (inst.SUBOP10 == 246 || inst.SUBOP10 == 278)
+@@ -7699,8 +7859,94 @@ CachedInterpreter::CachedInterpreter(Core::System& system) : JitBase(system), m_
+ 
+ CachedInterpreter::~CachedInterpreter() = default;
+ 
++#ifdef __EMSCRIPTEN__
++struct WasmDispatchLayout
++{
++  u32 pc, npc, downcount, feature_flags;
++  u32 cpu_state, running_state, step_armed, step_start, step_counter;
++  u32 map, map_mask, block_entry, block_flags, block_pc;
++  u32 callback, callback_size, operand_handle, operand_cycles, operand_ls, operand_fp, operand_end;
++  u32 perfmon_flag;
++};
++
++// A compact dispatcher for complete compiled blocks. No guest instruction or
++// exception handling is replaced here: it calls the same block functions and
++// commits the same bookkeeping as RunWasmBlock, then reloads the live map/tags.
++// Returning zero lets ExecuteOneBlock handle timing, frame completion or a JIT
++// miss. A nonzero return is an unexecuted callback for the ordinary interpreter.
++std::vector<u8> BuildWasmDispatchLoop(const WasmDispatchLayout& l)
++{
++  std::vector<u8> bytes{0, 97, 115, 109, 1, 0, 0, 0};
++  EmitSection(bytes, 1, {3, 0x60, 1, 0x7f, 1, 0x7f,
++      0x60, 2, 0x7f, 0x7f, 1, 0x7f,
++      0x60, 4, 0x7f, 0x7f, 0x7f, 0x7f, 0});
++  std::vector<u8> imports{3};
++  EmitName(imports, "env"); EmitName(imports, "memory");
++  imports.insert(imports.end(), {2, 3});
++  EmitU32Leb(imports, DOLPHIN_WASM_MEMORY_PAGES);
++  EmitU32Leb(imports, DOLPHIN_WASM_MEMORY_PAGES);
++  EmitName(imports, "env"); EmitName(imports, "table");
++  imports.insert(imports.end(), {1, 0x70, 0, 0});
++  EmitEnvFunctionImport(imports, "perfmon", 2);
++  EmitSection(bytes, 2, imports);
++  EmitSection(bytes, 3, {1, 1});
++  std::vector<u8> exports{1}; EmitName(exports, "f");
++  exports.insert(exports.end(), {0, 1}); EmitSection(bytes, 7, exports);
++  // Params: state pointer, callback pointer. Locals: operands, map block, pc, flags.
++  std::vector<u8> b{1, 4, 0x7f};
++  const auto load = [&](u32 offset) { b.insert(b.end(), {0x28, 2}); EmitU32Leb(b, offset); };
++  const auto state = [&](u32 offset) { EmitLocalGet(b, 0); load(offset); };
++  const auto absolute = [&](u32 pointer) { EmitI32Const(b, pointer); load(0); };
++  const auto store = [&](u32 offset) { b.insert(b.end(), {0x36, 2}); EmitU32Leb(b, offset); };
++  const auto stop_if = [&]() { b.insert(b.end(), {0x04, 0x40, 0x41, 0, 0x0f, 0x0b}); };
++  b.insert(b.end(), {0x03, 0x40});  // loop
++  EmitLocalGet(b, 1); EmitI32Const(b, l.callback_size); b.push_back(0x6a); EmitLocalSet(b, 2);
++  EmitLocalGet(b, 0); EmitLocalGet(b, 2); load(l.operand_handle);
++  b.insert(b.end(), {0x11, 0, 0});  // call_indirect block(state) -> halted
++  stop_if();
++  EmitLocalGet(b, 0); state(l.npc); store(l.pc);
++  EmitLocalGet(b, 0); state(l.downcount); EmitLocalGet(b, 2); load(l.operand_cycles);
++  b.push_back(0x6b); store(l.downcount);
++  state(l.feature_flags); EmitI32Const(b, l.perfmon_flag); b.push_back(0x71);
++  b.insert(b.end(), {0x04, 0x40});
++  EmitLocalGet(b, 0); EmitLocalGet(b, 2); load(l.operand_cycles);
++  EmitLocalGet(b, 2); load(l.operand_ls); EmitLocalGet(b, 2); load(l.operand_fp);
++  b.insert(b.end(), {0x10, 0, 0x0b});
++  state(l.downcount); EmitI32Const(b, 0); b.push_back(0x4c); stop_if();  // <= signed
++  absolute(l.cpu_state); EmitI32Const(b, l.running_state); b.push_back(0x47); stop_if();
++  EmitI32Const(b, l.step_armed); b.insert(b.end(), {0xfe, 0x12, 0, 0}); // atomic.load8_u
++  b.insert(b.end(), {0x04, 0x40});
++  absolute(l.step_counter); absolute(l.step_start); b.push_back(0x47); stop_if();
++  b.push_back(0x0b);
++  state(l.pc); EmitLocalSet(b, 4);
++  state(l.feature_flags); EmitLocalSet(b, 5);
++  EmitI32Const(b, l.map); EmitLocalGet(b, 4); EmitI32Const(b, 2); b.push_back(0x76);
++  EmitI32Const(b, l.map_mask); b.push_back(0x71); EmitI32Const(b, 2); b.push_back(0x74);
++  b.push_back(0x6a); load(0); EmitLocalSet(b, 3);
++  EmitLocalGet(b, 3); b.push_back(0x45); stop_if();
++  EmitLocalGet(b, 3); load(l.block_pc); EmitLocalGet(b, 4); b.push_back(0x47); stop_if();
++  EmitLocalGet(b, 3); load(l.block_flags); EmitLocalGet(b, 5); b.push_back(0x47); stop_if();
++  EmitLocalGet(b, 3); load(l.block_entry); EmitLocalSet(b, 1);
++  EmitLocalGet(b, 1); b.push_back(0x45); stop_if();
++  EmitLocalGet(b, 1); load(0); EmitI32Const(b, l.callback); b.push_back(0x47);
++  b.insert(b.end(), {0x04, 0x40}); EmitLocalGet(b, 1); b.insert(b.end(), {0x0f, 0x0b});
++  EmitLocalGet(b, 1); load(l.callback_size + l.operand_end); EmitI32Const(b, 1); b.push_back(0x47);
++  b.insert(b.end(), {0x04, 0x40}); EmitLocalGet(b, 1); b.insert(b.end(), {0x0f, 0x0b});
++  b.insert(b.end(), {0x0c, 0, 0x0b, 0x41, 0, 0x0b});
++  std::vector<u8> code{1}; EmitU32Leb(code, b.size());
++  code.insert(code.end(), b.begin(), b.end()); EmitSection(bytes, 10, code);
++  return bytes;
++}
++
++#endif
++
+ void CachedInterpreter::Init()
+ {
++#ifdef __EMSCRIPTEN__
++  s_wasm_dispatch_loop_handle = 0;
++  s_wasm_dispatch_loop_attempted = false;
++  s_wasm_dispatch_loop_calls.store(0);
++#endif
+   RefreshConfig();
+ 
+   AllocCodeSpace(CODE_SIZE);
+@@ -7720,9 +7966,94 @@ void CachedInterpreter::Shutdown()
+   m_block_cache.Shutdown();
+ }
+ 
++// Private GALE01 v1.02 rollback gate. Check only after a complete cached
++// block has committed its register/cycle writebacks, including redispatch.
++static std::atomic<bool> s_browser_game_step_armed{false};
++static const u8* s_browser_game_step_counter = nullptr;
++static u32 s_browser_game_step_start_native = 0;
++alignas(4) static std::atomic<u32> s_browser_game_step_sequence{0};
++static_assert(sizeof(s_browser_game_step_sequence) == sizeof(u32));
++extern "C" u32 DolphinWeb_GameFrameStepSignal()
++{
++  return static_cast<u32>(reinterpret_cast<std::uintptr_t>(&s_browser_game_step_sequence));
++}
++static void NotifyBrowserGameFrameStep()
++{
++  s_browser_game_step_sequence.fetch_add(1, std::memory_order_release);
++#ifdef __EMSCRIPTEN__
++  emscripten_futex_wake(&s_browser_game_step_sequence, std::numeric_limits<int>::max());
++#endif
++}
++extern "C" void DolphinWeb_ArmGameFrameStep(const u8* counter)
++{
++  // The caller holds CPUThreadGuard and validates this fixed GALE01 MEM1
++  // counter. Compare its four raw bytes: no address translation or endian
++  // conversion is needed after every executed PPC block. Release/acquire on
++  // armed publishes both fields to the CPU thread before it resumes.
++  s_browser_game_step_counter = counter;
++  std::memcpy(&s_browser_game_step_start_native, counter, sizeof(u32));
++  s_browser_game_step_armed.store(true, std::memory_order_release);
++}
++static bool BrowserGameFrameStepComplete()
++{
++  if (!s_browser_game_step_armed.load(std::memory_order_acquire)) return false;
++  u32 current;
++  std::memcpy(&current, s_browser_game_step_counter, sizeof(current));
++  return current != s_browser_game_step_start_native;
++}
++extern "C" void DolphinWeb_CancelGameFrameStep()
++{
++  if (s_browser_game_step_armed.exchange(false, std::memory_order_acq_rel))
++    NotifyBrowserGameFrameStep();
++}
++
++#ifdef __EMSCRIPTEN__
++// Use the live fallback map, not a second cache of entry pointers. Normal
++// invalidation/clear removes these entries, and colliding PCs or feature flags
++// always fall through to Dolphin's translation-aware slow dispatch.
++static inline const u8* LookupBrowserCachedBlock(JitBlock* const* map, u32 pc,
++                                                CPUEmuFeatureFlags flags)
++{
++  JitBlock* const block =
++      map[(static_cast<size_t>(pc) >> 2) & JitBaseBlockCache::FAST_BLOCK_MAP_FALLBACK_MASK];
++  if (!block || block->effectiveAddress != pc || block->feature_flags != flags)
++    return nullptr;
++  return block->normalEntry;
++}
++#endif
++
+ void CachedInterpreter::ExecuteOneBlock([[maybe_unused]] bool allow_redispatch)
+ {
+-  const u8* normal_entry = m_block_cache.Dispatch();
++#ifdef __EMSCRIPTEN__
++  // The map allocation belongs to this cache and stays stable while a chain
++  // executes. Only hoist the array base; reload the entry and both tags for
++  // every block, including after a helper invalidates executable memory.
++  JitBlock* const* const fast_map =
++#if !DOLPHIN_WEB_FALLBACK_MAP_DIAGNOSTICS
++      DolphinWebFeatureEnabled(1u << 26) && !m_block_cache.GetEntryPoints() ?
++          m_block_cache.GetFastBlockMapFallback() : nullptr;
++#else
++      nullptr;
++#endif
++  const auto dispatch = [&]() -> const u8* {
++    if (fast_map)
++    {
++      const u8* entry = LookupBrowserCachedBlock(fast_map, m_ppc_state.pc,
++                                                m_ppc_state.feature_flags);
++      if (s_ppc_block_profile_enabled &&
++          ((s_ppc_profile_total_blocks + 1) & PPC_PROFILE_SAMPLE_MASK) == 0)
++      {
++        s_ppc_profile_lookup_samples.fetch_add(1, std::memory_order_relaxed);
++        if (!entry) s_ppc_profile_lookup_misses.fetch_add(1, std::memory_order_relaxed);
++      }
++      if (entry) return entry;
++    }
++    return m_block_cache.Dispatch();
++  };
++#else
++  const auto dispatch = [&]() { return m_block_cache.Dispatch(); };
++#endif
++  const u8* normal_entry = dispatch();
+   if (!normal_entry)
+   {
+     Jit(m_ppc_state.pc);
+@@ -7742,6 +8073,9 @@ void CachedInterpreter::ExecuteOneBlock([[maybe_unused]] bool allow_redispatch)
+   // RecordPpcBlockProfile stays one-block-per-call. Runtime-killable via the
+   // DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH mask bit.
+   const CPU::State* const redispatch_state_ptr = m_system.GetCPU().GetStatePtr();
++  const bool wasm_dispatch = allow_redispatch && !s_ppc_block_profile_enabled &&
++      !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH) &&
++      DolphinWebFeatureEnabled(1u << 27) && s_wasm_dispatch_loop_handle != 0;
+   const bool redispatch_enabled =
+       allow_redispatch && !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH) &&
+       !s_ppc_block_profile_enabled;
+@@ -7779,6 +8113,17 @@ void CachedInterpreter::ExecuteOneBlock([[maybe_unused]] bool allow_redispatch)
+ #if DOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH
+     else if (callback == AnyCallbackCast(RunWasmBlock))
+     {
++      if (wasm_dispatch && reinterpret_cast<const WasmBlockOperands*>(payload)->end_block == 1)
++      {
++        using Dispatch = u32 (*)(u32, u32);
++        const auto run = reinterpret_cast<Dispatch>(static_cast<std::uintptr_t>(s_wasm_dispatch_loop_handle));
++        s_wasm_dispatch_loop_calls.fetch_add(1, std::memory_order_relaxed);
++        const u32 next = run(static_cast<u32>(reinterpret_cast<std::uintptr_t>(&ppc_state)),
++                             static_cast<u32>(reinterpret_cast<std::uintptr_t>(normal_entry)));
++        if (!next) break;
++        normal_entry = reinterpret_cast<const u8*>(static_cast<std::uintptr_t>(next));
++        continue;
++      }
+       if (const auto distance =
+               RunWasmBlock(ppc_state, *reinterpret_cast<const WasmBlockOperands*>(payload)))
+         normal_entry += distance;
+@@ -7976,10 +8321,17 @@ void CachedInterpreter::ExecuteOneBlock([[maybe_unused]] bool allow_redispatch)
+     }
+   }
+ #ifdef __EMSCRIPTEN__
++    if (BrowserGameFrameStepComplete())
++    {
++      s_browser_game_step_armed.store(false, std::memory_order_release);
++      m_system.GetCPU().Break();
++      NotifyBrowserGameFrameStep();
++      return;
++    }
+     if (redispatch_enabled && m_ppc_state.downcount > 0 &&
+         *redispatch_state_ptr == CPU::State::Running)
+     {
+-      const u8* const next = m_block_cache.Dispatch();
++      const u8* const next = dispatch();
+       if (!next)
+       {
+         Jit(m_ppc_state.pc);
+@@ -8008,6 +8360,55 @@ void CachedInterpreter::Run()
+   const CPU::State* state_ptr = m_system.GetCPU().GetStatePtr();
+   while (*state_ptr == CPU::State::Running)
+   {
++#ifdef __EMSCRIPTEN__
++    const int requested_mode = s_wasm_jit_requested_mode.load(std::memory_order_acquire);
++    if (requested_mode != s_wasm_jit_applied_mode.load(std::memory_order_relaxed))
++    {
++      // No cached callback is executing here. Invalidate on the CPU thread so
++      // hot blocks compiled during boot adopt the new tier. This also removes
++      // generated blocks when the worker disables JIT after a failed check.
++      s_wasm_jit_enabled = requested_mode != 0;
++      s_wasm_jit_direct_only = requested_mode < 2;
++      s_fast_os_interrupt_verified_modes = 0;
++      s_fast_melee_input_status_verified = false;
++      s_fast_melee_input_status_cycles = 0;
++      s_fast_melee_input_status_loadstores = 0;
++      s_fast_melee_status_fn_verified = false;
++      s_fast_melee_service_poll_verified = false;
++      s_fast_melee_service_poll_cycles = 0;
++      s_fast_melee_service_poll_loadstores = 0;
++      s_fast_melee_si_poll_verified = false;
++      s_fast_melee_si_poll_cycles = 0;
++      s_fast_melee_si_poll_loadstores = 0;
++      s_fast_melee_input_poll_verified = false;
++      s_fast_melee_input_poll_cycles = 0;
++      s_fast_melee_input_poll_loadstores = 0;
++      ClearCache();
++      s_wasm_jit_mode_flushes.fetch_add(1, std::memory_order_relaxed);
++      s_wasm_jit_applied_mode.store(requested_mode, std::memory_order_release);
++    }
++#endif
++    // Revisit blocks deferred by the previous slice's compile budget. A
++    // cached Interpret callback otherwise prevents TryWriteWasmBlock from
++    // ever being called again for these hot blocks.
++    if (s_wasm_deferred_overflow)
++    {
++      s_wasm_deferred_full_flushes.fetch_add(1, std::memory_order_relaxed);
++      ClearCache();
++    }
++    else
++    {
++      for (u32 i = 0; i < s_wasm_deferred_count; ++i)
++      {
++        const auto& deferred = s_wasm_deferred_blocks[i];
++        if (const auto* block = m_block_cache.GetBlockFromStartAddress(deferred.pc, deferred.flags))
++        {
++          EraseSingleBlock(*block);
++          s_wasm_deferred_retries.fetch_add(1, std::memory_order_relaxed);
++        }
++      }
++      s_wasm_deferred_count = 0;
++    }
+     // §28cn metrics-gated per-slice wall-time profiling. The timestamp below
+     // spans Advance + ExecuteOneBlock; >16000us means the CPU pthread crossed
+     // one 60Hz frame budget, including intentional waits.
+@@ -8066,6 +8467,8 @@ void CachedInterpreter::Run()
+           DolphinWeb::WasmTimingProfile::ElapsedMicros(_advance_start, _advance_end);
+       const u32 _exec_us = DolphinWeb::WasmTimingProfile::ElapsedMicros(_advance_end, _slice_end);
+       DolphinWeb::WasmTimingProfile::FinishSlice(_slice_us, _advance_us, _exec_us);
++      DolphinWeb::BrowserProfile::Record(DolphinWeb::BrowserProfile::Stage::CpuAdvance, _advance_us);
++      DolphinWeb::BrowserProfile::Record(DolphinWeb::BrowserProfile::Stage::CpuExecute, _exec_us);
+       // §28co per-stage maxes — CAS-update.
+       {
+         u32 prev = s_runloop_advance_max_us.load(std::memory_order_relaxed);
+@@ -9829,9 +10232,13 @@ s32 CachedInterpreter::FastMeleeIdlePollLoop(PowerPC::PowerPCState& ppc_state,
+     return fallback_size;
+   }
+ 
+-  if (s_fast_melee_idle_poll_loop_exits == 0 &&
+-      s_fast_melee_idle_poll_loop_blocks > MELEE_IDLE_POLL_LOOP_NO_EXIT_THROTTLE_BLOCKS)
++  // A real loop exit can happen in the guarded fallback, so a lifetime
++  // "no fast exits" threshold permanently disabled this helper after boot.
++  // Periodically run the original instructions instead. Runtime guards and
++  // the per-downcount / 256-iteration bounds remain in force on every batch.
++  if (s_fast_melee_idle_batches_since_fallback++ >= MELEE_IDLE_POLL_LOOP_FALLBACK_INTERVAL)
+   {
++    s_fast_melee_idle_batches_since_fallback = 0;
+     ++s_fast_melee_idle_poll_loop_throttles;
+     return fallback_size;
+   }
+@@ -10387,9 +10794,12 @@ s32 CachedInterpreter::FastDcbxLoop(PowerPC::PowerPCState& ppc_state,
+   else if (!ppc_state.m_enable_dcache)
+   {
+     u32 extra_iterations = 0;
+-    if (ppc_state.downcount > 0)
++    if (ppc_state.downcount > 0 && DolphinWebFeatureEnabled(1u << 25))
+     {
+-      const u32 max_by_cycles = static_cast<u32>(ppc_state.downcount) / cycle_count_per_loop;
++      // The ordinary add/branch tail still executes once after this callback.
++      // Total iterations must be ceil(remaining cycles / loop cycles), so an
++      // exactly divisible budget must not execute one extra iteration.
++      const u32 max_by_cycles = static_cast<u32>(ppc_state.downcount - 1) / cycle_count_per_loop;
+       if (loop_mode == DCBX_LOOP_COUNT_GPR)
+       {
+         const u32 remaining_bytes = ppc_state.gpr[count_gpr];
+@@ -10406,26 +10816,10 @@ s32 CachedInterpreter::FastDcbxLoop(PowerPC::PowerPCState& ppc_state,
+     }
+ 
+     const u32 line_count = extra_iterations + 1;
+-    bool skipped_large_data_flush = false;
+-#ifdef __EMSCRIPTEN__
+-    // Large dcb* sweeps are overwhelmingly data-buffer flushes in the browser path. Keeping small
+-    // invalidations preserves the self-modifying-code heuristic while avoiding multi-megabyte
+-    // block-cache scans in hot post-boot loops. Additionally, when the experimental WASM JIT is
+-    // not active (interpreter-only mode), there are no compiled blocks to invalidate, so every
+-    // invalidation is wasted work - skip them all.
+-    skipped_large_data_flush =
+-        !s_wasm_jit_enabled || line_count > LARGE_DCBX_DATA_FLUSH_SKIP_LINES;
+-#endif
+-    if (skipped_large_data_flush)
+-    {
+-      ++s_fast_dcbx_loop_skipped_large_invalidations;
+-      s_fast_dcbx_loop_skipped_large_lines =
+-          SaturatingAddU32(s_fast_dcbx_loop_skipped_large_lines, line_count);
+-    }
+-    else
+-    {
+-      system.GetJitInterface().InvalidateICacheLines(address, line_count);
+-    }
++    // A large range can contain code, and cached-interpreter blocks still
++    // require invalidation when the WASM tier is off. The block cache already
++    // skips empty ranges using its live valid-code bitmap.
++    system.GetJitInterface().InvalidateICacheLines(address, line_count);
+ 
+     if (extra_iterations != 0)
+     {
+@@ -10458,7 +10852,7 @@ DOLPHIN_WEB_DIRECT_WASM_BLOCK_INLINE s32 CachedInterpreter::RunWasmBlock(
+ {
+   using WasmBlockFunction = int (*)(int);
+ 
+-  ++s_wasm_block_run_count;
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_block_run_count);
+   const int halted =
+       reinterpret_cast<WasmBlockFunction>(static_cast<std::uintptr_t>(operands.handle))(
+           static_cast<int>(reinterpret_cast<std::uintptr_t>(&ppc_state)));
+@@ -10477,6 +10871,54 @@ DOLPHIN_WEB_DIRECT_WASM_BLOCK_INLINE s32 CachedInterpreter::RunWasmBlock(
+ 
+ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+ {
++  if (!s_wasm_dispatch_loop_attempted && DolphinWebFeatureEnabled(1u << 27) &&
++      !m_block_cache.GetEntryPoints())
++  {
++    s_wasm_dispatch_loop_attempted = true;
++    const auto addr = [](const auto* p) { return static_cast<u32>(reinterpret_cast<std::uintptr_t>(p)); };
++    const WasmDispatchLayout dispatch_layout{
++      addr(&m_ppc_state.pc)-addr(&m_ppc_state), addr(&m_ppc_state.npc)-addr(&m_ppc_state),
++      addr(&m_ppc_state.downcount)-addr(&m_ppc_state), addr(&m_ppc_state.feature_flags)-addr(&m_ppc_state),
++      addr(m_system.GetCPU().GetStatePtr()), static_cast<u32>(CPU::State::Running),
++      addr(&s_browser_game_step_armed), addr(&s_browser_game_step_start_native),
++      addr(m_system.GetMemory().GetRAM()) + 0x00479d58,
++      addr(m_block_cache.GetFastBlockMapFallback()), JitBaseBlockCache::FAST_BLOCK_MAP_FALLBACK_MASK,
++      offsetof(JitBlockData, normalEntry), offsetof(JitBlockData, feature_flags), offsetof(JitBlockData, effectiveAddress),
++      static_cast<u32>(reinterpret_cast<std::uintptr_t>(AnyCallbackCast(RunWasmBlock))), sizeof(AnyCallback),
++      offsetof(WasmBlockOperands, handle), offsetof(WasmBlockOperands, downcount),
++      offsetof(WasmBlockOperands, num_load_stores), offsetof(WasmBlockOperands, num_fp_inst),
++      offsetof(WasmBlockOperands, end_block), FEATURE_FLAG_PERFMON};
++    static_assert(sizeof(std::atomic<bool>) == 1 && sizeof(CPU::State) == 4);
++    const auto code = BuildWasmDispatchLoop(dispatch_layout);
++    s_wasm_dispatch_loop_handle = DolphinWeb_CompileWasmDispatchLoop(code.data(), code.size(),
++        static_cast<int>(reinterpret_cast<std::uintptr_t>(&DolphinWeb_DispatchPerfmon)));
++  }
++  // Leave cache-maintenance entries to TryWriteDcbxLoop. It verifies the
++  // complete three/four-instruction pattern before batching; unmatched entries
++  // take the existing single-operation callback. This keeps its runtime gate
++  // switchable for original-versus-batched state comparisons without changing
++  // compiled block boundaries during the trial.
++  if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_DCBXLOOP) &&
++      code_block.m_num_instructions > 0)
++  {
++    const UGeckoInstruction first = m_code_buffer[0].inst;
++    if (first.OPCD == 31 && first.RA == 0 && first.RB != 0 &&
++        (first.SUBOP10 == 54 || first.SUBOP10 == 86 || first.SUBOP10 == 470))
++      return false;
++  }
++  // The guarded Melee idle-loop batch must run before the generic WASM
++  // compiler consumes this entry. Its original instruction and runtime
++  // guards still decide whether to batch or execute the fallback code.
++  if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_MELEELOOP) &&
++      js.blockStart == MELEE_IDLE_POLL_LOOP_PC)
++    return false;
++  // Keep the existing, instruction-verified SDK handlers reachable. Compiling
++  // these entry blocks directly to WASM bypasses TryWriteOsInterruptFunction,
++  // so its verification bits never get populated after a JIT mode change and
++  // the dependent Melee idle/input helpers repeatedly fall back.
++  if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_OSINTERRUPT) &&
++      GetOsInterruptInlineTarget(js.blockStart).has_value())
++    return false;
+   // §28ce burst smearing: when ENABLED (gate bit CLEARED), reject early if
+   // we've already burned this slice's compile budget. Falls to Interpret;
+   // next slice will re-attempt this block (one extra Interpret cost per
+@@ -10487,6 +10929,13 @@ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+         s_wasm_compile_us_this_slice >= COMPILE_THROTTLE_MAX_US_PER_SLICE)
+     {
+       s_wasm_compile_throttle_reject_count.fetch_add(1, std::memory_order_relaxed);
++      if (s_wasm_jit_enabled)
++      {
++        if (s_wasm_deferred_count < s_wasm_deferred_blocks.size())
++          s_wasm_deferred_blocks[s_wasm_deferred_count++] = {js.blockStart, js.curBlock->feature_flags};
++        else
++          s_wasm_deferred_overflow = true;
++      }
+       return false;
+     }
+   }
+@@ -10533,8 +10982,6 @@ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+   }
+ 
+   ++s_wasm_block_attempt_count;
+-  if (!s_wasm_jit_direct_only && s_wasm_block_mixed_compile_count >= MAX_WASM_MIXED_COMPILED_BLOCKS)
+-    return false;
+ 
+   auto& power_pc = m_system.GetPowerPC();
+   auto& cpu = m_system.GetCPU();
+@@ -10823,6 +11270,8 @@ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+       m_system.GetMemory().GetRamSizeReal(),
+       static_cast<u32>(reinterpret_cast<std::uintptr_t>(m_system.GetMemory().GetL1Cache())),
+       m_system.GetMemory().GetL1CacheSize(),
++      static_cast<u32>(reinterpret_cast<std::uintptr_t>(m_mmu.GetIBATTable().data())),
++      static_cast<u32>(reinterpret_cast<std::uintptr_t>(GetBlockCache()->GetBlockBitSet())),
+   };
+   const bool write_npc =
+       did_merge ? merge_write_npc : (compiled_entire_block && !compiled_block_ends_with_branch);
+@@ -10998,26 +11447,35 @@ extern "C" u32 GetPpcWasmBlockRunCount()
+ 
+ extern "C" void SetPpcWasmJitEnabled(int enabled)
+ {
+-  const bool next_enabled = enabled != 0;
+-  s_wasm_jit_direct_only = enabled < 2;
+-  if (next_enabled && !s_wasm_jit_enabled)
+-  {
+-    s_fast_os_interrupt_verified_modes = 0;
+-    s_fast_melee_input_status_verified = false;
+-    s_fast_melee_input_status_cycles = 0;
+-    s_fast_melee_input_status_loadstores = 0;
+-    s_fast_melee_status_fn_verified = false;
+-    s_fast_melee_service_poll_verified = false;
+-    s_fast_melee_service_poll_cycles = 0;
+-    s_fast_melee_service_poll_loadstores = 0;
+-    s_fast_melee_si_poll_verified = false;
+-    s_fast_melee_si_poll_cycles = 0;
+-    s_fast_melee_si_poll_loadstores = 0;
+-    s_fast_melee_input_poll_verified = false;
+-    s_fast_melee_input_poll_cycles = 0;
+-    s_fast_melee_input_poll_loadstores = 0;
+-  }
+-  s_wasm_jit_enabled = next_enabled;
++  s_wasm_jit_requested_mode.store(std::clamp(enabled, 0, 2), std::memory_order_release);
++}
++
++extern "C" u32 GetPpcWasmDeferredRetries()
++{
++  return s_wasm_deferred_retries.load(std::memory_order_relaxed);
++}
++extern "C" u32 GetPpcWasmDeferredFlushes()
++{
++  return s_wasm_deferred_full_flushes.load(std::memory_order_relaxed);
++}
++extern "C" int GetPpcWasmDirectDispatch()
++{
++  return DOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH;
++}
++
++extern "C" int GetPpcWasmJitRequestedMode()
++{
++  return s_wasm_jit_requested_mode.load(std::memory_order_acquire);
++}
++
++extern "C" int GetPpcWasmJitAppliedMode()
++{
++  return s_wasm_jit_applied_mode.load(std::memory_order_acquire);
++}
++
++extern "C" u32 GetPpcWasmJitModeFlushes()
++{
++  return s_wasm_jit_mode_flushes.load(std::memory_order_relaxed);
+ }
+ 
+ extern "C" void SetPpcProfileEnabled(int enabled)
+@@ -11071,6 +11529,9 @@ extern "C" const char* GetPpcProfileStats()
+   out << "ppcprof blocks:" << s_ppc_profile_total_blocks
+       << " samples:" << s_ppc_profile_sample_blocks
+       << " window:" << s_ppc_profile_window_sample_blocks
++      << " sampleus:" << s_ppc_profile_window_total_us
++      << " lookup-samples:" << s_ppc_profile_lookup_samples.load(std::memory_order_relaxed)
++      << " lookup-misses:" << s_ppc_profile_lookup_misses.load(std::memory_order_relaxed)
+       << " rate:" << (PPC_PROFILE_SAMPLE_MASK + 1) << " avg:" << average_us
+       << "us max:" << s_ppc_profile_window_max_us
+       << "us col:" << s_ppc_profile_window_collision_count;
+@@ -11141,7 +11602,7 @@ extern "C" const char* GetPpcWasmHelperStats()
+                     [](const auto& lhs, const auto& rhs) { return lhs.first > rhs.first; });
+ 
+   std::ostringstream out;
+-  out << (s_wasm_jit_direct_only ? "tier:guarded " : "tier:mixed ");
++  out << (s_wasm_jit_applied_mode.load(std::memory_order_acquire) < 2 ? "tier:guarded " : "tier:mixed ");
+   out << "hotcounts:" << (DOLPHIN_WEB_HOT_COUNTERS ? "on " : "off ");
+   const u32 average_prefix =
+       s_wasm_block_attempt_count == 0 ? 0 : s_wasm_prefix_instruction_sum / s_wasm_block_attempt_count;
+@@ -11149,7 +11610,9 @@ extern "C" const char* GetPpcWasmHelperStats()
+       << " compiled:" << s_wasm_block_compile_count
+       << " full:" << s_wasm_block_full_compile_count
+       << " partial:" << s_wasm_block_partial_compile_count
+-      << " mixed:" << s_wasm_block_mixed_compile_count << "/" << MAX_WASM_MIXED_COMPILED_BLOCKS
++      << " mixed-descriptors:" << s_wasm_block_mixed_compile_count
++      << " unique-instances:" << s_wasm_unique_instance_count.load() << "/65536"
++      << " reused-instances:" << s_wasm_instance_reuse_count.load()
+       << " short:" << s_wasm_block_too_short_count << "/" << s_wasm_block_too_short_end_count
+       << " merge:" << s_wasm_block_merge_count
+       << " regalloc:" << s_wasm_regalloc_dead_store_skip_count
+@@ -11170,6 +11633,8 @@ extern "C" const char* GetPpcWasmHelperStats()
+       << s_wasm_emit_state_store_f64_count << "st "
+       << "statei64:" << s_wasm_emit_state_load_i64_count << "ld/"
+       << s_wasm_emit_state_store_i64_count << "st ";
++  out << "wasm-dispatch:" << s_wasm_dispatch_loop_handle << "/"
++      << s_wasm_dispatch_loop_calls.load(std::memory_order_relaxed) << "calls ";
+   // §28bz audit: §28bt re-dispatch chain depth. Avg chain length = 1 + iter/entry.
+ #if DOLPHIN_WEB_HOT_COUNTERS
+   const u32 entries_for_avg = std::max<u32>(s_wasm_redispatch_entry_count, 1);
+@@ -12276,6 +12741,10 @@ std::size_t CachedInterpreter::DisassembleFarCode(const JitBlock& block, std::os
+ 
+ void CachedInterpreter::ClearCache()
+ {
++#ifdef __EMSCRIPTEN__
++  s_wasm_deferred_count = 0;
++  s_wasm_deferred_overflow = false;
++#endif
+   m_block_cache.Clear();
+   m_block_cache.ClearRangesToFree();
+   ClearCodeSpace();
+diff --git a/Source/Core/Core/PowerPC/JitInterface.cpp b/Source/Core/Core/PowerPC/JitInterface.cpp
+index f229be35f2..a3f31aeaab 100644
+--- a/Source/Core/Core/PowerPC/JitInterface.cpp
++++ b/Source/Core/Core/PowerPC/JitInterface.cpp
+@@ -11,6 +11,7 @@
+ #include "Common/CommonTypes.h"
+ 
+ #include "Core/Core.h"
++#include "Core/State.h"
+ #include "Core/PowerPC/CPUCoreBase.h"
+ #include "Core/PowerPC/CachedInterpreter/CachedInterpreter.h"
+ #include "Core/PowerPC/JitCommon/JitBase.h"
+@@ -40,7 +41,7 @@ void JitInterface::SetJit(std::unique_ptr<JitBase> jit)
+ 
+ void JitInterface::DoState(PointerWrap& p)
+ {
+-  if (m_jit && p.IsReadMode())
++  if (m_jit && p.IsReadMode() && !State::BrowserKeepJit())
+     m_jit->ClearCache();
+ }
+ 
+diff --git a/Source/Core/Core/PowerPC/MMU.cpp b/Source/Core/Core/PowerPC/MMU.cpp
+index 940e93c7ea..7fcec2f0ba 100644
+--- a/Source/Core/Core/PowerPC/MMU.cpp
++++ b/Source/Core/Core/PowerPC/MMU.cpp
+@@ -54,6 +54,7 @@
+ #include "Core/PowerPC/JitInterface.h"
+ #include "Core/PowerPC/PowerPC.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ #include "VideoCommon/EFBInterface.h"
+ 
+@@ -2000,6 +2001,9 @@ void MMU::UpdateFakeMMUBat(BatTable& bat_table, u32 start_addr)
+ 
+ void MMU::DBATUpdated()
+ {
++  // Keep a heap copy only during checked browser restores. A BAT table is
++  // 128 KiB: avoid adding it to every caller's WASM stack during ordinary play.
++  const auto previous_bats = State::BrowserKeepJit() ? std::make_unique<BatTable>(m_dbat_table) : nullptr;
+   m_dbat_table = {};
+   UpdateBATs(m_dbat_table, SPR_DBAT0U);
+   bool extended_bats = m_system.IsWii() && HID4(m_ppc_state).SBE;
+@@ -2012,6 +2016,7 @@ void MMU::DBATUpdated()
+     UpdateFakeMMUBat(m_dbat_table, 0x70000000);
+   }
+ 
++  if (previous_bats && *previous_bats == m_dbat_table) return;
+ #ifndef _ARCH_32
+   m_memory.UpdateDBATMappings(m_dbat_table);
+ 
+@@ -2028,6 +2033,7 @@ void MMU::DBATUpdated()
+ 
+ void MMU::IBATUpdated()
+ {
++  const auto previous_bats = State::BrowserKeepJit() ? std::make_unique<BatTable>(m_ibat_table) : nullptr;
+   m_ibat_table = {};
+   UpdateBATs(m_ibat_table, SPR_IBAT0U);
+   bool extended_bats = m_system.IsWii() && HID4(m_ppc_state).SBE;
+@@ -2039,6 +2045,7 @@ void MMU::IBATUpdated()
+     UpdateFakeMMUBat(m_ibat_table, 0x40000000);
+     UpdateFakeMMUBat(m_ibat_table, 0x70000000);
+   }
++  if (previous_bats && *previous_bats == m_ibat_table) return;
+   m_system.GetJitInterface().ClearSafe();
+ }
+ 
+diff --git a/Source/Core/Core/PowerPC/PowerPC.cpp b/Source/Core/Core/PowerPC/PowerPC.cpp
+index 564d74d1f6..32cb4f7c1e 100644
+--- a/Source/Core/Core/PowerPC/PowerPC.cpp
++++ b/Source/Core/Core/PowerPC/PowerPC.cpp
+@@ -29,6 +29,7 @@
+ #include "Core/PowerPC/MMU.h"
+ #include "Core/PowerPC/PPCSymbolDB.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ namespace PowerPC
+ {
+@@ -104,8 +105,11 @@ void PowerPCManager::DoState(PointerWrap& p)
+   p.Do(m_ppc_state.reserve_address);
+ 
+   auto& memory = m_system.GetMemory();
++  State::BrowserRecordSection(p, "CPU registers");
+   m_ppc_state.iCache.DoState(memory, p);
++  State::BrowserRecordSection(p, "CPU instruction cache");
+   m_ppc_state.dCache.DoState(memory, p);
++  State::BrowserRecordSection(p, "CPU data cache");
+ 
+   auto& mmu = m_system.GetMMU();
+   if (p.IsReadMode())
+diff --git a/Source/Core/Core/State.cpp b/Source/Core/Core/State.cpp
+index 55abd8a89b..508e8a98ab 100644
+--- a/Source/Core/Core/State.cpp
++++ b/Source/Core/Core/State.cpp
+@@ -1,9 +1,14 @@
++#include "Common/BrowserStateCopy.h"
+ // Copyright 2008 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "Core/State.h"
+ 
+ #include <algorithm>
++#include <atomic>
++#include <chrono>
++#include <array>
++#include <cstring>
+ #include <filesystem>
+ #include <locale>
+ #include <map>
+@@ -20,6 +25,11 @@
+ #include <lzo/lzo1x.h>
+ 
+ #include "Common/Buffer.h"
++#include "VideoCommon/AsyncRequests.h"
++#include "VideoCommon/TextureCacheBase.h"
++#include "Common/RangeSet.h"
++#include "Core/PowerPC/JitCommon/JitCache.h"
++#include "Core/PowerPC/JitInterface.h"
+ #include "Common/ChunkFile.h"
+ #include "Common/CommonTypes.h"
+ #include "Common/Contains.h"
+@@ -133,8 +143,37 @@ static constexpr bool s_use_compression = true;
+ 
+ static bool ReadHeader(const std::string& filename, StateHeader& header);
+ 
++static u64 BrowserClockUs()
++{
++  return std::chrono::duration_cast<std::chrono::microseconds>(
++      std::chrono::steady_clock::now().time_since_epoch()).count();
++}
++static u64 browser_write_started = 0;
++static std::atomic<bool> browser_loading_state{false};
++bool BrowserLoadingState() { return browser_loading_state.load(std::memory_order_acquire); }
++struct BrowserLoadingScope
++{
++  BrowserLoadingScope() { browser_loading_state.store(true, std::memory_order_release); }
++  ~BrowserLoadingScope() { browser_loading_state.store(false, std::memory_order_release); }
++};
++struct BrowserStateSection { const char* name; std::size_t end; u64 write_us; };
++static std::vector<BrowserStateSection>* browser_sections_recording = nullptr;
++static u8* browser_section_base = nullptr;
++void BrowserRecordSection(PointerWrap& p, const char* name)
++{
++  if (browser_sections_recording && p.IsWriteMode())
++    browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(browser_section_base), BrowserClockUs() - browser_write_started});
++}
++static bool browser_keep_jit = false;
++static bool browser_last_kept_jit = false;
++bool BrowserKeepJit() { return browser_keep_jit; }
+ static void DoState(Core::System& system, PointerWrap& p)
+ {
++  const auto section_start = p.GetOffsetFromPreviousPosition(nullptr);
++  const auto section = [&](const char* name) {
++    if (browser_sections_recording && p.IsWriteMode())
++      browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(nullptr) - section_start, BrowserClockUs() - browser_write_started});
++  };
+   bool is_wii = system.IsWii() || system.IsMIOS();
+   const bool is_wii_currently = is_wii;
+   p.Do(is_wii);
+@@ -170,29 +209,36 @@ static void DoState(Core::System& system, PointerWrap& p)
+   // state load, and the frame number must be up-to-date.
+   system.GetMovie().DoState(p);
+   p.DoMarker("Movie");
++  section("Movie");
+ 
+   // Begin with video backend, so that it gets a chance to clear its caches and writeback modified
+   // things to RAM
+   g_video_backend->DoState(p);
+   p.DoMarker("video_backend");
++  section("video_backend");
+ 
+   // CoreTiming needs to be restored before restoring Hardware because
+   // the controller code might need to schedule an event if the controller has changed.
+   system.GetCoreTiming().DoState(p);
+   p.DoMarker("CoreTiming");
++  section("CoreTiming");
+ 
+   // HW needs to be restored before PowerPC because the data cache might need to be flushed.
+   HW::DoState(system, p);
+   p.DoMarker("HW");
++  section("HW");
+ 
+   system.GetPowerPC().DoState(p);
+   p.DoMarker("PowerPC");
++  section("PowerPC");
+ 
+   if (system.IsWii())
+     Wiimote::DoState(p);
+   p.DoMarker("Wiimote");
++  section("Wiimote");
+   Gecko::DoState(p);
+   p.DoMarker("Gecko");
++  section("Gecko");
+ 
+ #ifdef USE_RETRO_ACHIEVEMENTS
+   AchievementManager::GetInstance().DoState(p);
+@@ -256,6 +302,205 @@ static std::size_t SaveToBuffer(Core::System& system, Common::UniqueBuffer<u8>&
+   return 0;
+ }
+ 
++// Bounded, uncompressed complete-machine checkpoints, private to this core.
++// Six slots support a 12-frame window with checkpoints every four frames.
++static std::array<Common::UniqueBuffer<u8>, 6> browser_states;
++static std::array<std::size_t, 6> browser_state_sizes{};
++static std::array<bool, 6> browser_states_gpu{};
++struct BrowserTextureStateScope
++{
++  explicit BrowserTextureStateScope(unsigned slot, bool active, bool saving) : enabled(active)
++  { if (enabled) g_texture_cache->BrowserBeginState(slot, saving); }
++  ~BrowserTextureStateScope() { if (enabled) g_texture_cache->BrowserEndState(); }
++  bool enabled;
++};
++static std::array<std::vector<BrowserStateSection>, 6> browser_state_sections;
++static std::array<u64, 6> browser_measure_us{}, browser_allocate_us{};
++static std::size_t browser_required_size = 0;
++std::size_t BrowserRequiredSize() { return browser_required_size; }
++std::size_t BrowserSave(Core::System& system, unsigned slot, bool gpu_resident)
++{
++  if (slot >= browser_states.size() || (gpu_resident && !g_texture_cache)) return 0;
++  browser_state_sizes[slot] = 0;
++  browser_states_gpu[slot] = gpu_resident;
++  const BrowserTextureStateScope texture_scope(slot, gpu_resident, true);
++  const DolphinWeb::BrowserStateTransferScope transfer_scope;
++  constexpr std::size_t max_bytes = 128 * 1024 * 1024;
++  constexpr std::size_t total_budget = 640 * 1024 * 1024;
++  // Measure before allocating; never let an unexpected game/state consume
++  // the remaining shared WASM heap. SaveToBuffer reuses the allocation.
++  const auto measure_started = BrowserClockUs();
++  u8* ptr = nullptr;
++  PointerWrap measure(&ptr, 0, PointerWrap::Mode::Measure);
++  DoState(system, measure);
++  const auto size = measure.GetOffsetFromPreviousPosition(nullptr);
++  browser_measure_us[slot] = BrowserClockUs() - measure_started;
++  browser_required_size = size;
++  const auto allocation_started = BrowserClockUs();
++  if (!size || size > max_bytes) return 0;
++  auto& buffer = browser_states[slot];
++  if (buffer.size() < size)
++  {
++    std::size_t allocated = 0;
++    for (const auto& existing : browser_states) allocated += existing.size();
++    if (allocated - buffer.size() + size > total_budget) return 0;
++    // The slot is already invalid. Free its old allocation before allocating
++    // the replacement, avoiding a second full snapshot at peak heap usage.
++    buffer.reset();
++    buffer.reset(size);
++  }
++  browser_allocate_us[slot] = BrowserClockUs() - allocation_started;
++  browser_state_sections[slot].clear();
++  browser_section_base = buffer.data();
++  browser_sections_recording = &browser_state_sections[slot];
++  browser_write_started = BrowserClockUs();
++  browser_state_sizes[slot] = SaveToBuffer(system, buffer);
++  browser_sections_recording = nullptr;
++  if (gpu_resident && g_texture_cache->BrowserStateFailed()) browser_state_sizes[slot] = 0;
++  return browser_state_sizes[slot];
++}
++inline bool CoherentInstructionCache(Core::System& system) {
++  const auto& cache=system.GetPPCState().iCache;
++  auto& memory=system.GetMemory();
++  for (u32 set=0;set<PowerPC::CACHE_SETS;++set)
++    for (u32 way=0;way<PowerPC::CACHE_WAYS;++way) {
++      if (!(cache.valid[set] & (1u<<way))) continue;
++      const u32 address=cache.addrs[set][way];
++      if (address>memory.GetRamSize()-32 ||
++          std::memcmp(cache.data[set][way].data(),memory.GetRAM()+address,32)!=0) return false;
++    }
++  return true;
++}
++class CodeRestoreGuard {
++  Core::System& system;
++  struct Range {u32 from; std::vector<u8> bytes;};
++  std::vector<Range> saved;
++public:
++  explicit CodeRestoreGuard(Core::System& s):system(s) {
++    browser_last_kept_jit = false;
++    browser_keep_jit = CoherentInstructionCache(s);
++    if (!browser_keep_jit) return;
++    Core::CPUThreadGuard guard(s);
++    Common::RangeSet<u32> ranges;
++    s.GetJitInterface().RunOnBlocks(guard,[&](const JitBlock& block){
++      for (auto [from,to]:block.physical_addresses) ranges.insert(from,to);
++    });
++    auto& memory=s.GetMemory();
++    for (auto [from,to]:ranges) {
++      if (to>memory.GetRamSize()) {browser_keep_jit=false;break;}
++      saved.push_back({from,{memory.GetRAM()+from,memory.GetRAM()+to}});
++    }
++  }
++  ~CodeRestoreGuard() {
++    if (browser_keep_jit) {
++      bool valid=CoherentInstructionCache(system);
++      const auto* ram=system.GetMemory().GetRAM();
++      for (const auto& range:saved)
++        if (std::memcmp(range.bytes.data(),ram+range.from,range.bytes.size())!=0) {valid=false;break;}
++      browser_last_kept_jit = valid;
++      if (!valid) {
++        Core::CPUThreadGuard guard(system);
++        system.GetJitInterface().ClearCache(guard);
++      }
++    }
++    browser_keep_jit=false;
++  }
++};
++bool BrowserLoad(Core::System& system, unsigned slot)
++{
++  if (slot >= browser_states.size() || !browser_state_sizes[slot]) return false;
++  // Source bytes and instruction-cache coherence must agree on both sides
++  // of restore before compiled blocks may be retained.
++  const BrowserLoadingScope loading_scope;
++  const DolphinWeb::BrowserStateTransferScope transfer_scope;
++  CodeRestoreGuard code_guard(system);
++  if (browser_states_gpu[slot] && !g_texture_cache) return false;
++  const BrowserTextureStateScope texture_scope(slot, browser_states_gpu[slot], false);
++  return LoadFromBuffer(system, std::span<u8>(browser_states[slot].data(), browser_state_sizes[slot]));
++}
++bool BrowserEqual(unsigned a, unsigned b)
++{
++  return a < browser_states.size() && b < browser_states.size() && !browser_states_gpu[a] && !browser_states_gpu[b] && browser_state_sizes[a] &&
++         browser_state_sizes[a] == browser_state_sizes[b] &&
++         std::memcmp(browser_states[a].data(), browser_states[b].data(), browser_state_sizes[a]) == 0;
++}
++std::string BrowserCompare(unsigned a, unsigned b)
++{
++  if (a >= browser_states.size() || b >= browser_states.size() || !browser_state_sizes[a] || !browser_state_sizes[b])
++    return R"({"error":"Invalid checkpoints"})";
++  if (browser_states_gpu[a] || browser_states_gpu[b])
++    return R"({"error":"GPU checkpoints must be verified using full captures"})";
++  const auto* x = browser_states[a].data();
++  const auto* y = browser_states[b].data();
++  std::string report = fmt::format(R"({{"sizeA":{},"sizeB":{},"retainedCode":{},"sections":[)", browser_state_sizes[a], browser_state_sizes[b], browser_last_kept_jit);
++  std::size_t start_a = 0, start_b = 0;
++  const auto& sections_a = browser_state_sections[a];
++  const auto& sections_b = browser_state_sections[b];
++  if (sections_a.size() != sections_b.size()) return R"({"error":"Section count differs"})";
++  for (std::size_t n = 0; n < sections_a.size(); ++n)
++  {
++    const auto& sa = sections_a[n];
++    const auto& sb = sections_b[n];
++    if (std::strcmp(sa.name, sb.name)) return R"({"error":"Section order differs"})";
++    const auto size_a = sa.end - start_a, size_b = sb.end - start_b;
++    const auto common = std::min(size_a, size_b);
++    std::size_t different = 0, first = common;
++    for (std::size_t i = 0; i < common; ++i)
++      if (x[start_a+i] != y[start_b+i]) { ++different; if (first == common) first = i; }
++    if (n) report += ",";
++    report += fmt::format(R"({{"name":"{}","startA":{},"startB":{},"bytesA":{},"bytesB":{},"differentBytes":{},"firstRelativeOffset":{}}})",
++      sa.name, start_a, start_b, size_a, size_b, different,
++      first == common ? -1 : static_cast<int>(first));
++    start_a = sa.end;
++    start_b = sb.end;
++  }
++  return report + "]}";
++}
++std::string BrowserCaptureProfile(unsigned slot)
++{
++  if (slot >= browser_states.size()) return "{}";
++  std::string result = fmt::format(R"({{"measureUs":{},"allocateUs":{},"gpuTextureBytes":{},"writeSections":[)",
++      browser_measure_us[slot], browser_allocate_us[slot], g_texture_cache ? g_texture_cache->BrowserTextureBytes() : 0);
++  u64 previous = 0;
++  bool comma = false;
++  for (const auto& section : browser_state_sections[slot])
++  {
++    if (comma) result += ",";
++    result += fmt::format(R"({{"name":"{}","writeUs":{}}})", section.name, section.write_us - previous);
++    previous = section.write_us;
++    comma = true;
++  }
++  return result + "]}";
++}
++bool BrowserRelease(Core::System& system, unsigned slot)
++{
++  if (slot >= browser_states.size()) return false;
++  browser_state_sizes[slot] = 0;
++  browser_states_gpu[slot] = false;
++  browser_states[slot].reset();
++  browser_state_sections[slot].clear();
++  if (g_texture_cache)
++  {
++    auto release = [slot] { g_texture_cache->BrowserReleaseState(slot); };
++    if (system.IsDualCoreMode()) AsyncRequests::GetInstance()->PushBlockingEvent(release);
++    else release();
++  }
++  return true;
++}
++void BrowserClear()
++{
++  auto& system = Core::System::GetInstance();
++  if (g_texture_cache && Core::IsRunning(system))
++  {
++    const Core::CPUThreadGuard guard(system);
++    auto clear = [] { if (g_texture_cache) g_texture_cache->BrowserClearStates(); };
++    if (system.IsDualCoreMode()) AsyncRequests::GetInstance()->PushBlockingEvent(clear);
++    else clear();
++  }
++  browser_states_gpu.fill(false);
++  for (auto& state : browser_states) state.reset();
++  browser_state_sizes.fill(0);
++}
+ namespace
+ {
+ struct SlotWithTimestamp
+diff --git a/Source/Core/Core/State.h b/Source/Core/Core/State.h
+index 614dd889d0..94c26209cf 100644
+--- a/Source/Core/Core/State.h
++++ b/Source/Core/Core/State.h
+@@ -12,6 +12,8 @@
+ 
+ #include "Common/CommonTypes.h"
+ 
++class PointerWrap;
++
+ namespace Core
+ {
+ class System;
+@@ -79,6 +81,18 @@ struct StateExtendedHeader
+   // and WriteHeadersToFile()
+ };
+ 
++// Browser rollback probe: paused caller must hold CPUThreadGuard.
++std::size_t BrowserSave(Core::System& system, unsigned slot, bool gpu_resident = false);
++bool BrowserLoad(Core::System& system, unsigned slot);
++bool BrowserEqual(unsigned a, unsigned b);
++bool BrowserKeepJit();
++bool BrowserLoadingState();
++std::string BrowserCaptureProfile(unsigned slot);
++void BrowserRecordSection(PointerWrap& p, const char* name);
++std::string BrowserCompare(unsigned a, unsigned b);
++void BrowserClear();
++bool BrowserRelease(Core::System& system, unsigned slot);
++std::size_t BrowserRequiredSize();
+ void Init(Core::System& system);
+ void Shutdown();
+ 
+diff --git a/Source/Core/VideoBackends/OGL/OGLGfx.cpp b/Source/Core/VideoBackends/OGL/OGLGfx.cpp
+index cc13ddf672..bb6f8d63d6 100644
+--- a/Source/Core/VideoBackends/OGL/OGLGfx.cpp
++++ b/Source/Core/VideoBackends/OGL/OGLGfx.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2023 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "VideoBackends/OGL/OGLGfx.h"
+ 
+ #include "Common/GL/GLContext.h"
+@@ -22,9 +24,62 @@
+ 
+ #include <algorithm>
+ #include <string_view>
++#ifdef __EMSCRIPTEN__
++#include <cstdlib>
++#include <emscripten/emscripten.h>
++#endif
+ 
+ namespace OGL
+ {
++#ifdef __EMSCRIPTEN__
++// Bounded diagnostic for the experimental browser core, not a performance mode.
++static void TraceBrowserDraw(const char* phase)
++{
++  static unsigned errors = 0;
++  static unsigned checks = 0;
++  if (errors >= 8 || checks >= 128)
++    return;
++  ++checks;
++  const GLenum error = glGetError();
++  if (error == GL_NO_ERROR)
++    return;
++  ++errors;
++  char* details = static_cast<char*>(EM_ASM_PTR({
++    const gl = GL.currentContext.GLctx;
++    const program = gl.getParameter(gl.CURRENT_PROGRAM);
++    if (program) gl.validateProgram(program);
++    const blocks = program ? Array.from({length: gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS)}, (_, i) => {
++      const binding = gl.getActiveUniformBlockParameter(program, i, gl.UNIFORM_BLOCK_BINDING);
++      return {name: gl.getActiveUniformBlockName(program, i), binding,
++        required: gl.getActiveUniformBlockParameter(program, i, gl.UNIFORM_BLOCK_DATA_SIZE),
++        buffer: Boolean(gl.getIndexedParameter(gl.UNIFORM_BUFFER_BINDING, binding)),
++        size: gl.getIndexedParameter(gl.UNIFORM_BUFFER_SIZE, binding)};
++    }) : [];
++    const attributes = program ? Array.from({length: gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)}, (_, i) => {
++      const a = gl.getActiveAttrib(program, i), loc = gl.getAttribLocation(program, a.name);
++      if (loc < 0) return {name: a.name, type: a.type, loc};
++      return {name: a.name, type: a.type, loc,
++        enabled: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_ENABLED),
++        integer: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_INTEGER),
++        buffer: Boolean(gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING))};
++    }) : [];
++    const text = JSON.stringify({blocks, attributes,
++      program: program?.name || null,
++      valid: program ? gl.getProgramParameter(program, gl.VALIDATE_STATUS) : false,
++      validation: program ? gl.getProgramInfoLog(program) : 'No current program',
++      framebuffer: gl.checkFramebufferStatus(gl.FRAMEBUFFER),
++      vertexArray: Boolean(gl.getParameter(gl.VERTEX_ARRAY_BINDING)),
++      elementBuffer: Boolean(gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING))
++    });
++    const length = lengthBytesUTF8(text) + 1;
++    const ptr = _malloc(length);
++    stringToUTF8(text, ptr, length);
++    return ptr;
++  }));
++  ERROR_LOG_FMT(VIDEO, "Browser draw {} GL error {:#x}: {}", phase, error, details);
++  std::free(details);
++}
++#endif
+ VideoConfig g_ogl_config;
+ 
+ static void APIENTRY ErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+@@ -287,12 +342,27 @@ void OGLGfx::SetViewport(float x, float y, float width, float height, float near
+ 
+ void OGLGfx::Draw(u32 base_vertex, u32 num_vertices)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlDraw);
++#endif
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("before arrays");
++#endif
+   glDrawArrays(static_cast<const OGLPipeline*>(m_current_pipeline)->GetGLPrimitive(), base_vertex,
+                num_vertices);
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("after arrays");
++#endif
+ }
+ 
+ void OGLGfx::DrawIndexed(u32 base_index, u32 num_indices, u32 base_vertex)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlDraw);
++#endif
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("before indexed");
++#endif
+   if (g_ogl_config.bSupportsGLBaseVertex)
+   {
+     glDrawElementsBaseVertex(static_cast<const OGLPipeline*>(m_current_pipeline)->GetGLPrimitive(),
+@@ -304,6 +374,9 @@ void OGLGfx::DrawIndexed(u32 base_index, u32 num_indices, u32 base_vertex)
+     glDrawElements(static_cast<const OGLPipeline*>(m_current_pipeline)->GetGLPrimitive(),
+                    num_indices, GL_UNSIGNED_SHORT, static_cast<u16*>(nullptr) + base_index);
+   }
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("after indexed");
++#endif
+ }
+ 
+ void OGLGfx::DispatchComputeShader(const AbstractShader* shader, u32 groupsize_x, u32 groupsize_y,
+diff --git a/Source/Core/VideoBackends/OGL/OGLTexture.cpp b/Source/Core/VideoBackends/OGL/OGLTexture.cpp
+index 965f5485ec..58287ecf47 100644
+--- a/Source/Core/VideoBackends/OGL/OGLTexture.cpp
++++ b/Source/Core/VideoBackends/OGL/OGLTexture.cpp
+@@ -13,6 +13,13 @@
+ 
+ #include "VideoCommon/VideoConfig.h"
+ 
++#ifdef __EMSCRIPTEN__
++// Link Emscripten's WebGL2 implementation directly. The desktop extension
++// loader does not populate dolGetBufferSubData for GLES/WebGL contexts.
++#undef glGetBufferSubData
++extern "C" void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, void* data);
++#endif
++
+ namespace OGL
+ {
+ GLenum OGLTexture::GetGLInternalFormatForTextureFormat(AbstractTextureFormat format, bool storage)
+@@ -113,6 +120,9 @@ GLenum GetGLTypeForTextureFormat(AbstractTextureFormat format)
+ 
+ bool UsePersistentStagingBuffers()
+ {
++#ifdef __EMSCRIPTEN__
++  return false;
++#endif
+   // We require ARB_buffer_storage to create the persistent mapped buffer,
+   // ARB_shader_image_load_store for glMemoryBarrier, and ARB_sync to ensure
+   // the GPU has finished the copy before reading the buffer from the CPU.
+@@ -420,9 +430,13 @@ OGLStagingTexture::~OGLStagingTexture()
+     glDeleteSync(m_fence);
+   if (m_map_pointer)
+   {
++#ifdef __EMSCRIPTEN__
++    m_map_pointer = nullptr;
++#else
+     glBindBuffer(GL_PIXEL_PACK_BUFFER, m_buffer_name);
+     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
++#endif
+   }
+   if (m_buffer_name != 0)
+     glDeleteBuffers(1, &m_buffer_name);
+@@ -580,7 +594,11 @@ void OGLStagingTexture::CopyToTexture(const MathUtil::Rectangle<int>& src_rect,
+     // Unmap the buffer before writing when not using persistent mappings.
+     if (m_map_pointer)
+     {
++#ifdef __EMSCRIPTEN__
++      glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, m_buffer_size, m_map_pointer);
++#else
+       glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
++#endif
+       m_map_pointer = nullptr;
+     }
+   }
+@@ -636,6 +654,17 @@ bool OGLStagingTexture::Map()
+   if (m_map_pointer)
+     return true;
+ 
++#ifdef __EMSCRIPTEN__
++  // WebGL2 has no read mapping. Read the pixel buffer into reusable host
++  // storage; never claim a successful checkpoint with missing EFB copies.
++  m_webgl_staging.resize(m_buffer_size);
++  glBindBuffer(m_target, m_buffer_name);
++  if (m_type != StagingTextureType::Upload)
++    glGetBufferSubData(m_target, 0, m_buffer_size, m_webgl_staging.data());
++  glBindBuffer(m_target, 0);
++  m_map_pointer = m_webgl_staging.data();
++  return true;
++#endif
+   // Slow path, map the texture, unmap it later.
+   GLenum flags;
+   if (m_type == StagingTextureType::Readback)
+@@ -663,7 +692,12 @@ void OGLStagingTexture::Unmap()
+     return;
+ 
+   glBindBuffer(m_target, m_buffer_name);
++#ifdef __EMSCRIPTEN__
++  if (m_type != StagingTextureType::Readback)
++    glBufferSubData(m_target, 0, m_buffer_size, m_map_pointer);
++#else
+   glUnmapBuffer(m_target);
++#endif
+   glBindBuffer(m_target, 0);
+   m_map_pointer = nullptr;
+ }
+diff --git a/Source/Core/VideoBackends/OGL/OGLTexture.h b/Source/Core/VideoBackends/OGL/OGLTexture.h
+index fd1648be4c..e9dfc3250e 100644
+--- a/Source/Core/VideoBackends/OGL/OGLTexture.h
++++ b/Source/Core/VideoBackends/OGL/OGLTexture.h
+@@ -96,6 +96,9 @@ private:
+   GLuint m_buffer_name;
+   size_t m_buffer_size;
+   GLsync m_fence = nullptr;
++#ifdef __EMSCRIPTEN__
++  std::vector<char> m_webgl_staging;
++#endif
+ };
+ 
+ class OGLFramebuffer final : public AbstractFramebuffer
+diff --git a/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp b/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp
+index 1dfd026810..e9e22431c8 100644
+--- a/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp
++++ b/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2011 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "VideoBackends/OGL/ProgramShaderCache.h"
+ 
+ #include <array>
+@@ -223,6 +225,9 @@ u32 ProgramShaderCache::GetUniformBufferAlignment()
+ 
+ void ProgramShaderCache::UploadConstants()
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlUniform);
++#endif
+   auto& system = Core::System::GetInstance();
+   auto& pixel_shader_manager = system.GetPixelShaderManager();
+   auto& vertex_shader_manager = system.GetVertexShaderManager();
+@@ -280,15 +285,27 @@ void ProgramShaderCache::UploadConstants()
+ 
+ void ProgramShaderCache::UploadConstants(const void* data, u32 data_size)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlUniform);
++#endif
+   // allocate and copy
+-  const u32 alloc_size = Common::AlignUp(data_size, s_ubo_align);
++  // WebGL validates the complete std140 block, including its trailing padding.
++  // Melee's post-processing constants have 140 payload bytes but a 144-byte
++  // shader block; binding only the payload makes every presentation draw fail.
++#ifdef __EMSCRIPTEN__
++  const u32 bind_size = Common::AlignUp(data_size, 16u);
++#else
++  const u32 bind_size = data_size;
++#endif
++  const u32 alloc_size = Common::AlignUp(bind_size, s_ubo_align);
+   auto buffer = s_buffer->Map(alloc_size, s_ubo_align);
+   std::memcpy(buffer.first, data, data_size);
++  std::memset(buffer.first + data_size, 0, alloc_size - data_size);
+   s_buffer->Unmap(alloc_size);
+ 
+   // bind the same sub-buffer to all stages
+   for (u32 index = 1; index <= 4; index++)
+-    glBindBufferRange(GL_UNIFORM_BUFFER, index, s_buffer->m_buffer, buffer.second, data_size);
++    glBindBufferRange(GL_UNIFORM_BUFFER, index, s_buffer->m_buffer, buffer.second, bind_size);
+ 
+   ADDSTAT(g_stats.this_frame.bytes_uniform_streamed, data_size);
+ }
+@@ -328,6 +345,9 @@ bool ProgramShaderCache::CompileComputeShader(SHADER& shader, std::string_view c
+ 
+ GLuint ProgramShaderCache::CompileSingleShader(GLenum type, std::string_view code)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlCompile);
++#endif
+   const GLuint result = glCreateShader(type);
+ 
+   constexpr GLsizei num_strings = 2;
+diff --git a/Source/Core/VideoCommon/AsyncRequests.cpp b/Source/Core/VideoCommon/AsyncRequests.cpp
+index 7348724e43..37abb14588 100644
+--- a/Source/Core/VideoCommon/AsyncRequests.cpp
++++ b/Source/Core/VideoCommon/AsyncRequests.cpp
+@@ -35,7 +35,14 @@ void AsyncRequests::QueueEvent(Event&& event)
+   m_queue.Push(std::move(event));
+ 
+   auto& system = Core::System::GetInstance();
++#ifdef __EMSCRIPTEN__
++  // Host queries/checkpoints need the GPU even while emulation is paused.
++  // RunGpu intentionally skips the wakeup in deterministic mode and may
++  // schedule an emulated timing event. Neither behavior fits a host request.
++  system.GetFifo().WakeupForAsyncRequest();
++#else
+   system.GetFifo().RunGpu();
++#endif
+ }
+ 
+ void AsyncRequests::WaitForEmptyQueue()
+diff --git a/Source/Core/VideoCommon/AsyncRequests.h b/Source/Core/VideoCommon/AsyncRequests.h
+index 2c3e84fd47..52e6717ef7 100644
+--- a/Source/Core/VideoCommon/AsyncRequests.h
++++ b/Source/Core/VideoCommon/AsyncRequests.h
+@@ -2,6 +2,9 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #pragma once
++#ifdef __EMSCRIPTEN__
++#include "Common/BrowserProfile.h"
++#endif
+ 
+ #include <concepts>
+ #include <functional>
+@@ -42,6 +45,11 @@ public:
+     if (m_passthrough)
+       return std::invoke(std::forward<F>(callback));
+ 
++    // Includes queue dispatch and completion wait; nested inside CPU execution
++    // or host work, so this time must not be added to those parent totals.
++#ifdef __EMSCRIPTEN__
++    const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::CpuVideoWait);
++#endif
+     std::packaged_task task{std::forward<F>(callback)};
+     QueueEvent(Event{[&] { task(); }});
+ 
+diff --git a/Source/Core/VideoCommon/Fifo.cpp b/Source/Core/VideoCommon/Fifo.cpp
+index b44544f102..bbadb1c4f5 100644
+--- a/Source/Core/VideoCommon/Fifo.cpp
++++ b/Source/Core/VideoCommon/Fifo.cpp
+@@ -1,7 +1,11 @@
++#include "Common/BrowserStateCopy.h"
+ // Copyright 2008 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "VideoCommon/Fifo.h"
++#ifdef __EMSCRIPTEN__
++#include "Common/BrowserProfile.h"
++#endif
+ 
+ #include <atomic>
+ #include <cstring>
+@@ -71,7 +75,7 @@ void FifoManager::RefreshConfig()
+ 
+ void FifoManager::DoState(PointerWrap& p)
+ {
+-  p.DoArray(m_video_buffer, FIFO_SIZE);
++  DolphinWeb::TransferSnapshotMemory(p, m_video_buffer, FIFO_SIZE);
+   u8* write_ptr = m_video_buffer_write_ptr;
+   p.DoPointer(write_ptr, m_video_buffer);
+   m_video_buffer_write_ptr = write_ptr;
+@@ -88,6 +92,26 @@ void FifoManager::DoState(PointerWrap& p)
+ 
+ void FifoManager::PauseAndLock()
+ {
++#ifdef __EMSCRIPTEN__
++  if (m_use_deterministic_gpu_thread && !m_emu_running_state.IsSet() && m_system.IsDualCoreMode() &&
++      m_gpu_mainloop.IsRunning())
++  {
++    // A logic-frame break pauses adjacent systems before the host acquires
++    // CPUThreadGuard. Wait() alone cannot drain commands in that state: the
++    // normal GPU loop returns early while paused. Finish precisely the bytes
++    // already preprocessed by the stopped CPU on the owning GPU thread before
++    // SyncGPU compacts either FIFO or a snapshot copies the main CP state.
++    AsyncRequests::GetInstance()->PushBlockingEvent([this] {
++      u8* write_ptr = m_video_buffer_write_ptr;
++      if (write_ptr > m_video_buffer_seen_ptr.load())
++      {
++        m_video_buffer_read_ptr =
++            OpcodeDecoder::RunFifo(DataReader(m_video_buffer_read_ptr, write_ptr), nullptr);
++        m_video_buffer_seen_ptr = write_ptr;
++      }
++    });
++  }
++#endif
+   SyncGPU(SyncGPUReason::Other);
+   EmulatorState(false);
+ 
+@@ -167,6 +191,9 @@ void FifoManager::SyncGPU(SyncGPUReason reason, bool may_move_read_ptr)
+ {
+   if (m_use_deterministic_gpu_thread)
+   {
++#ifdef __EMSCRIPTEN__
++    const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::CpuGpuSync);
++#endif
+     m_gpu_mainloop.Wait();
+     if (!m_gpu_mainloop.IsRunning())
+       return;
+@@ -521,6 +548,11 @@ void FifoManager::FlushGpu()
+   m_gpu_mainloop.Wait();
+ }
+ 
++void FifoManager::WakeupForAsyncRequest()
++{
++  if (m_system.IsDualCoreMode()) m_gpu_mainloop.Wakeup();
++}
++
+ void FifoManager::GpuMaySleep()
+ {
+   m_gpu_mainloop.AllowSleep();
+@@ -571,6 +603,9 @@ void FifoManager::RunGpu()
+ 
+ int FifoManager::RunGpuOnCpu(int ticks)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::CpuGpuDecode);
++#endif
+   auto& command_processor = m_system.GetCommandProcessor();
+   auto& fifo = command_processor.GetFifo();
+   bool reset_simd_state = false;
+diff --git a/Source/Core/VideoCommon/Fifo.h b/Source/Core/VideoCommon/Fifo.h
+index 2afa110532..979d6c8588 100644
+--- a/Source/Core/VideoCommon/Fifo.h
++++ b/Source/Core/VideoCommon/Fifo.h
+@@ -71,6 +71,7 @@ public:
+   void FlushGpu();
+   void RunGpu();
+   void GpuMaySleep();
++  void WakeupForAsyncRequest();
+   void RunGpuLoop();
+   void ExitGpuLoop();
+   void EmulatorState(bool running);
+diff --git a/Source/Core/VideoCommon/Present.cpp b/Source/Core/VideoCommon/Present.cpp
+index 462c1f6fc5..cbbf4e33f3 100644
+--- a/Source/Core/VideoCommon/Present.cpp
++++ b/Source/Core/VideoCommon/Present.cpp
+@@ -10,6 +10,7 @@
+ #include "Core/HW/VideoInterface.h"
+ #include "Core/Host.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ #include "InputCommon/ControllerInterface/ControllerInterface.h"
+ 
+@@ -1001,6 +1002,16 @@ void Presenter::DoState(PointerWrap& p)
+   // If we're loading and there is a last XFB, re-display it.
+   if (p.IsReadMode() && m_last_xfb_stride != 0)
+   {
++    if (State::BrowserLoadingState())
++    {
++      // Restore the XFB reference without presenting an old frame or
++      // advancing host frame counters while correcting a prediction.
++      m_next_swap_estimated_ticks = m_last_xfb_ticks;
++      m_next_swap_estimated_time = Clock::now();
++      m_immediate_swap_happened_this_field.store(false, std::memory_order_relaxed);
++      FetchXFB(m_last_xfb_addr, m_last_xfb_width, m_last_xfb_stride, m_last_xfb_height, m_last_xfb_ticks);
++      return;
++    }
+     // This technically counts as the end of the frame
+     GetVideoEvents().after_frame_event.Trigger(Core::System::GetInstance());
+ 
+diff --git a/Source/Core/VideoCommon/TextureCacheBase.cpp b/Source/Core/VideoCommon/TextureCacheBase.cpp
+index bbcd1140b4..a24b371367 100644
+--- a/Source/Core/VideoCommon/TextureCacheBase.cpp
++++ b/Source/Core/VideoCommon/TextureCacheBase.cpp
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "VideoCommon/TextureCacheBase.h"
++#include "Common/BrowserStateCopy.h"
+ 
+ #include <algorithm>
+ #include <chrono>
+@@ -439,9 +440,93 @@ bool TextureCacheBase::CheckReadbackTexture(u32 width, u32 height, AbstractTextu
+   return m_readback_texture != nullptr;
+ }
+ 
++void TextureCacheBase::BrowserBeginState(unsigned slot, bool saving)
++{
++  m_browser_state_failed.store(false);
++  m_browser_clear_on_write = saving;
++  m_browser_state_slot.store(static_cast<int>(slot), std::memory_order_release);
++}
++void TextureCacheBase::BrowserEndState()
++{
++  m_browser_state_slot.store(-1, std::memory_order_release);
++}
++void TextureCacheBase::BrowserClearStates()
++{
++  for (auto& textures : m_browser_textures) textures.clear();
++  m_browser_texture_bytes.fill(0);
++}
++void TextureCacheBase::BrowserReleaseState(unsigned slot)
++{
++  if (slot >= m_browser_textures.size()) return;
++  m_browser_textures[slot].clear();
++  m_browser_texture_bytes[slot] = 0;
++}
++std::size_t TextureCacheBase::BrowserTextureBytes() const
++{
++  std::size_t bytes = 0;
++  for (const auto n : m_browser_texture_bytes) bytes += n;
++  return bytes;
++}
++static void CopyBrowserTexture(AbstractTexture* dst, const AbstractTexture* src)
++{
++  const auto& config = dst->GetConfig();
++  for (u32 layer = 0; layer < config.layers; ++layer)
++    for (u32 level = 0; level < config.levels; ++level)
++      dst->CopyRectangleFromTexture(src, src->GetConfig().GetMipRect(level), layer, level,
++                                   config.GetMipRect(level), layer, level);
++}
++
+ void TextureCacheBase::SerializeTexture(AbstractTexture* tex, const TextureConfig& config,
+                                         PointerWrap& p)
+ {
++  const int browser_slot = m_browser_state_slot.load(std::memory_order_acquire);
++  if (browser_slot >= 0)
++  {
++    p.Do(config);
++    u32 index = 0;
++    if (p.IsWriteMode())
++    {
++      auto& textures = m_browser_textures[browser_slot];
++      if (m_browser_clear_on_write)
++      {
++        textures.clear();
++        m_browser_texture_bytes[browser_slot] = 0;
++        m_browser_clear_on_write = false;
++      }
++      std::size_t bytes = 0;
++      for (u32 level = 0; level < config.levels; ++level)
++        bytes += AbstractTexture::CalculateStrideForFormat(config.format, std::max(1u, config.width >> level)) *
++                 std::max(1u, config.height >> level) * config.layers;
++      // Never allow an unexpected scene to grow an unbounded VRAM history.
++      if (textures.size() >= 1024 || BrowserTextureBytes() + bytes > 192 * 1024 * 1024 ||
++          config.type != AbstractTextureType::Texture_2DArray || config.samples != 1 ||
++          (config.format != AbstractTextureFormat::RGBA8 && config.format != AbstractTextureFormat::R32F))
++      {
++        m_browser_state_failed.store(true);
++        // Preserve the serialized layout on failure. Switching a writer into
++        // Verify makes later DoState methods read this unfinished buffer.
++        index = 0xffffffffu;
++        p.Do(index);
++        return;
++      }
++      auto copy = g_gfx->CreateTexture(config);
++      if (!copy)
++      {
++        m_browser_state_failed.store(true);
++        // Preserve the serialized layout on failure. Switching a writer into
++        // Verify makes later DoState methods read this unfinished buffer.
++        index = 0xffffffffu;
++        p.Do(index);
++        return;
++      }
++      CopyBrowserTexture(copy.get(), tex);
++      index = static_cast<u32>(textures.size());
++      textures.push_back(std::move(copy));
++      m_browser_texture_bytes[browser_slot] += bytes;
++    }
++    p.Do(index);
++    return;
++  }
+   // If we're in measure mode, skip the actual readback to save some time.
+   const bool skip_readback = p.IsMeasureMode();
+   p.Do(config);
+@@ -507,6 +592,28 @@ std::optional<TextureCacheBase::TexPoolEntry> TextureCacheBase::DeserializeTextu
+ {
+   TextureConfig config;
+   p.Do(config);
++  const int browser_slot = m_browser_state_slot.load(std::memory_order_acquire);
++  if (browser_slot >= 0)
++  {
++    u32 index = 0;
++    p.Do(index);
++    const auto& textures = m_browser_textures[browser_slot];
++    if (!p.IsReadMode() || index >= textures.size() || textures[index]->GetConfig() != config)
++    {
++      m_browser_state_failed.store(true);
++      p.SetVerifyMode();
++      return std::nullopt;
++    }
++    auto restored = AllocateTexture(config);
++    if (!restored)
++    {
++      m_browser_state_failed.store(true);
++      p.SetVerifyMode();
++      return std::nullopt;
++    }
++    CopyBrowserTexture(restored->texture.get(), textures[index].get());
++    return restored;
++  }
+ 
+   // Read in the size from the save state, then texture data will point to
+   // a region of size total_size where textures are stored.
+@@ -566,11 +673,18 @@ void TextureCacheBase::DoSaveState(PointerWrap& p)
+ 
+   std::map<const TCacheEntry*, u32> entry_map;
+   std::vector<TCacheEntry*> entries_to_save;
+-  auto ShouldSaveEntry = [](const RcTcacheEntry& entry) {
++  const bool complete_browser_cache =
++      DolphinWeb::browser_state_transfer_active.load(std::memory_order_acquire);
++  auto ShouldSaveEntry = [complete_browser_cache](const RcTcacheEntry& entry) {
+     // We skip non-copies as they can be decoded from RAM when the state is loaded.
+     // Storing them would duplicate data in the save state file, adding to decompression time.
+     // We also need to store invalidated entries, as they can't be restored from RAM.
+-    return entry->IsCopy() || entry->invalidated;
++    // All private browser snapshots preserve decoded entries too, including
++    // full readback references. Dropping these on a full-state restore changes
++    // subsequent texture IDs and makes it an inequivalent replay baseline.
++    // GPU checkpoints clone each texture independently; mutable
++    // entries and their circular references are serialized by the existing path.
++    return complete_browser_cache || entry->IsCopy() || entry->invalidated;
+   };
+   auto AddCacheEntryToMap = [&entry_map, &entries_to_save](const RcTcacheEntry& entry) -> u32 {
+     auto iter = entry_map.find(entry.get());
+@@ -702,6 +816,7 @@ void TextureCacheBase::DoLoadState(PointerWrap& p)
+     // Even if the texture isn't valid, we still need to create the cache entry object
+     // to update the point in the state state. We'll just throw it away if it's invalid.
+     auto tex = DeserializeTexture(p);
++    if (!tex) { p.SetVerifyMode(); return; }
+     auto entry =
+         std::make_shared<TCacheEntry>(std::move(tex->texture), std::move(tex->framebuffer));
+     entry->textures_by_hash_iter = m_textures_by_hash.end();
+diff --git a/Source/Core/VideoCommon/TextureCacheBase.h b/Source/Core/VideoCommon/TextureCacheBase.h
+index d596f84e5e..0ee48a1750 100644
+--- a/Source/Core/VideoCommon/TextureCacheBase.h
++++ b/Source/Core/VideoCommon/TextureCacheBase.h
+@@ -4,6 +4,7 @@
+ #pragma once
+ 
+ #include <array>
++#include <atomic>
+ #include <filesystem>
+ #include <fmt/format.h>
+ #include <map>
+@@ -267,6 +268,21 @@ public:
+   virtual ~TextureCacheBase();
+ 
+   bool Initialize();
++
++  // Browser private checkpoints: texture ownership stays on the GPU thread.
++  void BrowserBeginState(unsigned slot, bool saving);
++  void BrowserEndState();
++  void BrowserClearStates();
++  void BrowserReleaseState(unsigned slot);
++  bool BrowserStateFailed() const { return m_browser_state_failed.load(); }
++  std::size_t BrowserTextureBytes() const;
++private:
++  std::array<std::vector<std::unique_ptr<AbstractTexture>>, 6> m_browser_textures;
++  std::array<std::size_t, 6> m_browser_texture_bytes{};
++  std::atomic<int> m_browser_state_slot{-1};
++  std::atomic<bool> m_browser_state_failed{false};
++  bool m_browser_clear_on_write = false;
++public:
+   void Shutdown();
+ 
+   void OnConfigChanged(const VideoConfig& config);
+diff --git a/Source/Core/VideoCommon/VideoState.cpp b/Source/Core/VideoCommon/VideoState.cpp
+index 4b1892ad8f..9375fa5b5c 100644
+--- a/Source/Core/VideoCommon/VideoState.cpp
++++ b/Source/Core/VideoCommon/VideoState.cpp
+@@ -5,6 +5,7 @@
+ 
+ #include "Common/ChunkFile.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ #include "VideoCommon/BPMemory.h"
+ #include "VideoCommon/BPStructs.h"
+ #include "VideoCommon/BoundingBox.h"
+@@ -73,6 +74,7 @@ void VideoCommon_DoState(PointerWrap& p)
+ 
+   system.GetPixelEngine().DoState(p);
+   p.DoMarker("PixelEngine");
++  State::BrowserRecordSection(p, "GPU PixelEngine");
+ 
+   // the old way of replaying current bpmem as writes to push side effects to pixel shader manager
+   // doesn't really work.
+@@ -87,16 +89,20 @@ void VideoCommon_DoState(PointerWrap& p)
+ 
+   g_vertex_manager->DoState(p);
+   p.DoMarker("VertexManager");
++  State::BrowserRecordSection(p, "GPU VertexManager");
+ 
+   g_framebuffer_manager->DoState(p);
+   p.DoMarker("FramebufferManager");
++  State::BrowserRecordSection(p, "GPU FramebufferManager");
+ 
+   g_texture_cache->DoState(p);
+   p.DoMarker("TextureCache");
++  State::BrowserRecordSection(p, "GPU TextureCache");
+ 
+   g_presenter->DoState(p);
+   g_frame_dumper->DoState(p);
+   p.DoMarker("Presenter");
++  State::BrowserRecordSection(p, "GPU Presenter");
+ 
+   g_bounding_box->DoState(p);
+   p.DoMarker("Bounding Box");

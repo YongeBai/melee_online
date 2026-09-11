@@ -1,7 +1,7 @@
 import {BrowserRollbackTimeline,neutralBrowserPad} from './browser-rollback.js';
 
 // Local, real-engine late-input test. It does not claim network or FPS coverage.
-export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,delay=3,checkpointPolicy='periodic',cacheFastPathComparison=false,cacheLoopComparison=false,inlineDispatchComparison=false,wasmDispatchComparison=false,codegenComparison=null,onProgress=()=>{}}={}) {
+export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,delay=3,checkpointPolicy='periodic',cacheFastPathComparison=false,cacheLoopComparison=false,inlineDispatchComparison=false,wasmDispatchComparison=false,codegenComparison=null,batchAdvance=false,onProgress=()=>{}}={}) {
   if(!Number.isInteger(frames)||frames<4||frames>3600||!Number.isInteger(delay)||delay<1||delay>8||delay>=frames)
     throw Error('Invalid timeline probe duration or input delay');
   let phase='prepare',frame=-1,replaying=false,stepFrame=-1;
@@ -34,12 +34,20 @@ export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,dela
     suppress:value=>command('suppress',{value}),
     async advance(frame,pads,{replay}) {
       replaying=replay;stepFrame=frame;
-      await command('pads',{pads,frame:startFrame+frame});
-      const timing=await command('step',{unthrottled:true});
+      let timing, state;
+      // The reference deliberately keeps the original three-RPC path. The
+      // corrected run compares the one-RPC path against its full final state.
+      if (batchAdvance && phase !== 'reference') {
+        timing = await command('advance', {pads, frame:startFrame+frame, unthrottled:true});
+        state = timing.game;
+      } else {
+        await command('pads',{pads,frame:startFrame+frame});
+        timing=await command('step',{unthrottled:true});
+        state=await inspect();
+      }
       stepParts.push({phase,frame,replay,milliseconds:timing.milliseconds,
         transitionMilliseconds:timing.transitionMilliseconds,waitMilliseconds:timing.waitMilliseconds,
         waitStrategy:timing.waitStrategy,waitWakeups:timing.waitWakeups});
-      const state=await inspect();
       if(state.sceneFrame!==startFrame+frame+1)throw Error('Rollback did not advance exactly one logic frame');
       return {milliseconds:timing.milliseconds,replay};
     },
@@ -97,7 +105,7 @@ export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,dela
   return {
     passed:comparison.equal&&corrected.stats.rollbacks>0&&output.videoSkipped>0&&output.audioSamplesSkipped>0&&!output.suppressed,
     kind:'local-browser-late-input-correction',networkTest:false,performanceTest:false,
-    frames,delay,checkpointPolicy,cacheFastPathComparison,cacheLoopComparison,inlineDispatchComparison,wasmDispatchComparison,codegenComparison,stats:corrected.stats,output,fullMachineBytesEqual:comparison.equal,
+    frames,delay,checkpointPolicy,cacheFastPathComparison,cacheLoopComparison,inlineDispatchComparison,wasmDispatchComparison,codegenComparison,batchAdvance,stats:corrected.stats,output,fullMachineBytesEqual:comparison.equal,
     comparison:comparison.comparison,
     referenceFrame:referenceState.sceneFrame,correctedFrame:correctedState.sceneFrame,
     referenceFighters:referenceState.fighters,correctedFighters:correctedState.fighters,

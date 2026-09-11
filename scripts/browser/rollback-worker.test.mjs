@@ -8,15 +8,32 @@ const start=source.indexOf(marker)+marker.length;
 const end=source.indexOf('    case "validationSetCorePaused":',start);
 assert.ok(start>marker.length&&end>start);
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
-const request=new AsyncFunction('api','payload','moduleInstance',source.slice(start,end).replace(/\}\s*$/,''));
+const request=new AsyncFunction('api','payload','moduleInstance','handleMessage','inspectMelee',source.slice(start,end).replace(/\}\s*$/,''));
 function fixture() {
   const calls=[],module={HEAPU8:new Uint8Array(128),_malloc(n){calls.push(['malloc',n]);return 8;},_free(p){calls.push(['free',p]);}};
   const api={browserRollbackCapture(){},browserRollbackStep(){return 1;},
     browserRollbackSetPads(...args){calls.push(['pads',...args]);return 1;},
     getCoreStateName(){return 'Paused';},setCorePaused(value){calls.push(['pause',value]);return 1;},
     browserRollbackSetUnthrottled(value){calls.push(['speed',value]);return 1;},
-  };return {calls,module,api,run(payload){return request(api,payload,module);}};
+  };
+  const game={sceneFrame:124};
+  const run=payload=>request(api,payload,module,(_,p)=>run(p),()=>game);
+  return {calls,module,api,run,game};
 }
+test('one-RPC advance validates both pads, completes the step, then returns inspection',async()=>{
+  const f=fixture();
+  f.api.browserRollbackGameStep=()=>{f.calls.push(['step']);return 1;};
+  const result=await f.run({action:'advance',frame:123,pads:[neutralBrowserPad(),neutralBrowserPad()],unthrottled:true});
+  assert.equal(result.game,f.game);
+  assert.equal(result.state,'Paused');
+  assert.deepEqual(f.calls,[['malloc',72],['pads',8,18,123],['free',8],['speed',1],['step'],['pause',1],['speed',0]]);
+});
+test('invalid batched input cannot advance the simulation',async()=>{
+  const f=fixture();
+  f.api.browserRollbackGameStep=()=>assert.fail('must not step');
+  await assert.rejects(f.run({action:'advance',frame:1,pads:[neutralBrowserPad(),{...neutralBrowserPad(),mask:-1}],unthrottled:true}),/Invalid rollback pad/);
+  assert.deepEqual(f.calls,[]);
+});
 test('both complete pad records reach the core in one transaction',async()=>{
   const f=fixture(),a={...neutralBrowserPad(),mask:0x80000,stickX:230},b={...neutralBrowserPad(),mask:2,stickY:45};
   await f.run({action:'pads',frame:123,pads:[a,b]});

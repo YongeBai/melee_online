@@ -1,6 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { summarizeBrowserRun, summarizeCoreProfile } from "./browser-benchmark.js";
+import { summarizeBrowserRun, summarizeCoreProfile, browserDeliveryCounter } from "./browser-benchmark.js";
+
+test("delivery diagnostics use the active transport, never stale bitmap counts", () => {
+  assert.equal(browserDeliveryCounter({oglSabEnabled:true, oglSabFramesDrawn:60,
+    adapter:{detachedOglFramesDrawn:10}}), 60);
+  assert.equal(browserDeliveryCounter({oglSabEnabled:true, adapter:{detachedOglFramesDrawn:10}}), 0);
+  assert.equal(browserDeliveryCounter({oglSabEnabled:false, oglSabFramesDrawn:60,
+    adapter:{detachedOglFramesDrawn:10}}), 10);
+});
 
 const before = { major: 2, minor: 2, sceneFrame: 100, renderFrame: 100 };
 const after = { ...before, sceneFrame: 1900, renderFrame: 1900 };
