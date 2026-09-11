@@ -1,0 +1,42 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -442,6 +442,8 @@
+ std::string s_core_status = "Not initialized";
+ std::string s_core_title;
+ std::string s_video_backend = "Software Renderer";
++std::mutex s_browser_log_mutex;
++std::vector<std::string> s_browser_log;
+ 
+ // Dolphin's own ERROR_LOG_FMT / WARN_LOG_FMT output is otherwise discarded in
+ // this build: Emscripten's print is routed to postStatus and no LogListener is
+@@ -459,6 +461,13 @@
+   {
+     if (msg == nullptr)
+       return;
++    {
++      const std::lock_guard<std::mutex> lock(s_browser_log_mutex);
++      if (level != Common::Log::LogLevel::LNOTICE &&
++          (level == Common::Log::LogLevel::LERROR || std::strstr(msg, "Video")) &&
++          s_browser_log.size() < 64 && (s_browser_log.empty() || s_browser_log.back() != msg))
++        s_browser_log.emplace_back(std::string(msg).substr(0, 4096));
++    }
+     const int severity = static_cast<int>(level);
+     EM_ASM({
+       var text = "[dolphin] " + UTF8ToString($1);
+@@ -1105,6 +1114,16 @@
+   return s_core_status.c_str();
+ }
+ 
++EMSCRIPTEN_KEEPALIVE const char* GetBrowserLog()
++{
++  static std::string snapshot;
++  const std::lock_guard<std::mutex> lock(s_browser_log_mutex);
++  snapshot.clear();
++  for (const auto& line : s_browser_log)
++    snapshot += line + "\n";
++  return snapshot.c_str();
++}
++
+ const char* GetCoreTitle()
+ {
+   return s_core_title.c_str();

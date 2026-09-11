@@ -1,0 +1,249 @@
+--- a/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -6,6 +6,7 @@
+ 
+ #include "Common/GL/GLInterface/Emscripten.h"
+ 
++#include <array>
+ #include <chrono>
+ #include <cstdint>
+ #include <thread>
+@@ -16,6 +17,7 @@
+ #include <emscripten/html5_webgl.h>
+ #include <GLES3/gl3.h>
+ 
++extern "C" void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, void* data);
+ extern "C" int DolphinWeb_UseWorkerOwnedWebGL();
+ extern "C" int DolphinWeb_UseDiagnosticOglClear();
+ extern "C" int DolphinWeb_UseOglReadbackPresent();
+@@ -67,43 +69,91 @@
+   });
+ }
+ 
++// Two reusable pixel buffers bound graphics memory. Read the preceding
++// frame after the GPU has had a frame of work to complete the transfer.
++// getBufferSubData remains a synchronization point; this is not a promise
++// of zero stalls. WebGL fences cannot signal inside this long-running task.
++std::array<GLuint, 2> s_readbacks{};
++std::vector<std::uint8_t> s_readback_data;
++std::uint32_t s_readback_width = 0, s_readback_height = 0, s_readback_epoch = 0;
++std::size_t s_readback_next = 0;
++bool s_readback_pending = false;
++
++void ClearReadbacks()
++{
++  glDeleteBuffers(s_readbacks.size(), s_readbacks.data());
++  s_readbacks = {};
++  s_readback_next = 0;
++  s_readback_pending = false;
++}
++
+ std::uint32_t DolphinWebPublishAsyncReadback(std::uint32_t width, std::uint32_t height)
+ {
+-  static std::vector<std::uint8_t> s_readback_data;
+-
+-  if (width == 0 || height == 0)
+-    return 0;
+-
+-  const std::size_t byte_count = static_cast<std::size_t>(width) * height * 4;
+-  if (byte_count == 0)
++  if (!width || !height || width > 4096 || height > 4096) return 0;
++  const auto epoch = DolphinWeb::RollbackOutput::presentation_epoch.load(std::memory_order_acquire);
++  if (epoch != s_readback_epoch || width != s_readback_width || height != s_readback_height)
++  {
++    ClearReadbacks();
++    s_readback_epoch = epoch;
++    s_readback_width = width;
++    s_readback_height = height;
++    s_readback_data.resize(static_cast<std::size_t>(width) * height * 4);
++  }
++  if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++  {
++    DolphinWeb::RollbackOutput::video_skipped.fetch_add(1, std::memory_order_relaxed);
+     return 0;
+-
+-  s_readback_data.resize(byte_count);
+-  // Preserve earlier draw errors separately: they must not cause a valid
+-  // readback to be discarded. High bits identify the phase in diagnostics.
++  }
++  GLint previous_pack = 0, previous_framebuffer = 0, previous_alignment = 0;
++  glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &previous_pack);
++  glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previous_framebuffer);
++  glGetIntegerv(GL_PACK_ALIGNMENT, &previous_alignment);
+   const int prior_error = static_cast<int>(glGetError());
+-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+-  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
++  // Queue this frame before waiting for the preceding frame.
++  auto& write_buffer = s_readbacks[s_readback_next];
++  if (!write_buffer)
++  {
++    glGenBuffers(1, &write_buffer);
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, write_buffer);
++    glBufferData(GL_PIXEL_PACK_BUFFER, s_readback_data.size(), nullptr, GL_STREAM_READ);
++  }
++  else glBindBuffer(GL_PIXEL_PACK_BUFFER, write_buffer);
++  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+   glPixelStorei(GL_PACK_ALIGNMENT, 1);
+-  glReadPixels(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height), GL_RGBA,
+-               GL_UNSIGNED_BYTE, s_readback_data.data());
+-  const int read_error = static_cast<int>(glGetError());
++  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
++  glFlush();
++  const int write_error = static_cast<int>(glGetError());
++  std::uint32_t published_rgba = 0;
++  int read_error = 0;
++  if (s_readback_pending)
++  {
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, s_readbacks[1 - s_readback_next]);
++    glGetBufferSubData(GL_PIXEL_PACK_BUFFER, 0, s_readback_data.size(), s_readback_data.data());
++    read_error = static_cast<int>(glGetError());
++    if (!read_error)
++    {
++      published_rgba = static_cast<std::uint32_t>(s_readback_data[0]) |
++                       (static_cast<std::uint32_t>(s_readback_data[1]) << 8) |
++                       (static_cast<std::uint32_t>(s_readback_data[2]) << 16) |
++                       (static_cast<std::uint32_t>(s_readback_data[3]) << 24);
++      DolphinWeb_OnGlBackbuffer(s_readback_data.data(), width, height);
++    }
++  }
++  s_readback_pending = write_error == GL_NO_ERROR;
++  s_readback_next = 1 - s_readback_next;
++  glBindBuffer(GL_PIXEL_PACK_BUFFER, previous_pack);
++  glBindFramebuffer(GL_READ_FRAMEBUFFER, previous_framebuffer);
++  glPixelStorei(GL_PACK_ALIGNMENT, previous_alignment);
+   s_readback_error = read_error ? (0x20000 | read_error) :
+-                     prior_error ? (0x10000 | prior_error) : 0;
+-  if (read_error != GL_NO_ERROR)
+-    return 0;
+-
+-  const std::uint32_t published_rgba = static_cast<std::uint32_t>(s_readback_data[0]) |
+-                                       (static_cast<std::uint32_t>(s_readback_data[1]) << 8) |
+-                                       (static_cast<std::uint32_t>(s_readback_data[2]) << 16) |
+-                                       (static_cast<std::uint32_t>(s_readback_data[3]) << 24);
+-  DolphinWeb_OnGlBackbuffer(s_readback_data.data(), width, height);
++                     write_error ? (0x30000 | write_error) : prior_error ? (0x10000 | prior_error) : 0;
+   return published_rgba;
+ }
++
+ }  // namespace
+ 
+ GLContextEmscripten::~GLContextEmscripten()
+ {
++  ClearReadbacks();
+   if (m_context)
+     emscripten_webgl_destroy_context(m_context);
+ }
+--- a/vendor/dolphin/Source/Core/Common/BrowserRollbackOutput.h
++++ b/vendor/dolphin/Source/Core/Common/BrowserRollbackOutput.h
+@@ -6,6 +6,8 @@
+ namespace DolphinWeb::RollbackOutput {
+ // Host presentation only. Game DSP/GX execution and serialized state still run.
+ inline std::atomic<bool> suppressed{false};
++// Invalidates queued host images when replay starts; never serialized.
++inline std::atomic<std::uint32_t> presentation_epoch{0};
+ inline std::atomic<std::uint64_t> video_skipped{0};
+ inline std::atomic<std::uint64_t> audio_skipped{0};
+ }
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1141,9 +1141,10 @@
+ {
+   auto& system = Core::System::GetInstance();
+   if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused ||
+-      s_video_backend != "OGL" || !DolphinWeb_UseWorkerOwnedWebGL() ||
+-      DolphinWeb_UseOglReadbackPresent()) return 0;
++      s_video_backend != "OGL" || !DolphinWeb_UseWorkerOwnedWebGL()) return 0;
+   const Core::CPUThreadGuard guard(system);
++  if (enable)
++    DolphinWeb::RollbackOutput::presentation_epoch.fetch_add(1, std::memory_order_release);
+   DolphinWeb::RollbackOutput::suppressed.store(enable != 0, std::memory_order_release);
+   return 1;
+ }
+--- a/core/upstream/dolphin_web_discio.cpp
++++ b/core/upstream/dolphin_web_discio.cpp
+@@ -1031,6 +1031,7 @@
+   s_video_stats = out.str();
+ }
+ 
++extern "C" int DolphinWeb_UseOglReadbackPresent();
+ void DolphinWeb_OnOglSwap(int worker_owned, int commit_result, std::uint32_t width,
+                           std::uint32_t height, std::uint32_t debug_bits,
+                           std::uint32_t readback_rgba, int gl_error)
+@@ -1043,8 +1044,13 @@
+   s_last_ogl_debug_bits.store(debug_bits, std::memory_order_relaxed);
+   s_last_ogl_readback_rgba.store(readback_rgba, std::memory_order_relaxed);
+   s_last_ogl_gl_error.store(gl_error, std::memory_order_relaxed);
+-  ++s_frame;
+-  PublishFrameSignal();
++  // Readback publishes only complete pixel frames, once. A second signal
++  // here used to expose the same image twice and force a lossy time throttle.
++  if (!DolphinWeb_UseOglReadbackPresent())
++  {
++    ++s_frame;
++    PublishFrameSignal();
++  }
+ 
+   // Day-1 instrumentation: push a frame-ring entry. xfb_hash uses the most
+   // recently published readback hash; for direct OGL contexts where readback
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -802,12 +802,14 @@
+       const currentGen = Atomics.load(this.oglMetaView, 0) | 0;
+       const sabT2 = performance.now();
+       let copiedThisFrame = false;
+-      if (currentGen !== this.oglLastSeenGen && this.context) {
+-        this.oglLastSeenGen = currentGen;
++      if (currentGen !== this.oglLastSeenGen && this.context &&
++          Atomics.compareExchange(this.oglMetaView, 1, 0, 2) === 0) {
++        this.oglLastSeenGen = Atomics.load(this.oglMetaView, 0);
+         // Copy SAB-backed bytes into the non-shared ImageData buffer
+         // (Chrome refuses to construct ImageData over a SAB view directly).
+         const copyStartedAt = this.collectMetrics ? performance.now() : 0;
+         this.oglImageData.data.set(this.oglPixelView);
++        Atomics.store(this.oglMetaView, 1, 0);
+         const putStartedAt = this.collectMetrics ? performance.now() : 0;
+         this.context.putImageData(this.oglImageData, 0, 0);
+         if (this.collectMetrics) {
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -3978,7 +3978,7 @@
+   // canvas. The drawFrame* path above is a no-op in SAB mode (no presenter
+   // was set up), so this IS the visible-paint pipeline for OGL+SAB.
+   if (displayFrameView && oglPixelSabView && oglMetaSabView) {
+-    const published = publishOglSabFrame(width, height, displayFrameView);
++    const published = publishOglSabFrame(width, height, markerApplied ? displayFrameView : sourceFrameView);
+     if (markerApplied && published) markerOutputIssued = true;
+   }
+   finishProfileSample("draw", drawStartedAt);
+@@ -4008,7 +4008,7 @@
+ // wakes reliably but caps SAB write-rate around 20 Hz. Lower values lift
+ // the write rate but trade gameSpeed (Day-10 measured 91% at 4 ms vs 100%
+ // at 14 ms — main-thread paint contention with worker's SAB reads).
+-const OGL_SAB_MIN_INTERVAL_MS = 14;
++const OGL_SAB_MIN_INTERVAL_MS = 0;
+ 
+ let oglSabWriteCount = 0;       // successful SAB writes (memcpy + gen bump)
+ let oglSabThrottleSkipCount = 0; // calls returned early by 14ms throttle
+@@ -4032,10 +4032,13 @@
+   // exactly (presentationScale × 320 × 240). On the rare path where sizes
+   // diverge (e.g. presentation-scale change mid-run, currently not
+   // supported), clip to the smaller buffer so we don't OOB.
++  // Producer and consumer never copy the same shared pixels concurrently.
++  // Contention drops an image instead of blocking either emulation or UI.
++  if (Atomics.compareExchange(oglMetaSabView, 1, 0, 1) !== 0) return false;
+   const sabBytes = oglPixelSabView.length;
+   const fbBytes = frameView.length;
+   const copyBytes = fbBytes < sabBytes ? fbBytes : sabBytes;
+-  if (copyBytes === 0) return false;
++  if (copyBytes === 0) { Atomics.store(oglMetaSabView, 1, 0); return false; }
+   if (copyBytes === sabBytes && copyBytes === fbBytes) {
+     // Common path: same-size memcpy via TypedArray.set, which compiles to
+     // a SIMD memmove on Chrome.
+@@ -4048,6 +4051,7 @@
+   }
+   // Bump the generation; main thread polls this with Atomics.load on RAF.
+   Atomics.add(oglMetaSabView, 0, 1);
++  Atomics.store(oglMetaSabView, 1, 0);
+   oglSabWriteCount += 1;
+   maybeReportOglSabRates(now);
+   return true;

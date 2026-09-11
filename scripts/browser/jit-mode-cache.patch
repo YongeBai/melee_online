@@ -1,0 +1,122 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -434,6 +434,10 @@
+ 
+ namespace
+ {
++// Requested from the JS worker; applied only at a CPU slice boundary.
++std::atomic<int> s_wasm_jit_requested_mode{0};
++std::atomic<int> s_wasm_jit_applied_mode{0};
++std::atomic<u32> s_wasm_jit_mode_flushes{0};
+ bool s_wasm_jit_enabled = false;
+ bool s_wasm_jit_direct_only = true;
+ u32 s_wasm_direct_tier_reject_count = 0;
+@@ -8010,6 +8014,34 @@
+   const CPU::State* state_ptr = m_system.GetCPU().GetStatePtr();
+   while (*state_ptr == CPU::State::Running)
+   {
++#ifdef __EMSCRIPTEN__
++    const int requested_mode = s_wasm_jit_requested_mode.load(std::memory_order_acquire);
++    if (requested_mode != s_wasm_jit_applied_mode.load(std::memory_order_relaxed))
++    {
++      // No cached callback is executing here. Invalidate on the CPU thread so
++      // hot blocks compiled during boot adopt the new tier. This also removes
++      // generated blocks when the worker disables JIT after a failed check.
++      s_wasm_jit_enabled = requested_mode != 0;
++      s_wasm_jit_direct_only = requested_mode < 2;
++      s_fast_os_interrupt_verified_modes = 0;
++      s_fast_melee_input_status_verified = false;
++      s_fast_melee_input_status_cycles = 0;
++      s_fast_melee_input_status_loadstores = 0;
++      s_fast_melee_status_fn_verified = false;
++      s_fast_melee_service_poll_verified = false;
++      s_fast_melee_service_poll_cycles = 0;
++      s_fast_melee_service_poll_loadstores = 0;
++      s_fast_melee_si_poll_verified = false;
++      s_fast_melee_si_poll_cycles = 0;
++      s_fast_melee_si_poll_loadstores = 0;
++      s_fast_melee_input_poll_verified = false;
++      s_fast_melee_input_poll_cycles = 0;
++      s_fast_melee_input_poll_loadstores = 0;
++      ClearCache();
++      s_wasm_jit_mode_flushes.fetch_add(1, std::memory_order_relaxed);
++      s_wasm_jit_applied_mode.store(requested_mode, std::memory_order_release);
++    }
++#endif
+     // §28cn metrics-gated per-slice wall-time profiling. The timestamp below
+     // spans Advance + ExecuteOneBlock; >16000us means the CPU pthread crossed
+     // one 60Hz frame budget, including intentional waits.
+@@ -11002,26 +11034,22 @@
+ 
+ extern "C" void SetPpcWasmJitEnabled(int enabled)
+ {
+-  const bool next_enabled = enabled != 0;
+-  s_wasm_jit_direct_only = enabled < 2;
+-  if (next_enabled && !s_wasm_jit_enabled)
+-  {
+-    s_fast_os_interrupt_verified_modes = 0;
+-    s_fast_melee_input_status_verified = false;
+-    s_fast_melee_input_status_cycles = 0;
+-    s_fast_melee_input_status_loadstores = 0;
+-    s_fast_melee_status_fn_verified = false;
+-    s_fast_melee_service_poll_verified = false;
+-    s_fast_melee_service_poll_cycles = 0;
+-    s_fast_melee_service_poll_loadstores = 0;
+-    s_fast_melee_si_poll_verified = false;
+-    s_fast_melee_si_poll_cycles = 0;
+-    s_fast_melee_si_poll_loadstores = 0;
+-    s_fast_melee_input_poll_verified = false;
+-    s_fast_melee_input_poll_cycles = 0;
+-    s_fast_melee_input_poll_loadstores = 0;
+-  }
+-  s_wasm_jit_enabled = next_enabled;
++  s_wasm_jit_requested_mode.store(std::clamp(enabled, 0, 2), std::memory_order_release);
++}
++
++extern "C" int GetPpcWasmJitRequestedMode()
++{
++  return s_wasm_jit_requested_mode.load(std::memory_order_acquire);
++}
++
++extern "C" int GetPpcWasmJitAppliedMode()
++{
++  return s_wasm_jit_applied_mode.load(std::memory_order_acquire);
++}
++
++extern "C" u32 GetPpcWasmJitModeFlushes()
++{
++  return s_wasm_jit_mode_flushes.load(std::memory_order_relaxed);
+ }
+ 
+ extern "C" void SetPpcProfileEnabled(int enabled)
+@@ -11145,7 +11173,7 @@
+                     [](const auto& lhs, const auto& rhs) { return lhs.first > rhs.first; });
+ 
+   std::ostringstream out;
+-  out << (s_wasm_jit_direct_only ? "tier:guarded " : "tier:mixed ");
++  out << (s_wasm_jit_applied_mode.load(std::memory_order_acquire) < 2 ? "tier:guarded " : "tier:mixed ");
+   out << "hotcounts:" << (DOLPHIN_WEB_HOT_COUNTERS ? "on " : "off ");
+   const u32 average_prefix =
+       s_wasm_block_attempt_count == 0 ? 0 : s_wasm_prefix_instruction_sum / s_wasm_block_attempt_count;
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -58,6 +58,9 @@
+ extern "C" std::uint32_t DolphinWeb_SetCachedInterpreterDisableMask(std::uint32_t mask);
+ extern "C" std::uint32_t DolphinWeb_GetCachedInterpreterDisableMask();
+ extern "C" void NotifyWebGpuOwnershipTraceLoadRequested();
++extern "C" int GetPpcWasmJitRequestedMode();
++extern "C" int GetPpcWasmJitAppliedMode();
++extern "C" std::uint32_t GetPpcWasmJitModeFlushes();
+ 
+ #ifdef __EMSCRIPTEN__
+ #include <emscripten/emscripten.h>
+@@ -1142,6 +1145,9 @@
+     return "{}";
+   std::ostringstream out;
+   out << "{\"enabled\":" << (DolphinWeb::BrowserProfile::enabled.load() ? "true" : "false")
++      << ",\"jitRequestedMode\":" << GetPpcWasmJitRequestedMode()
++      << ",\"jitAppliedMode\":" << GetPpcWasmJitAppliedMode()
++      << ",\"jitModeFlushes\":" << GetPpcWasmJitModeFlushes()
+       << ",\"internalScale\":" << Config::Get(Config::GFX_EFB_SCALE)
+       << ",\"scaledEfbCopies\":" << Config::Get(Config::GFX_HACK_COPY_EFB_SCALED)
+       << ",\"cpuThread\":" << Config::Get(Config::MAIN_CPU_THREAD)

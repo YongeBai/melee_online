@@ -154,3 +154,149 @@ The view isolates input without pausing or muting the emulator. The earlier
 frozen-frame keyboard-view checks are superseded; native battle pause is unchanged.
 Nine targeted memory/input/video/asset tests passed, including the new cursor
 structure bounds and rejection of stale cursor data outside character select.
+
+## Two-player rooms and rollback revision
+
+The room owner is P1/controller 1 and the joining browser is P2/controller 2.
+The native `sub_color`/controller field must be set as well as the player slot;
+merely labeling the second socket P2 was insufficient. The integration now
+asserts that guest input moves the second fighter, and that both controller
+indices remain `[0, 1]` in a subsequent match.
+
+The real Dolphin integration (`MELEE_NATIVE_BACKEND=OGL node
+scripts/native/verify-rollback.mjs`) passed identical final MEM1 hashes for
+on-time input and input delayed 1, 3, 5 and 9 frames. Each delayed trial performed
+six restores; the deepest correction replayed ten frames. Decoded screenshots
+immediately after rollback and after a rematch showed original Battlefield,
+fighters and HUD, rather than a black restored GPU frame. Raw results are in
+`rollback-validation.json`. Native save/load now runs on the CPU thread, where
+the graphics context is valid.
+
+These are 75-frame stress runs, including cold checkpoint allocation. They
+measured about 66 simulation FPS without correction and 36–46 FPS with frequent
+corrections. The earlier solo 60 FPS results do not establish 60 FPS rollback
+performance. Room workers and solo use OpenGL by default. A longer Vulkan browser run crashed
+in `libvulkan_radeon.so`; the short Vulkan integration pass was insufficient to
+establish stability. Broad hardware and long-duration driver stability are not
+established by the OpenGL pass either.
+
+Twenty-two root tests pass, including real WebSocket protocol tests with a fake
+worker for two occupied seats, a rejected third guest, concurrent join races,
+readiness, forged input-port isolation, owner/guest refresh credentials, and
+stale CSS frame counters during asynchronous scene loading.
+All 19 frontend tests and TypeScript checks pass. Browser verification uses two
+independent tabs/sessionStorage clients in the in-app Chromium browser; a second
+browser engine was unavailable. An artificial 80-ms input delay affects inputs
+only and is not a WAN/loss simulation.
+
+The final OpenGL room `XDL4HZ` joined through the visible room field, advanced
+only after both Ready buttons, and used P1's native stage cursor to choose
+Battlefield. Browser screenshots showed red P1/Fox and blue P2/Falco. Guest
+jump/special inputs delayed 80 ms produced two corrections, ten replayed frames,
+a maximum depth of five and no late-input rejections. A 20.004-second sample
+measured 59.437 simulation FPS, 59.387 decoded FPS and 57.238 distinct browser
+presentations per second at 1280×720. This sample includes few input changes;
+it does not supersede the heavier correction stress results. The separate browser
+report is `room-browser-validation.json`.
+
+The normal room screen was visually reviewed without QA controls: native red
+and blue character cards flank a central panel using Melee's extracted texture,
+SIS letters and beveled controls. Owner and guest refreshes preserved seats in
+room `VJFUHR`. P2's keyboard navigation probe passed at native cursor
+`(23.312, -22)`, including tap jump, Back, O/Esc, input isolation, 44 advancing
+native frames and continuing non-silent menu audio. That controls probe preceded
+the Vulkan driver failure; the controller/UI code is shared with the final
+OpenGL path.
+
+Holding right in P2's client ended the first game through normal stock loss;
+both clients returned through native results to the same room's character select.
+The browser-driven rematch entered Battlefield again with controller indices
+`[0,1]`, player IDs `[0,1]`, four stocks each, a 480-second limit, no items and
+no teams. Its match epoch changed and no worker error was reported. Both clients
+were then returned to the normal `/play/` view, removing QA overlays and the
+artificial guest delay. The same-origin production server remains running.
+
+## Rollback optimization revision
+
+The current OpenGL room worker enables real MMU translation, retains safe JIT
+blocks across restores, reuses GPU allocations and skips intermediate replay
+readbacks. Checkpoints are four frames apart; the unchanged restored checkpoint
+is not copied again. The late-input window remains 12 frames, with at most 15
+replayed frames for an aligned restore. Each full snapshot is 76,598,746 bytes;
+five live slots use approximately 383 MB. No CPU, GPU or device state was removed
+from the serializer. The fake-VMEM allocation is unused in real MMU mode.
+
+A 3,600-frame Fox/Falco workload on Battlefield issued 400 scripted input changes
+in each trial. All final MEM1 hashes matched the known-input reference:
+
+| Input delay (frames) | New simulation FPS | Corrections | Replayed frames |
+| --- | ---: | ---: | ---: |
+| 0 | 136.85 | 0 | 0 |
+| 1 | 103.58 | 400 | 800 |
+| 3 | 91.27 | 400 | 1,600 |
+| 5 | 83.36 | 400 | 2,400 |
+| 9 | 68.54 | 400 | 4,000 |
+
+These rates include checkpoint and correction work, count only new simulation
+frames, and run unthrottled to measure headroom. They do not count replayed
+frames as progress or prove input-to-photon latency. The test enforced a minimum
+of 60 FPS for every trial. No late inputs were rejected. It also passed a
+compiled-instruction mutation that forces JIT invalidation before execution,
+visible 720p video after restore, and a subsequent Battlefield match with
+controller indices `[0, 1]`. The complete report is `rollback-validation.json`.
+
+The final source passed 24 root tests, 19 frontend tests, TypeScript checking,
+the frontend production build, and repeated idempotent native setup. Tests now
+include the oldest accepted corrections across repeated checkpoint-ring wraps
+and verify that the restored checkpoint is not redundantly copied.
+
+The first repeated-input browser run exposed a separate delivery failure:
+59.10 simulation FPS but only 49.26 presented FPS, with 578 discarded video
+frames. The final revision retains a bounded FIFO, permits the room clock to
+catch up after short correction bursts, and preserves ordinary captures queued
+before rollback begins. The native rendering itself remains unchanged.
+
+Two independent Chromium clients then joined room `Y58KQC` through the visible
+room-code field, with P1 on the left and P2 on the right. Both pressed Ready and
+P1 used native stage selection to enter Battlefield. Both clients sent repeated
+jump/attack/shield/neutral changes every 180 ms; P2's packets were delayed 80 ms.
+The final three-frame starting buffer/eight-frame cap produced:
+
+| Metric over 60 seconds | Owner P1 | Guest P2 |
+| --- | ---: | ---: |
+| New simulation FPS | 60.079 | 60.097 |
+| Distinct presented FPS | 59.863 | 59.913 |
+| Decoded FPS | 59.929 | 59.963 |
+| Dropped decoded frames / decode errors | 0 / 0 | 0 / 0 |
+| Corrections / replayed frames | 333 / 2,636 | 333 / 2,636 |
+| Average browser presentation queue | 73.94 ms | 74.07 ms |
+
+No inputs were rejected in this final 80-ms run. No room-clock deadline was
+reset. Both views retained the original models, animation, Battlefield and HUD;
+inspection confirmed controller indices `[0, 1]`, four stocks, 480 seconds,
+no items and no teams. Owner and guest refreshes preserved their assigned seats
+and resumed the same match. The raw results and earlier iterations are in
+`room-browser-validation.json`.
+
+A separate 150-ms guest-delay minute still presented 59.95/59.78 FPS with zero
+video drops, while replaying over 3,400 frames. Eleven packets arrived outside
+the 12-frame correction window and were rejected. This is a measured high-delay
+limit, not a lossless-WAN claim. These results establish approximately 60 FPS
+playback for the tested local workload; they do not establish competitive remote
+input latency, every hardware/character combination, or browser-native emulation.
+The measured presentation queue itself adds about 74 ms before display, in
+addition to simulation, input transport, encoding and network delivery.
+
+The final browser rematch returned through normal results to the same room,
+then entered Battlefield with a new epoch and controller indices `[0, 1]`.
+Both fighters started with four stocks, 480 seconds and the fixed no-item rules.
+QA overlays and packet delays were removed afterward.
+
+The updated capture code also passed a separate 600-frame Ice Climbers/Peach
+workload, including a stock loss. On-time and 1/3/5/9-frame-late runs produced
+identical final hashes; the nine-frame trial performed 60 corrections and 600
+replayed frames at **64.63 simulation FPS**. All five trials exceeded 60 FPS.
+Restored video, compiled-code invalidation and rematch checks passed. See
+`rollback-capture-validation.json`. The selection probe now waits for Melee's
+CSS reload and fighter-archive preload before issuing Start, avoiding a test-only
+race when changing characters through the QA memory interface.

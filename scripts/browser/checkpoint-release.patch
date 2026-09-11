@@ -1,0 +1,116 @@
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -344,6 +344,9 @@
+     std::size_t allocated = 0;
+     for (const auto& existing : browser_states) allocated += existing.size();
+     if (allocated - buffer.size() + size > total_budget) return 0;
++    // The slot is already invalid. Free its old allocation before allocating
++    // the replacement, avoiding a second full snapshot at peak heap usage.
++    buffer.reset();
+     buffer.reset(size);
+   }
+   browser_allocate_us[slot] = BrowserClockUs() - allocation_started;
+@@ -469,6 +472,21 @@
+   }
+   return result + "]}";
+ }
++bool BrowserRelease(Core::System& system, unsigned slot)
++{
++  if (slot >= browser_states.size()) return false;
++  browser_state_sizes[slot] = 0;
++  browser_states_gpu[slot] = false;
++  browser_states[slot].reset();
++  browser_state_sections[slot].clear();
++  if (g_texture_cache)
++  {
++    auto release = [slot] { g_texture_cache->BrowserReleaseState(slot); };
++    if (system.IsDualCoreMode()) AsyncRequests::GetInstance()->PushBlockingEvent(release);
++    else release();
++  }
++  return true;
++}
+ void BrowserClear()
+ {
+   auto& system = Core::System::GetInstance();
+--- a/vendor/dolphin/Source/Core/Core/State.h
++++ b/vendor/dolphin/Source/Core/Core/State.h
+@@ -91,6 +91,7 @@
+ void BrowserRecordSection(PointerWrap& p, const char* name);
+ std::string BrowserCompare(unsigned a, unsigned b);
+ void BrowserClear();
++bool BrowserRelease(Core::System& system, unsigned slot);
+ std::size_t BrowserRequiredSize();
+ void Init(Core::System& system);
+ void Shutdown();
+--- a/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
+@@ -454,6 +454,12 @@
+   for (auto& textures : m_browser_textures) textures.clear();
+   m_browser_texture_bytes.fill(0);
+ }
++void TextureCacheBase::BrowserReleaseState(unsigned slot)
++{
++  if (slot >= m_browser_textures.size()) return;
++  m_browser_textures[slot].clear();
++  m_browser_texture_bytes[slot] = 0;
++}
+ std::size_t TextureCacheBase::BrowserTextureBytes() const
+ {
+   std::size_t bytes = 0;
+--- a/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.h
++++ b/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.h
+@@ -273,6 +273,7 @@
+   void BrowserBeginState(unsigned slot, bool saving);
+   void BrowserEndState();
+   void BrowserClearStates();
++  void BrowserReleaseState(unsigned slot);
+   bool BrowserStateFailed() const { return m_browser_state_failed.load(); }
+   std::size_t BrowserTextureBytes() const;
+ private:
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1185,6 +1185,13 @@
+   BrowserRollbackReleasePads();
+   State::BrowserClear();
+ }
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackRelease(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return State::BrowserRelease(system, static_cast<unsigned>(slot)) ? 1 : 0;
++}
+ 
+ int ResetCore()
+ {
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1101,6 +1101,9 @@
+         if (![payload.a,payload.b].every(v=>Number.isInteger(v)&&v>=0&&v<6))
+           throw new Error("Invalid comparison slots");
+         return {equal: Boolean(api.browserRollbackEqual(payload.a,payload.b)), comparison: api.browserRollbackCompare ? JSON.parse(api.browserRollbackCompare(payload.a,payload.b)) : null};
++      } else if (payload.action === "release") {
++        if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
++            !api.browserRollbackRelease?.(payload.slot)) throw new Error("Checkpoint release failed");
+       } else if (payload.action === "clear") {
+         api.browserRollbackClear();
+       } else throw new Error("Unknown browser rollback action");
+@@ -2397,6 +2400,7 @@
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
+     browserRollbackCompare: optionalCwrap("BrowserRollbackCompare", "string", ["number", "number"]),
+     browserRollbackClear: optionalCwrap("BrowserRollbackClear", null, []),
++    browserRollbackRelease: optionalCwrap("BrowserRollbackRelease", "number", ["number"]),
+     getFrame: cwrap("GetFrame", "number", []),
+     getFrameSignalPtr: optionalCwrap("GetFrameSignalPtr", "number", []),
+     getGameId: cwrap("GetGameId", "string", []),
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -90,7 +90,7 @@
+ void FifoManager::PauseAndLock()
+ {
+ #ifdef __EMSCRIPTEN__
+-  if (m_use_deterministic_gpu_thread && m_system.IsDualCoreMode() &&
++  if (m_use_deterministic_gpu_thread && !m_emu_running_state.IsSet() && m_system.IsDualCoreMode() &&
+       m_gpu_mainloop.IsRunning())
+   {
+     // A logic-frame break pauses adjacent systems before the host acquires

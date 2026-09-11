@@ -1,0 +1,29 @@
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -125,6 +125,16 @@
+     this.workerCanvas = Boolean(canvas) || Boolean(this.transferCanvasFn);
+     this.visibleCanvas = visibleCanvas;
+     this.detachedOglContext = null;
++    this.presentationQueue = null;
++    this.bitmapPresentationPacing = "immediate";
++    if (new URLSearchParams(globalThis.location?.search || "").get("pace") === "raf") {
++      import("/play/browser-frame-queue.js").then(({BrowserFrameQueue}) => {
++        this.presentationQueue = new BrowserFrameQueue(bitmap =>
++          this.drawDetachedOglBitmap(bitmap, bitmap.width, bitmap.height));
++        this.bitmapPresentationPacing = "raf-buffered";
++        globalThis.addEventListener("pagehide", () => this.presentationQueue.close(), {once:true});
++      }).catch(error => this.onStatus("Presentation queue unavailable: " + error.message));
++    }
+     this.detachedOglFramesDrawn = 0;
+     this.detachedGpuFramesReceived = 0;
+     this.detachedGpuFramesDropped = 0;
+@@ -891,7 +901,8 @@
+       // Worker has rendered a frame to its standalone OffscreenCanvas and
+       // handed us the result as an ImageBitmap. Draw onto the visible
+       // canvas via 2D context. Lazily create the context on first frame.
+-      this.drawDetachedOglBitmap(message.bitmap, message.width, message.height);
++      if (this.presentationQueue) this.presentationQueue.push(message.bitmap);
++      else this.drawDetachedOglBitmap(message.bitmap, message.width, message.height);
+       return;
+     }
+ 

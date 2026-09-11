@@ -1,0 +1,251 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2026
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "dolphin_web_discio.cpp"
+ 
+ #include <array>
+@@ -33,6 +35,7 @@
+ #include "Core/ConfigManager.h"
+ #include "Core/Core.h"
+ #include "Core/CoreTiming.h"
++#include "Core/WasmTimingProfile.h"
+ #include "Core/HW/GBAPad.h"
+ #include "Core/HW/ProcessorInterface.h"
+ #include "Core/HW/EXI/EXI_Device.h"
+@@ -830,6 +833,10 @@
+ int CoreInit()
+ {
+   EnsureRuntime();
++  const bool profile = EM_ASM_INT({ return Module['dolphinCoreLog'] === true; }) != 0;
++  DolphinWeb::BrowserProfile::enabled.store(profile, std::memory_order_relaxed);
++  if (profile)
++    DolphinWeb::WasmTimingProfile::SetEnabled(true);
+   return 1;
+ }
+ 
+@@ -1128,6 +1135,35 @@
+   return snapshot.c_str();
+ }
+ 
++EMSCRIPTEN_KEEPALIVE const char* GetBrowserProfile()
++{
++  static std::string result;
++  if (!s_runtime_initialized)
++    return "{}";
++  std::ostringstream out;
++  out << "{\"enabled\":" << (DolphinWeb::BrowserProfile::enabled.load() ? "true" : "false")
++      << ",\"internalScale\":" << Config::Get(Config::GFX_EFB_SCALE)
++      << ",\"scaledEfbCopies\":" << Config::Get(Config::GFX_HACK_COPY_EFB_SCALED)
++      << ",\"cpuThread\":" << Config::Get(Config::MAIN_CPU_THREAD)
++      << ",\"cpuOverclock\":" << Config::Get(Config::MAIN_OVERCLOCK)
++      << ",\"emulationSpeed\":" << Config::Get(Config::MAIN_EMULATION_SPEED)
++      << ",\"syncOnSkipIdle\":" << Config::Get(Config::MAIN_SYNC_ON_SKIP_IDLE)
++      << ",\"rushPresentation\":" << Config::Get(Config::MAIN_RUSH_FRAME_PRESENTATION)
++      << ",\"smoothPresentation\":" << Config::Get(Config::MAIN_SMOOTH_EARLY_PRESENTATION)
++      << ",\"correctTimeDrift\":" << Config::Get(Config::MAIN_CORRECT_TIME_DRIFT)
++      << ",\"stages\":{";
++  for (std::size_t i = 0; i < DolphinWeb::BrowserProfile::counters.size(); ++i)
++  {
++    const auto& c = DolphinWeb::BrowserProfile::counters[i];
++    if (i) out << ',';
++    out << '\"' << DolphinWeb::BrowserProfile::names[i] << "\":{\"count\":" << c.count.load()
++        << ",\"totalUs\":" << c.total_us.load() << ",\"maxUs\":" << c.max_us.load() << '}';
++  }
++  out << "}}";
++  result = out.str();
++  return result.c_str();
++}
++
+ const char* GetCoreTitle()
+ {
+   return s_core_title.c_str();
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -668,6 +668,7 @@
+ function rendererDiagnosticsPayload() {
+   return {
+     coreLog: api?.getBrowserLog?.() || "",
++    coreProfile: JSON.parse(api?.getBrowserProfile?.() || "{}"),
+     ...rendererDiagnostics,
+     coreSelection: { ...rendererDiagnostics.coreSelection },
+     activePresenterBackend: renderBackend,
+@@ -2242,6 +2243,7 @@
+     getCoreStateName: optionalCwrap("GetCoreStateName", "string", []),
+     getCoreStatus: optionalCwrap("GetCoreStatus", "string", []),
+     getBrowserLog: optionalCwrap("GetBrowserLog", "string", []),
++    getBrowserProfile: optionalCwrap("GetBrowserProfile", "string", []),
+     getCoreTitle: optionalCwrap("GetCoreTitle", "string", []),
+     getCoreTicksLow: optionalCwrap("GetCoreTicksLow", "number", []),
+     getCoreTicksHigh: optionalCwrap("GetCoreTicksHigh", "number", []),
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2014 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "Core/PowerPC/CachedInterpreter/CachedInterpreter.h"
+ 
+ #include <algorithm>
+@@ -8066,6 +8068,8 @@
+           DolphinWeb::WasmTimingProfile::ElapsedMicros(_advance_start, _advance_end);
+       const u32 _exec_us = DolphinWeb::WasmTimingProfile::ElapsedMicros(_advance_end, _slice_end);
+       DolphinWeb::WasmTimingProfile::FinishSlice(_slice_us, _advance_us, _exec_us);
++      DolphinWeb::BrowserProfile::Record(DolphinWeb::BrowserProfile::Stage::CpuAdvance, _advance_us);
++      DolphinWeb::BrowserProfile::Record(DolphinWeb::BrowserProfile::Stage::CpuExecute, _exec_us);
+       // §28co per-stage maxes — CAS-update.
+       {
+         u32 prev = s_runloop_advance_max_us.load(std::memory_order_relaxed);
+--- a/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLGfx.cpp
++++ b/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLGfx.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2023 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "VideoBackends/OGL/OGLGfx.h"
+ 
+ #include "Common/GL/GLContext.h"
+@@ -341,6 +343,9 @@
+ void OGLGfx::Draw(u32 base_vertex, u32 num_vertices)
+ {
+ #ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlDraw);
++#endif
++#ifdef __EMSCRIPTEN__
+   TraceBrowserDraw("before arrays");
+ #endif
+   glDrawArrays(static_cast<const OGLPipeline*>(m_current_pipeline)->GetGLPrimitive(), base_vertex,
+@@ -353,6 +358,9 @@
+ void OGLGfx::DrawIndexed(u32 base_index, u32 num_indices, u32 base_vertex)
+ {
+ #ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlDraw);
++#endif
++#ifdef __EMSCRIPTEN__
+   TraceBrowserDraw("before indexed");
+ #endif
+   if (g_ogl_config.bSupportsGLBaseVertex)
+--- a/vendor/dolphin/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp
++++ b/vendor/dolphin/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2011 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "VideoBackends/OGL/ProgramShaderCache.h"
+ 
+ #include <array>
+@@ -223,6 +225,9 @@
+ 
+ void ProgramShaderCache::UploadConstants()
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlUniform);
++#endif
+   auto& system = Core::System::GetInstance();
+   auto& pixel_shader_manager = system.GetPixelShaderManager();
+   auto& vertex_shader_manager = system.GetVertexShaderManager();
+@@ -280,6 +285,9 @@
+ 
+ void ProgramShaderCache::UploadConstants(const void* data, u32 data_size)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlUniform);
++#endif
+   // allocate and copy
+   // WebGL validates the complete std140 block, including its trailing padding.
+   // Melee's post-processing constants have 140 payload bytes but a 144-byte
+@@ -337,6 +345,9 @@
+ 
+ GLuint ProgramShaderCache::CompileSingleShader(GLenum type, std::string_view code)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlCompile);
++#endif
+   const GLuint result = glCreateShader(type);
+ 
+   constexpr GLsizei num_strings = 2;
+--- a/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -1,6 +1,8 @@
+ // Copyright 2026 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
+ #include "Common/GL/GLInterface/Emscripten.h"
+ 
+ #include <chrono>
+@@ -309,6 +311,9 @@
+ 
+ void GLContextEmscripten::Swap()
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::GlPresent);
++#endif
+   static std::uint32_t s_diagnostic_clear_frame = 0;
+   std::uint32_t readback_rgba = 0;
+   if (DolphinWebUseDiagnosticClear())
+--- /dev/null
++++ b/vendor/dolphin/Source/Core/Common/BrowserProfile.h
+@@ -0,0 +1,51 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++
++#include <array>
++#include <atomic>
++#include <chrono>
++#include <cstdint>
++
++namespace DolphinWeb::BrowserProfile
++{
++enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, Count };
++constexpr std::array<const char*, 6> names{
++    "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent"};
++struct Counter
++{
++  std::atomic<std::uint64_t> count{0};
++  std::atomic<std::uint64_t> total_us{0};
++  std::atomic<std::uint64_t> max_us{0};
++};
++inline std::atomic<bool> enabled{false};
++inline std::array<Counter, static_cast<std::size_t>(Stage::Count)> counters;
++
++inline void Record(Stage stage, std::uint64_t us)
++{
++  if (!enabled.load(std::memory_order_relaxed))
++    return;
++  auto& counter = counters[static_cast<std::size_t>(stage)];
++  counter.count.fetch_add(1, std::memory_order_relaxed);
++  counter.total_us.fetch_add(us, std::memory_order_relaxed);
++  auto old = counter.max_us.load(std::memory_order_relaxed);
++  while (us > old && !counter.max_us.compare_exchange_weak(old, us, std::memory_order_relaxed)) {}
++}
++
++// CPU wall time of GL calls, not GPU execution time. Nested scopes overlap.
++class Scope
++{
++public:
++  explicit Scope(Stage stage) : m_stage(stage), m_active(enabled.load(std::memory_order_relaxed)),
++    m_start(m_active ? Clock::now() : Clock::time_point{}) {}
++  ~Scope()
++  {
++    if (m_active)
++      Record(m_stage, std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - m_start).count());
++  }
++private:
++  using Clock = std::chrono::steady_clock;
++  Stage m_stage;
++  bool m_active;
++  Clock::time_point m_start;
++};
++}  // namespace DolphinWeb::BrowserProfile

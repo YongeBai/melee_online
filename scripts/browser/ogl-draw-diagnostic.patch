@@ -1,0 +1,97 @@
+--- a/Source/Core/VideoBackends/OGL/OGLGfx.cpp
++++ b/Source/Core/VideoBackends/OGL/OGLGfx.cpp
+@@ -22,9 +22,62 @@
+ 
+ #include <algorithm>
+ #include <string_view>
++#ifdef __EMSCRIPTEN__
++#include <cstdlib>
++#include <emscripten/emscripten.h>
++#endif
+ 
+ namespace OGL
+ {
++#ifdef __EMSCRIPTEN__
++// Bounded diagnostic for the experimental browser core, not a performance mode.
++static void TraceBrowserDraw(const char* phase)
++{
++  static unsigned errors = 0;
++  static unsigned checks = 0;
++  if (errors >= 8 || checks >= 128)
++    return;
++  ++checks;
++  const GLenum error = glGetError();
++  if (error == GL_NO_ERROR)
++    return;
++  ++errors;
++  char* details = static_cast<char*>(EM_ASM_PTR({
++    const gl = GL.currentContext.GLctx;
++    const program = gl.getParameter(gl.CURRENT_PROGRAM);
++    if (program) gl.validateProgram(program);
++    const blocks = program ? Array.from({length: gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS)}, (_, i) => {
++      const binding = gl.getActiveUniformBlockParameter(program, i, gl.UNIFORM_BLOCK_BINDING);
++      return {name: gl.getActiveUniformBlockName(program, i), binding,
++        required: gl.getActiveUniformBlockParameter(program, i, gl.UNIFORM_BLOCK_DATA_SIZE),
++        buffer: Boolean(gl.getIndexedParameter(gl.UNIFORM_BUFFER_BINDING, binding)),
++        size: gl.getIndexedParameter(gl.UNIFORM_BUFFER_SIZE, binding)};
++    }) : [];
++    const attributes = program ? Array.from({length: gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)}, (_, i) => {
++      const a = gl.getActiveAttrib(program, i), loc = gl.getAttribLocation(program, a.name);
++      if (loc < 0) return {name: a.name, type: a.type, loc};
++      return {name: a.name, type: a.type, loc,
++        enabled: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_ENABLED),
++        integer: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_INTEGER),
++        buffer: Boolean(gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING))};
++    }) : [];
++    const text = JSON.stringify({blocks, attributes,
++      program: program?.name || null,
++      valid: program ? gl.getProgramParameter(program, gl.VALIDATE_STATUS) : false,
++      validation: program ? gl.getProgramInfoLog(program) : 'No current program',
++      framebuffer: gl.checkFramebufferStatus(gl.FRAMEBUFFER),
++      vertexArray: Boolean(gl.getParameter(gl.VERTEX_ARRAY_BINDING)),
++      elementBuffer: Boolean(gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING))
++    });
++    const length = lengthBytesUTF8(text) + 1;
++    const ptr = _malloc(length);
++    stringToUTF8(text, ptr, length);
++    return ptr;
++  }));
++  ERROR_LOG_FMT(VIDEO, "Browser draw {} GL error {:#x}: {}", phase, error, details);
++  std::free(details);
++}
++#endif
+ VideoConfig g_ogl_config;
+ 
+ static void APIENTRY ErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+@@ -287,12 +340,21 @@
+ 
+ void OGLGfx::Draw(u32 base_vertex, u32 num_vertices)
+ {
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("before arrays");
++#endif
+   glDrawArrays(static_cast<const OGLPipeline*>(m_current_pipeline)->GetGLPrimitive(), base_vertex,
+                num_vertices);
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("after arrays");
++#endif
+ }
+ 
+ void OGLGfx::DrawIndexed(u32 base_index, u32 num_indices, u32 base_vertex)
+ {
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("before indexed");
++#endif
+   if (g_ogl_config.bSupportsGLBaseVertex)
+   {
+     glDrawElementsBaseVertex(static_cast<const OGLPipeline*>(m_current_pipeline)->GetGLPrimitive(),
+@@ -304,6 +366,9 @@
+     glDrawElements(static_cast<const OGLPipeline*>(m_current_pipeline)->GetGLPrimitive(),
+                    num_indices, GL_UNSIGNED_SHORT, static_cast<u16*>(nullptr) + base_index);
+   }
++#ifdef __EMSCRIPTEN__
++  TraceBrowserDraw("after indexed");
++#endif
+ }
+ 
+ void OGLGfx::DispatchComputeShader(const AbstractShader* shader, u32 groupsize_x, u32 groupsize_y,

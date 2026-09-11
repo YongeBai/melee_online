@@ -1,0 +1,95 @@
+--- a/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -419,14 +419,30 @@
+       const ctx = GL.currentContext.GLctx;
+       const canvas = ctx ? ctx.canvas : null;
+       if (!canvas || typeof canvas.transferToImageBitmap !== 'function') return;
++      // BEGIN BOUNDED BITMAP EXPORT
++      // Bound images even when the main event loop cannot receive messages.
++      // [outstanding, exported, skipped]. Main acknowledges upon receipt;
++      // its optional local presentation queue has its own separate bound.
++      const credit = Module._detachedOglCredit ||
++        (Module._detachedOglCredit = new Int32Array(new SharedArrayBuffer(12)));
++      if (Atomics.load(credit, 0) >= 4) {
++        Atomics.add(credit, 2, 1);
++        return;
++      }
++      Atomics.add(credit, 0, 1);
++      let bitmap;
+       try {
+-        const bitmap = canvas.transferToImageBitmap();
+-        if (!bitmap) return;
++        bitmap = canvas.transferToImageBitmap();
++        if (!bitmap) { Atomics.sub(credit, 0, 1); return; }
+         self.postMessage(
+-          { type: 'detachedOglFrame', bitmap: bitmap, width: bitmap.width, height: bitmap.height },
++          { type: 'detachedOglFrame', bitmap: bitmap, width: bitmap.width, height: bitmap.height, credit },
+           [bitmap]
+         );
++        Atomics.add(credit, 1, 1);
+       } catch (e) {
++        Atomics.sub(credit, 0, 1);
++        try { if (bitmap) bitmap.close(); } catch (_) {}
++        // END BOUNDED BITMAP EXPORT
+         if (typeof Module !== 'undefined' && !Module._detachedOglPostErr) {
+           Module._detachedOglPostErr = true;
+           console.log('[ogl-detached] postMessage failed: ' + (e && e.message ? e.message : e));
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -726,11 +726,12 @@
+   if (data && data.type === "detachedOglFrame" && data.bitmap) {
+     try {
+       self.postMessage(
+-        { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height },
++        { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit },
+         [data.bitmap]
+       );
+     } catch (err) {
+       try { data.bitmap.close(); } catch {}
++      if (data.credit) Atomics.sub(data.credit, 0, 1);
+     }
+     return;
+   }
+@@ -11837,7 +11838,7 @@
+   }
+   try {
+     self.postMessage(
+-      { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height },
++      { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit },
+       [data.bitmap]
+     );
+   } catch (err) {
+@@ -11846,6 +11847,7 @@
+       postStatus(`ogl-detached: forward to main failed: ${err?.message || err}`);
+     }
+     try { data.bitmap.close(); } catch {}
++      if (data.credit) Atomics.sub(data.credit, 0, 1);
+   }
+ }
+ 
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -906,6 +906,15 @@
+ 
+     if ((message?.type === "detachedOglFrame" ||
+          message?.type === "detachedWgpuFrame") && message.bitmap) {
++      if (message.credit) {
++        Atomics.sub(message.credit, 0, 1);
++        this.bitmapTransport = {
++          inFlight: Atomics.load(message.credit, 0),
++          exported: Atomics.load(message.credit, 1),
++          skipped: Atomics.load(message.credit, 2),
++          capacity: 4,
++        };
++      }
+       // Worker has rendered a frame to its standalone OffscreenCanvas and
+       // handed us the result as an ImageBitmap. Draw onto the visible
+       // canvas via 2D context. Lazily create the context on first frame.
+@@ -1083,6 +1092,7 @@
+       presentation: {
+         detachedBitmapReceivedCount: this.detachedGpuFramesReceived,
+         detachedBitmapDrawnCount: this.detachedOglFramesDrawn,
++        bitmapTransport: this.bitmapTransport || null,
+         detachedBitmapDroppedCount: this.detachedGpuFramesDropped
+       },
+       host: {

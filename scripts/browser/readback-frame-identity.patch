@@ -1,0 +1,63 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -3497,8 +3497,11 @@
+         // OGL bypasses XFB, so api.getFrame() doesn't increment per visible frame.
+         // Use the OGL swap count (incremented in DolphinWeb_OnOglSwap) as the
+         // present-deduplication key so each new GL swap registers as a new frame.
+-        const oglSwap = parseOglSwapStats(api.getVideoStats?.()).swap >>> 0;
+-        const oglFrameKey = oglSwap > 0 ? oglSwap : coreFrame;
++        // Readback signals a completed pixel frame before Swap increments
++        // its separate counter. Using that lagging counter drops fresh
++        // pixels whenever this worker wakes between the two operations.
++        const oglSwap = oglSabEnabledForLoad ? 0 : parseOglSwapStats(api.getVideoStats?.()).swap >>> 0;
++        const oglFrameKey = oglSabEnabledForLoad ? coreFrame : (oglSwap > 0 ? oglSwap : coreFrame);
+         // Detached OGL bitmap capture now happens C++-side from the GPU
+         // pthread (Emscripten.cpp Swap() does transferToImageBitmap +
+         // self.postMessage), and the discio worker forwards via
+@@ -4000,33 +4003,12 @@
+   finishProfileSample("present", presentStartedAt);
+ }
+ 
+-let oglSabLastPublishMs = 0;
+-// Throttle on SAB writes. Each OGL swap fires the frame signal twice
+-// (OnGlBackbuffer + OnOglSwap, ~1 ms apart) and ogl_swap_count's relaxed
+-// memory ordering means the worker reads it racily — sometimes both wakes
+-// see the same count, sometimes adjacent counts. 14 ms catches the paired
+-// wakes reliably but caps SAB write-rate around 20 Hz. Lower values lift
+-// the write rate but trade gameSpeed (Day-10 measured 91% at 4 ms vs 100%
+-// at 14 ms — main-thread paint contention with worker's SAB reads).
+-const OGL_SAB_MIN_INTERVAL_MS = 0;
+-
+ let oglSabWriteCount = 0;       // successful SAB writes (memcpy + gen bump)
+-let oglSabThrottleSkipCount = 0; // calls returned early by 14ms throttle
++let oglSabThrottleSkipCount = 0; // consumer owns pixels; producer drops instead of blocking
+ let oglSabLastReportMs = 0;
+ const OGL_SAB_REPORT_INTERVAL_MS = 5000;
+ function publishOglSabFrame(width, height, frameView) {
+-  // Throttle to ~60 Hz: without this cap, the worker drives glReadPixels
+-  // at 150-200 Hz (no presenter pacing in SAB mode), eating GPU pthread
+-  // time that the CPU emulation pthread could otherwise use. Empirically
+-  // dropped gameSpeed from 98 % to 67 %. Capping the publish rate keeps the
+-  // readback at human-visible cadence without saturating the pipeline.
+   const now = performance.now();
+-  if (now - oglSabLastPublishMs < OGL_SAB_MIN_INTERVAL_MS) {
+-    oglSabThrottleSkipCount += 1;
+-    maybeReportOglSabRates(now);
+-    return false;
+-  }
+-  oglSabLastPublishMs = now;
+ 
+   // SAB allocation in core-host.js is sized to match this readback output
+   // exactly (presentationScale × 320 × 240). On the rare path where sizes
+@@ -4034,7 +4016,10 @@
+   // supported), clip to the smaller buffer so we don't OOB.
+   // Producer and consumer never copy the same shared pixels concurrently.
+   // Contention drops an image instead of blocking either emulation or UI.
+-  if (Atomics.compareExchange(oglMetaSabView, 1, 0, 1) !== 0) return false;
++  if (Atomics.compareExchange(oglMetaSabView, 1, 0, 1) !== 0) {
++    oglSabThrottleSkipCount += 1;
++    return false;
++  }
+   const sabBytes = oglPixelSabView.length;
+   const fbBytes = frameView.length;
+   const copyBytes = fbBytes < sabBytes ? fbBytes : sabBytes;

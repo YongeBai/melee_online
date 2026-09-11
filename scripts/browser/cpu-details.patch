@@ -1,0 +1,10 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -669,6 +669,7 @@
+   return {
+     coreLog: api?.getBrowserLog?.() || "",
+     coreProfile: JSON.parse(api?.getBrowserProfile?.() || "{}"),
++    cpuDetails: api?.getPpcWasmHelperStats?.() || "",
+     ...rendererDiagnostics,
+     coreSelection: { ...rendererDiagnostics.coreSelection },
+     activePresenterBackend: renderBackend,

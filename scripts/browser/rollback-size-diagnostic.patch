@@ -1,0 +1,61 @@
+--- a/vendor/dolphin/Source/Core/Core/State.h
++++ b/vendor/dolphin/Source/Core/Core/State.h
+@@ -84,6 +84,7 @@
+ bool BrowserLoad(Core::System& system, unsigned slot);
+ bool BrowserEqual(unsigned a, unsigned b);
+ void BrowserClear();
++std::size_t BrowserRequiredSize();
+ void Init(Core::System& system);
+ void Shutdown();
+ 
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -262,6 +262,8 @@
+ // Six slots support a 12-frame window with checkpoints every four frames.
+ static std::array<Common::UniqueBuffer<u8>, 6> browser_states;
+ static std::array<std::size_t, 6> browser_state_sizes{};
++static std::size_t browser_required_size = 0;
++std::size_t BrowserRequiredSize() { return browser_required_size; }
+ std::size_t BrowserSave(Core::System& system, unsigned slot)
+ {
+   if (slot >= browser_states.size()) return 0;
+@@ -272,6 +274,7 @@
+   PointerWrap measure(&ptr, 0, PointerWrap::Mode::Measure);
+   DoState(system, measure);
+   const auto size = measure.GetOffsetFromPreviousPosition(nullptr);
++  browser_required_size = size;
+   if (!size || size > max_bytes) return 0;
+   auto& buffer = browser_states[slot];
+   if (buffer.size() < size) buffer.reset(size);
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1041,6 +1041,10 @@
+   const Core::CPUThreadGuard guard(system);
+   return static_cast<int>(State::BrowserSave(system, static_cast<unsigned>(slot)));
+ }
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackRequiredSize()
++{
++  return static_cast<int>(State::BrowserRequiredSize());
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackRestore(int slot)
+ {
+   auto& system = Core::System::GetInstance();
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1033,7 +1033,7 @@
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6)
+           throw new Error("Invalid checkpoint slot");
+         const bytes = api.browserRollbackCapture(payload.slot);
+-        if (!bytes) throw new Error("Capture failed: machine must be paused and checkpoint under 64 MiB");
++        if (!bytes) throw new Error("Capture failed: state=" + api.getCoreStateName() + ", requiredBytes=" + api.browserRollbackRequiredSize?.() + ", limitBytes=67108864");
+         return {bytes, milliseconds: performance.now() - started};
+       } else if (payload.action === "restore") {
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
+@@ -2329,6 +2329,7 @@
+     loadStateFile: optionalCwrap("LoadStateFile", "number", ["string"]),
+     saveStateFile: optionalCwrap("SaveStateFile", "number", ["string"]),
+     browserRollbackCapture: optionalCwrap("BrowserRollbackCapture", "number", ["number"]),
++    browserRollbackRequiredSize: optionalCwrap("BrowserRollbackRequiredSize", "number", []),
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),

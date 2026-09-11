@@ -1,0 +1,36 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
+@@ -496,14 +496,20 @@
+           (config.format != AbstractTextureFormat::RGBA8 && config.format != AbstractTextureFormat::R32F))
+       {
+         m_browser_state_failed.store(true);
+-        p.SetVerifyMode();
++        // Preserve the serialized layout on failure. Switching a writer into
++        // Verify makes later DoState methods read this unfinished buffer.
++        index = 0xffffffffu;
++        p.Do(index);
+         return;
+       }
+       auto copy = g_gfx->CreateTexture(config);
+       if (!copy)
+       {
+         m_browser_state_failed.store(true);
+-        p.SetVerifyMode();
++        // Preserve the serialized layout on failure. Switching a writer into
++        // Verify makes later DoState methods read this unfinished buffer.
++        index = 0xffffffffu;
++        p.Do(index);
+         return;
+       }
+       CopyBrowserTexture(copy.get(), tex);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -759,7 +759,7 @@
+     self.postMessage(
+       buildWorkerErrorReply(
+         data,
+-        error instanceof Error ? error.message : String(error)
++        error instanceof Error ? (type === "browserRollback" ? error.stack || error.message : error.message) : String(error)
+       )
+     );
+   }

@@ -1,0 +1,30 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "VideoCommon/TextureCacheBase.h"
++#include "Common/BrowserStateCopy.h"
+ 
+ #include <algorithm>
+ #include <chrono>
+@@ -672,13 +673,16 @@
+ 
+   std::map<const TCacheEntry*, u32> entry_map;
+   std::vector<TCacheEntry*> entries_to_save;
+-  const bool complete_browser_cache = m_browser_state_slot.load(std::memory_order_acquire) >= 0;
++  const bool complete_browser_cache =
++      DolphinWeb::browser_state_transfer_active.load(std::memory_order_acquire);
+   auto ShouldSaveEntry = [complete_browser_cache](const RcTcacheEntry& entry) {
+     // We skip non-copies as they can be decoded from RAM when the state is loaded.
+     // Storing them would duplicate data in the save state file, adding to decompression time.
+     // We also need to store invalidated entries, as they can't be restored from RAM.
+-    // Private GPU snapshots preserve decoded entries too, avoiding a cold texture
+-    // cache on every rewind. Each texture is independently cloned; mutable
++    // All private browser snapshots preserve decoded entries too, including
++    // full readback references. Dropping these on a full-state restore changes
++    // subsequent texture IDs and makes it an inequivalent replay baseline.
++    // GPU checkpoints clone each texture independently; mutable
+     // entries and their circular references are serialized by the existing path.
+     return complete_browser_cache || entry->IsCopy() || entry->invalidated;
+   };

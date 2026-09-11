@@ -1,0 +1,205 @@
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -4,6 +4,8 @@
+ #include "Core/State.h"
+ 
+ #include <algorithm>
++#include <atomic>
++#include <chrono>
+ #include <array>
+ #include <cstring>
+ #include <filesystem>
+@@ -140,13 +142,26 @@
+ 
+ static bool ReadHeader(const std::string& filename, StateHeader& header);
+ 
+-struct BrowserStateSection { const char* name; std::size_t end; };
++static u64 BrowserClockUs()
++{
++  return std::chrono::duration_cast<std::chrono::microseconds>(
++      std::chrono::steady_clock::now().time_since_epoch()).count();
++}
++static u64 browser_write_started = 0;
++static std::atomic<bool> browser_loading_state{false};
++bool BrowserLoadingState() { return browser_loading_state.load(std::memory_order_acquire); }
++struct BrowserLoadingScope
++{
++  BrowserLoadingScope() { browser_loading_state.store(true, std::memory_order_release); }
++  ~BrowserLoadingScope() { browser_loading_state.store(false, std::memory_order_release); }
++};
++struct BrowserStateSection { const char* name; std::size_t end; u64 write_us; };
+ static std::vector<BrowserStateSection>* browser_sections_recording = nullptr;
+ static u8* browser_section_base = nullptr;
+ void BrowserRecordSection(PointerWrap& p, const char* name)
+ {
+   if (browser_sections_recording && p.IsWriteMode())
+-    browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(browser_section_base)});
++    browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(browser_section_base), BrowserClockUs() - browser_write_started});
+ }
+ static bool browser_keep_jit = false;
+ static bool browser_last_kept_jit = false;
+@@ -156,7 +171,7 @@
+   const auto section_start = p.GetOffsetFromPreviousPosition(nullptr);
+   const auto section = [&](const char* name) {
+     if (browser_sections_recording && p.IsWriteMode())
+-      browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(nullptr) - section_start});
++      browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(nullptr) - section_start, BrowserClockUs() - browser_write_started});
+   };
+   bool is_wii = system.IsWii() || system.IsMIOS();
+   const bool is_wii_currently = is_wii;
+@@ -299,6 +314,7 @@
+   bool enabled;
+ };
+ static std::array<std::vector<BrowserStateSection>, 6> browser_state_sections;
++static std::array<u64, 6> browser_measure_us{}, browser_allocate_us{};
+ static std::size_t browser_required_size = 0;
+ std::size_t BrowserRequiredSize() { return browser_required_size; }
+ std::size_t BrowserSave(Core::System& system, unsigned slot, bool gpu_resident)
+@@ -311,11 +327,14 @@
+   constexpr std::size_t total_budget = 640 * 1024 * 1024;
+   // Measure before allocating; never let an unexpected game/state consume
+   // the remaining shared WASM heap. SaveToBuffer reuses the allocation.
++  const auto measure_started = BrowserClockUs();
+   u8* ptr = nullptr;
+   PointerWrap measure(&ptr, 0, PointerWrap::Mode::Measure);
+   DoState(system, measure);
+   const auto size = measure.GetOffsetFromPreviousPosition(nullptr);
++  browser_measure_us[slot] = BrowserClockUs() - measure_started;
+   browser_required_size = size;
++  const auto allocation_started = BrowserClockUs();
+   if (!size || size > max_bytes) return 0;
+   auto& buffer = browser_states[slot];
+   if (buffer.size() < size)
+@@ -325,9 +344,11 @@
+     if (allocated - buffer.size() + size > total_budget) return 0;
+     buffer.reset(size);
+   }
++  browser_allocate_us[slot] = BrowserClockUs() - allocation_started;
+   browser_state_sections[slot].clear();
+   browser_section_base = buffer.data();
+   browser_sections_recording = &browser_state_sections[slot];
++  browser_write_started = BrowserClockUs();
+   browser_state_sizes[slot] = SaveToBuffer(system, buffer);
+   browser_sections_recording = nullptr;
+   if (gpu_resident && g_texture_cache->BrowserStateFailed()) browser_state_sizes[slot] = 0;
+@@ -371,6 +392,7 @@
+       const auto* ram=system.GetMemory().GetRAM();
+       for (const auto& range:saved)
+         if (std::memcmp(range.bytes.data(),ram+range.from,range.bytes.size())!=0) {valid=false;break;}
++      browser_last_kept_jit = valid;
+       if (!valid) {
+         Core::CPUThreadGuard guard(system);
+         system.GetJitInterface().ClearCache(guard);
+@@ -384,6 +406,7 @@
+   if (slot >= browser_states.size() || !browser_state_sizes[slot]) return false;
+   // Source bytes and instruction-cache coherence must agree on both sides
+   // of restore before compiled blocks may be retained.
++  const BrowserLoadingScope loading_scope;
+   CodeRestoreGuard code_guard(system);
+   if (browser_states_gpu[slot] && !g_texture_cache) return false;
+   const BrowserTextureStateScope texture_scope(slot, browser_states_gpu[slot], false);
+@@ -427,6 +450,22 @@
+   }
+   return report + "]}";
+ }
++std::string BrowserCaptureProfile(unsigned slot)
++{
++  if (slot >= browser_states.size()) return "{}";
++  std::string result = fmt::format(R"({{"measureUs":{},"allocateUs":{},"gpuTextureBytes":{},"writeSections":[)",
++      browser_measure_us[slot], browser_allocate_us[slot], g_texture_cache ? g_texture_cache->BrowserTextureBytes() : 0);
++  u64 previous = 0;
++  bool comma = false;
++  for (const auto& section : browser_state_sections[slot])
++  {
++    if (comma) result += ",";
++    result += fmt::format(R"({{"name":"{}","writeUs":{}}})", section.name, section.write_us - previous);
++    previous = section.write_us;
++    comma = true;
++  }
++  return result + "]}";
++}
+ void BrowserClear()
+ {
+   auto& system = Core::System::GetInstance();
+--- a/vendor/dolphin/Source/Core/Core/State.h
++++ b/vendor/dolphin/Source/Core/Core/State.h
+@@ -86,6 +86,8 @@
+ bool BrowserLoad(Core::System& system, unsigned slot);
+ bool BrowserEqual(unsigned a, unsigned b);
+ bool BrowserKeepJit();
++bool BrowserLoadingState();
++std::string BrowserCaptureProfile(unsigned slot);
+ void BrowserRecordSection(PointerWrap& p, const char* name);
+ std::string BrowserCompare(unsigned a, unsigned b);
+ void BrowserClear();
+--- a/vendor/dolphin/Source/Core/VideoCommon/Present.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Present.cpp
+@@ -10,6 +10,7 @@
+ #include "Core/HW/VideoInterface.h"
+ #include "Core/Host.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ #include "InputCommon/ControllerInterface/ControllerInterface.h"
+ 
+@@ -1001,6 +1002,16 @@
+   // If we're loading and there is a last XFB, re-display it.
+   if (p.IsReadMode() && m_last_xfb_stride != 0)
+   {
++    if (State::BrowserLoadingState())
++    {
++      // Restore the XFB reference without presenting an old frame or
++      // advancing host frame counters while correcting a prediction.
++      m_next_swap_estimated_ticks = m_last_xfb_ticks;
++      m_next_swap_estimated_time = Clock::now();
++      m_immediate_swap_happened_this_field.store(false, std::memory_order_relaxed);
++      FetchXFB(m_last_xfb_addr, m_last_xfb_width, m_last_xfb_stride, m_last_xfb_height, m_last_xfb_ticks);
++      return;
++    }
+     // This technically counts as the end of the frame
+     GetVideoEvents().after_frame_event.Trigger(Core::System::GetInstance());
+ 
+--- a/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
+@@ -794,6 +794,7 @@
+     // Even if the texture isn't valid, we still need to create the cache entry object
+     // to update the point in the state state. We'll just throw it away if it's invalid.
+     auto tex = DeserializeTexture(p);
++    if (!tex) { p.SetVerifyMode(); return; }
+     auto entry =
+         std::make_shared<TCacheEntry>(std::move(tex->texture), std::move(tex->framebuffer));
+     entry->textures_by_hash_iter = m_textures_by_hash.end();
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1055,6 +1055,12 @@
+   const Core::CPUThreadGuard guard(system);
+   return static_cast<int>(State::BrowserSave(system, static_cast<unsigned>(slot), true));
+ }
++EMSCRIPTEN_KEEPALIVE const char* BrowserRollbackCaptureProfile(int slot)
++{
++  static std::string result;
++  result = State::BrowserCaptureProfile(static_cast<unsigned>(slot));
++  return result.c_str();
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackRequiredSize()
+ {
+   return static_cast<int>(State::BrowserRequiredSize());
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1038,7 +1038,7 @@
+         if (!capture) throw new Error("GPU checkpoint API unavailable");
+         const bytes = capture(payload.slot);
+         if (!bytes) throw new Error("Capture failed: state=" + api.getCoreStateName() + ", requiredBytes=" + api.browserRollbackRequiredSize?.() + ", limitBytes=134217728, totalBudgetBytes=671088640");
+-        return {bytes, milliseconds: performance.now() - started};
++        return {bytes, milliseconds: performance.now() - started, profile: api.browserRollbackCaptureProfile ? JSON.parse(api.browserRollbackCaptureProfile(payload.slot)) : null};
+       } else if (payload.action === "restore") {
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
+             !api.browserRollbackRestore(payload.slot)) throw new Error("Checkpoint restore failed");
+@@ -2337,6 +2337,7 @@
+     loadState: cwrap("LoadState", "number", ["number"]),
+     loadStateFile: optionalCwrap("LoadStateFile", "number", ["string"]),
+     saveStateFile: optionalCwrap("SaveStateFile", "number", ["string"]),
++    browserRollbackCaptureProfile: optionalCwrap("BrowserRollbackCaptureProfile", "string", ["number"]),
+     browserRollbackCaptureGpu: optionalCwrap("BrowserRollbackCaptureGpu", "number", ["number"]),
+     browserRollbackCapture: optionalCwrap("BrowserRollbackCapture", "number", ["number"]),
+     browserRollbackRequiredSize: optionalCwrap("BrowserRollbackRequiredSize", "number", []),

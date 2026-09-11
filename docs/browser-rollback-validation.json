@@ -1,0 +1,1666 @@
+{
+  "date": "2026-09-10",
+  "kind": "local-browser-late-input-correction",
+  "coreSha256": "2f061a33e3e7a7263f809814d15098a5382ef04c724fb68c59c6df8fcdc06626",
+  "passed": true,
+  "networkTest": false,
+  "performanceTest": false,
+  "stage": "Battlefield",
+  "fighters": [
+    "Fox",
+    "Falco"
+  ],
+  "humanControllerPorts": [
+    0,
+    1
+  ],
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "profileEnabled": false,
+  "referenceFrames": 240,
+  "remoteInputDelayFrames": 3,
+  "rollbacks": 98,
+  "resimulatedFrames": 409,
+  "maxDepth": 6,
+  "fullMachineBytes": 113188634,
+  "fullMachineBytesEqual": true,
+  "differingSections": [],
+  "suppressedVideoExports": 409,
+  "suppressedAudioSampleFrames": 545872,
+  "outputSuppressedAtEnd": false,
+  "diagnosticCommandMeanMs": {
+    "referenceStep": 21.904375,
+    "delayedAndReplayStep": 18.501597,
+    "warmGpuCapture": 7.688776,
+    "gpuRestore": 13.675361
+  },
+  "limitations": [
+    "One local engine; no peer transport or independent-client test.",
+    "Only this fighter pair, stage, input script and delay are covered.",
+    "The paused QA stepping path does not meet 60 FPS.",
+    "This is not a normal-speed presentation or input-to-photon measurement."
+  ],
+  "checkpointPolicy": "periodic",
+  "normalGameplayBenchmark": {
+    "seconds": 29.993855,
+    "workload": "human versus level 9 CPU",
+    "simulationFps": 50.443666,
+    "gameRenderFps": 50.376986,
+    "visibleFps": 45.909404,
+    "p95GapMs": 36.355,
+    "maxGapMs": 77.17,
+    "passed": false
+  },
+  "previousProof": {
+    "date": "2026-09-10",
+    "kind": "local-browser-late-input-correction",
+    "coreSha256": "7dc611c8f0ce24651758c0c16d847adce4ed26af85231cd20a91821c658df5b5",
+    "passed": true,
+    "networkTest": false,
+    "performanceTest": false,
+    "stage": "Battlefield",
+    "fighters": [
+      "Fox",
+      "Falco"
+    ],
+    "humanControllerPorts": [
+      0,
+      1
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "profileEnabled": false,
+    "referenceFrames": 40,
+    "remoteInputDelayFrames": 3,
+    "rollbacks": 15,
+    "resimulatedFrames": 63,
+    "maxDepth": 6,
+    "fullMachineBytes": 113707877,
+    "fullMachineBytesEqual": true,
+    "differingSections": [],
+    "suppressedVideoExports": 63,
+    "suppressedAudioSampleFrames": 83584,
+    "outputSuppressedAtEnd": false,
+    "diagnosticCommandMeanMs": {
+      "referenceStep": 32.684125,
+      "delayedAndReplayStep": 40.379369,
+      "warmGpuCapture": 7.3875,
+      "gpuRestore": 13.549333
+    },
+    "limitations": [
+      "One local engine; no peer transport or independent-client test.",
+      "Only this fighter pair, stage, input script and delay are covered.",
+      "The paused QA stepping path does not meet 60 FPS.",
+      "This is not a normal-speed presentation or input-to-photon measurement."
+    ]
+  },
+  "predictionCheckpointTrial": {
+    "coreSha256": "2f061a33e3e7a7263f809814d15098a5382ef04c724fb68c59c6df8fcdc06626",
+    "frames": 240,
+    "delay": 3,
+    "checkpointPolicy": "prediction",
+    "passed": true,
+    "fullMachineBytes": 113188639,
+    "fullMachineBytesEqual": true,
+    "referenceFastCaptures": 0,
+    "delayedFastCaptures": 98,
+    "rollbacks": 98,
+    "resimulatedFrames": 409,
+    "maxDepth": 6,
+    "videoSkipped": 409,
+    "audioSamplesSkipped": 545832,
+    "outputSuppressedAtEnd": false,
+    "diagnosticCommandMeanMs": {
+      "referenceStep": 19.83725,
+      "delayedAndReplayStep": 20.580868,
+      "warmGpuCapture": 8.552857,
+      "gpuRestore": 14.654794
+    },
+    "networkTest": false,
+    "performanceTest": false
+  },
+  "cacheFastPathTrial": {
+    "coreSha256": "9deb5403f4f6eb9a444d26e409d993dfea80e45da0b48ec13e282a39aba6c371",
+    "frames": 240,
+    "delay": 3,
+    "checkpointPolicy": "prediction",
+    "originalHelperReference": true,
+    "optimizedCorrectedReplay": true,
+    "passed": true,
+    "fullMachineBytes": 113188634,
+    "fullMachineBytesEqual": true,
+    "rollbacks": 98,
+    "resimulatedFrames": 409,
+    "maxDepth": 6,
+    "videoSkipped": 409,
+    "audioSamplesSkipped": 546336,
+    "outputSuppressedAtEnd": false,
+    "networkTest": false,
+    "performanceTest": false,
+    "normalGameplayBenchmark": {
+      "seconds": 29.98937,
+      "workload": "human versus level 9 CPU",
+      "simulationFps": 50.084413,
+      "gameRenderFps": 50.084413,
+      "visibleFps": 46.349757,
+      "p95GapMs": 37.08,
+      "maxGapMs": 94.19,
+      "passed": false
+    }
+  },
+  "cacheLoopTrial": {
+    "coreSha256": "706e0ae971e1fc556dfef413ac886cc4e993c8cf2381c28a5bde2d12d7577613",
+    "passed": true,
+    "networkTest": false,
+    "performanceTest": false,
+    "checkpointPolicy": "prediction",
+    "cacheFastPathComparison": true,
+    "cacheLoopComparison": true,
+    "frames": 240,
+    "stats": {
+      "rollbacks": 98,
+      "resimulatedFrames": 409,
+      "maxDepth": 6,
+      "stalls": 1
+    },
+    "fullMachineBytes": 113188634,
+    "fullMachineBytesEqual": true,
+    "differingSections": [],
+    "output": {
+      "videoSkipped": 409,
+      "audioSamplesSkipped": 546024,
+      "suppressed": false
+    },
+    "profileEnabled": false,
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "manifestFilesVerified": 62,
+    "referenceStepMeanMs": 21.65797916666294,
+    "delayedStepMeanMs": 19.21678294573672,
+    "captureMeanMs": 8.41147959179112,
+    "restoreMeanMs": 13.69551546391599,
+    "benchmark": {
+      "passed": false,
+      "seconds": 29.989540000000037,
+      "simulationFps": 51.8847571519936,
+      "gameRenderFps": 51.851412192384345,
+      "visibleFps": 46.08273417998403,
+      "p95GapMs": 35.45999999996275,
+      "maxGapMs": 84.0800000000745,
+      "workload": "human versus level 9 CPU",
+      "sourceResolution": [
+        960,
+        720
+      ]
+    }
+  },
+  "inlineDispatchTrial": {
+    "coreSha256": "92828e5c4d93b94341b8e6cf04742df5bb010f858f751442c6eb534d93e39676",
+    "passed": true,
+    "networkTest": false,
+    "performanceTest": false,
+    "checkpointPolicy": "prediction",
+    "inlineDispatchComparison": true,
+    "frames": 240,
+    "stats": {
+      "rollbacks": 98,
+      "resimulatedFrames": 409,
+      "maxDepth": 6,
+      "stalls": 1
+    },
+    "fullMachineBytes": 113188634,
+    "fullMachineBytesEqual": true,
+    "output": {
+      "videoSkipped": 409,
+      "audioSamplesSkipped": 547008,
+      "suppressed": false
+    },
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "profileEnabled": false,
+    "manifestFilesVerified": 63,
+    "referenceStepMeanMs": 23.27981250002825,
+    "delayedStepMeanMs": 19.560542635651405,
+    "benchmark": {
+      "passed": false,
+      "seconds": 29.996830000000074,
+      "simulationFps": 53.77234861150315,
+      "gameRenderFps": 53.77234861150315,
+      "visibleFps": 47.171651137803444,
+      "p95GapMs": 33.10499999951571,
+      "maxGapMs": 92.13000000081956,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "workload": "human versus level 9 CPU"
+    }
+  },
+  "registerCacheTrial": {
+    "coreSha256": "c1ae651a30c19bfd001e6322cfc858184cdf8c0bdf99b0f2ce7c2f3b6a3eb8f9",
+    "passed": true,
+    "networkTest": false,
+    "performanceTest": false,
+    "codegenComparison": {
+      "regcache": true,
+      "fastmem": false
+    },
+    "frames": 240,
+    "stats": {
+      "rollbacks": 98,
+      "resimulatedFrames": 409,
+      "maxDepth": 6,
+      "stalls": 1
+    },
+    "fullMachineBytes": 113188634,
+    "fullMachineBytesEqual": true,
+    "output": {
+      "videoSkipped": 409,
+      "audioSamplesSkipped": 545568,
+      "suppressed": false
+    },
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "profileEnabled": false,
+    "manifestFilesVerified": 64,
+    "referenceStepMeanMs": 35.18818750001956,
+    "referenceStepMaxMs": 1074.2400000002235,
+    "delayedStepMeanMs": 20.14893023256617,
+    "note": "Code-generation cache is cleared between settings; reference timing includes recompilation and is not an optimization speed comparison.",
+    "benchmark": {
+      "passed": false,
+      "seconds": 29.9859299999997,
+      "simulationFps": 53.82524403945504,
+      "gameRenderFps": 53.75854609145076,
+      "visibleFps": 47.288845135035466,
+      "p95GapMs": 32.864999999292195,
+      "maxGapMs": 118.25999999977648,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "workload": "human versus level 9 CPU"
+    }
+  },
+  "combinedCodegenTrial": {
+    "coreSha256": "c1ae651a30c19bfd001e6322cfc858184cdf8c0bdf99b0f2ce7c2f3b6a3eb8f9",
+    "passed": true,
+    "networkTest": false,
+    "performanceTest": false,
+    "codegenComparison": {
+      "regcache": true,
+      "fastmem": true
+    },
+    "frames": 240,
+    "stats": {
+      "rollbacks": 98,
+      "resimulatedFrames": 409,
+      "maxDepth": 6,
+      "stalls": 1
+    },
+    "fullMachineBytes": 113188634,
+    "fullMachineBytesEqual": true,
+    "output": {
+      "videoSkipped": 409,
+      "audioSamplesSkipped": 546536,
+      "suppressed": false
+    },
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "profileEnabled": false,
+    "referenceStepMeanMs": 30.447437500022353,
+    "delayedStepMeanMs": 22.575310077511006,
+    "uniqueJitInstancesAfterTrial": 42843,
+    "jitInstanceLimit": 65536,
+    "compileFailures": 0,
+    "note": "Correctness run during another candidate source build; timing is not uncontended throughput. Both codegen variants are retained by the diagnostic comparison; use a fresh session for performance."
+  },
+  "graphicsWaitProfile": {
+    "coreSha256": "d3d055bea4a046ea509364acc8218eac887c2d48ef79cf13576a38754e1cff43",
+    "diagnosticOnly": true,
+    "performanceTest": false,
+    "profileEnabled": true,
+    "seconds": 30.028345,
+    "simulationFps": 38.13063956738124,
+    "visibleFps": 37.76431901258543,
+    "inclusiveWallFractions": {
+      "cpuExecute": 0.7877883046834406,
+      "cpuAdvance": 0.13588161452121017,
+      "cpuGpuSync": 0.004694098192890645,
+      "cpuGpuDecode": 0.03855800244735346,
+      "cpuVideoWait": 0,
+      "glPresent": 0.0385043864388788
+    },
+    "note": "Profile instrumentation materially reduces speed. Nested stages overlap. Graphics synchronization accounts for less than 0.5% of wall time in this run; CPU execution remains dominant."
+  },
+  "dispatchMissProfile44": {
+    "coreSha256": "753ee7cb8620a614c59f118cafbbdeee28f5bb68d0efc0d7dd4ebb857689ce07",
+    "lookupSamples": 1142458,
+    "lookupMisses": 5119,
+    "missPercent": 0.44806898809409185,
+    "profileEnabled": true,
+    "performanceTest": false
+  },
+  "wasmDispatchTrial45": {
+    "coreSha256": "e2ced433dd0abb78254d5ec34b6f0c1c1b0b4ea78dfd64caa8d72db5b03cd45e",
+    "status": "built; browser verification blocked",
+    "actualEmitterUnitTestPassed": true,
+    "focusedTestsPassed": 59,
+    "fullMachineBytesEqual": null,
+    "performanceTest": false,
+    "networkTest": false,
+    "passed": false,
+    "blocker": "Browser tool returned no browsers after memory pressure; no available iab provider. Candidate remains opt-in and unpromoted."
+  },
+  "wasmDispatchTrial46": {
+    "date": "2026-09-11",
+    "coreSha256": "cfc77c6ad8340f2e1d4270bc7f0a8efd59a84b121633dbbc2d006f043a81f322",
+    "kind": "local-browser-late-input-correction",
+    "package": "standalone preview46",
+    "passed": true,
+    "networkTest": false,
+    "performanceTest": false,
+    "fullMachineBytesEqual": true,
+    "fullMachineBytes": 113188634,
+    "frames": 240,
+    "delay": 3,
+    "rollbacks": 98,
+    "resimulatedFrames": 409,
+    "maxDepth": 6,
+    "dispatcherHandle": 11361,
+    "dispatcherCallsDuringTrial": 14454035,
+    "videoSkipped": 409,
+    "audioSampleFramesSkipped": 545840,
+    "outputSuppressedAtEnd": false,
+    "profileEnabled": false,
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "checkpointPolicy": "prediction",
+    "meanStepMs": {
+      "reference": 16.962208,
+      "corrected": 13.986217
+    },
+    "meanCaptureMs": 6.419082,
+    "meanRestoreMs": 10.247216,
+    "normalGameplayBenchmark": {
+      "seconds": 29.9939,
+      "workload": "human versus level 9 CPU",
+      "simulationFps": 58.911979,
+      "gameRenderFps": 58.945319,
+      "visibleFps": 55.911369,
+      "p95GapMs": 32.57,
+      "maxGapMs": 85.225,
+      "passed": false
+    },
+    "bitmapPresenterTrial": {
+      "seconds": 29.99718,
+      "simulationFps": 53.538366,
+      "visibleFps": 50.404738,
+      "p95GapMs": 34.5,
+      "passed": false,
+      "enabledInRelease": false
+    }
+  },
+  "browserRelease46": {
+    "coreSha256": "cfc77c6ad8340f2e1d4270bc7f0a8efd59a84b121633dbbc2d006f043a81f322",
+    "package": "dist/browser/release",
+    "files": 118,
+    "bytes": 228377308,
+    "sourceArchiveBytes": 212143972,
+    "sourceParts": 11,
+    "localMenuImagesCompared": 7,
+    "menuFlowPassed": true,
+    "keyboardNavigationPassed": true,
+    "menuMusic": {
+      "nativeFramesAdvanced": 61,
+      "audioScheduledSeconds": 1.024,
+      "audioState": "running",
+      "nonzeroPcmChunks": 48
+    },
+    "rootTestsPassed": 53,
+    "browserTestsPassed": 62,
+    "browserTestsSkipped": 1,
+    "localDiscAssetIntegrationPassed": true,
+    "dockerHttpSmokePassed": true,
+    "dockerUser": "node",
+    "dockerGpuDevices": 0,
+    "publicDomainDeployed": false,
+    "releaseApproved": false,
+    "allFighterFormsPassed": 26,
+    "rosterMatchesPassed": 13,
+    "releaseBlocker": "Detached ImageBitmap presentation accumulates graphics memory during continuous play; closing the tab releases it.",
+    "freshMemorySamples": [
+      {
+        "at": "2026-09-11T09:09:08.227Z",
+        "gttBytes": 142716928,
+        "vramBytes": 1147080704
+      },
+      {
+        "at": "2026-09-11T09:09:13.231Z",
+        "gttBytes": 144814080,
+        "vramBytes": 2064605184
+      },
+      {
+        "at": "2026-09-11T09:09:18.233Z",
+        "gttBytes": 140619776,
+        "vramBytes": 3011944448
+      },
+      {
+        "at": "2026-09-11T09:09:23.236Z",
+        "gttBytes": 741289984,
+        "vramBytes": 3348779008
+      },
+      {
+        "at": "2026-09-11T09:09:28.242Z",
+        "gttBytes": 1605611520,
+        "vramBytes": 3349868544
+      },
+      {
+        "at": "2026-09-11T09:09:33.246Z",
+        "gttBytes": 2392944640,
+        "vramBytes": 3348783104
+      },
+      {
+        "at": "2026-09-11T09:09:38.251Z",
+        "gttBytes": 3285868544,
+        "vramBytes": 3348791296
+      },
+      {
+        "at": "2026-09-11T09:09:43.256Z",
+        "gttBytes": 4162183168,
+        "vramBytes": 3352461312
+      },
+      {
+        "at": "2026-09-11T09:09:48.261Z",
+        "gttBytes": 5064089600,
+        "vramBytes": 3348017152
+      },
+      {
+        "at": "2026-09-11T09:09:53.266Z",
+        "gttBytes": 6042148864,
+        "vramBytes": 3349069824
+      },
+      {
+        "at": "2026-09-11T09:09:58.271Z",
+        "gttBytes": 6976753664,
+        "vramBytes": 3349073920
+      },
+      {
+        "at": "2026-09-11T09:10:03.277Z",
+        "gttBytes": 7924338688,
+        "vramBytes": 3351183360
+      },
+      {
+        "at": "2026-09-11T09:10:08.282Z",
+        "gttBytes": 8865980416,
+        "vramBytes": 3349356544
+      }
+    ],
+    "boundedReadback46": {
+      "memorySamples": [
+        {
+          "at": "2026-09-11T09:15:14.379Z",
+          "gttBytes": 131190784,
+          "vramBytes": 809730048
+        },
+        {
+          "at": "2026-09-11T09:15:19.384Z",
+          "gttBytes": 126996480,
+          "vramBytes": 813907968
+        },
+        {
+          "at": "2026-09-11T09:15:24.389Z",
+          "gttBytes": 126996480,
+          "vramBytes": 811810816
+        },
+        {
+          "at": "2026-09-11T09:15:29.394Z",
+          "gttBytes": 129093632,
+          "vramBytes": 812875776
+        },
+        {
+          "at": "2026-09-11T09:15:34.399Z",
+          "gttBytes": 133287936,
+          "vramBytes": 800268288
+        },
+        {
+          "at": "2026-09-11T09:15:39.404Z",
+          "gttBytes": 133287936,
+          "vramBytes": 813912064
+        },
+        {
+          "at": "2026-09-11T09:15:44.409Z",
+          "gttBytes": 135385088,
+          "vramBytes": 819445760
+        },
+        {
+          "at": "2026-09-11T09:15:49.414Z",
+          "gttBytes": 129093632,
+          "vramBytes": 813142016
+        },
+        {
+          "at": "2026-09-11T09:15:54.420Z",
+          "gttBytes": 131190784,
+          "vramBytes": 819769344
+        },
+        {
+          "at": "2026-09-11T09:15:59.425Z",
+          "gttBytes": 126996480,
+          "vramBytes": 832172032
+        },
+        {
+          "at": "2026-09-11T09:16:04.430Z",
+          "gttBytes": 132419584,
+          "vramBytes": 819269632
+        },
+        {
+          "at": "2026-09-11T09:16:09.430Z",
+          "gttBytes": 121933824,
+          "vramBytes": 819269632
+        },
+        {
+          "at": "2026-09-11T09:16:14.433Z",
+          "gttBytes": 121933824,
+          "vramBytes": 814022656
+        }
+      ],
+      "simulationFps": 57.8501119,
+      "visibleFps": 51.0853811,
+      "passed": false
+    }
+  },
+  "boundedPresentation47": {
+    "coreSha256": "50b43c44567685e9b697e7f689c014a9bed7ca51f71c14a4a429376a0c9e71b2",
+    "pboSlots": 2,
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "normalGameplayBenchmark": {
+      "seconds": 29.99291,
+      "simulationFps": 58.44714634,
+      "gameRenderFps": 58.48048756,
+      "visibleFps": 44.94395509,
+      "p95GapMs": 35.615,
+      "maxGapMs": 84.575,
+      "passed": false
+    },
+    "rendererErrors": [],
+    "rollbackProof": false
+  },
+  "boundedPresentation48": {
+    "coreSha256": "b390f64fcf28ab79430c9172ad05e1dd8a5cefa63ff246a141c2d39f3517c565",
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "pboSlots": 2,
+    "addedPresentationFrames": 1,
+    "normalGameplayBenchmarks": [
+      {
+        "stage": "Battlefield",
+        "seconds": 30.0018,
+        "simulationFps": 58.72980954476101,
+        "gameRenderFps": 58.72980954476101,
+        "visibleFps": 56.496610203388144,
+        "p95GapMs": 31.65,
+        "maxGapMs": 67.13,
+        "passed": false
+      },
+      {
+        "stage": "Final Destination",
+        "seconds": 29.997075,
+        "simulationFps": 59.73915790122833,
+        "gameRenderFps": 59.70582131757809,
+        "visibleFps": 56.67219220540634,
+        "p95GapMs": 31.005,
+        "maxGapMs": 65.155,
+        "passed": false
+      }
+    ],
+    "memorySoak": {
+      "scope": "device-wide",
+      "card": "card1",
+      "samples": [
+        {
+          "at": "2026-09-11T09:23:18.214Z",
+          "seconds": 0.00028223500000000004,
+          "gttBytes": 117379072,
+          "vramBytes": 832376832,
+          "totalBytes": 949755904
+        },
+        {
+          "at": "2026-09-11T09:23:23.220Z",
+          "seconds": 5.006969183,
+          "gttBytes": 117379072,
+          "vramBytes": 831311872,
+          "totalBytes": 948690944
+        },
+        {
+          "at": "2026-09-11T09:23:28.226Z",
+          "seconds": 10.012263561,
+          "gttBytes": 128692224,
+          "vramBytes": 837881856,
+          "totalBytes": 966574080
+        },
+        {
+          "at": "2026-09-11T09:23:33.232Z",
+          "seconds": 15.018120484999999,
+          "gttBytes": 121573376,
+          "vramBytes": 842633216,
+          "totalBytes": 964206592
+        },
+        {
+          "at": "2026-09-11T09:23:38.237Z",
+          "seconds": 20.023991814000002,
+          "gttBytes": 123670528,
+          "vramBytes": 838946816,
+          "totalBytes": 962617344
+        },
+        {
+          "at": "2026-09-11T09:23:43.243Z",
+          "seconds": 25.029305337999997,
+          "gttBytes": 121573376,
+          "vramBytes": 837607424,
+          "totalBytes": 959180800
+        },
+        {
+          "at": "2026-09-11T09:23:48.248Z",
+          "seconds": 30.034282289,
+          "gttBytes": 125005824,
+          "vramBytes": 837623808,
+          "totalBytes": 962629632
+        },
+        {
+          "at": "2026-09-11T09:23:53.253Z",
+          "seconds": 35.039319010999996,
+          "gttBytes": 127102976,
+          "vramBytes": 836284416,
+          "totalBytes": 963387392
+        },
+        {
+          "at": "2026-09-11T09:23:58.259Z",
+          "seconds": 40.045045852,
+          "gttBytes": 136318976,
+          "vramBytes": 837349376,
+          "totalBytes": 973668352
+        },
+        {
+          "at": "2026-09-11T09:24:03.265Z",
+          "seconds": 45.05104223000001,
+          "gttBytes": 142610432,
+          "vramBytes": 837345280,
+          "totalBytes": 979955712
+        },
+        {
+          "at": "2026-09-11T09:24:08.271Z",
+          "seconds": 50.057091214,
+          "gttBytes": 127102976,
+          "vramBytes": 844181504,
+          "totalBytes": 971284480
+        },
+        {
+          "at": "2026-09-11T09:24:13.276Z",
+          "seconds": 55.06218158400001,
+          "gttBytes": 129200128,
+          "vramBytes": 837349376,
+          "totalBytes": 966549504
+        },
+        {
+          "at": "2026-09-11T09:24:18.281Z",
+          "seconds": 60.067846481000004,
+          "gttBytes": 127102976,
+          "vramBytes": 840245248,
+          "totalBytes": 967348224
+        },
+        {
+          "at": "2026-09-11T09:24:23.287Z",
+          "seconds": 65.073188625,
+          "gttBytes": 122908672,
+          "vramBytes": 837607424,
+          "totalBytes": 960516096
+        },
+        {
+          "at": "2026-09-11T09:24:28.292Z",
+          "seconds": 70.078743388,
+          "gttBytes": 132124672,
+          "vramBytes": 830263296,
+          "totalBytes": 962387968
+        },
+        {
+          "at": "2026-09-11T09:24:33.298Z",
+          "seconds": 75.084329315,
+          "gttBytes": 131297280,
+          "vramBytes": 837627904,
+          "totalBytes": 968925184
+        },
+        {
+          "at": "2026-09-11T09:24:38.304Z",
+          "seconds": 80.09003704,
+          "gttBytes": 132886528,
+          "vramBytes": 852099072,
+          "totalBytes": 984985600
+        },
+        {
+          "at": "2026-09-11T09:24:43.309Z",
+          "seconds": 85.095583798,
+          "gttBytes": 118046720,
+          "vramBytes": 836055040,
+          "totalBytes": 954101760
+        },
+        {
+          "at": "2026-09-11T09:24:48.315Z",
+          "seconds": 90.101264403,
+          "gttBytes": 122241024,
+          "vramBytes": 853352448,
+          "totalBytes": 975593472
+        },
+        {
+          "at": "2026-09-11T09:24:53.320Z",
+          "seconds": 95.106807013,
+          "gttBytes": 125767680,
+          "vramBytes": 852537344,
+          "totalBytes": 978305024
+        },
+        {
+          "at": "2026-09-11T09:24:58.326Z",
+          "seconds": 100.112647753,
+          "gttBytes": 142610432,
+          "vramBytes": 840667136,
+          "totalBytes": 983277568
+        },
+        {
+          "at": "2026-09-11T09:25:03.335Z",
+          "seconds": 105.12138486600001,
+          "gttBytes": 134221824,
+          "vramBytes": 838311936,
+          "totalBytes": 972533760
+        },
+        {
+          "at": "2026-09-11T09:25:08.337Z",
+          "seconds": 110.123656774,
+          "gttBytes": 127102976,
+          "vramBytes": 832012288,
+          "totalBytes": 959115264
+        },
+        {
+          "at": "2026-09-11T09:25:13.343Z",
+          "seconds": 115.129127144,
+          "gttBytes": 131297280,
+          "vramBytes": 837246976,
+          "totalBytes": 968544256
+        },
+        {
+          "at": "2026-09-11T09:25:18.345Z",
+          "seconds": 120.13116631500002,
+          "gttBytes": 127102976,
+          "vramBytes": 825708544,
+          "totalBytes": 952811520
+        },
+        {
+          "at": "2026-09-11T09:25:23.350Z",
+          "seconds": 125.13612276500001,
+          "gttBytes": 125005824,
+          "vramBytes": 837263360,
+          "totalBytes": 962269184
+        },
+        {
+          "at": "2026-09-11T09:25:28.355Z",
+          "seconds": 130.141124849,
+          "gttBytes": 139845632,
+          "vramBytes": 844877824,
+          "totalBytes": 984723456
+        },
+        {
+          "at": "2026-09-11T09:25:33.360Z",
+          "seconds": 135.14613221800002,
+          "gttBytes": 120143872,
+          "vramBytes": 839634944,
+          "totalBytes": 959778816
+        },
+        {
+          "at": "2026-09-11T09:25:38.365Z",
+          "seconds": 140.151673883,
+          "gttBytes": 118046720,
+          "vramBytes": 827031552,
+          "totalBytes": 945078272
+        },
+        {
+          "at": "2026-09-11T09:25:43.371Z",
+          "seconds": 145.157266386,
+          "gttBytes": 130629632,
+          "vramBytes": 842256384,
+          "totalBytes": 972886016
+        },
+        {
+          "at": "2026-09-11T09:25:48.377Z",
+          "seconds": 150.163013637,
+          "gttBytes": 122241024,
+          "vramBytes": 836468736,
+          "totalBytes": 958709760
+        },
+        {
+          "at": "2026-09-11T09:25:53.382Z",
+          "seconds": 155.168570925,
+          "gttBytes": 124338176,
+          "vramBytes": 831221760,
+          "totalBytes": 955559936
+        },
+        {
+          "at": "2026-09-11T09:25:58.388Z",
+          "seconds": 160.174440133,
+          "gttBytes": 135651328,
+          "vramBytes": 838582272,
+          "totalBytes": 974233600
+        },
+        {
+          "at": "2026-09-11T09:26:03.394Z",
+          "seconds": 165.180244562,
+          "gttBytes": 135651328,
+          "vramBytes": 838582272,
+          "totalBytes": 974233600
+        },
+        {
+          "at": "2026-09-11T09:26:08.399Z",
+          "seconds": 170.185812737,
+          "gttBytes": 136921088,
+          "vramBytes": 843456512,
+          "totalBytes": 980377600
+        },
+        {
+          "at": "2026-09-11T09:26:13.405Z",
+          "seconds": 175.191160972,
+          "gttBytes": 127262720,
+          "vramBytes": 834150400,
+          "totalBytes": 961413120
+        },
+        {
+          "at": "2026-09-11T09:26:18.410Z",
+          "seconds": 180.196791481,
+          "gttBytes": 118046720,
+          "vramBytes": 849371136,
+          "totalBytes": 967417856
+        },
+        {
+          "at": "2026-09-11T09:26:23.416Z",
+          "seconds": 185.202683398,
+          "gttBytes": 115933184,
+          "vramBytes": 843210752,
+          "totalBytes": 959143936
+        },
+        {
+          "at": "2026-09-11T09:26:28.422Z",
+          "seconds": 190.208132595,
+          "gttBytes": 141926400,
+          "vramBytes": 903335936,
+          "totalBytes": 1045262336
+        },
+        {
+          "at": "2026-09-11T09:26:33.427Z",
+          "seconds": 195.213264942,
+          "gttBytes": 132710400,
+          "vramBytes": 904269824,
+          "totalBytes": 1036980224
+        },
+        {
+          "at": "2026-09-11T09:26:38.432Z",
+          "seconds": 200.21897478300002,
+          "gttBytes": 118030336,
+          "vramBytes": 898170880,
+          "totalBytes": 1016201216
+        },
+        {
+          "at": "2026-09-11T09:26:43.438Z",
+          "seconds": 205.224879068,
+          "gttBytes": 118030336,
+          "vramBytes": 902926336,
+          "totalBytes": 1020956672
+        },
+        {
+          "at": "2026-09-11T09:26:48.444Z",
+          "seconds": 210.230155317,
+          "gttBytes": 120127488,
+          "vramBytes": 895832064,
+          "totalBytes": 1015959552
+        },
+        {
+          "at": "2026-09-11T09:26:53.449Z",
+          "seconds": 215.23520481399999,
+          "gttBytes": 115933184,
+          "vramBytes": 893714432,
+          "totalBytes": 1009647616
+        },
+        {
+          "at": "2026-09-11T09:26:58.452Z",
+          "seconds": 220.238550334,
+          "gttBytes": 123052032,
+          "vramBytes": 905027584,
+          "totalBytes": 1028079616
+        },
+        {
+          "at": "2026-09-11T09:27:03.461Z",
+          "seconds": 225.247362415,
+          "gttBytes": 113836032,
+          "vramBytes": 896065536,
+          "totalBytes": 1009901568
+        },
+        {
+          "at": "2026-09-11T09:27:08.491Z",
+          "seconds": 230.278049206,
+          "gttBytes": 122224640,
+          "vramBytes": 895033344,
+          "totalBytes": 1017257984
+        },
+        {
+          "at": "2026-09-11T09:27:13.522Z",
+          "seconds": 235.30861647,
+          "gttBytes": 118030336,
+          "vramBytes": 895033344,
+          "totalBytes": 1013063680
+        },
+        {
+          "at": "2026-09-11T09:27:18.528Z",
+          "seconds": 240.314174938,
+          "gttBytes": 113836032,
+          "vramBytes": 895033344,
+          "totalBytes": 1008869376
+        },
+        {
+          "at": "2026-09-11T09:27:23.533Z",
+          "seconds": 245.31918784,
+          "gttBytes": 113836032,
+          "vramBytes": 893964288,
+          "totalBytes": 1007800320
+        },
+        {
+          "at": "2026-09-11T09:27:28.541Z",
+          "seconds": 250.327775279,
+          "gttBytes": 133537792,
+          "vramBytes": 914067456,
+          "totalBytes": 1047605248
+        },
+        {
+          "at": "2026-09-11T09:27:33.547Z",
+          "seconds": 255.33317334400002,
+          "gttBytes": 124321792,
+          "vramBytes": 892944384,
+          "totalBytes": 1017266176
+        },
+        {
+          "at": "2026-09-11T09:27:38.552Z",
+          "seconds": 260.338903098,
+          "gttBytes": 120127488,
+          "vramBytes": 892960768,
+          "totalBytes": 1013088256
+        },
+        {
+          "at": "2026-09-11T09:27:43.558Z",
+          "seconds": 265.344573637,
+          "gttBytes": 120127488,
+          "vramBytes": 891904000,
+          "totalBytes": 1012031488
+        },
+        {
+          "at": "2026-09-11T09:27:48.564Z",
+          "seconds": 270.35016469,
+          "gttBytes": 126418944,
+          "vramBytes": 894525440,
+          "totalBytes": 1020944384
+        },
+        {
+          "at": "2026-09-11T09:27:53.571Z",
+          "seconds": 275.357268696,
+          "gttBytes": 124321792,
+          "vramBytes": 892932096,
+          "totalBytes": 1017253888
+        },
+        {
+          "at": "2026-09-11T09:27:58.581Z",
+          "seconds": 280.367171676,
+          "gttBytes": 127246336,
+          "vramBytes": 892948480,
+          "totalBytes": 1020194816
+        },
+        {
+          "at": "2026-09-11T09:28:03.586Z",
+          "seconds": 285.372832306,
+          "gttBytes": 115933184,
+          "vramBytes": 891899904,
+          "totalBytes": 1007833088
+        },
+        {
+          "at": "2026-09-11T09:28:08.592Z",
+          "seconds": 290.37815187399997,
+          "gttBytes": 120127488,
+          "vramBytes": 904806400,
+          "totalBytes": 1024933888
+        },
+        {
+          "at": "2026-09-11T09:28:13.597Z",
+          "seconds": 295.383149139,
+          "gttBytes": 115933184,
+          "vramBytes": 899555328,
+          "totalBytes": 1015488512
+        },
+        {
+          "at": "2026-09-11T09:28:18.218Z",
+          "seconds": 300.004202901,
+          "gttBytes": 119459840,
+          "vramBytes": 887681024,
+          "totalBytes": 1007140864
+        }
+      ],
+      "minBytes": 945078272,
+      "maxBytes": 1047605248,
+      "deltaBytes": 57384960
+    },
+    "menuFlowPassed": true,
+    "keyboardNavigationPassed": true,
+    "menuMusic": {
+      "audioState": "running",
+      "audioScheduledSeconds": 1.024,
+      "nativeFramesAdvanced": 58,
+      "nonzeroPcmChunks": 48
+    },
+    "nativeCopyUnitPassed": true,
+    "networkTest": false,
+    "rollbackProof": false
+  },
+  "boundedPresentation49": {
+    "coreSha256": "b041332554a42918a67b72e58c171ffbacb3c4fff2acd1c0186f95e1b9e20b52",
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "strategy": "shared pixels; same-frame readback",
+    "addedPresentationFrames": 0,
+    "normalGameplayBenchmark": {
+      "stage": "Battlefield",
+      "seconds": 30.01204,
+      "simulationFps": 58.876370949792076,
+      "gameRenderFps": 58.876370949792076,
+      "visibleFps": 56.144134154159396,
+      "p95GapMs": 32.86,
+      "maxGapMs": 69.345,
+      "passed": false
+    },
+    "networkTest": false,
+    "rollbackProof": true,
+    "fullMachineBytesEqual": true,
+    "fullMachineBytes": 113188634,
+    "frames": 240,
+    "delay": 3,
+    "rollbacks": 98,
+    "resimulatedFrames": 409,
+    "maxDepth": 6,
+    "stalls": 1,
+    "dispatcherHandle": 11361,
+    "dispatcherCallsDuringTrial": 14433411,
+    "videoSkipped": 416,
+    "audioSampleFramesSkipped": 547600,
+    "outputSuppressedAtEnd": false,
+    "profileEnabled": false,
+    "meanCaptureMs": 7.09045918,
+    "meanRestoreMs": 13.12376289,
+    "memorySoak": {
+      "scope": "device-wide",
+      "card": "card1",
+      "samples": [
+        {
+          "at": "2026-09-11T09:33:13.051Z",
+          "seconds": 0.00019025599999999797,
+          "gttBytes": 119459840,
+          "vramBytes": 842620928,
+          "totalBytes": 962080768
+        },
+        {
+          "at": "2026-09-11T09:33:18.057Z",
+          "seconds": 5.0056593760000005,
+          "gttBytes": 115265536,
+          "vramBytes": 841551872,
+          "totalBytes": 956817408
+        },
+        {
+          "at": "2026-09-11T09:33:23.062Z",
+          "seconds": 10.010630002,
+          "gttBytes": 127340544,
+          "vramBytes": 839233536,
+          "totalBytes": 966574080
+        },
+        {
+          "at": "2026-09-11T09:33:28.067Z",
+          "seconds": 15.016250622,
+          "gttBytes": 136556544,
+          "vramBytes": 846602240,
+          "totalBytes": 983158784
+        },
+        {
+          "at": "2026-09-11T09:33:33.073Z",
+          "seconds": 20.021656615,
+          "gttBytes": 118951936,
+          "vramBytes": 842633216,
+          "totalBytes": 961585152
+        },
+        {
+          "at": "2026-09-11T09:33:38.078Z",
+          "seconds": 25.027438074,
+          "gttBytes": 118951936,
+          "vramBytes": 842633216,
+          "totalBytes": 961585152
+        },
+        {
+          "at": "2026-09-11T09:33:43.080Z",
+          "seconds": 30.028644704999998,
+          "gttBytes": 118951936,
+          "vramBytes": 845512704,
+          "totalBytes": 964464640
+        },
+        {
+          "at": "2026-09-11T09:33:48.085Z",
+          "seconds": 35.034314965,
+          "gttBytes": 125243392,
+          "vramBytes": 852869120,
+          "totalBytes": 978112512
+        },
+        {
+          "at": "2026-09-11T09:33:53.091Z",
+          "seconds": 40.040386321999996,
+          "gttBytes": 121049088,
+          "vramBytes": 848896000,
+          "totalBytes": 969945088
+        },
+        {
+          "at": "2026-09-11T09:33:58.097Z",
+          "seconds": 45.04630083,
+          "gttBytes": 126070784,
+          "vramBytes": 843636736,
+          "totalBytes": 969707520
+        },
+        {
+          "at": "2026-09-11T09:34:03.103Z",
+          "seconds": 50.052298936999996,
+          "gttBytes": 112660480,
+          "vramBytes": 866643968,
+          "totalBytes": 979304448
+        },
+        {
+          "at": "2026-09-11T09:34:08.109Z",
+          "seconds": 55.057640744,
+          "gttBytes": 123146240,
+          "vramBytes": 860954624,
+          "totalBytes": 984100864
+        },
+        {
+          "at": "2026-09-11T09:34:13.114Z",
+          "seconds": 60.063172255,
+          "gttBytes": 123146240,
+          "vramBytes": 860966912,
+          "totalBytes": 984113152
+        },
+        {
+          "at": "2026-09-11T09:34:18.120Z",
+          "seconds": 65.068679606,
+          "gttBytes": 123146240,
+          "vramBytes": 850153472,
+          "totalBytes": 973299712
+        },
+        {
+          "at": "2026-09-11T09:34:23.125Z",
+          "seconds": 70.07362884599999,
+          "gttBytes": 118951936,
+          "vramBytes": 852017152,
+          "totalBytes": 970969088
+        },
+        {
+          "at": "2026-09-11T09:34:28.130Z",
+          "seconds": 75.078608014,
+          "gttBytes": 130265088,
+          "vramBytes": 846757888,
+          "totalBytes": 977022976
+        },
+        {
+          "at": "2026-09-11T09:34:33.135Z",
+          "seconds": 80.083622097,
+          "gttBytes": 123146240,
+          "vramBytes": 844886016,
+          "totalBytes": 968032256
+        },
+        {
+          "at": "2026-09-11T09:34:38.139Z",
+          "seconds": 85.08800818200001,
+          "gttBytes": 116854784,
+          "vramBytes": 844902400,
+          "totalBytes": 961757184
+        },
+        {
+          "at": "2026-09-11T09:34:43.145Z",
+          "seconds": 90.093583862,
+          "gttBytes": 116854784,
+          "vramBytes": 852004864,
+          "totalBytes": 968859648
+        },
+        {
+          "at": "2026-09-11T09:34:48.150Z",
+          "seconds": 95.09905670299999,
+          "gttBytes": 116854784,
+          "vramBytes": 842014720,
+          "totalBytes": 958869504
+        },
+        {
+          "at": "2026-09-11T09:34:53.156Z",
+          "seconds": 100.104633502,
+          "gttBytes": 116854784,
+          "vramBytes": 841715712,
+          "totalBytes": 958570496
+        },
+        {
+          "at": "2026-09-11T09:34:58.161Z",
+          "seconds": 105.110416387,
+          "gttBytes": 126070784,
+          "vramBytes": 841715712,
+          "totalBytes": 967786496
+        },
+        {
+          "at": "2026-09-11T09:35:03.163Z",
+          "seconds": 110.111517658,
+          "gttBytes": 116854784,
+          "vramBytes": 849354752,
+          "totalBytes": 966209536
+        },
+        {
+          "at": "2026-09-11T09:35:08.168Z",
+          "seconds": 115.116648607,
+          "gttBytes": 129437696,
+          "vramBytes": 850964480,
+          "totalBytes": 980402176
+        },
+        {
+          "at": "2026-09-11T09:35:13.171Z",
+          "seconds": 120.11959288300001,
+          "gttBytes": 121049088,
+          "vramBytes": 848060416,
+          "totalBytes": 969109504
+        },
+        {
+          "at": "2026-09-11T09:35:18.176Z",
+          "seconds": 125.125294549,
+          "gttBytes": 116854784,
+          "vramBytes": 841740288,
+          "totalBytes": 958595072
+        },
+        {
+          "at": "2026-09-11T09:35:23.182Z",
+          "seconds": 130.130812403,
+          "gttBytes": 121049088,
+          "vramBytes": 846475264,
+          "totalBytes": 967524352
+        },
+        {
+          "at": "2026-09-11T09:35:28.187Z",
+          "seconds": 135.135639271,
+          "gttBytes": 130265088,
+          "vramBytes": 847839232,
+          "totalBytes": 978104320
+        },
+        {
+          "at": "2026-09-11T09:35:33.192Z",
+          "seconds": 140.140606379,
+          "gttBytes": 116854784,
+          "vramBytes": 846991360,
+          "totalBytes": 963846144
+        },
+        {
+          "at": "2026-09-11T09:35:38.197Z",
+          "seconds": 145.14613077799999,
+          "gttBytes": 116854784,
+          "vramBytes": 847540224,
+          "totalBytes": 964395008
+        },
+        {
+          "at": "2026-09-11T09:35:43.203Z",
+          "seconds": 150.151599227,
+          "gttBytes": 116854784,
+          "vramBytes": 848863232,
+          "totalBytes": 965718016
+        },
+        {
+          "at": "2026-09-11T09:35:48.208Z",
+          "seconds": 155.15715541199998,
+          "gttBytes": 121049088,
+          "vramBytes": 847278080,
+          "totalBytes": 968327168
+        },
+        {
+          "at": "2026-09-11T09:35:53.212Z",
+          "seconds": 160.161377329,
+          "gttBytes": 121049088,
+          "vramBytes": 903217152,
+          "totalBytes": 1024266240
+        },
+        {
+          "at": "2026-09-11T09:35:58.218Z",
+          "seconds": 165.16678297299998,
+          "gttBytes": 126070784,
+          "vramBytes": 903561216,
+          "totalBytes": 1029632000
+        },
+        {
+          "at": "2026-09-11T09:36:03.223Z",
+          "seconds": 170.172253957,
+          "gttBytes": 138653696,
+          "vramBytes": 895160320,
+          "totalBytes": 1033814016
+        },
+        {
+          "at": "2026-09-11T09:36:08.229Z",
+          "seconds": 175.177596106,
+          "gttBytes": 121049088,
+          "vramBytes": 891187200,
+          "totalBytes": 1012236288
+        },
+        {
+          "at": "2026-09-11T09:36:13.234Z",
+          "seconds": 180.18264639199998,
+          "gttBytes": 116854784,
+          "vramBytes": 884858880,
+          "totalBytes": 1001713664
+        },
+        {
+          "at": "2026-09-11T09:36:18.240Z",
+          "seconds": 185.18862142400002,
+          "gttBytes": 116854784,
+          "vramBytes": 891695104,
+          "totalBytes": 1008549888
+        },
+        {
+          "at": "2026-09-11T09:36:23.245Z",
+          "seconds": 190.194194755,
+          "gttBytes": 121049088,
+          "vramBytes": 896180224,
+          "totalBytes": 1017229312
+        },
+        {
+          "at": "2026-09-11T09:36:28.251Z",
+          "seconds": 195.199651026,
+          "gttBytes": 130265088,
+          "vramBytes": 897470464,
+          "totalBytes": 1027735552
+        },
+        {
+          "at": "2026-09-11T09:36:33.260Z",
+          "seconds": 200.20848168,
+          "gttBytes": 116854784,
+          "vramBytes": 894853120,
+          "totalBytes": 1011707904
+        },
+        {
+          "at": "2026-09-11T09:36:38.265Z",
+          "seconds": 205.21365193,
+          "gttBytes": 121876480,
+          "vramBytes": 895115264,
+          "totalBytes": 1016991744
+        },
+        {
+          "at": "2026-09-11T09:36:43.270Z",
+          "seconds": 210.21941835200002,
+          "gttBytes": 121049088,
+          "vramBytes": 893284352,
+          "totalBytes": 1014333440
+        },
+        {
+          "at": "2026-09-11T09:36:48.276Z",
+          "seconds": 215.225204836,
+          "gttBytes": 121049088,
+          "vramBytes": 891158528,
+          "totalBytes": 1012207616
+        },
+        {
+          "at": "2026-09-11T09:36:53.282Z",
+          "seconds": 220.230602794,
+          "gttBytes": 118951936,
+          "vramBytes": 891699200,
+          "totalBytes": 1010651136
+        },
+        {
+          "at": "2026-09-11T09:36:58.287Z",
+          "seconds": 225.236167985,
+          "gttBytes": 130265088,
+          "vramBytes": 896180224,
+          "totalBytes": 1026445312
+        },
+        {
+          "at": "2026-09-11T09:37:03.293Z",
+          "seconds": 230.24209634699997,
+          "gttBytes": 130265088,
+          "vramBytes": 894320640,
+          "totalBytes": 1024585728
+        },
+        {
+          "at": "2026-09-11T09:37:08.299Z",
+          "seconds": 235.247611511,
+          "gttBytes": 116854784,
+          "vramBytes": 889044992,
+          "totalBytes": 1005899776
+        },
+        {
+          "at": "2026-09-11T09:37:13.301Z",
+          "seconds": 240.249948134,
+          "gttBytes": 114757632,
+          "vramBytes": 892743680,
+          "totalBytes": 1007501312
+        },
+        {
+          "at": "2026-09-11T09:37:18.307Z",
+          "seconds": 245.25626284799998,
+          "gttBytes": 123146240,
+          "vramBytes": 899358720,
+          "totalBytes": 1022504960
+        },
+        {
+          "at": "2026-09-11T09:37:23.313Z",
+          "seconds": 250.261592169,
+          "gttBytes": 118951936,
+          "vramBytes": 911437824,
+          "totalBytes": 1030389760
+        },
+        {
+          "at": "2026-09-11T09:37:28.318Z",
+          "seconds": 255.26663662800001,
+          "gttBytes": 126070784,
+          "vramBytes": 897642496,
+          "totalBytes": 1023713280
+        },
+        {
+          "at": "2026-09-11T09:37:33.323Z",
+          "seconds": 260.271589155,
+          "gttBytes": 114757632,
+          "vramBytes": 906612736,
+          "totalBytes": 1021370368
+        },
+        {
+          "at": "2026-09-11T09:37:38.328Z",
+          "seconds": 265.277049633,
+          "gttBytes": 118951936,
+          "vramBytes": 892051456,
+          "totalBytes": 1011003392
+        },
+        {
+          "at": "2026-09-11T09:37:43.333Z",
+          "seconds": 270.28161287800003,
+          "gttBytes": 123146240,
+          "vramBytes": 890978304,
+          "totalBytes": 1014124544
+        },
+        {
+          "at": "2026-09-11T09:37:48.338Z",
+          "seconds": 275.286600103,
+          "gttBytes": 118951936,
+          "vramBytes": 895717376,
+          "totalBytes": 1014669312
+        },
+        {
+          "at": "2026-09-11T09:37:53.343Z",
+          "seconds": 280.291674277,
+          "gttBytes": 137826304,
+          "vramBytes": 893911040,
+          "totalBytes": 1031737344
+        },
+        {
+          "at": "2026-09-11T09:37:58.346Z",
+          "seconds": 285.294718839,
+          "gttBytes": 134459392,
+          "vramBytes": 889942016,
+          "totalBytes": 1024401408
+        },
+        {
+          "at": "2026-09-11T09:38:03.351Z",
+          "seconds": 290.300314648,
+          "gttBytes": 121049088,
+          "vramBytes": 885719040,
+          "totalBytes": 1006768128
+        },
+        {
+          "at": "2026-09-11T09:38:08.360Z",
+          "seconds": 295.308591584,
+          "gttBytes": 114757632,
+          "vramBytes": 892555264,
+          "totalBytes": 1007312896
+        },
+        {
+          "at": "2026-09-11T09:38:13.056Z",
+          "seconds": 300.00486180900003,
+          "gttBytes": 121049088,
+          "vramBytes": 896012288,
+          "totalBytes": 1017061376
+        }
+      ],
+      "minBytes": 956817408,
+      "maxBytes": 1033814016,
+      "deltaBytes": 54980608
+    }
+  },
+  "browserRelease49": {
+    "coreSha256": "b041332554a42918a67b72e58c171ffbacb3c4fff2acd1c0186f95e1b9e20b52",
+    "package": "dist/browser/solo-preview",
+    "files": 117,
+    "bytes": 222832578,
+    "sourceArchiveBytes": 206593626,
+    "sourceParts": 10,
+    "identicalGameplayFilesToValidatedPackage": 92,
+    "publicHttpFilesVerified": 114,
+    "privateBuildFilesDenied": 3,
+    "browserTestsPassed": 63,
+    "browserTestsSkipped": 1,
+    "dockerHttpSmokePassed": true,
+    "dockerImage": "melee-browser-solo:b041332",
+    "dockerUser": "node",
+    "dockerGpuDevices": 0,
+    "publicDomainDeployed": false,
+    "multiplayerImplemented": false,
+    "performanceCertified": false,
+    "stagesPassed": [
+      {
+        "name": "Battlefield",
+        "stage": 31,
+        "frames": [
+          148,
+          452
+        ]
+      },
+      {
+        "name": "Final Destination",
+        "stage": 32,
+        "frames": [
+          143,
+          444
+        ]
+      },
+      {
+        "name": "Dream Land 64",
+        "stage": 28,
+        "frames": [
+          146,
+          446
+        ]
+      },
+      {
+        "name": "Yoshi's Story",
+        "stage": 8,
+        "frames": [
+          144,
+          449
+        ]
+      },
+      {
+        "name": "Fountain of Dreams",
+        "stage": 2,
+        "frames": [
+          143,
+          446
+        ]
+      },
+      {
+        "name": "Pokémon Stadium",
+        "stage": 3,
+        "frames": [
+          143,
+          445
+        ]
+      }
+    ],
+    "stageTestRules": {
+      "stocks": 4,
+      "timeLimit": 480,
+      "cpuLevel": 9,
+      "items": -1,
+      "teams": 0
+    },
+    "stageSourceResolution": [
+      960,
+      720
+    ],
+    "returnedToCss": true,
+    "rootTestsPassed": 53,
+    "sourceInventoryExcludedGameFixtures": true,
+    "allFighterFormsPassed": 26,
+    "rosterMatchesPassed": 13,
+    "rosterActionCounts": [
+      7,
+      9,
+      8,
+      8,
+      10,
+      10,
+      11,
+      8,
+      11,
+      9,
+      8,
+      9,
+      7
+    ],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "normalContainerBootPassed": true,
+    "normalNativeCharacterAndStageSelectPassed": true,
+    "normalContainerConsoleErrors": [],
+    "normalContainerConsoleWarnings": [],
+    "cpuOnlyServing": true,
+    "normalContainerBattlefieldGameplayPassed": true,
+    "normalContainerKeyboardStartAndStageSelectPassed": true
+  }
+}

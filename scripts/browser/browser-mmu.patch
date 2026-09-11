@@ -1,0 +1,46 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -610,6 +610,7 @@
+   Config::SetBase(Config::GFX_PREFER_GLES, s_video_backend == "OGL");
+   Config::SetBase(Config::MAIN_CPU_CORE, s_cpu_core);
+   Config::SetBase(Config::MAIN_CPU_THREAD, s_cpu_thread);
++  Config::SetBase(Config::MAIN_MMU, EM_ASM_INT({ return Module['dolphinBrowserMmu'] ? 1 : 0; }) != 0);
+   if (EM_ASM_INT({ return Module['dolphinBrowserNoIcache'] ? 1 : 0; }))
+     Config::SetBase(Config::MAIN_DISABLE_ICACHE, true);
+   if (EM_ASM_INT({ return Module['dolphinRollbackDeterminism'] ? 1 : 0; }))
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -884,6 +884,7 @@
+         timingProfile: payload.timingProfile,
+         rollbackDeterminism: payload.rollbackDeterminism,
+         browserNoIcache: payload.browserNoIcache,
++        browserMmu: payload.browserMmu,
+         presentationQueueSize: payload.presentationQueueSize,
+         presentationPacing: payload.presentationPacing,
+         legacyTickQueue: payload.legacyTickQueue,
+@@ -1458,6 +1459,7 @@
+   timingProfile = "baseline",
+   rollbackDeterminism = false,
+   browserNoIcache = false,
++  browserMmu = false,
+   presentationQueueSize = DEFAULT_PRESENTATION_QUEUE,
+   presentationPacing = "smooth",
+   legacyTickQueue: requestedLegacyTickQueue = false,
+@@ -1927,6 +1929,7 @@
+     dolphinTimingProfile: timingProfile,
+     dolphinRollbackDeterminism: Boolean(rollbackDeterminism),
+     dolphinBrowserNoIcache: Boolean(browserNoIcache),
++    dolphinBrowserMmu: Boolean(browserMmu),
+     preinitializedWebGPUDevice,
+     locateFile: (path) => new URL(path, coreUrl).href,
+     print: (message) => postStatus(message),
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -353,6 +353,7 @@
+       renderHeight: this.renderHeight,
+       timingProfile: this.timingProfile,
+       browserNoIcache: new URLSearchParams(globalThis.location?.search || "").get("icache") === "0",
++      browserMmu: new URLSearchParams(globalThis.location?.search || "").get("mmu") === "1",
+       rollbackDeterminism: new URLSearchParams(globalThis.location?.search || "").get("determinism") === "1",
+       presentationQueueSize: this.presentationQueueSize,
+       presenterBackend: this.presenterBackend,

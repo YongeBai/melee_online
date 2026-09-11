@@ -1,0 +1,99 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -7732,6 +7732,20 @@
+   m_block_cache.Shutdown();
+ }
+ 
++// Private GALE01 v1.02 rollback gate. Check only after a complete cached
++// block has committed its register/cycle writebacks, including redispatch.
++static std::atomic<bool> s_browser_game_step_armed{false};
++static std::atomic<u32> s_browser_game_step_start{0};
++extern "C" void DolphinWeb_ArmGameFrameStep(u32 initial_frame)
++{
++  s_browser_game_step_start.store(initial_frame, std::memory_order_relaxed);
++  s_browser_game_step_armed.store(true, std::memory_order_release);
++}
++extern "C" void DolphinWeb_CancelGameFrameStep()
++{
++  s_browser_game_step_armed.store(false, std::memory_order_release);
++}
++
+ void CachedInterpreter::ExecuteOneBlock([[maybe_unused]] bool allow_redispatch)
+ {
+   const u8* normal_entry = m_block_cache.Dispatch();
+@@ -7988,6 +8002,14 @@
+     }
+   }
+ #ifdef __EMSCRIPTEN__
++    if (s_browser_game_step_armed.load(std::memory_order_acquire) &&
++        m_system.GetMemory().Read_U32(0x00479d58) !=
++            s_browser_game_step_start.load(std::memory_order_relaxed))
++    {
++      s_browser_game_step_armed.store(false, std::memory_order_release);
++      m_system.GetCPU().Break();
++      return;
++    }
+     if (redispatch_enabled && m_ppc_state.downcount > 0 &&
+         *redispatch_state_ptr == CPU::State::Running)
+     {
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -45,6 +45,7 @@
+ #include "Core/Host.h"
+ #include "Core/PowerPC/PowerPC.h"
+ #include "Core/State.h"
++#include "Core/HW/Memmap.h"
+ #include "Core/System.h"
+ 
+ #include "InputCommon/ControllerInterface/ControllerInterface.h"
+@@ -1066,6 +1067,22 @@
+   result = State::BrowserCompare(static_cast<unsigned>(a), static_cast<unsigned>(b));
+   return result.c_str();
+ }
++extern "C" void DolphinWeb_ArmGameFrameStep(u32 initial_frame);
++extern "C" void DolphinWeb_CancelGameFrameStep();
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackGameStep()
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused ||
++      SConfig::GetInstance().GetGameID() != "GALE01" || SConfig::GetInstance().GetRevision() != 2 ||
++      s_cpu_core != PowerPC::CPUCore::CachedInterpreter)
++    return 0;
++  {
++    const Core::CPUThreadGuard guard(system);
++    DolphinWeb_ArmGameFrameStep(system.GetMemory().Read_U32(0x00479d58));
++  }
++  Core::SetState(system, Core::State::Running);
++  return 1;
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackStep()
+ {
+   auto& system = Core::System::GetInstance();
+@@ -1075,6 +1092,7 @@
+ }
+ EMSCRIPTEN_KEEPALIVE void BrowserRollbackClear()
+ {
++  DolphinWeb_CancelGameFrameStep();
+   State::BrowserClear();
+ }
+ 
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1040,7 +1040,8 @@
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
+             !api.browserRollbackRestore(payload.slot)) throw new Error("Checkpoint restore failed");
+       } else if (payload.action === "step") {
+-        if (!api.browserRollbackStep()) throw new Error("Frame step requires a paused machine");
++        const step = api.browserRollbackGameStep || api.browserRollbackStep;
++        if (!step()) throw new Error("Game step requires paused GALE01 v1.02 on CachedInterpreter");
+         while (api.getCoreStateName() !== "Paused") {
+           if (performance.now() - started > 5000) {
+             api.setCorePaused(1);
+@@ -2334,6 +2335,7 @@
+     browserRollbackCapture: optionalCwrap("BrowserRollbackCapture", "number", ["number"]),
+     browserRollbackRequiredSize: optionalCwrap("BrowserRollbackRequiredSize", "number", []),
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
++    browserRollbackGameStep: optionalCwrap("BrowserRollbackGameStep", "number", []),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
+     browserRollbackCompare: optionalCwrap("BrowserRollbackCompare", "string", ["number", "number"]),

@@ -1,0 +1,92 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -125,6 +125,38 @@
+        int fp_index, int fctiwz_index, int interpret_index, int fastcheck_gpfifo_index,
+        int fast_os_interrupt_call_index, int fast_melee_input_status_call_index,
+        int fast_melee_status_call_index, int fast_melee_service_poll_call_index), {
++  // Runtime-local instance reuse: regenerated block descriptors should not
++  // consume a new function-table entry or a lifetime compilation allowance.
++  // The digest covers exact code bytes. Imports and memory/table identity
++  // must also agree before reusing a callable instance.
++  const importIndices = [read_u32_index, write_u32_index, read_u8_index, write_u8_index,
++    read_u16_index, write_u16_index, lfs_index, stfs_index, lfd_index, fmr_index,
++    system_index, fp_index, fctiwz_index, interpret_index, fastcheck_gpfifo_index,
++    fast_os_interrupt_call_index, fast_melee_input_status_call_index,
++    fast_melee_status_call_index, fast_melee_service_poll_call_index];
++  const bindings = importIndices.map(index => wasmTable.get(index));
++  if (!Module._dolphinJitInstances || Module._dolphinJitInstanceMemory !== wasmMemory ||
++      Module._dolphinJitInstanceTable !== wasmTable) {
++    if (Module._dolphinJitInstanceTable !== wasmTable) {
++      Module._dolphinJitInstanceBytes = 0;
++      Module._dolphinJitInstanceCount = 0;
++    }
++    Module._dolphinJitInstances = new Map();
++    Module._dolphinJitInstanceMemory = wasmMemory;
++    Module._dolphinJitInstanceTable = wasmTable;
++  }
++  const codeKey = UTF8ToString(cache_key_ptr);
++  if (!codeKey) return 0;
++  const instanceKey = codeKey + ':' + importIndices.join(',');
++  const previous = Module._dolphinJitInstances.get(instanceKey);
++  if (previous && previous.bindings.every((fn, i) => fn === bindings[i]) &&
++      wasmTable.get(previous.index) === previous.fn) {
++    _DolphinWeb_RecordInstanceReuse();
++    return previous.index;
++  }
++  // Limits apply to unique executable instances, not repeated descriptors.
++  if (bytes_len <= 0 || bytes_len > 1048576 || Module._dolphinJitInstanceCount >= 65536 ||
++      Module._dolphinJitInstanceBytes + bytes_len > 67108864) return 0;
+   // Day-7 Phase B: cache lookup before WebAssembly.Module compilation.
+   // Module._dolphinJitCache is populated on each pthread by the pre-js
+   // receiver (tools/jit-cache-prejs.js) when the discio worker sends a
+@@ -203,6 +235,10 @@
+   const index = wasmTable.length;
+   wasmTable.grow(1);
+   wasmTable.set(index, fn);
++  Module._dolphinJitInstances.set(instanceKey, { index, fn, bindings });
++  Module._dolphinJitInstanceBytes += bytes_len;
++  Module._dolphinJitInstanceCount += 1;
++  _DolphinWeb_RecordUniqueInstance();
+   return index | 0;
+ });
+ 
+@@ -305,6 +341,11 @@
+ u32 s_wasm_block_full_compile_count = 0;
+ u32 s_wasm_block_partial_compile_count = 0;
+ u32 s_wasm_block_mixed_compile_count = 0;
++std::atomic<u32> s_wasm_instance_reuse_count{0}, s_wasm_unique_instance_count{0};
++extern "C" EMSCRIPTEN_KEEPALIVE void DolphinWeb_RecordInstanceReuse()
++{ s_wasm_instance_reuse_count.fetch_add(1, std::memory_order_relaxed); }
++extern "C" EMSCRIPTEN_KEEPALIVE void DolphinWeb_RecordUniqueInstance()
++{ s_wasm_unique_instance_count.fetch_add(1, std::memory_order_relaxed); }
+ u32 s_wasm_block_too_short_count = 0;
+ u32 s_wasm_block_too_short_end_count = 0;
+ u32 s_wasm_prefix_instruction_sum = 0;
+@@ -455,7 +496,6 @@
+ // whole-block reject, so an adequate cap should eliminate the
+ // §28bh short-block interpreter fallback that is the ~3× drain.
+ // JIT cache cap is already 49152 (§28u) so memory headroom exists.
+-constexpr u32 MAX_WASM_MIXED_COMPILED_BLOCKS = 32768;
+ bool s_ppc_block_profile_enabled = false;
+ u32 s_ppc_profile_total_blocks = 0;
+ u32 s_ppc_profile_sample_blocks = 0;
+@@ -10638,8 +10678,6 @@
+   }
+ 
+   ++s_wasm_block_attempt_count;
+-  if (!s_wasm_jit_direct_only && s_wasm_block_mixed_compile_count >= MAX_WASM_MIXED_COMPILED_BLOCKS)
+-    return false;
+ 
+   auto& power_pc = m_system.GetPowerPC();
+   auto& cpu = m_system.GetCPU();
+@@ -11263,7 +11301,9 @@
+       << " compiled:" << s_wasm_block_compile_count
+       << " full:" << s_wasm_block_full_compile_count
+       << " partial:" << s_wasm_block_partial_compile_count
+-      << " mixed:" << s_wasm_block_mixed_compile_count << "/" << MAX_WASM_MIXED_COMPILED_BLOCKS
++      << " mixed-descriptors:" << s_wasm_block_mixed_compile_count
++      << " unique-instances:" << s_wasm_unique_instance_count.load() << "/65536"
++      << " reused-instances:" << s_wasm_instance_reuse_count.load()
+       << " short:" << s_wasm_block_too_short_count << "/" << s_wasm_block_too_short_end_count
+       << " merge:" << s_wasm_block_merge_count
+       << " regalloc:" << s_wasm_regalloc_dead_store_skip_count

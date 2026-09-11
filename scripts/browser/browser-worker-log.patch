@@ -1,0 +1,18 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -667,6 +667,7 @@
+ 
+ function rendererDiagnosticsPayload() {
+   return {
++    coreLog: api?.getBrowserLog?.() || "",
+     ...rendererDiagnostics,
+     coreSelection: { ...rendererDiagnostics.coreSelection },
+     activePresenterBackend: renderBackend,
+@@ -2234,6 +2235,7 @@
+     getCoreState: optionalCwrap("GetCoreState", "number", []),
+     getCoreStateName: optionalCwrap("GetCoreStateName", "string", []),
+     getCoreStatus: optionalCwrap("GetCoreStatus", "string", []),
++    getBrowserLog: optionalCwrap("GetBrowserLog", "string", []),
+     getCoreTitle: optionalCwrap("GetCoreTitle", "string", []),
+     getCoreTicksLow: optionalCwrap("GetCoreTicksLow", "number", []),
+     getCoreTicksHigh: optionalCwrap("GetCoreTicksHigh", "number", []),

@@ -14,7 +14,7 @@ const hooks = [
   { at: 0x800cb988, original: 0xc03e0624, fighter: 30, buttons: 0x800cb9ac },
 ];
 const branch = (from, to) => (0x48000000 | ((to - from) & 0x03fffffc)) >>> 0;
-export function installTapJumpHooks(read, write) {
+export function installTapJumpHooks(read, write, online = false) {
   // The vanilla executable starts at 0x80003100. This is the unused low-memory
   // code-handler area. Refuse to overwrite a disc mod using the same space.
   for (let i = 0; i < hooks.length; i++) {
@@ -30,7 +30,23 @@ export function installTapJumpHooks(read, write) {
     const h = hooks[i],
       cave = 0x80002800 + i * 0x80;
     // Use volatile r0/r12 and CR0; replay the displaced lfs on the normal path.
-    const words = [
+    const words = online ? [
+      // Read the fighter's assigned controller port, then that port's flag.
+      (0x8800000c | (h.fighter << 16)) >>> 0,
+      0x28000001, // cmplwi r0,1
+      0x41810028, // bgt normal
+      0x3d808000, // lis r12,0x8000
+      0x398c2f00, // addi r12,r12,flag
+      0x7c0c00ae, // lbzx r0,r12,r0
+      0x2c000000,
+      0x41820014, // beq normal
+      (0x80000004 | (h.fighter << 16)) >>> 0,
+      0x2c00000b, // Nana keeps AI stick jumps
+      0x41820008,
+      branch(cave+44,h.buttons),
+      h.original,
+      branch(cave+52,h.at+4),
+    ] : [
       0x3d808000, // lis r12,0x8000
       0x880c2f00, // lbz r0,flag(r12)
       0x2c000000, // cmpwi r0,0 (tap jump enabled)

@@ -1,0 +1,22 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1021,8 +1021,19 @@
+   return booted ? 1 : 0;
+ }
+ 
++extern "C" void DolphinWeb_CancelGameFrameStep();
+ void StopCore()
+ {
++  DolphinWeb_CancelGameFrameStep();
++  {
++    const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++    s_rollback_input_owner = false;
++  }
++  if (s_runtime_initialized && Core::IsRunning(Core::System::GetInstance()))
++  {
++    const Core::CPUThreadGuard guard(Core::System::GetInstance());
++    Core::SetIsThrottlerTempDisabled(false);
++  }
+   State::BrowserClear();
+   if (s_runtime_initialized)
+     Core::Stop(Core::System::GetInstance());

@@ -7,6 +7,10 @@
     "setup": "node scripts/setup-engine.mjs",
     "setup:native": "node scripts/native/setup-native.mjs",
     "test": "node --test scripts/engine/*.test.mjs scripts/native/*.test.mjs scripts/assets/*.test.mjs",
-    "serve": "node --env-file-if-exists=.env scripts/serve.mjs"
+    "serve": "node --env-file-if-exists=.env scripts/serve.mjs",
+    "build:browser": "node scripts/browser/package-release.mjs",
+    "verify:browser-release": "node scripts/browser/verify-release.mjs",
+    "test:browser": "node --test scripts/browser/*.test.mjs scripts/engine/browser-*.test.mjs",
+    "serve:browser": "node scripts/browser/serve.mjs"
   }
 }

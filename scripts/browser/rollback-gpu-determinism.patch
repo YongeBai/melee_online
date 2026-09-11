@@ -1,0 +1,90 @@
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -383,21 +383,27 @@
+     return R"({"error":"Invalid checkpoints"})";
+   const auto* x = browser_states[a].data();
+   const auto* y = browser_states[b].data();
+-  const auto size = std::min(browser_state_sizes[a], browser_state_sizes[b]);
+   std::string report = fmt::format(R"({{"sizeA":{},"sizeB":{},"sections":[)", browser_state_sizes[a], browser_state_sizes[b]);
+-  std::size_t start = 0;
+-  bool comma = false;
+-  for (const auto& section : browser_state_sections[a])
++  std::size_t start_a = 0, start_b = 0;
++  const auto& sections_a = browser_state_sections[a];
++  const auto& sections_b = browser_state_sections[b];
++  if (sections_a.size() != sections_b.size()) return R"({"error":"Section count differs"})";
++  for (std::size_t n = 0; n < sections_a.size(); ++n)
+   {
+-    std::size_t different = 0, first = size;
+-    for (std::size_t i = start; i < std::min(section.end, size); ++i)
+-      if (x[i] != y[i]) { ++different; if (first == size) first = i; }
+-    if (comma) report += ",";
+-    report += fmt::format(R"({{"name":"{}","start":{},"end":{},"differentBytes":{},"firstOffset":{},"firstA":{},"firstB":{}}})",
+-      section.name, start, section.end, different, first == size ? -1 : static_cast<int>(first),
+-      first == size ? -1 : x[first], first == size ? -1 : y[first]);
+-    comma = true;
+-    start = section.end;
++    const auto& sa = sections_a[n];
++    const auto& sb = sections_b[n];
++    if (std::strcmp(sa.name, sb.name)) return R"({"error":"Section order differs"})";
++    const auto size_a = sa.end - start_a, size_b = sb.end - start_b;
++    const auto common = std::min(size_a, size_b);
++    std::size_t different = 0, first = common;
++    for (std::size_t i = 0; i < common; ++i)
++      if (x[start_a+i] != y[start_b+i]) { ++different; if (first == common) first = i; }
++    if (n) report += ",";
++    report += fmt::format(R"({{"name":"{}","startA":{},"startB":{},"bytesA":{},"bytesB":{},"differentBytes":{},"firstRelativeOffset":{}}})",
++      sa.name, start_a, start_b, size_a, size_b, different,
++      first == common ? -1 : static_cast<int>(first));
++    start_a = sa.end;
++    start_b = sb.end;
+   }
+   return report + "]}";
+ }
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -608,6 +608,8 @@
+   Config::SetBase(Config::GFX_PREFER_GLES, s_video_backend == "OGL");
+   Config::SetBase(Config::MAIN_CPU_CORE, s_cpu_core);
+   Config::SetBase(Config::MAIN_CPU_THREAD, s_cpu_thread);
++  if (EM_ASM_INT({ return Module['dolphinRollbackDeterminism'] ? 1 : 0; }))
++    Config::SetBase(Config::MAIN_GPU_DETERMINISM_MODE, std::string("fake-completion"));
+   Config::SetBase(Config::MAIN_SKIP_IPL, true);
+   Config::SetBase(Config::MAIN_DSP_HLE, true);
+   Config::SetBase(Config::MAIN_DSP_THREAD, false);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -880,6 +880,7 @@
+         presentationScale: payload.presentationScale,
+         renderHeight: payload.renderHeight,
+         timingProfile: payload.timingProfile,
++        rollbackDeterminism: payload.rollbackDeterminism,
+         presentationQueueSize: payload.presentationQueueSize,
+         presentationPacing: payload.presentationPacing,
+         legacyTickQueue: payload.legacyTickQueue,
+@@ -1415,6 +1416,7 @@
+   presentationScale = 1,
+   renderHeight = 0,
+   timingProfile = "baseline",
++  rollbackDeterminism = false,
+   presentationQueueSize = DEFAULT_PRESENTATION_QUEUE,
+   presentationPacing = "smooth",
+   legacyTickQueue: requestedLegacyTickQueue = false,
+@@ -1882,6 +1884,7 @@
+     dolphinCoreLog: Boolean(coreLog),
+     dolphinRenderHeight: renderHeight,
+     dolphinTimingProfile: timingProfile,
++    dolphinRollbackDeterminism: Boolean(rollbackDeterminism),
+     preinitializedWebGPUDevice,
+     locateFile: (path) => new URL(path, coreUrl).href,
+     print: (message) => postStatus(message),
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -352,6 +352,7 @@
+       presentationScale: this.presentationScale,
+       renderHeight: this.renderHeight,
+       timingProfile: this.timingProfile,
++      rollbackDeterminism: new URLSearchParams(globalThis.location?.search || "").get("determinism") === "1",
+       presentationQueueSize: this.presentationQueueSize,
+       presenterBackend: this.presenterBackend,
+       presentationPacing: this.presentationPacing,

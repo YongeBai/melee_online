@@ -7,6 +7,8 @@ const mime = {
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".png": "image/png",
+  ".wasm": "application/wasm",
+  ".json": "application/json",
 };
 const equal = (a, b) => {
   const x = Buffer.from(a),
@@ -91,6 +93,12 @@ export function createWebHandler({ root, access = webAccess(), health = () => ({
     } else if (url.pathname.startsWith("/play/assets/")) {
       base = path.join(root, ".melee-assets");
       relative = url.pathname.slice(13);
+    } else if (url.pathname.startsWith("/play/build/core-candidates/")) {
+      base = path.join(root, "engines/wasm-dolphin/build/core-candidates");
+      relative = url.pathname.slice("/play/build/core-candidates/".length);
+    } else if (url.pathname.startsWith("/play/cores/") || url.pathname.startsWith("/engine/cores/")) {
+      base = path.join(root, "engines/wasm-dolphin/cores");
+      relative = url.pathname.replace(/^\/(play|engine)\/cores\//, "");
     } else if (url.pathname.startsWith("/play/")) {
       base = path.join(root, "scripts/engine");
       relative = url.pathname === "/play/" ? "melee.html" : url.pathname.slice(6);

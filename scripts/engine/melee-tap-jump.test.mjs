@@ -20,6 +20,7 @@ function execute(memory, start, player, disabled, kind = 2) {
   for (const r of [3, 4, 31, 28, 30]) regs[r] = 0x81000000;
   let pc = start,
     eq = false,
+    gt = false,
     replayed = false;
   for (let count = 0; count < 30; count++) {
     if (pc === start + 4 || targets.includes(pc)) return { pc, replayed };
@@ -38,11 +39,20 @@ function execute(memory, start, player, disabled, kind = 2) {
     if (op === 16) {
       const bo = (word >>> 21) & 31;
       assert.ok(bo === 12 || bo === 4);
-      if ((bo === 12 && eq) || (bo === 4 && !eq)) {
+      const condition=((word>>>16)&31)===1?gt:eq;
+      if ((bo === 12 && condition) || (bo === 4 && !condition)) {
         pc = (pc + ((word << 16) >> 16)) >>> 0;
         continue;
       }
     } else if (op === 15) regs[rt] = ((ra ? regs[ra] : 0) + (imm << 16)) >>> 0;
+    else if(op===14) regs[rt]=((ra?regs[ra]:0)+imm)>>>0;
+    else if(op===10){gt=regs[ra]>(word&65535);eq=regs[ra]===(word&65535);}
+    else if(op===31){
+      assert.equal((word>>>1)&1023,87);
+      const address=(regs[ra]+regs[(word>>>11)&31])>>>0;
+      assert.ok(address===TAP_JUMP_FLAG||address===TAP_JUMP_FLAG+1);
+      regs[rt]=Number(disabled[address-TAP_JUMP_FLAG]);
+    }
     else if (op === 34) {
       const address = (regs[ra] + imm) >>> 0;
       assert.ok(address === TAP_JUMP_FLAG || address === 0x8100000c);
@@ -77,6 +87,14 @@ test("all seven hooks, including inlined checks, preserve CPU input and button j
     (a, v) => memory.set(a, v),
   );
   assert.deepEqual(memory, before);
+});
+test('online jump hooks use independent port settings and preserve Nana',()=>{
+ const memory=new Map(originals);installTapJumpHooks(a=>memory.get(a)||0,(a,n)=>memory.set(a,n),true);
+ for(const [i,start] of [...originals.keys()].entries())for(const flags of [[false,true],[true,false],[true,true],[false,false]]){
+  for(const port of [0,1])assert.deepEqual(execute(memory,start,port,flags),flags[port]?{pc:targets[i],replayed:false}:{pc:start+4,replayed:true});
+  assert.deepEqual(execute(memory,start,1,flags,11),{pc:start+4,replayed:true});
+  assert.deepEqual(execute(memory,start,2,flags),{pc:start+4,replayed:true});
+ }
 });
 test("an incompatible executable or occupied code area is rejected before any write", () => {
   for (const invalid of [new Map(), new Map([...originals, [0x80002800, 1]])]) {

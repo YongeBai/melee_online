@@ -1,0 +1,29 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -89,6 +89,26 @@
+ 
+ void FifoManager::PauseAndLock()
+ {
++#ifdef __EMSCRIPTEN__
++  if (m_use_deterministic_gpu_thread && m_system.IsDualCoreMode() &&
++      m_gpu_mainloop.IsRunning())
++  {
++    // A logic-frame break pauses adjacent systems before the host acquires
++    // CPUThreadGuard. Wait() alone cannot drain commands in that state: the
++    // normal GPU loop returns early while paused. Finish precisely the bytes
++    // already preprocessed by the stopped CPU on the owning GPU thread before
++    // SyncGPU compacts either FIFO or a snapshot copies the main CP state.
++    AsyncRequests::GetInstance()->PushBlockingEvent([this] {
++      u8* write_ptr = m_video_buffer_write_ptr;
++      if (write_ptr > m_video_buffer_seen_ptr.load())
++      {
++        m_video_buffer_read_ptr =
++            OpcodeDecoder::RunFifo(DataReader(m_video_buffer_read_ptr, write_ptr), nullptr);
++        m_video_buffer_seen_ptr = write_ptr;
++      }
++    });
++  }
++#endif
+   SyncGPU(SyncGPUReason::Other);
+   EmulatorState(false);
+ 

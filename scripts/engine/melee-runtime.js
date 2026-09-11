@@ -47,6 +47,7 @@ let testForms = [false, false];
 let nativeSceneKey = "",
   nativeSceneSince = 0;
 const audio = new AudioController();
+const browserStatus = [];
 if (nativeEngine) audio.targetLeadSeconds = 0.08;
 const Host = nativeEngine
   ? (await import("./native-host.js")).NativeHost
@@ -54,6 +55,10 @@ const Host = nativeEngine
 const host = new Host({
   canvas: $("screen"),
   onStatus: (message) => {
+    if (!nativeEngine) {
+      browserStatus.push(String(message));
+      if (browserStatus.length > 64) browserStatus.shift();
+    }
     if (!ready && !message.includes("MEM1 signature")) status.textContent = message;
     if (nativeEngine && host.mode === "error") {
       status.textContent = message;
@@ -66,6 +71,11 @@ const host = new Host({
       `${measuredRenderFps} rendered FPS · ${measuredGameFps} simulation FPS${nativeEngine ? " · 1280×720" : ""}`;
   },
 });
+if(host.online){
+  const {createRoomUI}=await import('./room-ui.js');
+  createRoomUI(host);
+  document.body.classList.add('online-room');
+}
 audio.setSource((frames) => host.mixAudio(frames));
 audio.setTransportBridge((config) => host.configureAudioWorklet(config));
 const neutral = () => ({
@@ -204,6 +214,10 @@ async function setPaused(value) {
 }
 async function startButton() {
   if (!ready || paused) return;
+  if(host.online && gameState?.minor===0){
+    try {await control('start');}catch(error){window.dispatchEvent(new CustomEvent('melee-room-error',{detail:error.message}));}
+    return;
+  }
   if (gameState?.major === 2 && gameState.minor === 0) await control("start");
   pulse(16);
 }
@@ -215,12 +229,13 @@ async function quitMatch() {
 // match the icon in the original 640×480 picture, independent of browser size.
 function keyboardHovered(state) {
   const c = state?.cssCursor;
+  const shift=host.online&&host.room?.seat===1?46.2:0;
   return Boolean(
     c &&
     Number.isFinite(c.x) &&
     Number.isFinite(c.y) &&
-    c.x >= -24.6 &&
-    c.x <= -21.6 &&
+    c.x >= -24.6+shift &&
+    c.x <= -21.6+shift &&
     c.y >= -22 &&
     c.y <= -20,
   );
@@ -237,6 +252,7 @@ function toggleTapJump(value = !$("tapJump").checked) {
   $("tapJump").dispatchEvent(new Event("change"));
 }
 window.addEventListener("keydown", (event) => {
+  if(event.target instanceof Element && event.target.closest('#roomPanel input'))return;
   if (!relevant.has(event.code)) return;
   if (!ready && !$("begin").hidden && ["KeyP", "Enter"].includes(event.code)) {
     event.preventDefault();
@@ -337,11 +353,13 @@ $("tapJump").onchange = () => {
   localStorage.setItem("melee.tapJump", String($("tapJump").checked));
   void host.adapter.request("meleeControl", { action: "tapJump", enabled: $("tapJump").checked });
 };
-async function control(action) {
+async function control(action, overrides = {}) {
   const result = await host.adapter.request("meleeControl", {
     action,
     tapJump: $("tapJump").checked,
+    online: params.get("inputprobe") === "1",
     startingSheik: params.has("qa") ? testForms : undefined,
+    ...overrides,
   });
   actions.push({ action, major: result.major, minor: result.minor, frame: result.sceneFrame });
   return result;
@@ -376,7 +394,7 @@ async function tick() {
       menuSeenAt = 0;
     }
     if (state.major === 1 && state.sceneKind === 1 && !menuSeenAt) menuSeenAt = performance.now();
-    if (
+    if (!host.online &&
       state.major === 1 &&
       state.sceneKind === 1 &&
       state.sceneFrame > 60 &&
@@ -385,7 +403,7 @@ async function tick() {
     ) {
       await control("enterCss");
       bootStep = 3;
-    } else if (
+    } else if (!host.online &&
       [0, 24].includes(state.major) &&
       state.sceneFrame > 10 &&
       state.mainPointer !== "0" &&
@@ -404,11 +422,11 @@ async function tick() {
       }
       $("keyboardButton").hidden = state.minor !== 0 || state.sceneKind !== 8;
       $("keyboardButton").classList.toggle("hand-hover", keyboardHovered(state));
-      if (state.minor === 0 && state.sceneFrame > 20 && lastScene !== scene) {
+      if (!host.online && state.minor === 0 && state.sceneFrame > 20 && lastScene !== scene) {
         await control("lockCss");
         lastScene = scene;
       }
-      if (
+      if (!host.online &&
         state.minor === 4 &&
         state.sceneKind === 5 &&
         state.sceneFrame > 180 &&
@@ -419,7 +437,7 @@ async function tick() {
         lastScene = scene;
       }
       if (state.minor !== 0 && state.minor !== 4) lastScene = scene;
-    } else if (
+    } else if (!host.online &&
       !ready &&
       state.major !== 1 &&
       bootStep < 2 &&
@@ -435,7 +453,23 @@ async function tick() {
   }
 }
 const begin = $("begin");
+const discPicker = document.createElement("input");
+discPicker.type = "file";
+discPicker.accept = ".iso,.gcm";
+discPicker.hidden = true;
+discPicker.setAttribute("aria-label", "Melee USA 1.02 disc");
+document.body.append(discPicker);
+let browserDisc;
+let capabilities;
+discPicker.onchange = () => {
+  browserDisc = discPicker.files?.[0];
+  if (browserDisc) begin.click();
+};
 begin.onclick = async () => {
+  if (!nativeEngine && !browserDisc) {
+    discPicker.click();
+    return;
+  }
   begin.hidden = true;
   try {
     await audio.setMuted(false);
@@ -443,30 +477,47 @@ begin.onclick = async () => {
     if (nativeEngine) {
       await host.mountFile();
     } else {
-      const response = await fetch("/local-disc");
-      if (!response.ok) throw new Error(await response.text());
-      const blob = await response.blob();
-      const file = new File([blob], "Melee-GALE01.iso", { type: "application/octet-stream" });
+      const { browserCapabilities, requireBrowserBackend } = await import("./browser-capabilities.js");
+      capabilities = await browserCapabilities();
+      requireBrowserBackend(capabilities, host.videoBackend, host.oglProxyMode);
+      const file = browserDisc;
       const header = new Uint8Array(await file.slice(0, 8).arrayBuffer());
       if (String.fromCharCode(...header.slice(0, 6)) !== "GALE01" || header[7] !== 2)
         throw new Error("This integration requires the USA 1.02 Melee disc.");
+      if (document.documentElement.dataset.browserRelease === "true") {
+        const { installLocalMenuAssets } = await import("./browser-menu-assets.js");
+        await installLocalMenuAssets(file);
+      }
       await host.mountFile(file);
     }
-    if (host.mode !== "dolphin") throw new Error("The Dolphin engine could not boot the disc.");
+    if (host.mode !== "dolphin")
+      throw new Error(browserStatus.at(-1) || "The Dolphin engine could not boot the disc.");
     host.start();
     setInterval(tick, 150);
   } catch (error) {
     status.textContent = error.message;
+    if (!nativeEngine) {
+      browserDisc = undefined;
+      discPicker.value = "";
+    }
     begin.hidden = false;
     begin.textContent = "Retry";
   }
 };
 begin.hidden = false;
+if (!nativeEngine) begin.textContent = "Open Melee disc";
 status.textContent = "Your local copy · 4 stocks · 8 minutes · No items";
 if (params.has("qa")) {
   const panel = document.createElement("div");
   panel.id = "qa";
   const output = document.createElement("pre");
+  // StKind IDs from melee/src/melee/gr/forward.h (not the separate GrKind IDs).
+  const stageSelector = document.createElement("select");
+  stageSelector.setAttribute("aria-label", "Tournament stage");
+  for (const [id, name] of [[31, "Battlefield"], [32, "Final Destination"],
+    [28, "Dream Land 64"], [8, "Yoshi's Story"], [2, "Fountain of Dreams"], [3, "Pokémon Stadium"]])
+    stageSelector.add(new Option(name, String(id)));
+  panel.append(stageSelector);
   for (const [name, mask] of [
     ["A", 1],
     ["B", 2],
@@ -497,6 +548,10 @@ if (params.has("qa")) {
       window.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", { code, bubbles: true }));
     };
     panel.append(b);
+  }
+  for(const key of ["W","A","S","D"]){
+    const b=document.createElement("button");b.textContent=`Step ${key}`;
+    b.onclick=()=>{const code=`Key${key}`;window.dispatchEvent(new KeyboardEvent("keydown",{code,bubbles:true}));setTimeout(()=>window.dispatchEvent(new KeyboardEvent("keyup",{code,bubbles:true})),120);};panel.append(b);
   }
   const names = [
     "Captain Falcon",
@@ -562,11 +617,20 @@ if (params.has("qa")) {
   async function waitForGame(predicate, timeout = 90000) {
     const began = performance.now();
     while (performance.now() - began < timeout) {
-      const state = await host.adapter.request("meleeInspect", {});
-      if (predicate(state)) return state;
+      // QA may be activated while WASM is still initializing. Do not send
+      // memory inspection requests before the normal boot loop is ready.
+      if (!ready) { await delay(150); continue; }
+      try {
+        const state = await host.adapter.request("meleeInspect", {});
+        if (predicate(state)) return state;
+      } catch (error) {
+        // The disc can be mounted before its DOL initializes MEM1. Only this
+        // boot condition is retryable; core/transport errors must remain visible.
+        if (!error.message?.includes("Melee MEM1 signature not found")) throw error;
+      }
       await delay(150);
     }
-    throw new Error("Native scene transition timed out");
+    throw new Error("Melee scene transition timed out");
   }
   async function waitForCss() {
     let previous,
@@ -602,11 +666,21 @@ if (params.has("qa")) {
       return state.sceneFrame - baseline >= 60 && performance.now() - since >= 1000;
     });
   }
-  async function startTestMatch() {
-    await control("start");
-    pulse(16);
+  async function startTestMatch(overrides = {}) {
+    await control("start", overrides);
+    // A cold JIT burst can outlast a wall-clock pulse. Hold the QA Start
+    // input until Melee acknowledges the scene transition, then release it.
+    clearTimeout(pulseTimer);
+    pulseUntil = performance.now() + 90000;
+    host.setInputState({ ...sample(), mask: sample().mask | 16 });
+    try {
+      await waitForGame(s => s.major === 2 && s.minor === 1);
+    } finally {
+      pulseUntil = 0;
+      host.setInputState(sample());
+    }
     await waitForSss();
-    await host.adapter.request("meleeControl", { action: "selectStage", stage: 31 });
+    await host.adapter.request("meleeControl", { action: "selectStage", stage: Number(stageSelector.value) });
   }
   verify.onclick = async () => {
     verify.disabled = true;
@@ -761,6 +835,8 @@ if (params.has("qa")) {
   bench.textContent = "Benchmark 720p60";
   bench.onclick = async () => {
     bench.disabled = true;
+    progress.textContent = "Preparing a fresh match for measurement…";
+    output.textContent = "";
     try {
       if (paused) await setPaused(false);
       const initial = await waitForGame(
@@ -773,7 +849,8 @@ if (params.has("qa")) {
         await control("quit");
       }
       await waitForCss();
-      await startTestMatch();
+      const cpuWorkload = params.get("benchmarkcpu") === "1" || params.get("inputprobe") !== "1";
+      await startTestMatch({online: !cpuWorkload});
       await waitForGame(
         (s) =>
           s.major === 2 && s.minor === 2 && s.sceneKind === 2 && s.match?.timeRemaining === 480,
@@ -786,6 +863,47 @@ if (params.has("qa")) {
           s.match?.timeRemaining <= 474 &&
           s.match?.timeRemaining >= 460,
       );
+      if (!nativeEngine) {
+        if (params.get("ogltestclear") === "1") throw Error("Disable the test pattern before benchmarking gameplay");
+        const { measureBrowserGameplay, measureBrowserDelivery, summarizeCoreProfile } = await import("./browser-benchmark.js");
+        const capacityProbe = params.get("probe") === "capacity";
+        const duration = capacityProbe ? 10 : Math.max(30, Math.min(120, Number(params.get("benchmarkSeconds")) || 30));
+        progress.textContent = `Measuring ${duration} seconds of visible browser gameplay…`;
+        const profileBefore = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
+        const measure = params.get("probe") === "delivery" ? measureBrowserDelivery : measureBrowserGameplay;
+        const result = await measure(host, duration,
+          () => host.adapter.request("meleeInspect", {}));
+        const profileAfter = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
+        result.coreProfile = summarizeCoreProfile(profileBefore, profileAfter, result.seconds);
+        if (capacityProbe) { result.diagnosticOnly = true; result.passed = false; }
+        result.stage = stageSelector.selectedOptions[0].textContent;
+        result.workload = cpuWorkload ? "human versus level 9 CPU" : "two human controller ports (idle)";
+        result.engine = {
+          coreSha256: host.adapter.expectedCoreSha256,
+          backend: host.videoBackend,
+          proxy: host.oglProxyMode,
+          presentationPacing: host.adapter.bitmapPresentationPacing,
+          bitmapPresenter: typeof host.adapter.detachedOglContext?.transferFromImageBitmap === "function",
+          presentationQueue: host.adapter.presentationQueue?.stats,
+          timing: host.timingProfile,
+          jitRequested: host.ppcWasmJit,
+          jitTier: host.ppcWasmJitTier,
+          interpreterDisableMask: host.cachedInterpreterDisableMask,
+          profiler: host.ppcProfile,
+          metrics: host.collectMetrics,
+          emulationSpeed: host.emulationSpeed,
+          cpuOverclock: host.cpuOverclock,
+          cpuThread: host.cpuThread,
+          capabilities,
+        };
+        output.textContent = JSON.stringify(result, null, 2);
+        progress.textContent = result.diagnosticOnly
+          ? capacityProbe ? "Diagnostic capacity run; normal-speed acceptance was not tested." : "Diagnostic delivery run; distinct image cadence was not measured."
+          : result.passed
+          ? "PASS: sustained browser gameplay at 720p60."
+          : "Below target; see actual image cadence, source resolution, and simulation speed.";
+        return;
+      }
       const before = await host.adapter.request("meleeInspect", {}),
         video = { ...host.metrics },
         t0 = performance.now();
@@ -827,6 +945,150 @@ if (params.has("qa")) {
     }
   };
   panel.append(bench);
+  if (!nativeEngine) {
+    const rollbackCheck = document.createElement("button");
+    rollbackCheck.textContent = "Verify browser state replay";
+    rollbackCheck.onclick = async () => {
+      rollbackCheck.disabled = true;
+      progress.textContent = "Preparing browser state replay…";
+      let lastAction = "prepare";
+      const command = (action, data = {}) => {
+        lastAction = action + (data.slot === undefined ? "" : " slot " + data.slot);
+        if (action !== "clear") progress.textContent = "Replay: " + lastAction;
+        return host.adapter.request("browserRollback", {action, ...data});
+      };
+      const steps = async () => {
+        const records = [];
+        let previous = await host.adapter.request("meleeInspect", {});
+        for (let i = 0; i < 8; i++) {
+          if (params.get("inputprobe") === "1") {
+            const pads = [neutral(), neutral()];
+            pads[0].stickX = i < 4 ? 220 : 128;
+            pads[0].mask = i === 4 ? 1 : i >= 6 ? 4 : 0;
+            pads[1].stickX = i < 4 ? 36 : 128;
+            pads[1].mask = i === 4 ? 2 : i >= 6 ? 32 : 0;
+            await command("pads", {pads, frame: previous.sceneFrame});
+          }
+          const timing = await command("step", {unthrottled: params.get("stepcapacity") === "1"});
+          const state = await host.adapter.request("meleeInspect", {});
+          records.push({delta: state.sceneFrame - previous.sceneFrame, milliseconds: timing.milliseconds, transitionMilliseconds: timing.transitionMilliseconds, waitMilliseconds: timing.waitMilliseconds});
+          previous = state;
+        }
+        return {records, state: previous};
+      };
+      try {
+        let current = await waitForGame(() => true);
+        if (current.major !== 2) {
+          await waitForCss();
+          current = await host.adapter.request("meleeInspect", {});
+        }
+        if (current.major === 2 && current.minor === 2) {
+          await control("quit");
+          await waitForCss();
+          current = await host.adapter.request("meleeInspect", {});
+        }
+        if (current.major === 2 && current.minor === 0) {
+          await waitForCss();
+          await startTestMatch();
+        } else if (current.major === 2 && current.minor === 1) {
+          await host.adapter.request("meleeControl", {action:"selectStage", stage:Number(stageSelector.value)});
+          pulse(1);
+        }
+        await waitForGame(s => s.major === 2 && s.minor === 2 && s.sceneFrame > 300);
+        progress.textContent = "Checking complete-machine capture and replay…";
+        await command("pause");
+        // Align with the existing Dolphin frame-step boundary before capture.
+        await command("step");
+        const initial = await host.adapter.request("meleeInspect", {});
+        if (params.get("timelineprobe") === "1") {
+          const {verifyBrowserRollbackTimeline} = await import("./browser-rollback-probe.js");
+          const dispatchBefore = params.get("wasmdispatchcompare") === "1"
+            ? (await host.adapter.request("rendererDiagnostics", {})).cpuDetails : "";
+          const result = await verifyBrowserRollbackTimeline(command,
+            () => host.adapter.request("meleeInspect", {}),
+            {frames:Number(params.get("timelineframes") || 40),
+              delay:Number(params.get("timelinedelay") || 3),
+              checkpointPolicy:params.get("checkpoints") || "periodic",
+              cacheFastPathComparison:params.get("cachecompare") === "1",
+              cacheLoopComparison:params.get("batchcompare") === "1",
+              inlineDispatchComparison:params.get("dispatchcompare") === "1",
+              wasmDispatchComparison:params.get("wasmdispatchcompare") === "1",
+              codegenComparison:params.get("codegencompare") === "1" ? {regcache:params.get("regalloc") === "1",fastmem:params.get("fastmemhoist") === "1"} : null,
+              onProgress: context => { progress.textContent = "Replay: " + context; }});
+          const diagnostics = await host.adapter.request("rendererDiagnostics", {});
+          if (params.get("wasmdispatchcompare") === "1") {
+            const before = /wasm-dispatch:(\d+)\/(\d+)calls/.exec(dispatchBefore || "");
+            const after = /wasm-dispatch:(\d+)\/(\d+)calls/.exec(diagnostics.cpuDetails || "");
+            const calls = Number(after?.[2] || 0) - Number(before?.[2] || 0);
+            result.optimizationExecution = {dispatcherHandle:Number(after?.[1] || 0), calls};
+            result.passed = result.passed && result.optimizationExecution.dispatcherHandle > 0 && calls > 0;
+          }
+          result.engine = {coreSha256:host.adapter.expectedCoreSha256,
+            profileEnabled:diagnostics.coreProfile?.enabled,
+            sourceResolution:host.oglSabEnabled ? [host.oglSabWidth,host.oglSabHeight] :
+              [host.adapter.presentedWidth,host.adapter.presentedHeight]};
+          output.textContent = JSON.stringify(result, null, 2);
+          progress.textContent = result.passed ? "PASS: late inputs corrected to identical full state." :
+            "Replay or optimization execution check failed; see diagnostics.";
+          return;
+        }
+        const gpuResident = params.get("gpucheckpoint") === "1";
+        // Validate a fast checkpoint against independent full CPU/GPU captures.
+        if (gpuResident) await command("capture", {slot: 4});
+        const coldCapture = await command("capture", {slot: 0, gpuResident});
+        const warmCaptures = [];
+        if (params.get("checkpointwarm") === "1")
+          for (let i = 0; i < 3; i++) warmCaptures.push(await command("capture", {slot: 0, gpuResident}));
+        const capture = warmCaptures.at(-1) || coldCapture;
+        const first = await steps();
+        await command("capture", {slot: 1});
+        const restore = await command("restore", {slot: 0});
+        const restored = await host.adapter.request("meleeInspect", {});
+        await command("capture", {slot: 3});
+        const restoreComparison = await command("equal", {a: gpuResident ? 4 : 0, b: 3});
+        const second = await steps();
+        await command("capture", {slot: 2});
+        const comparison = await command("equal", {a: 1, b: 2});
+        const inputProbe = params.get("inputprobe") === "1";
+        const bothPortsMoved = !inputProbe || [0, 1].every(port => {
+          const before = initial.fighters.find(f => f.port === port);
+          const after = first.state.fighters.find(f => f.port === port);
+          return before && after && before.slotType === 0 && after.slotType === 0 &&
+            (after.x - before.x) * (port === 0 ? 1 : -1) > 0.1;
+        });
+        const passed = comparison.equal && bothPortsMoved && restored.sceneFrame === initial.sceneFrame &&
+          [...first.records, ...second.records].every(r => r.delta === 1);
+        output.textContent = JSON.stringify({passed, fullMachineBytesEqual: comparison.equal,
+          gpuResident, bothPortsMoved, initialFighters: initial.fighters, twoPortInputs: params.get("inputprobe") === "1", unthrottledReplay: params.get("stepcapacity") === "1", comparison: comparison.comparison, restoreComparison, coldCapture, warmCaptures, capture, restore, initialFrame: initial.sceneFrame, restoredFrame: restored.sceneFrame,
+          first, second}, null, 2);
+        progress.textContent = passed ? "PASS: eight-frame complete-machine replay matches." :
+          "Replay differs; this core is not yet suitable for rollback.";
+      } catch (error) {
+        progress.textContent = "FAILED: " + error.message;
+        output.textContent = JSON.stringify({passed:false, action:lastAction, error:error.message}, null, 2);
+      } finally {
+        try { await command("clear"); } catch {}
+        if (params.get("cachecompare") === "1") {
+          try { await host.adapter.request("browserRollback", {action:"cacheFastPath", value:params.get("dcbfast") === "1"}); } catch {}
+        }
+        if (params.get("batchcompare") === "1") {
+          try { await host.adapter.request("browserRollback", {action:"cacheLoopBatch", value:params.get("dcbbatch") === "1"}); } catch {}
+        }
+        if (params.get("dispatchcompare") === "1") {
+          try { await host.adapter.request("browserRollback", {action:"inlineDispatch", value:params.get("inlinedispatch") === "1"}); } catch {}
+        }
+        if (params.get("wasmdispatchcompare") === "1") {
+          try { await host.adapter.request("browserRollback", {action:"wasmDispatch", value:params.get("wasmdispatch") === "1"}); } catch {}
+        }
+        if (params.get("codegencompare") === "1") {
+          try { await host.adapter.request("browserRollback", {action:"codegen", regcache:params.get("regalloc") === "1",fastmem:params.get("fastmemhoist") === "1"}); } catch {}
+        }
+        try { await host.adapter.request("start", {}); } catch {}
+        rollbackCheck.disabled = false;
+      }
+    };
+    panel.append(rollbackCheck);
+  }
   const menuCheck = document.createElement("button");
   menuCheck.textContent = "Verify menu flow";
   menuCheck.onclick = async () => {
@@ -940,6 +1202,44 @@ if (params.has("qa")) {
     }
   };
   panel.append(menuCheck);
+  const stagesCheck = document.createElement("button");
+  stagesCheck.textContent = "Verify tournament stages";
+  stagesCheck.onclick = async () => {
+    stagesCheck.disabled = true;
+    const originalStage = stageSelector.value;
+    const stages = [];
+    output.textContent = "";
+    try {
+      if (paused) await setPaused(false);
+      if (gameState?.minor === 2) await quitMatch();
+      await waitForCss();
+      for (const option of stageSelector.options) {
+        stageSelector.value = option.value;
+        progress.textContent = `Checking ${option.textContent} (${stages.length + 1}/6)…`;
+        await startTestMatch({online:false});
+        const start = await waitForGame(s => s.minor === 2 && s.sceneKind === 2 &&
+          s.sceneFrame > 140 && s.fighters.length === 2);
+        if (start.match.stage !== Number(option.value) || start.match.timeLimit !== 480 ||
+            start.match.items !== -1 || start.match.cpuLevel !== 9 || start.match.teams !== 0 ||
+            start.fighters[1].slotType !== 1 || start.fighters.some(f => f.stocks !== 4))
+          throw Error(`Wrong match rules on ${option.textContent}`);
+        const end = await waitForGame(s => s.sceneFrame >= start.sceneFrame + 300);
+        stages.push({name:option.textContent,stage:start.match.stage,rules:start.match,
+          startFrame:start.sceneFrame,endFrame:end.sceneFrame,sourceResolution:[$("screen").width,$("screen").height]});
+        await quitMatch();
+        await waitForCss();
+      }
+      output.textContent = JSON.stringify({passed:true,stages,returnedToCss:true},null,2);
+      progress.textContent = "PASS: all six tournament stages, fixed match rules, live frame progression, and return to character select.";
+    } catch (error) {
+      output.textContent = JSON.stringify({passed:false,stages,error:error.message},null,2);
+      progress.textContent = "FAILED: " + error.message;
+    } finally {
+      stageSelector.value = originalStage;
+      stagesCheck.disabled = false;
+    }
+  };
+  panel.append(stagesCheck);
   const handCheck = document.createElement("button");
   handCheck.textContent = "Move hand to keyboard";
   handCheck.onclick = async () => {
@@ -950,7 +1250,7 @@ if (params.has("qa")) {
         const state = await host.adapter.request("meleeInspect", {});
         const c = state.cssCursor;
         if (!c) throw Error("Hand navigation requires character select");
-        const dx = -23.1 - c.x,
+        const dx = -23.1 + (host.online&&host.room?.seat===1?46.2:0) - c.x,
           dy = -21 - c.y;
         if (Math.abs(dx) < 0.4 && Math.abs(dy) < 0.4) break;
         keys.clear();
@@ -993,6 +1293,9 @@ if (params.has("qa")) {
       press("KeyP");
       for (let i = 0; i < 60 && (!paused || controlsChanging); i++) await delay(50);
       if (!paused || controlsChanging) throw Error("Hand + P did not open keyboard controls");
+      // Allow the neutral input and the room's sampled cursor to catch up before
+      // comparing positions, including the QA client's artificial input delay.
+      if (host.online) await delay(host.inputDelayMs + 200);
       const before = await host.adapter.request("meleeInspect", {});
       const audioBefore = audio.nextPlayTime;
       audio.source = async (frames) => {
@@ -1058,6 +1361,36 @@ if (params.has("qa")) {
     }
   };
   panel.append(keyboardCheck);
+  if (!nativeEngine) {
+    const diagnostic = document.createElement("button");
+    diagnostic.textContent = "Browser engine diagnostics";
+    diagnostic.onclick = async () => {
+      const d = typeof host.adapter.request === "function"
+        ? await host.adapter.request("rendererDiagnostics", {})
+        : {};
+      const { game, ...frame } = frames || {};
+      output.textContent = JSON.stringify({
+        frame,
+        boot: host.game?.coreBoot,
+        capabilities,
+        status: browserStatus,
+        renderer: {
+          requested: d.requestedVideoBackend,
+          configured: d.configuredVideoBackend,
+          presenter: d.activePresenterBackend,
+          errors: d.errors,
+          stderr: d.emscriptenPrintErr,
+          coreLog: d.coreLog,
+          cpuDetails: d.cpuDetails,
+          cpuBlocks: d.cpuBlocks,
+          profile: d.coreProfile,
+          history: d.statusHistory,
+          output: d.outputContract,
+        },
+      }, null, 2);
+    };
+    panel.append(diagnostic);
+  }
   const inspect = document.createElement("button");
   inspect.textContent = "Inspect game";
   inspect.onclick = async () => {

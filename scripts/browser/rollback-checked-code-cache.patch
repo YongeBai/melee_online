@@ -1,0 +1,194 @@
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -22,6 +22,9 @@
+ #include <lzo/lzo1x.h>
+ 
+ #include "Common/Buffer.h"
++#include "Common/RangeSet.h"
++#include "Core/PowerPC/JitCommon/JitCache.h"
++#include "Core/PowerPC/JitInterface.h"
+ #include "Common/ChunkFile.h"
+ #include "Common/CommonTypes.h"
+ #include "Common/Contains.h"
+@@ -137,6 +140,14 @@
+ 
+ struct BrowserStateSection { const char* name; std::size_t end; };
+ static std::vector<BrowserStateSection>* browser_sections_recording = nullptr;
++static u8* browser_section_base = nullptr;
++void BrowserRecordSection(PointerWrap& p, const char* name)
++{
++  if (browser_sections_recording && p.IsWriteMode())
++    browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(browser_section_base)});
++}
++static bool browser_keep_jit = false;
++bool BrowserKeepJit() { return browser_keep_jit; }
+ static void DoState(Core::System& system, PointerWrap& p)
+ {
+   const auto section_start = p.GetOffsetFromPreviousPosition(nullptr);
+@@ -301,15 +312,64 @@
+     buffer.reset(size);
+   }
+   browser_state_sections[slot].clear();
++  browser_section_base = buffer.data();
+   browser_sections_recording = &browser_state_sections[slot];
+   browser_state_sizes[slot] = SaveToBuffer(system, buffer);
+   browser_sections_recording = nullptr;
+   return browser_state_sizes[slot];
+ }
++inline bool CoherentInstructionCache(Core::System& system) {
++  const auto& cache=system.GetPPCState().iCache;
++  auto& memory=system.GetMemory();
++  for (u32 set=0;set<PowerPC::CACHE_SETS;++set)
++    for (u32 way=0;way<PowerPC::CACHE_WAYS;++way) {
++      if (!(cache.valid[set] & (1u<<way))) continue;
++      const u32 address=cache.addrs[set][way];
++      if (address>memory.GetRamSize()-32 ||
++          std::memcmp(cache.data[set][way].data(),memory.GetRAM()+address,32)!=0) return false;
++    }
++  return true;
++}
++class CodeRestoreGuard {
++  Core::System& system;
++  struct Range {u32 from; std::vector<u8> bytes;};
++  std::vector<Range> saved;
++public:
++  explicit CodeRestoreGuard(Core::System& s):system(s) {
++    browser_keep_jit = CoherentInstructionCache(s);
++    if (!browser_keep_jit) return;
++    Core::CPUThreadGuard guard(s);
++    Common::RangeSet<u32> ranges;
++    s.GetJitInterface().RunOnBlocks(guard,[&](const JitBlock& block){
++      for (auto [from,to]:block.physical_addresses) ranges.insert(from,to);
++    });
++    auto& memory=s.GetMemory();
++    for (auto [from,to]:ranges) {
++      if (to>memory.GetRamSize()) {browser_keep_jit=false;break;}
++      saved.push_back({from,{memory.GetRAM()+from,memory.GetRAM()+to}});
++    }
++  }
++  ~CodeRestoreGuard() {
++    if (browser_keep_jit) {
++      bool valid=CoherentInstructionCache(system);
++      const auto* ram=system.GetMemory().GetRAM();
++      for (const auto& range:saved)
++        if (std::memcmp(range.bytes.data(),ram+range.from,range.bytes.size())!=0) {valid=false;break;}
++      if (!valid) {
++        Core::CPUThreadGuard guard(system);
++        system.GetJitInterface().ClearCache(guard);
++      }
++    }
++    browser_keep_jit=false;
++  }
++};
+ bool BrowserLoad(Core::System& system, unsigned slot)
+ {
+-  return slot < browser_states.size() && browser_state_sizes[slot] &&
+-         LoadFromBuffer(system, std::span<u8>(browser_states[slot].data(), browser_state_sizes[slot]));
++  if (slot >= browser_states.size() || !browser_state_sizes[slot]) return false;
++  // Source bytes and instruction-cache coherence must agree on both sides
++  // of restore before compiled blocks may be retained.
++  CodeRestoreGuard code_guard(system);
++  return LoadFromBuffer(system, std::span<u8>(browser_states[slot].data(), browser_state_sizes[slot]));
+ }
+ bool BrowserEqual(unsigned a, unsigned b)
+ {
+--- a/vendor/dolphin/Source/Core/Core/State.h
++++ b/vendor/dolphin/Source/Core/Core/State.h
+@@ -12,6 +12,8 @@
+ 
+ #include "Common/CommonTypes.h"
+ 
++class PointerWrap;
++
+ namespace Core
+ {
+ class System;
+@@ -83,6 +85,8 @@
+ std::size_t BrowserSave(Core::System& system, unsigned slot);
+ bool BrowserLoad(Core::System& system, unsigned slot);
+ bool BrowserEqual(unsigned a, unsigned b);
++bool BrowserKeepJit();
++void BrowserRecordSection(PointerWrap& p, const char* name);
+ std::string BrowserCompare(unsigned a, unsigned b);
+ void BrowserClear();
+ std::size_t BrowserRequiredSize();
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/JitInterface.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/JitInterface.cpp
+@@ -11,6 +11,7 @@
+ #include "Common/CommonTypes.h"
+ 
+ #include "Core/Core.h"
++#include "Core/State.h"
+ #include "Core/PowerPC/CPUCoreBase.h"
+ #include "Core/PowerPC/CachedInterpreter/CachedInterpreter.h"
+ #include "Core/PowerPC/JitCommon/JitBase.h"
+@@ -40,7 +41,7 @@
+ 
+ void JitInterface::DoState(PointerWrap& p)
+ {
+-  if (m_jit && p.IsReadMode())
++  if (m_jit && p.IsReadMode() && !State::BrowserKeepJit())
+     m_jit->ClearCache();
+ }
+ 
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/PowerPC.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/PowerPC.cpp
+@@ -29,6 +29,7 @@
+ #include "Core/PowerPC/MMU.h"
+ #include "Core/PowerPC/PPCSymbolDB.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ namespace PowerPC
+ {
+@@ -104,8 +105,11 @@
+   p.Do(m_ppc_state.reserve_address);
+ 
+   auto& memory = m_system.GetMemory();
++  State::BrowserRecordSection(p, "CPU registers");
+   m_ppc_state.iCache.DoState(memory, p);
++  State::BrowserRecordSection(p, "CPU instruction cache");
+   m_ppc_state.dCache.DoState(memory, p);
++  State::BrowserRecordSection(p, "CPU data cache");
+ 
+   auto& mmu = m_system.GetMMU();
+   if (p.IsReadMode())
+--- a/vendor/dolphin/Source/Core/VideoCommon/VideoState.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/VideoState.cpp
+@@ -5,6 +5,7 @@
+ 
+ #include "Common/ChunkFile.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ #include "VideoCommon/BPMemory.h"
+ #include "VideoCommon/BPStructs.h"
+ #include "VideoCommon/BoundingBox.h"
+@@ -73,6 +74,7 @@
+ 
+   system.GetPixelEngine().DoState(p);
+   p.DoMarker("PixelEngine");
++  State::BrowserRecordSection(p, "GPU PixelEngine");
+ 
+   // the old way of replaying current bpmem as writes to push side effects to pixel shader manager
+   // doesn't really work.
+@@ -87,16 +89,20 @@
+ 
+   g_vertex_manager->DoState(p);
+   p.DoMarker("VertexManager");
++  State::BrowserRecordSection(p, "GPU VertexManager");
+ 
+   g_framebuffer_manager->DoState(p);
+   p.DoMarker("FramebufferManager");
++  State::BrowserRecordSection(p, "GPU FramebufferManager");
+ 
+   g_texture_cache->DoState(p);
+   p.DoMarker("TextureCache");
++  State::BrowserRecordSection(p, "GPU TextureCache");
+ 
+   g_presenter->DoState(p);
+   g_frame_dumper->DoState(p);
+   p.DoMarker("Presenter");
++  State::BrowserRecordSection(p, "GPU Presenter");
+ 
+   g_bounding_box->DoState(p);
+   p.DoMarker("Bounding Box");

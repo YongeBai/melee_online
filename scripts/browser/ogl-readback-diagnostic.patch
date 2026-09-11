@@ -1,0 +1,40 @@
+--- a/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -24,6 +24,7 @@
+ 
+ namespace
+ {
++int s_readback_error = 0;
+ bool DolphinWebUseDiagnosticClear()
+ {
+   return DolphinWeb_UseDiagnosticOglClear() != 0;
+@@ -75,12 +76,18 @@
+     return 0;
+ 
+   s_readback_data.resize(byte_count);
++  // Preserve earlier draw errors separately: they must not cause a valid
++  // readback to be discarded. High bits identify the phase in diagnostics.
++  const int prior_error = static_cast<int>(glGetError());
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+   glPixelStorei(GL_PACK_ALIGNMENT, 1);
+   glReadPixels(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height), GL_RGBA,
+                GL_UNSIGNED_BYTE, s_readback_data.data());
+-  if (glGetError() != GL_NO_ERROR)
++  const int read_error = static_cast<int>(glGetError());
++  s_readback_error = read_error ? (0x20000 | read_error) :
++                     prior_error ? (0x10000 | prior_error) : 0;
++  if (read_error != GL_NO_ERROR)
+     return 0;
+ 
+   const std::uint32_t published_rgba = static_cast<std::uint32_t>(s_readback_data[0]) |
+@@ -329,7 +336,8 @@
+     readback_rgba = DolphinWebPublishAsyncReadback(m_backbuffer_width, m_backbuffer_height);
+ 
+   const std::uint32_t debug_bits = DolphinWebOglDebugBits();
+-  const int gl_error = static_cast<int>(glGetError());
++  const int swap_error = static_cast<int>(glGetError());
++  const int gl_error = s_readback_error ? s_readback_error : swap_error;
+   glFlush();
+   // For direct-JS-created contexts (worker-mode patch 0009), commit_frame
+   // returns -3 INVALID_TARGET because explicitSwapControl isn't on the

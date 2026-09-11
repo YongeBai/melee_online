@@ -1,0 +1,87 @@
+--- a/core/upstream/dolphin_web_discio.cpp
++++ b/core/upstream/dolphin_web_discio.cpp
+@@ -7,6 +7,7 @@
+ #include <atomic>
+ #include <chrono>
+ #include <cstdint>
++#include <cstring>
+ #include <limits>
+ #include <memory>
+ #include <mutex>
+@@ -300,6 +301,24 @@
+                                   std::uint32_t source_height, int target_width,
+                                   int target_height)
+ {
++  // The 720-line release preserves source dimensions. Avoid two integer
++  // divisions per pixel; this loop also permits vectorized opaque RGBA copy.
++  if (source_width == static_cast<std::uint32_t>(target_width) &&
++      source_height == static_cast<std::uint32_t>(target_height))
++  {
++    for (int y = 0; y < target_height; ++y)
++    {
++      const auto* row = rgba + static_cast<std::size_t>(target_height - 1 - y) * target_width * 4;
++      auto* output = s_framebuffer.data() + static_cast<std::size_t>(y) * target_width;
++      for (int x = 0; x < target_width; ++x)
++      {
++        std::uint32_t pixel;
++        std::memcpy(&pixel, row + x * 4, sizeof(pixel));
++        output[x] = pixel | 0xff000000u;
++      }
++    }
++    return;
++  }
+   for (int y = 0; y < target_height; ++y)
+   {
+     const std::uint32_t sampled_y =
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -4053,6 +4053,9 @@
+   Atomics.add(oglMetaSabView, 0, 1);
+   Atomics.store(oglMetaSabView, 1, 0);
+   oglSabWriteCount += 1;
++  // Paint on delivery; RAF remains a fallback. Waiting for an unrelated
++  // animation tick discarded images whenever emulation crossed its phase.
++  self.postMessage({type: "sharedFrameReady"});
+   maybeReportOglSabRates(now);
+   return true;
+ }
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -35,6 +35,7 @@
+     expectedCoreSha256 = DEFAULT_UPSTREAM_CORE_SHA256,
+     workerUrl = DEFAULT_WORKER_URL,
+     onStatus = () => {},
++    onSharedFrame = () => {},
+     canvas = null,
+     transferCanvas = null,
+     visibleCanvas = null,
+@@ -218,6 +219,7 @@
+       ? { ...inputPhotonMarker }
+       : null;
+     this.oglPixelSab = oglPixelSab;
++    this.onSharedFrame = onSharedFrame;
+     this.oglMetaSab = oglMetaSab;
+     this.oglSabWidth = oglSabWidth | 0;
+     this.oglSabHeight = oglSabHeight | 0;
+@@ -929,6 +931,11 @@
+       return;
+     }
+ 
++    if (message?.type === "sharedFrameReady") {
++      this.onSharedFrame();
++      return;
++    }
++
+     if (message?.id === undefined && message?.ok === true) {
+       this.workerTransportStats.unmatchedSuccessRepliesReceived += 1;
+       return;
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -357,6 +357,7 @@
+                 ? canvas
+                 : null,
+             oglPixelSab: this.oglPixelSab,
++            onSharedFrame: () => { if (this.mode === "dolphin") this.renderDolphin(); },
+             oglMetaSab: this.oglMetaSab,
+             oglSabWidth: this.oglSabWidth || 0,
+             oglSabHeight: this.oglSabHeight || 0,

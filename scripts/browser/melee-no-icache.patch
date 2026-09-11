@@ -1,0 +1,74 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -609,6 +609,8 @@
+   Config::SetBase(Config::GFX_PREFER_GLES, s_video_backend == "OGL");
+   Config::SetBase(Config::MAIN_CPU_CORE, s_cpu_core);
+   Config::SetBase(Config::MAIN_CPU_THREAD, s_cpu_thread);
++  if (EM_ASM_INT({ return Module['dolphinBrowserNoIcache'] ? 1 : 0; }))
++    Config::SetBase(Config::MAIN_DISABLE_ICACHE, true);
+   if (EM_ASM_INT({ return Module['dolphinRollbackDeterminism'] ? 1 : 0; }))
+     Config::SetBase(Config::MAIN_GPU_DETERMINISM_MODE, std::string("fake-completion"));
+   Config::SetBase(Config::MAIN_SKIP_IPL, true);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -881,6 +881,7 @@
+         renderHeight: payload.renderHeight,
+         timingProfile: payload.timingProfile,
+         rollbackDeterminism: payload.rollbackDeterminism,
++        browserNoIcache: payload.browserNoIcache,
+         presentationQueueSize: payload.presentationQueueSize,
+         presentationPacing: payload.presentationPacing,
+         legacyTickQueue: payload.legacyTickQueue,
+@@ -1418,6 +1419,7 @@
+   renderHeight = 0,
+   timingProfile = "baseline",
+   rollbackDeterminism = false,
++  browserNoIcache = false,
+   presentationQueueSize = DEFAULT_PRESENTATION_QUEUE,
+   presentationPacing = "smooth",
+   legacyTickQueue: requestedLegacyTickQueue = false,
+@@ -1886,6 +1888,7 @@
+     dolphinRenderHeight: renderHeight,
+     dolphinTimingProfile: timingProfile,
+     dolphinRollbackDeterminism: Boolean(rollbackDeterminism),
++    dolphinBrowserNoIcache: Boolean(browserNoIcache),
+     preinitializedWebGPUDevice,
+     locateFile: (path) => new URL(path, coreUrl).href,
+     print: (message) => postStatus(message),
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -352,6 +352,7 @@
+       presentationScale: this.presentationScale,
+       renderHeight: this.renderHeight,
+       timingProfile: this.timingProfile,
++      browserNoIcache: new URLSearchParams(globalThis.location?.search || "").get("icache") === "0",
+       rollbackDeterminism: new URLSearchParams(globalThis.location?.search || "").get("determinism") === "1",
+       presentationQueueSize: this.presentationQueueSize,
+       presenterBackend: this.presenterBackend,
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -147,6 +147,7 @@
+     browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(browser_section_base)});
+ }
+ static bool browser_keep_jit = false;
++static bool browser_last_kept_jit = false;
+ bool BrowserKeepJit() { return browser_keep_jit; }
+ static void DoState(Core::System& system, PointerWrap& p)
+ {
+@@ -336,6 +337,7 @@
+   std::vector<Range> saved;
+ public:
+   explicit CodeRestoreGuard(Core::System& s):system(s) {
++    browser_last_kept_jit = false;
+     browser_keep_jit = CoherentInstructionCache(s);
+     if (!browser_keep_jit) return;
+     Core::CPUThreadGuard guard(s);
+@@ -383,7 +385,7 @@
+     return R"({"error":"Invalid checkpoints"})";
+   const auto* x = browser_states[a].data();
+   const auto* y = browser_states[b].data();
+-  std::string report = fmt::format(R"({{"sizeA":{},"sizeB":{},"sections":[)", browser_state_sizes[a], browser_state_sizes[b]);
++  std::string report = fmt::format(R"({{"sizeA":{},"sizeB":{},"retainedCode":{},"sections":[)", browser_state_sizes[a], browser_state_sizes[b], browser_last_kept_jit);
+   std::size_t start_a = 0, start_b = 0;
+   const auto& sections_a = browser_state_sections[a];
+   const auto& sections_b = browser_state_sections[b];

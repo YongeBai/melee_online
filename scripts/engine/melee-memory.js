@@ -1,4 +1,5 @@
 import { installTapJumpHooks, TAP_JUMP_FLAG } from "./melee-tap-jump.js";
+import { applyCssLayout } from "./melee-css-layout.js";
 // GALE01 revision 1.02. MEM1 is located by matching original executable bytes.
 const signature = [
   124, 8, 2, 166, 60, 96, 128, 76, 144, 1, 0, 4, 148, 33, 255, 40, 219, 225, 0, 208, 219, 193, 0,
@@ -37,6 +38,15 @@ export function inspectMelee(module) {
           y: view.getFloat32(mem1 + cursor + 0x10 - 0x80000000),
         }
       : undefined;
+  const cssCursors = [0, 1].map((port) => {
+    const c = major === 2 && minor === 0 && sceneKind === 8 ? u32(0x804a0bc0 + port * 4) : 0;
+    return valid(c) && c + 0x14 <= 0x81800000
+      ? {
+          x: view.getFloat32(mem1 + c + 12 - 0x80000000),
+          y: view.getFloat32(mem1 + c + 16 - 0x80000000),
+        }
+      : undefined;
+  });
   let match;
   if (major === 2 && minor === 2 && sceneKind === 2) {
     const rules = 0x8046b6a0 + 0x24c8;
@@ -59,7 +69,9 @@ export function inspectMelee(module) {
         fighters.push({
           port: i,
           playerId: read(fp + 0xc, 1)[0],
+          controllerIndex: read(slot + 0x46, 1)[0],
           character: u32(slot + 4),
+          slotType: u32(slot + 8),
           stocks: read(slot + 0x8e, 1)[0],
           action: u32(fp + 0x10),
           x: view.getFloat32(mem1 + fp + 0xb0 - 0x80000000),
@@ -75,13 +87,18 @@ export function inspectMelee(module) {
     mainPointer: u32(0x804d3ee0).toString(16),
     sceneKind,
     cssCursor,
+    cssCursors,
+    cssReady: major === 2 && minor === 0 && sceneKind === 8 && valid(u32(0x804d6cc0)),
     cssCharacters:
       major === 2 && minor === 0
         ? [0, 1].map((i) => read(0x804807b0 + 16 + 0x60 + i * 0x24, 1)[0])
         : undefined,
+    // SDK default-thread saved FPSCR, useful for replay desync diagnosis.
+    osContextFpscr: u32(0x804a855c).toString(16),
     sceneFrame: u32(0x80479d58),
     renderFrame: u32(0x80479d5c),
     tapJump: read(TAP_JUMP_FLAG, 1)[0] === 0,
+    tapJumpByPort: [0, 1].map((port) => read(TAP_JUMP_FLAG + port, 1)[0] === 0),
     tapJumpHooks: [
       0x800cae88, 0x800cb818, 0x800cafb0, 0x800d7420, 0x800caf04, 0x800cb060, 0x800cb988,
     ].map((a) => u32(a).toString(16)),
@@ -116,14 +133,20 @@ export function controlMelee(module, api, action, options = {}) {
   const rules = main + 0x1850,
     vs = main + 0x590;
   if (action === "inspect") return state;
+  if (action === "roomLayout") {
+    if (state.major === 2 && state.minor === 0 && state.sceneKind === 8) applyCssLayout(heap);
+    return state;
+  }
   if (action === "tapJump") {
-    b(TAP_JUMP_FLAG, options.enabled === false ? 1 : 0);
+    const port = options.online ? options.port : 0;
+    if (![0, 1].includes(port)) throw Error("Invalid controller port");
+    b(TAP_JUMP_FLAG + port, options.enabled === false ? 1 : 0);
     return state;
   }
   api.setCorePaused(1);
   try {
     if (action === "prepare" || action === "enterCss") {
-      installTapJumpHooks(u32, w);
+      installTapJumpHooks(u32, w, options.online);
       b(TAP_JUMP_FLAG, options.tapJump === false ? 1 : 0);
       h(main + 0x1868, 0x7ff); // all eleven unlockable fighters
       h(main + 0x186a, 0xffff);
@@ -141,9 +164,10 @@ export function controlMelee(module, api, action, options = {}) {
       h(vs + 8 + 14, 0x1f);
       for (let i = 0; i < 6; i++) {
         const p = vs + 8 + 0x60 + i * 0x24;
-        b(p + 1, i === 0 ? 0 : i === 1 ? 1 : 3);
+        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online ? 0 : 1) : 3);
         b(p + 2, 4);
-        b(p + 4, i);
+        b(p + 4, 0); // Native automatic player ID uses the fighter slot.
+        b(p + 7, i); // Controller/color index: owner P1, guest P2.
         if (i < 2) {
           b(p, i === 0 ? 2 : 20);
           b(p + 3, 0);
@@ -176,8 +200,12 @@ export function controlMelee(module, api, action, options = {}) {
       w(main + 0x1cbc, 0);
       for (let i = 0; i < 6; i++) {
         const p = 0x804807b0 + 16 + 0x60 + i * 0x24;
-        b(p + 1, i === 0 ? 0 : i === 1 ? 1 : 3);
+        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online ? 0 : 1) : 3);
         b(p + 2, 4);
+        if (options.online) {
+          b(p + 4, 0);
+          b(p + 7, i);
+        }
         if (i === 1) b(p + 15, 9);
       }
       if (action === "start")
@@ -215,8 +243,12 @@ export function controlMelee(module, api, action, options = {}) {
       const css = 0x804807b0;
       for (let i = 0; i < 6; i++) {
         const p = css + 16 + 0x60 + i * 0x24;
-        b(p + 1, i === 0 ? 0 : i === 1 ? 1 : 3);
+        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online ? 0 : 1) : 3);
         b(p + 2, 4);
+        if (options.online) {
+          b(p + 4, 0);
+          b(p + 7, i);
+        }
         if (i < 2) {
           const char = i === 0 ? options.player : options.cpu;
           b(p, char === 19 ? 18 : char);

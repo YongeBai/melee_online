@@ -1,0 +1,46 @@
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -127,6 +127,7 @@
+     this.detachedOglContext = null;
+     this.presentationQueue = null;
+     this.bitmapPresentationPacing = "immediate";
++    this.bitmapBlit = new URLSearchParams(globalThis.location?.search || "").get("blit") === "bitmap";
+     if (new URLSearchParams(globalThis.location?.search || "").get("pace") === "raf") {
+       import("/play/browser-frame-queue.js").then(({BrowserFrameQueue}) => {
+         this.presentationQueue = new BrowserFrameQueue(bitmap =>
+@@ -811,7 +812,8 @@
+     }
+     if (!this.detachedOglContext) {
+       try {
+-        this.detachedOglContext = this.visibleCanvas.getContext("2d", { alpha: false });
++        this.detachedOglContext = this.bitmapBlit ? this.visibleCanvas.getContext("bitmaprenderer") : null;
++        this.detachedOglContext ||= this.visibleCanvas.getContext("2d", { alpha: false });
+       } catch (err) {
+         this.onStatus(`Detached GPU presenter: cannot get 2D context: ${err.message}`);
+         this.detachedGpuFramesDropped += 1;
+@@ -828,7 +830,14 @@
+     }
+     const startedAt = this.collectMetrics ? performance.now() : 0;
+     try {
+-      this.detachedOglContext.drawImage(
++      // transferFromImageBitmap consumes the source; record dimensions first.
++      this.presentedWidth = bitmap.width;
++      this.presentedHeight = bitmap.height;
++      if (typeof this.detachedOglContext.transferFromImageBitmap === "function") {
++        if (this.visibleCanvas.width !== bitmap.width) this.visibleCanvas.width = bitmap.width;
++        if (this.visibleCanvas.height !== bitmap.height) this.visibleCanvas.height = bitmap.height;
++        this.detachedOglContext.transferFromImageBitmap(bitmap);
++      } else this.detachedOglContext.drawImage(
+         bitmap,
+         0,
+         0,
+@@ -836,9 +845,6 @@
+         this.visibleCanvas.height
+       );
+       this.detachedOglFramesDrawn += 1;
+-      // Actual source image dimensions, independent of canvas/CSS upscaling.
+-      this.presentedWidth = bitmap.width;
+-      this.presentedHeight = bitmap.height;
+       if (startedAt) {
+         this.detachedGpuDrawLastMs = performance.now() - startedAt;
+         this.detachedGpuDrawMaxMs = Math.max(

@@ -1,0 +1,81 @@
+--- a/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLTexture.cpp
++++ b/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLTexture.cpp
+@@ -113,6 +113,9 @@
+ 
+ bool UsePersistentStagingBuffers()
+ {
++#ifdef __EMSCRIPTEN__
++  return false;
++#endif
+   // We require ARB_buffer_storage to create the persistent mapped buffer,
+   // ARB_shader_image_load_store for glMemoryBarrier, and ARB_sync to ensure
+   // the GPU has finished the copy before reading the buffer from the CPU.
+@@ -420,9 +423,13 @@
+     glDeleteSync(m_fence);
+   if (m_map_pointer)
+   {
++#ifdef __EMSCRIPTEN__
++    m_map_pointer = nullptr;
++#else
+     glBindBuffer(GL_PIXEL_PACK_BUFFER, m_buffer_name);
+     glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
++#endif
+   }
+   if (m_buffer_name != 0)
+     glDeleteBuffers(1, &m_buffer_name);
+@@ -580,7 +587,11 @@
+     // Unmap the buffer before writing when not using persistent mappings.
+     if (m_map_pointer)
+     {
++#ifdef __EMSCRIPTEN__
++      glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, m_buffer_size, m_map_pointer);
++#else
+       glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
++#endif
+       m_map_pointer = nullptr;
+     }
+   }
+@@ -636,6 +647,17 @@
+   if (m_map_pointer)
+     return true;
+ 
++#ifdef __EMSCRIPTEN__
++  // WebGL2 has no read mapping. Read the pixel buffer into reusable host
++  // storage; never claim a successful checkpoint with missing EFB copies.
++  m_webgl_staging.resize(m_buffer_size);
++  glBindBuffer(m_target, m_buffer_name);
++  if (m_type != StagingTextureType::Upload)
++    glGetBufferSubData(m_target, 0, m_buffer_size, m_webgl_staging.data());
++  glBindBuffer(m_target, 0);
++  m_map_pointer = m_webgl_staging.data();
++  return true;
++#endif
+   // Slow path, map the texture, unmap it later.
+   GLenum flags;
+   if (m_type == StagingTextureType::Readback)
+@@ -663,7 +685,12 @@
+     return;
+ 
+   glBindBuffer(m_target, m_buffer_name);
++#ifdef __EMSCRIPTEN__
++  if (m_type != StagingTextureType::Readback)
++    glBufferSubData(m_target, 0, m_buffer_size, m_map_pointer);
++#else
+   glUnmapBuffer(m_target);
++#endif
+   glBindBuffer(m_target, 0);
+   m_map_pointer = nullptr;
+ }
+--- a/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLTexture.h
++++ b/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLTexture.h
+@@ -96,6 +96,9 @@
+   GLuint m_buffer_name;
+   size_t m_buffer_size;
+   GLsync m_fence = nullptr;
++#ifdef __EMSCRIPTEN__
++  std::vector<char> m_webgl_staging;
++#endif
+ };
+ 
+ class OGLFramebuffer final : public AbstractFramebuffer

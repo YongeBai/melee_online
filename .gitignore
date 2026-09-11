@@ -15,9 +15,13 @@
 # Local native renderer and build toolchain.
 /engines/dolphin-native/
 /.local-tools/
+/.browser-tools/
 /.melee-native/
 # Independent reference repositories (their own Git history remains intact).
 /melee/
 /opensmash/
 # UI textures decoded from the user's local disc; regenerated at startup.
 /.melee-assets/
+
+# Reproducible browser release artifacts.
+/dist/

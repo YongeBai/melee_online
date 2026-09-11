@@ -1,0 +1,156 @@
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -90,6 +90,8 @@
+     this.cpuOverclock = requestedCpuOverclock();
+     this.emulationSpeed = requestedEmulationSpeed();
+     this.presentationScale = requestedPresentationScale();
++    const renderHeight = Number(new URLSearchParams(window.location.search).get("renderheight"));
++    this.renderHeight = [480, 720].includes(renderHeight) ? renderHeight : 0;
+     this.presentationQueueSize = requestedPresentationQueueSize();
+     this.presenterBackend = requestedPresenterBackend();
+     this.presentationPacing = requestedPresentationPacing(this.videoBackend);
+@@ -220,8 +222,8 @@
+     // up to its display size.
+     if (this.oglSabEnabled) {
+       const scale = Math.min(1, Math.max(0.25, Number(this.presentationScale) || 0.5));
+-      this.oglSabWidth = Math.max(160, Math.round(320 * scale));
+-      this.oglSabHeight = Math.max(120, Math.round(240 * scale));
++      this.oglSabWidth = Math.max(160, Math.round((this.renderHeight ? this.renderHeight * 4 / 3 : 320) * scale));
++      this.oglSabHeight = Math.max(120, Math.round((this.renderHeight || 240) * scale));
+       canvas.width = this.oglSabWidth;
+       canvas.height = this.oglSabHeight;
+       const pixelBytes = this.oglSabWidth * this.oglSabHeight * 4;
+@@ -256,8 +258,8 @@
+       // owns its own canvas sizing above (matched to readback size); skip
+       // this so the SAB-sized canvas isn't clobbered.
+       const oglScale = Math.min(1, Math.max(0.25, Number(this.presentationScale) || 0.5));
+-      canvas.width = Math.max(160, Math.round(640 * oglScale));
+-      canvas.height = Math.max(120, Math.round(480 * oglScale));
++      canvas.width = Math.max(160, Math.round((this.renderHeight ? this.renderHeight * 4 / 3 : 640) * oglScale));
++      canvas.height = Math.max(120, Math.round((this.renderHeight || 480) * oglScale));
+     }
+     // Defer transferControlToOffscreen until the adapter actually posts the
+     // canvas to the worker, AND replace the canvas DOM node with a fresh
+@@ -320,6 +322,7 @@
+             cpuOverclock: this.cpuOverclock,
+             emulationSpeed: this.emulationSpeed,
+             presentationScale: this.presentationScale,
++            renderHeight: this.renderHeight,
+             oglTestClear: this.oglTestClear,
+             fastSoftwareRaster: this.fastSoftwareRaster,
+             xfbFastPaths: this.xfbFastPaths
+@@ -366,6 +369,7 @@
+             cpuOverclock: this.cpuOverclock,
+             emulationSpeed: this.emulationSpeed,
+             presentationScale: this.presentationScale,
++            renderHeight: this.renderHeight,
+             presentationQueueSize: this.presentationQueueSize,
+             presenterBackend: this.presenterBackend,
+             presentationPacing: this.presentationPacing,
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -49,6 +49,7 @@
+     cpuOverclock = 1,
+     emulationSpeed = 1,
+     presentationScale = 1,
++    renderHeight = 0,
+     presentationQueueSize = 2,
+     presenterBackend = "webgl",
+     presentationPacing = "smooth",
+@@ -139,6 +140,7 @@
+     this.cpuOverclock = cpuOverclock;
+     this.emulationSpeed = emulationSpeed;
+     this.presentationScale = presentationScale;
++    this.renderHeight = renderHeight;
+     this.presentationQueueSize = presentationQueueSize;
+     this.presenterBackend = presenterBackend;
+     this.presentationPacing = presentationPacing;
+@@ -335,6 +337,7 @@
+       cpuOverclock: this.cpuOverclock,
+       emulationSpeed: this.emulationSpeed,
+       presentationScale: this.presentationScale,
++      renderHeight: this.renderHeight,
+       presentationQueueSize: this.presentationQueueSize,
+       presenterBackend: this.presenterBackend,
+       presentationPacing: this.presentationPacing,
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -877,6 +877,7 @@
+         cpuOverclock: payload.cpuOverclock,
+         emulationSpeed: payload.emulationSpeed,
+         presentationScale: payload.presentationScale,
++        renderHeight: payload.renderHeight,
+         presentationQueueSize: payload.presentationQueueSize,
+         presentationPacing: payload.presentationPacing,
+         legacyTickQueue: payload.legacyTickQueue,
+@@ -1376,6 +1377,7 @@
+   cpuOverclock = 1,
+   emulationSpeed = 1,
+   presentationScale = 1,
++  renderHeight = 0,
+   presentationQueueSize = DEFAULT_PRESENTATION_QUEUE,
+   presentationPacing = "smooth",
+   legacyTickQueue: requestedLegacyTickQueue = false,
+@@ -1677,9 +1679,9 @@
+   let moduleCanvas;
+   if (videoBackend === "OGL") {
+     if (readbackOgl && typeof OffscreenCanvas === "function") {
+-      moduleCanvas = new OffscreenCanvas(320, 240);
++      moduleCanvas = new OffscreenCanvas(renderHeight ? renderHeight * 4 / 3 : 320, renderHeight || 240);
+     } else if (detachedOgl) {
+-      moduleCanvas = new OffscreenCanvas(640, 480);
++      moduleCanvas = new OffscreenCanvas(renderHeight ? renderHeight * 4 / 3 : 640, renderHeight || 480);
+       detachedOglCanvas = moduleCanvas;
+     } else {
+       moduleCanvas = canvas;
+@@ -1841,6 +1843,7 @@
+     // false, so the shipping page load is unchanged.
+     dolphinCorrectTimeDrift: Boolean(correctTimeDrift),
+     dolphinCoreLog: Boolean(coreLog),
++    dolphinRenderHeight: renderHeight,
+     preinitializedWebGPUDevice,
+     locateFile: (path) => new URL(path, coreUrl).href,
+     print: (message) => postStatus(message),
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -629,7 +629,10 @@
+   Config::SetBase(Config::MAIN_AUDIO_BACKEND, std::string("Web Audio"));
+   Config::SetBase(Config::MAIN_AUDIO_MUTED, false);
+   Config::SetBase(Config::GFX_HACK_SKIP_XFB_COPY_TO_RAM, s_video_backend == "OGL");
+-  Config::SetBase(Config::GFX_HACK_COPY_EFB_SCALED, false);
++  const int render_height = EM_ASM_INT({ return Module['dolphinRenderHeight'] || 480; });
++  const bool high_resolution_ogl = s_video_backend == "OGL" && render_height == 720;
++  Config::SetBase(Config::GFX_EFB_SCALE, high_resolution_ogl ? 2 : 1);
++  Config::SetBase(Config::GFX_HACK_COPY_EFB_SCALED, high_resolution_ogl);
+   // §28cx: ubershaders DISCRIMINATOR (May-30). The UBO const-index fix made the
+   // uber pixel shaders translate (fail 27->0) and 7195 draws execute, but the EFB
+   // is still all-zero (nz=0/max=0) => draws write nothing. Flip WebGPU back to
+--- a/core/upstream/dolphin_web_discio.cpp
++++ b/core/upstream/dolphin_web_discio.cpp
+@@ -53,6 +53,8 @@
+ constexpr int METADATA_FRAME_HEIGHT = 240;
+ constexpr int MAX_XFB_WIDTH = 720;
+ constexpr int MAX_XFB_HEIGHT = 576;
++constexpr int MAX_GL_WIDTH = 960;
++constexpr int MAX_GL_HEIGHT = 720;
+ 
+ constexpr std::uint32_t INPUT_A = 1u << 0;
+ constexpr std::uint32_t INPUT_B = 1u << 1;
+@@ -100,7 +102,7 @@
+ double s_data_size = -1.0;
+ int s_root_entry_count = -1;
+ std::vector<RootEntry> s_root_entries;
+-std::array<std::uint32_t, MAX_XFB_WIDTH * MAX_XFB_HEIGHT> s_framebuffer{};
++std::array<std::uint32_t, MAX_GL_WIDTH * MAX_GL_HEIGHT> s_framebuffer{};
+ int s_frame_width = METADATA_FRAME_WIDTH;
+ int s_frame_height = METADATA_FRAME_HEIGHT;
+ std::uint32_t s_frame = 0;
+@@ -976,7 +978,7 @@
+   }
+   s_last_xfb_profile_time = callback_start;
+ 
+-  if (!rgba || width == 0 || height == 0 || width > MAX_XFB_WIDTH || height > MAX_XFB_HEIGHT)
++  if (!rgba || width == 0 || height == 0 || width > MAX_GL_WIDTH || height > MAX_GL_HEIGHT)
+   {
+     return;
+   }

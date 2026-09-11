@@ -1,0 +1,28 @@
+--- a/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp
++++ b/Source/Core/VideoBackends/OGL/ProgramShaderCache.cpp
+@@ -281,14 +281,23 @@
+ void ProgramShaderCache::UploadConstants(const void* data, u32 data_size)
+ {
+   // allocate and copy
+-  const u32 alloc_size = Common::AlignUp(data_size, s_ubo_align);
++  // WebGL validates the complete std140 block, including its trailing padding.
++  // Melee's post-processing constants have 140 payload bytes but a 144-byte
++  // shader block; binding only the payload makes every presentation draw fail.
++#ifdef __EMSCRIPTEN__
++  const u32 bind_size = Common::AlignUp(data_size, 16u);
++#else
++  const u32 bind_size = data_size;
++#endif
++  const u32 alloc_size = Common::AlignUp(bind_size, s_ubo_align);
+   auto buffer = s_buffer->Map(alloc_size, s_ubo_align);
+   std::memcpy(buffer.first, data, data_size);
++  std::memset(buffer.first + data_size, 0, alloc_size - data_size);
+   s_buffer->Unmap(alloc_size);
+ 
+   // bind the same sub-buffer to all stages
+   for (u32 index = 1; index <= 4; index++)
+-    glBindBufferRange(GL_UNIFORM_BUFFER, index, s_buffer->m_buffer, buffer.second, data_size);
++    glBindBufferRange(GL_UNIFORM_BUFFER, index, s_buffer->m_buffer, buffer.second, bind_size);
+ 
+   ADDSTAT(g_stats.this_frame.bytes_uniform_streamed, data_size);
+ }

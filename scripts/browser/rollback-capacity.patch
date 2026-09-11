@@ -1,0 +1,38 @@
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -267,7 +267,8 @@
+ std::size_t BrowserSave(Core::System& system, unsigned slot)
+ {
+   if (slot >= browser_states.size()) return 0;
+-  constexpr std::size_t max_bytes = 64 * 1024 * 1024;
++  constexpr std::size_t max_bytes = 128 * 1024 * 1024;
++  constexpr std::size_t total_budget = 640 * 1024 * 1024;
+   // Measure before allocating; never let an unexpected game/state consume
+   // the remaining shared WASM heap. SaveToBuffer reuses the allocation.
+   u8* ptr = nullptr;
+@@ -277,7 +278,13 @@
+   browser_required_size = size;
+   if (!size || size > max_bytes) return 0;
+   auto& buffer = browser_states[slot];
+-  if (buffer.size() < size) buffer.reset(size);
++  if (buffer.size() < size)
++  {
++    std::size_t allocated = 0;
++    for (const auto& existing : browser_states) allocated += existing.size();
++    if (allocated - buffer.size() + size > total_budget) return 0;
++    buffer.reset(size);
++  }
+   browser_state_sizes[slot] = SaveToBuffer(system, buffer);
+   return browser_state_sizes[slot];
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1033,7 +1033,7 @@
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6)
+           throw new Error("Invalid checkpoint slot");
+         const bytes = api.browserRollbackCapture(payload.slot);
+-        if (!bytes) throw new Error("Capture failed: state=" + api.getCoreStateName() + ", requiredBytes=" + api.browserRollbackRequiredSize?.() + ", limitBytes=67108864");
++        if (!bytes) throw new Error("Capture failed: state=" + api.getCoreStateName() + ", requiredBytes=" + api.browserRollbackRequiredSize?.() + ", limitBytes=134217728, totalBudgetBytes=671088640");
+         return {bytes, milliseconds: performance.now() - started};
+       } else if (payload.action === "restore") {
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||

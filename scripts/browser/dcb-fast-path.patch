@@ -1,0 +1,141 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -2524,6 +2524,8 @@
+   u32 ram_size_real;
+   u32 l1_base;
+   u32 l1_size;
++  u32 ibat_base = 0;
++  u32 valid_blocks_base = 0;
+ };
+ 
+ constexpr u32 WASM_IMPORT_FASTCHECK_GPFIFO_INDEX = 14;
+@@ -5468,6 +5470,84 @@
+   body.push_back(0x0b);
+ }
+ 
++// Match Jit64::dcbx's empty-code-line fast path. Unknown translations,
++// privileged dcbi, accurate data caching, and live code all use the original
++// helper. Read the live IBAT and bitmap, never assume MEM1 aliases or retain
++// a cached mapping across a restore. Bit 24 is an opt-in runtime QA gate.
++void EmitDcbx(std::vector<u8>& body, const WasmStateLayout& layout,
++              const PPCAnalyst::CodeOp& op, u32 downcount)
++{
++  if (!layout.ibat_base || !layout.valid_blocks_base)
++  {
++    EmitSystemCall(body, op, downcount);
++    return;
++  }
++  body.insert(body.end(), {0x02, 0x40, 0x02, 0x40}); // done { slow {
++  EmitI32Const(body, static_cast<u32>(reinterpret_cast<std::uintptr_t>(&s_dolphin_web_disable_mask)));
++  body.insert(body.end(), {0xfe, 0x10, 0x02, 0x00}); // i32.atomic.load
++  EmitI32Const(body, 1u << 24);
++  body.push_back(0x71);
++  body.push_back(0x45);
++  body.insert(body.end(), {0x0d, 0x00}); // disabled -> slow
++  EmitStateLoadU8(body, layout.dcache_enabled_offset);
++  body.insert(body.end(), {0x0d, 0x00});
++  if (op.inst.SUBOP10 == 470)
++  {
++    EmitStateLoadU32(body, layout.msr_offset);
++    EmitI32Const(body, 1u << 14); // MSR.PR
++    body.push_back(0x71);
++    body.insert(body.end(), {0x0d, 0x00});
++  }
++  EmitEffectiveAddressX(body, layout, op.inst);
++  EmitLocalSet(body, 1);
++  EmitLocalGet(body, 1);
++  EmitLocalSet(body, 2);
++  EmitStateLoadU32(body, layout.msr_offset);
++  EmitI32Const(body, 1u << 5); // MSR.IR
++  body.push_back(0x71);
++  body.insert(body.end(), {0x04, 0x40});
++  EmitI32Const(body, layout.ibat_base);
++  EmitLocalGet(body, 1);
++  EmitI32Const(body, PowerPC::BAT_INDEX_SHIFT);
++  body.push_back(0x76);
++  EmitI32Const(body, 2);
++  body.push_back(0x74);
++  body.push_back(0x6a);
++  body.insert(body.end(), {0x28, 0x02, 0x00});
++  EmitLocalSet(body, 3);
++  EmitLocalGet(body, 3);
++  EmitI32Const(body, PowerPC::BAT_MAPPED_BIT);
++  body.push_back(0x71);
++  body.push_back(0x45);
++  body.insert(body.end(), {0x0d, 0x01}); // exit if + slow, keep done
++  EmitLocalGet(body, 3);
++  EmitI32Const(body, ~(PowerPC::BAT_PAGE_SIZE - 1u));
++  body.push_back(0x71);
++  EmitLocalGet(body, 1);
++  EmitI32Const(body, PowerPC::BAT_PAGE_SIZE - 1u);
++  body.push_back(0x71);
++  body.push_back(0x72);
++  EmitLocalSet(body, 2);
++  body.push_back(0x0b);
++  EmitI32Const(body, layout.valid_blocks_base);
++  EmitLocalGet(body, 2);
++  EmitI32Const(body, 10); // 32-byte lines, 32 lines per bitmap word
++  body.push_back(0x76);
++  EmitI32Const(body, 2);
++  body.push_back(0x74);
++  body.push_back(0x6a);
++  body.insert(body.end(), {0x28, 0x02, 0x00});
++  EmitI32Const(body, 1);
++  EmitLocalGet(body, 2);
++  EmitI32Const(body, 5);
++  body.push_back(0x76);
++  body.push_back(0x74); // WASM shift masks to five bits
++  body.push_back(0x71);
++  body.insert(body.end(), {0x0d, 0x00, 0x0c, 0x01, 0x0b});
++  EmitSystemCall(body, op, downcount);
++  body.push_back(0x0b);
++}
++
+ void LogWasmBlockReject(const char* reason, const GekkoOPInfo* opinfo, u32 inst_hex, u32 address,
+                         u32 instruction_count)
+ {
+@@ -6340,7 +6420,7 @@
+     }
+     if (inst.SUBOP10 == 54 || inst.SUBOP10 == 86 || inst.SUBOP10 == 470)
+     {
+-      EmitSystemCall(body, op, downcount);
++      EmitDcbx(body, layout, op, downcount);
+       return true;
+     }
+     if (inst.SUBOP10 == 246 || inst.SUBOP10 == 278)
+@@ -10999,6 +11079,8 @@
+       m_system.GetMemory().GetRamSizeReal(),
+       static_cast<u32>(reinterpret_cast<std::uintptr_t>(m_system.GetMemory().GetL1Cache())),
+       m_system.GetMemory().GetL1CacheSize(),
++      static_cast<u32>(reinterpret_cast<std::uintptr_t>(m_mmu.GetIBATTable().data())),
++      static_cast<u32>(reinterpret_cast<std::uintptr_t>(GetBlockCache()->GetBlockBitSet())),
+   };
+   const bool write_npc =
+       did_merge ? merge_write_npc : (compiled_entire_block && !compiled_block_ends_with_branch);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1035,6 +1035,14 @@
+       let stepTiming;
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
++      } else if (payload.action === "cacheFastPath") {
++        if (typeof payload.value !== "boolean" || api.getCoreStateName() !== "Paused" ||
++            !api.getCachedInterpreterDisableMask || !api.setCachedInterpreterDisableMask)
++          throw new Error("Cache fast-path comparison requires a paused machine");
++        const mask = api.getCachedInterpreterDisableMask();
++        const updated = payload.value ? mask | (1 << 24) : mask & ~(1 << 24);
++        api.setCachedInterpreterDisableMask(updated >>> 0);
++        return {enabled: Boolean(api.getCachedInterpreterDisableMask() & (1 << 24))};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -1470,6 +1470,7 @@
+   if (params.get("fastmemhoist") === "1") {
+     mask |= CACHED_INTERPRETER_DISABLE_BITS.fastmemhoist;
+   }
++  if (params.get("dcbfast") === "1") mask |= 1 << 24;
+   return mask >>> 0;
+ }
+ 

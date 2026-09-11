@@ -1,0 +1,103 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -367,6 +367,12 @@
+ std::atomic<u32> s_wasm_cache_miss_count{0};
+ // §28ce per-slice budget tracking. Plain non-atomic because read+written
+ // only from the CPU pthread (TryWriteWasmBlock, Record*, Run()).
++struct DeferredWasmBlock { u32 pc; CPUEmuFeatureFlags flags; };
++std::array<DeferredWasmBlock, 1024> s_wasm_deferred_blocks{};
++u32 s_wasm_deferred_count = 0;
++bool s_wasm_deferred_overflow = false;
++std::atomic<u32> s_wasm_deferred_retries{0};
++std::atomic<u32> s_wasm_deferred_full_flushes{0};
+ u32 s_wasm_compiles_this_slice = 0;
+ u32 s_wasm_compile_us_this_slice = 0;
+ // §28ce stats: cumulative throttle rejects, peak burst (max compiles
+@@ -8042,6 +8048,27 @@
+       s_wasm_jit_applied_mode.store(requested_mode, std::memory_order_release);
+     }
+ #endif
++    // Revisit blocks deferred by the previous slice's compile budget. A
++    // cached Interpret callback otherwise prevents TryWriteWasmBlock from
++    // ever being called again for these hot blocks.
++    if (s_wasm_deferred_overflow)
++    {
++      s_wasm_deferred_full_flushes.fetch_add(1, std::memory_order_relaxed);
++      ClearCache();
++    }
++    else
++    {
++      for (u32 i = 0; i < s_wasm_deferred_count; ++i)
++      {
++        const auto& deferred = s_wasm_deferred_blocks[i];
++        if (const auto* block = m_block_cache.GetBlockFromStartAddress(deferred.pc, deferred.flags))
++        {
++          EraseSingleBlock(*block);
++          s_wasm_deferred_retries.fetch_add(1, std::memory_order_relaxed);
++        }
++      }
++      s_wasm_deferred_count = 0;
++    }
+     // §28cn metrics-gated per-slice wall-time profiling. The timestamp below
+     // spans Advance + ExecuteOneBlock; >16000us means the CPU pthread crossed
+     // one 60Hz frame budget, including intentional waits.
+@@ -10523,6 +10550,13 @@
+         s_wasm_compile_us_this_slice >= COMPILE_THROTTLE_MAX_US_PER_SLICE)
+     {
+       s_wasm_compile_throttle_reject_count.fetch_add(1, std::memory_order_relaxed);
++      if (s_wasm_jit_enabled)
++      {
++        if (s_wasm_deferred_count < s_wasm_deferred_blocks.size())
++          s_wasm_deferred_blocks[s_wasm_deferred_count++] = {js.blockStart, js.curBlock->feature_flags};
++        else
++          s_wasm_deferred_overflow = true;
++      }
+       return false;
+     }
+   }
+@@ -11037,6 +11071,14 @@
+   s_wasm_jit_requested_mode.store(std::clamp(enabled, 0, 2), std::memory_order_release);
+ }
+ 
++extern "C" u32 GetPpcWasmDeferredRetries()
++{
++  return s_wasm_deferred_retries.load(std::memory_order_relaxed);
++}
++extern "C" u32 GetPpcWasmDeferredFlushes()
++{
++  return s_wasm_deferred_full_flushes.load(std::memory_order_relaxed);
++}
+ extern "C" int GetPpcWasmDirectDispatch()
+ {
+   return DOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH;
+@@ -12313,6 +12355,10 @@
+ 
+ void CachedInterpreter::ClearCache()
+ {
++#ifdef __EMSCRIPTEN__
++  s_wasm_deferred_count = 0;
++  s_wasm_deferred_overflow = false;
++#endif
+   m_block_cache.Clear();
+   m_block_cache.ClearRangesToFree();
+   ClearCodeSpace();
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -60,6 +60,8 @@
+ extern "C" void NotifyWebGpuOwnershipTraceLoadRequested();
+ extern "C" int GetPpcWasmJitRequestedMode();
+ extern "C" int GetPpcWasmDirectDispatch();
++extern "C" std::uint32_t GetPpcWasmDeferredRetries();
++extern "C" std::uint32_t GetPpcWasmDeferredFlushes();
+ extern "C" int GetPpcWasmJitAppliedMode();
+ extern "C" std::uint32_t GetPpcWasmJitModeFlushes();
+ 
+@@ -1188,6 +1190,8 @@
+       << ",\"jitAppliedMode\":" << GetPpcWasmJitAppliedMode()
+       << ",\"jitModeFlushes\":" << GetPpcWasmJitModeFlushes()
+       << ",\"directWasmDispatch\":" << GetPpcWasmDirectDispatch()
++      << ",\"deferredJitRetries\":" << GetPpcWasmDeferredRetries()
++      << ",\"deferredJitFullFlushes\":" << GetPpcWasmDeferredFlushes()
+       << ",\"internalScale\":" << Config::Get(Config::GFX_EFB_SCALE)
+       << ",\"scaledEfbCopies\":" << Config::Get(Config::GFX_HACK_COPY_EFB_SCALED)
+       << ",\"cpuThread\":" << Config::Get(Config::MAIN_CPU_THREAD)

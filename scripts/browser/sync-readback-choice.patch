@@ -1,0 +1,55 @@
+--- a/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -9,6 +9,7 @@
+ #include <array>
+ #include <chrono>
+ #include <cstdint>
++#include <cstring>
+ #include <thread>
+ #include <vector>
+ #include <emscripten/console.h>
+@@ -19,6 +20,7 @@
+ 
+ extern "C" void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, void* data);
+ extern "C" int DolphinWeb_UseWorkerOwnedWebGL();
++extern "C" std::uint32_t DolphinWeb_GetCachedInterpreterDisableMask();
+ extern "C" int DolphinWeb_UseDiagnosticOglClear();
+ extern "C" int DolphinWeb_UseOglReadbackPresent();
+ extern "C" void DolphinWeb_OnGlBackbuffer(const std::uint8_t* rgba, std::uint32_t width,
+@@ -109,6 +111,26 @@
+   glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previous_framebuffer);
+   glGetIntegerv(GL_PACK_ALIGNMENT, &previous_alignment);
+   const int prior_error = static_cast<int>(glGetError());
++  // Same-frame bounded readback is useful on integrated GPUs where the
++  // transfer is cheap. Keep a controlled comparison with the delayed PBO
++  // path; neither changes emulated clocks or game state.
++  if (DolphinWeb_GetCachedInterpreterDisableMask() & (1u << 28))
++  {
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
++    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
++    glPixelStorei(GL_PACK_ALIGNMENT, 1);
++    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, s_readback_data.data());
++    const int read_error = static_cast<int>(glGetError());
++    if (!read_error) DolphinWeb_OnGlBackbuffer(s_readback_data.data(), width, height);
++    glBindBuffer(GL_PIXEL_PACK_BUFFER, previous_pack);
++    glBindFramebuffer(GL_READ_FRAMEBUFFER, previous_framebuffer);
++    glPixelStorei(GL_PACK_ALIGNMENT, previous_alignment);
++    s_readback_pending = false;
++    s_readback_error = read_error ? (0x20000 | read_error) : prior_error ? (0x10000 | prior_error) : 0;
++    std::uint32_t pixel = 0;
++    if (!read_error) std::memcpy(&pixel, s_readback_data.data(), sizeof(pixel));
++    return pixel;
++  }
+   // Queue this frame before waiting for the preceding frame.
+   auto& write_buffer = s_readbacks[s_readback_next];
+   if (!write_buffer)
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -1477,6 +1477,7 @@
+   if (params.get("dcbbatch") === "1") mask |= 1 << 25;
+   if (params.get("inlinedispatch") === "1") mask |= 1 << 26;
+   if (params.get("wasmdispatch") === "1") mask |= 1 << 27;
++  if (params.get("oglsync") === "1") mask |= 1 << 28;
+   return mask >>> 0;
+ }
+ 

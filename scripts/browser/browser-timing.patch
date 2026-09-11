@@ -1,0 +1,95 @@
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -92,6 +92,7 @@
+     this.presentationScale = requestedPresentationScale();
+     const renderHeight = Number(new URLSearchParams(window.location.search).get("renderheight"));
+     this.renderHeight = [480, 720].includes(renderHeight) ? renderHeight : 0;
++    this.timingProfile = new URLSearchParams(window.location.search).get("timing") === "dolphin" ? "dolphin" : "baseline";
+     this.presentationQueueSize = requestedPresentationQueueSize();
+     this.presenterBackend = requestedPresenterBackend();
+     this.presentationPacing = requestedPresentationPacing(this.videoBackend);
+@@ -323,6 +324,7 @@
+             emulationSpeed: this.emulationSpeed,
+             presentationScale: this.presentationScale,
+             renderHeight: this.renderHeight,
++            timingProfile: this.timingProfile,
+             oglTestClear: this.oglTestClear,
+             fastSoftwareRaster: this.fastSoftwareRaster,
+             xfbFastPaths: this.xfbFastPaths
+@@ -370,6 +372,7 @@
+             emulationSpeed: this.emulationSpeed,
+             presentationScale: this.presentationScale,
+             renderHeight: this.renderHeight,
++            timingProfile: this.timingProfile,
+             presentationQueueSize: this.presentationQueueSize,
+             presenterBackend: this.presenterBackend,
+             presentationPacing: this.presentationPacing,
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -50,6 +50,7 @@
+     emulationSpeed = 1,
+     presentationScale = 1,
+     renderHeight = 0,
++    timingProfile = "baseline",
+     presentationQueueSize = 2,
+     presenterBackend = "webgl",
+     presentationPacing = "smooth",
+@@ -141,6 +142,7 @@
+     this.emulationSpeed = emulationSpeed;
+     this.presentationScale = presentationScale;
+     this.renderHeight = renderHeight;
++    this.timingProfile = timingProfile;
+     this.presentationQueueSize = presentationQueueSize;
+     this.presenterBackend = presenterBackend;
+     this.presentationPacing = presentationPacing;
+@@ -338,6 +340,7 @@
+       emulationSpeed: this.emulationSpeed,
+       presentationScale: this.presentationScale,
+       renderHeight: this.renderHeight,
++      timingProfile: this.timingProfile,
+       presentationQueueSize: this.presentationQueueSize,
+       presenterBackend: this.presenterBackend,
+       presentationPacing: this.presentationPacing,
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -878,6 +878,7 @@
+         emulationSpeed: payload.emulationSpeed,
+         presentationScale: payload.presentationScale,
+         renderHeight: payload.renderHeight,
++        timingProfile: payload.timingProfile,
+         presentationQueueSize: payload.presentationQueueSize,
+         presentationPacing: payload.presentationPacing,
+         legacyTickQueue: payload.legacyTickQueue,
+@@ -1378,6 +1379,7 @@
+   emulationSpeed = 1,
+   presentationScale = 1,
+   renderHeight = 0,
++  timingProfile = "baseline",
+   presentationQueueSize = DEFAULT_PRESENTATION_QUEUE,
+   presentationPacing = "smooth",
+   legacyTickQueue: requestedLegacyTickQueue = false,
+@@ -1844,6 +1846,7 @@
+     dolphinCorrectTimeDrift: Boolean(correctTimeDrift),
+     dolphinCoreLog: Boolean(coreLog),
+     dolphinRenderHeight: renderHeight,
++    dolphinTimingProfile: timingProfile,
+     preinitializedWebGPUDevice,
+     locateFile: (path) => new URL(path, coreUrl).href,
+     print: (message) => postStatus(message),
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -617,10 +617,11 @@
+   Config::SetBase(Config::MAIN_CORRECT_TIME_DRIFT, correct_time_drift);
+   Config::SetBase(Config::MAIN_OVERCLOCK_ENABLE, true);
+   Config::SetBase(Config::MAIN_OVERCLOCK, s_cpu_overclock);
++  const bool normal_timing = EM_ASM_INT({ return Module['dolphinTimingProfile'] === 'dolphin'; }) != 0;
+   Config::SetBase(Config::MAIN_PRECISION_FRAME_TIMING, false);
+-  Config::SetBase(Config::MAIN_RUSH_FRAME_PRESENTATION, true);
+-  Config::SetBase(Config::MAIN_SMOOTH_EARLY_PRESENTATION, true);
+-  Config::SetBase(Config::MAIN_SYNC_ON_SKIP_IDLE, false);
++  Config::SetBase(Config::MAIN_RUSH_FRAME_PRESENTATION, !normal_timing);
++  Config::SetBase(Config::MAIN_SMOOTH_EARLY_PRESENTATION, !normal_timing);
++  Config::SetBase(Config::MAIN_SYNC_ON_SKIP_IDLE, normal_timing);
+   Config::SetBase(Config::MAIN_ACCURATE_FMADDS, false);
+   Config::SetBase(Config::MAIN_ENABLE_CHEATS, false);
+   Config::SetBase(Config::MAIN_OSD_MESSAGES, false);

@@ -1,0 +1,28 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -657,7 +657,8 @@
+ constexpr u32 MELEE_IDLE_POLL_LOOP_PC = 0x801a4da8;
+ constexpr u32 MELEE_IDLE_POLL_LOOP_END_PC = 0x801a4db8;
+ constexpr u32 MELEE_IDLE_POLL_LOOP_MAX_BATCH = 256;
+-constexpr u32 MELEE_IDLE_POLL_LOOP_NO_EXIT_THROTTLE_BLOCKS = 8192;
++constexpr u32 MELEE_IDLE_POLL_LOOP_FALLBACK_INTERVAL = 8192;
++u32 s_fast_melee_idle_batches_since_fallback = 0;
+ constexpr u32 MELEE_STATUS_COMMON_CYCLES = 28;
+ constexpr u32 OS_INTERRUPT_DISABLE_CYCLES = 5;
+ constexpr u32 OS_INTERRUPT_ENABLE_CYCLES = 5;
+@@ -9954,9 +9955,13 @@
+     return fallback_size;
+   }
+ 
+-  if (s_fast_melee_idle_poll_loop_exits == 0 &&
+-      s_fast_melee_idle_poll_loop_blocks > MELEE_IDLE_POLL_LOOP_NO_EXIT_THROTTLE_BLOCKS)
++  // A real loop exit can happen in the guarded fallback, so a lifetime
++  // "no fast exits" threshold permanently disabled this helper after boot.
++  // Periodically run the original instructions instead. Runtime guards and
++  // the per-downcount / 256-iteration bounds remain in force on every batch.
++  if (s_fast_melee_idle_batches_since_fallback++ >= MELEE_IDLE_POLL_LOOP_FALLBACK_INTERVAL)
+   {
++    s_fast_melee_idle_batches_since_fallback = 0;
+     ++s_fast_melee_idle_poll_loop_throttles;
+     return fallback_size;
+   }

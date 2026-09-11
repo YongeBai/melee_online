@@ -1,0 +1,51 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -508,6 +508,8 @@
+ u32 s_ppc_profile_window_max_us = 0;
+ u32 s_ppc_profile_window_collision_count = 0;
+ constexpr u32 PPC_PROFILE_SAMPLE_MASK = 1023;
++std::atomic<u32> s_ppc_profile_lookup_samples{0};
++std::atomic<u32> s_ppc_profile_lookup_misses{0};
+ std::array<u32, 64 * 1024> s_wasm_direct_reject_key_counts{};
+ std::array<u32, 64 * 1024> s_wasm_emit_fail_key_counts{};
+ std::array<u32, 64 * 1024> s_wasm_emit_fail_sample_pcs{};
+@@ -1625,6 +1627,8 @@
+ 
+ void ResetPpcBlockProfile()
+ {
++  s_ppc_profile_lookup_samples.store(0, std::memory_order_relaxed);
++  s_ppc_profile_lookup_misses.store(0, std::memory_order_relaxed);
+   s_ppc_profile_total_blocks = 0;
+   s_ppc_profile_sample_blocks = 0;
+   s_ppc_profile_total_us = 0;
+@@ -7926,9 +7930,17 @@
+ #endif
+   const auto dispatch = [&]() -> const u8* {
+     if (fast_map)
+-      if (const u8* entry = LookupBrowserCachedBlock(fast_map, m_ppc_state.pc,
+-                                                    m_ppc_state.feature_flags))
+-        return entry;
++    {
++      const u8* entry = LookupBrowserCachedBlock(fast_map, m_ppc_state.pc,
++                                                m_ppc_state.feature_flags);
++      if (s_ppc_block_profile_enabled &&
++          ((s_ppc_profile_total_blocks + 1) & PPC_PROFILE_SAMPLE_MASK) == 0)
++      {
++        s_ppc_profile_lookup_samples.fetch_add(1, std::memory_order_relaxed);
++        if (!entry) s_ppc_profile_lookup_misses.fetch_add(1, std::memory_order_relaxed);
++      }
++      if (entry) return entry;
++    }
+     return m_block_cache.Dispatch();
+   };
+ #else
+@@ -11374,6 +11386,9 @@
+   out << "ppcprof blocks:" << s_ppc_profile_total_blocks
+       << " samples:" << s_ppc_profile_sample_blocks
+       << " window:" << s_ppc_profile_window_sample_blocks
++      << " sampleus:" << s_ppc_profile_window_total_us
++      << " lookup-samples:" << s_ppc_profile_lookup_samples.load(std::memory_order_relaxed)
++      << " lookup-misses:" << s_ppc_profile_lookup_misses.load(std::memory_order_relaxed)
+       << " rate:" << (PPC_PROFILE_SAMPLE_MASK + 1) << " avg:" << average_us
+       << "us max:" << s_ppc_profile_window_max_us
+       << "us col:" << s_ppc_profile_window_collision_count;

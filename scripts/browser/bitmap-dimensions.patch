@@ -1,0 +1,12 @@
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -820,6 +820,9 @@
+         this.visibleCanvas.height
+       );
+       this.detachedOglFramesDrawn += 1;
++      // Actual source image dimensions, independent of canvas/CSS upscaling.
++      this.presentedWidth = bitmap.width;
++      this.presentedHeight = bitmap.height;
+       if (startedAt) {
+         this.detachedGpuDrawLastMs = performance.now() - startedAt;
+         this.detachedGpuDrawMaxMs = Math.max(

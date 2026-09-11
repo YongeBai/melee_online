@@ -1,0 +1,16 @@
+--- a/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLTexture.cpp
++++ b/vendor/dolphin/Source/Core/VideoBackends/OGL/OGLTexture.cpp
+@@ -13,6 +13,13 @@
+ 
+ #include "VideoCommon/VideoConfig.h"
+ 
++#ifdef __EMSCRIPTEN__
++// Link Emscripten's WebGL2 implementation directly. The desktop extension
++// loader does not populate dolGetBufferSubData for GLES/WebGL contexts.
++#undef glGetBufferSubData
++extern "C" void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, void* data);
++#endif
++
+ namespace OGL
+ {
+ GLenum OGLTexture::GetGLInternalFormatForTextureFormat(AbstractTextureFormat format, bool storage)

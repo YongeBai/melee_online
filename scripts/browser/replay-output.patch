@@ -1,0 +1,154 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -3,6 +3,7 @@
+ 
+ #include "Common/BrowserProfile.h"
+ 
++#include "Common/BrowserRollbackOutput.h"
+ #include "dolphin_web_discio.cpp"
+ 
+ #include <array>
+@@ -1025,6 +1026,7 @@
+ extern "C" void DolphinWeb_CancelGameFrameStep();
+ void StopCore()
+ {
++  DolphinWeb::RollbackOutput::suppressed.store(false);
+   DolphinWeb_CancelGameFrameStep();
+   {
+     const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+@@ -1127,6 +1129,26 @@
+   const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+   s_rollback_input_owner = false;
+ }
++extern "C" int DolphinWeb_UseWorkerOwnedWebGL();
++extern "C" int DolphinWeb_UseOglReadbackPresent();
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackSuppressOutput(int enable)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused ||
++      s_video_backend != "OGL" || !DolphinWeb_UseWorkerOwnedWebGL() ||
++      DolphinWeb_UseOglReadbackPresent()) return 0;
++  const Core::CPUThreadGuard guard(system);
++  DolphinWeb::RollbackOutput::suppressed.store(enable != 0, std::memory_order_release);
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE const char* BrowserRollbackOutputStats()
++{
++  static std::string result;
++  result = "{\"suppressed\":" + std::string(DolphinWeb::RollbackOutput::suppressed.load() ? "true" : "false") +
++    ",\"videoSkipped\":" + std::to_string(DolphinWeb::RollbackOutput::video_skipped.load()) +
++    ",\"audioSamplesSkipped\":" + std::to_string(DolphinWeb::RollbackOutput::audio_skipped.load()) + "}";
++  return result.c_str();
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetUnthrottled(int enable)
+ {
+   auto& system = Core::System::GetInstance();
+@@ -1158,6 +1180,7 @@
+ }
+ EMSCRIPTEN_KEEPALIVE void BrowserRollbackClear()
+ {
++  DolphinWeb::RollbackOutput::suppressed.store(false);
+   DolphinWeb_CancelGameFrameStep();
+   BrowserRollbackReleasePads();
+   State::BrowserClear();
+--- a/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/vendor/dolphin/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -1,6 +1,7 @@
+ // Copyright 2026 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserRollbackOutput.h"
+ #include "Common/BrowserProfile.h"
+ 
+ #include "Common/GL/GLInterface/Emscripten.h"
+@@ -414,6 +415,11 @@
+   // own pacing reached this far in the wasm build.
+   if (worker_owned_webgl && !DolphinWebUseOglReadbackPresent())
+   {
++    if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++    {
++      DolphinWeb::RollbackOutput::video_skipped.fetch_add(1, std::memory_order_relaxed);
++      return;
++    }
+     EM_ASM({
+       if (typeof GL === 'undefined' || !GL.currentContext) return;
+       const ctx = GL.currentContext.GLctx;
+--- a/vendor/dolphin/Source/Core/AudioCommon/Mixer.cpp
++++ b/vendor/dolphin/Source/Core/AudioCommon/Mixer.cpp
+@@ -1,6 +1,9 @@
+ // Copyright 2008 Dolphin Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#ifdef __EMSCRIPTEN__
++#include "Common/BrowserRollbackOutput.h"
++#endif
+ #include "AudioCommon/Mixer.h"
+ 
+ #include <algorithm>
+@@ -210,6 +213,13 @@
+ 
+ void Mixer::PushSamples(const s16* samples, std::size_t num_samples)
+ {
++#ifdef __EMSCRIPTEN__
++  if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++  {
++    DolphinWeb::RollbackOutput::audio_skipped.fetch_add(num_samples, std::memory_order_relaxed);
++    return;
++  }
++#endif
+   if (IsOutputSampleRateValid())
+   {
+     // Big-endian RL-orderered stereo samples.
+@@ -233,6 +243,13 @@
+ 
+ void Mixer::PushStreamingSamples(const s16* samples, std::size_t num_samples)
+ {
++#ifdef __EMSCRIPTEN__
++  if (DolphinWeb::RollbackOutput::suppressed.load(std::memory_order_acquire))
++  {
++    DolphinWeb::RollbackOutput::audio_skipped.fetch_add(num_samples, std::memory_order_relaxed);
++    return;
++  }
++#endif
+   if (IsOutputSampleRateValid())
+   {
+     // Big-endian RL-orderered stereo samples.
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1035,6 +1035,13 @@
+       let stepTiming;
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
++      } else if (payload.action === "suppress") {
++        if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
++          throw new Error("Output suppression requires paused detached OGL core");
++        return {state: api.getCoreStateName(), output: JSON.parse(api.browserRollbackOutputStats())};
++      } else if (payload.action === "outputStats") {
++        if (!api.browserRollbackOutputStats) throw new Error("Replay output counters unavailable");
++        return {output: JSON.parse(api.browserRollbackOutputStats())};
+       } else if (payload.action === "pads") {
+         const fields = ["mask", "stickX", "stickY", "cStickX", "cStickY", "triggerLeft", "triggerRight", "analogA", "analogB"];
+         if (!api.browserRollbackSetPads || !Array.isArray(payload.pads) || payload.pads.length !== 2 ||
+@@ -2383,6 +2390,8 @@
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
+     browserRollbackGameStep: optionalCwrap("BrowserRollbackGameStep", "number", []),
+     browserRollbackSetPads: optionalCwrap("BrowserRollbackSetPads", "number", ["number", "number", "number"]),
++    browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
++    browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),
+     browserRollbackSetUnthrottled: optionalCwrap("BrowserRollbackSetUnthrottled", "number", ["number"]),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
+--- /dev/null
++++ b/vendor/dolphin/Source/Core/Common/BrowserRollbackOutput.h
+@@ -0,0 +1,11 @@
++// Copyright 2026
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++#include <atomic>
++#include <cstdint>
++namespace DolphinWeb::RollbackOutput {
++// Host presentation only. Game DSP/GX execution and serialized state still run.
++inline std::atomic<bool> suppressed{false};
++inline std::atomic<std::uint64_t> video_skipped{0};
++inline std::atomic<std::uint64_t> audio_skipped{0};
++}

@@ -1,0 +1,11 @@
+--- a/vendor/dolphin/Source/Core/Core/CMakeLists.txt
++++ b/vendor/dolphin/Source/Core/Core/CMakeLists.txt
+@@ -969,5 +969,7 @@
+   set_property(SOURCE PowerPC/CachedInterpreter/CachedInterpreter.cpp APPEND
+     PROPERTY COMPILE_OPTIONS
+       -UDOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH
+-      -DDOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH=1)
++      -DDOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH=1
++      -UDOLPHIN_WEB_HOT_COUNTERS
++      -DDOLPHIN_WEB_HOT_COUNTERS=0)
+ endif()

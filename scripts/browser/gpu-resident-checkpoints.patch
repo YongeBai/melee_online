@@ -1,0 +1,286 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.h
++++ b/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.h
+@@ -4,6 +4,7 @@
+ #pragma once
+ 
+ #include <array>
++#include <atomic>
+ #include <filesystem>
+ #include <fmt/format.h>
+ #include <map>
+@@ -267,6 +268,20 @@
+   virtual ~TextureCacheBase();
+ 
+   bool Initialize();
++
++  // Browser private checkpoints: texture ownership stays on the GPU thread.
++  void BrowserBeginState(unsigned slot, bool saving);
++  void BrowserEndState();
++  void BrowserClearStates();
++  bool BrowserStateFailed() const { return m_browser_state_failed.load(); }
++  std::size_t BrowserTextureBytes() const;
++private:
++  std::array<std::vector<std::unique_ptr<AbstractTexture>>, 6> m_browser_textures;
++  std::array<std::size_t, 6> m_browser_texture_bytes{};
++  std::atomic<int> m_browser_state_slot{-1};
++  std::atomic<bool> m_browser_state_failed{false};
++  bool m_browser_clear_on_write = false;
++public:
+   void Shutdown();
+ 
+   void OnConfigChanged(const VideoConfig& config);
+--- a/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
+@@ -439,9 +439,79 @@
+   return m_readback_texture != nullptr;
+ }
+ 
++void TextureCacheBase::BrowserBeginState(unsigned slot, bool saving)
++{
++  m_browser_state_failed.store(false);
++  m_browser_clear_on_write = saving;
++  m_browser_state_slot.store(static_cast<int>(slot), std::memory_order_release);
++}
++void TextureCacheBase::BrowserEndState()
++{
++  m_browser_state_slot.store(-1, std::memory_order_release);
++}
++void TextureCacheBase::BrowserClearStates()
++{
++  for (auto& textures : m_browser_textures) textures.clear();
++  m_browser_texture_bytes.fill(0);
++}
++std::size_t TextureCacheBase::BrowserTextureBytes() const
++{
++  std::size_t bytes = 0;
++  for (const auto n : m_browser_texture_bytes) bytes += n;
++  return bytes;
++}
++static void CopyBrowserTexture(AbstractTexture* dst, const AbstractTexture* src)
++{
++  const auto& config = dst->GetConfig();
++  for (u32 layer = 0; layer < config.layers; ++layer)
++    for (u32 level = 0; level < config.levels; ++level)
++      dst->CopyRectangleFromTexture(src, src->GetConfig().GetMipRect(level), layer, level,
++                                   config.GetMipRect(level), layer, level);
++}
++
+ void TextureCacheBase::SerializeTexture(AbstractTexture* tex, const TextureConfig& config,
+                                         PointerWrap& p)
+ {
++  const int browser_slot = m_browser_state_slot.load(std::memory_order_acquire);
++  if (browser_slot >= 0)
++  {
++    p.Do(config);
++    u32 index = 0;
++    if (p.IsWriteMode())
++    {
++      auto& textures = m_browser_textures[browser_slot];
++      if (m_browser_clear_on_write)
++      {
++        textures.clear();
++        m_browser_texture_bytes[browser_slot] = 0;
++        m_browser_clear_on_write = false;
++      }
++      std::size_t bytes = 0;
++      for (u32 level = 0; level < config.levels; ++level)
++        bytes += AbstractTexture::CalculateStrideForFormat(config.format, std::max(1u, config.width >> level)) *
++                 std::max(1u, config.height >> level) * config.layers;
++      // Never allow an unexpected scene to grow an unbounded VRAM history.
++      if (textures.size() >= 64 || BrowserTextureBytes() + bytes > 192 * 1024 * 1024)
++      {
++        m_browser_state_failed.store(true);
++        p.SetVerifyMode();
++        return;
++      }
++      auto copy = g_gfx->CreateTexture(config);
++      if (!copy)
++      {
++        m_browser_state_failed.store(true);
++        p.SetVerifyMode();
++        return;
++      }
++      CopyBrowserTexture(copy.get(), tex);
++      index = static_cast<u32>(textures.size());
++      textures.push_back(std::move(copy));
++      m_browser_texture_bytes[browser_slot] += bytes;
++    }
++    p.Do(index);
++    return;
++  }
+   // If we're in measure mode, skip the actual readback to save some time.
+   const bool skip_readback = p.IsMeasureMode();
+   p.Do(config);
+@@ -507,6 +577,28 @@
+ {
+   TextureConfig config;
+   p.Do(config);
++  const int browser_slot = m_browser_state_slot.load(std::memory_order_acquire);
++  if (browser_slot >= 0)
++  {
++    u32 index = 0;
++    p.Do(index);
++    const auto& textures = m_browser_textures[browser_slot];
++    if (!p.IsReadMode() || index >= textures.size() || textures[index]->GetConfig() != config)
++    {
++      m_browser_state_failed.store(true);
++      p.SetVerifyMode();
++      return std::nullopt;
++    }
++    auto restored = AllocateTexture(config);
++    if (!restored)
++    {
++      m_browser_state_failed.store(true);
++      p.SetVerifyMode();
++      return std::nullopt;
++    }
++    CopyBrowserTexture(restored->texture.get(), textures[index].get());
++    return restored;
++  }
+ 
+   // Read in the size from the save state, then texture data will point to
+   // a region of size total_size where textures are stored.
+--- a/vendor/dolphin/Source/Core/Core/State.h
++++ b/vendor/dolphin/Source/Core/Core/State.h
+@@ -82,7 +82,7 @@
+ };
+ 
+ // Browser rollback probe: paused caller must hold CPUThreadGuard.
+-std::size_t BrowserSave(Core::System& system, unsigned slot);
++std::size_t BrowserSave(Core::System& system, unsigned slot, bool gpu_resident = false);
+ bool BrowserLoad(Core::System& system, unsigned slot);
+ bool BrowserEqual(unsigned a, unsigned b);
+ bool BrowserKeepJit();
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -22,6 +22,8 @@
+ #include <lzo/lzo1x.h>
+ 
+ #include "Common/Buffer.h"
++#include "VideoCommon/AsyncRequests.h"
++#include "VideoCommon/TextureCacheBase.h"
+ #include "Common/RangeSet.h"
+ #include "Core/PowerPC/JitCommon/JitCache.h"
+ #include "Core/PowerPC/JitInterface.h"
+@@ -288,12 +290,23 @@
+ // Six slots support a 12-frame window with checkpoints every four frames.
+ static std::array<Common::UniqueBuffer<u8>, 6> browser_states;
+ static std::array<std::size_t, 6> browser_state_sizes{};
++static std::array<bool, 6> browser_states_gpu{};
++struct BrowserTextureStateScope
++{
++  explicit BrowserTextureStateScope(unsigned slot, bool active, bool saving) : enabled(active)
++  { if (enabled) g_texture_cache->BrowserBeginState(slot, saving); }
++  ~BrowserTextureStateScope() { if (enabled) g_texture_cache->BrowserEndState(); }
++  bool enabled;
++};
+ static std::array<std::vector<BrowserStateSection>, 6> browser_state_sections;
+ static std::size_t browser_required_size = 0;
+ std::size_t BrowserRequiredSize() { return browser_required_size; }
+-std::size_t BrowserSave(Core::System& system, unsigned slot)
++std::size_t BrowserSave(Core::System& system, unsigned slot, bool gpu_resident)
+ {
+-  if (slot >= browser_states.size()) return 0;
++  if (slot >= browser_states.size() || (gpu_resident && !g_texture_cache)) return 0;
++  browser_state_sizes[slot] = 0;
++  browser_states_gpu[slot] = gpu_resident;
++  const BrowserTextureStateScope texture_scope(slot, gpu_resident, true);
+   constexpr std::size_t max_bytes = 128 * 1024 * 1024;
+   constexpr std::size_t total_budget = 640 * 1024 * 1024;
+   // Measure before allocating; never let an unexpected game/state consume
+@@ -317,6 +330,7 @@
+   browser_sections_recording = &browser_state_sections[slot];
+   browser_state_sizes[slot] = SaveToBuffer(system, buffer);
+   browser_sections_recording = nullptr;
++  if (gpu_resident && g_texture_cache->BrowserStateFailed()) browser_state_sizes[slot] = 0;
+   return browser_state_sizes[slot];
+ }
+ inline bool CoherentInstructionCache(Core::System& system) {
+@@ -371,11 +385,13 @@
+   // Source bytes and instruction-cache coherence must agree on both sides
+   // of restore before compiled blocks may be retained.
+   CodeRestoreGuard code_guard(system);
++  if (browser_states_gpu[slot] && !g_texture_cache) return false;
++  const BrowserTextureStateScope texture_scope(slot, browser_states_gpu[slot], false);
+   return LoadFromBuffer(system, std::span<u8>(browser_states[slot].data(), browser_state_sizes[slot]));
+ }
+ bool BrowserEqual(unsigned a, unsigned b)
+ {
+-  return a < browser_states.size() && b < browser_states.size() && browser_state_sizes[a] &&
++  return a < browser_states.size() && b < browser_states.size() && !browser_states_gpu[a] && !browser_states_gpu[b] && browser_state_sizes[a] &&
+          browser_state_sizes[a] == browser_state_sizes[b] &&
+          std::memcmp(browser_states[a].data(), browser_states[b].data(), browser_state_sizes[a]) == 0;
+ }
+@@ -383,6 +399,8 @@
+ {
+   if (a >= browser_states.size() || b >= browser_states.size() || !browser_state_sizes[a] || !browser_state_sizes[b])
+     return R"({"error":"Invalid checkpoints"})";
++  if (browser_states_gpu[a] || browser_states_gpu[b])
++    return R"({"error":"GPU checkpoints must be verified using full captures"})";
+   const auto* x = browser_states[a].data();
+   const auto* y = browser_states[b].data();
+   std::string report = fmt::format(R"({{"sizeA":{},"sizeB":{},"retainedCode":{},"sections":[)", browser_state_sizes[a], browser_state_sizes[b], browser_last_kept_jit);
+@@ -411,6 +429,15 @@
+ }
+ void BrowserClear()
+ {
++  auto& system = Core::System::GetInstance();
++  if (g_texture_cache && Core::IsRunning(system))
++  {
++    const Core::CPUThreadGuard guard(system);
++    auto clear = [] { if (g_texture_cache) g_texture_cache->BrowserClearStates(); };
++    if (system.IsDualCoreMode()) AsyncRequests::GetInstance()->PushBlockingEvent(clear);
++    else clear();
++  }
++  browser_states_gpu.fill(false);
+   for (auto& state : browser_states) state.reset();
+   browser_state_sizes.fill(0);
+ }
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1021,9 +1021,9 @@
+ 
+ void StopCore()
+ {
++  State::BrowserClear();
+   if (s_runtime_initialized)
+     Core::Stop(Core::System::GetInstance());
+-  State::BrowserClear();
+   s_core_status = "Stopped";
+ }
+ 
+@@ -1048,6 +1048,13 @@
+   const Core::CPUThreadGuard guard(system);
+   return static_cast<int>(State::BrowserSave(system, static_cast<unsigned>(slot)));
+ }
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackCaptureGpu(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return static_cast<int>(State::BrowserSave(system, static_cast<unsigned>(slot), true));
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackRequiredSize()
+ {
+   return static_cast<int>(State::BrowserRequiredSize());
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1034,7 +1034,9 @@
+       } else if (payload.action === "capture") {
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6)
+           throw new Error("Invalid checkpoint slot");
+-        const bytes = api.browserRollbackCapture(payload.slot);
++        const capture = payload.gpuResident ? api.browserRollbackCaptureGpu : api.browserRollbackCapture;
++        if (!capture) throw new Error("GPU checkpoint API unavailable");
++        const bytes = capture(payload.slot);
+         if (!bytes) throw new Error("Capture failed: state=" + api.getCoreStateName() + ", requiredBytes=" + api.browserRollbackRequiredSize?.() + ", limitBytes=134217728, totalBudgetBytes=671088640");
+         return {bytes, milliseconds: performance.now() - started};
+       } else if (payload.action === "restore") {
+@@ -2335,6 +2337,7 @@
+     loadState: cwrap("LoadState", "number", ["number"]),
+     loadStateFile: optionalCwrap("LoadStateFile", "number", ["string"]),
+     saveStateFile: optionalCwrap("SaveStateFile", "number", ["string"]),
++    browserRollbackCaptureGpu: optionalCwrap("BrowserRollbackCaptureGpu", "number", ["number"]),
+     browserRollbackCapture: optionalCwrap("BrowserRollbackCapture", "number", ["number"]),
+     browserRollbackRequiredSize: optionalCwrap("BrowserRollbackRequiredSize", "number", []),
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),

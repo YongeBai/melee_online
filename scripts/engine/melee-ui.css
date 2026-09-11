@@ -313,3 +313,26 @@ button:focus-visible {
 .controls-open #stats {
   display: none;
 }
+/* Room controls occupy the space between the two native player cards. */
+#roomPanel { position:absolute;left:34%;top:54%;width:32%;height:39%;box-sizing:border-box;padding:1.4% 1.8%;background:linear-gradient(#101829d9,#071323ee),url("/play/assets/MnSlChr-2f740.png") center/100% 100%,#081222;border:2px solid #636a79;box-shadow:inset 0 0 0 2px #101420,inset 0 0 0 3px #969da255;clip-path:polygon(4% 0,100% 0,100% 94%,96% 100%,0 100%,0 6%);display:flex;flex-direction:column;align-items:center;gap:6%;font-size:clamp(10px,1.5vw,24px);color:#ffdc76; }
+#roomPanel[hidden],#roomPanel [hidden]{display:none}
+#roomPanel canvas{height:1em;max-width:100%;object-fit:contain;filter:drop-shadow(1px 2px 1px #000)}
+#roomPanel img{height:1em;max-width:100%;object-fit:contain;filter:drop-shadow(1px 2px 1px #000)}
+#roomStatus{height:.8em!important;min-height:.8em}
+.room-code{display:flex;align-items:center;justify-content:center;gap:8%;width:100%}
+#roomPanel button{cursor:pointer;color:#ffe394;border:0;background:none;padding:0;font:inherit}
+#copyRoom{min-width:44%;padding:2% 4%!important;background:linear-gradient(120deg,#121623,#404457,#111321)!important;box-shadow:inset 0 1px #dad7ca,inset 0 -1px #9b926f;transform:skew(-8deg)}
+#copyRoom canvas{transform:skew(8deg)}
+#joinRoom{display:grid;grid-template-columns:1fr 1fr 24px;align-items:center;gap:5%;width:100%}
+.code-entry{position:relative;min-width:0;height:1.6em;background:#040614a8;border-bottom:2px solid #d2bc6f}
+#joinCode{width:100%;height:100%;border:0;outline:none;background:none;color:transparent;caret-color:#ffe080;font:inherit;letter-spacing:.12em;padding:2px}
+#typedCode{position:absolute;left:3%;top:20%;max-width:94%!important;pointer-events:none}
+.code-entry:focus-within{outline:1px solid #ffe08b;box-shadow:0 0 8px #ffc55c80}
+#roomPanel .room-action{background:linear-gradient(115deg,#555561,#202332 65%,#111521);clip-path:polygon(7% 0,94% 0,100% 50%,94% 100%,7% 100%,0 50%);box-shadow:inset 0 1px #ddd6b5,inset 0 -1px #898375;padding:3% 14%;min-width:65%}
+#roomPanel .room-action.selected,#roomPanel button:hover{filter:brightness(1.4)}
+#roomPanel button:focus-visible{outline:2px solid #ffde80;outline-offset:4px}
+.online-room[data-seat="1"] .native #keyboardButton{left:76.5%}
+body.controls-open #roomPanel{visibility:hidden}
+#roomProbe{position:fixed;top:42px;left:8px;z-index:6;max-width:400px;font:12px monospace;background:#101b2dd9;color:white}
+#roomProbe button{font-size:12px;padding:6px}
+#roomReport{max-height:220px;overflow:auto;margin:4px}

@@ -1,0 +1,111 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -35,6 +35,7 @@
+ #include "Core/CoreTiming.h"
+ #ifdef __EMSCRIPTEN__
+ #include "Core/WasmTimingProfile.h"
++#include <emscripten/threading.h>
+ #endif
+ #include "Core/HLE/HLE.h"
+ #include "Core/HW/CPU.h"
+@@ -7777,6 +7778,19 @@
+ // block has committed its register/cycle writebacks, including redispatch.
+ static std::atomic<bool> s_browser_game_step_armed{false};
+ static std::atomic<u32> s_browser_game_step_start{0};
++alignas(4) static std::atomic<u32> s_browser_game_step_sequence{0};
++static_assert(sizeof(s_browser_game_step_sequence) == sizeof(u32));
++extern "C" u32 DolphinWeb_GameFrameStepSignal()
++{
++  return static_cast<u32>(reinterpret_cast<std::uintptr_t>(&s_browser_game_step_sequence));
++}
++static void NotifyBrowserGameFrameStep()
++{
++  s_browser_game_step_sequence.fetch_add(1, std::memory_order_release);
++#ifdef __EMSCRIPTEN__
++  emscripten_futex_wake(&s_browser_game_step_sequence, std::numeric_limits<int>::max());
++#endif
++}
+ extern "C" void DolphinWeb_ArmGameFrameStep(u32 initial_frame)
+ {
+   s_browser_game_step_start.store(initial_frame, std::memory_order_relaxed);
+@@ -7784,7 +7798,8 @@
+ }
+ extern "C" void DolphinWeb_CancelGameFrameStep()
+ {
+-  s_browser_game_step_armed.store(false, std::memory_order_release);
++  if (s_browser_game_step_armed.exchange(false, std::memory_order_acq_rel))
++    NotifyBrowserGameFrameStep();
+ }
+ 
+ void CachedInterpreter::ExecuteOneBlock([[maybe_unused]] bool allow_redispatch)
+@@ -8049,6 +8064,7 @@
+     {
+       s_browser_game_step_armed.store(false, std::memory_order_release);
+       m_system.GetCPU().Break();
++      NotifyBrowserGameFrameStep();
+       return;
+     }
+     if (redispatch_enabled && m_ppc_state.downcount > 0 &&
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1099,6 +1099,11 @@
+   return result.c_str();
+ }
+ extern "C" void DolphinWeb_ArmGameFrameStep(u32 initial_frame);
++extern "C" u32 DolphinWeb_GameFrameStepSignal();
++EMSCRIPTEN_KEEPALIVE u32 BrowserRollbackStepSignal()
++{
++  return DolphinWeb_GameFrameStepSignal();
++}
+ extern "C" void DolphinWeb_CancelGameFrameStep();
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetPads(const u32* packed, int count, u32 frame)
+ {
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1076,10 +1076,20 @@
+         if (unthrottled && !api.browserRollbackSetUnthrottled?.(1))
+           throw new Error("Unthrottled step requires paused machine");
+         try {
++          let signal = null, sequence = 0;
++          if (typeof Atomics.waitAsync === "function" && typeof SharedArrayBuffer === "function" &&
++              moduleInstance.HEAPU8.buffer instanceof SharedArrayBuffer && api.browserRollbackStepSignal) {
++            const pointer = api.browserRollbackStepSignal();
++            if (!Number.isInteger(pointer) || pointer <= 0 || pointer % 4 ||
++                pointer > moduleInstance.HEAPU8.byteLength - 4) throw new Error("Invalid frame completion signal");
++            signal = new Int32Array(moduleInstance.HEAPU8.buffer, pointer, 1);
++            sequence = Atomics.load(signal, 0);
++          }
+           const transitionAt = performance.now();
+           const step = api.browserRollbackGameStep || api.browserRollbackStep;
+           if (!step()) throw new Error("Game step requires paused GALE01 v1.02 on CachedInterpreter");
+-          stepTiming = { transitionMilliseconds: performance.now() - transitionAt };
++          stepTiming = { transitionMilliseconds: performance.now() - transitionAt,
++            waitStrategy: signal ? "atomic-notification" : "timer", waitWakeups: 0 };
+           const waitAt = performance.now();
+           while (api.getCoreStateName() !== "Paused") {
+             if (performance.now() - started > 5000) {
+@@ -1087,7 +1097,15 @@
+               throw new Error("Frame step did not complete within five seconds");
+             }
+             api.pumpHostJobs?.();
+-            await new Promise(resolve => setTimeout(resolve, 1));
++            if (signal) {
++              // A bounded async wait services the worker event loop without
++              // nested timer clamping. Sequence comparison closes the race
++              // where completion happens between the state read and waiting.
++              const wait = Atomics.waitAsync(signal, 0, sequence, 16);
++              if (wait.async) await wait.value;
++              sequence = Atomics.load(signal, 0);
++            } else await new Promise(resolve => setTimeout(resolve, 1));
++            stepTiming.waitWakeups++;
+           }
+           stepTiming.waitMilliseconds = performance.now() - waitAt;
+         } finally {
+@@ -2400,6 +2418,7 @@
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
+     browserRollbackCompare: optionalCwrap("BrowserRollbackCompare", "string", ["number", "number"]),
+     browserRollbackClear: optionalCwrap("BrowserRollbackClear", null, []),
++    browserRollbackStepSignal: optionalCwrap("BrowserRollbackStepSignal", "number", []),
+     browserRollbackRelease: optionalCwrap("BrowserRollbackRelease", "number", ["number"]),
+     getFrame: cwrap("GetFrame", "number", []),
+     getFrameSignalPtr: optionalCwrap("GetFrameSignalPtr", "number", []),

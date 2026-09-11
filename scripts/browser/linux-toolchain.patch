@@ -1,0 +1,44 @@
+diff --git a/tools/configure-upstream-wasm.mjs b/tools/configure-upstream-wasm.mjs
+index 8c5ccbd..fa7d33c 100644
+--- a/tools/configure-upstream-wasm.mjs
++++ b/tools/configure-upstream-wasm.mjs
+@@ -78,7 +78,7 @@ const toolchain = verifyWasmToolchain();
+ const { emcc, emcmake, cmake, ninja, cargo, rustc } = toolchain.paths;
+ const nagaEnvironment = {
+   ...process.env,
+-  PATH: `${dirname(rustc)};${dirname(emcc)};${process.env.PATH ?? ""}`,
++  PATH: [dirname(rustc), dirname(emcc), process.env.PATH ?? ""].join(process.platform === "win32" ? ";" : ":"),
+   RUSTC: rustc,
+   CARGO: cargo
+ };
+diff --git a/tools/wasm-toolchain.mjs b/tools/wasm-toolchain.mjs
+index 0c240e4..6aa4afc 100644
+--- a/tools/wasm-toolchain.mjs
++++ b/tools/wasm-toolchain.mjs
+@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
+ import { fileURLToPath } from "node:url";
+ 
+ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+-const lockPath = resolve(root, "provenance/wasm-toolchain.lock.json");
++const lockPath = resolve(process.env.DOLPHIN_TOOLCHAIN_LOCK || resolve(root, "provenance/wasm-toolchain.lock.json"));
+ 
+ function invariant(condition, message) {
+   if (!condition) throw new Error(message);
+@@ -36,7 +36,7 @@ function expandCandidate(candidate) {
+ }
+ 
+ function pathCandidate(command) {
+-  const where = spawnSync("where.exe", [command], { encoding: "utf8", windowsHide: true });
++  const where = spawnSync(process.platform === "win32" ? "where.exe" : "which", [command], { encoding: "utf8", windowsHide: true });
+   if (where.status !== 0) return null;
+   return where.stdout.split(/\r?\n/).map((line) => line.trim()).find(Boolean) ?? null;
+ }
+@@ -111,7 +111,7 @@ export function verifyWasmToolchain() {
+   const emsdkRoot = resolve(dirname(emcc), "../..");
+   const emsdkHead = runVersion("git", ["-C", emsdkRoot, "rev-parse", "HEAD"]);
+   invariant(emsdkHead === lock.emscripten.emsdkCommit, `emsdk commit mismatch: expected ${lock.emscripten.emsdkCommit}, got ${emsdkHead}`);
+-  const clangxx = resolve(emsdkRoot, "upstream/bin/clang++.exe");
++  const clangxx = resolve(emsdkRoot, `upstream/bin/clang++${process.platform === "win32" ? ".exe" : ""}`);
+   invariant(existsSync(clangxx), `Emscripten clang++ is missing at ${clangxx}`);
+   invariant(sha256File(clangxx) === lock.emscripten.clangxxSha256, "Emscripten clang++ hash mismatch");
+ 

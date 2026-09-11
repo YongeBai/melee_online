@@ -1,0 +1,133 @@
+--- a/core/upstream/dolphin_web_discio.cpp
++++ b/core/upstream/dolphin_web_discio.cpp
+@@ -133,6 +133,8 @@
+ 
+ std::mutex s_input_state_mutex;
+ InputStateSnapshot s_input_state;
++std::array<InputStateSnapshot, 2> s_rollback_inputs{};
++bool s_rollback_input_owner = false;
+ std::mutex s_pad_poll_mutex;
+ PadPollSnapshot s_pad_poll;
+ bool s_using_xfb_frame = false;
+@@ -1089,13 +1091,14 @@
+ 
+ int DolphinWeb_GetPadStatus(int pad_num, GCPadStatus* status)
+ {
+-  if (!status || pad_num != 0)
++  if (!status || pad_num < 0 || pad_num >= 2)
+     return 0;
+ 
+   InputStateSnapshot input;
+   {
+     const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+-    input = s_input_state;
++    if (!s_rollback_input_owner && pad_num != 0) return 0;
++    input = s_rollback_input_owner ? s_rollback_inputs[pad_num] : s_input_state;
+   }
+ 
+   *status = {};
+@@ -1167,6 +1170,7 @@
+   else if ((mask & INPUT_C_STICK_DOWN) && !(mask & INPUT_C_STICK_UP))
+     status->substickY = 0x20;
+ 
++  if (pad_num == 0)
+   {
+     const std::lock_guard<std::mutex> lock(s_pad_poll_mutex);
+     ++s_pad_poll.poll_count;
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -42,6 +42,7 @@
+ #include "Core/HW/GCKeyboard.h"
+ #include "Core/HW/GCPad.h"
+ #include "Core/HW/SystemTimers.h"
++#include "Core/HW/SI/SI_Device.h"
+ #include "Core/Host.h"
+ #include "Core/PowerPC/PowerPC.h"
+ #include "Core/State.h"
+@@ -641,6 +642,7 @@
+   Config::SetBase(Config::MAIN_OSD_MESSAGES, false);
+   Config::SetBase(Config::MAIN_SLOT_A, ExpansionInterface::EXIDeviceType::MemoryCardFolder);
+   Config::SetBase(Config::MAIN_SLOT_B, ExpansionInterface::EXIDeviceType::None);
++  Config::SetBase(Config::GetInfoForSIDevice(1), SerialInterface::SIDEVICE_GC_CONTROLLER);
+   Config::SetBase(Config::MAIN_AUDIO_BACKEND, std::string("Web Audio"));
+   Config::SetBase(Config::MAIN_AUDIO_MUTED, false);
+   Config::SetBase(Config::GFX_HACK_SKIP_XFB_COPY_TO_RAM, s_video_backend == "OGL");
+@@ -1084,6 +1086,35 @@
+ }
+ extern "C" void DolphinWeb_ArmGameFrameStep(u32 initial_frame);
+ extern "C" void DolphinWeb_CancelGameFrameStep();
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetPads(const u32* packed, int count, u32 frame)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || !packed || count != 18 ||
++      Core::GetState(system) != Core::State::Paused) return 0;
++  std::array<InputStateSnapshot, 2> next{};
++  for (unsigned port = 0; port < 2; ++port)
++  {
++    const auto* p = packed + port * 9;
++    if (p[0] > 0xfffffu) return 0;
++    for (unsigned field = 1; field < 9; ++field) if (p[field] > 255) return 0;
++    auto& input = next[port];
++    input.mask = p[0]; input.generation = frame;
++    input.stick_x = p[1]; input.stick_y = p[2];
++    input.c_stick_x = p[3]; input.c_stick_y = p[4];
++    input.trigger_left = p[5]; input.trigger_right = p[6];
++    input.analog_a = p[7]; input.analog_b = p[8];
++  }
++  const Core::CPUThreadGuard guard(system);
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_rollback_inputs = next;
++  s_rollback_input_owner = true;
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE void BrowserRollbackReleasePads()
++{
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_rollback_input_owner = false;
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetUnthrottled(int enable)
+ {
+   auto& system = Core::System::GetInstance();
+@@ -1116,6 +1147,7 @@
+ EMSCRIPTEN_KEEPALIVE void BrowserRollbackClear()
+ {
+   DolphinWeb_CancelGameFrameStep();
++  BrowserRollbackReleasePads();
+   State::BrowserClear();
+ }
+ 
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1032,6 +1032,24 @@
+       const started = performance.now();
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
++      } else if (payload.action === "pads") {
++        const fields = ["mask", "stickX", "stickY", "cStickX", "cStickY", "triggerLeft", "triggerRight", "analogA", "analogB"];
++        if (!api.browserRollbackSetPads || !Array.isArray(payload.pads) || payload.pads.length !== 2 ||
++            !Number.isInteger(payload.frame) || payload.frame < 0 || payload.frame > 0xffffffff)
++          throw new Error("Two complete pads and a frame number are required");
++        const packed = payload.pads.flatMap(pad => fields.map((field, i) => {
++          const value = pad?.[field];
++          if (!Number.isInteger(value) || value < 0 || value > (i === 0 ? 0xfffff : 255))
++            throw new Error("Invalid rollback pad field: " + field);
++          return value;
++        }));
++        const pointer = moduleInstance._malloc(72);
++        if (!pointer) throw new Error("Could not allocate controller input buffer");
++        try {
++          new Uint32Array(moduleInstance.HEAPU8.buffer, pointer, 18).set(packed);
++          if (!api.browserRollbackSetPads(pointer, 18, payload.frame))
++            throw new Error("Authoritative pads require a paused machine");
++        } finally { moduleInstance._free(pointer); }
+       } else if (payload.action === "capture") {
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6)
+           throw new Error("Invalid checkpoint slot");
+@@ -2355,6 +2373,7 @@
+     browserRollbackRequiredSize: optionalCwrap("BrowserRollbackRequiredSize", "number", []),
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
+     browserRollbackGameStep: optionalCwrap("BrowserRollbackGameStep", "number", []),
++    browserRollbackSetPads: optionalCwrap("BrowserRollbackSetPads", "number", ["number", "number", "number"]),
+     browserRollbackSetUnthrottled: optionalCwrap("BrowserRollbackSetUnthrottled", "number", ["number"]),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),

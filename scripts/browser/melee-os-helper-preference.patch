@@ -1,0 +1,16 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -10540,6 +10540,13 @@
+ 
+ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+ {
++  // Keep the existing, instruction-verified SDK handlers reachable. Compiling
++  // these entry blocks directly to WASM bypasses TryWriteOsInterruptFunction,
++  // so its verification bits never get populated after a JIT mode change and
++  // the dependent Melee idle/input helpers repeatedly fall back.
++  if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_OSINTERRUPT) &&
++      GetOsInterruptInlineTarget(js.blockStart).has_value())
++    return false;
+   // §28ce burst smearing: when ENABLED (gate bit CLEARED), reject early if
+   // we've already burned this slice's compile budget. Falls to Interpret;
+   // next slice will re-attempt this block (one extra Interpret cost per

@@ -1,0 +1,149 @@
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -135,8 +135,15 @@
+ 
+ static bool ReadHeader(const std::string& filename, StateHeader& header);
+ 
++struct BrowserStateSection { const char* name; std::size_t end; };
++static std::vector<BrowserStateSection>* browser_sections_recording = nullptr;
+ static void DoState(Core::System& system, PointerWrap& p)
+ {
++  const auto section_start = p.GetOffsetFromPreviousPosition(nullptr);
++  const auto section = [&](const char* name) {
++    if (browser_sections_recording && p.IsWriteMode())
++      browser_sections_recording->push_back({name, p.GetOffsetFromPreviousPosition(nullptr) - section_start});
++  };
+   bool is_wii = system.IsWii() || system.IsMIOS();
+   const bool is_wii_currently = is_wii;
+   p.Do(is_wii);
+@@ -172,29 +179,36 @@
+   // state load, and the frame number must be up-to-date.
+   system.GetMovie().DoState(p);
+   p.DoMarker("Movie");
++  section("Movie");
+ 
+   // Begin with video backend, so that it gets a chance to clear its caches and writeback modified
+   // things to RAM
+   g_video_backend->DoState(p);
+   p.DoMarker("video_backend");
++  section("video_backend");
+ 
+   // CoreTiming needs to be restored before restoring Hardware because
+   // the controller code might need to schedule an event if the controller has changed.
+   system.GetCoreTiming().DoState(p);
+   p.DoMarker("CoreTiming");
++  section("CoreTiming");
+ 
+   // HW needs to be restored before PowerPC because the data cache might need to be flushed.
+   HW::DoState(system, p);
+   p.DoMarker("HW");
++  section("HW");
+ 
+   system.GetPowerPC().DoState(p);
+   p.DoMarker("PowerPC");
++  section("PowerPC");
+ 
+   if (system.IsWii())
+     Wiimote::DoState(p);
+   p.DoMarker("Wiimote");
++  section("Wiimote");
+   Gecko::DoState(p);
+   p.DoMarker("Gecko");
++  section("Gecko");
+ 
+ #ifdef USE_RETRO_ACHIEVEMENTS
+   AchievementManager::GetInstance().DoState(p);
+@@ -262,6 +276,7 @@
+ // Six slots support a 12-frame window with checkpoints every four frames.
+ static std::array<Common::UniqueBuffer<u8>, 6> browser_states;
+ static std::array<std::size_t, 6> browser_state_sizes{};
++static std::array<std::vector<BrowserStateSection>, 6> browser_state_sections;
+ static std::size_t browser_required_size = 0;
+ std::size_t BrowserRequiredSize() { return browser_required_size; }
+ std::size_t BrowserSave(Core::System& system, unsigned slot)
+@@ -285,7 +300,10 @@
+     if (allocated - buffer.size() + size > total_budget) return 0;
+     buffer.reset(size);
+   }
++  browser_state_sections[slot].clear();
++  browser_sections_recording = &browser_state_sections[slot];
+   browser_state_sizes[slot] = SaveToBuffer(system, buffer);
++  browser_sections_recording = nullptr;
+   return browser_state_sizes[slot];
+ }
+ bool BrowserLoad(Core::System& system, unsigned slot)
+@@ -299,6 +317,30 @@
+          browser_state_sizes[a] == browser_state_sizes[b] &&
+          std::memcmp(browser_states[a].data(), browser_states[b].data(), browser_state_sizes[a]) == 0;
+ }
++std::string BrowserCompare(unsigned a, unsigned b)
++{
++  if (a >= browser_states.size() || b >= browser_states.size() || !browser_state_sizes[a] || !browser_state_sizes[b])
++    return R"({"error":"Invalid checkpoints"})";
++  const auto* x = browser_states[a].data();
++  const auto* y = browser_states[b].data();
++  const auto size = std::min(browser_state_sizes[a], browser_state_sizes[b]);
++  std::string report = fmt::format(R"({{"sizeA":{},"sizeB":{},"sections":[)", browser_state_sizes[a], browser_state_sizes[b]);
++  std::size_t start = 0;
++  bool comma = false;
++  for (const auto& section : browser_state_sections[a])
++  {
++    std::size_t different = 0, first = size;
++    for (std::size_t i = start; i < std::min(section.end, size); ++i)
++      if (x[i] != y[i]) { ++different; if (first == size) first = i; }
++    if (comma) report += ",";
++    report += fmt::format(R"({{"name":"{}","start":{},"end":{},"differentBytes":{},"firstOffset":{},"firstA":{},"firstB":{}}})",
++      section.name, start, section.end, different, first == size ? -1 : static_cast<int>(first),
++      first == size ? -1 : x[first], first == size ? -1 : y[first]);
++    comma = true;
++    start = section.end;
++  }
++  return report + "]}";
++}
+ void BrowserClear()
+ {
+   for (auto& state : browser_states) state.reset();
+--- a/vendor/dolphin/Source/Core/Core/State.h
++++ b/vendor/dolphin/Source/Core/Core/State.h
+@@ -83,6 +83,7 @@
+ std::size_t BrowserSave(Core::System& system, unsigned slot);
+ bool BrowserLoad(Core::System& system, unsigned slot);
+ bool BrowserEqual(unsigned a, unsigned b);
++std::string BrowserCompare(unsigned a, unsigned b);
+ void BrowserClear();
+ std::size_t BrowserRequiredSize();
+ void Init(Core::System& system);
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1058,6 +1058,12 @@
+ {
+   return a >= 0 && b >= 0 && State::BrowserEqual(static_cast<unsigned>(a), static_cast<unsigned>(b));
+ }
++EMSCRIPTEN_KEEPALIVE const char* BrowserRollbackCompare(int a, int b)
++{
++  static std::string result;
++  result = State::BrowserCompare(static_cast<unsigned>(a), static_cast<unsigned>(b));
++  return result.c_str();
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackStep()
+ {
+   auto& system = Core::System::GetInstance();
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1051,7 +1051,7 @@
+       } else if (payload.action === "equal") {
+         if (![payload.a,payload.b].every(v=>Number.isInteger(v)&&v>=0&&v<6))
+           throw new Error("Invalid comparison slots");
+-        return {equal: Boolean(api.browserRollbackEqual(payload.a,payload.b))};
++        return {equal: Boolean(api.browserRollbackEqual(payload.a,payload.b)), comparison: api.browserRollbackCompare ? JSON.parse(api.browserRollbackCompare(payload.a,payload.b)) : null};
+       } else if (payload.action === "clear") {
+         api.browserRollbackClear();
+       } else throw new Error("Unknown browser rollback action");
+@@ -2333,6 +2333,7 @@
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
++    browserRollbackCompare: optionalCwrap("BrowserRollbackCompare", "string", ["number", "number"]),
+     browserRollbackClear: optionalCwrap("BrowserRollbackClear", null, []),
+     getFrame: cwrap("GetFrame", "number", []),
+     getFrameSignalPtr: optionalCwrap("GetFrameSignalPtr", "number", []),

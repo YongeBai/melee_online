@@ -1,0 +1,225 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -244,6 +244,19 @@
+   return index | 0;
+ });
+ 
++EM_JS(int, DolphinWeb_CompileWasmDispatchLoop, (const u8* ptr, int length, int perfmon_index), {
++  try {
++    const module = new WebAssembly.Module(HEAPU8.slice(ptr, ptr + length));
++    const f = new WebAssembly.Instance(module, {env: {memory: wasmMemory, table: wasmTable,
++      perfmon: wasmTable.get(perfmon_index)}}).exports.f;
++    const index = wasmTable.length; wasmTable.grow(1); wasmTable.set(index, f);
++    return index;
++  } catch (error) { console.warn("WASM dispatcher unavailable:", String(error)); return 0; }
++});
++static int s_wasm_dispatch_loop_handle = 0;
++static bool s_wasm_dispatch_loop_attempted = false;
++static std::atomic<u32> s_wasm_dispatch_loop_calls{0};
++
+ static std::array<char, 86> DolphinWeb_MakeWasmBlockCacheKey(std::span<const u8> bytes)
+ {
+   static constexpr std::string_view prefix = "wasm-block-sha256-v1:";
+@@ -805,6 +818,14 @@
+     PowerPC::UpdatePerformanceMonitor(cycles, num_load_stores, num_fp_inst, ppc_state);
+ }
+ 
++#ifdef __EMSCRIPTEN__
++extern "C" void DolphinWeb_DispatchPerfmon(int pointer, u32 cycles, u32 loads, u32 fp)
++{
++  auto& state = *reinterpret_cast<PowerPC::PowerPCState*>(static_cast<std::uintptr_t>(pointer));
++  UpdatePerformanceMonitorIfNeeded(cycles, loads, fp, state);
++}
++#endif
++
+ bool ExecuteFastOsInterruptInline(PowerPC::PowerPCState& ppc_state,
+                                   PowerPC::PowerPCManager& power_pc, u32 function_pc,
+                                   u32 return_pc, u32 mode, u32 cycles_primary,
+@@ -7838,8 +7859,94 @@
+ 
+ CachedInterpreter::~CachedInterpreter() = default;
+ 
++#ifdef __EMSCRIPTEN__
++struct WasmDispatchLayout
++{
++  u32 pc, npc, downcount, feature_flags;
++  u32 cpu_state, running_state, step_armed, step_start, step_counter;
++  u32 map, map_mask, block_entry, block_flags, block_pc;
++  u32 callback, callback_size, operand_handle, operand_cycles, operand_ls, operand_fp, operand_end;
++  u32 perfmon_flag;
++};
++
++// A compact dispatcher for complete compiled blocks. No guest instruction or
++// exception handling is replaced here: it calls the same block functions and
++// commits the same bookkeeping as RunWasmBlock, then reloads the live map/tags.
++// Returning zero lets ExecuteOneBlock handle timing, frame completion or a JIT
++// miss. A nonzero return is an unexecuted callback for the ordinary interpreter.
++std::vector<u8> BuildWasmDispatchLoop(const WasmDispatchLayout& l)
++{
++  std::vector<u8> bytes{0, 97, 115, 109, 1, 0, 0, 0};
++  EmitSection(bytes, 1, {3, 0x60, 1, 0x7f, 1, 0x7f,
++      0x60, 2, 0x7f, 0x7f, 1, 0x7f,
++      0x60, 4, 0x7f, 0x7f, 0x7f, 0x7f, 0});
++  std::vector<u8> imports{3};
++  EmitName(imports, "env"); EmitName(imports, "memory");
++  imports.insert(imports.end(), {2, 3});
++  EmitU32Leb(imports, DOLPHIN_WASM_MEMORY_PAGES);
++  EmitU32Leb(imports, DOLPHIN_WASM_MEMORY_PAGES);
++  EmitName(imports, "env"); EmitName(imports, "table");
++  imports.insert(imports.end(), {1, 0x70, 0, 0});
++  EmitEnvFunctionImport(imports, "perfmon", 2);
++  EmitSection(bytes, 2, imports);
++  EmitSection(bytes, 3, {1, 1});
++  std::vector<u8> exports{1}; EmitName(exports, "f");
++  exports.insert(exports.end(), {0, 1}); EmitSection(bytes, 7, exports);
++  // Params: state pointer, callback pointer. Locals: operands, map block, pc, flags.
++  std::vector<u8> b{1, 4, 0x7f};
++  const auto load = [&](u32 offset) { b.insert(b.end(), {0x28, 2}); EmitU32Leb(b, offset); };
++  const auto state = [&](u32 offset) { EmitLocalGet(b, 0); load(offset); };
++  const auto absolute = [&](u32 pointer) { EmitI32Const(b, pointer); load(0); };
++  const auto store = [&](u32 offset) { b.insert(b.end(), {0x36, 2}); EmitU32Leb(b, offset); };
++  const auto stop_if = [&]() { b.insert(b.end(), {0x04, 0x40, 0x41, 0, 0x0f, 0x0b}); };
++  b.insert(b.end(), {0x03, 0x40});  // loop
++  EmitLocalGet(b, 1); EmitI32Const(b, l.callback_size); b.push_back(0x6a); EmitLocalSet(b, 2);
++  EmitLocalGet(b, 0); EmitLocalGet(b, 2); load(l.operand_handle);
++  b.insert(b.end(), {0x11, 0, 0});  // call_indirect block(state) -> halted
++  stop_if();
++  EmitLocalGet(b, 0); state(l.npc); store(l.pc);
++  EmitLocalGet(b, 0); state(l.downcount); EmitLocalGet(b, 2); load(l.operand_cycles);
++  b.push_back(0x6b); store(l.downcount);
++  state(l.feature_flags); EmitI32Const(b, l.perfmon_flag); b.push_back(0x71);
++  b.insert(b.end(), {0x04, 0x40});
++  EmitLocalGet(b, 0); EmitLocalGet(b, 2); load(l.operand_cycles);
++  EmitLocalGet(b, 2); load(l.operand_ls); EmitLocalGet(b, 2); load(l.operand_fp);
++  b.insert(b.end(), {0x10, 0, 0x0b});
++  state(l.downcount); EmitI32Const(b, 0); b.push_back(0x4c); stop_if();  // <= signed
++  absolute(l.cpu_state); EmitI32Const(b, l.running_state); b.push_back(0x47); stop_if();
++  EmitI32Const(b, l.step_armed); b.insert(b.end(), {0xfe, 0x12, 0, 0}); // atomic.load8_u
++  b.insert(b.end(), {0x04, 0x40});
++  absolute(l.step_counter); absolute(l.step_start); b.push_back(0x47); stop_if();
++  b.push_back(0x0b);
++  state(l.pc); EmitLocalSet(b, 4);
++  state(l.feature_flags); EmitLocalSet(b, 5);
++  EmitI32Const(b, l.map); EmitLocalGet(b, 4); EmitI32Const(b, 2); b.push_back(0x76);
++  EmitI32Const(b, l.map_mask); b.push_back(0x71); EmitI32Const(b, 2); b.push_back(0x74);
++  b.push_back(0x6a); load(0); EmitLocalSet(b, 3);
++  EmitLocalGet(b, 3); b.push_back(0x45); stop_if();
++  EmitLocalGet(b, 3); load(l.block_pc); EmitLocalGet(b, 4); b.push_back(0x47); stop_if();
++  EmitLocalGet(b, 3); load(l.block_flags); EmitLocalGet(b, 5); b.push_back(0x47); stop_if();
++  EmitLocalGet(b, 3); load(l.block_entry); EmitLocalSet(b, 1);
++  EmitLocalGet(b, 1); b.push_back(0x45); stop_if();
++  EmitLocalGet(b, 1); load(0); EmitI32Const(b, l.callback); b.push_back(0x47);
++  b.insert(b.end(), {0x04, 0x40}); EmitLocalGet(b, 1); b.insert(b.end(), {0x0f, 0x0b});
++  EmitLocalGet(b, 1); load(l.callback_size + l.operand_end); EmitI32Const(b, 1); b.push_back(0x47);
++  b.insert(b.end(), {0x04, 0x40}); EmitLocalGet(b, 1); b.insert(b.end(), {0x0f, 0x0b});
++  b.insert(b.end(), {0x0c, 0, 0x0b, 0x41, 0, 0x0b});
++  std::vector<u8> code{1}; EmitU32Leb(code, b.size());
++  code.insert(code.end(), b.begin(), b.end()); EmitSection(bytes, 10, code);
++  return bytes;
++}
++
++#endif
++
+ void CachedInterpreter::Init()
+ {
++#ifdef __EMSCRIPTEN__
++  s_wasm_dispatch_loop_handle = 0;
++  s_wasm_dispatch_loop_attempted = false;
++  s_wasm_dispatch_loop_calls.store(0);
++#endif
+   RefreshConfig();
+ 
+   AllocCodeSpace(CODE_SIZE);
+@@ -7966,6 +8073,9 @@
+   // RecordPpcBlockProfile stays one-block-per-call. Runtime-killable via the
+   // DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH mask bit.
+   const CPU::State* const redispatch_state_ptr = m_system.GetCPU().GetStatePtr();
++  const bool wasm_dispatch = allow_redispatch && !s_ppc_block_profile_enabled &&
++      !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH) &&
++      DolphinWebFeatureEnabled(1u << 27) && s_wasm_dispatch_loop_handle != 0;
+   const bool redispatch_enabled =
+       allow_redispatch && !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH) &&
+       !s_ppc_block_profile_enabled;
+@@ -8003,6 +8113,17 @@
+ #if DOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH
+     else if (callback == AnyCallbackCast(RunWasmBlock))
+     {
++      if (wasm_dispatch && reinterpret_cast<const WasmBlockOperands*>(payload)->end_block == 1)
++      {
++        using Dispatch = u32 (*)(u32, u32);
++        const auto run = reinterpret_cast<Dispatch>(static_cast<std::uintptr_t>(s_wasm_dispatch_loop_handle));
++        s_wasm_dispatch_loop_calls.fetch_add(1, std::memory_order_relaxed);
++        const u32 next = run(static_cast<u32>(reinterpret_cast<std::uintptr_t>(&ppc_state)),
++                             static_cast<u32>(reinterpret_cast<std::uintptr_t>(normal_entry)));
++        if (!next) break;
++        normal_entry = reinterpret_cast<const u8*>(static_cast<std::uintptr_t>(next));
++        continue;
++      }
+       if (const auto distance =
+               RunWasmBlock(ppc_state, *reinterpret_cast<const WasmBlockOperands*>(payload)))
+         normal_entry += distance;
+@@ -10750,6 +10871,28 @@
+ 
+ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+ {
++  if (!s_wasm_dispatch_loop_attempted && DolphinWebFeatureEnabled(1u << 27) &&
++      !m_block_cache.GetEntryPoints())
++  {
++    s_wasm_dispatch_loop_attempted = true;
++    const auto addr = [](const auto* p) { return static_cast<u32>(reinterpret_cast<std::uintptr_t>(p)); };
++    const WasmDispatchLayout dispatch_layout{
++      addr(&m_ppc_state.pc)-addr(&m_ppc_state), addr(&m_ppc_state.npc)-addr(&m_ppc_state),
++      addr(&m_ppc_state.downcount)-addr(&m_ppc_state), addr(&m_ppc_state.feature_flags)-addr(&m_ppc_state),
++      addr(m_system.GetCPU().GetStatePtr()), static_cast<u32>(CPU::State::Running),
++      addr(&s_browser_game_step_armed), addr(&s_browser_game_step_start_native),
++      addr(m_system.GetMemory().GetRAM()) + 0x00479d58,
++      addr(m_block_cache.GetFastBlockMapFallback()), JitBaseBlockCache::FAST_BLOCK_MAP_FALLBACK_MASK,
++      offsetof(JitBlockData, normalEntry), offsetof(JitBlockData, feature_flags), offsetof(JitBlockData, effectiveAddress),
++      static_cast<u32>(reinterpret_cast<std::uintptr_t>(AnyCallbackCast(RunWasmBlock))), sizeof(AnyCallback),
++      offsetof(WasmBlockOperands, handle), offsetof(WasmBlockOperands, downcount),
++      offsetof(WasmBlockOperands, num_load_stores), offsetof(WasmBlockOperands, num_fp_inst),
++      offsetof(WasmBlockOperands, end_block), FEATURE_FLAG_PERFMON};
++    static_assert(sizeof(std::atomic<bool>) == 1 && sizeof(CPU::State) == 4);
++    const auto code = BuildWasmDispatchLoop(dispatch_layout);
++    s_wasm_dispatch_loop_handle = DolphinWeb_CompileWasmDispatchLoop(code.data(), code.size(),
++        static_cast<int>(reinterpret_cast<std::uintptr_t>(&DolphinWeb_DispatchPerfmon)));
++  }
+   // Leave cache-maintenance entries to TryWriteDcbxLoop. It verifies the
+   // complete three/four-instruction pattern before batching; unmatched entries
+   // take the existing single-operation callback. This keeps its runtime gate
+@@ -11490,6 +11633,8 @@
+       << s_wasm_emit_state_store_f64_count << "st "
+       << "statei64:" << s_wasm_emit_state_load_i64_count << "ld/"
+       << s_wasm_emit_state_store_i64_count << "st ";
++  out << "wasm-dispatch:" << s_wasm_dispatch_loop_handle << "/"
++      << s_wasm_dispatch_loop_calls.load(std::memory_order_relaxed) << "calls ";
+   // §28bz audit: §28bt re-dispatch chain depth. Avg chain length = 1 + iter/entry.
+ #if DOLPHIN_WEB_HOT_COUNTERS
+   const u32 entries_for_avg = std::max<u32>(s_wasm_redispatch_entry_count, 1);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1036,12 +1036,12 @@
+       let stepTiming;
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
+-      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch" || payload.action === "inlineDispatch") {
++      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch" || payload.action === "inlineDispatch" || payload.action === "wasmDispatch") {
+         if (typeof payload.value !== "boolean" || api.getCoreStateName() !== "Paused" ||
+             !api.getCachedInterpreterDisableMask || !api.setCachedInterpreterDisableMask)
+           throw new Error("Cache fast-path comparison requires a paused machine");
+         const mask = api.getCachedInterpreterDisableMask();
+-        const bit = 1 << ({cacheFastPath:24, cacheLoopBatch:25, inlineDispatch:26}[payload.action]);
++        const bit = 1 << ({cacheFastPath:24, cacheLoopBatch:25, inlineDispatch:26, wasmDispatch:27}[payload.action]);
+         const updated = payload.value ? mask | bit : mask & ~bit;
+         api.setCachedInterpreterDisableMask(updated >>> 0);
+         return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -1473,6 +1473,7 @@
+   if (params.get("dcbfast") === "1") mask |= 1 << 24;
+   if (params.get("dcbbatch") === "1") mask |= 1 << 25;
+   if (params.get("inlinedispatch") === "1") mask |= 1 << 26;
++  if (params.get("wasmdispatch") === "1") mask |= 1 << 27;
+   return mask >>> 0;
+ }
+ 

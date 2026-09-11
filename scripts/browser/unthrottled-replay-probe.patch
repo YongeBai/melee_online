@@ -1,0 +1,61 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1084,6 +1084,14 @@
+ }
+ extern "C" void DolphinWeb_ArmGameFrameStep(u32 initial_frame);
+ extern "C" void DolphinWeb_CancelGameFrameStep();
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetUnthrottled(int enable)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  Core::SetIsThrottlerTempDisabled(enable != 0);
++  return 1;
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackGameStep()
+ {
+   auto& system = Core::System::GetInstance();
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1044,15 +1044,26 @@
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
+             !api.browserRollbackRestore(payload.slot)) throw new Error("Checkpoint restore failed");
+       } else if (payload.action === "step") {
+-        const step = api.browserRollbackGameStep || api.browserRollbackStep;
+-        if (!step()) throw new Error("Game step requires paused GALE01 v1.02 on CachedInterpreter");
+-        while (api.getCoreStateName() !== "Paused") {
+-          if (performance.now() - started > 5000) {
++        const unthrottled = payload.unthrottled === true;
++        if (unthrottled && !api.browserRollbackSetUnthrottled?.(1))
++          throw new Error("Unthrottled step requires paused machine");
++        try {
++          const step = api.browserRollbackGameStep || api.browserRollbackStep;
++          if (!step()) throw new Error("Game step requires paused GALE01 v1.02 on CachedInterpreter");
++          while (api.getCoreStateName() !== "Paused") {
++            if (performance.now() - started > 5000) {
++              api.setCorePaused(1);
++              throw new Error("Frame step did not complete within five seconds");
++            }
++            api.pumpHostJobs?.();
++            await new Promise(resolve => setTimeout(resolve, 1));
++          }
++        } finally {
++          if (unthrottled) {
+             api.setCorePaused(1);
+-            throw new Error("Frame step did not complete within five seconds");
++            if (!api.browserRollbackSetUnthrottled(0))
++              throw new Error("Could not restore normal speed after step");
+           }
+-          api.pumpHostJobs?.();
+-          await new Promise(resolve => setTimeout(resolve, 1));
+         }
+       } else if (payload.action === "equal") {
+         if (![payload.a,payload.b].every(v=>Number.isInteger(v)&&v>=0&&v<6))
+@@ -2344,6 +2355,7 @@
+     browserRollbackRequiredSize: optionalCwrap("BrowserRollbackRequiredSize", "number", []),
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
+     browserRollbackGameStep: optionalCwrap("BrowserRollbackGameStep", "number", []),
++    browserRollbackSetUnthrottled: optionalCwrap("BrowserRollbackSetUnthrottled", "number", ["number"]),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
+     browserRollbackCompare: optionalCwrap("BrowserRollbackCompare", "string", ["number", "number"]),

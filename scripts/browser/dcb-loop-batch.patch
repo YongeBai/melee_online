@@ -1,0 +1,99 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -10625,9 +10625,12 @@
+   else if (!ppc_state.m_enable_dcache)
+   {
+     u32 extra_iterations = 0;
+-    if (ppc_state.downcount > 0)
++    if (ppc_state.downcount > 0 && DolphinWebFeatureEnabled(1u << 25))
+     {
+-      const u32 max_by_cycles = static_cast<u32>(ppc_state.downcount) / cycle_count_per_loop;
++      // The ordinary add/branch tail still executes once after this callback.
++      // Total iterations must be ceil(remaining cycles / loop cycles), so an
++      // exactly divisible budget must not execute one extra iteration.
++      const u32 max_by_cycles = static_cast<u32>(ppc_state.downcount - 1) / cycle_count_per_loop;
+       if (loop_mode == DCBX_LOOP_COUNT_GPR)
+       {
+         const u32 remaining_bytes = ppc_state.gpr[count_gpr];
+@@ -10644,26 +10647,10 @@
+     }
+ 
+     const u32 line_count = extra_iterations + 1;
+-    bool skipped_large_data_flush = false;
+-#ifdef __EMSCRIPTEN__
+-    // Large dcb* sweeps are overwhelmingly data-buffer flushes in the browser path. Keeping small
+-    // invalidations preserves the self-modifying-code heuristic while avoiding multi-megabyte
+-    // block-cache scans in hot post-boot loops. Additionally, when the experimental WASM JIT is
+-    // not active (interpreter-only mode), there are no compiled blocks to invalidate, so every
+-    // invalidation is wasted work - skip them all.
+-    skipped_large_data_flush =
+-        !s_wasm_jit_enabled || line_count > LARGE_DCBX_DATA_FLUSH_SKIP_LINES;
+-#endif
+-    if (skipped_large_data_flush)
+-    {
+-      ++s_fast_dcbx_loop_skipped_large_invalidations;
+-      s_fast_dcbx_loop_skipped_large_lines =
+-          SaturatingAddU32(s_fast_dcbx_loop_skipped_large_lines, line_count);
+-    }
+-    else
+-    {
+-      system.GetJitInterface().InvalidateICacheLines(address, line_count);
+-    }
++    // A large range can contain code, and cached-interpreter blocks still
++    // require invalidation when the WASM tier is off. The block cache already
++    // skips empty ranges using its live valid-code bitmap.
++    system.GetJitInterface().InvalidateICacheLines(address, line_count);
+ 
+     if (extra_iterations != 0)
+     {
+@@ -10715,6 +10702,19 @@
+ 
+ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+ {
++  // Leave cache-maintenance entries to TryWriteDcbxLoop. It verifies the
++  // complete three/four-instruction pattern before batching; unmatched entries
++  // take the existing single-operation callback. This keeps its runtime gate
++  // switchable for original-versus-batched state comparisons without changing
++  // compiled block boundaries during the trial.
++  if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_DCBXLOOP) &&
++      code_block.m_num_instructions > 0)
++  {
++    const UGeckoInstruction first = m_code_buffer[0].inst;
++    if (first.OPCD == 31 && first.RA == 0 && first.RB != 0 &&
++        (first.SUBOP10 == 54 || first.SUBOP10 == 86 || first.SUBOP10 == 470))
++      return false;
++  }
+   // The guarded Melee idle-loop batch must run before the generic WASM
+   // compiler consumes this entry. Its original instruction and runtime
+   // guards still decide whether to batch or execute the fallback code.
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1035,14 +1035,15 @@
+       let stepTiming;
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
+-      } else if (payload.action === "cacheFastPath") {
++      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch") {
+         if (typeof payload.value !== "boolean" || api.getCoreStateName() !== "Paused" ||
+             !api.getCachedInterpreterDisableMask || !api.setCachedInterpreterDisableMask)
+           throw new Error("Cache fast-path comparison requires a paused machine");
+         const mask = api.getCachedInterpreterDisableMask();
+-        const updated = payload.value ? mask | (1 << 24) : mask & ~(1 << 24);
++        const bit = 1 << (payload.action === "cacheLoopBatch" ? 25 : 24);
++        const updated = payload.value ? mask | bit : mask & ~bit;
+         api.setCachedInterpreterDisableMask(updated >>> 0);
+-        return {enabled: Boolean(api.getCachedInterpreterDisableMask() & (1 << 24))};
++        return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -1471,6 +1471,7 @@
+     mask |= CACHED_INTERPRETER_DISABLE_BITS.fastmemhoist;
+   }
+   if (params.get("dcbfast") === "1") mask |= 1 << 24;
++  if (params.get("dcbbatch") === "1") mask |= 1 << 25;
+   return mask >>> 0;
+ }
+ 

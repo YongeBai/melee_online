@@ -1,0 +1,41 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.h
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.h
+@@ -71,6 +71,7 @@
+   void FlushGpu();
+   void RunGpu();
+   void GpuMaySleep();
++  void WakeupForAsyncRequest();
+   void RunGpuLoop();
+   void ExitGpuLoop();
+   void EmulatorState(bool running);
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -521,6 +521,11 @@
+   m_gpu_mainloop.Wait();
+ }
+ 
++void FifoManager::WakeupForAsyncRequest()
++{
++  if (m_system.IsDualCoreMode()) m_gpu_mainloop.Wakeup();
++}
++
+ void FifoManager::GpuMaySleep()
+ {
+   m_gpu_mainloop.AllowSleep();
+--- a/vendor/dolphin/Source/Core/VideoCommon/AsyncRequests.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/AsyncRequests.cpp
+@@ -35,7 +35,14 @@
+   m_queue.Push(std::move(event));
+ 
+   auto& system = Core::System::GetInstance();
++#ifdef __EMSCRIPTEN__
++  // Host queries/checkpoints need the GPU even while emulation is paused.
++  // RunGpu intentionally skips the wakeup in deterministic mode and may
++  // schedule an emulated timing event. Neither behavior fits a host request.
++  system.GetFifo().WakeupForAsyncRequest();
++#else
+   system.GetFifo().RunGpu();
++#endif
+ }
+ 
+ void AsyncRequests::WaitForEmptyQueue()

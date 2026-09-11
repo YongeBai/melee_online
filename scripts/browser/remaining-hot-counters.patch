@@ -1,0 +1,56 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -2129,7 +2129,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterFpOp(int state_ptr, u32 inst_hex, u32 current_pc,
+                                                  u32 downcount, u32 unused)
+ {
+-  ++s_wasm_fp_call_count;
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_fp_call_count);
+   (void)unused;
+   auto& system = Core::System::GetInstance();
+   auto& interpreter = system.GetInterpreter();
+@@ -2139,7 +2139,7 @@
+     return 1;
+ 
+   const UGeckoInstruction inst{inst_hex};
+-  ++s_wasm_fp_key_counts[(inst.OPCD << 10) | inst.SUBOP10];
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_fp_key_counts[(inst.OPCD << 10) | inst.SUBOP10]);
+   if (inst.OPCD == 56 || inst.OPCD == 57 || inst.OPCD == 60 || inst.OPCD == 61)
+   {
+     auto reason = PsqFallbackReason::ShouldHaveInlined;
+@@ -2184,13 +2184,13 @@
+ extern "C" int DolphinWeb_CachedInterpreterSystem(int state_ptr, u32 inst_hex, u32 current_pc,
+                                                    u32 downcount, u32 unused)
+ {
+-  ++s_wasm_system_call_count;
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_system_call_count);
+   (void)unused;
+   auto& system = Core::System::GetInstance();
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+       static_cast<std::uintptr_t>(state_ptr));
+   const UGeckoInstruction inst{inst_hex};
+-  ++s_wasm_system_key_counts[(inst.OPCD << 10) | inst.SUBOP10];
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_system_key_counts[(inst.OPCD << 10) | inst.SUBOP10]);
+ 
+   if (inst.OPCD == 46 || inst.OPCD == 47)
+   {
+@@ -2404,8 +2404,8 @@
+       static_cast<std::uintptr_t>(state_ptr));
+   const UGeckoInstruction inst{inst_hex};
+   const GekkoOPInfo* opinfo = PPCTables::GetOpInfo(inst, current_pc);
+-  ++s_wasm_helper_call_count;
+-  ++s_wasm_helper_key_counts[(inst.OPCD << 10) | inst.SUBOP10];
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_helper_call_count);
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_helper_key_counts[(inst.OPCD << 10) | inst.SUBOP10]);
+   if (inst.OPCD == 31 && inst.SUBOP10 == 339)
+     ++s_wasm_helper_mfspr_counts[DecodeMfsprIndex(inst)];
+   else if (inst.OPCD == 31 && inst.SUBOP10 == 467)
+@@ -10696,7 +10696,7 @@
+ {
+   using WasmBlockFunction = int (*)(int);
+ 
+-  ++s_wasm_block_run_count;
++  DOLPHIN_WEB_HOT_COUNT(++s_wasm_block_run_count);
+   const int halted =
+       reinterpret_cast<WasmBlockFunction>(static_cast<std::uintptr_t>(operands.handle))(
+           static_cast<int>(reinterpret_cast<std::uintptr_t>(&ppc_state)));

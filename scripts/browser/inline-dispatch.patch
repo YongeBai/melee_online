@@ -1,0 +1,85 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -7896,9 +7896,45 @@
+     NotifyBrowserGameFrameStep();
+ }
+ 
++#ifdef __EMSCRIPTEN__
++// Use the live fallback map, not a second cache of entry pointers. Normal
++// invalidation/clear removes these entries, and colliding PCs or feature flags
++// always fall through to Dolphin's translation-aware slow dispatch.
++static inline const u8* LookupBrowserCachedBlock(JitBlock* const* map, u32 pc,
++                                                CPUEmuFeatureFlags flags)
++{
++  JitBlock* const block =
++      map[(static_cast<size_t>(pc) >> 2) & JitBaseBlockCache::FAST_BLOCK_MAP_FALLBACK_MASK];
++  if (!block || block->effectiveAddress != pc || block->feature_flags != flags)
++    return nullptr;
++  return block->normalEntry;
++}
++#endif
++
+ void CachedInterpreter::ExecuteOneBlock([[maybe_unused]] bool allow_redispatch)
+ {
+-  const u8* normal_entry = m_block_cache.Dispatch();
++#ifdef __EMSCRIPTEN__
++  // The map allocation belongs to this cache and stays stable while a chain
++  // executes. Only hoist the array base; reload the entry and both tags for
++  // every block, including after a helper invalidates executable memory.
++  JitBlock* const* const fast_map =
++#if !DOLPHIN_WEB_FALLBACK_MAP_DIAGNOSTICS
++      DolphinWebFeatureEnabled(1u << 26) && !m_block_cache.GetEntryPoints() ?
++          m_block_cache.GetFastBlockMapFallback() : nullptr;
++#else
++      nullptr;
++#endif
++  const auto dispatch = [&]() -> const u8* {
++    if (fast_map)
++      if (const u8* entry = LookupBrowserCachedBlock(fast_map, m_ppc_state.pc,
++                                                    m_ppc_state.feature_flags))
++        return entry;
++    return m_block_cache.Dispatch();
++  };
++#else
++  const auto dispatch = [&]() { return m_block_cache.Dispatch(); };
++#endif
++  const u8* normal_entry = dispatch();
+   if (!normal_entry)
+   {
+     Jit(m_ppc_state.pc);
+@@ -8162,7 +8198,7 @@
+     if (redispatch_enabled && m_ppc_state.downcount > 0 &&
+         *redispatch_state_ptr == CPU::State::Running)
+     {
+-      const u8* const next = m_block_cache.Dispatch();
++      const u8* const next = dispatch();
+       if (!next)
+       {
+         Jit(m_ppc_state.pc);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1035,12 +1035,12 @@
+       let stepTiming;
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
+-      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch") {
++      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch" || payload.action === "inlineDispatch") {
+         if (typeof payload.value !== "boolean" || api.getCoreStateName() !== "Paused" ||
+             !api.getCachedInterpreterDisableMask || !api.setCachedInterpreterDisableMask)
+           throw new Error("Cache fast-path comparison requires a paused machine");
+         const mask = api.getCachedInterpreterDisableMask();
+-        const bit = 1 << (payload.action === "cacheLoopBatch" ? 25 : 24);
++        const bit = 1 << ({cacheFastPath:24, cacheLoopBatch:25, inlineDispatch:26}[payload.action]);
+         const updated = payload.value ? mask | bit : mask & ~bit;
+         api.setCachedInterpreterDisableMask(updated >>> 0);
+         return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -1472,6 +1472,7 @@
+   }
+   if (params.get("dcbfast") === "1") mask |= 1 << 24;
+   if (params.get("dcbbatch") === "1") mask |= 1 << 25;
++  if (params.get("inlinedispatch") === "1") mask |= 1 << 26;
+   return mask >>> 0;
+ }
+ 

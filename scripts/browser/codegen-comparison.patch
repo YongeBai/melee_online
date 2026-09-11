@@ -1,0 +1,60 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -46,6 +46,7 @@
+ #include "Core/HW/SI/SI_Device.h"
+ #include "Core/Host.h"
+ #include "Core/PowerPC/PowerPC.h"
++#include "Core/PowerPC/JitInterface.h"
+ #include "Core/State.h"
+ #include "Core/HW/Memmap.h"
+ #include "Core/System.h"
+@@ -1154,6 +1155,27 @@
+     ",\"audioSamplesSkipped\":" + std::to_string(DolphinWeb::RollbackOutput::audio_skipped.load()) + "}";
+   return result.c_str();
+ }
++// QA-only code-generation comparison. Generated blocks must be discarded when
++// changing these flags, otherwise a test could unknowingly reuse old code.
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || flags < 0 || flags > 3 ||
++      Core::GetState(system) != Core::State::Paused ||
++      s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
++  const Core::CPUThreadGuard guard(system);
++  constexpr u32 regcache_disable = 1u << 20;
++  constexpr u32 fastmem_enable = 1u << 23;
++  const u32 previous = DolphinWeb_GetCachedInterpreterDisableMask();
++  const u32 next = (previous & ~(regcache_disable | fastmem_enable)) |
++      ((flags & 1) ? 0 : regcache_disable) | ((flags & 2) ? fastmem_enable : 0);
++  if (next != previous)
++  {
++    system.GetJitInterface().ClearCache(guard);
++    DolphinWeb_SetCachedInterpreterDisableMask(next);
++  }
++  return 1;
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetUnthrottled(int enable)
+ {
+   auto& system = Core::System::GetInstance();
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1044,6 +1044,11 @@
+         const updated = payload.value ? mask | bit : mask & ~bit;
+         api.setCachedInterpreterDisableMask(updated >>> 0);
+         return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};
++      } else if (payload.action === "codegen") {
++        if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0)))
++          throw new Error("Codegen comparison requires a paused cached-interpreter machine");
++        return {regcache:payload.regcache, fastmem:payload.fastmem};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");
+@@ -2422,6 +2427,7 @@
+     browserRollbackSetPads: optionalCwrap("BrowserRollbackSetPads", "number", ["number", "number", "number"]),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
+     browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),
++    browserRollbackConfigureCodegen: optionalCwrap("BrowserRollbackConfigureCodegen", "number", ["number"]),
+     browserRollbackSetUnthrottled: optionalCwrap("BrowserRollbackSetUnthrottled", "number", ["number"]),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),

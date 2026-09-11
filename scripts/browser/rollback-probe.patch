@@ -1,0 +1,173 @@
+--- a/vendor/dolphin/Source/Core/Core/State.h
++++ b/vendor/dolphin/Source/Core/Core/State.h
+@@ -79,6 +79,11 @@
+   // and WriteHeadersToFile()
+ };
+ 
++// Browser rollback probe: paused caller must hold CPUThreadGuard.
++std::size_t BrowserSave(Core::System& system, unsigned slot);
++bool BrowserLoad(Core::System& system, unsigned slot);
++bool BrowserEqual(unsigned a, unsigned b);
++void BrowserClear();
+ void Init(Core::System& system);
+ void Shutdown();
+ 
+--- a/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -4,6 +4,8 @@
+ #include "Core/State.h"
+ 
+ #include <algorithm>
++#include <array>
++#include <cstring>
+ #include <filesystem>
+ #include <locale>
+ #include <map>
+@@ -256,6 +258,42 @@
+   return 0;
+ }
+ 
++// Bounded, uncompressed complete-machine checkpoints, private to this core.
++// Six slots support a 12-frame window with checkpoints every four frames.
++static std::array<Common::UniqueBuffer<u8>, 6> browser_states;
++static std::array<std::size_t, 6> browser_state_sizes{};
++std::size_t BrowserSave(Core::System& system, unsigned slot)
++{
++  if (slot >= browser_states.size()) return 0;
++  constexpr std::size_t max_bytes = 64 * 1024 * 1024;
++  // Measure before allocating; never let an unexpected game/state consume
++  // the remaining shared WASM heap. SaveToBuffer reuses the allocation.
++  u8* ptr = nullptr;
++  PointerWrap measure(&ptr, 0, PointerWrap::Mode::Measure);
++  DoState(system, measure);
++  const auto size = measure.GetOffsetFromPreviousPosition(nullptr);
++  if (!size || size > max_bytes) return 0;
++  auto& buffer = browser_states[slot];
++  if (buffer.size() < size) buffer.reset(size);
++  browser_state_sizes[slot] = SaveToBuffer(system, buffer);
++  return browser_state_sizes[slot];
++}
++bool BrowserLoad(Core::System& system, unsigned slot)
++{
++  return slot < browser_states.size() && browser_state_sizes[slot] &&
++         LoadFromBuffer(system, std::span<u8>(browser_states[slot].data(), browser_state_sizes[slot]));
++}
++bool BrowserEqual(unsigned a, unsigned b)
++{
++  return a < browser_states.size() && b < browser_states.size() && browser_state_sizes[a] &&
++         browser_state_sizes[a] == browser_state_sizes[b] &&
++         std::memcmp(browser_states[a].data(), browser_states[b].data(), browser_state_sizes[a]) == 0;
++}
++void BrowserClear()
++{
++  for (auto& state : browser_states) state.reset();
++  browser_state_sizes.fill(0);
++}
+ namespace
+ {
+ struct SlotWithTimestamp
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1016,6 +1016,7 @@
+ {
+   if (s_runtime_initialized)
+     Core::Stop(Core::System::GetInstance());
++  State::BrowserClear();
+   s_core_status = "Stopped";
+ }
+ 
+@@ -1030,6 +1031,39 @@
+   return 1;
+ }
+ 
++
++// Explicit paused-machine API. RunFrame() remains a presentation poll and
++// must never be mistaken for an emulation step by the network scheduler.
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackCapture(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return static_cast<int>(State::BrowserSave(system, static_cast<unsigned>(slot)));
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackRestore(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return State::BrowserLoad(system, static_cast<unsigned>(slot)) ? 1 : 0;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackEqual(int a, int b)
++{
++  return a >= 0 && b >= 0 && State::BrowserEqual(static_cast<unsigned>(a), static_cast<unsigned>(b));
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackStep()
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused) return 0;
++  Core::DoFrameStep(system);
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE void BrowserRollbackClear()
++{
++  State::BrowserClear();
++}
++
+ int ResetCore()
+ {
+   if (!s_runtime_initialized || !Core::IsRunning(Core::System::GetInstance()))
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1023,6 +1023,40 @@
+       }
+       return { loaded, ...framePayload() };
+     }
++    case "browserRollback": {
++      if (!api?.browserRollbackCapture || !api?.browserRollbackStep)
++        throw new Error("This core has no browser rollback probe API");
++      const started = performance.now();
++      if (payload.action === "pause") {
++        if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
++      } else if (payload.action === "capture") {
++        if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6)
++          throw new Error("Invalid checkpoint slot");
++        const bytes = api.browserRollbackCapture(payload.slot);
++        if (!bytes) throw new Error("Capture failed: machine must be paused and checkpoint under 64 MiB");
++        return {bytes, milliseconds: performance.now() - started};
++      } else if (payload.action === "restore") {
++        if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
++            !api.browserRollbackRestore(payload.slot)) throw new Error("Checkpoint restore failed");
++      } else if (payload.action === "step") {
++        if (!api.browserRollbackStep()) throw new Error("Frame step requires a paused machine");
++        while (api.getCoreStateName() !== "Paused") {
++          if (performance.now() - started > 5000) {
++            api.setCorePaused(1);
++            throw new Error("Frame step did not complete within five seconds");
++          }
++          api.pumpHostJobs?.();
++          await new Promise(resolve => setTimeout(resolve, 1));
++        }
++      } else if (payload.action === "equal") {
++        if (![payload.a,payload.b].every(v=>Number.isInteger(v)&&v>=0&&v<6))
++          throw new Error("Invalid comparison slots");
++        return {equal: Boolean(api.browserRollbackEqual(payload.a,payload.b))};
++      } else if (payload.action === "clear") {
++        api.browserRollbackClear();
++      } else throw new Error("Unknown browser rollback action");
++      return {state: api.getCoreStateName(), milliseconds: performance.now() - started};
++    }
+     case "validationSetCorePaused": {
+       // Harness-only checkpoint barrier. The app never sends this message;
+       // normal emulator pause/start behavior and defaults remain unchanged.
+@@ -2294,6 +2328,11 @@
+     loadState: cwrap("LoadState", "number", ["number"]),
+     loadStateFile: optionalCwrap("LoadStateFile", "number", ["string"]),
+     saveStateFile: optionalCwrap("SaveStateFile", "number", ["string"]),
++    browserRollbackCapture: optionalCwrap("BrowserRollbackCapture", "number", ["number"]),
++    browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
++    browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
++    browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
++    browserRollbackClear: optionalCwrap("BrowserRollbackClear", null, []),
+     getFrame: cwrap("GetFrame", "number", []),
+     getFrameSignalPtr: optionalCwrap("GetFrameSignalPtr", "number", []),
+     getGameId: cwrap("GetGameId", "string", []),

@@ -1,0 +1,44 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/MMU.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/MMU.cpp
+@@ -54,6 +54,7 @@
+ #include "Core/PowerPC/JitInterface.h"
+ #include "Core/PowerPC/PowerPC.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ #include "VideoCommon/EFBInterface.h"
+ 
+@@ -2000,6 +2001,9 @@
+ 
+ void MMU::DBATUpdated()
+ {
++  // Keep a heap copy only during checked browser restores. A BAT table is
++  // 128 KiB: avoid adding it to every caller's WASM stack during ordinary play.
++  const auto previous_bats = State::BrowserKeepJit() ? std::make_unique<BatTable>(m_dbat_table) : nullptr;
+   m_dbat_table = {};
+   UpdateBATs(m_dbat_table, SPR_DBAT0U);
+   bool extended_bats = m_system.IsWii() && HID4(m_ppc_state).SBE;
+@@ -2012,6 +2016,7 @@
+     UpdateFakeMMUBat(m_dbat_table, 0x70000000);
+   }
+ 
++  if (previous_bats && *previous_bats == m_dbat_table) return;
+ #ifndef _ARCH_32
+   m_memory.UpdateDBATMappings(m_dbat_table);
+ 
+@@ -2028,6 +2033,7 @@
+ 
+ void MMU::IBATUpdated()
+ {
++  const auto previous_bats = State::BrowserKeepJit() ? std::make_unique<BatTable>(m_ibat_table) : nullptr;
+   m_ibat_table = {};
+   UpdateBATs(m_ibat_table, SPR_IBAT0U);
+   bool extended_bats = m_system.IsWii() && HID4(m_ppc_state).SBE;
+@@ -2039,6 +2045,7 @@
+     UpdateFakeMMUBat(m_ibat_table, 0x40000000);
+     UpdateFakeMMUBat(m_ibat_table, 0x70000000);
+   }
++  if (previous_bats && *previous_bats == m_ibat_table) return;
+   m_system.GetJitInterface().ClearSafe();
+ }
+ 

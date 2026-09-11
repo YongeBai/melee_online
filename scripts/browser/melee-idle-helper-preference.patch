@@ -1,0 +1,15 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -10562,6 +10562,12 @@
+ 
+ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+ {
++  // The guarded Melee idle-loop batch must run before the generic WASM
++  // compiler consumes this entry. Its original instruction and runtime
++  // guards still decide whether to batch or execute the fallback code.
++  if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_MELEELOOP) &&
++      js.blockStart == MELEE_IDLE_POLL_LOOP_PC)
++    return false;
+   // Keep the existing, instruction-verified SDK handlers reachable. Compiling
+   // these entry blocks directly to WASM bypasses TryWriteOsInterruptFunction,
+   // so its verification bits never get populated after a JIT mode change and

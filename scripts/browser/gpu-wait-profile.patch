@@ -1,0 +1,72 @@
+--- a/vendor/dolphin/Source/Core/Common/BrowserProfile.h
++++ b/vendor/dolphin/Source/Core/Common/BrowserProfile.h
+@@ -8,9 +8,10 @@
+ 
+ namespace DolphinWeb::BrowserProfile
+ {
+-enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, Count };
+-constexpr std::array<const char*, 6> names{
+-    "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent"};
++enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, Count };
++constexpr std::array<const char*, 9> names{
++    "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent",
++    "cpuGpuSync", "cpuGpuDecode", "cpuVideoWait"};
+ struct Counter
+ {
+   std::atomic<std::uint64_t> count{0};
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -3,6 +3,9 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "VideoCommon/Fifo.h"
++#ifdef __EMSCRIPTEN__
++#include "Common/BrowserProfile.h"
++#endif
+ 
+ #include <atomic>
+ #include <cstring>
+@@ -188,6 +191,9 @@
+ {
+   if (m_use_deterministic_gpu_thread)
+   {
++#ifdef __EMSCRIPTEN__
++    const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::CpuGpuSync);
++#endif
+     m_gpu_mainloop.Wait();
+     if (!m_gpu_mainloop.IsRunning())
+       return;
+@@ -597,6 +603,9 @@
+ 
+ int FifoManager::RunGpuOnCpu(int ticks)
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::CpuGpuDecode);
++#endif
+   auto& command_processor = m_system.GetCommandProcessor();
+   auto& fifo = command_processor.GetFifo();
+   bool reset_simd_state = false;
+--- a/vendor/dolphin/Source/Core/VideoCommon/AsyncRequests.h
++++ b/vendor/dolphin/Source/Core/VideoCommon/AsyncRequests.h
+@@ -2,6 +2,9 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #pragma once
++#ifdef __EMSCRIPTEN__
++#include "Common/BrowserProfile.h"
++#endif
+ 
+ #include <concepts>
+ #include <functional>
+@@ -42,6 +45,11 @@
+     if (m_passthrough)
+       return std::invoke(std::forward<F>(callback));
+ 
++    // Includes queue dispatch and completion wait; nested inside CPU execution
++    // or host work, so this time must not be added to those parent totals.
++#ifdef __EMSCRIPTEN__
++    const DolphinWeb::BrowserProfile::Scope profile(DolphinWeb::BrowserProfile::Stage::CpuVideoWait);
++#endif
+     std::packaged_task task{std::forward<F>(callback)};
+     QueueEvent(Event{[&] { task(); }});
+ 

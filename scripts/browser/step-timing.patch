@@ -1,0 +1,39 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1030,6 +1030,7 @@
+       if (!api?.browserRollbackCapture || !api?.browserRollbackStep)
+         throw new Error("This core has no browser rollback probe API");
+       const started = performance.now();
++      let stepTiming;
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
+       } else if (payload.action === "pads") {
+@@ -1066,8 +1067,11 @@
+         if (unthrottled && !api.browserRollbackSetUnthrottled?.(1))
+           throw new Error("Unthrottled step requires paused machine");
+         try {
++          const transitionAt = performance.now();
+           const step = api.browserRollbackGameStep || api.browserRollbackStep;
+           if (!step()) throw new Error("Game step requires paused GALE01 v1.02 on CachedInterpreter");
++          stepTiming = { transitionMilliseconds: performance.now() - transitionAt };
++          const waitAt = performance.now();
+           while (api.getCoreStateName() !== "Paused") {
+             if (performance.now() - started > 5000) {
+               api.setCorePaused(1);
+@@ -1076,6 +1080,7 @@
+             api.pumpHostJobs?.();
+             await new Promise(resolve => setTimeout(resolve, 1));
+           }
++          stepTiming.waitMilliseconds = performance.now() - waitAt;
+         } finally {
+           if (unthrottled) {
+             api.setCorePaused(1);
+@@ -1090,7 +1095,7 @@
+       } else if (payload.action === "clear") {
+         api.browserRollbackClear();
+       } else throw new Error("Unknown browser rollback action");
+-      return {state: api.getCoreStateName(), milliseconds: performance.now() - started};
++      return {state: api.getCoreStateName(), milliseconds: performance.now() - started, ...stepTiming};
+     }
+     case "validationSetCorePaused": {
+       // Harness-only checkpoint barrier. The app never sends this message;
