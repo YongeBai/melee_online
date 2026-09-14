@@ -1,0 +1,69 @@
+{
+  "kind": "uncapped-native-work-headroom-summary",
+  "source": "QA output captured in browser; selected fields retained",
+  "diagnosticOnly": true,
+  "passed": false,
+  "stage": "Battlefield",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+  "cpuClock": 1,
+  "emulationSpeed": 1,
+  "limits": "No image verifier; host pacing temporarily uncapped. Not normal-speed image-cadence acceptance or physical latency. Normal pacing restored afterward. Separate fresh matches, not a same-checkpoint comparison.",
+  "runs": [
+    {
+      "temperature": "first",
+      "frames": 1200,
+      "nativeWorkFps": 56.934192308652776,
+      "startFrame": 427,
+      "stopFrame": 1627,
+      "elapsedMs": 21076.965376,
+      "nativeInputPolls": 1201,
+      "skippedPolls": 0,
+      "inputHash": 2214155657,
+      "stateHash": 4253099856,
+      "inputChanges": [
+        126,
+        127
+      ],
+      "jitWork": {
+        "moduleUs": 246633,
+        "instanceUs": 46316,
+        "newInstances": 6397,
+        "reusedInstances": 149,
+        "totalMs": 292.949
+      }
+    },
+    {
+      "temperature": "warm",
+      "frames": 1200,
+      "nativeWorkFps": 61.92870767172831,
+      "startFrame": 431,
+      "stopFrame": 1631,
+      "elapsedMs": 19377.12,
+      "nativeInputPolls": 1200,
+      "skippedPolls": 1,
+      "gaps": [
+        {
+          "after": 1114,
+          "before": 1116
+        }
+      ],
+      "inputHash": 1442717245,
+      "stateHash": 374546029,
+      "inputChanges": [
+        122,
+        136
+      ],
+      "jitWork": {
+        "moduleUs": 46004,
+        "instanceUs": 9198,
+        "newInstances": 860,
+        "reusedInstances": 19,
+        "totalMs": 55.202
+      }
+    }
+  ]
+}

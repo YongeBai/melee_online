@@ -1,0 +1,128 @@
+{
+  "coreSha256": "bc7f6fb00ebaece725786e3fbf2bd428988a9c2a5dcfdf0bb2f8456c81d4d27e",
+  "feature": "stateconst",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two active scripted human controllers; native partner AI retained",
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "sceneryAnimation": "on",
+    "shadows": "full",
+    "efbPercent": 150,
+    "wideMap": false
+  },
+  "profileEnabled": false,
+  "passed": false,
+  "limitations": [
+    "Live browser-timer controls can produce different frame-by-frame trajectories between trials.",
+    "Not all-character or all-stage sustained performance; physical input-to-photon unmeasured."
+  ],
+  "repeatWithoutReload": true,
+  "warmupSimulationFps": [
+    57.06609600570519,
+    56.76968492158646,
+    59.43425456427879,
+    56.101122022443235
+  ],
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 29.999995000001043,
+      "simulationFps": 58.33334305555515,
+      "gameRenderFps": 58.30000971666626,
+      "visibleFps": 58.133343022221815,
+      "p95GapMs": 19.015000000596046,
+      "maxGapMs": 35.849999997764826,
+      "inputChanges": [
+        168,
+        170
+      ],
+      "exercisedBothPlayers": true,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.999280000001193,
+      "simulationFps": 58.53473816704702,
+      "gameRenderFps": 58.46806990034195,
+      "visibleFps": 58.234730966874224,
+      "p95GapMs": 19.019999999552965,
+      "maxGapMs": 36.649999998509884,
+      "inputChanges": [
+        173,
+        172
+      ],
+      "exercisedBothPlayers": true,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.999754999998956,
+      "simulationFps": 58.300476120557015,
+      "gameRenderFps": 58.267142514999236,
+      "visibleFps": 58.13380809276811,
+      "p95GapMs": 18.96000000089407,
+      "maxGapMs": 50.36999999731779,
+      "inputChanges": [
+        167,
+        173
+      ],
+      "exercisedBothPlayers": true,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 30.000310000002383,
+      "simulationFps": 58.86605838405869,
+      "gameRenderFps": 58.83272539516624,
+      "visibleFps": 58.69939343959646,
+      "p95GapMs": 18.820000000298023,
+      "maxGapMs": 35.769999999552965,
+      "inputChanges": [
+        173,
+        174
+      ],
+      "exercisedBothPlayers": true,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    }
+  ],
+  "means": {
+    "off": 58.59970071980692,
+    "on": 58.417607143802016,
+    "percent": -0.31074147780306705
+  },
+  "decision": "Keep disabled: opposing pair results, no repeatable gain."
+}

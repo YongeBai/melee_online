@@ -1,0 +1,70 @@
+{
+  "coreSha256": "a959f40c9da57d5f43e6f62417409449711d805a5a3f953f0b3b2f99665aedbd",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "performanceTest": false,
+  "networkTest": false,
+  "artifactScope": "Exact selected CUA leanRunningReplay fields; matching serialized section rows omitted",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "passed": true,
+  "frames": 600,
+  "fullMachineBytesEqual": true,
+  "fingerprintsEqual": true,
+  "comparison": {
+    "sizeA": 106880524,
+    "sizeB": 106880524,
+    "sectionCount": 29,
+    "differingSections": []
+  },
+  "runs": [
+    {
+      "leandispatch": false,
+      "calls": 29547757,
+      "leanScopes": 0,
+      "newReadFusionEmissions": 1791,
+      "dispatcherHandle": 11378,
+      "counterBatches": 0,
+      "readFusionEmissions": 1791,
+      "sceneFrame": 908,
+      "input": {
+        "startFrame": 308,
+        "lastFrame": 908,
+        "frames": 601,
+        "inputHash": 2759473394,
+        "stateHash": 2974290766,
+        "gaps": []
+      }
+    },
+    {
+      "leandispatch": true,
+      "calls": 0,
+      "leanScopes": 940511,
+      "newReadFusionEmissions": 0,
+      "dispatcherHandle": 11378,
+      "counterBatches": 0,
+      "readFusionEmissions": 1791,
+      "sceneFrame": 908,
+      "input": {
+        "startFrame": 308,
+        "lastFrame": 908,
+        "frames": 601,
+        "inputHash": 2759473394,
+        "stateHash": 2974290766,
+        "gaps": []
+      }
+    }
+  ],
+  "limits": "Lean scopes prove entry into the alternate CPU dispatcher, not an exact count of compiled chain calls. Removed counter intentionally reports zero. Browser configuration equivalence, not validation against native Dolphin."
+}

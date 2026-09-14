@@ -1,0 +1,66 @@
+{
+  "kind": "fountain-reflection-abba-selected-scalars",
+  "core": "a854a47c3d9647baf9f62948f0459ae14eff3fccbc78ca05bd5d2190723810f1",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle P1 versus CPU9",
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "speed": 1,
+  "cpuClock": 1,
+  "probe": "async actual canvas pixels",
+  "presentation": "RAF capacity2",
+  "gameplayValidation": {
+    "frames": 600,
+    "passed": true,
+    "fullMachineEquivalence": false,
+    "probes": [
+      "fighters positions/actions/stocks/damage",
+      "match settings and timers",
+      "RNG",
+      "moving platforms",
+      "native camera"
+    ]
+  },
+  "runs": [
+    {
+      "reflection": true,
+      "seconds": 30.00118,
+      "simulationFps": 38.09850145894299,
+      "visibleFps": 38.0651694366692
+    },
+    {
+      "reflection": false,
+      "seconds": 29.999595,
+      "simulationFps": 50.600683109222416,
+      "visibleFps": 50.500681759204184
+    },
+    {
+      "reflection": false,
+      "seconds": 30.001435,
+      "simulationFps": 51.96418104667236,
+      "visibleFps": 51.86418582977691
+    },
+    {
+      "reflection": true,
+      "seconds": 30.00069,
+      "simulationFps": 39.165765854051486,
+      "visibleFps": 39.06576815399859
+    }
+  ],
+  "passed": false,
+  "decision": "Retain opt-in reflection=off. Both adjacent pairs improve; target still unmet.",
+  "allActorValidation": {
+    "passed": true,
+    "framesCompared": 600,
+    "initialActorCount": 4,
+    "core": "a854a47c3d9647baf9f62948f0459ae14eff3fccbc78ca05bd5d2190723810f1",
+    "fullMachineEquivalence": false
+  },
+  "scope": "600-frame all-fighter/partner, player-slot, RNG, moving-platform and native-camera probes passed on a854. Visual floor/ledges/platforms/HUD preserved. Not exhaustive gameplay validation."
+}

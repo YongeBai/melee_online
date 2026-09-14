@@ -1,0 +1,225 @@
+{
+  "artifactScope": "Selected exact fields from three fresh live matches on one core session",
+  "passed": false,
+  "runs": [
+    {
+      "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "profiler": false,
+      "emulationSpeed": 1,
+      "cpuOverclock": 1,
+      "queueCapacity": 2,
+      "qstatefull": false,
+      "qstatecache": false,
+      "stage": 31,
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0,
+      "slotTypes": [
+        0,
+        0
+      ],
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerWorkload": "two scripted human tracks at native logic frames; Nana AI retained when present",
+      "validWorkload": true,
+      "characters": [
+        14,
+        14
+      ],
+      "seconds": 29.99922500000149,
+      "simulationFps": 54.93475248110303,
+      "gameRenderFps": 54.93475248110303,
+      "visibleFps": 54.101397619435815,
+      "p95GapMs": 33.32499999925494,
+      "maxGapMs": 60.84500000067055,
+      "jitBefore": {
+        "moduleUs": 615682,
+        "instanceUs": 120732,
+        "uniqueInstances": 20676,
+        "reusedInstances": 7430
+      },
+      "jitAfter": {
+        "moduleUs": 912857,
+        "instanceUs": 181625,
+        "uniqueInstances": 27054,
+        "reusedInstances": 7589
+      },
+      "jitDelta": {
+        "moduleUs": 297175,
+        "instanceUs": 60893,
+        "uniqueInstances": 6378,
+        "reusedInstances": 159
+      },
+      "synchronousCompileAndLinkMs": 358.068,
+      "queue": {
+        "received": 1647,
+        "presented": 1624,
+        "dropped": 23,
+        "underruns": 173,
+        "meanAgeMs": 12.594929187174364,
+        "p95AgeUpperMs": 28
+      },
+      "passed": false
+    },
+    {
+      "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "profiler": false,
+      "emulationSpeed": 1,
+      "cpuOverclock": 1,
+      "queueCapacity": 2,
+      "qstatefull": false,
+      "qstatecache": false,
+      "stage": 31,
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0,
+      "slotTypes": [
+        0,
+        0
+      ],
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerWorkload": "two scripted human tracks at native logic frames; Nana AI retained when present",
+      "validWorkload": true,
+      "characters": [
+        14,
+        14
+      ],
+      "seconds": 29.998884999999778,
+      "simulationFps": 58.5688434753496,
+      "gameRenderFps": 58.53550890308133,
+      "visibleFps": 57.568806307301514,
+      "p95GapMs": 18.16000000014901,
+      "maxGapMs": 64.99499999918044,
+      "jitBefore": {
+        "moduleUs": 1064243,
+        "instanceUs": 210603,
+        "uniqueInstances": 30356,
+        "reusedInstances": 9178
+      },
+      "jitAfter": {
+        "moduleUs": 1130996,
+        "instanceUs": 224208,
+        "uniqueInstances": 31766,
+        "reusedInstances": 9206
+      },
+      "jitDelta": {
+        "moduleUs": 66753,
+        "instanceUs": 13605,
+        "uniqueInstances": 1410,
+        "reusedInstances": 28
+      },
+      "synchronousCompileAndLinkMs": 80.358,
+      "queue": {
+        "received": 1756,
+        "presented": 1728,
+        "dropped": 29,
+        "underruns": 67,
+        "meanAgeMs": 15.73619502313711,
+        "p95AgeUpperMs": 30
+      },
+      "passed": false
+    },
+    {
+      "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "profiler": false,
+      "emulationSpeed": 1,
+      "cpuOverclock": 1,
+      "queueCapacity": 2,
+      "qstatefull": false,
+      "qstatecache": false,
+      "stage": 31,
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0,
+      "slotTypes": [
+        0,
+        0
+      ],
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerWorkload": "two scripted human tracks at native logic frames; Nana AI retained when present",
+      "validWorkload": true,
+      "characters": [
+        2,
+        20
+      ],
+      "simulationFps": 59.470452952171584,
+      "gameRenderFps": 59.403782040790226,
+      "visibleFps": 57.93702199040034,
+      "p95GapMs": 18.03999999910593,
+      "maxGapMs": 70.40499999932945,
+      "jitBefore": {
+        "moduleUs": 1165713,
+        "instanceUs": 231740,
+        "uniqueInstances": 32287,
+        "reusedInstances": 9288
+      },
+      "jitAfter": {
+        "moduleUs": 1217819,
+        "instanceUs": 241964,
+        "uniqueInstances": 33184,
+        "reusedInstances": 9302
+      },
+      "jitDelta": {
+        "moduleUs": 52106,
+        "instanceUs": 10224,
+        "uniqueInstances": 897,
+        "reusedInstances": 14
+      },
+      "synchronousCompileAndLinkMs": 62.33,
+      "queue": {
+        "received": 1782,
+        "presented": 1739,
+        "dropped": 43,
+        "underruns": 53,
+        "meanAgeMs": 16.35805347901911,
+        "p95AgeUpperMs": 27
+      },
+      "passed": false
+    }
+  ],
+  "limits": "Counters bracket image interval with small RPC boundary overhead. They measure synchronous module compile/link, not native byte generation or browser background optimization/tiering. Fresh matches have different input start phases; do not infer causal speedup from first/second FPS alone."
+}

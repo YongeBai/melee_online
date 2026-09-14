@@ -1,0 +1,46 @@
+{
+  "kind": "fountain-render-scale-abba-selected-scalars",
+  "core": "d516a30633080668e8f3bb38d78e00890ddfe364e5c3dda5c4274a81798812cf",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle P1 versus CPU9",
+  "reflection": false,
+  "scenery": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "speed": 1,
+  "cpuClock": 1,
+  "runs": [
+    {
+      "percent": 200,
+      "simulationFps": 51.50268672349145,
+      "visibleFps": 51.40268150655263,
+      "p95GapMs": 33.655
+    },
+    {
+      "percent": 150,
+      "simulationFps": 55.10248879574306,
+      "visibleFps": 55.00248427887238,
+      "p95GapMs": 33.335
+    },
+    {
+      "percent": 150,
+      "simulationFps": 56.60308486812489,
+      "visibleFps": 56.53641456792686,
+      "p95GapMs": 32.505
+    },
+    {
+      "percent": 200,
+      "simulationFps": 57.16624744751744,
+      "visibleFps": 57.13291435862676,
+      "p95GapMs": 31.335
+    }
+  ],
+  "passed": false,
+  "scope": "All runs valid30sec and nonblack. Opposite adjacent comparisons disagree; upward drift prevents accepting a repeatable scale gain. No recurrence of multi-second image-readback stalls."
+}

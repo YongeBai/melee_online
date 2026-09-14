@@ -1,0 +1,115 @@
+{
+  "artifactScope": "Exact selected measured CUA counterRun/counterWarmRun fields; warmup rows omitted",
+  "coreSha256": "648ffd7b3b46f82b38ceb6b3b4e9893fd7678ceb0647116a15af63e53762c58c",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "counterbatch",
+  "diagnosticOnly": true,
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame human controller scripts; partner AI retained, not human play",
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "profiler": false,
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "runs": [
+    {
+      "counterbatch": false,
+      "seconds": 29.997744999997316,
+      "simulationFps": 57.504322408239496,
+      "gameRenderFps": 57.43765073008502,
+      "visibleFps": 57.337643212853294,
+      "p95GapMs": 19.939999997615814,
+      "maxGapMs": 40.07999999821186,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.722937245815906
+      },
+      "passed": false
+    },
+    {
+      "counterbatch": true,
+      "seconds": 29.99776999999583,
+      "simulationFps": 57.67095354088789,
+      "gameRenderFps": 57.60428191829727,
+      "visibleFps": 57.53761029570665,
+      "p95GapMs": 19.875,
+      "maxGapMs": 35.689999997615814,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "dropped": 1,
+        "meanAgeMs": 15.332762015020323
+      },
+      "passed": false
+    },
+    {
+      "counterbatch": true,
+      "seconds": 29.998789999999104,
+      "simulationFps": 59.33572654097226,
+      "gameRenderFps": 59.26905718530824,
+      "visibleFps": 59.0690491183162,
+      "p95GapMs": 18.684999994933605,
+      "maxGapMs": 35.26500000059605,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "dropped": 5,
+        "meanAgeMs": 16.422320924951443
+      },
+      "passed": false
+    },
+    {
+      "counterbatch": false,
+      "seconds": 29.9999450000003,
+      "simulationFps": 57.40010523352569,
+      "gameRenderFps": 57.36677183908113,
+      "visibleFps": 57.100104683524684,
+      "p95GapMs": 19.825000002980232,
+      "maxGapMs": 95.16500000655651,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "dropped": 5,
+        "meanAgeMs": 15.699507001126696
+      },
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 112,
+    "mismatches": []
+  },
+  "meanSimulationGainPercent": 1.8295660865646601,
+  "bothPairsFavorCandidate": true,
+  "decision": "Both timing pairs favor batching in both comparisons, but all720p60 gates fail. Keep experimental/defaultOFF because initial stepped replay discrepancy remains unexplained. This compares flags within the new core; absolute improvement versus prior cores is not established. Next fixed1800frame work timing removes differing trajectory lengths and compares full endpoints."
+}

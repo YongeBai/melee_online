@@ -1,0 +1,144 @@
+{
+  "artifactScope": "Selected exact fields from failed raw full-state GPU scheduling replay",
+  "kind": "normal-running-browser-gpu-scheduling-equivalence",
+  "passed": false,
+  "fullMachineBytesEqual": false,
+  "fingerprintsEqual": true,
+  "coreSha256": "895f2b3278f3409cf461380e5cd54d8aa9d3f406795681253d627da175887395",
+  "frames": 600,
+  "stage": "Yoshi's Story",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "sizeA": 110087616,
+  "sizeB": 110087616,
+  "unmatchedBytes": 0,
+  "sceneStart": 303,
+  "sceneStop": 903,
+  "input": {
+    "frames": 601,
+    "skipped": 0,
+    "inputHash": 1017270108,
+    "stateHash": 666758973,
+    "inputChanges": [
+      67,
+      65
+    ]
+  },
+  "differences": [
+    {
+      "section": "GPU PixelEngine",
+      "differentBytes": 33548,
+      "firstRelativeOffset": 1201450,
+      "rangeCount": 3028,
+      "rangesTruncated": true,
+      "scope": "This section includes BP/CP/XF/TMEM/FIFO/CP/PE state; the label is not a pixel-buffer diagnosis."
+    },
+    {
+      "section": "CoreTiming",
+      "differentBytes": 26,
+      "ranges": [
+        {
+          "offset": 12,
+          "bytes": 2,
+          "field": "CoreTiming.m_idled_cycles"
+        },
+        {
+          "offset": 52,
+          "bytes": 3
+        },
+        {
+          "offset": 76,
+          "bytes": 3
+        },
+        {
+          "offset": 114,
+          "bytes": 3
+        },
+        {
+          "offset": 152,
+          "bytes": 3
+        },
+        {
+          "offset": 196,
+          "bytes": 3
+        },
+        {
+          "offset": 235,
+          "bytes": 3
+        },
+        {
+          "offset": 274,
+          "bytes": 3
+        },
+        {
+          "offset": 313,
+          "bytes": 3
+        }
+      ]
+    },
+    {
+      "section": "HW Memory RAM",
+      "differentBytes": 18,
+      "ranges": [
+        {
+          "offset": 5168584,
+          "bytes": 2
+        },
+        {
+          "offset": 5168587,
+          "bytes": 3
+        },
+        {
+          "offset": 5168689,
+          "bytes": 1
+        },
+        {
+          "offset": 5168694,
+          "bytes": 8
+        },
+        {
+          "offset": 5169014,
+          "bytes": 4
+        }
+      ],
+      "mappedGuestStarts": [
+        "0x804eddb2",
+        "0x804eddb5",
+        "0x804ede1b",
+        "0x804ede20",
+        "0x804edf60"
+      ]
+    }
+  ],
+  "otherSectionsEqual": true,
+  "framebufferAndTextureSectionsEqual": true,
+  "transitions": [
+    {
+      "cycles": 1000,
+      "starts": 1794028,
+      "callbacks": 1794028
+    },
+    {
+      "cycles": 4000,
+      "starts": 2278528,
+      "callbacks": 2278528
+    },
+    {
+      "cycles": 1000,
+      "starts": 2445582,
+      "callbacks": 2445582
+    }
+  ],
+  "callbackDeltas": [
+    484500,
+    167054
+  ],
+  "dispatchCallDeltas": [
+    1559148,
+    1237982
+  ],
+  "decision": "Baseline restored. No FPS comparison or retained speedup. Adding field diagnostics to classify saved FIFO storage and event-order differences; the 18 RAM bytes still need ownership identification.",
+  "limits": "Raw equality remains failed. Matching sampled gameplay fingerprints does not settle the unexplained state changes."
+}

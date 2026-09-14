@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-14",
+  "coreSha256": "8bf2dbc6db9109a97017e7800e6594dcce94697dd18256f34c532f9cb14dcb1c",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "resolution": [960, 720],
+    "framesPerRun": 1200,
+    "input": "two deterministic native-frame controller tracks",
+    "settings": "black decorative background, low fighter detail, reflection and scenery disabled"
+  },
+  "ablation": "skip GX link 3 draw callbacks while preserving game-object processes, collision, animation, input, camera and projection",
+  "measurementRunsFps": {
+    "normal": [58.528747241704025, 63.94275748861768],
+    "stageDrawsSkipped": [70.07121328062881, 72.01783147679942]
+  },
+  "means": {
+    "normalFps": 61.23575236516085,
+    "stageDrawsSkippedFps": 71.04452237871412,
+    "throughputChangePercent": 16.01806367690955,
+    "normalMsPerFrame": 16.362304426666668,
+    "stageDrawsSkippedMsPerFrame": 14.07832288,
+    "savedMsPerFrame": 2.283981546666668
+  },
+  "directionalThroughputChangesPercent": [19.72277998982629, 12.628599687653396],
+  "inputFingerprints": {"passed": true, "checked": 80},
+  "limits": "Diagnostic output omits the foreground stage. The gain is an opportunity bound, not a playable setting. Next step is per-object and per-material isolation inside link 3."
+}

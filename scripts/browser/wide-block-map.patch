@@ -1,0 +1,234 @@
+--- a/Source/Core/Core/PowerPC/JitCommon/JitCache.h
++++ b/Source/Core/Core/PowerPC/JitCommon/JitCache.h
+@@ -197,6 +197,10 @@
+   }
+ };
+ 
++#ifdef __EMSCRIPTEN__
++extern "C" bool DolphinWeb_GetWideBlockMap();
++#endif
++
+ class JitBaseBlockCache
+ {
+ public:
+@@ -207,6 +211,21 @@
+       size_t{1} << DOLPHIN_WEB_FALLBACK_MAP_BITS;
+   static constexpr size_t FAST_BLOCK_MAP_FALLBACK_MASK = FAST_BLOCK_MAP_FALLBACK_ELEMENTS - 1;
+ 
++  // Reserve one stable allocation for both QA modes. Changing the mask is
++  // allowed only after the paused caller clears every cached block.
++#ifdef __EMSCRIPTEN__
++  static constexpr size_t FAST_BLOCK_MAP_FALLBACK_STORAGE_ELEMENTS = size_t{1} << 20;
++#else
++  static constexpr size_t FAST_BLOCK_MAP_FALLBACK_STORAGE_ELEMENTS = FAST_BLOCK_MAP_FALLBACK_ELEMENTS;
++#endif
++  static size_t GetFastBlockMapFallbackMask()
++  {
++#ifdef __EMSCRIPTEN__
++    if (DolphinWeb_GetWideBlockMap()) return (size_t{1} << 20) - 1;
++#endif
++    return FAST_BLOCK_MAP_FALLBACK_MASK;
++  }
++
+   explicit JitBaseBlockCache(JitBase& jit);
+   virtual ~JitBaseBlockCache();
+ 
+@@ -291,6 +310,6 @@
+ 
+   // An alternative for the above but without a shm segment
+   // in case the shm memory region couldn't be allocated.
+-  std::array<JitBlock*, FAST_BLOCK_MAP_FALLBACK_ELEMENTS>
++  std::array<JitBlock*, FAST_BLOCK_MAP_FALLBACK_STORAGE_ELEMENTS>
+       m_fast_block_map_fallback{};  // start_addr & mask -> number
+ };
+--- a/Source/Core/Core/PowerPC/JitCommon/JitCache.cpp
++++ b/Source/Core/Core/PowerPC/JitCommon/JitCache.cpp
+@@ -36,6 +36,9 @@
+ 
+ namespace
+ {
++// Miss-only counters leave fast hits and the WASM dispatcher uninstrumented.
++std::atomic<u64> s_browser_map_empty_misses{0};
++std::atomic<u64> s_browser_map_collision_misses{0};
+ #if DOLPHIN_WEB_FALLBACK_MAP_DIAGNOSTICS
+ std::atomic<u64> s_fallback_dispatch_hit{0};
+ std::atomic<u64> s_fallback_dispatch_empty_miss{0};
+@@ -48,6 +51,8 @@
+ JitFallbackDispatchStats GetJitFallbackDispatchStats()
+ {
+   JitFallbackDispatchStats stats;
++  stats.empty_miss = s_browser_map_empty_misses.load(std::memory_order_relaxed);
++  stats.collision_miss = s_browser_map_collision_misses.load(std::memory_order_relaxed);
+ #if DOLPHIN_WEB_FALLBACK_MAP_DIAGNOSTICS
+   stats.enabled = true;
+   stats.hit = s_fallback_dispatch_hit.load(std::memory_order_relaxed);
+@@ -307,6 +312,10 @@
+   if (!block || block->effectiveAddress != ppc_state.pc ||
+       block->feature_flags != ppc_state.feature_flags)
+   {
++#ifdef __EMSCRIPTEN__
++    (block ? s_browser_map_collision_misses : s_browser_map_empty_misses)
++        .fetch_add(1, std::memory_order_relaxed);
++#endif
+     block = MoveBlockIntoFastCache(ppc_state.pc, ppc_state.feature_flags);
+   }
+ #endif
+@@ -631,6 +640,6 @@
+   }
+   else
+   {
+-    return (static_cast<size_t>(address) >> 2) & FAST_BLOCK_MAP_FALLBACK_MASK;
++    return (static_cast<size_t>(address) >> 2) & GetFastBlockMapFallbackMask();
+   }
+ }
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -255,8 +255,8 @@
+     return index;
+   } catch (error) { console.warn("WASM dispatcher unavailable:", String(error)); return 0; }
+ });
+-static int s_wasm_dispatch_loop_handle = 0;
+-static bool s_wasm_dispatch_loop_attempted = false;
++static std::array<int, 2> s_wasm_dispatch_loop_handles{};
++static std::array<bool, 2> s_wasm_dispatch_loop_attempted_modes{};
+ static std::atomic<u32> s_wasm_dispatch_loop_calls{0};
+ 
+ static std::array<char, 86> DolphinWeb_MakeWasmBlockCacheKey(std::span<const u8> bytes)
+@@ -306,6 +306,7 @@
+ std::atomic<bool> s_dolphin_web_paired_memory_simd{false};
+ std::atomic<bool> s_dolphin_web_vector_fpr_cache{false};
+ std::atomic<bool> s_dolphin_web_psq_hoist{false};
++std::atomic<bool> s_dolphin_web_wide_block_map{false};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEECALL   = 1u << 1;  // 5 Melee fast call-branch helpers
+@@ -8383,6 +8384,9 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetWideBlockMap() { return s_dolphin_web_wide_block_map.load(std::memory_order_relaxed); }
++extern "C" void DolphinWeb_SetWideBlockMap(bool value) { s_dolphin_web_wide_block_map.store(value, std::memory_order_relaxed); }
++
+ extern "C" bool DolphinWeb_GetPsqHoist() { return s_dolphin_web_psq_hoist.load(std::memory_order_relaxed); }
+ extern "C" void DolphinWeb_SetPsqHoist(bool value) { s_dolphin_web_psq_hoist.store(value,std::memory_order_relaxed); }
+ 
+@@ -8517,8 +8521,8 @@
+ void CachedInterpreter::Init()
+ {
+ #ifdef __EMSCRIPTEN__
+-  s_wasm_dispatch_loop_handle = 0;
+-  s_wasm_dispatch_loop_attempted = false;
++  s_wasm_dispatch_loop_handles = {};
++  s_wasm_dispatch_loop_attempted_modes = {};
+   s_wasm_dispatch_loop_calls.store(0);
+ #endif
+   RefreshConfig();
+@@ -8589,7 +8593,7 @@
+                                                 CPUEmuFeatureFlags flags)
+ {
+   JitBlock* const block =
+-      map[(static_cast<size_t>(pc) >> 2) & JitBaseBlockCache::FAST_BLOCK_MAP_FALLBACK_MASK];
++      map[(static_cast<size_t>(pc) >> 2) & JitBaseBlockCache::GetFastBlockMapFallbackMask()];
+   if (!block || block->effectiveAddress != pc || block->feature_flags != flags)
+     return nullptr;
+   return block->normalEntry;
+@@ -8648,6 +8652,8 @@
+   // DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH mask bit.
+   const CPU::State* const redispatch_state_ptr = m_system.GetCPU().GetStatePtr();
+   const bool profile_segments = DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed);
++  const int s_wasm_dispatch_loop_handle =
++      s_wasm_dispatch_loop_handles[DolphinWeb_GetWideBlockMap() ? 1 : 0];
+   const bool wasm_dispatch = allow_redispatch && !s_ppc_block_profile_enabled &&
+       !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH) &&
+       DolphinWebFeatureEnabled(1u << 27) && s_wasm_dispatch_loop_handle != 0;
+@@ -11482,6 +11488,9 @@
+ 
+ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+ {
++  const unsigned dispatch_mode = DolphinWeb_GetWideBlockMap() ? 1 : 0;
++  auto& s_wasm_dispatch_loop_handle = s_wasm_dispatch_loop_handles[dispatch_mode];
++  auto& s_wasm_dispatch_loop_attempted = s_wasm_dispatch_loop_attempted_modes[dispatch_mode];
+   if (!s_wasm_dispatch_loop_attempted && DolphinWebFeatureEnabled(1u << 27) &&
+       !m_block_cache.GetEntryPoints())
+   {
+@@ -11493,7 +11502,7 @@
+       addr(m_system.GetCPU().GetStatePtr()), static_cast<u32>(CPU::State::Running),
+       addr(&s_browser_game_step_armed), addr(&s_browser_game_step_start_native),
+       addr(m_system.GetMemory().GetRAM()) + 0x00479d58,
+-      addr(m_block_cache.GetFastBlockMapFallback()), JitBaseBlockCache::FAST_BLOCK_MAP_FALLBACK_MASK,
++      addr(m_block_cache.GetFastBlockMapFallback()), static_cast<u32>(JitBaseBlockCache::GetFastBlockMapFallbackMask()),
+       offsetof(JitBlockData, normalEntry), offsetof(JitBlockData, feature_flags), offsetof(JitBlockData, effectiveAddress),
+       static_cast<u32>(reinterpret_cast<std::uintptr_t>(AnyCallbackCast(RunWasmBlock))), sizeof(AnyCallback),
+       offsetof(WasmBlockOperands, handle), offsetof(WasmBlockOperands, downcount),
+@@ -12259,7 +12268,7 @@
+       << s_wasm_emit_state_store_f64_count << "st "
+       << "statei64:" << s_wasm_emit_state_load_i64_count << "ld/"
+       << s_wasm_emit_state_store_i64_count << "st ";
+-  out << "wasm-dispatch:" << s_wasm_dispatch_loop_handle << "/"
++  out << "wasm-dispatch:" << s_wasm_dispatch_loop_handles[DolphinWeb_GetWideBlockMap() ? 1 : 0] << "/"
+       << s_wasm_dispatch_loop_calls.load(std::memory_order_relaxed) << "calls ";
+   // §28bz audit: §28bt re-dispatch chain depth. Avg chain length = 1 + iter/entry.
+ #if DOLPHIN_WEB_HOT_COUNTERS
+@@ -12314,7 +12323,9 @@
+   }
+   else
+   {
+-    out << "fbmap:off ";
++    out << "fbmap:off map-mask:" << JitBaseBlockCache::GetFastBlockMapFallbackMask()
++        << " slow-empty/collision:" << fallback_dispatch.empty_miss << "/"
++        << fallback_dispatch.collision_miss << " ";
+   }
+   const DolphinWeb::WasmTimingProfile::WorstSlice worst_slice =
+       DolphinWeb::WasmTimingProfile::CaptureWorstSlice();
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -67,6 +67,8 @@
+ extern "C" bool DolphinWeb_GetPairedMemorySimd();
+ extern "C" bool DolphinWeb_GetVectorFprCache();
+ extern "C" bool DolphinWeb_GetPsqHoist();
++extern "C" bool DolphinWeb_GetWideBlockMap();
++extern "C" void DolphinWeb_SetWideBlockMap(bool);
+ extern "C" void DolphinWeb_SetPsqHoist(bool);
+ extern "C" void DolphinWeb_SetVectorFprCache(bool);
+ extern "C" void DolphinWeb_SetPairedMemorySimd(bool);
+@@ -1201,7 +1203,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 1023 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 2047 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1218,7 +1220,8 @@
+   const bool memory_simd = (flags & 128) != 0;
+   const bool vector_fpr = (flags & 256) != 0;
+   const bool psq_hoist = (flags & 512) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist())
++  const bool wide_map = (flags & 1024) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1227,6 +1230,7 @@
+     DolphinWeb_SetPairedMemorySimd(memory_simd);
+     DolphinWeb_SetVectorFprCache(vector_fpr);
+     DolphinWeb_SetPsqHoist(psq_hoist);
++    DolphinWeb_SetWideBlockMap(wide_map);
+   }
+   return 1;
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

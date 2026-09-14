@@ -1,0 +1,201 @@
+{
+  "kind": "same-checkpoint-stadium-stadiumscreen-abba",
+  "saved": "selected exact measured fields; warmups omitted",
+  "core": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "passed": false,
+  "stage": "Pokémon Stadium",
+  "fighters": [
+    "Fox",
+    "Falco"
+  ],
+  "verifiedSelection": {
+    "stage": 3,
+    "characters": [
+      2,
+      20
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 113,
+    "mismatches": [],
+    "limits": "32-bit rolling sampled native-input/gameplay fingerprints and exact polling gaps; not full machine equivalence."
+  },
+  "runs": [
+    {
+      "stadiumscreen": true,
+      "seconds": 29.998364999999758,
+      "simulationFps": 59.66991867723506,
+      "gameRenderFps": 59.56991322693801,
+      "visibleFps": 58.46985327367055,
+      "p95GapMs": 18.399999999906868,
+      "maxGapMs": 57.10499999998137,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "dropped": 32,
+        "underruns": 40,
+        "meanAgeMs": 20.44361538462065
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "cosmeticCoverage": {
+        "screen": true,
+        "stableAtEnd": true,
+        "copySites": [
+          2149396320,
+          2149396492,
+          2149396672
+        ]
+      }
+    },
+    {
+      "stadiumscreen": false,
+      "seconds": 29.998060000000056,
+      "simulationFps": 59.73719633869646,
+      "gameRenderFps": 59.67052536063988,
+      "visibleFps": 58.603789711734585,
+      "p95GapMs": 18.56000000005588,
+      "maxGapMs": 60.885000000242144,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "dropped": 32,
+        "underruns": 37,
+        "meanAgeMs": 18.36560830016816
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "cosmeticCoverage": {
+        "screen": false,
+        "stableAtEnd": true,
+        "copySites": [
+          2149396320,
+          2149396492,
+          2149396672
+        ]
+      }
+    },
+    {
+      "stadiumscreen": false,
+      "seconds": 29.99824500000011,
+      "simulationFps": 60.03684548879421,
+      "gameRenderFps": 59.97017492189938,
+      "visibleFps": 59.43681038674074,
+      "p95GapMs": 17.865000000223517,
+      "maxGapMs": 55.03500000014901,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "dropped": 15,
+        "underruns": 13,
+        "meanAgeMs": 18.89009809417122
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "cosmeticCoverage": {
+        "screen": false,
+        "stableAtEnd": true,
+        "copySites": [
+          2149396320,
+          2149396492,
+          2149396672
+        ]
+      }
+    },
+    {
+      "stadiumscreen": true,
+      "seconds": 29.998010000000242,
+      "simulationFps": 60.03731580861482,
+      "gameRenderFps": 59.97064471943257,
+      "visibleFps": 58.93724283710772,
+      "p95GapMs": 19.455000000074506,
+      "maxGapMs": 59.544999999925494,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "dropped": 30,
+        "underruns": 24,
+        "meanAgeMs": 17.782128321081654
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "cosmeticCoverage": {
+        "screen": true,
+        "stableAtEnd": true,
+        "copySites": [
+          2149396320,
+          2149396492,
+          2149396672
+        ]
+      }
+    }
+  ]
+}

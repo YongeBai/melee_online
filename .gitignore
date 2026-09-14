@@ -28,3 +28,6 @@
 # User-supplied Slippi reference distributions.
 /Slippi-Launcher-*.AppImage
 /Slippi-Nintendont-*.zip
+
+# Isolated performance experiments
+.perf-lab/

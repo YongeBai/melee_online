@@ -1,0 +1,235 @@
+{
+  "artifactScope": "Selected exact fields from CUA selectiveWarmRun",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "selective fprcache",
+  "coreSha256": "b317c2cc97f415883f52408055b4bdd3123a29780d6af4a02c21dee18703808e",
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 58.36846636104758,
+      "visibleFps": 57.3351011656207,
+      "seconds": 29.999074999999255,
+      "p95GapMs": 17.679999999701977,
+      "maxGapMs": 82.91500000283122,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 58.934787058077546,
+      "visibleFps": 58.368106413288345,
+      "seconds": 29.999260000001637,
+      "p95GapMs": 17.440000001341105,
+      "maxGapMs": 50.2200000025332,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 58.668250709433195,
+      "visibleFps": 57.601555241988954,
+      "seconds": 29.99919000000134,
+      "p95GapMs": 17.58999999985099,
+      "maxGapMs": 66.67499999701977,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 59.167248477939545,
+      "visibleFps": 58.70057722233889,
+      "seconds": 29.99970500000194,
+      "p95GapMs": 17.484999999403954,
+      "maxGapMs": 34.05499999970198,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 59.5355295846986,
+      "visibleFps": 58.43610458397389,
+      "seconds": 30.015689999997615,
+      "p95GapMs": 17.514999996870756,
+      "maxGapMs": 37.00499999895692,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 57.46795011755605,
+      "visibleFps": 56.801268561667925,
+      "seconds": 29.999329999998213,
+      "p95GapMs": 32.70500000193715,
+      "maxGapMs": 50.185000002384186,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 58.60427811230482,
+      "visibleFps": 57.50419780644244,
+      "seconds": 29.99780999999866,
+      "p95GapMs": 17.605000000447035,
+      "maxGapMs": 65.1900000013411,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 59.404049376036006,
+      "visibleFps": 58.07062514761769,
+      "seconds": 29.99795499999821,
+      "p95GapMs": 17.480000000447035,
+      "maxGapMs": 49.96999999880791,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 112,
+    "mismatches": []
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "settings": {
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbPercent": 150,
+    "profiler": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "otherRejectedCpuFlags": false
+  },
+  "lastQueue": {
+    "capacity": 2,
+    "received": 1781,
+    "presented": 1743,
+    "dropped": 37,
+    "underruns": 56,
+    "meanAgeMs": 18.881285140567634,
+    "clockSkips": 2,
+    "readyClockSkips": 2
+  },
+  "passed": false,
+  "interpretation": "No repeatable gain. Opposing pairs; warmed candidate mean is slower. Leave scalar FPR cache disabled. All FPS gates fail. Last baseline loses37images in30seconds despite59.37renderedFPS; image probe itself averages0.2815ms harvest and0.0751ms enqueue.",
+  "warmRepeatWithoutReload": true,
+  "means": {
+    "baselineSimulationFps": 59.16941821705677,
+    "candidateSimulationFps": 58.3175992977478,
+    "percent": -1.4396269981634235
+  },
+  "lastDelivery": {
+    "renderFps": 59.37071377032555,
+    "submissionFps": 58.10396075332815,
+    "callbackFps": 60.00409027882425
+  }
+}

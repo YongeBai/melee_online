@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-14",
+  "coreSha256": "8bf2dbc6db9109a97017e7800e6594dcce94697dd18256f34c532f9cb14dcb1c",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "resolution": [960, 720],
+    "framesPerRun": 1200,
+    "input": "two deterministic native-frame controller tracks"
+  },
+  "ablation": "skip GX links 7 and 8 effect draw callbacks while preserving effect processes, fighter state, input, camera and projection",
+  "measurementRunsFps": {
+    "normal": [63.26411238459614, 61.24673741079682],
+    "effectDrawsSkipped": [63.43840885670832, 64.00259402001542]
+  },
+  "means": {
+    "normalFps": 62.25542489769648,
+    "effectDrawsSkippedFps": 63.72050143836187,
+    "throughputChangePercent": 2.353331525843627,
+    "normalMsPerFrame": 16.067075093333333,
+    "effectDrawsSkippedMsPerFrame": 15.693843840000003,
+    "savedMsPerFrame": 0.37323125333333035
+  },
+  "directionalThroughputChangesPercent": [0.2755060737319681, 4.499597408322997],
+  "inputFingerprints": {"passed": true, "checked": 80},
+  "decision": "Preserve gameplay effects. Their full render opportunity is far smaller and noisier than stage or fighter rendering."
+}

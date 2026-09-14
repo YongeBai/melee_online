@@ -1,0 +1,47 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -11043,6 +11043,7 @@
+   // (?shortprefix=1), drop to 2 so short blocks that currently fall to
+   // Interpret<false> (54% of attempts in the §28bz audit) compile instead.
+   const u32 MIN_WASM_PREFIX_INSTRUCTIONS =
++      DolphinWebFeatureEnabled(1u << 18) ? 1u :
+       DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_SHORT_PREFIX) ? 4u : 2u;
+ 
+   if (DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_WASMBLOCK))
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1161,16 +1161,17 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 7 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 15 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+   constexpr u32 regcache_disable = 1u << 20;
+   constexpr u32 fastmem_enable = 1u << 23;
+   constexpr u32 integer_fifo_enable = 1u << 16;
++  constexpr u32 single_prefix_enable = 1u << 18;
+   const u32 previous = DolphinWeb_GetCachedInterpreterDisableMask();
+-  const u32 next = (previous & ~(regcache_disable | fastmem_enable | integer_fifo_enable)) |
+-      ((flags & 1) ? 0 : regcache_disable) | ((flags & 2) ? fastmem_enable : 0) | ((flags & 4) ? integer_fifo_enable : 0);
++  const u32 next = (previous & ~(regcache_disable | fastmem_enable | integer_fifo_enable | single_prefix_enable)) |
++      ((flags & 1) ? 0 : regcache_disable) | ((flags & 2) ? fastmem_enable : 0) | ((flags & 4) ? integer_fifo_enable : 0) | ((flags & 8) ? single_prefix_enable : 0);
+   if (next != previous)
+   {
+     system.GetJitInterface().ClearCache(guard);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1054,9 +1054,9 @@
+         return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

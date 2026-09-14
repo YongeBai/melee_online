@@ -1,5 +1,40 @@
 # Browser-only preview deployment
 
+Current requirement (September 13): every playable browser build must load the
+hosted game automatically. A player-supplied ISO or file picker is prohibited;
+the local disc is only a development fixture. See [AGENTS.md](../AGENTS.md).
+The private 720p60 lab preserves automatic startup. Its hosted loader and
+performance changes still need to be reconciled into the reproducible release
+packaging before deployment.
+
+The September 11 deployment and packaging commands below are historical. They
+predate the no-ISO requirement and must not be used to republish that player flow.
+
+## Live Vercel deployment
+
+Published September 11, 2026 at https://melee-online.vercel.app in the
+`yongebais-projects/melee-online` Vercel project. Deployment ID:
+`dpl_5jGiGZoyQRpzjBJAxemE9T4JpAXB`. This is a static deployment with no server
+GPU or native emulator workers. It contains the candidate-49 `solo-preview`
+package and matching source archive described below.
+
+The deployment copy is in `dist/browser/vercel-solo-preview` in the main
+checkout, copied only from the verified release inventory. To redeploy that
+same package from the repository root:
+
+```sh
+node scripts/browser/verify-release.mjs dist/browser/vercel-solo-preview
+vercel --cwd dist/browser/vercel-solo-preview --prod --yes --scope yongebais-projects
+```
+
+Remote validation passed SHA-256 checks for all 113 public content files,
+COOP/COEP headers, WASM MIME, and 404 checks for `.env`, `local-disc`, a missing
+engine module, and Vercel's private configuration file. The HTTPS browser
+reached **Open Melee disc** without console warnings or errors. Gameplay was
+not repeated on the remote origin; the earlier packaged gameplay measurements
+below still apply. Players select their own local disc. Live multiplayer and
+certified sustained 60 FPS remain unavailable.
+
 The solo preview uses candidate 49 and bounded, same-frame pixel readback.
 **Do not publish the older `dist/browser/release` (candidate 46):** its detached
 ImageBitmap presenter accumulated graphics memory at roughly 180 MB/second
@@ -47,7 +82,8 @@ volume or emulator port should be mounted. `/health` identifies it as a browser
 engine with zero native workers. The Docker image was built locally and passed health, module, WASM, source-part
 and isolation-header checks. Inspection confirmed user `node`, no GPU device
 requests, and no attached devices. Gameplay was tested against the identical
-packaged Node server. External TLS/domain deployment is still unverified.
+packaged Node server. Vercel HTTPS deployment is verified above; custom-domain
+deployment remains unverified.
 
 ## Hosting
 

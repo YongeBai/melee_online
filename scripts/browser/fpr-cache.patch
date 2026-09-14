@@ -1,0 +1,237 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -2616,6 +2616,69 @@
+ };
+ static WasmGprRegCache s_gpr_rc;
+ 
++// Opt-in bit19: paired-single register cache. Use f64 locals for FP arithmetic,
++// preserving loaded NaN payloads and bitcasting integer/FP aliases. Eager loads cover both arms
++// of generated conditionals; dirty is sticky across helpers and branches.
++struct WasmFprRegCache
++{
++  bool active = false;
++  u32 base = 0, local_base = 40, scratch_local = 0;
++  u32 locals[64] = {};
++  bool present[64] = {};
++  bool dirty[64] = {};
++};
++static WasmFprRegCache s_fpr_rc;
++bool FprCacheIndex(u32 offset, u32* index)
++{
++  if (!s_fpr_rc.active || offset < s_fpr_rc.base) return false;
++  const u32 rel = offset - s_fpr_rc.base;
++  if (rel >= 64 * sizeof(u64) || rel % sizeof(u64)) return false;
++  *index = rel / sizeof(u64);
++  return s_fpr_rc.present[*index];
++}
++void ConfigureFprCacheLocals(std::vector<u8>& body, u32 used_regs)
++{
++  if (!s_fpr_rc.active) return;
++  if (used_regs == 0) { s_fpr_rc.active = false; return; }
++  u32 count = 0;
++  for (u32 reg = 0; reg < 32; ++reg)
++  {
++    if (!(used_regs & (1u << reg))) continue;
++    for (u32 lane = reg * 2; lane < reg * 2 + 2; ++lane)
++    {
++      s_fpr_rc.present[lane] = true;
++      s_fpr_rc.locals[lane] = s_fpr_rc.local_base + count++;
++    }
++  }
++  // Unused locals are still zero-initialized by baseline WASM compilers.
++  // Declare only referenced lanes, and none for integer-only blocks.
++  body[0] += 2;
++  EmitU32Leb(body, count); body.insert(body.end(), {0x7c, 0x01, 0x7e});
++  s_fpr_rc.scratch_local = s_fpr_rc.local_base + count;
++}
++void EmitFprCacheFlush(std::vector<u8>& body)
++{
++  if (!s_fpr_rc.active) return;
++  for (u32 i=0; i<64; ++i)
++  {
++    if (!s_fpr_rc.present[i] || !s_fpr_rc.dirty[i]) continue;
++    EmitLocalGet(body, 0); EmitLocalGet(body, s_fpr_rc.locals[i]);
++    body.insert(body.end(), {0x39, 0x03});
++    EmitU32Leb(body, s_fpr_rc.base+i*sizeof(u64));
++  }
++}
++void EmitFprCacheReload(std::vector<u8>& body)
++{
++  if (!s_fpr_rc.active) return;
++  for (u32 i=0; i<64; ++i)
++  {
++    if (!s_fpr_rc.present[i]) continue;
++    EmitLocalGet(body, 0); body.insert(body.end(), {0x2b, 0x03});
++    EmitU32Leb(body, s_fpr_rc.base+i*sizeof(u64));
++    EmitLocalSet(body, s_fpr_rc.locals[i]);
++  }
++}
++
+ // §28cz fastmem bounds-check hoist plan. Built per block (gated on the enable
+ // bit) BEFORE the emit loop by AnalyzeFastmemHoistPlan, which re-runs the exact
+ // s_fmh_ grouping logic and records, per CodeOp, whether the op is the first
+@@ -2661,6 +2724,7 @@
+ // block-end return. Dirty stays set on purpose (see struct comment).
+ void EmitRegCacheFlushDirty(std::vector<u8>& body)
+ {
++  EmitFprCacheFlush(body);
+   if (!s_gpr_rc.active)
+     return;
+   for (u32 i = 0; i < 32; ++i)
+@@ -2762,6 +2826,15 @@
+ 
+ void EmitStateLoadU32(std::vector<u8>& body, u32 offset)
+ {
++  u32 lane;
++  if (FprCacheIndex(offset & ~7u, &lane))
++  {
++    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    body.push_back(0xbd); // i64.reinterpret_f64
++    if (offset & 4u) body.insert(body.end(), {0x42, 0x20, 0x88}); // i64.shr_u 32
++    body.push_back(0xa7); // i32.wrap_i64
++    return;
++  }
+   u32 gpr_index;
+   if (RegCacheGprIndex(offset, &gpr_index) && s_gpr_rc.present[gpr_index])
+   {
+@@ -2778,6 +2851,13 @@
+ 
+ void EmitStateLoadF64(std::vector<u8>& body, u32 offset)
+ {
++  u32 lane;
++  if (FprCacheIndex(offset, &lane))
++  {
++    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++
++    return;
++  }
+   ++s_wasm_emit_state_load_f64_count;
+   EmitLocalGet(body, 0);
+   body.push_back(0x2b);
+@@ -2787,6 +2867,14 @@
+ 
+ void EmitStateLoadI64(std::vector<u8>& body, u32 offset)
+ {
++  u32 lane;
++  if (FprCacheIndex(offset, &lane))
++  {
++    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    body.push_back(0xbd); // i64.reinterpret_f64
++    
++    return;
++  }
+   ++s_wasm_emit_state_load_i64_count;
+   EmitLocalGet(body, 0);
+   body.push_back(0x29);
+@@ -2817,6 +2905,25 @@
+ 
+ void EmitStateStoreU32Suffix(std::vector<u8>& body, u32 offset)
+ {
++  u32 lane;
++  if (FprCacheIndex(offset & ~7u, &lane))
++  {
++    // lfd/stfd use two 32-bit accesses to a cached 64-bit register lane.
++    body.push_back(0xad); // i64.extend_i32_u
++    EmitLocalSet(body, s_fpr_rc.scratch_local); // dedicated scratch, no caller clobber
++    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    body.push_back(0xbd); // i64.reinterpret_f64
++    body.insert(body.end(), {0x42, 0x20, static_cast<u8>((offset & 4u) ? 0x86 : 0x88),
++                            0x42, 0x20, static_cast<u8>((offset & 4u) ? 0x88 : 0x86)});
++    EmitLocalGet(body, s_fpr_rc.scratch_local);
++    if (offset & 4u) body.insert(body.end(), {0x42, 0x20, 0x86});
++    body.push_back(0x84); // i64.or
++    body.push_back(0xbf); // f64.reinterpret_i64
++    EmitLocalSet(body, s_fpr_rc.locals[lane]);
++    body.push_back(0x1a); // state pointer
++    s_fpr_rc.dirty[lane] = true;
++    return;
++  }
+   u32 gpr_index;
+   if (RegCacheGprIndex(offset, &gpr_index) && s_gpr_rc.present[gpr_index])
+   {
+@@ -2836,6 +2943,15 @@
+ 
+ void EmitStateStoreF64Suffix(std::vector<u8>& body, u32 offset)
+ {
++  u32 lane;
++  if (FprCacheIndex(offset, &lane))
++  {
++
++    EmitLocalSet(body, s_fpr_rc.locals[lane]);
++    body.push_back(0x1a); // drop the state pointer pushed by the store prefix
++    s_fpr_rc.dirty[lane] = true;
++    return;
++  }
+   ++s_wasm_emit_state_store_f64_count;
+   body.push_back(0x39);
+   body.push_back(0x03);
+@@ -2844,6 +2960,16 @@
+ 
+ void EmitStateStoreI64Suffix(std::vector<u8>& body, u32 offset)
+ {
++  u32 lane;
++  if (FprCacheIndex(offset, &lane))
++  {
++    
++    body.push_back(0xbf); // f64.reinterpret_i64
++    EmitLocalSet(body, s_fpr_rc.locals[lane]);
++    body.push_back(0x1a); // drop the state pointer pushed by the store prefix
++    s_fpr_rc.dirty[lane] = true;
++    return;
++  }
+   ++s_wasm_emit_state_store_i64_count;
+   body.push_back(0x37);
+   body.push_back(0x03);
+@@ -4176,6 +4302,9 @@
+   EmitI32Const(body, 1);
+   body.push_back(0x0f);
+   body.push_back(0x0b);
++  // Each state-touching helper was preceded by the common cache flush.
++  // Reload on its continuing path; a halted block already committed its state.
++  EmitFprCacheReload(body);
+ }
+ 
+ void EmitSystemCall(std::vector<u8>& body, const PPCAnalyst::CodeOp& op, u32 downcount)
+@@ -7711,6 +7840,24 @@
+       ? std::vector<u8>{0x06, 0x03, 0x7f, 0x02, 0x7e, 0x01, 0x7c, 0x01, 0x7f, 0x20, 0x7f, 0x01, 0x7f}
+       : std::vector<u8>{0x05, 0x03, 0x7f, 0x02, 0x7e, 0x01, 0x7c, 0x01, 0x7f, 0x20, 0x7f};
+ 
++  s_fpr_rc = {};
++  s_fpr_rc.active = DolphinWebFeatureEnabled(1u << 19);
++  s_fpr_rc.base = layout.ps_offset;
++  s_fpr_rc.local_base = s_fmh_plan.active ? 41 : 40;
++  if (s_fpr_rc.active)
++  {
++    BitSet32 used;
++    for (const auto& op : ops)
++    {
++      used |= op.fregsIn;
++      if (op.fregOut >= 0 && op.fregOut < 32) used[op.fregOut] = true;
++    }
++    u32 used_mask = 0;
++    for (int reg : used) used_mask |= 1u << reg;
++    ConfigureFprCacheLocals(body, used_mask);
++    EmitFprCacheReload(body);
++  }
++
+   // §28cx C1: set up the GPR register cache for this block, then eagerly load
+   // every GPR the block reads or writes into its local. Eager (not lazy) load
+   // guarantees a GPR is resident on every control-flow path before any
+@@ -7759,7 +7906,8 @@
+           if (s_wasm_emit_fail_sample_pcs[key] == 0)
+             s_wasm_emit_fail_sample_pcs[key] = op.address;
+         }
+-        s_gpr_rc.active = false;  // §28cx C1: don't leak cache state on abort
++        s_fpr_rc.active = false;
++  s_gpr_rc.active = false;  // §28cx C1: don't leak cache state on abort
+         s_fmh_plan.active = false;  // §28cz: don't leak hoist plan on abort
+         s_fmh_plan.ops.clear();
+         return {};
+@@ -7788,6 +7936,7 @@
+   code.insert(code.end(), body.begin(), body.end());
+   EmitSection(bytes, 10, code);
+ 
++  s_fpr_rc.active = false;
+   s_gpr_rc.active = false;  // §28cx C1: cache state is per-block; clear on exit
+   s_fmh_plan.active = false;  // §28cz: hoist plan is per-block; clear on exit
+   s_fmh_plan.ops.clear();

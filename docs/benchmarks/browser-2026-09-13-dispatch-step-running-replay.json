@@ -1,0 +1,66 @@
+{
+  "artifactScope": "Selected exact fields from completed CUA stepRunningReplay2",
+  "coreSha256": "34f85fc775d2d94ccd2ffe61b2fdc1ff43c8aa4b91598ac24f0ece9978f8641e",
+  "passed": true,
+  "kind": "normal-running-browser-codegen-equivalence",
+  "performanceTest": false,
+  "networkTest": false,
+  "frames": 600,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107382085,
+    "sizeB": 107382085,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "fingerprintsEqual": true,
+  "stop": {
+    "startFrame": 303,
+    "stoppedFrame": 903,
+    "nativeFramesObserved": 601,
+    "skipped": 0,
+    "inputHash": 221119829,
+    "stateHash": 2220731446
+  },
+  "runs": [
+    {
+      "stepcheck": false,
+      "dispatcherHandle": 11378,
+      "calls": 1666914
+    },
+    {
+      "stepcheck": true,
+      "dispatcherHandle": 39180,
+      "calls": 1666914
+    }
+  ],
+  "commonCodegen": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "branchfusion": false,
+    "fpuguardwide": false
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "notes": [
+    "Normal-running reference and candidate use identical native two-port input. Stopping occurs at a native controller poll without arming per-frame stepping.",
+    "An initial harness report falsely rejected matching state/input because it included different RPC request IDs; transport metadata is now excluded and this fresh comparison passed.",
+    "No performance conclusion or whole-emulator equivalence against native Dolphin follows from this replay."
+  ]
+}

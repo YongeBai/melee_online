@@ -1,0 +1,280 @@
+{
+  "coreSha256": "c80b52550b7bf30c19c16b443f3ec289f845181a2dae4378595787cf69b35989",
+  "seconds": 29.999300000000744,
+  "diagnosticOnly": true,
+  "passed": false,
+  "simulationFps": 39.534255799301,
+  "visibleFps": 39.46758757704249,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two ordinary browser-timer controller tracks; native partner AI",
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "sceneryAnimation": "on",
+    "shadows": "full",
+    "fifoCopy": false,
+    "msrCache": false,
+    "efbPercent": 150,
+    "output": [
+      960,
+      720
+    ],
+    "emulationSpeed": 1,
+    "cpuClock": 1,
+    "corelog": true,
+    "pcsample": true
+  },
+  "stages": {
+    "cpuAdvance": {
+      "count": 1859528,
+      "totalMs": 4154.87,
+      "fractionOfWallTime": 0.13849889830762374
+    },
+    "cpuExecute": {
+      "count": 1859527,
+      "totalMs": 23703.344,
+      "fractionOfWallTime": 0.7901299030310511
+    },
+    "glDraw": {
+      "count": 523024,
+      "totalMs": 238.334,
+      "fractionOfWallTime": 0.00794465204188078
+    },
+    "glUniform": {
+      "count": 524212,
+      "totalMs": 746.367,
+      "fractionOfWallTime": 0.02487948052121154
+    },
+    "glCompile": {
+      "count": 9,
+      "totalMs": 10.902,
+      "fractionOfWallTime": 0.00036340847953118
+    },
+    "glPresent": {
+      "count": 1188,
+      "totalMs": 5560.059,
+      "fractionOfWallTime": 0.18533962459123587
+    },
+    "cpuGpuSync": {
+      "count": 1188,
+      "totalMs": 26.39,
+      "fractionOfWallTime": 0.0008796871927011412
+    },
+    "cpuGpuDecode": {
+      "count": 1131875,
+      "totalMs": 1310.165,
+      "fractionOfWallTime": 0.04367318570766543
+    },
+    "cpuVideoWait": {
+      "count": 0,
+      "totalMs": 0,
+      "fractionOfWallTime": 0
+    }
+  },
+  "sampledScopes": {
+    "cpuChain": {
+      "count": 3398,
+      "rawSampledMs": 20.665,
+      "sampleEvery": 1024,
+      "estimatedCalls": 3479552
+    },
+    "cpuPartial": {
+      "count": 450,
+      "rawSampledMs": 0.144,
+      "sampleEvery": 1024,
+      "estimatedCalls": 460800
+    },
+    "cpuCallback": {
+      "count": 568,
+      "rawSampledMs": 0.176,
+      "sampleEvery": 1024,
+      "estimatedCalls": 581632
+    },
+    "cpuIdle": {
+      "count": 26,
+      "rawSampledMs": 0.021,
+      "sampleEvery": 1024,
+      "estimatedCalls": 26624
+    },
+    "cpuFpHelper": {
+      "count": 1251,
+      "rawSampledMs": 0.426,
+      "sampleEvery": 1024,
+      "estimatedCalls": 1281024
+    },
+    "cpuMemoryHelper": {
+      "count": 2,
+      "rawSampledMs": 0,
+      "sampleEvery": 1024,
+      "estimatedCalls": 2048
+    },
+    "cpuSystemHelper": {
+      "count": 241,
+      "rawSampledMs": 0.07,
+      "sampleEvery": 1024,
+      "estimatedCalls": 246784
+    },
+    "cpuInterpreterHelper": {
+      "count": 0,
+      "rawSampledMs": 0,
+      "sampleEvery": 1024,
+      "estimatedCalls": 0
+    },
+    "cpuMemoryRead": {
+      "count": 121,
+      "rawSampledMs": 0.052,
+      "sampleEvery": 1024,
+      "estimatedCalls": 123904
+    },
+    "cpuMemoryWrite": {
+      "count": 69,
+      "rawSampledMs": 0.142,
+      "sampleEvery": 1024,
+      "estimatedCalls": 70656
+    },
+    "cpuFifoWrite": {
+      "count": 0,
+      "rawSampledMs": 0,
+      "sampleEvery": 1024,
+      "estimatedCalls": 0
+    },
+    "cpuBranchCallback": {
+      "count": 497,
+      "rawSampledMs": 0.159,
+      "sampleEvery": 1024,
+      "estimatedCalls": 508928
+    },
+    "cpuEndCallback": {
+      "count": 542,
+      "rawSampledMs": 0.121,
+      "sampleEvery": 1024,
+      "estimatedCalls": 555008
+    },
+    "cpuGuestInterpret": {
+      "count": 20,
+      "rawSampledMs": 0.008,
+      "sampleEvery": 1024,
+      "estimatedCalls": 20480
+    },
+    "cpuGather": {
+      "count": 4692,
+      "rawSampledMs": 1.493,
+      "sampleEvery": 1024,
+      "estimatedCalls": 4804608
+    },
+    "cpuGatherCopy": {
+      "count": 5319,
+      "rawSampledMs": 1.356,
+      "sampleEvery": 1024,
+      "estimatedCalls": 5446656
+    },
+    "cpuBurst": {
+      "count": 5319,
+      "rawSampledMs": 1.696,
+      "sampleEvery": 1024,
+      "estimatedCalls": 5446656
+    }
+  },
+  "pcSamples": 1518,
+  "topFunctions": [
+    {
+      "name": "SelectThread",
+      "count": 74,
+      "fraction": 0.048748353096179184
+    },
+    {
+      "name": "HSD_FObjInterpretAnim",
+      "count": 48,
+      "fraction": 0.03162055335968379
+    },
+    {
+      "name": "SetupEnvelopeModelMtx",
+      "count": 44,
+      "fraction": 0.028985507246376812
+    },
+    {
+      "name": "HSD_TExpSetReg",
+      "count": 23,
+      "fraction": 0.015151515151515152
+    },
+    {
+      "name": "psDispParticles",
+      "count": 23,
+      "fraction": 0.015151515151515152
+    },
+    {
+      "name": "JObjUpdateFunc",
+      "count": 21,
+      "fraction": 0.01383399209486166
+    },
+    {
+      "name": "MObjSetupTev",
+      "count": 20,
+      "fraction": 0.013175230566534914
+    },
+    {
+      "name": "sinf",
+      "count": 18,
+      "fraction": 0.011857707509881422
+    },
+    {
+      "name": "HSD_SetupChannel",
+      "count": 17,
+      "fraction": 0.011198945981554678
+    },
+    {
+      "name": "HSD_SetupTevStage",
+      "count": 16,
+      "fraction": 0.010540184453227932
+    },
+    {
+      "name": "hsd_8039930C",
+      "count": 15,
+      "fraction": 0.009881422924901186
+    },
+    {
+      "name": "GXLoadTexObjPreLoaded",
+      "count": 14,
+      "fraction": 0.00922266139657444
+    },
+    {
+      "name": "HSD_JObjMakeMatrix",
+      "count": 14,
+      "fraction": 0.00922266139657444
+    },
+    {
+      "name": "HandleReverb",
+      "count": 14,
+      "fraction": 0.00922266139657444
+    },
+    {
+      "name": "HSD_SetupChannelMode",
+      "count": 14,
+      "fraction": 0.00922266139657444
+    }
+  ],
+  "controllerStress": {
+    "inputChanges": [
+      118,
+      112
+    ],
+    "distinctActions": [
+      26,
+      24
+    ],
+    "exercisedBothPlayers": true
+  },
+  "limits": [
+    "Profiling slows execution; no FPS acceptance or regression conclusion.",
+    "CPU wall scopes overlap across functions/threads and must not be summed.",
+    "Sample times include clock/bookkeeping overhead and periodic sampling bias. Tiny copy/burst estimates exceed the separately sampled enclosing gather estimate; they cannot establish precise FIFO time shares.",
+    "Call counts are estimated as samples times1024, not exact per-frame counts.",
+    "Last-PC samples measure residency including host waits, not exact native stack CPU cost. SelectThread idle loop is already recognized by Dolphin."
+  ],
+  "decision": "CPU execution remains the main measured scope. Copying is frequent but its cost is unresolved by these short-scope timers; use clean matched-input ABBA to test net ROI."
+}

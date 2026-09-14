@@ -1,0 +1,32 @@
+{
+  "coreSha256": "dcf171543b583cd24fffb9f9770f2ed6c1a9acd3a898ed4beb1b183da49643e3",
+  "change": "frsqrte uses canonical Dolphin interpreter bridge instead of 1/sqrt(x)",
+  "testScope": "Actual native handler with upstream 57 expected vectors across 16 alias/Rc/VE/ZE combinations; actual generated Wasm bridge checks halt/continue and opcode/PC/downcount. Existing paired-scalar alias and FPR cache tests also passed.",
+  "passed": true,
+  "frames": 120,
+  "delay": 3,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Fox",
+    "Falco"
+  ],
+  "actualCharacterIds": [
+    2,
+    20
+  ],
+  "fullMachineBytesEqual": true,
+  "sizeA": 105209150,
+  "sizeB": 105209150,
+  "all29SectionsEqual": true,
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "referenceFrame": 422,
+  "correctedFrame": 422,
+  "codegen": "Retained baseline versus identical retained baseline; all rejected CPU flags off.",
+  "limits": "Internal delayed-input replay on corrected core, not native-Dolphin whole-game equivalence or performance. The first attempted replay was rejected before running because it had a CPU port. Dropdown selections alone did not apply to the next replay; actual captured roster and screenshot establish Fox/Falco. Heavy Ice Climbers replay was started after explicitly applying Choose fighters."
+}

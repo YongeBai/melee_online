@@ -1,0 +1,430 @@
+{
+  "kind": "same-checkpoint-probe-abba",
+  "artifactScope": "Selected exact fields from completed CUA probeControlRun.",
+  "coreSha256": "dcf171543b583cd24fffb9f9770f2ed6c1a9acd3a898ed4beb1b183da49643e3",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "rosterEvidence": "Explicit Choose fighters applied before heavy replay; captured character IDs14/14. Benchmark then restarted that selected match.",
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbScalePercent": 150,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "rejectedCpuFlags": false,
+    "queueClock": true
+  },
+  "diagnosticOnly": true,
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 108,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "probe": "async",
+      "warmup": true,
+      "seconds": 29.998515000000594,
+      "simulationFps": 54.302687983054085,
+      "gameRenderFps": 54.269352999639075,
+      "visibleFps": 54.00267313231898,
+      "deliveryFps": null,
+      "sampleCallbackFps": 59.93630018019107,
+      "maxDistinctImageGapMs": 73.07999999821186,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.39499999955296516,
+        "restore": 18.75,
+        "settle 120 frames": 2055.995000001043
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1630,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      },
+      "nonblackFraction": 1,
+      "p95GapMs": 33.37999999895692,
+      "passed": false,
+      "readbackHarvestMs": {
+        "mean": 0.28416064481202796,
+        "p95": 0.5299999974668026,
+        "max": 16.46000000089407
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 7,
+        "underruns": 176,
+        "meanAgeMs": 10.776957459933826
+      }
+    },
+    {
+      "probe": "async",
+      "warmup": false,
+      "seconds": 29.9985549999997,
+      "simulationFps": 54.70263484357884,
+      "gameRenderFps": 54.669299904612615,
+      "visibleFps": 54.4026203928828,
+      "deliveryFps": null,
+      "sampleCallbackFps": 59.93622026127652,
+      "maxDistinctImageGapMs": 74.16500000283122,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.1600000001490116,
+        "restore": 25.24499999731779,
+        "settle 120 frames": 2047.210000000894
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1642,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      },
+      "nonblackFraction": 1,
+      "p95GapMs": 33.28500000014901,
+      "passed": false,
+      "readbackHarvestMs": {
+        "mean": 0.2803362979035433,
+        "p95": 0.5250000022351742,
+        "max": 16.990000002086163
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 6,
+        "underruns": 164,
+        "meanAgeMs": 10.555691554485803
+      }
+    },
+    {
+      "probe": "delivery",
+      "warmup": true,
+      "seconds": 30.010484999999402,
+      "simulationFps": 54.24770709303873,
+      "gameRenderFps": null,
+      "visibleFps": null,
+      "deliveryFps": 53.981133593810036,
+      "sampleCallbackFps": 59.9790373264556,
+      "maxRafGapMs": 58.46999999880791,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.12000000104308128,
+        "restore": 25.12000000104308,
+        "settle 120 frames": 2022.015000000596
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1627,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      }
+    },
+    {
+      "probe": "delivery",
+      "warmup": false,
+      "seconds": 30.012980000000447,
+      "simulationFps": 56.27565140149278,
+      "gameRenderFps": null,
+      "visibleFps": null,
+      "deliveryFps": 55.77586764126638,
+      "sampleCallbackFps": 59.94073230981972,
+      "maxRafGapMs": 71.51999999955297,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.125,
+        "restore": 25.945000000298023,
+        "settle 120 frames": 2023.5
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1688,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      }
+    },
+    {
+      "probe": "delivery",
+      "warmup": true,
+      "seconds": 30.01406500000134,
+      "simulationFps": 54.107965715404674,
+      "gameRenderFps": null,
+      "visibleFps": null,
+      "deliveryFps": 53.6748354479784,
+      "sampleCallbackFps": 59.90524775634089,
+      "maxRafGapMs": 67.23000000044703,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.10500000044703484,
+        "restore": 29.300000000745058,
+        "settle 120 frames": 2019.425000000745
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1623,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      }
+    },
+    {
+      "probe": "delivery",
+      "warmup": false,
+      "seconds": 30.0105549999997,
+      "simulationFps": 57.4131334792048,
+      "gameRenderFps": null,
+      "visibleFps": null,
+      "deliveryFps": 56.78002289527858,
+      "sampleCallbackFps": 59.945575814909716,
+      "maxRafGapMs": 72.56000000238419,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.14499999955296516,
+        "restore": 25.854999996721745,
+        "settle 120 frames": 2059.035000000149
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1722,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      }
+    },
+    {
+      "probe": "async",
+      "warmup": true,
+      "seconds": 29.998240000002085,
+      "simulationFps": 57.370032375228696,
+      "gameRenderFps": 57.33669708622507,
+      "visibleFps": 56.836667751170786,
+      "deliveryFps": null,
+      "sampleCallbackFps": 59.936849628507375,
+      "maxDistinctImageGapMs": 73.03999999910593,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.10500000044703484,
+        "restore": 28.109999999403954,
+        "settle 120 frames": 1975.445000000298
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1722,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      },
+      "nonblackFraction": 1,
+      "p95GapMs": 32.87999999895692,
+      "passed": false,
+      "readbackHarvestMs": {
+        "mean": 0.2832434685790022,
+        "p95": 0.5749999992549419,
+        "max": 15.894999999552965
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 14,
+        "underruns": 91,
+        "meanAgeMs": 15.928570591718588
+      }
+    },
+    {
+      "probe": "async",
+      "warmup": false,
+      "seconds": 29.99886000000313,
+      "simulationFps": 57.70219268331594,
+      "gameRenderFps": 57.668858083267814,
+      "visibleFps": 56.76882388196826,
+      "deliveryFps": null,
+      "sampleCallbackFps": 59.935610886540765,
+      "maxDistinctImageGapMs": 87.38499999791384,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "setupTimingMs": {
+        "pause": 0.16499999910593033,
+        "restore": 25.050000000745058,
+        "settle 120 frames": 1947.699999999255
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "controllerStress": {
+        "valid": true,
+        "startFrame": 550,
+        "frames": 1731,
+        "gaps": [
+          {
+            "after": 1043,
+            "before": 1045
+          }
+        ]
+      },
+      "nonblackFraction": 1,
+      "p95GapMs": 32.78999999910593,
+      "passed": false,
+      "readbackHarvestMs": {
+        "mean": 0.29467759868249155,
+        "p95": 0.5249999985098839,
+        "max": 16.974999997764826
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 25,
+        "underruns": 92,
+        "meanAgeMs": 14.363170087931792
+      }
+    }
+  ],
+  "means": {
+    "imageMean": 56.202413763447396,
+    "deliveryMean": 56.84439244034879,
+    "percent": 1.1422617533891843
+  },
+  "interpretation": "No repeatable readback cost established: delivery first pair faster, reverse pair slower. No multi-second stall recurred in these eight segments; absence does not establish root cause or a fix. Even without image verification the corrected core remains below60simulationFPS. Image gate fails both measurements; native-input fingerprints matched. Earlier incorrect-frsqrte core timing is not acceptance evidence for this core."
+}

@@ -1,0 +1,80 @@
+{
+  "kind": "shadow-ablation-abba-measured-summary",
+  "core": "f7a2a4b67e696b1de11884d879dc0d0cbfe98807b16ba3f4f8c2e647d0d2e3b5",
+  "workload": "Fountain Ice Climbers mirror; idle P1 versus native CPU9; low models; reflection/scenery off; hidden scenery animation retained; 150% internal scale; RAF queue2; async image verification",
+  "runs": [
+    {
+      "shadows": true,
+      "seconds": 29.999240000000224,
+      "simulationFps": 56.83477314758598,
+      "gameRenderFps": 56.80143896978681,
+      "visibleFps": 56.50143136959427,
+      "p95GapMs": 32.294999999925494,
+      "maxGapMs": 50.10999999940395,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "diagnosticOnly": true,
+      "passed": false
+    },
+    {
+      "shadows": false,
+      "seconds": 29.999355000000445,
+      "simulationFps": 58.3345875269643,
+      "gameRenderFps": 58.30125347694889,
+      "visibleFps": 57.90124487676399,
+      "p95GapMs": 18.93500000052154,
+      "maxGapMs": 66.04000000096858,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "diagnosticOnly": true,
+      "passed": false
+    },
+    {
+      "shadows": false,
+      "seconds": 29.997630000000818,
+      "simulationFps": 58.30460606387746,
+      "gameRenderFps": 58.27127009700274,
+      "visibleFps": 57.90457446138087,
+      "p95GapMs": 18.679999999701977,
+      "maxGapMs": 34.49000000022352,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "diagnosticOnly": true,
+      "passed": false
+    },
+    {
+      "shadows": true,
+      "seconds": 29.99880999999866,
+      "simulationFps": 58.235643347188706,
+      "gameRenderFps": 58.2023086915807,
+      "visibleFps": 57.83562747989262,
+      "p95GapMs": 18.850000001490116,
+      "maxGapMs": 67.08499999903142,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "diagnosticOnly": true,
+      "passed": false
+    }
+  ],
+  "enabledMean": 57.535208247387345,
+  "disabledMean": 58.31959679542088,
+  "meanGainPercent": 1.36331921257824,
+  "decision": "Retain full shadows. Reverse pair differs by only 0.069 simulation FPS; removal cannot count as competitive gameplay acceptance.",
+  "passed": false
+}

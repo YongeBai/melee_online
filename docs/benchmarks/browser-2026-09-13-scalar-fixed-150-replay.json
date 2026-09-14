@@ -1,0 +1,33 @@
+{
+  "kind": "corrected-core-fixed-150-replay",
+  "core": "d516a30633080668e8f3bb38d78e00890ddfe364e5c3dda5c4274a81798812cf",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "internalScalePercent": 150,
+  "frames": 120,
+  "passed": true,
+  "fullMachineBytesEqual": true,
+  "bytesCompared": 109039327,
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false
+  },
+  "scope": "Both conditions use corrected scalar emitter and fixed 150% scale. Tests optimized flags and delayed inputs; not comparison against native Dolphin or proof of FPS/input latency."
+}

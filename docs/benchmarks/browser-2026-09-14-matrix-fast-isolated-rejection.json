@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "matrixfast",
+  "coreSha256": "172876d5a91c9d621f7f59c4d6b9d6f0c627ed7effbeacd26bbf8a1d7e1cce09",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "input": "two deterministic controller tracks indexed by native logic frame",
+    "retained": ["animstatefast", "blockmerge", "fpuguard", "integerfifo", "singleprefix"],
+    "callfusion": false
+  },
+  "measuredRuns": [
+    {"enabled": false, "simulationFps": 43.23891115287893, "visibleFps": 43.20557351899082},
+    {"enabled": true, "simulationFps": 43.73540347576712, "visibleFps": 43.702068564581324},
+    {"enabled": true, "simulationFps": 43.14445446337073, "visibleFps": 43.14445446337073},
+    {"enabled": false, "simulationFps": 47.40460614757436, "visibleFps": 47.371269575037395}
+  ],
+  "symmetricMeans": {
+    "disabledSimulationFps": 45.321758650226645,
+    "enabledSimulationFps": 43.43992896956892,
+    "simulationChangePercent": -4.15215534907416,
+    "disabledVisibleFps": 45.28842154701411,
+    "enabledVisibleFps": 43.42326151397603,
+    "visibleChangePercent": -4.118408176881967
+  },
+  "coverage": {
+    "enabledCumulativeRuns": 5573716,
+    "fallbacks": 128,
+    "fallbackReasons": {"fp": 128, "stack": 0, "a": 0, "b": 0, "out": 0, "unit": 0}
+  },
+  "inputConsistency": {
+    "passed": false,
+    "reason": "The first warmup produced 1169 common tracked frames instead of 1200; measured runs had matching native tracks and gaps."
+  },
+  "decision": "Reject. Exact matrix specialization regressed both symmetric means despite near-complete runtime coverage. Keep matrixfast and callfusion disabled. The result reinforces that repeated generated-Wasm-to-C++ transitions cost more than this guest matrix routine saves.",
+  "limits": "All image gates failed. Strong monotonic browser warmup drift remains visible, so the conclusion uses the symmetric mean and agrees with the direction of both enabled measurements relative to their surrounding controls."
+}

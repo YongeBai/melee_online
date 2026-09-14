@@ -1,0 +1,88 @@
+{
+  "core": "84a3cf8ee86919fc9e54e4f0bbcf4dbea1d4a8ad2cffe36063761134b4ec5bec",
+  "kind": "same-checkpoint-vector-arithmetic-abba-measured-summary",
+  "workload": "Fountain Ice Climbers mirror; idle P1/native CPU9; low models; reflection/scenery off; full shadows/hidden animation retained;150% EFB;RAF queue2;async probe",
+  "runs": [
+    {
+      "enabled": false,
+      "vectorfpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "seconds": 29.999379999998958,
+      "simulationFps": 54.70113049003203,
+      "gameRenderFps": 54.63446244555911,
+      "visibleFps": 54.53446037884972,
+      "p95GapMs": 33.12999999895692,
+      "maxGapMs": 51.09500000067055,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "vectorfpr": true,
+      "pssimd": true,
+      "psmemsimd": false,
+      "seconds": 29.999019999999554,
+      "simulationFps": 54.368442702462424,
+      "gameRenderFps": 54.33510828020463,
+      "visibleFps": 54.235105013431244,
+      "p95GapMs": 32.84500000067055,
+      "maxGapMs": 63.03999999910593,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "vectorfpr": true,
+      "pssimd": true,
+      "psmemsimd": false,
+      "seconds": 29.999375,
+      "simulationFps": 54.934477801620865,
+      "gameRenderFps": 54.90114377382862,
+      "visibleFps": 54.801141690451885,
+      "p95GapMs": 33.09499999880791,
+      "maxGapMs": 70.07000000029802,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "vectorfpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "seconds": 29.999934999998658,
+      "simulationFps": 57.333457555827266,
+      "gameRenderFps": 57.26679074471584,
+      "visibleFps": 57.20012393360442,
+      "p95GapMs": 20.840000001713634,
+      "maxGapMs": 67.82499999925494,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    }
+  ],
+  "meanOff": 56.01729402292965,
+  "meanOn": 54.651460252041645,
+  "changePercent": -2.4382358960947426,
+  "passed": false,
+  "decision": "Keep vector cache/arithmetic combination disabled: slower in both adjacent pairs."
+}

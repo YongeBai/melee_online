@@ -1,0 +1,166 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "psqhoist",
+  "coreSha256": "eae953535cf9f09f7d7b51c1bf5bcf0c9cb681a5155e103de0687d427a4368c2",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle human versus native level 9 CPU",
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "sceneryAnimation": "on",
+    "shadows": "full",
+    "efbPercent": 150,
+    "presentation": "raf-buffered",
+    "queueCapacity": 2,
+    "imageProbe": "webgl2-pbo-fence",
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "simd": false,
+    "vectorFpr": false
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.998620000001043,
+      "simulationFps": 49.368937637796286,
+      "gameRenderFps": 49.33560277105909,
+      "visibleFps": 49.30226790432189,
+      "p95GapMs": 33.50999999977648,
+      "maxGapMs": 50.46499999985099,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 29.99848000000045,
+      "simulationFps": 53.40270573708988,
+      "gameRenderFps": 53.33603569247429,
+      "visibleFps": 53.302700670166494,
+      "p95GapMs": 33.24000000022352,
+      "maxGapMs": 67.83999999985099,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.99875499999896,
+      "simulationFps": 54.70227014421288,
+      "gameRenderFps": 54.668935427488805,
+      "visibleFps": 54.56893127731657,
+      "p95GapMs": 33.01500000059605,
+      "maxGapMs": 49.959999999031425,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.999234999999405,
+      "simulationFps": 56.36810405332114,
+      "gameRenderFps": 56.33476986996613,
+      "visibleFps": 56.168098953191084,
+      "p95GapMs": 32.44500000029802,
+      "maxGapMs": 66.34999999962747,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.99788000000082,
+      "simulationFps": 56.203971747335274,
+      "gameRenderFps": 56.17063605827992,
+      "visibleFps": 56.07062899111384,
+      "p95GapMs": 32.58999999985099,
+      "maxGapMs": 35.90000000037253,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.999484999999403,
+      "simulationFps": 56.70097336671059,
+      "gameRenderFps": 56.667639461145214,
+      "visibleFps": 56.56763774444907,
+      "p95GapMs": 32.25499999895692,
+      "maxGapMs": 61.33999999985099,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.999805000001565,
+      "simulationFps": 56.76703565239544,
+      "gameRenderFps": 56.73370210239404,
+      "visibleFps": 56.63370145238982,
+      "p95GapMs": 32.18500000052154,
+      "maxGapMs": 35.705000000074506,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 29.99904500000179,
+      "simulationFps": 57.36849289702047,
+      "gameRenderFps": 57.33515850254224,
+      "visibleFps": 57.168486530151135,
+      "p95GapMs": 31.059999998658895,
+      "maxGapMs": 72.93500000052154,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "interpretation": "Opposing pairs and substantial upward warmup drift. The +2.07% mean does not establish a repeatable gain. A second already-warm ABBA follows."
+}

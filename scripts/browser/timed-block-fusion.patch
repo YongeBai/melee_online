@@ -1,0 +1,382 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -8285,11 +8285,94 @@
+   return floating>=2;
+ }
+ 
++// Two original blocks may share register locals, but keep the original
++// architectural timing boundary. A register-only prefix cannot invalidate B.
++struct WasmFusionBoundary
++{
++  u32 after_ops = 0, target_pc = 0;
++  u32 pc_offset = 0, downcount_offset = 0;
++  u32 cpu_state = 0, running_state = 0;
++  u32 step_armed = 0, step_start = 0, step_counter = 0;
++};
++
++bool IsFusionSafeInstruction(const PPCAnalyst::CodeOp& op, bool register_only)
++{
++  if (op.skip) return true;
++  const auto i = op.inst;
++  if (i.OPCD >= 32 && i.OPCD <= 57) return !register_only;
++  if (i.OPCD == 60 || i.OPCD == 61) return !register_only;
++  switch (i.OPCD)
++  {
++  case 7: case 8: case 10: case 11: case 12: case 13: case 14: case 15:
++  case 20: case 21: case 23: case 24: case 25: case 26: case 27: case 28: case 29:
++    return true;
++  case 16: case 18:
++    return !i.LK;
++  case 19:
++    return !i.LK && (i.SUBOP10 == 16 || i.SUBOP10 == 528);
++  case 4:
++    return !i.Rc && (IsPairedSingleArithmeticSubop(i.SUBOP5) ||
++                    IsPairedSingleMergeSubop(i.SUBOP10));
++  case 59:
++    return !i.Rc && IsSinglePrecisionArithmeticSubop(i.SUBOP5);
++  case 63:
++    return !i.Rc && (IsDoublePrecisionArithmeticSubop(i.SUBOP5) ||
++        i.SUBOP10 == 0 || i.SUBOP10 == 32 || i.SUBOP10 == 12 ||
++        i.SUBOP10 == 15 || i.SUBOP10 == 26 || i.SUBOP10 == 40 ||
++        i.SUBOP10 == 136 || i.SUBOP10 == 264 || i.SUBOP10 == 72);
++  case 31:
++    switch (i.SUBOP10)
++    {
++    case 0: case 11: case 19: case 24: case 26: case 28: case 32:
++    case 60: case 75: case 124: case 144: case 316: case 444: case 476:
++    case 536: case 792: case 824: case 922: case 954:
++      return true;
++    case 8: case 10: case 40: case 104: case 136: case 138: case 202:
++    case 235: case 266:
++      return !i.OE;
++    case 23: case 55: case 87: case 119: case 151: case 183: case 215:
++    case 247: case 279: case 311: case 343: case 375: case 407: case 439:
++      return !register_only;
++    default:
++      return false; // No SPR/MSR/cache, time-base or broad system helpers.
++    }
++  default:
++    return false;
++  }
++}
++
++void EmitFusionBoundary(std::vector<u8>& body, const WasmFusionBoundary& boundary,
++                        u32 cycles)
++{
++  // B and its helpers must see the same live budget/PC as separate dispatch.
++  EmitStateLoadU32(body, boundary.downcount_offset);
++  EmitI32Const(body, cycles); body.push_back(0x6b); EmitLocalSet(body, 3);
++  EmitStateStoreU32Prefix(body); EmitLocalGet(body, 3);
++  EmitStateStoreU32Suffix(body, boundary.downcount_offset);
++  EmitStateStoreU32Prefix(body); EmitI32Const(body, boundary.target_pc);
++  EmitStateStoreU32Suffix(body, boundary.pc_offset);
++  const auto absolute = [&](u32 pointer) {
++    EmitI32Const(body, pointer); body.insert(body.end(), {0x28, 2, 0});
++  };
++  EmitLocalGet(body, 3); EmitI32Const(body, 0); body.push_back(0x4c);
++  absolute(boundary.cpu_state); EmitI32Const(body, boundary.running_state);
++  body.push_back(0x47); body.push_back(0x72);
++  EmitI32Const(body, boundary.step_armed);
++  body.insert(body.end(), {0xfe, 0x12, 0, 0, 0x04, 0x7f});
++  absolute(boundary.step_counter); absolute(boundary.step_start); body.push_back(0x47);
++  body.push_back(0x05); EmitI32Const(body, 0); body.push_back(0x0b);
++  body.push_back(0x72);
++  body.insert(body.end(), {0x04, 0x40});
++  EmitRegCacheFlushDirty(body);
++  EmitI32Const(body, 1); body.push_back(0x0f); body.push_back(0x0b);
++}
++
+ std::vector<u8> BuildWasmCachedInterpreterBlock(std::span<const PPCAnalyst::CodeOp> ops,
+                                                 const WasmStateLayout& layout, u32 next_pc,
+                                                 bool write_npc,
+                                                 bool allow_interpret_fallback = false,
+-                                                bool record_emit_failure = false)
++                                                bool record_emit_failure = false,
++                                                const WasmFusionBoundary* fusion = nullptr)
+ {
+   const ScopedBlockMsrCache msr_cache_scope;
+   const bool cache_msr=s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
+@@ -8425,9 +8508,10 @@
+   EmitRegCacheReloadAll(body);
+   if(cache_msr){s_block_msr_cache.active=true;EmitBlockMsrReload(body);s_block_msr_cache_blocks.fetch_add(1,std::memory_order_relaxed);}
+ 
+-  u32 downcount = 0;
++  u32 downcount = 0, op_index = 0;
+   for (const PPCAnalyst::CodeOp& op : ops)
+   {
++    ++op_index;
+     downcount += op.opinfo->num_cycles;
+     if (op.skip)
+       continue;
+@@ -8453,6 +8537,11 @@
+       }
+       EmitInterpretCall(body, op, downcount, op.canEndBlock);
+     }
++    if (fusion && op_index == fusion->after_ops)
++    {
++      EmitFusionBoundary(body, *fusion, downcount);
++      downcount = 0; // A was committed; B helpers count only B instructions.
++    }
+   }
+ 
+   // §28cx C1: commit all dirty GPR locals to guest memory before the block's
+@@ -11926,183 +12015,63 @@
+   bool did_merge = false;
+   u32 merge_downcount = 0, merge_loadstores = 0, merge_fpinst = 0, merge_next_pc = 0;
+   bool merge_write_npc = false;
++  WasmFusionBoundary fusion;
+   if (prefix_count < MIN_WASM_PREFIX_INSTRUCTIONS)
+   {
+     ++s_wasm_block_too_short_count;
+-    if (prefix_ended_block)
+-      ++s_wasm_block_too_short_end_count;
+-    // §28bx adjacent-block merge (gated DEFAULT-OFF). When a block was
+-    // rejected only because a plain unconditional bx (not bl, not idle,
+-    // not self) to a compile-time-constant target ended it short, analyze
+-    // that successor and — if the combined region is a CLEAN fused block
+-    // clearing MIN — emit BOTH original blocks as one WASM function (the
+-    // bx is elided; the unconditional A→B edge needs no npc write).
+-    // downcount is the SUM (prefix_downcount already counts the bx cycles);
+-    // B's terminator / merge_write_npc governs the exit. B's physical
+-    // address ranges are unioned into code_block so icbi/dcbi on EITHER
+-    // source range invalidates the merged block (the #1 hazard).
+-    // §28cx N-block straight-line chain merge. Generalizes the single A→B
+-    // fuse into A→B→C→… across successive eligible unconditional bx edges.
+-    // Eliding an unconditional bx is fully recoverable: its only semantic
+-    // effect is "npc = target" (+ its cycles, already in downcount). If we
+-    // continue into the target we append the block MINUS its bx; if the chain
+-    // STOPS before a pending target T we set merge_next_pc=T, merge_write_npc
+-    // =true to reproduce the elided bx exactly. Every included block's
+-    // physical address ranges are unioned into code_block for invalidation.
+-    constexpr u32 MERGE_MAX_CHAIN_BLOCKS = 8;  // bound module size + analyze cost
+-    constexpr u32 MERGE_MAX_CHAIN_OPS = 64;
+-    if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_MERGE) && prefix_ended_block &&
+-        prefix_count >= 2)
+-    {
+-      const PPCAnalyst::CodeOp& term = m_code_buffer[prefix_count - 1];
+-      const bool term_eligible = term.inst.OPCD == 18 && !term.inst.LK &&
+-                                 !term.branchIsIdleLoop && term.branchTo != 0xFFFFFFFFu &&
+-                                 term.branchTo != js.blockStart && term.branchTo != term.address;
+-      if (term_eligible)
+-      {
+-        // seed: A without its bx
+-        std::vector<u32> visited_starts;
+-        visited_starts.push_back(js.blockStart);
+-        merge_storage.reserve((prefix_count - 1) + 16);
+-        for (u32 a = 0; a + 1 < prefix_count; ++a)
+-          merge_storage.push_back(m_code_buffer[a]);
+-        merge_downcount = prefix_downcount;  // already includes A's bx cycles
+-        merge_loadstores = prefix_loadstores;
+-        merge_fpinst = prefix_fpinst;
+-        u32 cur_target = term.branchTo;
+-        u32 chain_blocks = 0;
+-        bool chained_ok = false;  // included >=1 target block
+-        bool finalized = false;   // terminus block appended with its own terminator
+-        while (true)
+-        {
+-          bool visited = false;
+-          for (u32 v : visited_starts)
+-          {
+-            if (v == cur_target)
+-            {
+-              visited = true;
+-              break;
+-            }
+-          }
+-          if (visited || chain_blocks >= MERGE_MAX_CHAIN_BLOCKS ||
+-              merge_storage.size() >= MERGE_MAX_CHAIN_OPS)
+-          {
+-            merge_next_pc = cur_target;
+-            merge_write_npc = true;  // elision recovery
+-            break;
+-          }
+-          PPCAnalyst::CodeBuffer c_buffer(m_code_buffer.size());
+-          PPCAnalyst::CodeBlock c_block;
+-          const u32 c_next = analyzer.Analyze(cur_target, &c_block, &c_buffer, c_buffer.size());
+-          if (c_block.m_memory_exception || c_block.m_num_instructions == 0)
+-          {
+-            merge_next_pc = cur_target;
+-            merge_write_npc = true;
+-            break;
+-          }
+-          // validate + scan this block (same guard set as the original B-walk)
+-          u32 c_count = 0, c_dc = 0, c_ls = 0, c_fp = 0;
+-          bool c_ended = false, c_ok = true;
+-          for (u32 j = 0; j < c_block.m_num_instructions; ++j)
+-          {
+-            const PPCAnalyst::CodeOp& cop = c_buffer[j];
+-            if (HLE::TryReplaceFunction(m_ppc_symbol_db, cop.address, PowerPC::CoreMode::JIT) ||
+-                (IsDebuggingEnabled() && !cpu.IsStepping() &&
+-                 breakpoints.IsAddressBreakPoint(cop.address)) ||
+-                cop.branchIsIdleLoop ||
+-                (s_wasm_jit_direct_only && (cop.opinfo->flags & FL_USE_FPU) != 0 &&
+-                 !m_ppc_state.msr.FP) ||
+-                (s_wasm_jit_direct_only && !IsPpcWasmDirectInstructionCandidate(cop)))
+-            {
+-              c_ok = false;
+-              break;
+-            }
+-            c_dc += cop.opinfo->num_cycles;
+-            if (cop.opinfo->flags & FL_LOADSTORE)
+-              ++c_ls;
+-            if (cop.opinfo->flags & FL_USE_FPU)
+-              ++c_fp;
+-            ++c_count;
+-            if (cop.canEndBlock)
+-            {
+-              c_ended = true;
+-              break;
+-            }
+-          }
+-          const bool c_entire = c_ok && c_count == c_block.m_num_instructions;
+-          if (!c_ok || c_count == 0 || !(c_entire || c_ended) ||
+-              merge_storage.size() + c_count > MERGE_MAX_CHAIN_OPS)
+-          {
+-            merge_next_pc = cur_target;
+-            merge_write_npc = true;  // can't include T → recover
+-            break;
+-          }
+-          // T is includable
+-          visited_starts.push_back(cur_target);
+-          chained_ok = true;
+-          ++chain_blocks;
+-          // does T itself end in an eligible unconditional bx we can chain through?
+-          const PPCAnalyst::CodeOp& c_term = c_buffer[c_count - 1];
+-          const bool c_term_eligible =
+-              c_ended && c_term.inst.OPCD == 18 && !c_term.inst.LK && !c_term.branchIsIdleLoop &&
+-              c_term.branchTo != 0xFFFFFFFFu && c_term.branchTo != cur_target &&
+-              c_term.branchTo != c_term.address;
+-          bool c_next_visited = false;
+-          if (c_term_eligible)
+-          {
+-            for (u32 v : visited_starts)
+-            {
+-              if (v == c_term.branchTo)
+-              {
+-                c_next_visited = true;
+-                break;
+-              }
+-            }
+-          }
+-          const bool can_continue = c_term_eligible && !c_next_visited &&
+-                                    (chain_blocks < MERGE_MAX_CHAIN_BLOCKS) &&
+-                                    (merge_storage.size() + (c_count - 1) < MERGE_MAX_CHAIN_OPS);
+-          // union T's physical addresses (invalidation correctness — every included block)
+-          for (auto it = c_block.m_physical_addresses.begin();
+-               it != c_block.m_physical_addresses.end(); ++it)
+-          {
+-            const auto range = *it;
+-            code_block.m_physical_addresses.insert(range.first, range.second);
+-          }
+-          merge_loadstores += c_ls;
+-          merge_fpinst += c_fp;
+-          merge_downcount += c_dc;
+-          if (can_continue)
+-          {
+-            for (u32 j = 0; j + 1 < c_count; ++j)
+-              merge_storage.push_back(c_buffer[j]);  // drop T's bx
+-            cur_target = c_term.branchTo;
+-            continue;
+-          }
+-          else
+-          {
+-            for (u32 j = 0; j < c_count; ++j)
+-              merge_storage.push_back(c_buffer[j]);  // keep terminator
+-            merge_next_pc = c_next;
+-            merge_write_npc = c_entire && !c_ended;  // fall-through writes npc; branch-ended does not
+-            finalized = true;
+-            break;
+-          }
+-        }
+-        if (chained_ok && merge_storage.size() >= MIN_WASM_PREFIX_INSTRUCTIONS)
+-        {
+-          did_merge = true;
+-        }
+-        else
+-        {
+-          merge_storage.clear();  // discard partial; A falls to interpret
+-          did_merge = false;
+-        }
+-        (void)finalized;
++    if (prefix_ended_block) ++s_wasm_block_too_short_end_count;
++    return false;
++  }
++  // Performance counters retain separate-block execution. Neither admitted
++  // segment can write SPR/MSR state to enable them during a fused invocation.
++  if (!DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_MERGE) &&
++      !IsDebuggingEnabled() && (m_ppc_state.feature_flags & FEATURE_FLAG_PERFMON) == 0 &&
++      prefix_ended_block && prefix_count > 0 && prefix_count < 64)
++  {
++    const auto& term = m_code_buffer[prefix_count - 1];
++    bool safe = !term.skip && term.inst.OPCD == 18 && !term.inst.LK &&
++        !term.branchIsIdleLoop && term.branchTo != 0xffffffffu &&
++        term.branchTo != js.blockStart && term.branchTo != term.address;
++    for (u32 i = 0; safe && i < prefix_count; ++i)
++      safe = IsFusionSafeInstruction(m_code_buffer[i], true);
++    if (safe)
++    {
++      PPCAnalyst::CodeBuffer next_buffer(m_code_buffer.size());
++      PPCAnalyst::CodeBlock next_block;
++      const u32 successor = analyzer.Analyze(term.branchTo, &next_block, &next_buffer,
++                                             next_buffer.size());
++      u32 count = 0, cycles = 0, loads = 0, fp = 0;
++      bool ended = false;
++      safe = !next_block.m_memory_exception && next_block.m_num_instructions > 0 &&
++             prefix_count + next_block.m_num_instructions <= 64;
++      for (u32 i = 0; safe && i < next_block.m_num_instructions; ++i)
++      {
++        const auto& op = next_buffer[i];
++        if (op.branchIsIdleLoop || !IsFusionSafeInstruction(op, false) ||
++            HLE::TryReplaceFunction(m_ppc_symbol_db, op.address, PowerPC::CoreMode::JIT) ||
++            (s_wasm_jit_direct_only && !IsPpcWasmDirectInstructionCandidate(op)))
++        { safe = false; break; }
++        cycles += op.opinfo->num_cycles;
++        if (op.opinfo->flags & FL_LOADSTORE) ++loads;
++        if (op.opinfo->flags & FL_USE_FPU) ++fp;
++        ++count;
++        if (op.canEndBlock) { ended = true; break; }
++      }
++      if (safe && count && (ended || count == next_block.m_num_instructions))
++      {
++        merge_storage.reserve(prefix_count + count);
++        for (u32 i = 0; i < prefix_count; ++i) merge_storage.push_back(m_code_buffer[i]);
++        for (u32 i = 0; i < count; ++i) merge_storage.push_back(next_buffer[i]);
++        for (auto [from, to] : next_block.m_physical_addresses)
++          code_block.m_physical_addresses.insert(from, to);
++        fusion.after_ops = prefix_count;
++        fusion.target_pc = term.branchTo;
++        // A commits its own budget inside the function. Final operands cover B.
++        merge_downcount = cycles; merge_loadstores = loads; merge_fpinst = fp;
++        merge_next_pc = successor; merge_write_npc = !ended;
++        did_merge = true;
+       }
+     }
+-    if (!did_merge)
+-      return false;
+   }
+ 
+   const bool compiled_entire_block =
+@@ -12146,9 +12115,22 @@
+       did_merge ? std::span<const PPCAnalyst::CodeOp>{merge_storage.data(), merge_storage.size()}
+                 : std::span<const PPCAnalyst::CodeOp>{m_code_buffer.data(), prefix_count};
+   const u32 block_next_pc = did_merge ? merge_next_pc : nextPC;
++  if (did_merge)
++  {
++    const auto addr = [](const auto* pointer) {
++      return static_cast<u32>(reinterpret_cast<std::uintptr_t>(pointer));
++    };
++    fusion.pc_offset = addr(&m_ppc_state.pc) - addr(&m_ppc_state);
++    fusion.downcount_offset = addr(&m_ppc_state.downcount) - addr(&m_ppc_state);
++    fusion.cpu_state = addr(m_system.GetCPU().GetStatePtr());
++    fusion.running_state = static_cast<u32>(CPU::State::Running);
++    fusion.step_armed = addr(&s_browser_game_step_armed);
++    fusion.step_start = addr(&s_browser_game_step_start_native);
++    fusion.step_counter = addr(m_system.GetMemory().GetRAM()) + 0x00479d58;
++  }
+   const std::vector<u8> bytes =
+       BuildWasmCachedInterpreterBlock(ops, layout, block_next_pc, write_npc,
+-                                      !s_wasm_jit_direct_only, true);
++                                      !s_wasm_jit_direct_only, true, did_merge ? &fusion : nullptr);
+   if (bytes.empty())
+   {
+     LogWasmBlockReject("emit", nullptr, 0, js.blockStart, code_block.m_num_instructions);

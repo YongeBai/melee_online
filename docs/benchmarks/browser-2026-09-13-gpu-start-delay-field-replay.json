@@ -1,0 +1,62 @@
+{
+  "kind": "normal-running-browser-gpu-scheduling-equivalence",
+  "coreSha256": "f2e807d6a316978c18c21d708891520a10d36d11e3ab8bf34cf530f4b739c0f7",
+  "frames": 600,
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "passed": false,
+  "performanceTest": false,
+  "networkTest": false,
+  "fullMachineBytesEqual": false,
+  "fingerprintsEqual": true,
+  "sizeA": 109704081,
+  "sizeB": 109704081,
+  "sectionsCompared": 29,
+  "identicalSections": 28,
+  "onlyDifferentSection": {
+    "name": "CoreTiming",
+    "startA": 25462818,
+    "startB": 25462818,
+    "bytes": 363,
+    "differentBytes": 108,
+    "rangeCount": 21,
+    "rangesTruncated": false
+  },
+  "rawEqualityUnmodified": true,
+  "runs": [
+    {
+      "cycles": 1000,
+      "startFrame": 303,
+      "lastFrame": 903,
+      "polls": 601,
+      "skipped": 0,
+      "inputHash": 2874748968,
+      "stateHash": 583055645,
+      "dispatchCalls": 1579283,
+      "callbacks": 483661
+    },
+    {
+      "cycles": 4000,
+      "startFrame": 303,
+      "lastFrame": 903,
+      "polls": 601,
+      "skipped": 0,
+      "inputHash": 2874748968,
+      "stateHash": 583055645,
+      "dispatchCalls": 1258221,
+      "callbacks": 166755
+    }
+  ],
+  "fifo": {
+    "base": 6409216,
+    "end": 6671328,
+    "initialReadWrite": 6438784,
+    "finalReadWrite": 6553408,
+    "distance": 0
+  },
+  "scope": "Selected observed diagnostics. All RAM, CPU, GPU, framebuffer, texture, audio and other sections matched in this repeat. Raw scheduling bytes differ. Earlier 18 RAM bytes and broad FIFO/storage differences are not classified or excused by this repeat.",
+  "decision": "Keep raw result failed. Investigate logical event ordering and earlier non-timing differences before retaining candidate."
+}

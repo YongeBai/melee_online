@@ -1,0 +1,263 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "Common/BrowserProfile.h"
++#include "Common/BrowserDispatchProfile.h"
+ #include <type_traits>
+ 
+ #include "Core/PowerPC/CachedInterpreter/CachedInterpreter.h"
+@@ -248,17 +249,17 @@
+   return index | 0;
+ });
+ 
+-EM_JS(int, DolphinWeb_CompileWasmDispatchLoop, (const u8* ptr, int length, int perfmon_index), {
++EM_JS(int, DolphinWeb_CompileWasmDispatchLoop, (const u8* ptr, int length, int perfmon_index, int profile_index), {
+   try {
+     const module = new WebAssembly.Module(HEAPU8.slice(ptr, ptr + length));
+     const f = new WebAssembly.Instance(module, {env: {memory: wasmMemory, table: wasmTable,
+-      perfmon: wasmTable.get(perfmon_index)}}).exports.f;
++      perfmon: wasmTable.get(perfmon_index), profile: wasmTable.get(profile_index)}}).exports.f;
+     const index = wasmTable.length; wasmTable.grow(1); wasmTable.set(index, f);
+     return index;
+   } catch (error) { console.warn("WASM dispatcher unavailable:", String(error)); return 0; }
+ });
+-static std::array<int, 4> s_wasm_dispatch_loop_handles{};
+-static std::array<bool, 4> s_wasm_dispatch_loop_attempted_modes{};
++static std::array<int, 8> s_wasm_dispatch_loop_handles{};
++static std::array<bool, 8> s_wasm_dispatch_loop_attempted_modes{};
+ static std::atomic<u32> s_wasm_dispatch_loop_calls{0};
+ 
+ static std::array<char, 86> DolphinWeb_MakeWasmBlockCacheKey(std::span<const u8> bytes)
+@@ -9081,6 +9082,7 @@
+   u32 callback, callback_size, operand_handle, operand_cycles, operand_ls, operand_fp, operand_end;
+   u32 perfmon_flag;
+   bool hoist_step_check = false;
++  u32 profile_sequence = 0;
+ };
+ 
+ // A compact dispatcher for complete compiled blocks. No guest instruction or
+@@ -9094,7 +9096,7 @@
+   EmitSection(bytes, 1, {3, 0x60, 1, 0x7f, 1, 0x7f,
+       0x60, 2, 0x7f, 0x7f, 1, 0x7f,
+       0x60, 4, 0x7f, 0x7f, 0x7f, 0x7f, 0});
+-  std::vector<u8> imports{3};
++  std::vector<u8> imports{static_cast<u8>(l.profile_sequence ? 4 : 3)};
+   EmitName(imports, "env"); EmitName(imports, "memory");
+   imports.insert(imports.end(), {2, 3});
+   EmitU32Leb(imports, DOLPHIN_WASM_MEMORY_PAGES);
+@@ -9102,12 +9104,13 @@
+   EmitName(imports, "env"); EmitName(imports, "table");
+   imports.insert(imports.end(), {1, 0x70, 0, 0});
+   EmitEnvFunctionImport(imports, "perfmon", 2);
++  if (l.profile_sequence) EmitEnvFunctionImport(imports, "profile", 2);
+   EmitSection(bytes, 2, imports);
+   EmitSection(bytes, 3, {1, 1});
+   std::vector<u8> exports{1}; EmitName(exports, "f");
+-  exports.insert(exports.end(), {0, 1}); EmitSection(bytes, 7, exports);
++  exports.insert(exports.end(), {0, static_cast<u8>(l.profile_sequence ? 2 : 1)}); EmitSection(bytes, 7, exports);
+   // Params: state pointer, callback pointer. Locals: operands, map block, pc, flags.
+-  std::vector<u8> b{1, 4, 0x7f};
++  std::vector<u8> b{1, static_cast<u8>(l.profile_sequence ? 5 : 4), 0x7f};
+   const auto load = [&](u32 offset) { b.insert(b.end(), {0x28, 2}); EmitU32Leb(b, offset); };
+   const auto state = [&](u32 offset) { EmitLocalGet(b, 0); load(offset); };
+   const auto absolute = [&](u32 pointer) { EmitI32Const(b, pointer); load(0); };
+@@ -9116,9 +9119,25 @@
+   const auto emit_loop = [&](bool step_checks) {
+   b.insert(b.end(), {0x03, 0x40});  // loop
+   EmitLocalGet(b, 1); EmitI32Const(b, l.callback_size); b.push_back(0x6a); EmitLocalSet(b, 2);
++  if (l.profile_sequence)
++  {
++    EmitI32Const(b, l.profile_sequence); absolute(l.profile_sequence);
++    EmitI32Const(b, 1); b.push_back(0x6a); EmitLocalSet(b, 6); EmitLocalGet(b, 6); store(0);
++    EmitLocalGet(b, 6); EmitI32Const(b, 1023); b.push_back(0x71); b.push_back(0x45); EmitLocalSet(b, 6);
++    EmitLocalGet(b, 6); b.insert(b.end(), {0x04, 0x40});
++    EmitI32Const(b, 0); state(l.pc); EmitI32Const(b, 0); EmitI32Const(b, 0);
++    b.insert(b.end(), {0x10, 1, 0x0b});
++  }
+   EmitLocalGet(b, 0); EmitLocalGet(b, 2); load(l.operand_handle);
+   b.insert(b.end(), {0x11, 0, 0});  // block(state):0=normal,1=hard stop,2=self-committed dispatch
+-  EmitLocalSet(b,3);EmitLocalGet(b,3);
++  EmitLocalSet(b,3);
++  if (l.profile_sequence)
++  {
++    EmitLocalGet(b, 6); b.insert(b.end(), {0x04, 0x40});
++    EmitI32Const(b, 1); EmitI32Const(b, 0); EmitI32Const(b, 0); EmitI32Const(b, 0);
++    b.insert(b.end(), {0x10, 1, 0x0b});
++  }
++  EmitLocalGet(b,3);
+   b.insert(b.end(),{0x04,0x40});
+   EmitLocalGet(b,3);EmitI32Const(b,2);b.push_back(0x47);stop_if();
+   b.push_back(0x05); // Normal completion alone commits final operands below.
+@@ -9331,7 +9350,7 @@
+   const CPU::State* const redispatch_state_ptr = m_system.GetCPU().GetStatePtr();
+   const bool profile_segments = Diagnostics && DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed);
+   const int s_wasm_dispatch_loop_handle =
+-      s_wasm_dispatch_loop_handles[(DolphinWeb_GetWideBlockMap() ? 1 : 0) | (DolphinWeb_GetStepCheck() ? 2 : 0)];
++      s_wasm_dispatch_loop_handles[(DolphinWeb_GetWideBlockMap() ? 1 : 0) | (DolphinWeb_GetStepCheck() ? 2 : 0) | (DolphinWeb::DispatchProfile::enabled.load(std::memory_order_relaxed) ? 4 : 0)];
+   std::conditional_t<Diagnostics, ScopedDispatchCounter, NoDispatchDiagnostics> dispatch_counter(s_wasm_dispatch_loop_calls, s_dispatch_counter_batches,
+                                          Diagnostics && DolphinWeb_GetCounterBatch());
+   const bool wasm_dispatch = allow_redispatch && !(Diagnostics && s_ppc_block_profile_enabled) &&
+@@ -12166,9 +12185,18 @@
+   return sizeof(AnyCallback) + sizeof(operands);
+ }
+ 
++extern "C" void DolphinWeb_DispatchSample(u32 phase, u32 pc, u32, u32)
++{
++  if (phase == 0) DolphinWeb::DispatchProfile::Begin(pc);
++  else DolphinWeb::DispatchProfile::End();
++}
++
+ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+ {
+-  const unsigned dispatch_mode = (DolphinWeb_GetWideBlockMap() ? 1 : 0) | (DolphinWeb_GetStepCheck() ? 2 : 0);
++  // Prepare both dispatchers without changing or invalidating guest code.
++  for (unsigned profile_mode = 0; profile_mode < 2; ++profile_mode)
++  {
++  const unsigned dispatch_mode = (DolphinWeb_GetWideBlockMap() ? 1 : 0) | (DolphinWeb_GetStepCheck() ? 2 : 0) | (profile_mode ? 4 : 0);
+   auto& s_wasm_dispatch_loop_handle = s_wasm_dispatch_loop_handles[dispatch_mode];
+   auto& s_wasm_dispatch_loop_attempted = s_wasm_dispatch_loop_attempted_modes[dispatch_mode];
+   if (!s_wasm_dispatch_loop_attempted && DolphinWebFeatureEnabled(1u << 27) &&
+@@ -12187,11 +12215,14 @@
+       static_cast<u32>(reinterpret_cast<std::uintptr_t>(AnyCallbackCast(RunWasmBlock))), sizeof(AnyCallback),
+       offsetof(WasmBlockOperands, handle), offsetof(WasmBlockOperands, downcount),
+       offsetof(WasmBlockOperands, num_load_stores), offsetof(WasmBlockOperands, num_fp_inst),
+-      offsetof(WasmBlockOperands, end_block), FEATURE_FLAG_PERFMON, DolphinWeb_GetStepCheck()};
++      offsetof(WasmBlockOperands, end_block), FEATURE_FLAG_PERFMON, DolphinWeb_GetStepCheck(),
++      profile_mode ? addr(&DolphinWeb::DispatchProfile::sequence) : 0};
+     static_assert(sizeof(std::atomic<bool>) == 1 && sizeof(CPU::State) == 4);
+     const auto code = BuildWasmDispatchLoop(dispatch_layout);
+     s_wasm_dispatch_loop_handle = DolphinWeb_CompileWasmDispatchLoop(code.data(), code.size(),
+-        static_cast<int>(reinterpret_cast<std::uintptr_t>(&DolphinWeb_DispatchPerfmon)));
++        static_cast<int>(reinterpret_cast<std::uintptr_t>(&DolphinWeb_DispatchPerfmon)),
++        static_cast<int>(reinterpret_cast<std::uintptr_t>(&DolphinWeb_DispatchSample)));
++  }
+   }
+   // Leave cache-maintenance entries to TryWriteDcbxLoop. It verifies the
+   // complete three/four-instruction pattern before batching; unmatched entries
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -4,6 +4,7 @@
+ #include "Common/BrowserProfile.h"
+ 
+ #include "Common/BrowserRollbackOutput.h"
++#include "Common/BrowserDispatchProfile.h"
+ #include "dolphin_web_discio.cpp"
+ #include "dolphin_web_benchmark_pad.h"
+ 
+@@ -1477,6 +1478,20 @@
+   return result.c_str();
+ }
+ 
++// Opt-in direct-block profiler. Call only while CPU ownership is paused.
++EMSCRIPTEN_KEEPALIVE const char* BrowserDispatchProfile(int mode)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || mode < -1 || mode > 1 || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"Dispatch profiling requires a paused machine and -1/0/1\"}";
++  const Core::CPUThreadGuard guard(system);
++  if (mode == 1) DolphinWeb::DispatchProfile::Reset();
++  if (mode != -1) DolphinWeb::DispatchProfile::enabled.store(mode != 0, std::memory_order_relaxed);
++  static std::string result;
++  result = DolphinWeb::DispatchProfile::Report();
++  return result.c_str();
++}
++
+ // Host-only throttle policy. This leaves the virtual clock and code cache intact.
+ EMSCRIPTEN_KEEPALIVE const char* BrowserRushPresentation(int mode)
+ {
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1084,6 +1084,12 @@
+         if(stats.error)throw Error(stats.error);
+         if(payload.cycles!==undefined&&stats.cycles!==payload.cycles)throw Error("GPU start delay did not apply");
+         return stats;
++      } else if (payload.action === "dispatchProfile") {
++        if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Dispatch profiling mode must be boolean");
++        if(!api.browserDispatchProfile)throw Error("Dispatch profiling unavailable");
++        const stats=JSON.parse(api.browserDispatchProfile(payload.enabled===undefined?-1:payload.enabled?1:0));
++        if(stats.error)throw Error(stats.error);
++        return stats;
+       } else if (payload.action === "rushPresentation") {
+         if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Rush presentation mode must be boolean");
+         if(!api.browserRushPresentation)throw Error("Rush presentation diagnostics unavailable");
+@@ -2494,6 +2500,7 @@
+     browserGpuStartDelay: optionalCwrap("BrowserGpuStartDelay", "string", ["number"]),
+     browserTimingDrift: optionalCwrap("BrowserTimingDrift", "string", ["number"]),
+     browserRushPresentation: optionalCwrap("BrowserRushPresentation", "string", ["number"]),
++    browserDispatchProfile: optionalCwrap("BrowserDispatchProfile", "string", ["number"]),
+     browserFrameBenchmarkTiming: optionalCwrap("BrowserFrameBenchmarkTiming", "string", []),
+     browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
+--- /dev/null
++++ b/vendor/dolphin/Source/Core/Common/BrowserDispatchProfile.h
+@@ -0,0 +1,68 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++#include <algorithm>
++#include <array>
++#include <atomic>
++#include <chrono>
++#include <cstdint>
++#include <sstream>
++#include <vector>
++
++// Host diagnostics only. CPU-thread ownership is required for reset/report.
++// Production dispatch has no sampling instructions; the profiled dispatcher
++// calls the identical compiled blocks and keeps all normal timing boundaries.
++namespace DolphinWeb::DispatchProfile
++{
++inline std::atomic<bool> enabled{false};
++inline std::uint32_t sequence = 0;
++struct Entry { std::uint32_t pc = 0; std::uint64_t count = 0; double us = 0; };
++inline std::array<Entry, 16384> entries{};
++inline std::uint64_t samples = 0, collisions = 0;
++inline double total_us = 0;
++inline std::uint32_t current_pc = 0;
++inline std::chrono::steady_clock::time_point start;
++
++inline void Reset()
++{
++  sequence = 0; entries = {}; samples = 0; collisions = 0; total_us = 0;
++}
++inline void Begin(std::uint32_t pc)
++{
++  current_pc = pc;
++  start = std::chrono::steady_clock::now();
++}
++inline void End()
++{
++  const double us = std::chrono::duration<double, std::micro>(
++      std::chrono::steady_clock::now() - start).count();
++  ++samples; total_us += us;
++  const auto slot = ((current_pc >> 2) * 2654435761u) & (entries.size() - 1);
++  for (std::size_t probe = 0; probe < 16; ++probe)
++  {
++    auto& entry = entries[(slot + probe) & (entries.size() - 1)];
++    if (entry.count && entry.pc != current_pc) continue;
++    entry.pc = current_pc; ++entry.count; entry.us += us; return;
++  }
++  ++collisions;
++}
++inline std::string Report()
++{
++  std::vector<Entry> hot;
++  for (const auto& entry : entries) if (entry.count) hot.push_back(entry);
++  std::sort(hot.begin(), hot.end(), [](const auto& a, const auto& b) { return a.us > b.us; });
++  const auto size = std::min<std::size_t>(hot.size(), 256);
++  std::ostringstream out;
++  out << "{\"enabled\":" << (enabled.load(std::memory_order_relaxed) ? "true" : "false")
++      << ",\"sampleEvery\":1024,\"samples\":" << samples << ",\"sampledUs\":" << total_us
++      << ",\"collisions\":" << collisions << ",\"uniqueSampledBlocks\":" << hot.size()
++      << ",\"reportedBlocks\":" << size << ",\"blocks\":[";
++  for (std::size_t i = 0; i < size; ++i)
++  {
++    if (i) out << ',';
++    out << "{\"pc\":" << hot[i].pc << ",\"samples\":" << hot[i].count
++        << ",\"sampledUs\":" << hot[i].us << '}';
++  }
++  out << "]}";
++  return out.str();
++}
++}

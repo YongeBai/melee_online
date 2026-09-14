@@ -1,0 +1,27 @@
+{
+  "kind":"same-checkpoint-codegen-abba",
+  "feature":"constantaddr",
+  "coreSha256":"521f4b2be89b1e2d4c9c9d15c8d6a787f1662b2d9f61cabf462d4dcfd8318ee8",
+  "stage":"Yoshi's Story",
+  "characters":["Ice Climbers","Ice Climbers"],
+  "sourceResolution":[960,720],
+  "passed":false,
+  "inputConsistency":{"passed":true,"checked":121,"mismatches":[]},
+  "columns":["enabled","warmup","seconds","simulationFps","visibleFps","compileMs","dropped","underruns","focusedAtStart","focusedAtEnd"],
+  "runs":[
+    [false,true,45.013699999999254,41.60955442454255,41.56512350684416,165.587,1,822,true,true],
+    [false,false,44.998234999999404,42.023870491809845,42.001647397948496,0,0,801,true,true],
+    [true,true,45.014894999999555,42.385970243849705,32.478138625004334,3.451,444,631,true,false],
+    [true,false,45.74768499999866,44.57056133004456,0.9836563314624842,11.79,1992,0,false,false],
+    [true,true,44.732379999998955,45.17980040409312,0.9836275199307756,0,1975,0,false,false],
+    [true,false,44.54748000000045,44.85102187598445,7.946577449498747,0,1643,114,false,true],
+    [false,true,45.01264999999851,42.49916412386437,42.43251619267169,0,2,781,true,true],
+    [false,false,44.998484999999405,36.64567818227707,36.623455211881506,0,0,1042,true,true]
+  ],
+  "lifecycleEvents":[
+    {"runIndex":2,"type":"blur","atMs":34149.349999997765,"visibility":"visible","focused":false},
+    {"runIndex":5,"type":"focus","atMs":37740.33999999985,"visibility":"visible","focused":true}
+  ],
+  "diagnosis":"Presentation callbacks dropped to about one per second after blur, while native simulation/render production continued at roughly 42–45 FPS. Focus returned in the second candidate measurement and normal delivery resumed. The different presentation workload contaminates throughput comparison as well as image cadence. Do not claim a candidate speedup or rendering regression from this run.",
+  "limits":"Selected exact fields from visible QA output. Every image gate failed. No native build, tests, profiler or resource sampler ran during timing. Original candidate flag restored off. A focused retry is required."
+}

@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-14",
+  "hypothesis": "Publishing atomic diagnostic counters on every accepted Melee specializer call costs measurable CPU and presentation throughput.",
+  "workload": "Yoshi's Story, Ice Climbers vs Ice Climbers, ordinary two-controller native-frame input, 960x720 visible-image measurement",
+  "method": "Same-checkpoint 30-second A/B/B/A comparison after one warm-up per measured leg; only leandispatch changed. In this build leandispatch suppresses specializer counter publications while leaving the specializers enabled.",
+  "coreSha256": "1922d5587a438092c76ccc134e19cb08b3fa74d1de1612b6ff3bb8078bc34c2e",
+  "measuredRuns": {
+    "countersEnabled": [
+      {"simulationFps": 57.66687811188526, "visibleFps": 56.466873711869155, "p95GapMs": 32.86500000953674, "dropped": 33, "underruns": 95},
+      {"simulationFps": 56.037125178805994, "visibleFps": 55.60376252126615, "p95GapMs": 32.57999999821186, "dropped": 9, "underruns": 114}
+    ],
+    "countersSuppressed": [
+      {"simulationFps": 57.3717918800883, "visibleFps": 57.07176507769388, "p95GapMs": 30.234999999403954, "dropped": 7, "underruns": 77},
+      {"simulationFps": 57.3675558637609, "visibleFps": 56.934215813656955, "p95GapMs": 25.75500001013279, "dropped": 9, "underruns": 75}
+    ]
+  },
+  "means": {
+    "countersEnabled": {"simulationFps": 56.852001645345624, "visibleFps": 56.03531811656765, "p95GapMs": 32.7225000038743, "dropped": 21, "underruns": 104.5},
+    "countersSuppressed": {"simulationFps": 57.369673871924604, "visibleFps": 57.00299044567542, "p95GapMs": 27.99500000476837, "dropped": 8, "underruns": 76}
+  },
+  "effect": {
+    "simulationFps": 0.5176722265789806,
+    "simulationPercent": 0.9105611264284441,
+    "visibleFps": 0.9676723291077707,
+    "visiblePercent": 1.7268971813361844,
+    "p95GapMs": -4.72749999910593,
+    "droppedPercent": -61.904761904761905,
+    "underrunsPercent": -27.27272727272727
+  },
+  "inputConsistency": {"passed": true, "checked": 112, "mismatches": []},
+  "interpretation": "Accepted. Simulation deltas were noisy across the two pairs, but the symmetric mean was positive and both candidate legs improved paired visible delivery. This removes diagnostic-only atomic RMWs from production hot paths without changing emulation work or gameplay state."
+}

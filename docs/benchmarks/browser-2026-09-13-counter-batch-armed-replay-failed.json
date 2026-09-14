@@ -1,0 +1,55 @@
+{
+  "artifactScope": "Exact selected CUA counterRunningReplay/counterArmedReplay fields; raw state and per-step payloads excluded",
+  "coreSha256": "648ffd7b3b46f82b38ceb6b3b4e9893fd7678ceb0647116a15af63e53762c58c",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "performanceTest": false,
+  "networkTest": false,
+  "kind": "local-browser-late-input-correction",
+  "passed": false,
+  "frames": 120,
+  "fullMachineBytesEqual": false,
+  "comparison": {
+    "sizeA": 106928914,
+    "sizeB": 106928914,
+    "sections": 29,
+    "retainedCode": true,
+    "differences": [
+      {
+        "name": "CoreTiming",
+        "bytesA": 363,
+        "bytesB": 363,
+        "differentBytes": 1,
+        "firstRelativeOffset": 12
+      }
+    ]
+  },
+  "tickDifferences": [
+    {
+      "frame": 5,
+      "reference": 40590053637,
+      "corrected": 40590053651,
+      "delta": 14
+    }
+  ],
+  "referenceFrame": 426,
+  "correctedFrame": 426,
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "decision": "No FPS test pending unchanged-mode control. Source maps CoreTiming offset12 to accumulated idled cycles; one frame boundary also differs14ticks. Counter toggle preserves compiled code, unlike preceding codegen comparisons. Causal attribution remains unproven."
+}

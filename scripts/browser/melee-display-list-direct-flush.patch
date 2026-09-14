@@ -1,0 +1,209 @@
+diff --git a/.perf-lab/CachedInterpreter.cpp.before-display-list-direct-flush b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+index e2a5df3..318c939 100644
+--- a/.perf-lab/CachedInterpreter.cpp.before-display-list-direct-flush
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -10712,6 +10712,14 @@ bool CachedInterpreter::TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_
+       0x806da508, 0x80030000, 0x28000000, 0x40820008, 0x4bffc0a1, 0x38000040,
+       0x3c60cc01, 0x98038000, 0x93c38000, 0x93e38000, 0x8001001c, 0x83e10014,
+       0x83c10010, 0x38210018, 0x7c0803a6, 0x4e800020};
++  constexpr u32 flush_start = 0x8033d1b8;
++  constexpr std::array<u32, 34> flush_expected = {
++      0x806da508, 0x38000098, 0x3ca0cc01, 0xa0c30004, 0x38800000, 0xa0630006,
++      0x7ce619d6, 0x98058000, 0xb0c58000, 0x38670003, 0x28070000, 0x5463f0be,
++      0x40810048, 0x5460e8ff, 0x7c0903a6, 0x41820030, 0x90858000, 0x90858000,
++      0x90858000, 0x90858000, 0x90858000, 0x90858000, 0x90858000, 0x90858000,
++      0x4200ffe0, 0x70630007, 0x41820010, 0x7c6903a6, 0x90858000, 0x4200fffc,
++      0x806da508, 0x38000001, 0xb0030002, 0x4e800020};
+   if (!s_dolphin_web_melee_display_list_fast.load(std::memory_order_relaxed) ||
+       (js.blockStart != start && js.blockStart != suffix && js.blockStart != tail) ||
+       IsDebuggingEnabled() || IsBranchWatchEnabled() || IsProfilingEnabled() || jo.memcheck)
+@@ -10724,6 +10732,7 @@ bool CachedInterpreter::TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_
+   std::array<u32, 3> ready_suffix{};
+   std::array<u32, 3> flush_prefix{};
+   std::array<u32, 3> tail_metric{};
++  std::array<std::array<u32, 3>, 7> flush_blocks{};
+   const auto add_metric = [](std::array<u32, 3>& metric, const GekkoOPInfo& opinfo) {
+     metric[0] += opinfo.num_cycles;
+     if ((opinfo.flags & FL_LOADSTORE) != 0)
+@@ -10760,8 +10769,31 @@ bool CachedInterpreter::TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_
+   }
+   add_metric(flush_prefix,
+              *PPCTables::GetOpInfo(UGeckoInstruction{expected[16]}, start + 16 * sizeof(u32)));
++  for (u32 i = 0; i < flush_expected.size(); ++i)
++  {
++    const u32 address = flush_start + i * sizeof(u32);
++    const auto result = m_system.GetMMU().TryReadInstruction(address);
++    if (!result.valid || result.hex != flush_expected[i])
++      return false;
++    const GekkoOPInfo& opinfo = *PPCTables::GetOpInfo(UGeckoInstruction{result.hex}, address);
++    if (i <= 12)
++      add_metric(flush_blocks[0], opinfo);
++    if (i >= 13 && i <= 15)
++      add_metric(flush_blocks[1], opinfo);
++    if (i >= 16 && i <= 24)
++      add_metric(flush_blocks[2], opinfo);
++    if (i >= 25 && i <= 26)
++      add_metric(flush_blocks[3], opinfo);
++    if (i >= 27 && i <= 29)
++      add_metric(flush_blocks[4], opinfo);
++    if (i >= 28 && i <= 29)
++      add_metric(flush_blocks[5], opinfo);
++    if (i >= 30)
++      add_metric(flush_blocks[6], opinfo);
++  }
+   Write(FastMeleeDisplayList,
+-        {power_pc, js.blockStart, clean, dirty_prefix, ready_suffix, flush_prefix, tail_metric});
++        {power_pc, js.blockStart, clean, dirty_prefix, ready_suffix, flush_prefix, tail_metric,
++         flush_blocks});
+   s_melee_display_list_compiles.fetch_add(1, std::memory_order_relaxed);
+   return true;
+ }
+@@ -12748,21 +12780,82 @@ s32 CachedInterpreter::FastMeleeJObjUpdate(PowerPC::PowerPCState& ppc_state,
+ s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+                                              const MeleeDisplayListOperands& operands)
+ {
+-  const auto& [power_pc, current_pc, clean, dirty_prefix, ready_suffix, flush_prefix, tail] =
+-      operands;
++  const auto& [power_pc, current_pc, clean, dirty_prefix, ready_suffix, flush_prefix, tail,
++               flush_blocks] = operands;
+   (void)power_pc;
+   constexpr s32 fallback_size = sizeof(AnyCallback) + sizeof(operands);
+   constexpr u32 start_pc = 0x803410d8;
+   constexpr u32 suffix_pc = 0x80341108;
+   constexpr u32 tail_pc = 0x8034111c;
+   constexpr u32 dirty_state_pc = 0x8033d050;
+-  constexpr u32 flush_primitive_pc = 0x8033d1b8;
+ 
+   auto& system = Core::System::GetInstance();
+   auto& memory = system.GetMemory();
+   u8* const ram = memory.GetRAM();
+   const u32 ram_size = memory.GetRamSizeReal();
+ 
++  const auto apply_metric = [&](const std::array<u32, 3>& metric) {
++    ppc_state.downcount -= static_cast<int>(metric[0]);
++    UpdatePerformanceMonitorIfNeeded(metric[0], metric[1], metric[2], ppc_state);
++  };
++
++  // Run the exact USA 1.02 __GXSendFlushPrim body without another guest block
++  // round trip. Its FIFO writes, volatile registers, CR0, CTR, GX flag, and
++  // dynamic basic-block accounting match the original function.
++  const auto run_flush_primitive = [&](u32 gx, u32 gx_offset) {
++    const u16 width = ReadRamU16BE(ram, gx_offset + 4);
++    const u16 height = ReadRamU16BE(ram, gx_offset + 6);
++    const u32 vertices = static_cast<u32>(width) * static_cast<u32>(height);
++    const u32 words = (vertices + 3u) >> 2;
++    const u32 groups = words >> 3;
++    const u32 remainder = words & 7;
++    auto& fifo = system.GetGPFifo();
++
++    fifo.FastWrite8(0x98);
++    fifo.FastCheckGatherPipe();
++    fifo.FastWrite16(width);
++    fifo.FastCheckGatherPipe();
++    apply_metric(flush_blocks[0]);
++    if (vertices != 0)
++    {
++      apply_metric(flush_blocks[1]);
++      for (u32 group = 0; group < groups; ++group)
++      {
++        for (u32 word = 0; word < 8; ++word)
++        {
++          fifo.FastWrite32(0);
++          fifo.FastCheckGatherPipe();
++        }
++        apply_metric(flush_blocks[2]);
++      }
++      if (groups != 0)
++        apply_metric(flush_blocks[3]);
++      if (remainder != 0)
++      {
++        fifo.FastWrite32(0);
++        fifo.FastCheckGatherPipe();
++        apply_metric(flush_blocks[4]);
++        for (u32 word = 1; word < remainder; ++word)
++        {
++          fifo.FastWrite32(0);
++          fifo.FastCheckGatherPipe();
++          apply_metric(flush_blocks[5]);
++        }
++      }
++      CTR(ppc_state) = 0;
++    }
++    WriteRamU16BE(ram, gx_offset + 2, 1);
++    apply_metric(flush_blocks[6]);
++
++    ppc_state.gpr[0] = 1;
++    ppc_state.gpr[3] = gx;
++    ppc_state.gpr[4] = 0;
++    ppc_state.gpr[5] = 0xcc010000;
++    ppc_state.gpr[6] = width;
++    ppc_state.gpr[7] = vertices;
++    SetFastCompareField<u32>(ppc_state, 0, groups == 0 ? groups : remainder, 0);
++  };
++
+   // Complete the wrapper after Dolphin's original __GXSendFlushPrim. CR and
+   // volatile registers are intentionally left as that function produced them.
+   if (current_pc == tail_pc)
+@@ -12820,7 +12913,7 @@ s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+     }
+     const u32 gx = ReadRamU32BE(ram, gx_global_offset);
+     u32 gx_offset = 0;
+-    if (!TryFastAlignedRamOffset(ppc_state, ram, ram_size, gx, 4, &gx_offset))
++    if (!TryFastAlignedRamOffset(ppc_state, ram, ram_size, gx, 8, &gx_offset))
+     {
+       s_melee_display_list_memory.fetch_add(1, std::memory_order_relaxed);
+       s_melee_display_list_fallbacks.fetch_add(1, std::memory_order_relaxed);
+@@ -12829,16 +12922,30 @@ s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+     const u32 gx_ready = ReadRamU32BE(ram, gx_offset);
+     if (gx_ready == 0)
+     {
+-      ppc_state.gpr[0] = gx_ready;
+-      ppc_state.gpr[3] = gx;
+-      SetFastCompareField<u32>(ppc_state, 0, gx_ready, 0);
+-      LR(ppc_state) = tail_pc;
+-      ppc_state.pc = flush_primitive_pc;
+-      ppc_state.npc = flush_primitive_pc;
+-      ppc_state.downcount -= static_cast<int>(flush_prefix[0]);
+-      UpdatePerformanceMonitorIfNeeded(flush_prefix[0], flush_prefix[1], flush_prefix[2],
+-                                       ppc_state);
++      apply_metric(flush_prefix);
++      run_flush_primitive(gx, gx_offset);
++      const u32 old_lr = ReadRamU32BE(ram, stack_offset + 28);
++      const u32 old_r31 = ReadRamU32BE(ram, stack_offset + 20);
++      const u32 old_r30 = ReadRamU32BE(ram, stack_offset + 16);
++      auto& fifo = system.GetGPFifo();
++      fifo.FastWrite8(0x40);
++      fifo.FastCheckGatherPipe();
++      fifo.FastWrite32(ppc_state.gpr[30]);
++      fifo.FastCheckGatherPipe();
++      fifo.FastWrite32(ppc_state.gpr[31]);
++      fifo.FastCheckGatherPipe();
++
++      ppc_state.gpr[0] = old_lr;
++      ppc_state.gpr[3] = 0xcc010000;
++      ppc_state.gpr[31] = old_r31;
++      ppc_state.gpr[30] = old_r30;
++      ppc_state.gpr[1] = stack + 24;
++      LR(ppc_state) = old_lr;
++      ppc_state.pc = old_lr & ~3u;
++      ppc_state.npc = ppc_state.pc;
++      apply_metric(tail);
+       s_melee_display_list_flush_continuations.fetch_add(1, std::memory_order_relaxed);
++      s_melee_display_list_tails.fetch_add(1, std::memory_order_relaxed);
+       return 0;
+     }
+ 
+diff --git a/.perf-lab/CachedInterpreter.h.before-display-list-direct-flush b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.h
+index 7ec4c55..cf36bf4 100644
+--- a/.perf-lab/CachedInterpreter.h.before-display-list-direct-flush
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.h
+@@ -357,6 +357,9 @@ struct CachedInterpreter::MeleeDisplayListOperands
+   std::array<u32, 3> ready_suffix;
+   std::array<u32, 3> flush_prefix;
+   std::array<u32, 3> tail;
++  // Original __GXSendFlushPrim basic blocks, retained separately so its
++  // dynamic loops keep exact cycle and performance-monitor accounting.
++  std::array<std::array<u32, 3>, 7> flush_blocks;
+ };
+ 
+ struct CachedInterpreter::OsInterruptFunctionOperands

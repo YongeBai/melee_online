@@ -1,0 +1,75 @@
+{
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "commonCodegen": {
+    "readfusion": false,
+    "branchfusion": false,
+    "fpuguard": true,
+    "blockmerge": true,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "performanceTest": false,
+  "networkTest": false,
+  "artifactScope": "Exact selected CUA cpRunningReplay fields; matching section rows omitted",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "passed": true,
+  "frames": 600,
+  "fullMachineBytesEqual": true,
+  "fingerprintsEqual": true,
+  "comparison": {
+    "sizeA": 107382085,
+    "sizeB": 107382085,
+    "sectionCount": 29,
+    "differingSections": []
+  },
+  "runs": [
+    {
+      "cpformat": false,
+      "calls": 1669647,
+      "avoided": 0,
+      "cpFormat": {
+        "writes": 357254,
+        "unchanged": 295154,
+        "avoided": 0
+      },
+      "dispatcherHandle": 11378,
+      "sceneFrame": 903,
+      "input": {
+        "startFrame": 303,
+        "lastFrame": 903,
+        "frames": 601,
+        "inputHash": 221119829,
+        "stateHash": 1668573309,
+        "gaps": []
+      }
+    },
+    {
+      "cpformat": true,
+      "calls": 1652414,
+      "avoided": 295154,
+      "cpFormat": {
+        "writes": 357254,
+        "unchanged": 295154,
+        "avoided": 295154
+      },
+      "dispatcherHandle": 11378,
+      "sceneFrame": 903,
+      "input": {
+        "startFrame": 303,
+        "lastFrame": 903,
+        "frames": 601,
+        "inputHash": 221119829,
+        "stateHash": 1668573309,
+        "gaps": []
+      }
+    }
+  ],
+  "limits": "Avoided counts suppressed dirty-mark operations, not actual cache lookups avoided. Repeated invalidations can coalesce before a lookup. Browser equivalence is not native-Dolphin equivalence."
+}

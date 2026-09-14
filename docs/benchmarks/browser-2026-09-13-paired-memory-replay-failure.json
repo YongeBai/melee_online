@@ -1,0 +1,37 @@
+{
+  "coreSha256": "28a5899ca069b3907eaa9ff6e5b8a35321261900180875015e25de5bd18c2857",
+  "passed": false,
+  "frames": 120,
+  "comparison": {
+    "sizeA": 109035106,
+    "sizeB": 109035106,
+    "differences": [
+      {
+        "name": "CoreTiming",
+        "differentBytes": 2,
+        "firstRelativeOffset": 12,
+        "field": "m_idled_cycles"
+      }
+    ],
+    "otherSectionsEqual": true
+  },
+  "tickDifferences": [
+    {
+      "frame": 21,
+      "reference": 10223130922,
+      "corrected": 10223130663,
+      "delta": -259
+    }
+  ],
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": true
+  },
+  "next": "Isolate memory SIMD while keeping all other codegen flags identical."
+}

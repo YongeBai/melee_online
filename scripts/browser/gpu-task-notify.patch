@@ -1,0 +1,42 @@
+--- a/Source/Core/Common/BlockingLoop.h
++++ b/Source/Core/Common/BlockingLoop.h
+@@ -8,6 +8,8 @@
+ #include <functional>
+ #ifdef __EMSCRIPTEN__
+ #include <emscripten/eventloop.h>
++#include <emscripten/atomic.h>
++#include <emscripten/emscripten.h>
+ #endif
+ #include <thread>
+ 
+@@ -45,7 +47,13 @@
+ 
+     // Mark that new data is available. If the old state will rerun the payload
+     // itself, we don't have to set the event to interrupt the worker.
+-    if (m_running_state.exchange(STATE_NEED_EXECUTION) != STATE_SLEEPING)
++    const auto previous = m_running_state.exchange(STATE_NEED_EXECUTION);
++#ifdef __EMSCRIPTEN__
++    // Wake a browser task parked on this word, including the race before waitAsync.
++    if (previous <= STATE_DONE)
++      emscripten_atomic_notify(&m_running_state, 1);
++#endif
++    if (previous != STATE_SLEEPING)
+       return;
+ 
+     // Else as the worker thread may sleep now, we have to set the event.
+@@ -209,6 +217,7 @@
+     Prepare();
+     struct Pending { BlockingLoop* loop; std::function<void()> run, stop; };
+     auto* pending = new Pending{this, std::move(payload), std::move(stopped)};
++    EM_ASM({ Module._meleeGpuWaitAddress = $0 >>> 0; }, &m_running_state);
+     emscripten_set_timeout_loop([](double, void* opaque) -> bool {
+       auto* p = static_cast<Pending*>(opaque);
+       auto& loop = *p->loop;
+@@ -229,6 +238,7 @@
+       loop.m_running_state.store(STATE_DONE);
+       loop.m_stopped.Set();
+       loop.m_done_event.Set();
++      EM_ASM({ Module._meleeGpuWaitAddress = 0; });
+       auto stopped = std::move(p->stop);
+       delete p;
+       stopped();

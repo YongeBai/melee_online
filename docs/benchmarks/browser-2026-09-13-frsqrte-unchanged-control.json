@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "frames": 120,
+  "delay": 3,
+  "performanceTest": false,
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "fullMachineBytesEqual": true,
+  "tickDifferences": [],
+  "all29SectionsEqual": true,
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "limits": "Internal full-machine delayed-input replay, not FPS or native-Dolphin whole-game conformance.",
+  "coreSha256": "7a32b99fe130b6a77a9c06755d3707535a0a47ff5ad9b72f05117ffb6b922080",
+  "sizeA": 107055991,
+  "sizeB": 107055991,
+  "referenceFrame": 423,
+  "correctedFrame": 423,
+  "reference": "Exact fast path enabled",
+  "candidate": "Same exact fast path enabled"
+}

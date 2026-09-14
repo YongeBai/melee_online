@@ -1,0 +1,108 @@
+{
+  "kind": "sampled-direct-block-profile",
+  "coreSha256": "094195c8d1c1c5dca154ef34765b9168353cdc863f85c2fa365d8073cf62d042",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "diagnosticOnly": true,
+  "passed": false,
+  "seconds": 29.999449999999253,
+  "simulationFps": 33.20060867782659,
+  "synchronousCompileAndLinkMs": 424.682,
+  "profile": {
+    "sampleEvery": 1024,
+    "samples": 404085,
+    "sampledUs": 219988,
+    "collisions": 21,
+    "uniqueSampledBlocks": 9756,
+    "reportedBlocks": 256
+  },
+  "selectedTopFunctions": [
+    {
+      "name": "HSD_FObjInterpretAnim",
+      "start": 2151067696,
+      "samples": 46206,
+      "sampledUs": 19430.143999999997,
+      "blocks": 43
+    },
+    {
+      "name": "JObjUpdateFunc",
+      "start": 2151087552,
+      "samples": 2628,
+      "sampledUs": 18518.74,
+      "blocks": 6
+    },
+    {
+      "name": "HandleReverb",
+      "start": 2151008528,
+      "samples": 16959,
+      "sampledUs": 7703.552,
+      "blocks": 11
+    },
+    {
+      "name": "SetupEnvelopeModelMtx",
+      "start": 2151081156,
+      "samples": 7678,
+      "sampledUs": 3699.456,
+      "blocks": 17
+    },
+    {
+      "name": "parseFloat",
+      "start": 2151066640,
+      "samples": 6753,
+      "sampledUs": 2704.8959999999997,
+      "blocks": 6
+    },
+    {
+      "name": "cosf",
+      "start": 2150785600,
+      "samples": 5167,
+      "sampledUs": 2659.3279999999995,
+      "blocks": 9
+    },
+    {
+      "name": "sinf",
+      "start": 2150786004,
+      "samples": 4944,
+      "sampledUs": 2644.9919999999997,
+      "blocks": 8
+    },
+    {
+      "name": "FObjUpdateAnim",
+      "start": 2151067248,
+      "samples": 4883,
+      "sampledUs": 2025.728,
+      "blocks": 9
+    },
+    {
+      "name": "HSD_TExpSetReg",
+      "start": 2151173928,
+      "samples": 3051,
+      "sampledUs": 1702.4,
+      "blocks": 6
+    },
+    {
+      "name": "lbArq_80014BD0",
+      "start": 2147568592,
+      "samples": 3851,
+      "sampledUs": 1464.576,
+      "blocks": 2
+    }
+  ],
+  "largestBlock": {
+    "pc": 2151088472,
+    "samples": 150,
+    "sampledUs": 16754.9
+  },
+  "limits": [
+    "Selected exact fields from completed native profile; not all reported rows reproduced.",
+    "Clock/import overhead and host preemption are included. Multiplying sampled microseconds by 1024 exceeds the whole capture duration: these totals are NOT additive CPU shares or exact self-time.",
+    "The largest block has an isolated large total and only 150 samples; no per-sample maximum was recorded. Do not optimize based on this spike without repetition/calibration.",
+    "Complete compiled blocks only; dispatch bookkeeping, partial blocks and native callbacks excluded. Periodic sampling and top-256 truncation bias coverage.",
+    "Profiling reduced throughput. No build or separate resource sampler was run during capture; unrelated desktop applications remained running.",
+    "Normal speed, native 720p framing, and partner AI retained; profiler cleaned up and disabled."
+  ],
+  "interpretation": "HSD_FObjInterpretAnim accounts for 46,206/404,085 sampled complete-block visits (~11.4%), including many two-instruction compare/branch blocks at 8036b0ac/b4/b8/c0/c4. This motivates examining dispatch frequency and hot memory operations; it does not establish their total CPU share."
+}

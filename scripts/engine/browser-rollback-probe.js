@@ -1,9 +1,10 @@
 import {BrowserRollbackTimeline,neutralBrowserPad} from './browser-rollback.js';
 
 // Local, real-engine late-input test. It does not claim network or FPS coverage.
-export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,delay=3,checkpointPolicy='periodic',cacheFastPathComparison=false,cacheLoopComparison=false,inlineDispatchComparison=false,wasmDispatchComparison=false,codegenComparison=null,batchAdvance=false,onProgress=()=>{}}={}) {
+export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,delay=3,prewarmFrames=0,checkpointPolicy='periodic',cacheFastPathComparison=false,cacheLoopComparison=false,inlineDispatchComparison=false,wasmDispatchComparison=false,idleChecksComparison=false,codegenComparison=null,codegenReference=null,batchAdvance=false,onProgress=()=>{}}={}) {
   if(!Number.isInteger(frames)||frames<4||frames>3600||!Number.isInteger(delay)||delay<1||delay>8||delay>=frames)
     throw Error('Invalid timeline probe duration or input delay');
+  if(!Number.isInteger(prewarmFrames)||prewarmFrames<0||prewarmFrames>frames)throw Error('Invalid replay prewarm length');
   let phase='prepare',frame=-1,replaying=false,stepFrame=-1;
   const timings={},stepParts=[];
   const command=async(action,data)=>{
@@ -45,7 +46,7 @@ export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,dela
         timing=await command('step',{unthrottled:true});
         state=await inspect();
       }
-      stepParts.push({phase,frame,replay,milliseconds:timing.milliseconds,
+      stepParts.push({phase,frame,replay,milliseconds:timing.milliseconds,coreTicks:timing.coreTicks,ppcPc:timing.ppcPc,
         transitionMilliseconds:timing.transitionMilliseconds,waitMilliseconds:timing.waitMilliseconds,
         waitStrategy:timing.waitStrategy,waitWakeups:timing.waitWakeups});
       if(state.sceneFrame!==startFrame+frame+1)throw Error('Rollback did not advance exactly one logic frame');
@@ -59,8 +60,17 @@ export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,dela
   if(cacheLoopComparison)await command('cacheLoopBatch',{value:false});
   if(inlineDispatchComparison)await command('inlineDispatch',{value:false});
   if(wasmDispatchComparison)await command('wasmDispatch',{value:false});
-  if(codegenComparison)await command('codegen',{regcache:false,fastmem:false});
+  if(idleChecksComparison)await command('idleBatchChecks',{value:false});
+  if(codegenComparison)await command('codegen',codegenReference??{regcache:false,fastmem:false});
   await command('capture',{slot:5});
+  // Optional diagnostic control: execute the exact future input path, then
+  // restore its initial state while retaining verified compiled code. This
+  // does not erase a failure without prewarming or establish cold replay.
+  if(prewarmFrames){
+    phase='prewarm';
+    for(let f=0;f<prewarmFrames;f++){frame=f;await adapter.advance(f,[scripted(f,0),scripted(f,1)],{replay:false});}
+    await command('restore',{slot:5});
+  }
   const reference=new BrowserRollbackTimeline(adapter,{window:8,checkpointInterval:4,checkpointPolicy});
   phase='reference';
   for(let f=0;f<frames;f++){
@@ -77,6 +87,7 @@ export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,dela
   if(cacheLoopComparison)await command('cacheLoopBatch',{value:true});
   if(inlineDispatchComparison)await command('inlineDispatch',{value:true});
   if(wasmDispatchComparison)await command('wasmDispatch',{value:true});
+  if(idleChecksComparison)await command('idleBatchChecks',{value:true});
   if(codegenComparison)await command('codegen',codegenComparison);
   const before=await command('outputStats');
   const corrected=new BrowserRollbackTimeline(adapter,{window:8,checkpointInterval:4,checkpointPolicy});
@@ -102,10 +113,14 @@ export async function verifyBrowserRollbackTimeline(send,inspect,{frames=40,dela
     audioSamplesSkipped:after.output.audioSamplesSkipped-before.output.audioSamplesSkipped,
     suppressed:after.output.suppressed,
   };
+  const referenceTicks=new Map(stepParts.filter(s=>s.phase==="reference").map(s=>[s.frame,s.coreTicks]));
+  const correctedTicks=new Map(stepParts.filter(s=>s.phase!=="reference").map(s=>[s.frame,s.coreTicks]));
+  const tickDifferences=[...referenceTicks].filter(([frame,ticks])=>Number.isFinite(ticks)&&Number.isFinite(correctedTicks.get(frame))&&ticks!==correctedTicks.get(frame)).map(([frame,ticks])=>({frame,reference:ticks,corrected:correctedTicks.get(frame),delta:correctedTicks.get(frame)-ticks}));
   return {
-    passed:comparison.equal&&corrected.stats.rollbacks>0&&output.videoSkipped>0&&output.audioSamplesSkipped>0&&!output.suppressed,
+    tickDifferences,
+    passed:comparison.equal&&tickDifferences.length===0&&corrected.stats.rollbacks>0&&output.videoSkipped>0&&output.audioSamplesSkipped>0&&!output.suppressed,
     kind:'local-browser-late-input-correction',networkTest:false,performanceTest:false,
-    frames,delay,checkpointPolicy,cacheFastPathComparison,cacheLoopComparison,inlineDispatchComparison,wasmDispatchComparison,codegenComparison,batchAdvance,stats:corrected.stats,output,fullMachineBytesEqual:comparison.equal,
+    frames,delay,prewarmFrames,checkpointPolicy,cacheFastPathComparison,cacheLoopComparison,inlineDispatchComparison,wasmDispatchComparison,idleChecksComparison,codegenComparison,codegenReference,batchAdvance,stats:corrected.stats,output,fullMachineBytesEqual:comparison.equal,
     comparison:comparison.comparison,
     referenceFrame:referenceState.sceneFrame,correctedFrame:correctedState.sceneFrame,
     referenceFighters:referenceState.fighters,correctedFighters:correctedState.fighters,

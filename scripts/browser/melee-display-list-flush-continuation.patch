@@ -1,0 +1,187 @@
+diff --git a/.perf-lab/CachedInterpreter.cpp.before-display-list-flush-continuation b/.perf-lab/CachedInterpreter.cpp.before-display-list-direct-flush
+index 070eff2..e2a5df3 100644
+--- a/.perf-lab/CachedInterpreter.cpp.before-display-list-flush-continuation
++++ b/.perf-lab/CachedInterpreter.cpp.before-display-list-direct-flush
+@@ -399,6 +399,7 @@ std::atomic<u32> s_melee_display_list_compiles{0}, s_melee_display_list_runs{0};
+ std::atomic<u32> s_melee_display_list_fallbacks{0}, s_melee_display_list_dirty{0};
+ std::atomic<u32> s_melee_display_list_flush{0}, s_melee_display_list_memory{0};
+ std::atomic<u32> s_melee_display_list_continuations{0}, s_melee_display_list_suffixes{0};
++std::atomic<u32> s_melee_display_list_flush_continuations{0}, s_melee_display_list_tails{0};
+ std::atomic<u32> s_chain_fusion_blocks{0}, s_chain_fusion_boundaries{0};
+ std::atomic<u32> s_bswap_rotate_sites{0};
+ std::atomic<u32> s_block_msr_cache_load_sites{0},s_block_msr_cache_blocks{0};
+@@ -10704,6 +10705,7 @@ bool CachedInterpreter::TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_
+ {
+   constexpr u32 start = 0x803410d8;
+   constexpr u32 suffix = 0x80341108;
++  constexpr u32 tail = 0x8034111c;
+   constexpr std::array<u32, 28> expected = {
+       0x7c0802a6, 0x90010004, 0x9421ffe8, 0x93e10014, 0x3be40000, 0x93c10010,
+       0x3bc30000, 0x80ada508, 0x800504f0, 0x28000000, 0x41820008, 0x4bffbf4d,
+@@ -10711,15 +10713,17 @@ bool CachedInterpreter::TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_
+       0x3c60cc01, 0x98038000, 0x93c38000, 0x93e38000, 0x8001001c, 0x83e10014,
+       0x83c10010, 0x38210018, 0x7c0803a6, 0x4e800020};
+   if (!s_dolphin_web_melee_display_list_fast.load(std::memory_order_relaxed) ||
+-      (js.blockStart != start && js.blockStart != suffix) || IsDebuggingEnabled() || IsBranchWatchEnabled() ||
+-      IsProfilingEnabled() || jo.memcheck)
++      (js.blockStart != start && js.blockStart != suffix && js.blockStart != tail) ||
++      IsDebuggingEnabled() || IsBranchWatchEnabled() || IsProfilingEnabled() || jo.memcheck)
+   {
+     return false;
+   }
+ 
+   std::array<u32, 3> clean{};
+   std::array<u32, 3> dirty_prefix{};
+-  std::array<u32, 3> suffix_metric{};
++  std::array<u32, 3> ready_suffix{};
++  std::array<u32, 3> flush_prefix{};
++  std::array<u32, 3> tail_metric{};
+   const auto add_metric = [](std::array<u32, 3>& metric, const GekkoOPInfo& opinfo) {
+     metric[0] += opinfo.num_cycles;
+     if ((opinfo.flags & FL_LOADSTORE) != 0)
+@@ -10747,11 +10751,17 @@ bool CachedInterpreter::TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_
+       if (i <= 10)
+         add_metric(dirty_prefix, opinfo);
+       if (i >= 12)
+-        add_metric(suffix_metric, opinfo);
++        add_metric(ready_suffix, opinfo);
++      if (i >= 12 && i <= 15)
++        add_metric(flush_prefix, opinfo);
++      if (i >= 17)
++        add_metric(tail_metric, opinfo);
+     }
+   }
++  add_metric(flush_prefix,
++             *PPCTables::GetOpInfo(UGeckoInstruction{expected[16]}, start + 16 * sizeof(u32)));
+   Write(FastMeleeDisplayList,
+-        {power_pc, js.blockStart, clean, dirty_prefix, suffix_metric});
++        {power_pc, js.blockStart, clean, dirty_prefix, ready_suffix, flush_prefix, tail_metric});
+   s_melee_display_list_compiles.fetch_add(1, std::memory_order_relaxed);
+   return true;
+ }
+@@ -12738,18 +12748,59 @@ s32 CachedInterpreter::FastMeleeJObjUpdate(PowerPC::PowerPCState& ppc_state,
+ s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+                                              const MeleeDisplayListOperands& operands)
+ {
+-  const auto& [power_pc, current_pc, clean, dirty_prefix, suffix] = operands;
++  const auto& [power_pc, current_pc, clean, dirty_prefix, ready_suffix, flush_prefix, tail] =
++      operands;
+   (void)power_pc;
+   constexpr s32 fallback_size = sizeof(AnyCallback) + sizeof(operands);
+   constexpr u32 start_pc = 0x803410d8;
+   constexpr u32 suffix_pc = 0x80341108;
++  constexpr u32 tail_pc = 0x8034111c;
+   constexpr u32 dirty_state_pc = 0x8033d050;
++  constexpr u32 flush_primitive_pc = 0x8033d1b8;
+ 
+   auto& system = Core::System::GetInstance();
+   auto& memory = system.GetMemory();
+   u8* const ram = memory.GetRAM();
+   const u32 ram_size = memory.GetRamSizeReal();
+ 
++  // Complete the wrapper after Dolphin's original __GXSendFlushPrim. CR and
++  // volatile registers are intentionally left as that function produced them.
++  if (current_pc == tail_pc)
++  {
++    const u32 stack = ppc_state.gpr[1];
++    u32 stack_offset = 0;
++    if (ppc_state.msr.LE ||
++        !TryFastAlignedRamOffset(ppc_state, ram, ram_size, stack, 32, &stack_offset))
++    {
++      s_melee_display_list_memory.fetch_add(1, std::memory_order_relaxed);
++      s_melee_display_list_fallbacks.fetch_add(1, std::memory_order_relaxed);
++      return fallback_size;
++    }
++    const u32 old_lr = ReadRamU32BE(ram, stack_offset + 28);
++    const u32 old_r31 = ReadRamU32BE(ram, stack_offset + 20);
++    const u32 old_r30 = ReadRamU32BE(ram, stack_offset + 16);
++    auto& fifo = system.GetGPFifo();
++    fifo.FastWrite8(0x40);
++    fifo.FastCheckGatherPipe();
++    fifo.FastWrite32(ppc_state.gpr[30]);
++    fifo.FastCheckGatherPipe();
++    fifo.FastWrite32(ppc_state.gpr[31]);
++    fifo.FastCheckGatherPipe();
++
++    ppc_state.gpr[0] = old_lr;
++    ppc_state.gpr[3] = 0xcc010000;
++    ppc_state.gpr[31] = old_r31;
++    ppc_state.gpr[30] = old_r30;
++    ppc_state.gpr[1] = stack + 24;
++    LR(ppc_state) = old_lr;
++    ppc_state.pc = old_lr & ~3u;
++    ppc_state.npc = ppc_state.pc;
++    ppc_state.downcount -= static_cast<int>(tail[0]);
++    UpdatePerformanceMonitorIfNeeded(tail[0], tail[1], tail[2], ppc_state);
++    s_melee_display_list_tails.fetch_add(1, std::memory_order_relaxed);
++    return 0;
++  }
++
+   // A dirty call executes Dolphin's original __GXSetDirtyState and returns to
+   // this separately compiled suffix. This retains every GX state update while
+   // removing the wrapper instructions around the expensive original work.
+@@ -12778,9 +12829,17 @@ s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+     const u32 gx_ready = ReadRamU32BE(ram, gx_offset);
+     if (gx_ready == 0)
+     {
+-      s_melee_display_list_flush.fetch_add(1, std::memory_order_relaxed);
+-      s_melee_display_list_fallbacks.fetch_add(1, std::memory_order_relaxed);
+-      return fallback_size;
++      ppc_state.gpr[0] = gx_ready;
++      ppc_state.gpr[3] = gx;
++      SetFastCompareField<u32>(ppc_state, 0, gx_ready, 0);
++      LR(ppc_state) = tail_pc;
++      ppc_state.pc = flush_primitive_pc;
++      ppc_state.npc = flush_primitive_pc;
++      ppc_state.downcount -= static_cast<int>(flush_prefix[0]);
++      UpdatePerformanceMonitorIfNeeded(flush_prefix[0], flush_prefix[1], flush_prefix[2],
++                                       ppc_state);
++      s_melee_display_list_flush_continuations.fetch_add(1, std::memory_order_relaxed);
++      return 0;
+     }
+ 
+     const u32 old_lr = ReadRamU32BE(ram, stack_offset + 28);
+@@ -12803,8 +12862,9 @@ s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+     LR(ppc_state) = old_lr;
+     ppc_state.pc = old_lr & ~3u;
+     ppc_state.npc = ppc_state.pc;
+-    ppc_state.downcount -= static_cast<int>(suffix[0]);
+-    UpdatePerformanceMonitorIfNeeded(suffix[0], suffix[1], suffix[2], ppc_state);
++    ppc_state.downcount -= static_cast<int>(ready_suffix[0]);
++    UpdatePerformanceMonitorIfNeeded(ready_suffix[0], ready_suffix[1], ready_suffix[2],
++                                     ppc_state);
+     s_melee_display_list_suffixes.fetch_add(1, std::memory_order_relaxed);
+     return 0;
+   }
+@@ -14267,7 +14327,9 @@ extern "C" const char* GetPpcWasmHelperStats()
+       << s_melee_display_list_fallbacks.load() << "/" << s_melee_display_list_dirty.load() << "/"
+       << s_melee_display_list_flush.load() << "/" << s_melee_display_list_memory.load()
+       << " continuation/suffix:" << s_melee_display_list_continuations.load() << "/"
+-      << s_melee_display_list_suffixes.load() << " ";
++      << s_melee_display_list_suffixes.load() << " flush-continuation/tail:"
++      << s_melee_display_list_flush_continuations.load() << "/"
++      << s_melee_display_list_tails.load() << " ";
+   out << "chainfusion:" << DolphinWeb_GetChainFusion() << " emit-blocks/boundaries:" << s_chain_fusion_blocks.load() << "/" << s_chain_fusion_boundaries.load() << " ";
+   out << "bswaprotate:" << DolphinWeb_GetBswapRotate() << " emit-sites:" << s_bswap_rotate_sites.load(std::memory_order_relaxed) << " ";
+   out << "qstatefull:" << (DolphinWeb_GetQStateFull()?1:0) << " emit-blocks/sites:" << s_qstate_cache_blocks.load() << "/" << s_qstate_cache_sites.load() << " ";
+diff --git a/.perf-lab/CachedInterpreter.h.before-display-list-flush-continuation b/.perf-lab/CachedInterpreter.h.before-display-list-direct-flush
+index c5bca9f..7ec4c55 100644
+--- a/.perf-lab/CachedInterpreter.h.before-display-list-flush-continuation
++++ b/.perf-lab/CachedInterpreter.h.before-display-list-direct-flush
+@@ -350,11 +350,13 @@ struct CachedInterpreter::MeleeDisplayListOperands
+ {
+   PowerPC::PowerPCManager& power_pc;
+   u32 current_pc;
+-  // cycles/load-stores/floating-point instructions for the complete clean
+-  // wrapper, the dirty-state prefix, and the post-dirty-state suffix.
++  // cycles/load-stores/floating-point instructions for each exact wrapper
++  // path segment retained around the original GX state functions.
+   std::array<u32, 3> clean;
+   std::array<u32, 3> dirty_prefix;
+-  std::array<u32, 3> suffix;
++  std::array<u32, 3> ready_suffix;
++  std::array<u32, 3> flush_prefix;
++  std::array<u32, 3> tail;
+ };
+ 
+ struct CachedInterpreter::OsInterruptFunctionOperands

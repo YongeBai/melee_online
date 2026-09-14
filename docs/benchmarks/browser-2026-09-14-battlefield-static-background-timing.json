@@ -1,0 +1,34 @@
+{
+  "kind": "same-checkpoint-battlefield-staticbackground-abba",
+  "coreSha256": "09569744729a89147b1b16a8c27469f562eb7f123d82e4fc7329f98fc82af051",
+  "stage": "Battlefield",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "sourceResolution": [960, 720],
+  "passed": false,
+  "inputConsistency": {
+    "passed": false,
+    "checked": 98,
+    "reason": "The normal and frozen variants diverged in fighter state at relative frame 720 and in controller input from frame 840. The first run also tracked fewer than 1200 common frames."
+  },
+  "runs": [
+    {"animation": true, "warmup": true, "simulationFps": 39.367500, "visibleFps": 39.334166},
+    {"animation": true, "warmup": false, "simulationFps": 45.534798, "visibleFps": 45.501464, "p95GapMs": 33.855000},
+    {"animation": false, "warmup": true, "simulationFps": 53.033378, "visibleFps": 52.833377},
+    {"animation": false, "warmup": false, "simulationFps": 53.402011, "visibleFps": 53.202004, "p95GapMs": 33.445000},
+    {"animation": false, "warmup": true, "simulationFps": 53.801085, "visibleFps": 53.467745},
+    {"animation": false, "warmup": false, "simulationFps": 55.001833, "visibleFps": 54.735158, "p95GapMs": 33.330000},
+    {"animation": true, "warmup": true, "simulationFps": 52.367592, "visibleFps": 52.134254},
+    {"animation": true, "warmup": false, "simulationFps": 53.534645, "visibleFps": 53.434642, "p95GapMs": 33.440000}
+  ],
+  "coverage": {
+    "objects": 2,
+    "mapIds": [3, 1],
+    "preserved": ["main Battlefield", "three platforms"],
+    "stableAtEnd": true,
+    "nonblackFraction": 1,
+    "normalSpeed": true,
+    "tournamentRules": {"stocks": 4, "timeLimitSeconds": 480, "items": "off", "teams": false}
+  },
+  "scope": "Selected benchmark fields from eight focused 30-second visible captures. The comparison restored one checkpoint and used native-frame two-player inputs. No profiler or build ran during capture.",
+  "decision": "Reject the current static-background animation skip. Both measured pairs are faster with animation frozen (+7.87 and +1.47 simulation FPS), but gameplay-observable fighter trajectories diverge, so the change is not tournament-safe."
+}

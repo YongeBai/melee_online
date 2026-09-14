@@ -1,0 +1,123 @@
+{
+  "kind": "same-checkpoint-probe-abba",
+  "saved": "selected exact measured fields; warmups omitted",
+  "stage": "Final Destination",
+  "fighters": [
+    "Fox",
+    "Falco"
+  ],
+  "core": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "diagnosticOnly": true,
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 113,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "probe": "async",
+      "seconds": 29.998299999999812,
+      "simulationFps": 59.970064970348695,
+      "visibleFps": 59.236690079104854,
+      "canvasSubmissionFps": 59.27002530143412,
+      "p95GapMs": 20.195000000298023,
+      "maxGapMs": 51.81500000040978,
+      "nonblackFraction": 1,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false
+    },
+    {
+      "probe": "delivery",
+      "seconds": 30.006220000000205,
+      "simulationFps": 59.95423615503678,
+      "visibleFps": null,
+      "canvasSubmissionFps": 59.75427761310781,
+      "p95GapMs": null,
+      "maxRafGapMs": 35.12000000011176,
+      "limits": "Delivery counters cannot prove distinct pixels.",
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false
+    },
+    {
+      "probe": "delivery",
+      "seconds": 30.00278500000015,
+      "simulationFps": 59.96110027785724,
+      "visibleFps": null,
+      "canvasSubmissionFps": 59.66112812527207,
+      "p95GapMs": null,
+      "maxRafGapMs": 37.859999999869615,
+      "limits": "Delivery counters cannot prove distinct pixels.",
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false
+    },
+    {
+      "probe": "async",
+      "seconds": 29.998435000000057,
+      "simulationFps": 59.80311972941244,
+      "visibleFps": 59.203088427779534,
+      "canvasSubmissionFps": 59.23642350009248,
+      "p95GapMs": 17.455000000074506,
+      "maxGapMs": 50.30499999970198,
+      "nonblackFraction": 1,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false
+    }
+  ]
+}

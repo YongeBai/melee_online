@@ -1,0 +1,182 @@
+{
+  "artifactScope": "Selected exact fields from completed browser idleRun",
+  "core": "83a8df37e84c7070494b9d4948c60479cba7c1d9cb3a78a5098b542ed37e06ac",
+  "feature": "idlechecks",
+  "kind": "same-checkpoint-codegen-abba",
+  "passed": false,
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "input": "native frame polling, scripted two human ports",
+  "settings": {
+    "blockmerge": true,
+    "reflection": false,
+    "scenery": false,
+    "lowModels": true,
+    "hiddenAnimation": true,
+    "profile": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "internalResolution": [
+      960,
+      792
+    ],
+    "nativeOutput": [
+      960,
+      720
+    ],
+    "blackBackground": true,
+    "msrcache": false,
+    "fprcache": false,
+    "fpuguard": true,
+    "branchfusion": false
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 49.10368277620822,
+      "visibleFps": 49.03701110916652,
+      "seconds": 29.99775,
+      "p95GapMs": 33.57000000029802,
+      "maxGapMs": 100.46500000357628,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 0
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 52.2696721728192,
+      "visibleFps": 52.23633692270898,
+      "seconds": 29.99827499999851,
+      "p95GapMs": 33.40500000119209,
+      "maxGapMs": 49.5,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 0
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 54.871741053365696,
+      "visibleFps": 54.73847635135388,
+      "seconds": 30.01544999999553,
+      "p95GapMs": 33.24000000208616,
+      "maxGapMs": 50.439999997615814,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 185064
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 55.50286764815631,
+      "visibleFps": 55.369527425578156,
+      "seconds": 29.99845000000298,
+      "p95GapMs": 33.17000000178814,
+      "maxGapMs": 80.0300000011921,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 185063
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 55.46958806496812,
+      "visibleFps": 55.236242442098664,
+      "seconds": 29.998420000001786,
+      "p95GapMs": 33.225000001490116,
+      "maxGapMs": 50.35999999940395,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 185064
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 57.202755266045884,
+      "visibleFps": 56.56939142568757,
+      "seconds": 29.9985549999997,
+      "p95GapMs": 32.940000005066395,
+      "maxGapMs": 50.26500000059605,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 185064
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 57.33815929507115,
+      "visibleFps": 56.53809195607016,
+      "seconds": 29.99747500000149,
+      "p95GapMs": 32.92999999970198,
+      "maxGapMs": 50.479999996721745,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 0
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 57.57148348078056,
+      "visibleFps": 57.138113888858065,
+      "seconds": 29.997490000002085,
+      "p95GapMs": 19.100000001490116,
+      "maxGapMs": 76.85999999940395,
+      "passed": false,
+      "idleGuardCounters": {
+        "iterations": 192777,
+        "hoisted": 0
+      }
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 106,
+    "mismatches": []
+  },
+  "interpretation": "Opposing pairs with strong warmup drift; no repeatable gain established. Counter deltas prove execution but identical iteration totals despite differing frame totals cannot establish steady CPU cost share. All FPS gates fail; warmed repeat pending.",
+  "measuredLifecycle": "Visible and focused at all endpoints, no lifecycle events.",
+  "candidatePresentation": [
+    {
+      "gameRenderFps": 55.46953259251177,
+      "dropped": 3,
+      "underruns": 136,
+      "meanAgeMs": 10.62795550205929,
+      "capacity": 2
+    },
+    {
+      "gameRenderFps": 57.169420327079656,
+      "dropped": 17,
+      "underruns": 101,
+      "meanAgeMs": 14.577202591255254,
+      "capacity": 2
+    }
+  ]
+}

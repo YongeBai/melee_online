@@ -1,0 +1,119 @@
+{
+  "kind": "uncapped-checkpoint-codegen-abba",
+  "feature": "chainfusion",
+  "diagnosticOnly": true,
+  "passed": false,
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "frames": 1200,
+  "configuredEfbScale": 150,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 80,
+    "mismatches": []
+  },
+  "commonController": {
+    "startFrame": 432,
+    "stopFrame": 1632,
+    "trackedPolls": 1201,
+    "skipped": 0,
+    "inputHash": 585521023,
+    "stateHash": 3910530869
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "nativeWorkFps": 36.854640744618,
+      "elapsedMs": 32560.349952,
+      "synchronousCompileAndLinkMs": 485.957,
+      "coverage": {
+        "sites": 0,
+        "boundaries": 0
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "nativeWorkFps": 39.939046922360525,
+      "elapsedMs": 30045.784576,
+      "synchronousCompileAndLinkMs": 0,
+      "coverage": {
+        "sites": 0,
+        "boundaries": 0
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "nativeWorkFps": 39.55601001062826,
+      "elapsedMs": 30336.730112,
+      "synchronousCompileAndLinkMs": 255.861,
+      "coverage": {
+        "sites": 1109,
+        "boundaries": 3438
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "nativeWorkFps": 42.742508523950406,
+      "elapsedMs": 28075.095296,
+      "synchronousCompileAndLinkMs": 0,
+      "coverage": {
+        "sites": 1109,
+        "boundaries": 3438
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "nativeWorkFps": 42.62314907554368,
+      "elapsedMs": 28153.7152,
+      "synchronousCompileAndLinkMs": 0,
+      "coverage": {
+        "sites": 1109,
+        "boundaries": 3438
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "nativeWorkFps": 42.02018378010328,
+      "elapsedMs": 28557.704704,
+      "synchronousCompileAndLinkMs": 0,
+      "coverage": {
+        "sites": 1109,
+        "boundaries": 3438
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "nativeWorkFps": 40.9255518506181,
+      "elapsedMs": 29321.534976,
+      "synchronousCompileAndLinkMs": 0,
+      "coverage": {
+        "sites": 1109,
+        "boundaries": 3438
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "nativeWorkFps": 42.11645732803221,
+      "elapsedMs": 28492.42496,
+      "synchronousCompileAndLinkMs": 0,
+      "coverage": {
+        "sites": 1109,
+        "boundaries": 3438
+      }
+    }
+  ],
+  "decision": "Keep OFF: first measured pair +7.02%, reverse pair -0.23%. No repeatable gain despite equal fixed native workload.",
+  "limits": "Selected exact UI fields. Rendering kept enabled; no pixel verifier, so no resolution/image-cadence acceptance claim. Host pacing temporarily uncapped, restored afterward. Native clock and instructions unchanged. All 80 rolling fingerprints match, not full machine equivalence. No profiler/build/test/sampler during measurement. Initial interrupted attempt excluded from this comparison."
+}

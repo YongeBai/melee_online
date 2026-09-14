@@ -1,0 +1,75 @@
+{
+  "kind": "incomplete-hidden-animation-abba",
+  "coreSha256": "f7a2a4b67e696b1de11884d879dc0d0cbfe98807b16ba3f4f8c2e647d0d2e3b5",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "settings": {
+    "models": "low",
+    "reflection": false,
+    "scenery": false,
+    "efbscale": 150
+  },
+  "passed": false,
+  "complete": false,
+  "decision": "Unaccepted. Multi-second image readback stalls during first off warmup; subsequent off measurement stopped advancing. Similar earlier stalls mean causality is unresolved.",
+  "runs": [
+    {
+      "animation": true,
+      "warmup": true,
+      "seconds": 29.999169999999925,
+      "simulationFps": 56.06821788736169,
+      "gameRenderFps": 56.03488363178062,
+      "visibleFps": 55.83487809829419,
+      "p95GapMs": 32.65500000119209,
+      "maxGapMs": 64.23499999940395,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "animation": true,
+      "warmup": false,
+      "seconds": 29.999020000001416,
+      "simulationFps": 57.501878394691516,
+      "gameRenderFps": 57.40187512791814,
+      "visibleFps": 57.30187186114476,
+      "p95GapMs": 19.550000000745058,
+      "maxGapMs": 49.955000000074506,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "animation": false,
+      "warmup": true,
+      "seconds": 30.01375,
+      "simulationFps": 29.886302111532213,
+      "gameRenderFps": 29.886302111532213,
+      "visibleFps": 29.686393736204238,
+      "p95GapMs": 19.03500000014901,
+      "maxGapMs": 4995.890000000596,
+      "readbackHarvestMeanMs": 13.783313318786076,
+      "readbackHarvestMaxMs": 1002.5750000011176,
+      "readbackCompletionMaxMs": 4993.739999998361,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false
+    }
+  ],
+  "laterOutcome": "The comparison recovered without a reload and finished all8 trials. See hidden-animation-fountain.json for all measured trials; the stall remains unexplained."
+}

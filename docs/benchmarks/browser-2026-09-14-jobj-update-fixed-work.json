@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-14",
+  "coreSha256": "8bf2dbc6db9109a97017e7800e6594dcce94697dd18256f34c532f9cb14dcb1c",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "resolution": [960, 720],
+    "framesPerRun": 1200,
+    "input": "two deterministic native-frame controller tracks"
+  },
+  "feature": "guarded whole-callback JObjUpdateFunc specialization",
+  "directCoverage": {
+    "calls": 2061152,
+    "direct": 1996754,
+    "fallback": 64398,
+    "percent": 96.876
+  },
+  "measurementRunsFps": {
+    "off": [57.16699054180526, 59.09952968499717],
+    "on": [58.10105451027919, 58.703891709222134]
+  },
+  "meansFps": {
+    "off": 58.13326011340122,
+    "on": 58.40247310975066,
+    "changePercent": 0.463108184789967
+  },
+  "pairedChangesPercent": [0.934114863162557, -0.395640167041984],
+  "inputFingerprints": {"passed": true, "checked": 80},
+  "stateComparison": {
+    "normalRunningReplay": {
+      "frames": 600,
+      "fullMachineBytesEqual": true,
+      "bytes": 109959396
+    },
+    "fixedWorkCaptures": {
+      "fullMachineBytesEqual": false,
+      "differentBytes": 1,
+      "section": "CoreTiming",
+      "field": "CoreTiming.m_idled_cycles",
+      "interpretation": "The closing disabled control has the same one-byte historical idle-cycle residue; normal-running exact replay is byte-equal."
+    }
+  },
+  "decision": "Do not enable by default. The broad, exact specialization has a small and opposing throughput result, proving callback dispatch is not a high-ROI bottleneck."
+}

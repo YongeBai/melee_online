@@ -1,0 +1,52 @@
+{
+  "coreSha256": "3cbc3b2f2ab66c25ff3489a63c73f0c00e47189f1ca78760f0e0f39c652992bc",
+  "passed": true,
+  "performanceTest": false,
+  "networkTest": false,
+  "fullMachineBytesEqual": true,
+  "reference": {
+    "branchfusion": false,
+    "readfusion": false,
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false
+  },
+  "candidate": {
+    "branchfusion": true,
+    "readfusion": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "artifactScope": "Exact selected fields from CUA combinedArmedReplay",
+  "kind": "local-browser-late-input-correction",
+  "frames": 120,
+  "comparison": {
+    "sizeA": 107060212,
+    "sizeB": 107060212,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "correctedFrame": 428
+}

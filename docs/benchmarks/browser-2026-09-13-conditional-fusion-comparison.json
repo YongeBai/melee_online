@@ -1,0 +1,149 @@
+{
+  "artifactScope": "Selected exact fields from completed browser branchRun",
+  "core": "83a8df37e84c7070494b9d4948c60479cba7c1d9cb3a78a5098b542ed37e06ac",
+  "feature": "branchfusion",
+  "kind": "same-checkpoint-codegen-abba",
+  "passed": false,
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "input": "native frame polling, scripted two human ports",
+  "settings": {
+    "blockmerge": true,
+    "reflection": false,
+    "scenery": false,
+    "lowModels": true,
+    "hiddenAnimation": true,
+    "profile": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "internalResolution": [
+      960,
+      792
+    ],
+    "nativeOutput": [
+      960,
+      720
+    ],
+    "blackBackground": true,
+    "msrcache": false,
+    "fprcache": false,
+    "fpuguard": true
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 50.80114302571303,
+      "visibleFps": 50.66780669231221,
+      "seconds": 29.99932500000298,
+      "p95GapMs": 33.35999999940395,
+      "maxGapMs": 67.4050000011921,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 54.96901201118133,
+      "visibleFps": 54.80233823310012,
+      "seconds": 29.99871999999881,
+      "p95GapMs": 32.73499999940395,
+      "maxGapMs": 50.49500000476837,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 55.1004499870033,
+      "visibleFps": 54.9671155647722,
+      "seconds": 29.999755000002683,
+      "p95GapMs": 32.850000001490116,
+      "maxGapMs": 83.33500000089407,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 56.70145533735985,
+      "visibleFps": 56.56811858171645,
+      "seconds": 29.99922999999672,
+      "p95GapMs": 31.900000005960464,
+      "maxGapMs": 37.16999999433756,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 57.36971682327549,
+      "visibleFps": 57.23637640067636,
+      "seconds": 29.998405000001192,
+      "p95GapMs": 19.984999999403954,
+      "maxGapMs": 35.66499999910593,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 57.933323677774204,
+      "visibleFps": 57.7999903666631,
+      "seconds": 30.000005000002684,
+      "p95GapMs": 19.359999999403954,
+      "maxGapMs": 35.67499999701977,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 57.27079970937732,
+      "visibleFps": 57.070785275002315,
+      "seconds": 29.997835000000894,
+      "p95GapMs": 30.50500000268221,
+      "maxGapMs": 35.270000003278255,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 58.10486144006978,
+      "visibleFps": 57.97151695024748,
+      "seconds": 29.997490000002085,
+      "p95GapMs": 19.07999999821186,
+      "maxGapMs": 34.6600000038743,
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 108,
+    "mismatches": []
+  },
+  "interpretation": "Opposing pairs: forward +1.7324 FPS, reverse -0.1715 FPS. No repeatable conditional-fusion gain established; warmed repeat needed. All target gates fail.",
+  "measuredLifecycle": "Visible and focused at all endpoints, no lifecycle events.",
+  "candidatePresentation": [
+    {
+      "gameRenderFps": 56.668121148449,
+      "dropped": 2,
+      "underruns": 101,
+      "meanAgeMs": 15.731153619752483,
+      "capacity": 2
+    },
+    {
+      "gameRenderFps": 57.89999034999643,
+      "dropped": 1,
+      "underruns": 64,
+      "meanAgeMs": 15.718407258013702,
+      "capacity": 2
+    }
+  ]
+}

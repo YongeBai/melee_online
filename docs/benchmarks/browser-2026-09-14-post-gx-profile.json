@@ -1,0 +1,45 @@
+{
+  "kind": "sampled-direct-block-profile",
+  "diagnosticOnly": true,
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "resolution": [960, 720],
+  "durationSeconds": 30.003,
+  "simulationFps": 53.5962,
+  "visibleFps": 53.4296,
+  "p95GapMs": 34.21,
+  "samples": 590359,
+  "sampledUs": 242840,
+  "uniqueSampledBlocks": 10812,
+  "profileScope": "Host wall duration around every 1024th complete compiled block. Includes clock/import overhead and host preemption; excludes dispatcher bookkeeping, partial blocks, and native callbacks. Periodic sampling can be biased and is not performance acceptance.",
+  "timedFunctions": [
+    {"name": "HSD_FObjInterpretAnim", "sampledUs": 22564.600},
+    {"name": "HandleReverb", "sampledUs": 11202.046},
+    {"name": "parseFloat", "sampledUs": 4777.732},
+    {"name": "SetupEnvelopeModelMtx", "sampledUs": 4443.648},
+    {"name": "cosf", "sampledUs": 3261.952},
+    {"name": "sinf", "sampledUs": 3171.328},
+    {"name": "HSD_AObjInterpretAnim", "sampledUs": 2320.640},
+    {"name": "FObjUpdateAnim", "sampledUs": 2206.464},
+    {"name": "_HSD_TObjGetCurrentByType", "sampledUs": 2174.720},
+    {"name": "HSD_PObjAnimAll", "sampledUs": 1914.880},
+    {"name": "HSD_TExpSetReg", "sampledUs": 1899.008},
+    {"name": "HSD_StateInvalidate", "sampledUs": 1769.472},
+    {"name": "mpLineIntersection", "sampledUs": 1758.464},
+    {"name": "mpRemap2d", "sampledUs": 1739.776},
+    {"name": "HSD_SetupChannel", "sampledUs": 1735.168},
+    {"name": "HSD_SetupTevStage", "sampledUs": 1494.272},
+    {"name": "GXLoadNrmMtxImm", "sampledUs": 195.328}
+  ],
+  "observations": {
+    "GXLoadPosMtxImmPresent": false,
+    "GXSetMatrixIndexPresent": false,
+    "specializerRuntimeCounts": {
+      "animStateRuns": 22235324,
+      "jobjUpdateRuns": 20074549,
+      "displayListRuns": 9965013,
+      "gxMatrixRuns": 25499523
+    }
+  },
+  "coreSha256": "e63eb52d85558131029fbfd8e97dbe3a3cdf2ac998b579e18b1607c3adf30294"
+}

@@ -1,0 +1,49 @@
+--- a/Source/Core/Common/GL/GLInterface/Emscripten.cpp
++++ b/Source/Core/Common/GL/GLInterface/Emscripten.cpp
+@@ -413,9 +413,24 @@
+   if (worker_owned_webgl && DolphinWebUseOglReadbackPresent())
+     readback_rgba = DolphinWebPublishAsyncReadback(m_backbuffer_width, m_backbuffer_height);
+ 
+-  const std::uint32_t debug_bits = DolphinWebOglDebugBits();
+-  const int swap_error = static_cast<int>(glGetError());
+-  const int gl_error = s_readback_error ? s_readback_error : swap_error;
++  // Bit 30: omit synchronous diagnostic polling in the normal bitmap path.
++  // Always check the first swap and diagnostic/profiler runs. Bit 9 in the
++  // diagnostics explicitly marks a retained sample, not a fresh error query.
++  const bool lean_swap = worker_owned_webgl && !DolphinWebUseOglReadbackPresent() &&
++      (DolphinWeb_GetCachedInterpreterDisableMask() & (1u << 30)) &&
++      !DolphinWebUseDiagnosticClear() &&
++      !DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed);
++  std::uint32_t debug_bits = DolphinWebOglDebugBits();
++  if (!lean_swap || !m_swap_error_sampled)
++  {
++    m_last_swap_error = static_cast<int>(glGetError());
++    m_swap_error_sampled = true;
++  }
++  else
++  {
++    debug_bits |= 1u << 9;
++  }
++  const int gl_error = s_readback_error ? s_readback_error : m_last_swap_error;
+   glFlush();
+   // For direct-JS-created contexts (worker-mode patch 0009), commit_frame
+   // returns -3 INVALID_TARGET because explicitSwapControl isn't on the
+@@ -429,7 +444,8 @@
+   DolphinWeb_OnOglSwap(worker_owned_webgl ? 1 : 0, commit_result, m_backbuffer_width,
+                        m_backbuffer_height, debug_bits, readback_rgba, gl_error);
+ 
+-  if (worker_owned_webgl)
++  // glFlush already ran above; OnOglSwap only updates host counters/signals.
++  if (worker_owned_webgl && !lean_swap)
+   {
+     EM_ASM({
+       const direct = (typeof Module !== 'undefined') ? Module._dolphinWorkerGLCtx : null;
+--- a/Source/Core/Common/GL/GLInterface/Emscripten.h
++++ b/Source/Core/Common/GL/GLInterface/Emscripten.h
+@@ -38,4 +38,6 @@
+   // OffscreenCanvas auto-mirror at task boundary instead. Without this gate,
+   // PE_FINISH never fires → Melee CPU stuck in FastMeleeIdlePollLoop forever.
+   bool m_context_created_via_direct_js = false;
++  bool m_swap_error_sampled = false;
++  int m_last_swap_error = 0;
+ };

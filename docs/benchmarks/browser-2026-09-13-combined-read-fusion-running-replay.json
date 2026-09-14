@@ -1,0 +1,68 @@
+{
+  "coreSha256": "3cbc3b2f2ab66c25ff3489a63c73f0c00e47189f1ca78760f0e0f39c652992bc",
+  "passed": true,
+  "performanceTest": false,
+  "networkTest": false,
+  "fullMachineBytesEqual": true,
+  "reference": {
+    "branchfusion": false,
+    "readfusion": false,
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false
+  },
+  "candidate": {
+    "branchfusion": true,
+    "readfusion": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "artifactScope": "Exact selected fields from CUA combinedRunningReplay",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "frames": 600,
+  "comparison": {
+    "sizeA": 107856034,
+    "sizeB": 107856034,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "fingerprintsEqual": true,
+  "stop": {
+    "startFrame": 304,
+    "stoppedFrame": 904,
+    "nativeFramesObserved": 601,
+    "skipped": 0,
+    "inputHash": 4277785105,
+    "stateHash": 276834104
+  },
+  "execution": [
+    {
+      "dispatcherHandle": 11378,
+      "calls": 1670833,
+      "readfusion": 0,
+      "newReadFusionEmissions": 0
+    },
+    {
+      "dispatcherHandle": 11378,
+      "calls": 30330014,
+      "readfusion": 1,
+      "newReadFusionEmissions": 1995
+    }
+  ],
+  "interpretation": "Full-state and native input match. Combined fusion greatly increases C++ entry into the WASM dispatcher: ~18.15x. Source review shows conditional-target mismatch exits via generic halted=1 and unwinds to C++, despite remaining budget. This counter is not self-time or FPS attribution."
+}

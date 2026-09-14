@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-14",
+  "coreSha256": "8bf2dbc6db9109a97017e7800e6594dcce94697dd18256f34c532f9cb14dcb1c",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "resolution": [960, 720],
+    "framesPerRun": 1200,
+    "input": "two deterministic native-frame controller tracks",
+    "settings": "black decorative background, low fighter detail, reflection and scenery disabled"
+  },
+  "ablation": "skip GX link 5 fighter draw callbacks while preserving fighter processes, animation, state, input, camera and projection",
+  "measurementRunsFps": {
+    "normal": [68.11859619801886, 69.41682580335149],
+    "fighterDrawsSkipped": [80.86062825887738, 84.94844413232146]
+  },
+  "means": {
+    "normalFps": 68.76771100068518,
+    "fighterDrawsSkippedFps": 82.90453619559942,
+    "throughputChangePercent": 20.557358954078573,
+    "normalMsPerFrame": 14.54300416,
+    "fighterDrawsSkippedMsPerFrame": 12.069402026666667,
+    "savedMsPerFrame": 2.473602133333334
+  },
+  "directionalThroughputChangesPercent": [18.70565861900293, 22.374428892742728],
+  "inputFingerprints": {"passed": true, "checked": 80},
+  "limits": "Diagnostic output omits fighters. The gain is an opportunity bound, not a playable setting. It motivates optimization of the shared material, skinning and display-list path while retaining readable fighter rendering."
+}

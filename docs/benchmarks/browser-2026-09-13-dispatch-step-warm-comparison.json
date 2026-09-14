@@ -1,0 +1,66 @@
+{
+  "artifactScope": "Exact selected measured rows from CUA stepWarmRun; separate warmup rows omitted",
+  "coreSha256": "34f85fc775d2d94ccd2ffe61b2fdc1ff43c8aa4b91598ac24f0ece9978f8641e",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "stepcheck",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two ordinary human-controller scripts on native logic frames; native partner AI retained",
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "profiler": false,
+  "runs": [
+    {
+      "stepcheck": false,
+      "simulationFps": 58.769810851540804,
+      "gameRenderFps": 58.73647573477873,
+      "visibleFps": 58.60313526773042,
+      "p95GapMs": 18.99499999731779,
+      "passed": false
+    },
+    {
+      "stepcheck": true,
+      "simulationFps": 58.39994160005608,
+      "gameRenderFps": 58.33327500005601,
+      "visibleFps": 57.9999420000557,
+      "p95GapMs": 19.135000005364418,
+      "passed": false
+    },
+    {
+      "stepcheck": true,
+      "simulationFps": 58.736475734793316,
+      "gameRenderFps": 58.70314061803123,
+      "visibleFps": 58.56980015098289,
+      "p95GapMs": 19.035000003874302,
+      "passed": false
+    },
+    {
+      "stepcheck": false,
+      "simulationFps": 58.33479170312591,
+      "gameRenderFps": 58.30145753643841,
+      "visibleFps": 58.00145003625091,
+      "p95GapMs": 19.054999999701977,
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 112,
+    "mismatches": []
+  },
+  "commonCodegen": {
+    "blockmerge": true,
+    "fpuguard": true,
+    "branchfusion": false,
+    "fpuguardwide": false
+  },
+  "interpretation": "Opposing pairs and mean simulation change about +0.027%. No repeatable gain; leave stepcheck disabled."
+}

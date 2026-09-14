@@ -1,0 +1,224 @@
+{
+  "coreSha256": "21b62c02d413f3d3ee1931a4c7f094ddd955bfc7c7985c089a234568a490f7b0",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "settings": {
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbPercent": 150,
+    "profiler": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "otherRejectedCpuFlags": false
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "passed": false,
+  "kind": "same-checkpoint-codegen-abba",
+  "artifactScope": "Selected exact fields from completed CUA frsqrteRun",
+  "feature": "frsqrtefast",
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 49.01042912612245,
+      "visibleFps": 48.977111363290284,
+      "p95GapMs": 33.58500000089407,
+      "seconds": 30.014019999999554,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 53.47244386725882,
+      "visibleFps": 53.40581153845226,
+      "p95GapMs": 33.434999998658895,
+      "seconds": 30.015460000000893,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 54.76984331757609,
+      "visibleFps": 54.60316698368207,
+      "p95GapMs": 33.33500000089407,
+      "seconds": 29.99826000000164,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 55.70381571137568,
+      "visibleFps": 55.53713762726025,
+      "p95GapMs": 33.16999999806285,
+      "seconds": 29.997945000000296,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 56.56994772363857,
+      "visibleFps": 56.36993612296572,
+      "p95GapMs": 32.91499999910593,
+      "seconds": 29.998259999997913,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 57.63595576931769,
+      "visibleFps": 57.269272418558586,
+      "p95GapMs": 18.16499999910593,
+      "seconds": 29.998635000001638,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 57.26856607411012,
+      "visibleFps": 56.76854949022673,
+      "p95GapMs": 33.00999999791384,
+      "seconds": 29.999004999998956,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 57.63632081596172,
+      "visibleFps": 57.13629489795164,
+      "p95GapMs": 32.564999997615814,
+      "seconds": 29.9984450000003,
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 107,
+    "mismatches": []
+  },
+  "means": {
+    "baseline": 55.554382341610264,
+    "candidate": 56.669885740346686,
+    "percent": 2.007948521283276
+  },
+  "interpretation": "No repeatable gain established. First pair favors candidate; reverse pair is effectively tied, marginally favoring baseline. Upward warmup drift is substantial. All FPS gates fail. Keep disabled pending evidence."
+}

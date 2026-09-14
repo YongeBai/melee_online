@@ -1,0 +1,184 @@
+--- a/Source/Core/Common/BrowserProfile.h
++++ b/Source/Core/Common/BrowserProfile.h
+@@ -8,10 +8,11 @@
+ 
+ namespace DolphinWeb::BrowserProfile
+ {
+-enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, Count };
+-constexpr std::array<const char*, 9> names{
++enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, Count };
++constexpr std::array<const char*, static_cast<std::size_t>(Stage::Count)> names{
+     "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent",
+-    "cpuGpuSync", "cpuGpuDecode", "cpuVideoWait"};
++    "cpuGpuSync", "cpuGpuDecode", "cpuVideoWait",
++    "cpuChainSample1024", "cpuPartialSample1024", "cpuCallbackSample1024", "cpuIdleSample1024", "cpuFpHelperSample1024", "cpuMemoryHelperSample1024", "cpuSystemHelperSample1024", "cpuInterpreterHelperSample1024", "cpuMemoryReadSample1024", "cpuMemoryWriteSample1024", "cpuFifoWriteSample1024"};
+ struct Counter
+ {
+   std::atomic<std::uint64_t> count{0};
+@@ -45,6 +46,27 @@
+   }
+ private:
+   using Clock = std::chrono::steady_clock;
++  Stage m_stage;
++  bool m_active;
++  Clock::time_point m_start;
++};
++// CPU-thread-only sampling. These totals are raw sampled microseconds, not
++// complete wall time. Multiply by 1024 for an estimate; nested helpers overlap
++// their containing chains. Timing and bookkeeping overhead remain in samples.
++inline std::array<std::uint32_t, static_cast<std::size_t>(Stage::Count)> sample_sequences{};
++class SampleScope
++{
++public:
++  explicit SampleScope(Stage stage, bool active) : m_stage(stage),
++    m_active(active && ((++sample_sequences[static_cast<std::size_t>(stage)] & 1023u) == 0)),
++    m_start(m_active ? Clock::now() : Clock::time_point{}) {}
++  explicit SampleScope(Stage stage) : SampleScope(stage, enabled.load(std::memory_order_relaxed)) {}
++  ~SampleScope() {
++    if (m_active) Record(m_stage,
++      std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - m_start).count());
++  }
++private:
++  using Clock = std::chrono::steady_clock;
+   Stage m_stage;
+   bool m_active;
+   Clock::time_point m_start;
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -1732,36 +1732,45 @@
+ 
+ extern "C" u32 DolphinWeb_CachedInterpreterReadU32(int state_ptr, u32 address)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryReadSample);
+   (void)state_ptr;
+   return Core::System::GetInstance().GetMMU().Read<u32>(address);
+ }
+ 
+ extern "C" void DolphinWeb_CachedInterpreterWriteU32(int state_ptr, u32 address, u32 value)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryWriteSample);
++  const DolphinWeb::BrowserProfile::SampleScope sampled_fifo(DolphinWeb::BrowserProfile::Stage::CpuFifoWriteSample, DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed) && ((address & 0x0ffff000u) == 0x0c008000u));
+   (void)state_ptr;
+   Core::System::GetInstance().GetMMU().Write<u32>(value, address);
+ }
+ 
+ extern "C" u32 DolphinWeb_CachedInterpreterReadU8(int state_ptr, u32 address)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryReadSample);
+   (void)state_ptr;
+   return Core::System::GetInstance().GetMMU().Read<u8>(address);
+ }
+ 
+ extern "C" void DolphinWeb_CachedInterpreterWriteU8(int state_ptr, u32 address, u32 value)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryWriteSample);
++  const DolphinWeb::BrowserProfile::SampleScope sampled_fifo(DolphinWeb::BrowserProfile::Stage::CpuFifoWriteSample, DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed) && ((address & 0x0ffff000u) == 0x0c008000u));
+   (void)state_ptr;
+   Core::System::GetInstance().GetMMU().Write<u8>(value, address);
+ }
+ 
+ extern "C" u32 DolphinWeb_CachedInterpreterReadU16(int state_ptr, u32 address)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryReadSample);
+   (void)state_ptr;
+   return Core::System::GetInstance().GetMMU().Read<u16>(address);
+ }
+ 
+ extern "C" void DolphinWeb_CachedInterpreterWriteU16(int state_ptr, u32 address, u32 value)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryWriteSample);
++  const DolphinWeb::BrowserProfile::SampleScope sampled_fifo(DolphinWeb::BrowserProfile::Stage::CpuFifoWriteSample, DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed) && ((address & 0x0ffff000u) == 0x0c008000u));
+   (void)state_ptr;
+   Core::System::GetInstance().GetMMU().Write<u16>(value, address);
+ }
+@@ -1796,6 +1805,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterLfs(int state_ptr, u32 address, u32 fd,
+                                                 u32 current_pc, u32 downcount)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryHelperSample);
+   ++s_wasm_lfs_call_count;
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+       static_cast<std::uintptr_t>(state_ptr));
+@@ -1819,6 +1829,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterStfs(int state_ptr, u32 address, u32 fs,
+                                                  u32 current_pc, u32 downcount)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryHelperSample);
+   ++s_wasm_stfs_call_count;
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+       static_cast<std::uintptr_t>(state_ptr));
+@@ -1841,6 +1852,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterLfd(int state_ptr, u32 address, u32 fd,
+                                                 u32 current_pc, u32 downcount)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuMemoryHelperSample);
+   ++s_wasm_lfd_call_count;
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+       static_cast<std::uintptr_t>(state_ptr));
+@@ -1864,6 +1876,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterFmr(int state_ptr, u32 fd, u32 fb, u32 current_pc,
+                                                 u32 downcount)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuFpHelperSample);
+   ++s_wasm_fmr_call_count;
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+       static_cast<std::uintptr_t>(state_ptr));
+@@ -1877,6 +1890,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterFctiwz(int state_ptr, u32 inst_hex, u32 current_pc,
+                                                    u32 downcount, u32 unused)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuFpHelperSample);
+   ++s_wasm_fctiwz_call_count;
+   (void)unused;
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+@@ -2156,6 +2170,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterFpOp(int state_ptr, u32 inst_hex, u32 current_pc,
+                                                  u32 downcount, u32 unused)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuFpHelperSample);
+   DOLPHIN_WEB_HOT_COUNT(++s_wasm_fp_call_count);
+   (void)unused;
+   auto& system = Core::System::GetInstance();
+@@ -2211,6 +2226,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterSystem(int state_ptr, u32 inst_hex, u32 current_pc,
+                                                    u32 downcount, u32 unused)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuSystemHelperSample);
+   DOLPHIN_WEB_HOT_COUNT(++s_wasm_system_call_count);
+   (void)unused;
+   auto& system = Core::System::GetInstance();
+@@ -2425,6 +2441,7 @@
+ extern "C" int DolphinWeb_CachedInterpreterInterpret(int state_ptr, u32 current_pc, u32 inst_hex,
+                                                       int write_pc, u32 downcount)
+ {
++  const DolphinWeb::BrowserProfile::SampleScope sampled_helper(DolphinWeb::BrowserProfile::Stage::CpuInterpreterHelperSample);
+   auto& system = Core::System::GetInstance();
+   auto& interpreter = system.GetInterpreter();
+   auto& ppc_state = *reinterpret_cast<PowerPC::PowerPCState*>(
+@@ -8075,6 +8092,7 @@
+   // RecordPpcBlockProfile stays one-block-per-call. Runtime-killable via the
+   // DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH mask bit.
+   const CPU::State* const redispatch_state_ptr = m_system.GetCPU().GetStatePtr();
++  const bool profile_segments = DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed);
+   const bool wasm_dispatch = allow_redispatch && !s_ppc_block_profile_enabled &&
+       !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH) &&
+       DolphinWebFeatureEnabled(1u << 27) && s_wasm_dispatch_loop_handle != 0;
+@@ -8106,6 +8124,18 @@
+   {
+     const auto callback = *reinterpret_cast<const AnyCallback*>(normal_entry);
+     const u8* payload = normal_entry + sizeof(callback);
++#ifdef __EMSCRIPTEN__
++    using CpuStage = DolphinWeb::BrowserProfile::Stage;
++    CpuStage sampled_stage = CpuStage::CpuCallbackSample;
++    if (profile_segments) {
++      if (callback == AnyCallbackCast(RunWasmBlock))
++        sampled_stage = wasm_dispatch && reinterpret_cast<const WasmBlockOperands*>(payload)->end_block == 1
++            ? CpuStage::CpuChainSample : CpuStage::CpuPartialSample;
++      else if (callback == AnyCallbackCast(FastMeleeIdlePollLoop) || callback == AnyCallbackCast(FastMeleeTitleLoop))
++        sampled_stage = CpuStage::CpuIdleSample;
++    }
++    const DolphinWeb::BrowserProfile::SampleScope sampled_callback(sampled_stage, profile_segments);
++#endif
+     // Direct dispatch to the most commonly used callbacks for better performance
+     if (callback == AnyCallbackCast(Interpret<false>)) [[likely]]
+     {

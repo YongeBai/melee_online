@@ -1,0 +1,70 @@
+{
+  "artifactScope": "Exact selected measured rows from CUA combinedRun, warmups omitted",
+  "coreSha256": "3cbc3b2f2ab66c25ff3489a63c73f0c00e47189f1ca78760f0e0f39c652992bc",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "readbranchfusion",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two ordinary human-controller scripts on native logic frames, partner AI retained",
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "profiler": false,
+  "runs": [
+    {
+      "readfusion": false,
+      "branchfusion": false,
+      "simulationFps": 58.66862228740958,
+      "gameRenderFps": 58.60195339844662,
+      "visibleFps": 58.46861562052069,
+      "p95GapMs": 19.024999998509884,
+      "passed": false
+    },
+    {
+      "readfusion": true,
+      "branchfusion": true,
+      "simulationFps": 58.53713824731068,
+      "gameRenderFps": 58.50380274716984,
+      "visibleFps": 58.40379624674733,
+      "p95GapMs": 18.884999997913837,
+      "passed": false
+    },
+    {
+      "readfusion": true,
+      "branchfusion": true,
+      "simulationFps": 59.30336052375418,
+      "gameRenderFps": 59.270025301424916,
+      "visibleFps": 59.070013967449356,
+      "p95GapMs": 18.654999993741512,
+      "passed": false
+    },
+    {
+      "readfusion": false,
+      "branchfusion": false,
+      "simulationFps": 57.902103776444115,
+      "gameRenderFps": 57.86876923195566,
+      "visibleFps": 57.70209650951339,
+      "p95GapMs": 19.57499999552965,
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 111,
+    "mismatches": []
+  },
+  "commonCodegen": {
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false,
+    "fpuguardwide": false
+  },
+  "decision": "Opposing pairs; no repeatable gain established. No acceptance or retention. Next isolate safe conditional-exit redispatch within this combined configuration."
+}

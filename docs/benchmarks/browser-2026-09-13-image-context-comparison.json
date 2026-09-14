@@ -1,0 +1,248 @@
+{
+  "kind": "same-checkpoint-probe-abba",
+  "artifactScope": "Selected exact fields from completed CUA contextRun",
+  "coreSha256": "21b62c02d413f3d3ee1931a4c7f094ddd955bfc7c7985c089a234568a490f7b0",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "settings": {
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbPercent": 150,
+    "profiler": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "rejectedCpuFlags": false
+  },
+  "warmRepeatWithoutReload": false,
+  "runs": [
+    {
+      "probe": "async-fresh",
+      "warmup": true,
+      "simulationFps": 48.83380539345674,
+      "visibleFps": 48.7671380823394,
+      "seconds": 29.99970999999717,
+      "maxGapMs": 83.41499999910593,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "probe": "async-fresh",
+      "warmup": false,
+      "simulationFps": 54.69953505395394,
+      "visibleFps": 54.53286980394189,
+      "seconds": 30.00025499999896,
+      "maxGapMs": 35.775000002235174,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "probe": "async-reuse",
+      "warmup": true,
+      "simulationFps": 55.66873568801361,
+      "visibleFps": 55.50206282667225,
+      "seconds": 29.998884999997912,
+      "maxGapMs": 42.82000000029802,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "probe": "async-reuse",
+      "warmup": false,
+      "simulationFps": 55.898500056915694,
+      "visibleFps": 55.86516761800281,
+      "seconds": 30.0008049999997,
+      "maxGapMs": 63.730000000447035,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "probe": "async-reuse",
+      "warmup": true,
+      "simulationFps": 56.13632727079056,
+      "visibleFps": 56.036321937172765,
+      "seconds": 29.99839999999851,
+      "maxGapMs": 35.17000000178814,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "probe": "async-reuse",
+      "warmup": false,
+      "simulationFps": 56.267632594360656,
+      "visibleFps": 56.167630877664514,
+      "seconds": 29.999484999999403,
+      "maxGapMs": 36.16999999806285,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "probe": "async-fresh",
+      "warmup": true,
+      "simulationFps": 57.39922511045873,
+      "visibleFps": 57.2658935771011,
+      "seconds": 30.00040500000119,
+      "maxGapMs": 65.21000000089407,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "probe": "async-fresh",
+      "warmup": false,
+      "simulationFps": 56.268270312371406,
+      "visibleFps": 56.06826461220895,
+      "seconds": 29.999144999999555,
+      "maxGapMs": 35.434999998658895,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 107,
+    "mismatches": []
+  },
+  "diagnosticOnly": true,
+  "passed": false,
+  "interpretation": "No repeatable gain from context reuse; reverse pair effectively tied in first comparison, opposing results in warmed repeat. No multi-second stall reproduced in either mode across both comparisons; this does not prove the intermittent stall fixed. All FPS gates fail."
+}

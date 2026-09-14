@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "compile-out-melee-hot-atomic-counters",
+  "coreSha256": "1da1c2e98d7e0ff45c8ef85f3688deffb3027c190776d687e1a05b9e01ec4be9",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "rules": {
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0
+    },
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "secondsPerRun": 30,
+  "measuredRuns": [
+    {
+      "enabled": false,
+      "simulationFps": 44.7701
+    },
+    {
+      "enabled": true,
+      "simulationFps": 45.0351
+    },
+    {
+      "enabled": true,
+      "simulationFps": 47.1032
+    },
+    {
+      "enabled": false,
+      "simulationFps": 41.6022
+    }
+  ],
+  "measuredMeans": {
+    "controlSimulationFps": 43.1861,
+    "candidateSimulationFps": 46.0692,
+    "simulationUpliftPercent": 6.6759
+  },
+  "correctness": {
+    "fullMachineReplay120Frames": "pass",
+    "fullMachineReplay600Frames": "pass"
+  },
+  "decision": "Reject and revert. The total optimization uplift was lower than the accepted counter-enabled core result, so the counters were not the missing gain."
+}

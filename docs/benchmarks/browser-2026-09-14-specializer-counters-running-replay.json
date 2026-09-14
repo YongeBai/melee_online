@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-14",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "passed": true,
+  "frames": 600,
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "coreSha256": "1922d5587a438092c76ccc134e19cb08b3fa74d1de1612b6ff3bb8078bc34c2e",
+  "fullMachineBytesEqual": true,
+  "fingerprintsEqual": true,
+  "comparison": {
+    "sizeA": 110108838,
+    "sizeB": 110108838,
+    "sectionCount": 29,
+    "differingSections": []
+  },
+  "reference": {
+    "leandispatch": false,
+    "sceneFrame": 908,
+    "specializerCounterRuns": 1623094,
+    "animStateRuns": 419672,
+    "displayListFastRuns": 194658,
+    "gxMatrixFastRuns": 633204,
+    "inputHash": 498127758,
+    "stateHash": 1711367849,
+    "pollingGaps": []
+  },
+  "candidate": {
+    "leandispatch": true,
+    "sceneFrame": 908,
+    "specializerCounterRuns": 0,
+    "animStateRunsPublished": 0,
+    "displayListFastRunsPublished": 0,
+    "gxMatrixFastRunsPublished": 0,
+    "inputHash": 498127758,
+    "stateHash": 1711367849,
+    "pollingGaps": []
+  },
+  "retainedCodegen": {
+    "animstatefast": true,
+    "displaylistfast": true,
+    "gxmatrixfast": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true
+  },
+  "limits": "Exact complete-machine equality for one 600-frame ordinary-running Yoshi IC/IC trace. This validates counter suppression against its ordinary-counter control; it is not exhaustive roster or stage coverage."
+}

@@ -1,0 +1,153 @@
+--- a/Source/Core/Core/HW/GPFifo.cpp
++++ b/Source/Core/Core/HW/GPFifo.cpp
+@@ -3,7 +3,9 @@
+ 
+ #include "Core/HW/GPFifo.h"
+ 
++#include <atomic>
+ #include <cstddef>
++#include "Common/BrowserProfile.h"
+ #include <cstring>
+ 
+ #include "Common/ChunkFile.h"
+@@ -16,6 +18,23 @@
+ #include "Core/System.h"
+ #include "VideoCommon/CommandProcessor.h"
+ 
++#ifdef __EMSCRIPTEN__
++static std::atomic<bool> s_browser_fifo_copy{false};
++extern "C" bool DolphinWeb_GetFifoCopy(){return s_browser_fifo_copy.load(std::memory_order_relaxed);}
++extern "C" void DolphinWeb_SetFifoCopy(bool value){s_browser_fifo_copy.store(value,std::memory_order_relaxed);}
++
++// Same masked MEM1 range as MemoryManager::GetSpanForAddress. The generic
++// handler still owns EXRAM, invalid ranges and their original diagnostics.
++// A constant size permits the compiler to inline two vector-width copies.
++static bool CopyGatherPipeToRam(u8* ram,u32 size,u32 address,const u8* source)
++{
++  const u32 offset=address&0x3fffffffu;
++  if(!ram || size<32 || offset>size-32)return false;
++  std::memcpy(ram+offset,source,32);
++  return true;
++}
++#endif
++
+ namespace GPFifo
+ {
+ GPFifoManager::GPFifoManager(Core::System& system) : m_system(system)
+@@ -84,6 +103,9 @@
+ 
+ void GPFifoManager::UpdateGatherPipe()
+ {
++#ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::SampleScope sample(DolphinWeb::BrowserProfile::Stage::CpuGatherSample);
++#endif
+   auto& system = m_system;
+   auto& memory = system.GetMemory();
+   auto& processor_interface = system.GetProcessorInterface();
+@@ -93,8 +115,16 @@
+   for (processed = 0; pipe_count >= GATHER_PIPE_SIZE; processed += GATHER_PIPE_SIZE)
+   {
+     // copy the GatherPipe
+-    memory.CopyToEmu(processor_interface.m_fifo_cpu_write_pointer, m_gather_pipe + processed,
+-                     GATHER_PIPE_SIZE);
++    {
++#ifdef __EMSCRIPTEN__
++      const DolphinWeb::BrowserProfile::SampleScope copy_sample(DolphinWeb::BrowserProfile::Stage::CpuGatherCopySample);
++      if(!s_browser_fifo_copy.load(std::memory_order_relaxed) ||
++         !CopyGatherPipeToRam(memory.GetRAM(),memory.GetRamSizeReal(),
++                             processor_interface.m_fifo_cpu_write_pointer,m_gather_pipe+processed))
++#endif
++        memory.CopyToEmu(processor_interface.m_fifo_cpu_write_pointer,m_gather_pipe+processed,
++                         GATHER_PIPE_SIZE);
++    }
+     pipe_count -= GATHER_PIPE_SIZE;
+ 
+     // increase the CPUWritePointer
+--- a/Source/Core/VideoCommon/CommandProcessor.cpp
++++ b/Source/Core/VideoCommon/CommandProcessor.cpp
+@@ -7,6 +7,7 @@
+ #include <fmt/format.h>
+ 
+ #include "Common/Assert.h"
++#include "Common/BrowserProfile.h"
+ #include "Common/ChunkFile.h"
+ #include "Common/CommonTypes.h"
+ #include "Common/Flag.h"
+@@ -346,6 +347,9 @@
+ void CommandProcessorManager::GatherPipeBursted()
+ {
+ #ifdef __EMSCRIPTEN__
++  const DolphinWeb::BrowserProfile::SampleScope sample(DolphinWeb::BrowserProfile::Stage::CpuBurstSample);
++#endif
++#ifdef __EMSCRIPTEN__
+   // §27 diag: is the CPU bursting GP data post-load, and is the FIFO
+   // linked (else CPReadWriteDistance never grows → GPU idle → black)?
+   if (DolphinWeb::WgpuDeepDiagnostics::IsEnabled())
+--- a/Source/Core/Common/BrowserProfile.h
++++ b/Source/Core/Common/BrowserProfile.h
+@@ -8,11 +8,11 @@
+ 
+ namespace DolphinWeb::BrowserProfile
+ {
+-enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, CpuBranchCallbackSample, CpuEndCallbackSample, CpuGuestInterpretSample, Count };
++enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, CpuBranchCallbackSample, CpuEndCallbackSample, CpuGuestInterpretSample, CpuGatherSample, CpuGatherCopySample, CpuBurstSample, Count };
+ constexpr std::array<const char*, static_cast<std::size_t>(Stage::Count)> names{
+     "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent",
+     "cpuGpuSync", "cpuGpuDecode", "cpuVideoWait",
+-    "cpuChainSample1024", "cpuPartialSample1024", "cpuCallbackSample1024", "cpuIdleSample1024", "cpuFpHelperSample1024", "cpuMemoryHelperSample1024", "cpuSystemHelperSample1024", "cpuInterpreterHelperSample1024", "cpuMemoryReadSample1024", "cpuMemoryWriteSample1024", "cpuFifoWriteSample1024", "cpuBranchCallbackSample1024", "cpuEndCallbackSample1024", "cpuGuestInterpretSample1024"};
++    "cpuChainSample1024", "cpuPartialSample1024", "cpuCallbackSample1024", "cpuIdleSample1024", "cpuFpHelperSample1024", "cpuMemoryHelperSample1024", "cpuSystemHelperSample1024", "cpuInterpreterHelperSample1024", "cpuMemoryReadSample1024", "cpuMemoryWriteSample1024", "cpuFifoWriteSample1024", "cpuBranchCallbackSample1024", "cpuEndCallbackSample1024", "cpuGuestInterpretSample1024", "cpuGatherSample1024", "cpuGatherCopySample1024", "cpuBurstSample1024"};
+ struct Counter
+ {
+   std::atomic<std::uint64_t> count{0};
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -71,6 +71,8 @@
+ extern "C" bool DolphinWeb_GetWideBlockMap();
+ extern "C" bool DolphinWeb_GetConstantStateBase();
+ extern "C" bool DolphinWeb_GetBlockMsrCache();
++extern "C" bool DolphinWeb_GetFifoCopy();
++extern "C" void DolphinWeb_SetFifoCopy(bool);
+ extern "C" void DolphinWeb_SetBlockMsrCache(bool);
+ extern "C" void DolphinWeb_SetConstantStateBase(bool);
+ extern "C" void DolphinWeb_SetWideBlockMap(bool);
+@@ -1296,7 +1298,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 8191 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 16383 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1316,7 +1318,8 @@
+   const bool wide_map = (flags & 1024) != 0;
+   const bool constant_state_base = (flags & 2048) != 0;
+   const bool block_msr_cache = (flags & 4096) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache())
++  const bool fifo_copy = (flags & 8192) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1328,6 +1331,7 @@
+     DolphinWeb_SetWideBlockMap(wide_map);
+     DolphinWeb_SetConstantStateBase(constant_state_base);
+     DolphinWeb_SetBlockMsrCache(block_msr_cache);
++    DolphinWeb_SetFifoCopy(fifo_copy);
+   }
+   return 1;
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

@@ -1,0 +1,140 @@
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -488,7 +488,8 @@
+ // only at the native CPU controller poll, once per observed logic frame.
+ struct FrameBenchmarkStats
+ {
+-  bool active=false,valid=true,have_frame=false;
++  bool active=false,valid=true,have_frame=false,completed=false;
++  u32 stop_after=0,stopped_frame=0;
+   u32 start=0,last=0,frames=0,skipped=0,input_hash=2166136261u,state_hash=2166136261u;
+   std::array<u32,2> changes{};
+   std::array<std::array<bool,512>,2> actions{};
+@@ -500,24 +501,30 @@
+   std::vector<Gap> gaps;
+ };
+ FrameBenchmarkStats s_frame_benchmark;
+-bool ReadFrameBenchmarkInput(int port,InputStateSnapshot* input)
++void RequestFrameBenchmarkBreak(){Core::System::GetInstance().GetCPU().Break();}
++bool ReadFrameBenchmarkInput(int port,InputStateSnapshot* input,bool* break_requested)
+ {
++  *break_requested=false;
+   if (!s_frame_benchmark.active) return false;
+   auto& b=s_frame_benchmark;
+   // Frontend inspection must not sample mutable guest state or advance the
+   // script. The CPU thread is the sole producer of native poll snapshots.
+   if (!Core::IsCPUThread()) {*input=b.pads[port];return true;}
++  if (b.completed) {*input=b.pads[port];return true;}
++  const auto finish = [&](bool valid,u32 frame) {
++    b.valid=b.valid&&valid;b.completed=true;b.stopped_frame=frame;*break_requested=true;
++  };
+   DolphinWeb::FrameBenchmark::State state;
+   if (!DolphinWeb::FrameBenchmark::Read(Core::System::GetInstance().GetMemory().GetRAM(),0x1800000,&state))
+-  {b.valid=false;*input={};return true;}
++  {b.valid=false;if(b.stop_after)finish(false,b.last);*input=b.pads[port];return true;}
+   if (!b.have_frame || b.last!=state.frame)
+   {
+     const u32 relative=state.frame-b.start;
+-    if (relative>7200) {b.valid=false;*input={};return true;}
++    if (relative>7200) {b.valid=false;if(b.stop_after)finish(false,state.frame);*input=b.pads[port];return true;}
+     if (b.have_frame && state.frame-b.last!=1)
+     {
+       const u32 delta=state.frame-b.last;
+-      if (delta>7200) {b.valid=false;*input={};return true;}
++      if (delta>7200) {b.valid=false;if(b.stop_after)finish(false,state.frame);*input=b.pads[port];return true;}
+       b.skipped+=delta-1;b.gaps.push_back({b.last-b.start,relative});
+     }
+     b.input_hash=DolphinWeb::FrameBenchmark::HashWord(b.input_hash,relative);
+@@ -538,6 +545,7 @@
+     }
+     DecodeTwoControllerInputs(packed.data(),18,state.frame,&b.pads);
+     if (relative && relative%120==0)b.digests.push_back({relative,b.input_hash,b.state_hash});
++    if (b.stop_after && relative>=b.stop_after)finish(relative==b.stop_after,state.frame);
+   }
+   *input=b.pads[port];return true;
+ }
+@@ -1229,12 +1237,26 @@
+   s_frame_benchmark={};s_frame_benchmark.start=state.frame;s_frame_benchmark.active=true;
+   return 1;
+ }
++// QA only: stop at a native controller poll without arming per-frame stepping.
++// CPUThreadGuard waits for the old run loop before the target is published.
++EMSCRIPTEN_KEEPALIVE int BrowserFrameBenchmarkStopAfterFrames(int frames)
++{
++  auto& system=Core::System::GetInstance();
++  if (!s_runtime_initialized || frames<120 || frames>3600 || Core::GetState(system)!=Core::State::Paused)return 0;
++  const Core::CPUThreadGuard guard(system);
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  auto& b=s_frame_benchmark;
++  if (!b.active || b.have_frame || b.stop_after || s_rollback_input_owner)return 0;
++  b.stop_after=frames;return 1;
++}
+ EMSCRIPTEN_KEEPALIVE const char* BrowserFrameBenchmarkStats()
+ {
+   static std::string result;
+   const std::lock_guard<std::mutex> lock(s_input_state_mutex);const auto& b=s_frame_benchmark;
+   std::ostringstream out;
+   out<<"{\"active\":"<<(b.active?"true":"false")<<",\"valid\":"<<(b.valid?"true":"false")
++     <<",\"completed\":"<<(b.completed?"true":"false")<<",\"stopAfterFrames\":"<<b.stop_after<<",\"stoppedFrame\":"<<b.stopped_frame
++     <<",\"inputHash\":"<<b.input_hash<<",\"stateHash\":"<<b.state_hash
+      <<",\"startFrame\":"<<b.start<<",\"lastFrame\":"<<b.last<<",\"frames\":"<<b.frames<<",\"skipped\":"<<b.skipped
+      <<",\"inputChanges\":["<<b.changes[0]<<","<<b.changes[1]<<"],\"observedActions\":[";
+   for (u32 p=0;p<2;++p) {if(p)out<<",";out<<"[";bool comma=false;for(u32 a=0;a<512;++a)if(b.actions[p][a]){if(comma)out<<",";comma=true;out<<a;}out<<"]";}
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_discio.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_discio.cpp
+@@ -160,17 +160,23 @@
+   return true;
+ }
+ 
+-bool ReadFrameBenchmarkInput(int port, InputStateSnapshot* input);
++bool ReadFrameBenchmarkInput(int port, InputStateSnapshot* input, bool* break_requested);
++void RequestFrameBenchmarkBreak();
+ 
+ bool ReadControllerInput(int port, InputStateSnapshot* input)
+ {
+   if (!input || port < 0 || port >= 2) return false;
++  bool break_requested=false;
++  {
+   const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+   if (s_rollback_input_owner) *input = s_rollback_inputs[port];
+-  else if (ReadFrameBenchmarkInput(port,input)) {}
++  else if (ReadFrameBenchmarkInput(port,input,&break_requested)) {}
+   else if (s_live_input_owner) *input = s_live_inputs[port];
+   else if (port == 0) *input = s_input_state;
+   else return false;
++  }
++  // Break can notify FIFO/audio; never hold the controller mutex across it.
++  if (break_requested)RequestFrameBenchmarkBreak();
+   return true;
+ }
+ std::mutex s_pad_poll_mutex;
+--- a/engines/wasm-dolphin/src/upstream-discio-worker.js
++++ b/engines/wasm-dolphin/src/upstream-discio-worker.js
+@@ -1073,6 +1073,9 @@
+       } else if (payload.action === "frameInput") {
+         if(typeof payload.enabled!=="boolean" || !api.browserFrameBenchmarkInput?.(payload.enabled?1:0))throw Error("Frame-based QA input requires paused USA 1.02 VS with two human ports");
+         return {enabled:payload.enabled};
++      } else if (payload.action === "frameInputStop") {
++        if(!Number.isInteger(payload.frames) || !api.browserFrameBenchmarkStopAfterFrames?.(payload.frames))throw Error("Frame input stop requires fresh paused QA input and 120–3600 frames");
++        return {frames:payload.frames};
+       } else if (payload.action === "frameInputStats") {
+         if(!api.browserFrameBenchmarkStats)throw Error("Frame input counters unavailable");
+         return JSON.parse(api.browserFrameBenchmarkStats());
+@@ -2454,6 +2457,7 @@
+     browserLiveSetPads: optionalCwrap("BrowserLiveSetPads", "number", ["number", "number", "number"]),
+     browserLiveReleasePads: optionalCwrap("BrowserLiveReleasePads", "number", []),
+     browserFrameBenchmarkInput: optionalCwrap("BrowserFrameBenchmarkInput", "number", ["number"]),
++    browserFrameBenchmarkStopAfterFrames: optionalCwrap("BrowserFrameBenchmarkStopAfterFrames", "number", ["number"]),
+     browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
+     browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -51,6 +51,7 @@
+ #include "Core/State.h"
+ #include "Core/HW/Memmap.h"
+ #include "Core/System.h"
++#include "Core/HW/CPU.h"
+ 
+ #include "InputCommon/ControllerInterface/ControllerInterface.h"
+ 

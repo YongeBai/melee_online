@@ -1,0 +1,42 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Canvas image probe verification</title><style>body{background:#171717;color:#eee;font:16px system-ui;margin:20px}canvas{width:640px;height:480px;display:block}button{padding:12px}pre{white-space:pre-wrap}</style></head><body>
+<h1>Canvas image probe verification</h1><p>Checks captured pixels against known images, including source changes after capture. This page cannot certify game performance.</p>
+<button id="run">Verify async image samples</button><button id="reuse">Verify reused async image samples</button><button id="task">Verify task-harvest image samples</button><button id="worker">Verify worker image samples</button><p role="status" id="status">Ready</p><canvas id="source" width="960" height="720"></canvas><pre id="result"></pre>
+<script type="module">
+import{AsyncCanvasImageProbe,hashImagePixels,ImageHarvestTask}from'./browser-async-image-probe.js';
+import{WorkerCanvasImageProbe}from'./browser-worker-image-probe.js';
+const canvas=document.querySelector('#source'),ctx=canvas.getContext('2d',{alpha:false});
+async function verify(reuse,taskHarvest=false,workerProbe=false){
+ const button=document.querySelector('#run'),status=document.querySelector('#status'),output=document.querySelector('#result');button.disabled=true;
+ const results=[];let probe,harvester,harvestError;
+ try{
+  for(const mode of ['black','static','30fps','60fps','snapshot','bitmap-30fps','bitmap-60fps','bitmap-snapshot']){
+   status.textContent='Verifying '+mode+'…';const bitmapMode=mode.startsWith('bitmap-'),pattern=mode.replace('bitmap-','');const bitmapCanvas=bitmapMode?document.createElement('canvas'):null;if(bitmapCanvas){bitmapCanvas.width=960;bitmapCanvas.height=720;bitmapCanvas.style.display='none';document.body.append(bitmapCanvas);}const bitmapContext=bitmapCanvas?.getContext('bitmaprenderer');const painted=bitmapMode?new OffscreenCanvas(960,720):canvas;const paint=bitmapMode?painted.getContext('2d',{alpha:false}):ctx;const source=bitmapMode?bitmapCanvas:canvas;if(probe)probe.reset();else probe=workerProbe?new WorkerCanvasImageProbe():new AsyncCanvasImageProbe();if(workerProbe)await probe.ready;const samples=[];const started=performance.now();let count=0;
+   const pixels=new Uint8Array(32*24*4);harvestError=null;if(taskHarvest)harvester=new ImageHarvestTask(probe,ready=>samples.push(...ready),error=>{harvestError=error;});
+   await new Promise((resolve,reject)=>{
+    function tick(){try{
+     if(harvestError)throw harvestError;if(!taskHarvest)samples.push(...probe.poll());const at=performance.now(),index=pattern==='60fps'?Math.floor((at-started)*60/1000):pattern==='30fps'?Math.floor((at-started)*30/1000):pattern==='snapshot'?count:0;
+     const color=pattern==='black'?[0,0,0]:pattern==='static'?[255,0,0]:[[255,0,0],[0,255,0],[0,0,255],[255,255,255]][index%4];
+     paint.fillStyle='rgb('+color.join(',')+')';paint.fillRect(0,0,960,720);if(bitmapMode)bitmapContext.transferFromImageBitmap(painted.transferToImageBitmap());
+     for(let i=0;i<pixels.length;i+=4){pixels.set(color,i);pixels[i+3]=255;}
+     const expected=hashImagePixels(pixels);probe.capture(source,{at,expected,index});harvester?.request();count++;
+     if(pattern==='snapshot'){paint.fillStyle='#000';paint.fillRect(0,0,960,720);if(bitmapMode)bitmapContext.transferFromImageBitmap(painted.transferToImageBitmap());}
+     if(at-started>=2200)resolve();else requestAnimationFrame(tick);
+    }catch(error){reject(error);}}
+    requestAnimationFrame(tick);
+   });
+   harvester?.stop();if(harvestError)throw harvestError;const drain=performance.now();while(probe.pending.length){samples.push(...probe.poll());if(performance.now()-drain>2000)throw Error('GPU samples timed out');if(probe.pending.length)await new Promise(requestAnimationFrame);}
+   const mismatches=samples.filter(s=>s.hash!==s.expected.hash||s.nonblack!==s.expected.nonblack).length;
+   let changes=0,expectedChanges=0;for(let i=1;i<samples.length;i++){if(samples[i].hash!==samples[i-1].hash)changes++;if(samples[i].expected.hash!==samples[i-1].expected.hash)expectedChanges++;}
+   const seconds=(samples.at(-1).at-samples[0].at)/1000;
+   const result={mode,reuse,taskHarvest,workerProbe,samples:samples.length,captures:count,mismatches,changes,expectedChanges,visibleFps:changes/seconds,maxPending:probe.maxPending,passed:samples.length===count&&mismatches===0&&changes===expectedChanges};
+   results.push(result);if(!reuse){probe.dispose();probe=null;}bitmapCanvas?.remove();output.textContent=JSON.stringify({passed:results.every(r=>r.passed),results},null,2);
+   if(!result.passed)throw Error('Pixel or cadence mismatch for '+mode);
+  }
+  status.textContent='PASS: all captured pixels and changes match the known source images.';
+ }catch(error){status.textContent='FAIL: '+error.message;}finally{harvester?.stop();probe?.dispose();button.disabled=false;}
+};
+document.querySelector('#run').onclick=()=>verify(false);
+document.querySelector('#reuse').onclick=()=>verify(true);
+document.querySelector('#task').onclick=()=>verify(false,true);
+document.querySelector('#worker').onclick=()=>verify(false,false,true);
+</script></body></html>

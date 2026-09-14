@@ -1,0 +1,27 @@
+{
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "stage": "Battlefield",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "method": "Two consecutive fresh matches on a warm core; original WebGL2/PBO/fence image verifier; native-frame scripted human input with partner AI retained. Not human play.",
+  "verifiedSelection": {"stage":31,"characters":[14,14],"slotTypes":[0,0],"timeLimit":480,"items":-1,"teams":0},
+  "sourceResolution": [960,720],
+  "nonblackFraction": 1,
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "pageLifecycleBoth": {"start":{"visibility":"visible","focused":true},"end":{"visibility":"visible","focused":true},"events":[]},
+  "runs": [
+    {
+      "seconds":29.999330000000075,"simulationFps":58.234633906823774,"gameRenderFps":58.167965751234966,"visibleFps":57.23461157299165,"p95GapMs":19.520000000484288,"maxGapMs":54.139999999664724,"passed":false,
+      "wallStartMs":1789331274579.6401,"wallEndMs":1789331304578.9702,
+      "queue":{"capacity":2,"rateLimited":true,"received":1745,"presented":1718,"dropped":28,"underruns":81,"meanAgeMs":16.827334109430307,"p50AgeUpperMs":16,"p95AgeUpperMs":31,"p99AgeUpperMs":32,"ageOverflow256Ms":0,"clockSkips":0,"readyClockSkips":0},
+      "input":{"valid":true,"frames":1748,"skipped":1,"inputChanges":[190,191],"exercisedBothPlayers":true}
+    },
+    {
+      "seconds":29.999260000000707,"simulationFps":59.468133547292766,"gameRenderFps":59.40146523614109,"visibleFps":58.83478459135187,"p95GapMs":17.37000000011176,"maxGapMs":54.71499999985099,"passed":false,
+      "wallStartMs":1789331375574.6702,"wallEndMs":1789331405573.9302,
+      "queue":{"capacity":2,"rateLimited":true,"received":1782,"presented":1766,"dropped":17,"underruns":27,"meanAgeMs":18.869552661376844,"p50AgeUpperMs":20,"p95AgeUpperMs":30,"p99AgeUpperMs":32,"ageOverflow256Ms":0,"clockSkips":2,"readyClockSkips":2},
+      "input":{"valid":true,"frames":1785,"skipped":1,"inputChanges":[196,193],"exercisedBothPlayers":true}
+    }
+  ],
+  "conclusion":"Both gates fail. Performance shortfalls extend beyond the accepted Fountain/Ice Climbers exception; goal remains incomplete. Queue age is not input-to-photon latency."
+}

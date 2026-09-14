@@ -1,0 +1,76 @@
+{
+  "artifactScope": "Selected exact fields from completed live browser replay",
+  "coreSha256": "b9f28907ed7e4256d09d239872d68088a32e40f5df62a76481459dc2dd622e88",
+  "passed": true,
+  "fullMachineBytesEqual": true,
+  "kind": "local-browser-late-input-correction",
+  "networkTest": false,
+  "performanceTest": false,
+  "frames": 120,
+  "delay": 3,
+  "tickDifferences": [],
+  "comparison": {
+    "sizeA": 105129682,
+    "sizeB": 105129682,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0,
+    "allSectionUnmatchedBytes": 0
+  },
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "referenceFrame": 425,
+  "correctedFrame": 425,
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "commonCodegen": {
+    "cpformat": false,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "readfusion": false,
+    "stepcheck": false,
+    "fpuguardwide": false,
+    "branchfusion": false,
+    "fpuguard": true,
+    "blockmerge": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "qstatecache": false
+  },
+  "limits": [
+    "Local deterministic correction test, not Internet netplay or an FPS measurement.",
+    "Does not prove equivalence for every possible game interaction."
+  ],
+  "referenceQStateFull": false,
+  "candidateQStateFull": true
+}

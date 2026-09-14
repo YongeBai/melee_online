@@ -1,0 +1,18 @@
+{
+  "coreSha256": "28a5899ca069b3907eaa9ff6e5b8a35321261900180875015e25de5bd18c2857",
+  "passed": true,
+  "kind": "fountain-gameplay-observable-comparison",
+  "feature": "modeldetail",
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "moving platform state and positions",
+    "native camera transform and settings"
+  ],
+  "visualCheck": "Low-detail Ice Climbers models remained readable during the replay. Native framing retained; not a native Dolphin image comparison."
+}

@@ -1,0 +1,40 @@
+{
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "commonCodegen": {
+    "readfusion": false,
+    "branchfusion": false,
+    "fpuguard": true,
+    "blockmerge": true,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "performanceTest": false,
+  "networkTest": false,
+  "artifactScope": "Exact selected CUA cpArmedReplay fields; step parts and matching section rows omitted",
+  "passed": true,
+  "frames": 120,
+  "prewarmFrames": 0,
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "tickDifferences": [],
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107097189,
+    "sizeB": 107097189,
+    "sectionCount": 29,
+    "differingSections": []
+  },
+  "referenceFrame": 431,
+  "correctedFrame": 431
+}

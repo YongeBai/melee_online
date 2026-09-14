@@ -1,0 +1,59 @@
+{
+  "artifactScope": "Exact selected CUA counterRunningReplay/counterArmedReplay fields; raw state and per-step payloads excluded",
+  "coreSha256": "648ffd7b3b46f82b38ceb6b3b4e9893fd7678ceb0647116a15af63e53762c58c",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "performanceTest": false,
+  "networkTest": false,
+  "kind": "normal-running-browser-codegen-equivalence",
+  "passed": true,
+  "frames": 600,
+  "fullMachineBytesEqual": true,
+  "fingerprintsEqual": true,
+  "comparison": {
+    "sizeA": 107382085,
+    "sizeB": 107382085,
+    "sections": 29,
+    "differentBytes": 0,
+    "retainedCode": true
+  },
+  "runs": [
+    {
+      "counterbatch": false,
+      "dispatcherHandle": 11378,
+      "calls": 30543125,
+      "counterBatches": 0,
+      "readFusionEmissions": 1968,
+      "newReadFusionEmissions": 1968,
+      "startFrame": 303,
+      "stoppedFrame": 903,
+      "inputHash": 221119829,
+      "stateHash": 2220731446,
+      "gaps": []
+    },
+    {
+      "counterbatch": true,
+      "dispatcherHandle": 11378,
+      "calls": 30529169,
+      "counterBatches": 709793,
+      "readFusionEmissions": 1968,
+      "newReadFusionEmissions": 0,
+      "startFrame": 303,
+      "stoppedFrame": 903,
+      "inputHash": 221119829,
+      "stateHash": 2220731446,
+      "gaps": []
+    }
+  ]
+}

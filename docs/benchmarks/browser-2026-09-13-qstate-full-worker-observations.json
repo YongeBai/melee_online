@@ -1,0 +1,2450 @@
+{
+  "scope": "Lightweight OS observations during FPS comparison; not guest-PC profiling. Clock ticks are raw kernel accounting.",
+  "pid": 7933,
+  "rows": [
+    {
+      "time": 1789333560687,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2083,
+          "systemTicks": 97,
+          "cpu": 2,
+          "frequencyKhz": 4245828
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884616
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4246399
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1884700
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4245828
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 4236720
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4229613
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1885794
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884616
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1885099
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1885794
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 4245703
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11284,
+          "systemTicks": 606,
+          "cpu": 14,
+          "frequencyKhz": 4244763
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 3,
+          "frequencyKhz": 4246399
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1885477
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1885184
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 28606,
+          "systemTicks": 347,
+          "cpu": 15,
+          "frequencyKhz": 4245643
+        }
+      ]
+    },
+    {
+      "time": 1789333561688,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "R",
+          "userTicks": 2091,
+          "systemTicks": 97,
+          "cpu": 2,
+          "frequencyKhz": 4653385
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1597511
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4643256
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1882372
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4653385
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 4619464
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4643185
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1597511
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 4649503
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11326,
+          "systemTicks": 607,
+          "cpu": 0,
+          "frequencyKhz": 4643185
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 3,
+          "frequencyKhz": 4643256
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1884486
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 28706,
+          "systemTicks": 348,
+          "cpu": 15,
+          "frequencyKhz": 4647046
+        }
+      ]
+    },
+    {
+      "time": 1789333562689,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2100,
+          "systemTicks": 97,
+          "cpu": 16,
+          "frequencyKhz": 1884656
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1883453
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1884224
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4540720
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 1581100
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4777553
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1884956
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1883453
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1886276
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1884956
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 1595579
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11363,
+          "systemTicks": 610,
+          "cpu": 0,
+          "frequencyKhz": 4777553
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 3,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1883743
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1885106
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 28804,
+          "systemTicks": 349,
+          "cpu": 15,
+          "frequencyKhz": 4778854
+        }
+      ]
+    },
+    {
+      "time": 1789333563690,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2109,
+          "systemTicks": 98,
+          "cpu": 0,
+          "frequencyKhz": 1596232
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884644
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4773734
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1880875
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 2875097
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 1596232
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1883359
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884644
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1879700
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1883359
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 1593067
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11396,
+          "systemTicks": 611,
+          "cpu": 4,
+          "frequencyKhz": 1883475
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 3,
+          "frequencyKhz": 4773734
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1880282
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1885942
+        },
+        {
+          "tid": 33935,
+          "state": "S",
+          "userTicks": 28896,
+          "systemTicks": 350,
+          "cpu": 15,
+          "frequencyKhz": 4790015
+        }
+      ]
+    },
+    {
+      "time": 1789333564691,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2117,
+          "systemTicks": 98,
+          "cpu": 22,
+          "frequencyKhz": 1882439
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1882015
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4785636
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1883412
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 4791296
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 1573971
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1883297
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1882015
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1866214
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1883297
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 1568880
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11431,
+          "systemTicks": 613,
+          "cpu": 14,
+          "frequencyKhz": 4722302
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 3,
+          "frequencyKhz": 4785636
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1882855
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1883391
+        },
+        {
+          "tid": 33935,
+          "state": "S",
+          "userTicks": 28991,
+          "systemTicks": 351,
+          "cpu": 15,
+          "frequencyKhz": 4722842
+        }
+      ]
+    },
+    {
+      "time": 1789333565692,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "R",
+          "userTicks": 2126,
+          "systemTicks": 98,
+          "cpu": 0,
+          "frequencyKhz": 1568098
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1883390
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1883290
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4700079
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 1568098
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1883563
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1883390
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1882973
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1883563
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 3317226
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11465,
+          "systemTicks": 615,
+          "cpu": 2,
+          "frequencyKhz": 4700079
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 13,
+          "frequencyKhz": 1576418
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1882882
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1882852
+        },
+        {
+          "tid": 33935,
+          "state": "S",
+          "userTicks": 29083,
+          "systemTicks": 352,
+          "cpu": 15,
+          "frequencyKhz": 4690991
+        }
+      ]
+    },
+    {
+      "time": 1789333566694,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2135,
+          "systemTicks": 98,
+          "cpu": 1,
+          "frequencyKhz": 1789556
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1885858
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 1613672
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1886060
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 3231807
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 2202735
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 1648618
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1886009
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1885858
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1886064
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1886009
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 1789556
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11506,
+          "systemTicks": 617,
+          "cpu": 16,
+          "frequencyKhz": 1884801
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 13,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1885955
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1886016
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29174,
+          "systemTicks": 352,
+          "cpu": 14,
+          "frequencyKhz": 3626084
+        }
+      ]
+    },
+    {
+      "time": 1789333567696,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2143,
+          "systemTicks": 98,
+          "cpu": 22,
+          "frequencyKhz": 1887152
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884252
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4727664
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1884287
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 1588579
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 1568590
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1883218
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884252
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1884003
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1883218
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 1792222
+        },
+        {
+          "tid": 33931,
+          "state": "R",
+          "userTicks": 11540,
+          "systemTicks": 618,
+          "cpu": 3,
+          "frequencyKhz": 4727664
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 13,
+          "frequencyKhz": 1672529
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1883713
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1882478
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29265,
+          "systemTicks": 353,
+          "cpu": 14,
+          "frequencyKhz": 3110607
+        }
+      ]
+    },
+    {
+      "time": 1789333568697,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2152,
+          "systemTicks": 99,
+          "cpu": 19,
+          "frequencyKhz": 1884887
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1882028
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4722127
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1883812
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4695097
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 3353526
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4695516
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1883177
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1882028
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1884887
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1883177
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 4751436
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11578,
+          "systemTicks": 619,
+          "cpu": 0,
+          "frequencyKhz": 4695516
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 13,
+          "frequencyKhz": 4694612
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1885098
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1877132
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29364,
+          "systemTicks": 354,
+          "cpu": 2,
+          "frequencyKhz": 4695097
+        }
+      ]
+    },
+    {
+      "time": 1789333569698,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2161,
+          "systemTicks": 99,
+          "cpu": 1,
+          "frequencyKhz": 3182869
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1887333
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4788513
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1885183
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4718126
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 2552501
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4805839
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1882479
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1887333
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1884969
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1882479
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 3182869
+        },
+        {
+          "tid": 33931,
+          "state": "R",
+          "userTicks": 11614,
+          "systemTicks": 621,
+          "cpu": 13,
+          "frequencyKhz": 4717683
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 12,
+          "frequencyKhz": 2552501
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1884947
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1884727
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29463,
+          "systemTicks": 355,
+          "cpu": 2,
+          "frequencyKhz": 4718126
+        }
+      ]
+    },
+    {
+      "time": 1789333570699,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2168,
+          "systemTicks": 99,
+          "cpu": 17,
+          "frequencyKhz": 1886628
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1891199
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4826431
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1895701
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 1614554
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 4834798
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4827836
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1886820
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1891199
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1880934
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1886820
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 4821504
+        },
+        {
+          "tid": 33931,
+          "state": "R",
+          "userTicks": 11650,
+          "systemTicks": 623,
+          "cpu": 18,
+          "frequencyKhz": 1884706
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 12,
+          "frequencyKhz": 4807518
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1884840
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1884706
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29560,
+          "systemTicks": 356,
+          "cpu": 3,
+          "frequencyKhz": 4800127
+        }
+      ]
+    },
+    {
+      "time": 1789333571701,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2177,
+          "systemTicks": 99,
+          "cpu": 21,
+          "frequencyKhz": 1884215
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1886391
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1885545
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4850711
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4847466
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1887236
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1886391
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1887284
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1887236
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 4805929
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11690,
+          "systemTicks": 624,
+          "cpu": 13,
+          "frequencyKhz": 4839089
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 12,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1884992
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1885534
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29657,
+          "systemTicks": 356,
+          "cpu": 15,
+          "frequencyKhz": 4846346
+        }
+      ]
+    },
+    {
+      "time": 1789333572702,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2186,
+          "systemTicks": 99,
+          "cpu": 5,
+          "frequencyKhz": 1859841
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884595
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4728120
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1882021
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4733192
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 4742920
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4757472
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1885331
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1884595
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1880514
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1885331
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 4742474
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11728,
+          "systemTicks": 626,
+          "cpu": 1,
+          "frequencyKhz": 4742474
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 12,
+          "frequencyKhz": 4742920
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1883966
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1703442
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29747,
+          "systemTicks": 357,
+          "cpu": 15,
+          "frequencyKhz": 4734488
+        }
+      ]
+    },
+    {
+      "time": 1789333573703,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2195,
+          "systemTicks": 100,
+          "cpu": 1,
+          "frequencyKhz": 1699569
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1888294
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4975455
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1883021
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 1672598
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 1673018
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 605264
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1881724
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1888294
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1883705
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1881724
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 1699569
+        },
+        {
+          "tid": 33931,
+          "state": "R",
+          "userTicks": 11768,
+          "systemTicks": 628,
+          "cpu": 19,
+          "frequencyKhz": 1883705
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 12,
+          "frequencyKhz": 1673018
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1880931
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1882585
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29835,
+          "systemTicks": 358,
+          "cpu": 15,
+          "frequencyKhz": 5025695
+        }
+      ]
+    },
+    {
+      "time": 1789333574704,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2202,
+          "systemTicks": 100,
+          "cpu": 22,
+          "frequencyKhz": 1881603
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1882747
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4722476
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1882668
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4716302
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 2362852
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 1572404
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1883298
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1882747
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1884250
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1883298
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 4792207
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11808,
+          "systemTicks": 630,
+          "cpu": 20,
+          "frequencyKhz": 1882668
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 3,
+          "frequencyKhz": 4722476
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1882310
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1882481
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 29927,
+          "systemTicks": 359,
+          "cpu": 15,
+          "frequencyKhz": 4715990
+        }
+      ]
+    },
+    {
+      "time": 1789333575706,
+      "workers": [
+        {
+          "tid": 33919,
+          "state": "S",
+          "userTicks": 2211,
+          "systemTicks": 100,
+          "cpu": 1,
+          "frequencyKhz": 1407483
+        },
+        {
+          "tid": 33920,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1883587
+        },
+        {
+          "tid": 33921,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 3,
+          "frequencyKhz": 4280968
+        },
+        {
+          "tid": 33922,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 20,
+          "frequencyKhz": 1884917
+        },
+        {
+          "tid": 33923,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 2,
+          "frequencyKhz": 4282949
+        },
+        {
+          "tid": 33924,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 12,
+          "frequencyKhz": 4225701
+        },
+        {
+          "tid": 33925,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 0,
+          "frequencyKhz": 4212563
+        },
+        {
+          "tid": 33926,
+          "state": "S",
+          "userTicks": 23,
+          "systemTicks": 4,
+          "cpu": 11,
+          "frequencyKhz": 1885033
+        },
+        {
+          "tid": 33927,
+          "state": "S",
+          "userTicks": 3,
+          "systemTicks": 0,
+          "cpu": 23,
+          "frequencyKhz": 1883587
+        },
+        {
+          "tid": 33928,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 19,
+          "frequencyKhz": 1882256
+        },
+        {
+          "tid": 33929,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 11,
+          "frequencyKhz": 1885033
+        },
+        {
+          "tid": 33930,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 1,
+          "frequencyKhz": 1407483
+        },
+        {
+          "tid": 33931,
+          "state": "S",
+          "userTicks": 11845,
+          "systemTicks": 631,
+          "cpu": 3,
+          "frequencyKhz": 4280968
+        },
+        {
+          "tid": 33932,
+          "state": "S",
+          "userTicks": 9,
+          "systemTicks": 2,
+          "cpu": 3,
+          "frequencyKhz": 4280968
+        },
+        {
+          "tid": 33933,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 7,
+          "frequencyKhz": 1884140
+        },
+        {
+          "tid": 33934,
+          "state": "S",
+          "userTicks": 2,
+          "systemTicks": 0,
+          "cpu": 18,
+          "frequencyKhz": 1882244
+        },
+        {
+          "tid": 33935,
+          "state": "R",
+          "userTicks": 30026,
+          "systemTicks": 360,
+          "cpu": 2,
+          "frequencyKhz": 4282949
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "seconds": 15.019,
+    "clockTicksPerSecond": 100,
+    "workers": [
+      {
+        "tid": 33935,
+        "cpuSeconds": 14.33,
+        "observedCpus": [
+          15,
+          14,
+          2,
+          3
+        ],
+        "minObservedFrequencyKhz": 3110607,
+        "maxObservedFrequencyKhz": 5025695
+      },
+      {
+        "tid": 33931,
+        "cpuSeconds": 5.86,
+        "observedCpus": [
+          14,
+          0,
+          4,
+          2,
+          16,
+          3,
+          13,
+          18,
+          1,
+          19,
+          20
+        ],
+        "minObservedFrequencyKhz": 1882668,
+        "maxObservedFrequencyKhz": 4839089
+      },
+      {
+        "tid": 33919,
+        "cpuSeconds": 1.31,
+        "observedCpus": [
+          2,
+          16,
+          0,
+          22,
+          1,
+          19,
+          17,
+          21,
+          5
+        ],
+        "minObservedFrequencyKhz": 1407483,
+        "maxObservedFrequencyKhz": 4653385
+      },
+      {
+        "tid": 33920,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          23
+        ],
+        "minObservedFrequencyKhz": 1597511,
+        "maxObservedFrequencyKhz": 1891199
+      },
+      {
+        "tid": 33921,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          3
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 4975455
+      },
+      {
+        "tid": 33922,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          20
+        ],
+        "minObservedFrequencyKhz": 1880875,
+        "maxObservedFrequencyKhz": 1895701
+      },
+      {
+        "tid": 33923,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          2
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 4850711
+      },
+      {
+        "tid": 33924,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          12
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 4834798
+      },
+      {
+        "tid": 33925,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          0
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 4847466
+      },
+      {
+        "tid": 33926,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          11
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 1887236
+      },
+      {
+        "tid": 33927,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          23
+        ],
+        "minObservedFrequencyKhz": 1597511,
+        "maxObservedFrequencyKhz": 1891199
+      },
+      {
+        "tid": 33928,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          19
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 1887284
+      },
+      {
+        "tid": 33929,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          11
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 1887236
+      },
+      {
+        "tid": 33930,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          1
+        ],
+        "minObservedFrequencyKhz": 1407483,
+        "maxObservedFrequencyKhz": 4821504
+      },
+      {
+        "tid": 33932,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          3,
+          13,
+          12
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 4807518
+      },
+      {
+        "tid": 33933,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          7
+        ],
+        "minObservedFrequencyKhz": 1880282,
+        "maxObservedFrequencyKhz": 1885955
+      },
+      {
+        "tid": 33934,
+        "cpuSeconds": 0,
+        "observedCpus": [
+          18
+        ],
+        "minObservedFrequencyKhz": 605264,
+        "maxObservedFrequencyKhz": 1886016
+      }
+    ]
+  },
+  "limits": [
+    "Observed CPU frequency belongs to the logical CPU at each read, not an integrated worker-cycle measurement.",
+    "The busiest DedicatedWorker is inferred to be the emulator CPU worker; these samples are not an exact guest stack profile.",
+    "Samples occurred after the 9.23-second gap and cannot diagnose its cause.",
+    "No affinity, priority or OS settings were changed."
+  ]
+}

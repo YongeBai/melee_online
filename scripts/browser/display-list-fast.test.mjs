@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import test from 'node:test';
+
+const cpp=fs.readFileSync('engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp','utf8');
+const core=fs.readFileSync('engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp','utf8');
+const worker=fs.readFileSync('engines/wasm-dolphin/src/upstream-discio-worker.js','utf8');
+
+test('display-list fast path is revision-locked, guarded, and opt-in',()=>{
+  const start=cpp.indexOf('bool CachedInterpreter::TryWriteMeleeDisplayList');
+  const end=cpp.indexOf('bool CachedInterpreter::TryWriteOsInterruptFunction',start);
+  const writer=cpp.slice(start,end);
+  const executeStart=cpp.indexOf('s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState&');
+  const executeEnd=cpp.indexOf('s32 CachedInterpreter::FastMeleeTitleLoop',executeStart);
+  const executor=cpp.slice(executeStart,executeEnd);
+  assert.match(writer,/constexpr u32 start = 0x803410d8/);
+  assert.match(writer,/constexpr u32 suffix = 0x80341108/);
+  assert.match(writer,/constexpr u32 tail = 0x8034111c/);
+  assert.match(writer,/constexpr std::array<u32, 28> expected/);
+  assert.match(writer,/js\.blockStart != start && js\.blockStart != suffix && js\.blockStart != tail/);
+  assert.match(writer,/add_metric\(dirty_prefix, opinfo\)/);
+  assert.match(writer,/add_metric\(ready_suffix, opinfo\)/);
+  assert.match(writer,/add_metric\(flush_prefix,/);
+  assert.match(writer,/add_metric\(tail_metric, opinfo\)/);
+  assert.match(executor,/constexpr u32 dirty_state_pc = 0x8033d050/);
+  assert.match(writer,/constexpr u32 flush_start = 0x8033d1b8/);
+  assert.match(writer,/constexpr std::array<u32, 34> flush_expected/);
+  assert.match(writer,/flush_blocks\[6\]/);
+  assert.match(executor,/if \(current_pc == tail_pc\)/);
+  assert.match(executor,/if \(current_pc == suffix_pc\)/);
+  assert.match(executor,/LR\(ppc_state\) = suffix_pc;[\s\S]*ppc_state\.pc = dirty_state_pc/);
+  assert.match(executor,/run_flush_primitive\(gx, gx_offset\)/);
+  assert.match(executor,/fifo\.FastWrite8\(0x98\)[\s\S]*fifo\.FastWrite16\(width\)/);
+  assert.match(executor,/WriteRamU16BE\(ram, gx_offset \+ 2, 1\)/);
+  assert.match(executor,/CTR\(ppc_state\) = 0/);
+  assert.match(executor,/WriteRamU32BE\(ram, stack_offset \+ 20, ppc_state\.gpr\[31\]\)/);
+  assert.match(executor,/ppc_state\.gpr\[31\] = old_r31;[\s\S]*ppc_state\.gpr\[30\] = old_r30/);
+  assert.match(executor,/if \(gx_ready == 0\)/);
+  assert.match(executor,/fifo\.FastWrite8\(0x40\)[\s\S]*fifo\.FastWrite32\(ppc_state\.gpr\[30\]\)[\s\S]*fifo\.FastWrite32\(ppc_state\.gpr\[31\]\)/);
+  assert.match(executor,/UpdatePerformanceMonitorIfNeeded\(dirty_prefix\[0\], dirty_prefix\[1\], dirty_prefix\[2\]/);
+  assert.match(executor,/UpdatePerformanceMonitorIfNeeded\(ready_suffix\[0\], ready_suffix\[1\], ready_suffix\[2\]/);
+  assert.match(executor,/apply_metric\(flush_prefix\)/);
+  assert.match(executor,/UpdatePerformanceMonitorIfNeeded\(tail\[0\], tail\[1\], tail\[2\]/);
+  assert.match(executor,/fifo\.FastWrite8\(0x40\)[\s\S]*fifo\.FastWrite32\(ppc_state\.gpr\[3\]\)[\s\S]*fifo\.FastWrite32\(ppc_state\.gpr\[4\]\)/);
+  assert.match(core,/extra_flags > 31/);
+  assert.match(core,/melee_display_list_fast = \(extra_flags & 8\) != 0/);
+  assert.match(worker,/payload\.displaylistfast === true \? 8 : 0/);
+});

@@ -1,0 +1,165 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/OpcodeDecoding.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/OpcodeDecoding.cpp
+@@ -13,6 +13,7 @@
+ // vertices.
+ 
+ #include "VideoCommon/OpcodeDecoding.h"
++#include <string>
+ 
+ #include "Common/Assert.h"
+ #include "Common/Logging/Log.h"
+@@ -34,6 +35,39 @@
+ {
+ bool g_record_fifo_data = false;
+ 
++#ifdef __EMSCRIPTEN__
++// CPU preprocessing owns these fields. Setters and snapshots are only called
++// while paused under CPUThreadGuard; the GPU decoder never accesses them.
++static bool s_cp_format_reuse = false;
++struct CPFormatReuseStats { u64 writes = 0, unchanged = 0, avoided = 0; };
++static CPFormatReuseStats s_cp_format_stats;
++extern "C" bool DolphinWeb_GetCPFormatReuse() { return s_cp_format_reuse; }
++extern "C" void DolphinWeb_SetCPFormatReuse(bool value) { s_cp_format_reuse = value; }
++extern "C" const char* DolphinWeb_CPFormatStats()
++{
++  static std::string result;
++  result = "{\"enabled\":" + std::string(s_cp_format_reuse ? "true" : "false") +
++    ",\"writes\":" + std::to_string(s_cp_format_stats.writes) +
++    ",\"unchanged\":" + std::to_string(s_cp_format_stats.unchanged) +
++    ",\"avoided\":" + std::to_string(s_cp_format_stats.avoided) + "}";
++  return result.c_str();
++}
++// 0: another/unsupported register, 1: changed format, 2: identical format.
++// Keep unusual command aliases on the original path, including its diagnostics.
++static int ClassifyCPFormatWrite(const CPState& state, u8 command, u32 value)
++{
++  if (command == VCD_LO) return state.vtx_desc.low.Hex == value ? 2 : 1;
++  if (command == VCD_HI) return state.vtx_desc.high.Hex == value ? 2 : 1;
++  if (command >= CP_VAT_REG_A && command < CP_VAT_REG_A + CP_NUM_VAT_REG)
++    return state.vtx_attr[command - CP_VAT_REG_A].g0.Hex == value ? 2 : 1;
++  if (command >= CP_VAT_REG_B && command < CP_VAT_REG_B + CP_NUM_VAT_REG)
++    return state.vtx_attr[command - CP_VAT_REG_B].g1.Hex == value ? 2 : 1;
++  if (command >= CP_VAT_REG_C && command < CP_VAT_REG_C + CP_NUM_VAT_REG)
++    return state.vtx_attr[command - CP_VAT_REG_C].g2.Hex == value ? 2 : 1;
++  return 0;
++}
++#endif
++
+ template <bool is_preprocess>
+ class RunCallback final : public Callback
+ {
+@@ -88,6 +122,25 @@
+     }
+     else if constexpr (is_preprocess)
+     {
++      bool invalidate_format = true;
++#ifdef __EMSCRIPTEN__
++      const int format_write = ClassifyCPFormatWrite(GetCPState(), command, value);
++      if (format_write)
++      {
++        ++s_cp_format_stats.writes;
++        if (format_write == 2)
++        {
++          ++s_cp_format_stats.unchanged;
++          if (s_cp_format_reuse)
++          {
++            ++s_cp_format_stats.avoided;
++            invalidate_format = false;
++          }
++        }
++      }
++#endif
++      if (invalidate_format)
++      {
+       if (sub_command == VCD_LO || sub_command == VCD_HI)
+       {
+         VertexLoaderManager::g_preprocess_vat_dirty = BitSet8::AllTrue(CP_NUM_VAT_REG);
+@@ -98,6 +151,8 @@
+         VertexLoaderManager::g_preprocess_vat_dirty[command & CP_VAT_MASK] = true;
+       }
+     }
++    }
++    // Preserve every register write, command cycle and existing dirty flag.
+     GetCPState().LoadCPReg(command, value);
+   }
+   OPCODE_CALLBACK(void OnBP(u8 command, u32 value))
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -81,6 +81,9 @@
+ extern "C" bool DolphinWeb_GetFusionRedispatch();
+ extern "C" bool DolphinWeb_GetCounterBatch();
+ extern "C" bool DolphinWeb_GetLeanDispatch();
++extern "C" bool DolphinWeb_GetCPFormatReuse();
++extern "C" void DolphinWeb_SetCPFormatReuse(bool);
++extern "C" const char* DolphinWeb_CPFormatStats();
+ extern "C" void DolphinWeb_SetLeanDispatch(bool);
+ extern "C" void DolphinWeb_SetCounterBatch(bool);
+ extern "C" void DolphinWeb_SetFusionRedispatch(bool);
+@@ -1362,7 +1365,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 33554431 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 67108863 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1394,6 +1397,7 @@
+   const bool fusion_redispatch = (flags & 4194304) != 0;
+   const bool counter_batch = (flags & 8388608) != 0;
+   const bool lean_dispatch = (flags & 16777216) != 0;
++  const bool cp_format_reuse = (flags & 33554432) != 0;
+   if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
+   {
+     system.GetJitInterface().ClearCache(guard);
+@@ -1419,8 +1423,18 @@
+   // Counter publication does not change emitted code. Preserve the warm JIT.
+   if(counter_batch != DolphinWeb_GetCounterBatch())DolphinWeb_SetCounterBatch(counter_batch);
+   if(lean_dispatch != DolphinWeb_GetLeanDispatch())DolphinWeb_SetLeanDispatch(lean_dispatch);
++  if(cp_format_reuse != DolphinWeb_GetCPFormatReuse())DolphinWeb_SetCPFormatReuse(cp_format_reuse);
+   return 1;
+ }
++// CPU-owned opportunity counters. Never sample concurrently with preprocessing.
++EMSCRIPTEN_KEEPALIVE const char* BrowserCPFormatStats()
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"CP statistics require paused CPU ownership\"}";
++  const Core::CPUThreadGuard guard(system);
++  return DolphinWeb_CPFormatStats();
++}
+ // Private paused QA control. Normal startup remains at its measured scale.
+ EMSCRIPTEN_KEEPALIVE int BrowserRenderScalePercent(int percent)
+ {
+--- a/engines/wasm-dolphin/src/upstream-discio-worker.js
++++ b/engines/wasm-dolphin/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");
+@@ -1076,6 +1076,9 @@
+       } else if (payload.action === "frameInputStop") {
+         if(!Number.isInteger(payload.frames) || !api.browserFrameBenchmarkStopAfterFrames?.(payload.frames))throw Error("Frame input stop requires fresh paused QA input and 120–3600 frames");
+         return {frames:payload.frames};
++      } else if (payload.action === "cpFormatStats") {
++        if(!api.browserCPFormatStats)throw Error("CP format statistics unavailable");
++        const stats=JSON.parse(api.browserCPFormatStats());if(stats.error)throw Error(stats.error);return stats;
+       } else if (payload.action === "frameInputTiming") {
+         if(!api.browserFrameBenchmarkTiming)throw Error("Native frame timing unavailable");
+         return JSON.parse(api.browserFrameBenchmarkTiming());
+@@ -2461,6 +2464,7 @@
+     browserLiveReleasePads: optionalCwrap("BrowserLiveReleasePads", "number", []),
+     browserFrameBenchmarkInput: optionalCwrap("BrowserFrameBenchmarkInput", "number", ["number"]),
+     browserFrameBenchmarkStopAfterFrames: optionalCwrap("BrowserFrameBenchmarkStopAfterFrames", "number", ["number"]),
++    browserCPFormatStats: optionalCwrap("BrowserCPFormatStats", "string", []),
+     browserFrameBenchmarkTiming: optionalCwrap("BrowserFrameBenchmarkTiming", "string", []),
+     browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),

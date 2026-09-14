@@ -1,0 +1,120 @@
+{
+  "kind": "same-checkpoint-render-scale-abba",
+  "recordedAt": "2026-09-13T00:03:49.907Z",
+  "transcription": "Selected scalar fields from the completed browser QA result; not a full trace.",
+  "coreSha256": "2aaff4b8fdbe7ad76fabaf8724da6b79b13353a31d7413c6692f4c0210a9528f",
+  "stage": "Battlefield",
+  "workload": "human versus level 9 CPU",
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "imageProbe": [
+    32,
+    24
+  ],
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "fprCache": false,
+  "passed": false,
+  "runs": [
+    {
+      "percent": 200,
+      "warmup": true,
+      "seconds": 29.97718,
+      "simulationFps": 49.07065974851538,
+      "gameRenderFps": 49.10401845670608,
+      "visibleFps": 44.86746251648755,
+      "canvasSubmissionFps": 49.07065974851538,
+      "sampleCallbackFps": 59.67872895315705,
+      "p95GapMs": 35.43499999999767
+    },
+    {
+      "percent": 200,
+      "warmup": false,
+      "seconds": 30.00043,
+      "simulationFps": 57.59917441183344,
+      "gameRenderFps": 57.59917441183344,
+      "visibleFps": 53.06590605534655,
+      "canvasSubmissionFps": 57.56584155627104,
+      "sampleCallbackFps": 59.86580859007689,
+      "p95GapMs": 34.42499999998836
+    },
+    {
+      "percent": 150,
+      "warmup": true,
+      "seconds": 29.978825,
+      "simulationFps": 58.941602948080835,
+      "gameRenderFps": 58.908246070351304,
+      "visibleFps": 51.00266604845251,
+      "canvasSubmissionFps": 58.908246070351304,
+      "sampleCallbackFps": 59.908952402237226,
+      "p95GapMs": 35.76000000000931
+    },
+    {
+      "percent": 150,
+      "warmup": false,
+      "seconds": 29.98271,
+      "simulationFps": 59.601016719302635,
+      "gameRenderFps": 59.5676641637798,
+      "visibleFps": 56.09899838940517,
+      "canvasSubmissionFps": 59.601016719302635,
+      "sampleCallbackFps": 59.90118971900813,
+      "p95GapMs": 32.45499999995809
+    },
+    {
+      "percent": 150,
+      "warmup": true,
+      "seconds": 29.99809,
+      "simulationFps": 59.60379477493384,
+      "gameRenderFps": 59.57045931924316,
+      "visibleFps": 56.57026830708206,
+      "canvasSubmissionFps": 59.57045931924316,
+      "sampleCallbackFps": 59.83714296476859,
+      "p95GapMs": 32.410000000032596
+    },
+    {
+      "percent": 150,
+      "warmup": false,
+      "seconds": 29.998165,
+      "simulationFps": 58.10355400071964,
+      "gameRenderFps": 58.0702186283727,
+      "visibleFps": 52.60321756347424,
+      "canvasSubmissionFps": 58.0702186283727,
+      "sampleCallbackFps": 59.9036641074545,
+      "p95GapMs": 34.63000000000466
+    },
+    {
+      "percent": 200,
+      "warmup": true,
+      "seconds": 29.992205,
+      "simulationFps": 59.54880609811791,
+      "gameRenderFps": 59.51546410142243,
+      "visibleFps": 52.54698679206821,
+      "canvasSubmissionFps": 59.48212210472696,
+      "sampleCallbackFps": 59.98225205515908,
+      "p95GapMs": 34.54000000003725
+    },
+    {
+      "percent": 200,
+      "warmup": false,
+      "seconds": 29.993055,
+      "simulationFps": 60.0138932162797,
+      "gameRenderFps": 59.98055216449288,
+      "visibleFps": 50.51169345703541,
+      "canvasSubmissionFps": 59.98055216449288,
+      "sampleCallbackFps": 59.94721111270606,
+      "p95GapMs": 34.88000000000466
+    }
+  ],
+  "means": {
+    "150": {
+      "simulationFps": 58.85228536001114,
+      "visibleFps": 54.35110797643971
+    },
+    "200": {
+      "simulationFps": 58.806533814056564,
+      "visibleFps": 51.78879975619098
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "kind": "fountain-gpr-cache-abba-selected-scalars",
+  "core": "d516a30633080668e8f3bb38d78e00890ddfe364e5c3dda5c4274a81798812cf",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle P1 versus CPU9",
+  "reflection": false,
+  "scenery": false,
+  "internalScalePercent": 150,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "runs": [
+    {
+      "regcache": false,
+      "simulationFps": 49.135372451290245,
+      "visibleFps": 49.03536830111801,
+      "passed": false
+    },
+    {
+      "regcache": true,
+      "simulationFps": 50.86843010557706,
+      "visibleFps": 50.76842663879021,
+      "passed": false
+    },
+    {
+      "regcache": true,
+      "simulationFps": 51.56751753070611,
+      "visibleFps": 51.40084811399407,
+      "passed": false
+    },
+    {
+      "regcache": false,
+      "simulationFps": 50.36844635177041,
+      "visibleFps": 50.2351083071595,
+      "passed": false
+    }
+  ],
+  "meanOn": 51.21797381814159,
+  "meanOff": 49.75190940153033,
+  "gainPercent": 2.9467500529058333,
+  "passed": false
+}

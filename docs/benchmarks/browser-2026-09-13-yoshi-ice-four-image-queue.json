@@ -1,0 +1,174 @@
+{
+  "kind": "same-checkpoint-queue-capacity-abba",
+  "coreSha256": "f2e807d6a316978c18c21d708891520a10d36d11e3ab8bf34cf530f4b739c0f7",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "gpuStartDelay": 1000,
+  "passed": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "nonblackFraction": 1,
+  "normalSpeed": true,
+  "cpuClock": 1,
+  "activeTwoHumanNativeFrameInputs": true,
+  "profileEnabled": false,
+  "backgroundBuilds": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 176,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "capacity": 2,
+      "warmup": true,
+      "seconds": 45.0141649999991,
+      "simulationFps": 60.003334505928386,
+      "gameRenderFps": 59.93668881784331,
+      "visibleFps": 59.11472533146073,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.85489293764633,
+        "dropped": 37,
+        "underruns": 30
+      },
+      "p95GapMs": 17.355000000447035,
+      "maxGapMs": 75.85999999940395,
+      "synchronousCompileAndLinkMs": 69.313,
+      "passed": false
+    },
+    {
+      "capacity": 2,
+      "warmup": false,
+      "seconds": 44.99781499999948,
+      "simulationFps": 59.84735036579068,
+      "gameRenderFps": 59.78068046192979,
+      "visibleFps": 58.80285520530343,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.54700604455583,
+        "dropped": 44,
+        "underruns": 46
+      },
+      "p95GapMs": 17.424999998882413,
+      "maxGapMs": 70.76999999955297,
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "capacity": 4,
+      "warmup": true,
+      "seconds": 44.9981799999997,
+      "simulationFps": 59.86908803867219,
+      "gameRenderFps": 59.84686491764818,
+      "visibleFps": 59.380179376144056,
+      "queue": {
+        "capacity": 4,
+        "meanAgeMs": 46.60867938642372,
+        "dropped": 21,
+        "underruns": 16
+      },
+      "p95GapMs": 17.43999999947846,
+      "maxGapMs": 70.44500000029802,
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "capacity": 4,
+      "warmup": false,
+      "seconds": 44.997240000000225,
+      "simulationFps": 59.60365569088208,
+      "gameRenderFps": 59.559208520344505,
+      "visibleFps": 59.07028964443123,
+      "queue": {
+        "capacity": 4,
+        "meanAgeMs": 46.74952801803478,
+        "dropped": 21,
+        "underruns": 33
+      },
+      "p95GapMs": 17.449999999254942,
+      "maxGapMs": 73.91499999910593,
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "capacity": 4,
+      "warmup": true,
+      "seconds": 44.997929999999705,
+      "simulationFps": 59.6694114595942,
+      "gameRenderFps": 59.60274172611979,
+      "visibleFps": 58.958267635867195,
+      "queue": {
+        "capacity": 4,
+        "meanAgeMs": 42.416156744567594,
+        "dropped": 29,
+        "underruns": 33
+      },
+      "p95GapMs": 17.41000000014901,
+      "maxGapMs": 72.125,
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "capacity": 4,
+      "warmup": false,
+      "seconds": 44.997195000000296,
+      "simulationFps": 59.892622195672025,
+      "gameRenderFps": 59.87039858817827,
+      "visibleFps": 59.42592643830315,
+      "queue": {
+        "capacity": 4,
+        "meanAgeMs": 44.66526542057501,
+        "dropped": 18,
+        "underruns": 17
+      },
+      "p95GapMs": 17.46000000089407,
+      "maxGapMs": 70.55499999970198,
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "capacity": 2,
+      "warmup": true,
+      "seconds": 44.99496999999881,
+      "simulationFps": 59.82890976480418,
+      "gameRenderFps": 59.76223564545262,
+      "visibleFps": 59.117719158387494,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.461608417868355,
+        "dropped": 29,
+        "underruns": 32
+      },
+      "p95GapMs": 17.380000000819564,
+      "maxGapMs": 67.04000000096858,
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "capacity": 2,
+      "warmup": false,
+      "seconds": 44.9960700000003,
+      "simulationFps": 59.80522298947401,
+      "gameRenderFps": 59.738550500076606,
+      "visibleFps": 58.82735981164538,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.12566465256367,
+        "dropped": 41,
+        "underruns": 41
+      },
+      "p95GapMs": 17.384999999776483,
+      "maxGapMs": 72.0449999999255,
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    }
+  ],
+  "scope": "Selected recorded diagnostics from eight focused and visible 45-second image captures; no builds, profilers or resource samplers during capture. Queue age is not physical input-to-photon latency.",
+  "decision": "Keep capacity2. Capacity4 improved visible cadence but missed both candidate image gates and added about26ms mean queue delay."
+}

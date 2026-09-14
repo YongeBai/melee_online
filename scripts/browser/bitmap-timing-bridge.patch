@@ -1,0 +1,59 @@
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -128,6 +128,10 @@
+     this.detachedOglContext = null;
+     this.presentationQueue = null;
+     this.bitmapPresentationPacing = "immediate";
++    this.bitmapTiming = null;
++    if(new URLSearchParams(globalThis.location?.search || "").get("frametiming") === "1") {
++      import("/play/browser-presentation-timing.js").then(({BrowserPresentationTiming})=>{this.bitmapTiming=new BrowserPresentationTiming();}).catch(error=>this.onStatus("Frame timing unavailable: "+error.message));
++    }
+     this.bitmapBlit = new URLSearchParams(globalThis.location?.search || "").get("blit") === "bitmap";
+     if (new URLSearchParams(globalThis.location?.search || "").get("pace") === "raf") {
+       import("/play/browser-frame-queue.js").then(({BrowserFrameQueue}) => {
+@@ -834,6 +838,7 @@
+       this.onStatus(`Detached GPU presenter live (${this.visibleCanvas.width}x${this.visibleCanvas.height})`);
+     }
+     const startedAt = this.collectMetrics ? performance.now() : 0;
++    const timingStart = this.bitmapTiming?.active ? performance.timeOrigin + performance.now() : 0;
+     try {
+       // transferFromImageBitmap consumes the source; record dimensions first.
+       this.presentedWidth = bitmap.width;
+@@ -850,6 +855,7 @@
+         this.visibleCanvas.height
+       );
+       this.detachedOglFramesDrawn += 1;
++      if(timingStart)this.bitmapTiming.present(bitmap,timingStart,performance.timeOrigin+performance.now());
+       if (startedAt) {
+         this.detachedGpuDrawLastMs = performance.now() - startedAt;
+         this.detachedGpuDrawMaxMs = Math.max(
+@@ -909,7 +915,9 @@
+ 
+     if ((message?.type === "detachedOglFrame" ||
+          message?.type === "detachedWgpuFrame") && message.bitmap) {
++      this.bitmapTiming?.receive(message.bitmap,message.timing,performance.timeOrigin+performance.now());
+       if (message.credit) {
++        if(message.credit.length>3)Atomics.store(message.credit,3,this.bitmapTiming?.active?1:0);
+         Atomics.sub(message.credit, 0, 1);
+         this.bitmapTransport = {
+           inFlight: Atomics.load(message.credit, 0),
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -727,7 +727,7 @@
+   if (data && data.type === "detachedOglFrame" && data.bitmap) {
+     try {
+       self.postMessage(
+-        { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit },
++        { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit, timing:data.timing?{...data.timing,forwardedAt:data.timing.forwardedAt??(performance.timeOrigin+performance.now())}:undefined },
+         [data.bitmap]
+       );
+     } catch (err) {
+@@ -11889,7 +11889,7 @@
+   }
+   try {
+     self.postMessage(
+-      { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit },
++      { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit, timing:data.timing?{...data.timing,forwardedAt:data.timing.forwardedAt??(performance.timeOrigin+performance.now())}:undefined },
+       [data.bitmap]
+     );
+   } catch (err) {

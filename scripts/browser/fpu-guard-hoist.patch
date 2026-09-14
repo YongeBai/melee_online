@@ -1,0 +1,139 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -310,6 +310,8 @@
+ std::atomic<bool> s_dolphin_web_wide_block_map{false};
+ std::atomic<bool> s_dolphin_web_constant_state_base{false};
+ std::atomic<bool> s_dolphin_web_block_msr_cache{false};
++std::atomic<bool> s_dolphin_web_fpu_guard_hoist{false};
++std::atomic<u32> s_fpu_guard_blocks{0}, s_fpu_guard_sites{0};
+ std::atomic<bool> s_dolphin_web_frsqrte_fast{false};
+ std::atomic<u32> s_block_msr_cache_load_sites{0},s_block_msr_cache_blocks{0};
+ std::atomic<u32> s_selective_fpr_selected{0}, s_selective_fpr_rejected{0};
+@@ -5102,9 +5104,39 @@
+   body.push_back(0x0b);
+ }
+ 
++// Compile-time proof within one admitted MSR-stable block. The first FP
++// instruction still faults at its own PC/cycle count when FP is unavailable.
++struct WasmFpuGuardProof { bool active=false, available=false; };
++static WasmFpuGuardProof s_fpu_guard;
++struct ScopedFpuGuardProof
++{
++  WasmFpuGuardProof previous=s_fpu_guard;
++  ScopedFpuGuardProof(){s_fpu_guard={};}
++  ~ScopedFpuGuardProof(){s_fpu_guard=previous;}
++};
++void EmitFirstFpuGuard(std::vector<u8>& body, const WasmStateLayout& layout,
++                       const PPCAnalyst::CodeOp& op, u32 downcount)
++{
++  if (!s_fpu_guard.active || s_fpu_guard.available) return;
++  EmitStateLoadU32(body, layout.msr_offset);
++  EmitI32Const(body, 1u << 13); body.insert(body.end(), {0x71,0x45,0x04,0x40});
++  // This helper always returns halted after CheckFpu takes the unavailable
++  // exception. Its ordinary cache flush preserves all preceding integer work.
++  EmitFpCall(body, op, downcount);
++  body.push_back(0x0b);
++  s_fpu_guard.available=true;
++  s_fpu_guard_blocks.fetch_add(1,std::memory_order_relaxed);
++}
++
+ void EmitFpuAvailableOrFallback(std::vector<u8>& body, const PPCAnalyst::CodeOp& op,
+                                 const WasmStateLayout& layout, u32 downcount)
+ {
++  if (s_fpu_guard.available)
++  {
++    EmitI32Const(body, 1); body.insert(body.end(), {0x04,0x40});
++    s_fpu_guard_sites.fetch_add(1,std::memory_order_relaxed);
++    return;
++  }
+   EmitStateLoadU32(body, layout.msr_offset);
+   EmitI32Const(body, 1u << 13);
+   body.push_back(0x71);
+@@ -8374,6 +8406,8 @@
+                                                 bool record_emit_failure = false,
+                                                 const WasmFusionBoundary* fusion = nullptr)
+ {
++  const ScopedFpuGuardProof fpu_guard_scope;
++  s_fpu_guard.active=s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
+   const ScopedBlockMsrCache msr_cache_scope;
+   const bool cache_msr=s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
+   const ScopedWasmStateBase state_base_scope(
+@@ -8516,6 +8550,8 @@
+     if (op.skip)
+       continue;
+ 
++    if (s_fpu_guard.active && (op.opinfo->flags & FL_USE_FPU))
++      EmitFirstFpuGuard(body, layout, op, downcount);
+     if (!EmitWasmSupportedIntegerInstruction(body, layout, op, downcount))
+     {
+       if (!allow_interpret_fallback)
+@@ -8698,6 +8734,9 @@
+ extern "C" bool DolphinWeb_GetFrsqrteFast(){return s_dolphin_web_frsqrte_fast.load(std::memory_order_relaxed);}
+ extern "C" void DolphinWeb_SetFrsqrteFast(bool value){s_dolphin_web_frsqrte_fast.store(value,std::memory_order_relaxed);}
+ 
++extern "C" bool DolphinWeb_GetFpuGuardHoist(){return s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed);}
++extern "C" void DolphinWeb_SetFpuGuardHoist(bool value){s_dolphin_web_fpu_guard_hoist.store(value,std::memory_order_relaxed);}
++
+ extern "C" bool DolphinWeb_GetBlockMsrCache(){return s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed);}
+ extern "C" void DolphinWeb_SetBlockMsrCache(bool value){s_dolphin_web_block_msr_cache.store(value,std::memory_order_relaxed);}
+ 
+@@ -12484,6 +12523,7 @@
+       << "statei64:" << s_wasm_emit_state_load_i64_count << "ld/"
+       << s_wasm_emit_state_store_i64_count << "st ";
+   out << "selective-fpr emit-selected/rejected:" << s_selective_fpr_selected.load() << "/" << s_selective_fpr_rejected.load() << " ";
++  out << "fpuguard:" << (DolphinWeb_GetFpuGuardHoist()?1:0) << " emit-blocks/sites:" << s_fpu_guard_blocks.load() << "/" << s_fpu_guard_sites.load() << " ";
+   out << "msrcache:" << (DolphinWeb_GetBlockMsrCache()?1:0) << " emit-blocks/sites:" << s_block_msr_cache_blocks.load() << "/" << s_block_msr_cache_load_sites.load() << " ";
+   out << "stateconst:" << (DolphinWeb_GetConstantStateBase() ? 1 : 0) << " ";
+   out << "wasm-dispatch:" << s_wasm_dispatch_loop_handles[DolphinWeb_GetWideBlockMap() ? 1 : 0] << "/"
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -71,6 +71,8 @@
+ extern "C" bool DolphinWeb_GetWideBlockMap();
+ extern "C" bool DolphinWeb_GetConstantStateBase();
+ extern "C" bool DolphinWeb_GetBlockMsrCache();
++extern "C" bool DolphinWeb_GetFpuGuardHoist();
++extern "C" void DolphinWeb_SetFpuGuardHoist(bool);
+ extern "C" bool DolphinWeb_GetFifoCopy();
+ extern "C" bool DolphinWeb_GetFifoBatch();
+ extern "C" bool DolphinWeb_GetFrsqrteFast();
+@@ -1302,7 +1304,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 131071 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 262143 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1326,7 +1328,8 @@
+   const bool fifo_copy = (flags & 8192) != 0;
+   const bool fifo_batch = (flags & 16384) != 0;
+   const bool frsqrte_fast = (flags & 32768) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast())
++  const bool fpu_guard = (flags & 131072) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1341,6 +1344,7 @@
+     DolphinWeb_SetFifoCopy(fifo_copy);
+     DolphinWeb_SetFifoBatch(fifo_batch);
+     DolphinWeb_SetFrsqrteFast(frsqrte_fast);
++    DolphinWeb_SetFpuGuardHoist(fpu_guard);
+   }
+   return 1;
+ }
+--- a/engines/wasm-dolphin/src/upstream-discio-worker.js
++++ b/engines/wasm-dolphin/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

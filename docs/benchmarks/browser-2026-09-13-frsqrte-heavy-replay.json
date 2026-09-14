@@ -1,0 +1,29 @@
+{
+  "coreSha256": "dcf171543b583cd24fffb9f9770f2ed6c1a9acd3a898ed4beb1b183da49643e3",
+  "passed": true,
+  "frames": 120,
+  "delay": 3,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "actualCharacterIds": [
+    14,
+    14
+  ],
+  "fullMachineBytesEqual": true,
+  "sizeA": 107031991,
+  "sizeB": 107031991,
+  "tickDifferences": [],
+  "referenceFrame": 428,
+  "correctedFrame": 428,
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "codegen": "Retained baseline versus identical retained baseline on corrected-frsqrte core",
+  "limits": "Internal full-state/timing delayed-input replay, not performance or whole-game native conformance."
+}

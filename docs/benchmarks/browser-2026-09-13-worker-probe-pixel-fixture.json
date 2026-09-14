@@ -1,0 +1,111 @@
+{
+  "passed": true,
+  "diagnosticOnly": true,
+  "limits": "Known-image validation of capture accuracy, not game performance.",
+  "results": [
+    {
+      "mode": "black",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 133,
+      "captures": 133,
+      "mismatches": 0,
+      "changes": 0,
+      "expectedChanges": 0,
+      "maxPending": 3,
+      "passed": true
+    },
+    {
+      "mode": "static",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 133,
+      "captures": 133,
+      "mismatches": 0,
+      "changes": 0,
+      "expectedChanges": 0,
+      "maxPending": 2,
+      "passed": true
+    },
+    {
+      "mode": "30fps",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 134,
+      "captures": 134,
+      "mismatches": 0,
+      "changes": 66,
+      "expectedChanges": 66,
+      "maxPending": 2,
+      "passed": true
+    },
+    {
+      "mode": "60fps",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 134,
+      "captures": 134,
+      "mismatches": 0,
+      "changes": 132,
+      "expectedChanges": 132,
+      "maxPending": 1,
+      "passed": true
+    },
+    {
+      "mode": "snapshot",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 134,
+      "captures": 134,
+      "mismatches": 0,
+      "changes": 133,
+      "expectedChanges": 133,
+      "maxPending": 2,
+      "passed": true
+    },
+    {
+      "mode": "bitmap-30fps",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 133,
+      "captures": 133,
+      "mismatches": 0,
+      "changes": 66,
+      "expectedChanges": 66,
+      "maxPending": 1,
+      "passed": true
+    },
+    {
+      "mode": "bitmap-60fps",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 134,
+      "captures": 134,
+      "mismatches": 0,
+      "changes": 132,
+      "expectedChanges": 132,
+      "maxPending": 2,
+      "passed": true
+    },
+    {
+      "mode": "bitmap-snapshot",
+      "workerProbe": true,
+      "taskHarvest": false,
+      "reuse": false,
+      "samples": 134,
+      "captures": 134,
+      "mismatches": 0,
+      "changes": 133,
+      "expectedChanges": 133,
+      "maxPending": 2,
+      "passed": true
+    }
+  ]
+}

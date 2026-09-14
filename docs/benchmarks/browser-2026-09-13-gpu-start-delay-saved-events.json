@@ -1,0 +1,182 @@
+{
+  "coreSha256": "2e26b8b3e79164f9f5f91495ed97225b0023fdefe9cae900147517c4c8d40126",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "frames": 600,
+  "startFrame": 306,
+  "endFrame": 906,
+  "polls": 601,
+  "skipped": 0,
+  "inputHash": 2617109027,
+  "stateHash": 4085548570,
+  "fingerprintsEqual": true,
+  "sizeA": 110128135,
+  "sizeB": 110128135,
+  "sections": 29,
+  "profileEnabled": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "scope": "Selected recorded native replay diagnostics, not an FPS or network test.",
+  "kind": "normal-running-browser-gpu-scheduling-equivalence",
+  "passed": false,
+  "fullMachineBytesEqual": false,
+  "logicalSavedEventQueueEqual": true,
+  "rawEqualityUnmodified": true,
+  "reference": {
+    "globalTimer": "16106980060",
+    "guestPc": "2149207464",
+    "guestStackPointer": "2152655608",
+    "idleCycles": "4830485630",
+    "nextOrder": "2670389",
+    "ordersValid": true,
+    "events": [
+      {
+        "name": "VICallback",
+        "time": "16106995476",
+        "userdata": "0",
+        "order": "2670388"
+      },
+      {
+        "name": "GPUSleeper",
+        "time": "16107012000",
+        "userdata": "0",
+        "order": "2670351"
+      },
+      {
+        "name": "DSPCallback",
+        "time": "16107012000",
+        "userdata": "0",
+        "order": "2670352"
+      },
+      {
+        "name": "AudioDMACallback",
+        "time": "16107018912",
+        "userdata": "0",
+        "order": "2670382"
+      },
+      {
+        "name": "FinishExecutingCommand",
+        "time": "16107747264",
+        "userdata": "12884901889",
+        "order": "2670315"
+      },
+      {
+        "name": "PatchEngine",
+        "time": "16110794700",
+        "userdata": "0",
+        "order": "2669252"
+      },
+      {
+        "name": "DecCallback",
+        "time": "16110900054",
+        "userdata": "0",
+        "order": "2669263"
+      }
+    ]
+  },
+  "candidate": {
+    "globalTimer": "16106980060",
+    "guestPc": "2149207464",
+    "guestStackPointer": "2152655608",
+    "idleCycles": "4830485491",
+    "nextOrder": "2350252",
+    "ordersValid": true,
+    "events": [
+      {
+        "name": "VICallback",
+        "time": "16106995476",
+        "userdata": "0",
+        "order": "2350251"
+      },
+      {
+        "name": "GPUSleeper",
+        "time": "16107012000",
+        "userdata": "0",
+        "order": "2350214"
+      },
+      {
+        "name": "DSPCallback",
+        "time": "16107012000",
+        "userdata": "0",
+        "order": "2350215"
+      },
+      {
+        "name": "AudioDMACallback",
+        "time": "16107018912",
+        "userdata": "0",
+        "order": "2350245"
+      },
+      {
+        "name": "FinishExecutingCommand",
+        "time": "16107747264",
+        "userdata": "12884901889",
+        "order": "2350178"
+      },
+      {
+        "name": "PatchEngine",
+        "time": "16110794700",
+        "userdata": "0",
+        "order": "2349641"
+      },
+      {
+        "name": "DecCallback",
+        "time": "16110900054",
+        "userdata": "0",
+        "order": "2349652"
+      }
+    ]
+  },
+  "differentSections": [
+    {
+      "name": "GPU PixelEngine",
+      "differentBytes": 21346,
+      "rangeCount": 2917,
+      "rangesTruncated": true,
+      "firstRelativeOffset": 1202377,
+      "reportedRanges": 32,
+      "allReportedRangesWithinUnusedFifo": true,
+      "unusedFifoRelativeStart": 1066889,
+      "unusedFifoBytes": 2097152,
+      "note": "First32 ranges only: cannot classify every changed byte from these bounded ranges."
+    },
+    {
+      "name": "CoreTiming",
+      "differentBytes": 26,
+      "rangeCount": 9,
+      "logicalEventTimesTypesPayloadsAndTieOrderEqual": true
+    },
+    {
+      "name": "HW Memory RAM",
+      "differentBytes": 15,
+      "ranges": [
+        {
+          "offset": 5075876,
+          "bytes": 2
+        },
+        {
+          "offset": 5166866,
+          "bytes": 4
+        },
+        {
+          "offset": 5168745,
+          "bytes": 1
+        },
+        {
+          "offset": 5168750,
+          "bytes": 8
+        }
+      ]
+    },
+    {
+      "name": "CPU registers",
+      "differentBytes": 2,
+      "firstRelativeOffset": 1868
+    }
+  ],
+  "investigation": "RAM804d738e is inside the symbol __OSLastInterruptTime. Other RAM ranges are inside the default stack allocation, below saved SP804eeaf8. Whether these differences can affect later gameplay is not established by this replay. Raw failure remains; original GPU scheduling restored."
+}

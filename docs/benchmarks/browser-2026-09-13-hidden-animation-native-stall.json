@@ -1,0 +1,941 @@
+{
+  "kind": "same-checkpoint-fountain-animation-abba",
+  "coreSha256": "c80b52550b7bf30c19c16b443f3ec289f845181a2dae4378595787cf69b35989",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "Two ordinary native-poll controller tracks; native partner AI. Low models, reflection/scenery off, full shadows. FIFO-copy/MSR/vector/hoist/widemap/stateconst off.",
+  "passed": false,
+  "runs": [
+    {
+      "animation": true,
+      "warmup": true,
+      "seconds": 29.999879999998956,
+      "simulationFps": 49.766865734131336,
+      "gameRenderFps": 49.766865734131336,
+      "visibleFps": 49.66686533412973,
+      "p95GapMs": 33.48499999940395,
+      "maxGapMs": 50.28500000014901,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 0.48499999940395355,
+        "restore": 19.87999999895692,
+        "apply change": 0.28999999910593033,
+        "settle 120 frames": 2678.10000000149,
+        "enable controller input": 0.26000000163912773,
+        "resume": 0.1850000023841858
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 2047,
+        "frames": 1494,
+        "inputChanges": [
+          158,
+          151
+        ],
+        "observedActionCounts": [
+          20,
+          28
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          },
+          {
+            "frame": 600,
+            "input": 2049942,
+            "state": 4058823439
+          },
+          {
+            "frame": 720,
+            "input": 4114587674,
+            "state": 396609249
+          },
+          {
+            "frame": 840,
+            "input": 2791434290,
+            "state": 2639878455
+          },
+          {
+            "frame": 960,
+            "input": 3214322239,
+            "state": 3818045791
+          },
+          {
+            "frame": 1080,
+            "input": 2598325352,
+            "state": 2471119400
+          },
+          {
+            "frame": 1200,
+            "input": 4115595311,
+            "state": 3406199516
+          },
+          {
+            "frame": 1320,
+            "input": 3782081935,
+            "state": 219373705
+          },
+          {
+            "frame": 1440,
+            "input": 581696108,
+            "state": 699311699
+          }
+        ],
+        "gaps": [
+          {
+            "after": 899,
+            "before": 901
+          }
+        ]
+      }
+    },
+    {
+      "animation": true,
+      "warmup": false,
+      "seconds": 29.998470000002534,
+      "simulationFps": 56.20286634617891,
+      "gameRenderFps": 56.16953131275887,
+      "visibleFps": 55.96952111223866,
+      "p95GapMs": 32.105000000447035,
+      "maxGapMs": 69.29500000178814,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 0.10500000044703484,
+        "restore": 23.224999997764826,
+        "apply change": 0.25999999791383743,
+        "settle 120 frames": 2373.279999997467,
+        "enable controller input": 0.17999999970197678,
+        "resume": 0.23499999940395355
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 2240,
+        "frames": 1687,
+        "inputChanges": [
+          178,
+          172
+        ],
+        "observedActionCounts": [
+          24,
+          31
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          },
+          {
+            "frame": 600,
+            "input": 2049942,
+            "state": 4058823439
+          },
+          {
+            "frame": 720,
+            "input": 4114587674,
+            "state": 396609249
+          },
+          {
+            "frame": 840,
+            "input": 2791434290,
+            "state": 2639878455
+          },
+          {
+            "frame": 960,
+            "input": 3214322239,
+            "state": 3818045791
+          },
+          {
+            "frame": 1080,
+            "input": 2598325352,
+            "state": 2471119400
+          },
+          {
+            "frame": 1200,
+            "input": 4115595311,
+            "state": 3406199516
+          },
+          {
+            "frame": 1320,
+            "input": 3782081935,
+            "state": 219373705
+          },
+          {
+            "frame": 1440,
+            "input": 581696108,
+            "state": 699311699
+          },
+          {
+            "frame": 1560,
+            "input": 2467826097,
+            "state": 3400334278
+          },
+          {
+            "frame": 1680,
+            "input": 1933468179,
+            "state": 3990749545
+          }
+        ],
+        "gaps": [
+          {
+            "after": 899,
+            "before": 901
+          }
+        ]
+      }
+    },
+    {
+      "animation": false,
+      "warmup": true,
+      "seconds": 31.959789999999106,
+      "simulationFps": 18.11651453279312,
+      "gameRenderFps": 18.11651453279312,
+      "visibleFps": 17.92877863089889,
+      "p95GapMs": 32.63499999791384,
+      "maxGapMs": 4996.214999999851,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 0.10500000044703484,
+        "restore": 20.79500000178814,
+        "apply change": 0.6450000032782555,
+        "settle 120 frames": 2221.079999998212,
+        "enable controller input": 0.16999999806284904,
+        "resume": 0.17000000178813934
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 1135,
+        "frames": 583,
+        "inputChanges": [
+          57,
+          60
+        ],
+        "observedActionCounts": [
+          16,
+          22
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          }
+        ],
+        "gaps": []
+      }
+    },
+    {
+      "animation": false,
+      "warmup": false,
+      "seconds": 29.998664999999107,
+      "simulationFps": 57.36921959694044,
+      "gameRenderFps": 57.335884780207756,
+      "visibleFps": 57.135875879811685,
+      "p95GapMs": 30.46000000089407,
+      "maxGapMs": 35.26500000059605,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 3004.839999999851,
+        "restore": 1019.519999999553,
+        "apply change": 0.5399999991059303,
+        "settle 120 frames": 123006.91999999806,
+        "enable controller input": 2.530000001192093,
+        "resume": 0.30000000074505806
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 2275,
+        "frames": 1722,
+        "inputChanges": [
+          182,
+          175
+        ],
+        "observedActionCounts": [
+          24,
+          31
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          },
+          {
+            "frame": 600,
+            "input": 2049942,
+            "state": 4058823439
+          },
+          {
+            "frame": 720,
+            "input": 4114587674,
+            "state": 396609249
+          },
+          {
+            "frame": 840,
+            "input": 2791434290,
+            "state": 2639878455
+          },
+          {
+            "frame": 960,
+            "input": 3214322239,
+            "state": 3818045791
+          },
+          {
+            "frame": 1080,
+            "input": 2598325352,
+            "state": 2471119400
+          },
+          {
+            "frame": 1200,
+            "input": 4115595311,
+            "state": 3406199516
+          },
+          {
+            "frame": 1320,
+            "input": 3782081935,
+            "state": 219373705
+          },
+          {
+            "frame": 1440,
+            "input": 581696108,
+            "state": 699311699
+          },
+          {
+            "frame": 1560,
+            "input": 2467826097,
+            "state": 3400334278
+          },
+          {
+            "frame": 1680,
+            "input": 1933468179,
+            "state": 3990749545
+          }
+        ],
+        "gaps": [
+          {
+            "after": 899,
+            "before": 901
+          }
+        ]
+      }
+    },
+    {
+      "animation": false,
+      "warmup": true,
+      "seconds": 29.998720000002532,
+      "simulationFps": 58.102479039100764,
+      "gameRenderFps": 58.069144283484526,
+      "visibleFps": 57.802466238554636,
+      "p95GapMs": 19.125,
+      "maxGapMs": 62.19999999925494,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 0.12000000104308128,
+        "restore": 36.88499999791384,
+        "apply change": 0.4400000013411045,
+        "settle 120 frames": 2335.890000000596,
+        "enable controller input": 0.14000000059604645,
+        "resume": 0.22499999776482582
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 2297,
+        "frames": 1744,
+        "inputChanges": [
+          185,
+          177
+        ],
+        "observedActionCounts": [
+          24,
+          31
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          },
+          {
+            "frame": 600,
+            "input": 2049942,
+            "state": 4058823439
+          },
+          {
+            "frame": 720,
+            "input": 4114587674,
+            "state": 396609249
+          },
+          {
+            "frame": 840,
+            "input": 2791434290,
+            "state": 2639878455
+          },
+          {
+            "frame": 960,
+            "input": 3214322239,
+            "state": 3818045791
+          },
+          {
+            "frame": 1080,
+            "input": 2598325352,
+            "state": 2471119400
+          },
+          {
+            "frame": 1200,
+            "input": 4115595311,
+            "state": 3406199516
+          },
+          {
+            "frame": 1320,
+            "input": 3782081935,
+            "state": 219373705
+          },
+          {
+            "frame": 1440,
+            "input": 581696108,
+            "state": 699311699
+          },
+          {
+            "frame": 1560,
+            "input": 2467826097,
+            "state": 3400334278
+          },
+          {
+            "frame": 1680,
+            "input": 1933468179,
+            "state": 3990749545
+          }
+        ],
+        "gaps": [
+          {
+            "after": 899,
+            "before": 901
+          }
+        ]
+      }
+    },
+    {
+      "animation": false,
+      "warmup": false,
+      "seconds": 29.997744999997316,
+      "simulationFps": 58.304382546093265,
+      "gameRenderFps": 58.271046707016026,
+      "visibleFps": 58.071031672552586,
+      "p95GapMs": 19.075000002980232,
+      "maxGapMs": 36.46499999985099,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 0.10999999940395355,
+        "restore": 35.105000000447035,
+        "apply change": 0.4150000028312206,
+        "settle 120 frames": 2238.510000001639,
+        "enable controller input": 0.3150000013411045,
+        "resume": 0.2850000001490116
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 2303,
+        "frames": 1750,
+        "inputChanges": [
+          185,
+          177
+        ],
+        "observedActionCounts": [
+          24,
+          31
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          },
+          {
+            "frame": 600,
+            "input": 2049942,
+            "state": 4058823439
+          },
+          {
+            "frame": 720,
+            "input": 4114587674,
+            "state": 396609249
+          },
+          {
+            "frame": 840,
+            "input": 2791434290,
+            "state": 2639878455
+          },
+          {
+            "frame": 960,
+            "input": 3214322239,
+            "state": 3818045791
+          },
+          {
+            "frame": 1080,
+            "input": 2598325352,
+            "state": 2471119400
+          },
+          {
+            "frame": 1200,
+            "input": 4115595311,
+            "state": 3406199516
+          },
+          {
+            "frame": 1320,
+            "input": 3782081935,
+            "state": 219373705
+          },
+          {
+            "frame": 1440,
+            "input": 581696108,
+            "state": 699311699
+          },
+          {
+            "frame": 1560,
+            "input": 2467826097,
+            "state": 3400334278
+          },
+          {
+            "frame": 1680,
+            "input": 1933468179,
+            "state": 3990749545
+          }
+        ],
+        "gaps": [
+          {
+            "after": 899,
+            "before": 901
+          }
+        ]
+      }
+    },
+    {
+      "animation": true,
+      "warmup": true,
+      "seconds": 29.998949999999255,
+      "simulationFps": 57.23533657011471,
+      "gameRenderFps": 57.202002070073874,
+      "visibleFps": 57.06866406991053,
+      "p95GapMs": 30.58999999985099,
+      "maxGapMs": 60.625,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 0.42500000074505806,
+        "restore": 38.21499999985099,
+        "apply change": 0.30000000074505806,
+        "settle 120 frames": 2183.984999999404,
+        "enable controller input": 0.22500000149011612,
+        "resume": 0.32499999925494194
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 2271,
+        "frames": 1718,
+        "inputChanges": [
+          182,
+          175
+        ],
+        "observedActionCounts": [
+          24,
+          31
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          },
+          {
+            "frame": 600,
+            "input": 2049942,
+            "state": 4058823439
+          },
+          {
+            "frame": 720,
+            "input": 4114587674,
+            "state": 396609249
+          },
+          {
+            "frame": 840,
+            "input": 2791434290,
+            "state": 2639878455
+          },
+          {
+            "frame": 960,
+            "input": 3214322239,
+            "state": 3818045791
+          },
+          {
+            "frame": 1080,
+            "input": 2598325352,
+            "state": 2471119400
+          },
+          {
+            "frame": 1200,
+            "input": 4115595311,
+            "state": 3406199516
+          },
+          {
+            "frame": 1320,
+            "input": 3782081935,
+            "state": 219373705
+          },
+          {
+            "frame": 1440,
+            "input": 581696108,
+            "state": 699311699
+          },
+          {
+            "frame": 1560,
+            "input": 2467826097,
+            "state": 3400334278
+          },
+          {
+            "frame": 1680,
+            "input": 1933468179,
+            "state": 3990749545
+          }
+        ],
+        "gaps": [
+          {
+            "after": 899,
+            "before": 901
+          }
+        ]
+      }
+    },
+    {
+      "animation": true,
+      "warmup": false,
+      "seconds": 29.998839999999852,
+      "simulationFps": 59.23562377745302,
+      "gameRenderFps": 59.23562377745302,
+      "visibleFps": 58.80227368791622,
+      "p95GapMs": 19.450000002980232,
+      "maxGapMs": 48.28999999910593,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "setupTimingMs": {
+        "pause": 0.3049999997019768,
+        "restore": 23.240000002086163,
+        "apply change": 0.17500000074505806,
+        "settle 120 frames": 2098.960000000894,
+        "enable controller input": 0.17000000178813934,
+        "resume": 0.16499999910593033
+      },
+      "controllerStress": {
+        "valid": true,
+        "exercisedBothPlayers": true,
+        "startFrame": 553,
+        "lastFrame": 2331,
+        "frames": 1778,
+        "inputChanges": [
+          189,
+          179
+        ],
+        "observedActionCounts": [
+          24,
+          33
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2854150817,
+            "state": 502977601
+          },
+          {
+            "frame": 240,
+            "input": 1702011481,
+            "state": 2723572791
+          },
+          {
+            "frame": 360,
+            "input": 1561594423,
+            "state": 2681527275
+          },
+          {
+            "frame": 480,
+            "input": 2710076177,
+            "state": 3872557035
+          },
+          {
+            "frame": 600,
+            "input": 2049942,
+            "state": 4058823439
+          },
+          {
+            "frame": 720,
+            "input": 4114587674,
+            "state": 396609249
+          },
+          {
+            "frame": 840,
+            "input": 2791434290,
+            "state": 2639878455
+          },
+          {
+            "frame": 960,
+            "input": 3214322239,
+            "state": 3818045791
+          },
+          {
+            "frame": 1080,
+            "input": 2598325352,
+            "state": 2471119400
+          },
+          {
+            "frame": 1200,
+            "input": 4115595311,
+            "state": 3406199516
+          },
+          {
+            "frame": 1320,
+            "input": 3782081935,
+            "state": 219373705
+          },
+          {
+            "frame": 1440,
+            "input": 581696108,
+            "state": 699311699
+          },
+          {
+            "frame": 1560,
+            "input": 2467826097,
+            "state": 3400334278
+          },
+          {
+            "frame": 1680,
+            "input": 1933468179,
+            "state": 3990749545
+          }
+        ],
+        "gaps": [
+          {
+            "after": 899,
+            "before": 901
+          }
+        ]
+      }
+    }
+  ],
+  "inputConsistency": {
+    "passed": false,
+    "checked": 100,
+    "mismatches": [
+      {
+        "run": 2,
+        "reason": "fewer than 1200 common tracked frames"
+      }
+    ],
+    "limits": "Available common fingerprints and polling gaps matched; not full machine equivalence."
+  },
+  "stall": {
+    "harvestMaxMs": 1006.8450000025332,
+    "completionMaxMs": 4996.105000000447,
+    "setupSettleMs": 123006.91999999806,
+    "hostSample": {
+      "durationMs": 2000,
+      "ticksPerSecond": 100,
+      "workers": [
+        {
+          "tid": 126423,
+          "deltaTicks": 2,
+          "wchan": "futex_do_wait"
+        },
+        {
+          "tid": 126419,
+          "deltaTicks": 1,
+          "wchan": "futex_do_wait"
+        }
+      ],
+      "rendererMainTicks": 1,
+      "gpuMainTicks": 1,
+      "wireplumberTicks": 200
+    },
+    "diagnostics": {
+      "coreFps": 0,
+      "uiFps": 2,
+      "gameSpeed": 0,
+      "ppcPc": "0x8037e538",
+      "function": "HSD_SListAllocAndPrepend",
+      "glError": 0,
+      "rendererErrors": [],
+      "uniqueJitInstances": 29285,
+      "uniqueJitLimit": 65536,
+      "jitCompileFailures": 0
+    },
+    "interventions": [
+      "Browser engine diagnostics clicked after stall; subsequent measured window may overlap diagnostic activity.",
+      "Test task brought forward during fourth pair because open-browser request was queued in hidden task. No causal inference about focus recovery is established."
+    ]
+  },
+  "decision": "Invalid comparison; no new animation gain established. Keep normal hidden animation enabled while investigating intermittent image/setup stalls.",
+  "limits": [
+    "Compact transcription; all sampled digests/gaps available in the UI matched, but the short stalled trial invalidated the minimum prefix requirement.",
+    "Every FPS gate failed.",
+    "Earlier cosmetic 600-frame gameplay/RNG/platform/camera replay passed, not full GPU/native equivalence."
+  ]
+}

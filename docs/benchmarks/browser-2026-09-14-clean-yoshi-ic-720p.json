@@ -1,0 +1,33 @@
+{
+  "kind": "visible-browser-gameplay",
+  "coreSha256": "3df4fb821460f482643c8a256683103320f2e4a860919a252107e34d737f9769",
+  "stage": "Yoshi's Story",
+  "characters": ["Ice Climbers", "Ice Climbers"],
+  "seconds": 40.0148200000003,
+  "simulationFps": 56.00425042521704,
+  "gameRenderFps": 55.97925968428655,
+  "visibleFps": 55.229537456372,
+  "canvasSubmissionFps": 55.254528197302484,
+  "p95GapMs": 33.25999999791384,
+  "maxGapMs": 100.20499999821186,
+  "sourceResolution": [960, 720],
+  "nonblackFraction": 1,
+  "validGameplay": true,
+  "pageFocusedAndVisibleThroughout": true,
+  "passed": false,
+  "settings": {
+    "callfusion": false,
+    "animstatefast": false,
+    "matrixfast": true,
+    "internalScale": 1.5,
+    "cpuOverclock": 1,
+    "emulationSpeed": 1,
+    "presentationPacing": "raf-buffered",
+    "background": "black",
+    "models": "low"
+  },
+  "queue": {"capacity": 2, "received": 2240, "presented": 2211, "dropped": 28, "underruns": 187, "meanAgeMs": 15.208417005944797},
+  "jit": {"synchronousCompileAndLinkMs": 445.327, "newUniqueInstances": 8610},
+  "controller": {"frames": 2242, "skipped": 1, "inputHash": 2171492513, "stateHash": 4201950537, "bothPlayersExercised": true},
+  "interpretation": "Clean single-tab acceptance-style control after removing rejected call fusion and animation HLE. Native production remains the limiter: 56.00 simulation FPS and 55.23 distinct visible FPS."
+}

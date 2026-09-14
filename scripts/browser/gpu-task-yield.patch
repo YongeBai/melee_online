@@ -1,0 +1,124 @@
+--- a/Source/Core/Common/BlockingLoop.h
++++ b/Source/Core/Common/BlockingLoop.h
+@@ -5,6 +5,10 @@
+ 
+ #include <atomic>
+ #include <mutex>
++#include <functional>
++#ifdef __EMSCRIPTEN__
++#include <emscripten/eventloop.h>
++#endif
+ #include <thread>
+ 
+ #include "Common/Event.h"
+@@ -197,6 +201,42 @@
+     m_done_event.Set();
+   }
+ 
++#ifdef __EMSCRIPTEN__
++  // Browser GPU worker: return to JS between bounded batches, allowing the
++  // canvas implementation to retire transferred images. Native Run is intact.
++  void RunAsync(std::function<void()> payload, std::function<void()> stopped)
++  {
++    Prepare();
++    struct Pending { BlockingLoop* loop; std::function<void()> run, stop; };
++    auto* pending = new Pending{this, std::move(payload), std::move(stopped)};
++    emscripten_set_timeout_loop([](double, void* opaque) -> bool {
++      auto* p = static_cast<Pending*>(opaque);
++      auto& loop = *p->loop;
++      // Retain the final execution after a concurrent Wakeup, just as Run does.
++      for (unsigned n = 0; n < 8 && !loop.m_shutdown.IsSet(); ++n)
++      {
++        p->run();
++        const auto state = loop.m_running_state.load();
++        if (state == STATE_NEED_EXECUTION) { loop.m_running_state--; continue; }
++        if (state == STATE_LAST_EXECUTION)
++        {
++          if (loop.m_running_state-- != STATE_LAST_EXECUTION) continue;
++          loop.m_done_event.Set();
++        }
++        break;
++      }
++      if (!loop.m_shutdown.IsSet()) return true;
++      loop.m_running_state.store(STATE_DONE);
++      loop.m_stopped.Set();
++      loop.m_done_event.Set();
++      auto stopped = std::move(p->stop);
++      delete p;
++      stopped();
++      return false;
++    }, 0, pending);
++  }
++#endif
++
+   // Quits the main loop.
+   // By default, it will wait until the main loop quits.
+   // Be careful to not use the blocking way within the payload of the Run() method.
+--- a/Source/Core/VideoCommon/Fifo.h
++++ b/Source/Core/VideoCommon/Fifo.h
+@@ -72,7 +72,7 @@
+   void RunGpu();
+   void GpuMaySleep();
+   void WakeupForAsyncRequest();
+-  void RunGpuLoop();
++  void RunGpuLoop(std::function<void()> stopped = {});
+   void ExitGpuLoop();
+   void EmulatorState(bool running);
+   void ResetVideoBuffer();
+--- a/Source/Core/VideoCommon/Fifo.cpp
++++ b/Source/Core/VideoCommon/Fifo.cpp
+@@ -329,10 +329,9 @@
+ 
+ // Description: Main FIFO update loop
+ // Purpose: Keep the Core HW updated about the CPU-GPU distance
+-void FifoManager::RunGpuLoop()
++void FifoManager::RunGpuLoop(std::function<void()> stopped)
+ {
+-  m_gpu_mainloop.Run(
+-      [this] {
++  auto payload = [this] {
+         // Run events from the CPU thread.
+         AsyncRequests::GetInstance()->PullEvents();
+ 
+@@ -536,8 +535,11 @@
+                 flush_needed, refresh_needed, dirty_at_skip);
+           }
+         }
+-      },
+-      100);
++      };
++#ifdef __EMSCRIPTEN__
++  if (stopped) { m_gpu_mainloop.RunAsync(std::move(payload), std::move(stopped)); return; }
++#endif
++  m_gpu_mainloop.Run(std::move(payload), 100);
+ }
+ 
+ void FifoManager::FlushGpu()
+--- a/Source/Core/Core/Core.cpp
++++ b/Source/Core/Core/Core.cpp
+@@ -191,6 +191,7 @@
+ 
+ using DolphinThread = DolphinWebThread;
+ 
++extern "C" u32 DolphinWeb_GetCachedInterpreterDisableMask();
+ static std::atomic<bool> s_worker_owned_webgl = false;
+ static std::atomic<bool> s_diagnostic_ogl_clear = false;
+ static std::atomic<bool> s_ogl_readback_present = false;
+@@ -766,6 +767,17 @@
+       if (!is_init)
+         return;
+ 
++#ifdef __EMSCRIPTEN__
++      // Opt-in bit 29; never change native threads or the ordinary readback path.
++      if (UseWorkerOwnedWebGL() && (DolphinWeb_GetCachedInterpreterDisableMask() & (1u << 29)))
++      {
++        system.GetFifo().RunGpuLoop([deinit_video] {
++          deinit_video();
++          pthread_exit(nullptr);
++        });
++        emscripten_exit_with_live_runtime();
++      }
++#endif
+       system.GetFifo().RunGpuLoop();
+       INFO_LOG_FMT(CONSOLE, "{}", StopMessage(false, "Video Loop Ended"));
+ 

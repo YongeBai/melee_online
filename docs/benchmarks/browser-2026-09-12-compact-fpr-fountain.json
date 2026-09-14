@@ -1,0 +1,45 @@
+{
+  "core": "a854a47c3d9647baf9f62948f0459ae14eff3fccbc78ca05bd5d2190723810f1",
+  "kind": "compact-fpr-off-on-on-off-selected-scalars",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle P1 versus CPU9",
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "presentation": "RAF capacity2",
+  "probe": "async actual canvas pixels",
+  "speed": 1,
+  "cpuClock": 1,
+  "runs": [
+    {
+      "enabled": false,
+      "simulationFps": 35.93460302263964,
+      "visibleFps": 35.93460302263964,
+      "seconds": 29.99894
+    },
+    {
+      "enabled": true,
+      "simulationFps": 35.03441940033494,
+      "visibleFps": 35.03441940033494,
+      "seconds": 29.99907
+    },
+    {
+      "enabled": true,
+      "simulationFps": 36.16763113683009,
+      "visibleFps": 36.16763113683009,
+      "seconds": 29.9992
+    },
+    {
+      "enabled": false,
+      "simulationFps": 38.40154246195505,
+      "visibleFps": 38.40154246195505,
+      "seconds": 29.998795
+    }
+  ],
+  "decision": "Disabled. Both adjacent pairs favor OFF; every run failed 720p60."
+}

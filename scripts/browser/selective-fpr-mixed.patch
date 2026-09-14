@@ -1,0 +1,36 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -8201,6 +8201,33 @@
+     case 19:
+       if (i.LK || (i.SUBOP10 != 16 && i.SUBOP10 != 528)) return false;
+       break;
++    case 31:
++      // Ordinary address calculations must not disqualify a math loop.
++      // Exclude MSR/SPR/cache-management operations and SDK substitutions.
++      switch (i.SUBOP10)
++      {
++      case 0: case 11: case 19: case 23: case 24: case 26: case 28: case 32:
++      case 55: case 60: case 75: case 87: case 119: case 124: case 144:
++      case 151: case 183: case 215: case 247: case 279: case 311: case 316:
++      case 343: case 375: case 407: case 439: case 444: case 476: case 536:
++      case 792: case 824: case 922: case 954:
++        break;
++      case 8: case 10: case 40: case 104: case 136: case 138: case 202:
++      case 235: case 266:
++        if (i.OE) return false;
++        break;
++      default:
++        return false;
++      }
++      break;
++    case 63:
++      if (i.Rc) return false;
++      if (!IsDoublePrecisionArithmeticSubop(i.SUBOP5) && i.SUBOP10 != 0 &&
++          i.SUBOP10 != 32 && i.SUBOP10 != 12 && i.SUBOP10 != 40 &&
++          i.SUBOP10 != 136 && i.SUBOP10 != 264 && i.SUBOP10 != 72)
++        return false; // Keep frsqrte, fctiwz and FPSCR operations out.
++      fp = true;
++      break;
+     case 4:
+       if (i.Rc || (!IsPairedSingleArithmeticSubop(i.SUBOP5) &&
+                    !IsPairedSingleMergeSubop(i.SUBOP10))) return false;

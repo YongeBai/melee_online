@@ -1,0 +1,214 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "bswaprotate",
+  "passed": false,
+  "scope": "Selected recorded fields from the actual browser comparison; no profilers, builds, tests or worker samplers during image intervals.",
+  "coreSha256": "3718aaf2db6209ebb2ef8d0a92bd79b260ce8547affaa2a757d30626dc69ee4f",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "nonblackFraction": 1,
+  "pageFocusedAndVisibleThroughout": true,
+  "queueCapacity": 2,
+  "frameInputStart": 550,
+  "inputConsistency": {
+    "passed": false,
+    "checked": 76,
+    "mismatches": [
+      {
+        "run": 0,
+        "reason": "fewer than 1200 common tracked frames"
+      },
+      {
+        "run": 1,
+        "reason": "fewer than 1200 common tracked frames"
+      },
+      {
+        "run": 2,
+        "reason": "fewer than 1200 common tracked frames"
+      },
+      {
+        "run": 3,
+        "reason": "fewer than 1200 common tracked frames"
+      }
+    ],
+    "note": "No divergent fingerprint was reported, but the minimum trace length gate failed. Do not label input consistency PASS."
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.99859,
+      "simulationFps": 39.001833086155244,
+      "gameRenderFps": 39.001833086155244,
+      "visibleFps": 38.8684934858607,
+      "p95GapMs": 34.100000001490116,
+      "maxGapMs": 108.5650000013411,
+      "compileMs": 55.047,
+      "queue": {
+        "dropped": 3,
+        "underruns": 625,
+        "meanAgeMs": 8.020385604115537
+      },
+      "emittedSites": 69636,
+      "trackedFrames": 1172,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 29.99879000000283,
+      "simulationFps": 38.60155692945918,
+      "gameRenderFps": 38.568222251627176,
+      "visibleFps": 38.46821821813117,
+      "p95GapMs": 34.37999999895692,
+      "maxGapMs": 119.95999999716878,
+      "compileMs": 0,
+      "queue": {
+        "dropped": 3,
+        "underruns": 633,
+        "meanAgeMs": 7.688610389654513
+      },
+      "emittedSites": 69636,
+      "trackedFrames": 1159,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.997974999997766,
+      "simulationFps": 38.80261917679732,
+      "gameRenderFps": 38.80261917679732,
+      "visibleFps": 38.735948009826885,
+      "p95GapMs": 33.96000000089407,
+      "maxGapMs": 119.97500000149012,
+      "compileMs": 109.654,
+      "queue": {
+        "dropped": 1,
+        "underruns": 629,
+        "meanAgeMs": 8.218598452269365
+      },
+      "emittedSites": 140912,
+      "trackedFrames": 1165,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.99333499999717,
+      "simulationFps": 39.57545901448145,
+      "gameRenderFps": 39.60879975501597,
+      "visibleFps": 39.408755311808825,
+      "p95GapMs": 33.850000001490116,
+      "maxGapMs": 140.839999999851,
+      "compileMs": 7.29,
+      "queue": {
+        "dropped": 4,
+        "underruns": 604,
+        "meanAgeMs": 8.21538884196169
+      },
+      "emittedSites": 141409,
+      "trackedFrames": 1188,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.99822500000149,
+      "simulationFps": 41.10243189388501,
+      "gameRenderFps": 41.069096588212766,
+      "visibleFps": 41.00242597686826,
+      "p95GapMs": 33.875,
+      "maxGapMs": 110.8150000013411,
+      "compileMs": 35.093,
+      "queue": {
+        "dropped": 2,
+        "underruns": 561,
+        "meanAgeMs": 8.493976441960234
+      },
+      "emittedSites": 141861,
+      "trackedFrames": 1234,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.99970499999821,
+      "simulationFps": 42.067080326292384,
+      "gameRenderFps": 42.067080326292384,
+      "visibleFps": 41.967079342949376,
+      "p95GapMs": 33.82000000029802,
+      "maxGapMs": 106.52000000327826,
+      "compileMs": 4.505,
+      "queue": {
+        "dropped": 3,
+        "underruns": 533,
+        "meanAgeMs": 8.285059571032418
+      },
+      "emittedSites": 141996,
+      "trackedFrames": 1263,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.998690000001343,
+      "simulationFps": 42.90187338180242,
+      "gameRenderFps": 42.93520817075487,
+      "visibleFps": 42.868538592849966,
+      "p95GapMs": 33.82000000029802,
+      "maxGapMs": 115.0599999986589,
+      "compileMs": 12.312,
+      "queue": {
+        "dropped": 2,
+        "underruns": 506,
+        "meanAgeMs": 8.374953343699545
+      },
+      "emittedSites": 141996,
+      "trackedFrames": 1288,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 30.002899999998508,
+      "simulationFps": 42.6625426208821,
+      "gameRenderFps": 42.6625426208821,
+      "visibleFps": 42.49589206376928,
+      "p95GapMs": 33.82500000298023,
+      "maxGapMs": 92.83499999716878,
+      "compileMs": 0,
+      "queue": {
+        "dropped": 3,
+        "underruns": 517,
+        "meanAgeMs": 8.360176332259908
+      },
+      "emittedSites": 141996,
+      "trackedFrames": 1281,
+      "skippedFrames": 0,
+      "validControllerTrack": true,
+      "passed": false
+    }
+  ],
+  "decision": "Keep OFF: both measured FPS gates fail and the two pairs disagree. Exact 600-frame raw-state replay passed separately; an isolated Node endian microbenchmark is not a gameplay speedup."
+}

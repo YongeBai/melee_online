@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-14",
+  "coreSha256": "9c75e242eb6adcf87bc1b848adc68e2d4d79b7fd2c5b980497d701efbde6605f",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "resolution": [960, 720],
+    "framesPerRun": 1200,
+    "input": "two deterministic native-frame controller tracks"
+  },
+  "feature": "guarded direct GXCallDisplayList FIFO submission for clean-state calls",
+  "coverage": {
+    "directPercent": 17.137998105848446,
+    "limitingCondition": "83% of calls entered with dirty GX state"
+  },
+  "measurementRunsFps": {
+    "off": [55.995129433144854, 58.713097581280906],
+    "on": [58.039960986745456, 58.898712070187514]
+  },
+  "measurementRunsMs": {
+    "off": [21430.435328, 20438.369792],
+    "on": [20675.410176, 20373.959936]
+  },
+  "meansFps": {
+    "off": 57.35411350721288,
+    "on": 58.469336528466485,
+    "changePercent": 1.9444516758390096
+  },
+  "pairedChangesPercent": [3.6518025305076307, 0.31613813025219706],
+  "averageMsPerFrame": {
+    "off": 17.44533546666667,
+    "on": 17.103904213333337,
+    "saved": 0.341431253333335
+  },
+  "inputFingerprints": {"passed": true, "checked": 80},
+  "stateComparison": {
+    "closingDisabledControlFullMachineBytesEqual": true,
+    "candidateDifferentBytes": 1,
+    "candidateDifference": "CoreTiming.m_idled_cycles only",
+    "executionStateEqual": true
+  },
+  "decision": "Promising but incomplete. The direct subset improved both ABBA directions and saved 0.34 ms/frame. Expand through the original dirty-state handler and validate exact replay."
+}

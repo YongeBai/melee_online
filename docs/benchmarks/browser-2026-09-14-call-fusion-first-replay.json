@@ -1,0 +1,27 @@
+{
+  "kind":"normal-running-browser-codegen-equivalence", "passed":false,
+  "coreSha256":"d8cf5bfd3bed74caa13fcdb2f726d6b81566a1653a29932a4436b60239711ed6",
+  "frames":600, "stage":"Yoshi's Story", "characters":["Ice Climbers","Ice Climbers"],
+  "fullMachineBytesEqual":false, "fingerprintsEqual":true,
+  "commonInput":{"startFrame":302,"stopFrame":902,"polls":601,"skipped":0,"inputHash":3110740595,"stateHash":1015296052},
+  "snapshotBytes":109881701, "sections":29, "equalSections":28,
+  "differentSection":{"name":"CoreTiming","bytes":363,"differentBytes":8,"rangesTruncated":false,"fieldsComplete":true,
+    "ranges":[
+      {"offset":52,"bytes":1,"field":"CoreTiming.next_event_order"},
+      {"offset":76,"bytes":1,"field":"CoreTiming.event.order"},
+      {"offset":114,"bytes":1,"field":"CoreTiming.event.order"},
+      {"offset":152,"bytes":1,"field":"CoreTiming.event.order"},
+      {"offset":196,"bytes":1,"field":"CoreTiming.event.order"},
+      {"offset":235,"bytes":1,"field":"CoreTiming.event.order"},
+      {"offset":285,"bytes":1,"field":"CoreTiming.event.order"},
+      {"offset":324,"bytes":1,"field":"CoreTiming.event.order"}
+    ]},
+  "reference":{"callfusion":false,"dispatcherCalls":1573703,"callFusionBlocks":0},
+  "candidate":{"callfusion":true,"dispatcherCalls":1558402,"newCallFusionBlocks":910,"newReadFallbackTrackedBlocks":114},
+  "commonCpFormat":{"writes":158330,"unchanged":112382,"avoided":0},
+  "selection":{"stage":8,"characters":[14,14],"slotTypes":[0,0],"timeLimit":480,"items":-1,"teams":0},
+  "resolution":[960,720], "profileEnabled":false,
+  "interpretation":"All RAM, CPU register/cache, graphics, audio and other serialized sections match. Differences are eight single bytes within scheduler insertion ordinal fields. This remains a failed full-state replay. Saved event queue inspection and an unchanged-codegen replay control are next; do not normalize saved bytes or claim the candidate is correct based only on fingerprints.",
+  "restoration":"Original codegen restored by replay cleanup. Candidate stays disabled; no timing or image acceptance result yet.",
+  "limits":"Selected exact UI result fields. 600-frame trace is not exhaustive roster/move coverage. Dispatcher call counts are frequency evidence, not CPU-time percentages."
+}

@@ -1,0 +1,157 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "widemap",
+  "coreSha256": "43829cb205f09fcf56eeb9c947f10f41ce80997e2ce4dae445d90f77fe8e781a",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two active scripted human controller tracks; native partner AI retained",
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "sceneryAnimation": "on",
+    "shadows": "full",
+    "efbPercent": 150,
+    "presentation": "raf-buffered",
+    "queueCapacity": 2,
+    "imageProbe": "webgl2-pbo-fence",
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "simd": false,
+    "vectorFpr": false,
+    "psqHoist": false
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 30.002044999999924,
+      "simulationFps": 55.99618292686396,
+      "gameRenderFps": 55.99618292686396,
+      "visibleFps": 55.8628586818,
+      "p95GapMs": 32.52500000037253,
+      "maxGapMs": 67.17999999970198,
+      "blockMap": {
+        "mask": 65535,
+        "emptyMisses": 932,
+        "collisionMisses": 2822622
+      },
+      "inputChanges": [
+        166,
+        167
+      ],
+      "exercisedBothPlayers": true,
+      "meanQueueAgeMs": 15.556707389777053,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 30.001179999999703,
+      "simulationFps": 56.797765954539685,
+      "gameRenderFps": 56.764433932265895,
+      "visibleFps": 56.69776988771831,
+      "p95GapMs": 31.615000000223517,
+      "maxGapMs": 47.94500000029802,
+      "blockMap": {
+        "mask": 1048575,
+        "emptyMisses": 1167,
+        "collisionMisses": 0
+      },
+      "inputChanges": [
+        165,
+        165
+      ],
+      "exercisedBothPlayers": true,
+      "meanQueueAgeMs": 15.30102172636887,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 30.000805000001563,
+      "simulationFps": 58.79842224233344,
+      "gameRenderFps": 58.765089803420544,
+      "visibleFps": 58.665092486681885,
+      "p95GapMs": 18.87000000104308,
+      "maxGapMs": 35.89000000059605,
+      "blockMap": {
+        "mask": 1048575,
+        "emptyMisses": 321,
+        "collisionMisses": 0
+      },
+      "inputChanges": [
+        174,
+        166
+      ],
+      "exercisedBothPlayers": true,
+      "meanQueueAgeMs": 15.386441543697254,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 30.001230000000447,
+      "simulationFps": 57.76429833043426,
+      "gameRenderFps": 57.76429833043426,
+      "visibleFps": 57.69763439698886,
+      "p95GapMs": 19.315000001341105,
+      "maxGapMs": 35.52999999932945,
+      "blockMap": {
+        "mask": 65535,
+        "emptyMisses": 566,
+        "collisionMisses": 2936122
+      },
+      "inputChanges": [
+        163,
+        165
+      ],
+      "exercisedBothPlayers": true,
+      "meanQueueAgeMs": 15.28380553954562,
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    }
+  ],
+  "warmupSimulationFps": [
+    49.70179754834306,
+    56.031932535019955,
+    57.72748361499182,
+    58.03273366175115
+  ],
+  "meanOff": 56.880240628649105,
+  "meanOn": 57.798094098436565,
+  "meanChangePercent": 1.6136596112168444,
+  "passed": false,
+  "interpretation": "Both adjacent pairs favor the larger map, mean+1.61%; collision misses eliminated. Browser warmed upward during the sequence; second already-warm ABBA underway. Still below target.",
+  "limits": [
+    "Counter reads bracket the image interval, including small RPC overhead; not exact per-frame CPU attribution.",
+    "Live scripted input tracks are frame-guided through the input API but are not identical recorded trajectories across all runs.",
+    "No physical input-to-photon measurement."
+  ]
+}

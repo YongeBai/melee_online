@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-14",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "feature": "gxmatrixfast",
+  "coreSha256": "e63eb52d85558131029fbfd8e97dbe3a3cdf2ac998b579e18b1607c3adf30294",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "frames": 600,
+    "sourceResolution": [960, 720],
+    "retained": ["animstatefast", "displaylistfast", "blockmerge", "fpuguard", "integerfifo", "singleprefix", "regcache"]
+  },
+  "result": {
+    "passed": false,
+    "fullMachineBytesEqual": false,
+    "fingerprintsEqual": true,
+    "differentSections": [
+      {"name":"CoreTiming","differentBytes":19,"firstRelativeOffset":12},
+      {"name":"HW Memory RAM","differentBytes":1,"firstRelativeOffset":4882205},
+      {"name":"HW GPFifo","differentBytes":3,"firstRelativeOffset":77}
+    ]
+  },
+  "coverage": {
+    "compiledBlocks": 4,
+    "newCompiledBlocks": 2,
+    "runs": 634873,
+    "fallbacks": 69,
+    "loadPos": 393409,
+    "setIndex": 241395
+  },
+  "matching": ["native inputs", "gameplay fingerprints", "fighters", "CPU registers", "GPU PixelEngine", "GPU VertexManager", "framebuffer", "texture cache", "presenter", "video backend", "DVD state"],
+  "decision": "Do not claim raw equivalence. Retain only as a performance candidate while the scheduler ordinals, one RAM byte, and three gather-pipe bytes remain different."
+}

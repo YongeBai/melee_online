@@ -1,0 +1,142 @@
+{
+  "kind": "same-checkpoint-probe-abba",
+  "saved": "selected exact measured fields; warmups omitted",
+  "stage": "Final Destination",
+  "fighters": [
+    "Fox",
+    "Falco"
+  ],
+  "diagnosticOnly": true,
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 111,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "probe": "async-raf",
+      "seconds": 29.999299999999813,
+      "simulationFps": 57.46800758684405,
+      "gameRenderFps": 57.46800758684405,
+      "visibleFps": 55.834636141510316,
+      "p95GapMs": 33.09499999973923,
+      "maxGapMs": 53.515000000130385,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 48,
+        "meanAgeMs": 15.613576968969847
+      },
+      "passed": false
+    },
+    {
+      "probe": "async-task",
+      "seconds": 29.998504999999888,
+      "simulationFps": 59.93632015995486,
+      "gameRenderFps": 59.86965017090041,
+      "visibleFps": 58.66959036792022,
+      "p95GapMs": 17.365000000223517,
+      "maxGapMs": 53.46500000031665,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 36,
+        "meanAgeMs": 18.20020159000974
+      },
+      "passed": false
+    },
+    {
+      "probe": "async-task",
+      "seconds": 30.015169999999927,
+      "simulationFps": 58.27053453303794,
+      "gameRenderFps": 58.27053453303794,
+      "visibleFps": 55.93838049226455,
+      "p95GapMs": 33.09499999973923,
+      "maxGapMs": 66.58500000042841,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 70,
+        "meanAgeMs": 16.406872023801718
+      },
+      "passed": false
+    },
+    {
+      "probe": "async-raf",
+      "seconds": 29.998725000000093,
+      "simulationFps": 59.669202607777315,
+      "gameRenderFps": 59.6358678577171,
+      "visibleFps": 58.36914735542909,
+      "p95GapMs": 21.895000000018626,
+      "maxGapMs": 58.60000000009313,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 37,
+        "meanAgeMs": 19.95033105022511
+      },
+      "passed": false
+    }
+  ]
+}

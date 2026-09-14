@@ -1,0 +1,577 @@
+{
+  "kind": "roster-loading-input-model-table-smoke",
+  "core": "f7a2a4b67e696b1de11884d879dc0d0cbfe98807b16ba3f4f8c2e647d0d2e3b5",
+  "passed": true,
+  "acceptance720p60": false,
+  "nativeCameraUnmodified": true,
+  "hostedNoIsoStartup": true,
+  "pairs": [
+    {
+      "player": "Captain Falcon",
+      "cpu": "Donkey Kong",
+      "models": [
+        {
+          "kind": 2,
+          "costume": 0,
+          "highMeshes": 44,
+          "lowMeshes": 35,
+          "selectedLow": true
+        },
+        {
+          "kind": 3,
+          "costume": 0,
+          "highMeshes": 22,
+          "lowMeshes": 15,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        16,
+        15,
+        44,
+        60,
+        14,
+        25,
+        236,
+        65,
+        85,
+        42,
+        70
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Fox",
+      "cpu": "Mr. Game & Watch",
+      "models": [
+        {
+          "kind": 1,
+          "costume": 0,
+          "highMeshes": 45,
+          "lowMeshes": 32,
+          "selectedLow": true
+        },
+        {
+          "kind": 24,
+          "costume": 0,
+          "highMeshes": 39,
+          "lowMeshes": 38,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        21,
+        53,
+        14,
+        342,
+        15,
+        343,
+        17,
+        179,
+        50,
+        178,
+        25
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Kirby",
+      "cpu": "Bowser",
+      "models": [
+        {
+          "kind": 4,
+          "costume": 0,
+          "highMeshes": 21,
+          "lowMeshes": 21,
+          "selectedLow": true
+        },
+        {
+          "kind": 5,
+          "costume": 0,
+          "highMeshes": 61,
+          "lowMeshes": 54,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        20,
+        363,
+        351,
+        18,
+        179,
+        25,
+        178,
+        41
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Link",
+      "cpu": "Luigi",
+      "models": [
+        {
+          "kind": 6,
+          "costume": 0,
+          "highMeshes": 71,
+          "lowMeshes": 24,
+          "selectedLow": true
+        },
+        {
+          "kind": 17,
+          "costume": 0,
+          "highMeshes": 37,
+          "lowMeshes": 16,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        21,
+        233,
+        79,
+        44,
+        85,
+        45,
+        46,
+        212
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Mario",
+      "cpu": "Marth",
+      "models": [
+        {
+          "kind": 0,
+          "costume": 0,
+          "highMeshes": 43,
+          "lowMeshes": 16,
+          "selectedLow": true
+        },
+        {
+          "kind": 18,
+          "costume": 0,
+          "highMeshes": 52,
+          "lowMeshes": 33,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        90,
+        222,
+        183,
+        18,
+        64,
+        65,
+        15
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Mewtwo",
+      "cpu": "Ness",
+      "models": [
+        {
+          "kind": 16,
+          "costume": 0,
+          "highMeshes": 23,
+          "lowMeshes": 19,
+          "selectedLow": true
+        },
+        {
+          "kind": 8,
+          "costume": 0,
+          "highMeshes": 44,
+          "lowMeshes": 26,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        20,
+        233,
+        50,
+        16,
+        25,
+        15,
+        236,
+        14
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Peach",
+      "cpu": "Pikachu",
+      "models": [
+        {
+          "kind": 9,
+          "costume": 0,
+          "highMeshes": 51,
+          "lowMeshes": 34,
+          "selectedLow": true
+        },
+        {
+          "kind": 12,
+          "costume": 0,
+          "highMeshes": 13,
+          "lowMeshes": 13,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        89,
+        60,
+        14,
+        27,
+        17,
+        236,
+        35
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Ice Climbers",
+      "cpu": "Jigglypuff",
+      "models": [
+        {
+          "kind": 10,
+          "costume": 0,
+          "highMeshes": 23,
+          "lowMeshes": 20,
+          "selectedLow": true
+        },
+        {
+          "kind": 11,
+          "costume": 0,
+          "highMeshes": 23,
+          "lowMeshes": 20,
+          "selectedLow": true
+        },
+        {
+          "kind": 15,
+          "costume": 0,
+          "highMeshes": 10,
+          "lowMeshes": 4,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        20,
+        221,
+        50,
+        17,
+        25,
+        236,
+        16,
+        18,
+        35
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Samus",
+      "cpu": "Yoshi",
+      "models": [
+        {
+          "kind": 13,
+          "costume": 0,
+          "highMeshes": 64,
+          "lowMeshes": 31,
+          "selectedLow": true
+        },
+        {
+          "kind": 14,
+          "costume": 0,
+          "highMeshes": 23,
+          "lowMeshes": 17,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        90,
+        222,
+        18,
+        27,
+        25,
+        236,
+        357,
+        42,
+        14
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Zelda",
+      "cpu": "Sheik",
+      "models": [
+        {
+          "kind": 19,
+          "costume": 1,
+          "highMeshes": 44,
+          "lowMeshes": 11,
+          "selectedLow": true
+        },
+        {
+          "kind": 7,
+          "costume": 1,
+          "highMeshes": 47,
+          "lowMeshes": 16,
+          "selectedLow": true
+        },
+        {
+          "kind": 7,
+          "costume": 0,
+          "highMeshes": 47,
+          "lowMeshes": 16,
+          "selectedLow": true
+        },
+        {
+          "kind": 19,
+          "costume": 0,
+          "highMeshes": 44,
+          "lowMeshes": 11,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        223,
+        213,
+        225,
+        217,
+        239,
+        219,
+        88,
+        20
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Falco",
+      "cpu": "Young Link",
+      "models": [
+        {
+          "kind": 22,
+          "costume": 0,
+          "highMeshes": 26,
+          "lowMeshes": 30,
+          "selectedLow": true
+        },
+        {
+          "kind": 20,
+          "costume": 0,
+          "highMeshes": 58,
+          "lowMeshes": 25,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        78,
+        45,
+        48,
+        81,
+        25,
+        49,
+        236,
+        357,
+        43
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Dr. Mario",
+      "cpu": "Roy",
+      "models": [
+        {
+          "kind": 21,
+          "costume": 0,
+          "highMeshes": 44,
+          "lowMeshes": 14,
+          "selectedLow": true
+        },
+        {
+          "kind": 26,
+          "costume": 0,
+          "highMeshes": 76,
+          "lowMeshes": 19,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        242,
+        222,
+        90,
+        18,
+        85,
+        44,
+        179,
+        14,
+        178,
+        214,
+        221
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    },
+    {
+      "player": "Pichu",
+      "cpu": "Ganondorf",
+      "models": [
+        {
+          "kind": 23,
+          "costume": 0,
+          "highMeshes": 19,
+          "lowMeshes": 18,
+          "selectedLow": true
+        },
+        {
+          "kind": 25,
+          "costume": 0,
+          "highMeshes": 71,
+          "lowMeshes": 19,
+          "selectedLow": true
+        }
+      ],
+      "actions": [
+        242,
+        222,
+        90,
+        275,
+        355,
+        88,
+        356,
+        38,
+        191,
+        43
+      ],
+      "rules": {
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "initialStocks": [
+        4,
+        4
+      ]
+    }
+  ],
+  "limits": "All26 selectable starts loaded into Battlefield matches, checked native rules and selected model tables, exercised P1 keyboard inputs, and returned to character select. Not sustained30-second FPS acceptance, exhaustive moves/costumes, or visual review of every character."
+}

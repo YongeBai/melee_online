@@ -1,0 +1,278 @@
+{
+  "artifactScope": "Exact selected CUA particleFpsRun fields; warmups omitted",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "kind": "same-checkpoint-fountain-particles-abba",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "codegen": {
+    "fpuguard": true,
+    "blockmerge": true,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true,
+    "readfusion": false,
+    "branchfusion": false,
+    "cpformat": false,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false
+  },
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 108,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "particles": true,
+      "seconds": 29.999055000007154,
+      "simulationFps": 55.93509528882159,
+      "gameRenderFps": 55.90176090545519,
+      "visibleFps": 55.66842022189038,
+      "p95GapMs": 33.15999999642372,
+      "maxGapMs": 50.36999998986721,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 7,
+        "meanAgeMs": 11.867076600903454
+      },
+      "cosmeticCoverage": {
+        "particles": true,
+        "stableAtEnd": true,
+        "snapshot": {
+          "total": 106,
+          "banks": [
+            {
+              "bank": 0,
+              "particles": 12,
+              "aboveDrawThreshold": 12,
+              "links": [
+                0
+              ]
+            },
+            {
+              "bank": 30,
+              "particles": 94,
+              "aboveDrawThreshold": 94,
+              "links": [
+                0
+              ]
+            }
+          ],
+          "limits": "Live particle count, not CPU time or executed draw count."
+        }
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "particles": false,
+      "seconds": 29.999584999993445,
+      "simulationFps": 58.46747546675673,
+      "gameRenderFps": 58.4341416723059,
+      "visibleFps": 57.567463016584306,
+      "p95GapMs": 17.560000002384186,
+      "maxGapMs": 50.55500000715256,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 25,
+        "meanAgeMs": 15.519247685352134
+      },
+      "cosmeticCoverage": {
+        "particles": false,
+        "stableAtEnd": true,
+        "snapshot": {
+          "total": 108,
+          "banks": [
+            {
+              "bank": 0,
+              "particles": 12,
+              "aboveDrawThreshold": 12,
+              "links": [
+                0
+              ]
+            },
+            {
+              "bank": 30,
+              "particles": 96,
+              "aboveDrawThreshold": 96,
+              "links": [
+                0
+              ]
+            }
+          ],
+          "limits": "Live particle count, not CPU time or executed draw count."
+        }
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "particles": false,
+      "seconds": 29.997465000003576,
+      "simulationFps": 58.471607517494924,
+      "gameRenderFps": 58.4382713672569,
+      "visibleFps": 57.47152301035419,
+      "p95GapMs": 17.54500000178814,
+      "maxGapMs": 96.08500000834465,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 27,
+        "meanAgeMs": 15.43098260872606
+      },
+      "cosmeticCoverage": {
+        "particles": false,
+        "stableAtEnd": true,
+        "snapshot": {
+          "total": 108,
+          "banks": [
+            {
+              "bank": 0,
+              "particles": 13,
+              "aboveDrawThreshold": 13,
+              "links": [
+                0
+              ]
+            },
+            {
+              "bank": 30,
+              "particles": 95,
+              "aboveDrawThreshold": 95,
+              "links": [
+                0
+              ]
+            }
+          ],
+          "limits": "Live particle count, not CPU time or executed draw count."
+        }
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "particles": true,
+      "seconds": 29.99842999999225,
+      "simulationFps": 55.06954863972637,
+      "gameRenderFps": 55.03621356185729,
+      "visibleFps": 54.96954340611912,
+      "p95GapMs": 33.19499999284744,
+      "maxGapMs": 66.56999999284744,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 10.672251515090466
+      },
+      "cosmeticCoverage": {
+        "particles": true,
+        "stableAtEnd": true,
+        "snapshot": {
+          "total": 113,
+          "banks": [
+            {
+              "bank": 0,
+              "particles": 11,
+              "aboveDrawThreshold": 11,
+              "links": [
+                0
+              ]
+            },
+            {
+              "bank": 30,
+              "particles": 102,
+              "aboveDrawThreshold": 102,
+              "links": [
+                0
+              ]
+            }
+          ],
+          "limits": "Live particle count, not CPU time or executed draw count."
+        }
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "decision": "Both pairs favor disabling ambient draws; mean simulation gain about5.35%. All FPS gates still fail. Warm repeat required before retention.",
+  "meanSimulationGainPercent": 5.346117825055674
+}

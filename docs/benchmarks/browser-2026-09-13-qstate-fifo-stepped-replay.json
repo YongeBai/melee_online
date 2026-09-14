@@ -1,0 +1,50 @@
+{
+  "artifactScope": "Selected exact fields from completed live browser replay",
+  "engine": {
+    "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+    "profileEnabled": false,
+    "sourceResolution": [
+      960,
+      720
+    ]
+  },
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "performanceTest": false,
+  "networkTest": false,
+  "kind": "local-browser-late-input-correction",
+  "passed": true,
+  "frames": 120,
+  "fullMachineBytesEqual": true,
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "comparison": {
+    "sizeA": 105129682,
+    "sizeB": 105129682,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0,
+    "allSectionUnmatchedBytes": 0
+  },
+  "referenceFrame": 424,
+  "correctedFrame": 424,
+  "codegenFeature": "qstatefull",
+  "referenceEnabled": false,
+  "candidateEnabled": true
+}

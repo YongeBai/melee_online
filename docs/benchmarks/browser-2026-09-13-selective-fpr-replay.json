@@ -1,0 +1,87 @@
+{
+  "artifactScope": "Selected exact fields from CUA selectiveReplay and selectiveDiag",
+  "coreSha256": "b317c2cc97f415883f52408055b4bdd3123a29780d6af4a02c21dee18703808e",
+  "passed": true,
+  "frames": 120,
+  "referenceFrame": 424,
+  "correctedFrame": 424,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107060212,
+    "sizeB": 107060212,
+    "sectionsChecked": 29,
+    "differingSections": []
+  },
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "codegenReference": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false
+  },
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": true,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "profileEnabled": false,
+  "emissionCoverage": {
+    "selected": 30,
+    "rejected": 16153,
+    "limit": "Compilation decisions, not dynamic CPU cost or block execution frequencies."
+  },
+  "setupFailure": {
+    "error": "Timeline probe requires two human controller ports",
+    "resolvedBy": "Reloaded fixture with inputprobe=1; failed setup is not replay evidence."
+  },
+  "limits": "Same browser core with flag off/on; not whole-emulator equivalence against native Dolphin or exhaustive character coverage. No performance gain established."
+}

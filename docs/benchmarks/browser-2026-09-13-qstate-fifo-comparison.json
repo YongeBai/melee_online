@@ -1,0 +1,282 @@
+{
+  "artifactScope": "Selected exact fields from completed live browser comparison",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "qstatefull including FIFO eligibility reuse",
+  "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+  "passed": false,
+  "requestedSecondsPerInterval": 45,
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "workload": "two scripted human controller tracks at native logic frames; partner AI retained (not human play)",
+  "inputConsistency": {
+    "passed": true,
+    "checked": 154,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "warmup": true,
+      "enabled": false,
+      "simulationFps": 44.758062007027505,
+      "gameRenderFps": 44.71361507355479,
+      "visibleFps": 44.71361507355479,
+      "p95GapMs": 33.99500000104308,
+      "maxGapMs": 84.08999999985099,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 0,
+        "emittedSites": 0
+      }
+    },
+    {
+      "warmup": false,
+      "enabled": false,
+      "simulationFps": 49.80183713443668,
+      "gameRenderFps": 49.80183713443668,
+      "visibleFps": 49.668498882403384,
+      "p95GapMs": 33.66000000014901,
+      "maxGapMs": 69.73999999836087,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 0,
+        "emittedSites": 0
+      }
+    },
+    {
+      "warmup": true,
+      "enabled": true,
+      "simulationFps": 52.00306240256414,
+      "gameRenderFps": 51.98083887162287,
+      "visibleFps": 51.891944747857806,
+      "p95GapMs": 33.55499999970198,
+      "maxGapMs": 74.375,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 257
+      }
+    },
+    {
+      "warmup": false,
+      "enabled": true,
+      "simulationFps": 52.01600342003677,
+      "gameRenderFps": 51.97156428853737,
+      "visibleFps": 51.860466459788896,
+      "p95GapMs": 33.55499999970198,
+      "maxGapMs": 71.14499999955297,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 257
+      }
+    },
+    {
+      "warmup": true,
+      "enabled": true,
+      "simulationFps": 51.9620044226573,
+      "gameRenderFps": 51.91757346547675,
+      "visibleFps": 51.67320320098371,
+      "p95GapMs": 33.64000000059605,
+      "maxGapMs": 76.13000000081956,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 257
+      }
+    },
+    {
+      "warmup": false,
+      "enabled": true,
+      "simulationFps": 56.11358634375242,
+      "gameRenderFps": 56.09136314124004,
+      "visibleFps": 54.93575661059643,
+      "p95GapMs": 33.24000000022352,
+      "maxGapMs": 62.75499999895692,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 257
+      }
+    },
+    {
+      "warmup": true,
+      "enabled": false,
+      "simulationFps": 55.93907217562142,
+      "gameRenderFps": 55.91685649961839,
+      "visibleFps": 54.82828837547008,
+      "p95GapMs": 33.23499999940395,
+      "maxGapMs": 65.125,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 257
+      }
+    },
+    {
+      "warmup": false,
+      "enabled": false,
+      "simulationFps": 59.2924464356765,
+      "gameRenderFps": 59.22577576876982,
+      "visibleFps": 58.07015087572066,
+      "p95GapMs": 17.65000000037253,
+      "maxGapMs": 66.38000000081956,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 257
+      }
+    }
+  ],
+  "engine": {
+    "profiler": false,
+    "metrics": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "queueCapacity": 2
+  },
+  "measurementLimitations": [
+    "A screenshot was taken while first measured control was in progress, after its stale-looking progress raised a warmup-stall concern. No focus/visibility events recorded; retain observation and do not present as uncontaminated speedup evidence.",
+    "Repeated intervals trend faster. Host variability and compilation/tiering contributions have not been separated."
+  ],
+  "decision": "Keep qstatefull OFF. Opposing pairs: first favors candidate, reverse favors baseline. All strict image gates fail. Do not keep tuning this eligibility-cache approach without new evidence."
+}

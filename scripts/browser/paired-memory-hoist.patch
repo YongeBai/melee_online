@@ -1,0 +1,231 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -15,6 +15,7 @@
+ #include <cstring>
+ #include <initializer_list>
+ #include <limits>
++#include <map>
+ #include <optional>
+ #include <span>
+ #include <sstream>
+@@ -304,6 +305,7 @@
+ std::atomic<bool> s_dolphin_web_paired_simd{false};
+ std::atomic<bool> s_dolphin_web_paired_memory_simd{false};
+ std::atomic<bool> s_dolphin_web_vector_fpr_cache{false};
++std::atomic<bool> s_dolphin_web_psq_hoist{false};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEECALL   = 1u << 1;  // 5 Melee fast call-branch helpers
+@@ -5513,6 +5515,79 @@
+   }
+ }
+ 
++// Opt-in paired-memory range checks. A run contains only non-update psq
++// accesses and paired arithmetic/merges. No instruction can change a base GPR,
++// MSR, HID2 or GQR. Exceptional memory helpers leave the compiled block.
++struct WasmPsqHoistPlan
++{
++  struct Group { u32 base=0, quant=0; bool store=false; s32 lo=0, hi=0; u32 local=0; };
++  struct Member { u32 group=0; bool first=false; };
++  std::vector<Group> groups;
++  std::unordered_map<const PPCAnalyst::CodeOp*, Member> members;
++};
++static WasmPsqHoistPlan s_psq_hoist;
++
++void AnalyzePsqHoistPlan(std::span<const PPCAnalyst::CodeOp> ops)
++{
++  s_psq_hoist = {};
++  if (!s_dolphin_web_psq_hoist.load(std::memory_order_relaxed)) return;
++  struct Pending { WasmPsqHoistPlan::Group group; std::vector<const PPCAnalyst::CodeOp*> ops; };
++  std::map<u32, Pending> pending;
++  const auto finish = [&]() {
++    for (const auto& [key,p] : pending)
++    {
++      if (p.ops.size()<2) continue;
++      const u32 index=static_cast<u32>(s_psq_hoist.groups.size());
++      s_psq_hoist.groups.push_back(p.group);
++      for (std::size_t i=0;i<p.ops.size();++i) s_psq_hoist.members[p.ops[i]]={index,i==0};
++    }
++    pending.clear();
++  };
++  for (const auto& op : ops)
++  {
++    if (op.skip) continue;
++    const auto inst=op.inst;
++    if ((inst.OPCD==56 || inst.OPCD==60) && inst.RA!=0)
++    {
++      const bool store=inst.OPCD==60;
++      const u32 key=(inst.RA*8+inst.I)*2+store;
++      const s32 lo=static_cast<s32>(inst.SIMM_12);
++      const s32 hi=lo+(inst.W?4:8)-1;
++      auto& p=pending[key];
++      if (p.ops.empty()) p.group={inst.RA,inst.I,store,lo,hi,0};
++      else { p.group.lo=std::min(p.group.lo,lo);p.group.hi=std::max(p.group.hi,hi); }
++      p.ops.push_back(&op);
++    }
++    else if (inst.OPCD!=4 || inst.Rc ||
++             (!IsPairedSingleArithmeticSubop(inst.SUBOP5) && !IsPairedSingleMergeSubop(inst.SUBOP10)))
++      finish();
++  }
++  finish();
++}
++
++void EmitPsqHoistCheck(std::vector<u8>& body, const WasmStateLayout& layout,
++                       const WasmPsqHoistPlan::Group& group)
++{
++  EmitStateLoadU32(body,layout.msr_offset);
++  EmitI32Const(body,(1u<<13)|1u);body.push_back(0x71);
++  EmitI32Const(body,1u<<13);body.push_back(0x46);
++  EmitStateLoadU32(body,SprOffset(layout,SPR_HID2));
++  EmitI32Const(body,1u<<31);body.push_back(0x71);body.push_back(0x45);body.push_back(0x45);body.push_back(0x71);
++  EmitStateLoadU32(body,SprOffset(layout,SPR_GQR0+group.quant));
++  if (!group.store) { EmitI32Const(body,16);body.push_back(0x76); }
++  EmitI32Const(body,7);body.push_back(0x71);body.push_back(0x45);body.push_back(0x71);
++  // Mask endpoints exactly as the existing per-access path does. Reject a
++  // range wrapping across the 30-bit MEM1 alias boundary before using it.
++  EmitGprOrZero(body,layout,group.base);EmitI32Const(body,static_cast<u32>(group.lo));body.push_back(0x6a);
++  EmitI32Const(body,0x3fffffffu);body.push_back(0x71);
++  EmitGprOrZero(body,layout,group.base);EmitI32Const(body,static_cast<u32>(group.hi));body.push_back(0x6a);
++  EmitI32Const(body,0x3fffffffu);body.push_back(0x71);EmitLocalSet(body,3);
++  EmitLocalGet(body,3);body.push_back(0x4d);body.push_back(0x71);
++  EmitLocalGet(body,3);EmitI32Const(body,layout.ram_size_real-1);body.push_back(0x4d);body.push_back(0x71);
++  EmitLocalSet(body,group.local);
++}
++
++
+ void EmitPsqFloatFastPathCondition(std::vector<u8>& body, const WasmStateLayout& layout,
+                                    UGeckoInstruction inst, bool store)
+ {
+@@ -5803,6 +5878,19 @@
+   if (simd) body.push_back(0x0b);
+ }
+ 
++void EmitPsqHoistedFloatCondition(std::vector<u8>& body, const WasmStateLayout& layout,
++                                 const PPCAnalyst::CodeOp& op, bool store)
++{
++  const auto member=s_psq_hoist.members.find(&op);
++  if (member!=s_psq_hoist.members.end())
++  {
++    EmitLocalGet(body,s_psq_hoist.groups[member->second.group].local);
++    body.insert(body.end(),{0x04,0x7f,0x41,0x01,0x05}); // if flag then true else original checks
++  }
++  EmitPsqFloatFastPathCondition(body,layout,op.inst,store);
++  if (member!=s_psq_hoist.members.end()) body.push_back(0x0b);
++}
++
+ void EmitPairedQuantizedFloatMemory(std::vector<u8>& body, const WasmStateLayout& layout,
+                                     const PPCAnalyst::CodeOp& op, u32 downcount)
+ {
+@@ -5810,10 +5898,13 @@
+   const bool load = inst.OPCD == 56 || inst.OPCD == 57;
+   const bool update = inst.OPCD == 57 || inst.OPCD == 61;
+ 
++  const auto member=s_psq_hoist.members.find(&op);
++  if (member!=s_psq_hoist.members.end() && member->second.first)
++    EmitPsqHoistCheck(body,layout,s_psq_hoist.groups[member->second.group]);
+   EmitEffectiveAddress12(body, layout, inst, update);
+   EmitLocalSet(body, 1);
+ 
+-  EmitPsqFloatFastPathCondition(body, layout, inst, !load);
++  EmitPsqHoistedFloatCondition(body, layout, op, !load);
+   body.push_back(0x04);
+   body.push_back(0x40);
+ 
+@@ -7989,6 +8080,7 @@
+                                                 bool record_emit_failure = false)
+ {
+   AnalyzeFastmemHoistability(ops);
++  AnalyzePsqHoistPlan(ops);
+   AnalyzeFastmemHoistPlan(ops);  // §28cz build the hoist plan (no-op unless enable bit set)
+   std::vector<u8> bytes = {0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00};
+ 
+@@ -8088,6 +8180,11 @@
+       ++body[0]; body.insert(body.end(), {0x01, 0x7b});
+     }
+   }
++  if (!s_psq_hoist.groups.empty())
++  {
++    ++body[0];EmitU32Leb(body,static_cast<u32>(s_psq_hoist.groups.size()));body.push_back(0x7f);
++    for(auto& group:s_psq_hoist.groups)group.local=next_local++;
++  }
+   s_fpr_rc.local_base = next_local;
+   if (s_fpr_rc.active)
+   {
+@@ -8128,6 +8225,7 @@
+   s_gpr_rc.active = false;  // §28cx C1: don't leak cache state on abort
+         s_fmh_plan.active = false;  // §28cz: don't leak hoist plan on abort
+         s_fmh_plan.ops.clear();
++        s_psq_hoist = {};
+         return {};
+       }
+       EmitInterpretCall(body, op, downcount, op.canEndBlock);
+@@ -8158,6 +8256,7 @@
+   s_gpr_rc.active = false;  // §28cx C1: cache state is per-block; clear on exit
+   s_fmh_plan.active = false;  // §28cz: hoist plan is per-block; clear on exit
+   s_fmh_plan.ops.clear();
++  s_psq_hoist = {};
+   return bytes;
+ }
+ 
+@@ -8284,6 +8383,9 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetPsqHoist() { return s_dolphin_web_psq_hoist.load(std::memory_order_relaxed); }
++extern "C" void DolphinWeb_SetPsqHoist(bool value) { s_dolphin_web_psq_hoist.store(value,std::memory_order_relaxed); }
++
+ extern "C" bool DolphinWeb_GetVectorFprCache()
+ {
+   return s_dolphin_web_vector_fpr_cache.load(std::memory_order_relaxed);
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -66,6 +66,8 @@
+ extern "C" bool DolphinWeb_GetPairedSimd();
+ extern "C" bool DolphinWeb_GetPairedMemorySimd();
+ extern "C" bool DolphinWeb_GetVectorFprCache();
++extern "C" bool DolphinWeb_GetPsqHoist();
++extern "C" void DolphinWeb_SetPsqHoist(bool);
+ extern "C" void DolphinWeb_SetVectorFprCache(bool);
+ extern "C" void DolphinWeb_SetPairedMemorySimd(bool);
+ extern "C" void DolphinWeb_SetPairedSimd(bool);
+@@ -1199,7 +1201,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 511 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 1023 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1215,7 +1217,8 @@
+   const bool simd = (flags & 64) != 0;
+   const bool memory_simd = (flags & 128) != 0;
+   const bool vector_fpr = (flags & 256) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache())
++  const bool psq_hoist = (flags & 512) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1223,6 +1226,7 @@
+     DolphinWeb_SetPairedSimd(simd);
+     DolphinWeb_SetPairedMemorySimd(memory_simd);
+     DolphinWeb_SetVectorFprCache(vector_fpr);
++    DolphinWeb_SetPsqHoist(psq_hoist);
+   }
+   return 1;
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

@@ -1,0 +1,33 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -5436,26 +5436,13 @@
+   body.push_back(0x0b);
+ }
+ 
+-void EmitFrsqrte(std::vector<u8>& body, const WasmStateLayout& layout,
++void EmitFrsqrte(std::vector<u8>& body, [[maybe_unused]] const WasmStateLayout& layout,
+                  const PPCAnalyst::CodeOp& op, u32 downcount)
+ {
+-  const UGeckoInstruction inst = op.inst;
+-
+-  EmitFpuAvailableOrFallback(body, op, layout, downcount);
+-
+-  EmitF64ConstBits(body, std::bit_cast<u64>(1.0));
+-  EmitStateLoadF64(body, PsOffset(layout, inst.FB, 0));
+-  body.push_back(0x9f);  // f64.sqrt
+-  body.push_back(0xa3);  // f64.div
+-  EmitLocalSet(body, 6);
+-
+-  EmitStateStoreU32Prefix(body);
+-  EmitLocalGet(body, 6);
+-  EmitStateStoreF64Suffix(body, PsOffset(layout, inst.FD, 0));
+-
+-  body.push_back(0x05);
++  // Gekko returns a table-based estimate, not 1/sqrt(x). Use the existing
++  // interpreter bridge for its exact bits, FPSCR flags and enabled exceptions.
++  // The bridge also preserves cache flush/reload and FPU-unavailable handling.
+   EmitFpCall(body, op, downcount);
+-  body.push_back(0x0b);
+ }
+ 
+ bool IsPairedQuantizedFloatMemoryCandidate(UGeckoInstruction inst)

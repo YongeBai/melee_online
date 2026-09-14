@@ -1,0 +1,206 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "chainfusion",
+  "passed": false,
+  "diagnosticOnly": true,
+  "scope": "Selected fields from the real browser comparison. No profiler, build, test or worker sampler ran during image capture. An initial claim that the background filter hid Randall was a false-positive source-comment diagnosis; map 1 is scenery and map 2 is Randall. All FPS gates fail regardless. These finite scripted trials do not establish full gameplay coverage.",
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "nonblackFraction": 1,
+  "pageFocusedAndVisibleThroughout": true,
+  "queueCapacity": 2,
+  "inputStartFrame": 551,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 124,
+    "mismatches": [],
+    "limits": "Shared rolling fingerprints and polling gaps, not full machine equivalence."
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 44.997329999998215,
+      "simulationFps": 40.80242094364427,
+      "gameRenderFps": 40.780197402825294,
+      "visibleFps": 40.75797386200632,
+      "p95GapMs": 33.975000001490116,
+      "maxGapMs": 107.21499999985099,
+      "compileMs": 208.983,
+      "queue": {
+        "dropped": 2,
+        "underruns": 854,
+        "meanAgeMs": 8.434967284554954
+      },
+      "emittedBlocks": 1050,
+      "emittedBoundaries": 3266,
+      "trackedFrames": 1837,
+      "skippedFrames": 1,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 44.99646499999985,
+      "simulationFps": 41.84773181626615,
+      "gameRenderFps": 41.82550784822777,
+      "visibleFps": 41.75883594411264,
+      "p95GapMs": 33.8450000025332,
+      "maxGapMs": 119.14499999955297,
+      "compileMs": 16.279,
+      "queue": {
+        "dropped": 3,
+        "underruns": 808,
+        "meanAgeMs": 8.279430548190087
+      },
+      "emittedBlocks": 1050,
+      "emittedBoundaries": 3266,
+      "trackedFrames": 1883,
+      "skippedFrames": 1,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 44.996574999999254,
+      "simulationFps": 42.42545127045851,
+      "gameRenderFps": 42.381003443040534,
+      "visibleFps": 42.35877952933154,
+      "p95GapMs": 33.850000001490116,
+      "maxGapMs": 97.10500000044703,
+      "compileMs": 74.623,
+      "queue": {
+        "dropped": 2,
+        "underruns": 786,
+        "meanAgeMs": 8.005849947564593
+      },
+      "emittedBlocks": 2232,
+      "emittedBoundaries": 6930,
+      "trackedFrames": 1909,
+      "skippedFrames": 1,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 44.99629500000179,
+      "simulationFps": 42.58128363679552,
+      "gameRenderFps": 42.53683553279051,
+      "visibleFps": 42.470163376783,
+      "p95GapMs": 33.85999999940395,
+      "maxGapMs": 107.35000000149012,
+      "compileMs": 2,
+      "queue": {
+        "dropped": 3,
+        "underruns": 779,
+        "meanAgeMs": 8.270010460199297
+      },
+      "emittedBlocks": 2233,
+      "emittedBoundaries": 6932,
+      "trackedFrames": 1916,
+      "skippedFrames": 1,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 44.99647500000149,
+      "simulationFps": 44.62571790345652,
+      "gameRenderFps": 44.559046014158525,
+      "visibleFps": 44.4701501617612,
+      "p95GapMs": 33.79000000283122,
+      "maxGapMs": 97.87000000104308,
+      "compileMs": 6.927,
+      "queue": {
+        "dropped": 5,
+        "underruns": 686,
+        "meanAgeMs": 8.59840329837376
+      },
+      "emittedBlocks": 2234,
+      "emittedBoundaries": 6936,
+      "trackedFrames": 2007,
+      "skippedFrames": 2,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 44.997239999998364,
+      "simulationFps": 43.64712146789606,
+      "gameRenderFps": 43.62489788262727,
+      "visibleFps": 43.55822712682092,
+      "p95GapMs": 33.82999999821186,
+      "maxGapMs": 97.26999999955297,
+      "compileMs": 0,
+      "queue": {
+        "dropped": 2,
+        "underruns": 728,
+        "meanAgeMs": 8.433745537973344
+      },
+      "emittedBlocks": 2234,
+      "emittedBoundaries": 6936,
+      "trackedFrames": 1964,
+      "skippedFrames": 2,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 44.99627999999747,
+      "simulationFps": 42.89243466349015,
+      "gameRenderFps": 42.87021060407901,
+      "visibleFps": 42.80353842584561,
+      "p95GapMs": 33.87000000104308,
+      "maxGapMs": 123.03500000014901,
+      "compileMs": 2.699,
+      "queue": {
+        "dropped": 3,
+        "underruns": 764,
+        "meanAgeMs": 8.229452232573944
+      },
+      "emittedBlocks": 2234,
+      "emittedBoundaries": 6936,
+      "trackedFrames": 1931,
+      "skippedFrames": 1,
+      "validControllerTrack": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 44.996894999999554,
+      "simulationFps": 43.958588698176165,
+      "gameRenderFps": 43.9363649425148,
+      "visibleFps": 43.86969367553071,
+      "p95GapMs": 33.83000000193715,
+      "maxGapMs": 93.52499999850988,
+      "compileMs": 0.27,
+      "queue": {
+        "dropped": 2,
+        "underruns": 718,
+        "meanAgeMs": 8.12863037976283
+      },
+      "emittedBlocks": 2234,
+      "emittedBoundaries": 6936,
+      "trackedFrames": 1977,
+      "skippedFrames": 2,
+      "validControllerTrack": true,
+      "passed": false
+    }
+  ],
+  "decision": "Keep OFF: both pairs disagree (+0.71 and -0.31 visible FPS); all image gates fail. Exact 600-frame raw replay passed separately."
+}

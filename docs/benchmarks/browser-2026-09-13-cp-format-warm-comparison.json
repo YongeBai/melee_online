@@ -1,0 +1,182 @@
+{
+  "artifactScope": "Exact selected CUA cpWarmRun fields; warmups omitted",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "kind": "same-checkpoint-codegen-abba-warm-repeat",
+  "feature": "cpformat",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame controller scripts plus native partner AI",
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "commonCodegen": {
+    "readfusion": false,
+    "branchfusion": false,
+    "fpuguard": true,
+    "blockmerge": true,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 112,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "cpformat": false,
+      "seconds": 29.999,
+      "simulationFps": 57.568585619520654,
+      "gameRenderFps": 57.50191673055769,
+      "visibleFps": 57.36857895263176,
+      "p95GapMs": 20.280000001192093,
+      "maxGapMs": 37.94500000029802,
+      "queue": {
+        "capacity": 2,
+        "dropped": 3,
+        "meanAgeMs": 15.928220092917119
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false,
+      "cpFormat": {
+        "writes": 990520,
+        "unchanged": 811518,
+        "avoided": 0,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    },
+    {
+      "cpformat": true,
+      "seconds": 30.000660000003876,
+      "simulationFps": 59.26536282867678,
+      "gameRenderFps": 59.23203022866065,
+      "visibleFps": 59.13203242861226,
+      "p95GapMs": 18.600000001490116,
+      "maxGapMs": 35.49000000208616,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.682169014110531
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false,
+      "cpFormat": {
+        "writes": 1019918,
+        "unchanged": 835491,
+        "avoided": 835491,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    },
+    {
+      "cpformat": true,
+      "seconds": 29.999089999996126,
+      "simulationFps": 58.70178062068641,
+      "gameRenderFps": 58.668446276211284,
+      "visibleFps": 58.335102831460084,
+      "p95GapMs": 19.00499999523163,
+      "maxGapMs": 36.24000000208616,
+      "queue": {
+        "capacity": 2,
+        "dropped": 8,
+        "meanAgeMs": 16.254114791640276
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false,
+      "cpFormat": {
+        "writes": 1010142,
+        "unchanged": 827530,
+        "avoided": 827530,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    },
+    {
+      "cpformat": false,
+      "seconds": 30.000394999995827,
+      "simulationFps": 59.26588633250487,
+      "gameRenderFps": 59.19922054360441,
+      "visibleFps": 58.93255738800259,
+      "p95GapMs": 18.79500000178814,
+      "maxGapMs": 35.350000001490116,
+      "queue": {
+        "capacity": 2,
+        "dropped": 7,
+        "meanAgeMs": 16.658445449346974
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "passed": false,
+      "cpFormat": {
+        "writes": 1019396,
+        "unchanged": 835059,
+        "avoided": 0,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    }
+  ],
+  "decision": "Opposing pairs; reverse loses 0.5641 simulation FPS. Initial improvement not replicated. Keep CP format reuse OFF; large repeat count does not establish large cost. Goal remains unachieved."
+}

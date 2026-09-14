@@ -1,0 +1,173 @@
+{
+  "kind": "same-checkpoint-rush-presentation-abba",
+  "coreSha256": "2e26b8b3e79164f9f5f91495ed97225b0023fdefe9cae900147517c4c8d40126",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "passed": false,
+  "normalSpeed": true,
+  "cpuClock": 1,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "nonblackFraction": 1,
+  "gpuStartDelay": 1000,
+  "profileEnabled": false,
+  "backgroundBuilds": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 143,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 45.01410499999859,
+      "simulationFps": 47.65173049647588,
+      "gameRenderFps": 47.58508471955773,
+      "visibleFps": 47.60729997853045,
+      "rushPresentation": {
+        "calls": 6432,
+        "skips": 4295
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 8.316530564632155
+      },
+      "synchronousCompileAndLinkMs": 288.508,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 44.997405000001194,
+      "simulationFps": 49.84731897317057,
+      "gameRenderFps": 49.80287196561536,
+      "visibleFps": 49.73620145428254,
+      "rushPresentation": {
+        "calls": 6729,
+        "skips": 4494
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 8.325245755147005
+      },
+      "synchronousCompileAndLinkMs": 0.717,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 44.99908000000008,
+      "simulationFps": 48.22320811892146,
+      "gameRenderFps": 48.20098544236896,
+      "visibleFps": 48.13431741271147,
+      "rushPresentation": {
+        "calls": 6507,
+        "skips": 0
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 8.360449930766437
+      },
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 44.99658999999985,
+      "simulationFps": 48.47033964129298,
+      "gameRenderFps": 48.44811573499253,
+      "visibleFps": 48.29254839088934,
+      "rushPresentation": {
+        "calls": 6540,
+        "skips": 0
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 8.975032198679802
+      },
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 45.026894999999556,
+      "simulationFps": 49.992343464945165,
+      "gameRenderFps": 49.94792556759737,
+      "visibleFps": 49.770253978206185,
+      "rushPresentation": {
+        "calls": 6750,
+        "skips": 0
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 9.216715751892385
+      },
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 44.996939999999476,
+      "simulationFps": 50.625664767427,
+      "gameRenderFps": 50.581217300554805,
+      "visibleFps": 50.29230876588556,
+      "rushPresentation": {
+        "calls": 6833,
+        "skips": 0
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 10.998023409904853
+      },
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 44.99679499999993,
+      "simulationFps": 48.9368187223113,
+      "gameRenderFps": 48.914594917260295,
+      "visibleFps": 48.847923502107285,
+      "rushPresentation": {
+        "calls": 6605,
+        "skips": 4410
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 8.242319236016947
+      },
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 45.01366000000015,
+      "simulationFps": 48.78519098424773,
+      "gameRenderFps": 48.7185445484769,
+      "visibleFps": 48.67411359129635,
+      "rushPresentation": {
+        "calls": 6587,
+        "skips": 4398
+      },
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 8.267414422615655
+      },
+      "synchronousCompileAndLinkMs": 0,
+      "passed": false
+    }
+  ],
+  "scope": "Selected recorded diagnostics from eight focused visible 45-second image captures. One read-only process listing occurred during capture; it reports lifetime CPU averages, not timed attribution. No build or profiler ran.",
+  "decision": "Opposing timing pairs and all gates fail. Restore rush ON. Lower throughput than prior f2 intervals remains unexplained; different fresh checkpoints prevent attributing it solely to build changes or warming."
+}

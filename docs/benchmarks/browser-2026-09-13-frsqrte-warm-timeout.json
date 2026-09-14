@@ -1,0 +1,72 @@
+{
+  "coreSha256": "21b62c02d413f3d3ee1931a4c7f094ddd955bfc7c7985c089a234568a490f7b0",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "settings": {
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbPercent": 150,
+    "profiler": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "otherRejectedCpuFlags": false
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "passed": false,
+  "kind": "incomplete-codegen-comparison",
+  "failure": "Asynchronous image verification timed out",
+  "failedPhase": "First candidate warmup; no candidate measurement returned",
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 56.53585860168393,
+      "visibleFps": 56.10250591193045,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 58.13500955943912,
+      "visibleFps": 57.701663731301096,
+      "passed": false
+    }
+  ],
+  "rendererErrors": [],
+  "rendererStderr": [],
+  "workerHistory": [
+    {
+      "atMs": 446261.68,
+      "message": "Boot stall detected: core not advancing. Try reloading."
+    },
+    {
+      "atMs": 456335.76,
+      "message": "Boot stall detected: core not advancing. Try reloading."
+    }
+  ],
+  "limits": "Incomplete comparison: no input-consistency result or valid candidate FPS. Driver/scheduling/probe lifecycle cause unresolved."
+}

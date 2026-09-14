@@ -1,0 +1,135 @@
+{
+  "kind": "unchanged-checkpoint-control",
+  "coreSha256": "f2e807d6a316978c18c21d708891520a10d36d11e3ab8bf34cf530f4b739c0f7",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 40,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "repetition": 1,
+      "seconds": 29.998929999999703,
+      "simulationFps": 40.601448118316625,
+      "gameRenderFps": 40.568113596051994,
+      "visibleFps": 40.568113596051994,
+      "p95GapMs": 34.13499999977648,
+      "maxGapMs": 99.89499999955297,
+      "passed": false,
+      "synchronousCompileAndLinkMs": 490.868,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1217,
+        "presented": 1218,
+        "dropped": 0,
+        "underruns": 577,
+        "meanAgeMs": 8.177471264378644
+      },
+      "nativeInputs": {
+        "startFrame": 548,
+        "lastFrame": 1766
+      },
+      "focusedAndVisible": true
+    },
+    {
+      "repetition": 2,
+      "seconds": 29.99796499999985,
+      "simulationFps": 42.96958143660766,
+      "gameRenderFps": 42.96958143660766,
+      "visibleFps": 42.93624584200983,
+      "p95GapMs": 33.92500000074506,
+      "maxGapMs": 88.01999999955297,
+      "passed": false,
+      "synchronousCompileAndLinkMs": 6.725,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1289,
+        "presented": 1289,
+        "dropped": 0,
+        "underruns": 506,
+        "meanAgeMs": 7.955865011642246
+      },
+      "nativeInputs": {
+        "startFrame": 548,
+        "lastFrame": 1838
+      },
+      "focusedAndVisible": true
+    },
+    {
+      "repetition": 3,
+      "seconds": 30.015080000000076,
+      "simulationFps": 42.41201422751486,
+      "gameRenderFps": 42.41201422751486,
+      "visibleFps": 42.37869764131886,
+      "p95GapMs": 34.080000000074506,
+      "maxGapMs": 81.75999999977648,
+      "passed": false,
+      "synchronousCompileAndLinkMs": 0,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1273,
+        "presented": 1272,
+        "dropped": 1,
+        "underruns": 524,
+        "meanAgeMs": 8.167775157213786
+      },
+      "nativeInputs": {
+        "startFrame": 548,
+        "lastFrame": 1821
+      },
+      "focusedAndVisible": true
+    },
+    {
+      "repetition": 4,
+      "seconds": 29.996789999999105,
+      "simulationFps": 43.60466569923112,
+      "gameRenderFps": 43.57132879884944,
+      "visibleFps": 43.537991898467766,
+      "p95GapMs": 34.005000000819564,
+      "maxGapMs": 72.41500000096858,
+      "passed": false,
+      "synchronousCompileAndLinkMs": 2.641,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1307,
+        "presented": 1307,
+        "dropped": 1,
+        "underruns": 490,
+        "meanAgeMs": 7.764693955643574
+      },
+      "nativeInputs": {
+        "startFrame": 548,
+        "lastFrame": 1856
+      },
+      "focusedAndVisible": true
+    }
+  ],
+  "scope": "Selected exact diagnostics. Same native checkpoint, settings, and frame-input producer for all runs. No codegen setter called. No build/profiler ran; a few read-only process/frequency snapshots occurred and are not timed attribution. OS placement was unrestricted; not an affinity experiment.",
+  "conclusion": "Slowdown persists through repeats with little or zero synchronous compilation. Only 0–1 image drops versus 490–577 queue underruns per run: production throughput is the limiting layer."
+}

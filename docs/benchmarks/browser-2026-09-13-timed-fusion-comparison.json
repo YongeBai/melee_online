@@ -1,0 +1,120 @@
+{
+  "artifactScope": "Exact selected fields from completed CUA fusionRun",
+  "core": "c78752db8943f5cc1d6cf7f174b15dcdba77120ba44e0c9ee59949ffc7446941",
+  "feature": "blockmerge",
+  "kind": "same-checkpoint-codegen-abba",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "input": "native frame polling, scripted two human ports",
+  "settings": {
+    "reflection": false,
+    "scenery": false,
+    "lowModels": true,
+    "hiddenAnimation": true,
+    "profile": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "internalResolution": [
+      960,
+      792
+    ],
+    "nativeOutput": [
+      960,
+      720
+    ],
+    "blackBackground": true
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 49.00283399723187,
+      "visibleFps": 48.93616347478665,
+      "seconds": 29.998265000000597,
+      "p95GapMs": 33.63500000163913,
+      "maxGapMs": 83.58999999985099,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 51.502952835966944,
+      "visibleFps": 51.436282346858896,
+      "seconds": 29.998279999997468,
+      "p95GapMs": 33.51500000059605,
+      "maxGapMs": 50.37999999895692,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 53.570782688469365,
+      "visibleFps": 53.537446793828124,
+      "seconds": 29.9976950000003,
+      "p95GapMs": 33.310000002384186,
+      "maxGapMs": 52.85999999940395,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 54.13419948052583,
+      "visibleFps": 54.00086401382502,
+      "seconds": 29.999519999999553,
+      "p95GapMs": 33.30499999970198,
+      "maxGapMs": 92.91999999806285,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 55.40535585106285,
+      "visibleFps": 55.171999959993386,
+      "seconds": 29.997100000001492,
+      "p95GapMs": 33.315000001341105,
+      "maxGapMs": 50.32499999925494,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 56.935496882215986,
+      "visibleFps": 56.568816281686495,
+      "seconds": 29.998859999999404,
+      "p95GapMs": 32.92999999970198,
+      "maxGapMs": 50.605000000447035,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 55.135088466986424,
+      "visibleFps": 54.93508210011707,
+      "seconds": 29.999044999998063,
+      "p95GapMs": 33.24500000104308,
+      "maxGapMs": 49.730000000447035,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 56.43622098664076,
+      "visibleFps": 56.069535557902995,
+      "seconds": 29.99846499999985,
+      "p95GapMs": 33.065000001341105,
+      "maxGapMs": 34.314999997615814,
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 104,
+    "mismatches": []
+  },
+  "interpretation": "Both timing pairs favor fusion, with strong warmup drift and only0.50FPS reverse-pair gain. Warm repeat required; all FPS gates fail.",
+  "setupNotes": "Manual GC Start left native stage select; setup timed out without measurement. Reloaded and let the harness drive complete menu selection."
+}

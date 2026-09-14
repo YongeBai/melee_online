@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "gxmatrixfast",
+  "coreSha256": "e63eb52d85558131029fbfd8e97dbe3a3cdf2ac998b579e18b1607c3adf30294",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "queueCapacity": 3,
+    "input": "two deterministic controller tracks indexed by native logic frame",
+    "retained": ["animstatefast", "displaylistfast", "blockmerge", "fpuguard", "integerfifo", "singleprefix", "regcache"]
+  },
+  "measuredRuns": [
+    {"enabled":false,"simulationFps":52.60011396690941,"visibleFps":52.500113750242285,"p95GapMs":34.12999999523163},
+    {"enabled":true,"simulationFps":54.06499966251578,"visibleFps":53.998335051341286,"p95GapMs":33.6499999910593},
+    {"enabled":true,"simulationFps":54.03454010473222,"visibleFps":53.96787194914341,"p95GapMs":33.65500000119209},
+    {"enabled":false,"simulationFps":50.20052710553062,"visibleFps":50.13385973885661,"p95GapMs":35.185000002384186}
+  ],
+  "symmetricMeans": {
+    "disabledSimulationFps": 51.400320536220015,
+    "enabledSimulationFps": 54.049769883624,
+    "simulationChangePercent": 5.154538570507583,
+    "disabledVisibleFps": 51.316986744549446,
+    "enabledVisibleFps": 53.98310350024235,
+    "visibleChangePercent": 5.1953883593449435
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 100,
+    "mismatches": []
+  },
+  "coverageAtEnd": {
+    "compiledBlocks": 6,
+    "runs": 7754532,
+    "fallbacks": 771,
+    "loadPos": 4786599,
+    "setIndex": 2967162
+  },
+  "decision": "Both candidate legs exceeded both controls and the symmetric simulation mean improved 5.15%. Retain as an experimental candidate, not an accepted default: every 720p60 image gate failed and raw replay is not exact."
+}

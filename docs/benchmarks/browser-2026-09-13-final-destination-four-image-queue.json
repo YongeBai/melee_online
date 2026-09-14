@@ -1,0 +1,159 @@
+{
+  "kind": "same-checkpoint-queue-capacity-abba",
+  "saved": "selected exact measured fields; warmups omitted",
+  "stage": "Final Destination",
+  "fighters": [
+    "Fox",
+    "Falco"
+  ],
+  "core": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "passed": true,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 120,
+    "mismatches": []
+  },
+  "limitations": "This specific warmed matchup passed. All-stage/all-character performance and physical input-to-photon latency are not established.",
+  "runs": [
+    {
+      "capacity": 2,
+      "seconds": 29.999145000000485,
+      "simulationFps": 60.00171004873542,
+      "gameRenderFps": 59.935041482014604,
+      "visibleFps": 59.63503293177092,
+      "p95GapMs": 17.375,
+      "maxGapMs": 46.27999999932945,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": true,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "dropped": 10,
+        "underruns": 9,
+        "meanAgeMs": 19.615220670396848,
+        "p95AgeUpperMs": 28,
+        "p99AgeUpperMs": 30
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "capacity": 4,
+      "seconds": 29.998900000000372,
+      "simulationFps": 60.00220008066888,
+      "gameRenderFps": 59.93553096946814,
+      "visibleFps": 59.93553096946814,
+      "p95GapMs": 17.419999999925494,
+      "maxGapMs": 49.65500000026077,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": true,
+      "queue": {
+        "capacity": 4,
+        "rateLimited": true,
+        "dropped": 1,
+        "underruns": 0,
+        "meanAgeMs": 40.87664535852577,
+        "p95AgeUpperMs": 61,
+        "p99AgeUpperMs": 63
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "capacity": 4,
+      "seconds": 29.998990000000223,
+      "simulationFps": 60.00202006800851,
+      "gameRenderFps": 59.93535115682183,
+      "visibleFps": 59.9020167012285,
+      "p95GapMs": 17.470000000670552,
+      "maxGapMs": 49.56499999947846,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": true,
+      "queue": {
+        "capacity": 4,
+        "rateLimited": true,
+        "dropped": 2,
+        "underruns": 0,
+        "meanAgeMs": 47.519079532820804,
+        "p95AgeUpperMs": 61,
+        "p99AgeUpperMs": 62
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "capacity": 2,
+      "seconds": 29.999404999999328,
+      "simulationFps": 60.00119002360348,
+      "gameRenderFps": 59.934522034688364,
+      "visibleFps": 59.83452005131569,
+      "p95GapMs": 17.40500000026077,
+      "maxGapMs": 69.81500000040978,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": true,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "dropped": 3,
+        "underruns": 4,
+        "meanAgeMs": 19.489810690426378,
+        "p95AgeUpperMs": 28,
+        "p99AgeUpperMs": 30
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ]
+}

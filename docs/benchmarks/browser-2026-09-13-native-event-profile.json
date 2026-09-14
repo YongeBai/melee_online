@@ -1,0 +1,244 @@
+{
+  "core": "84d4f3da20851777d218d5833915d253251c850a8ce4a46542e7ce161ca0652b",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "settings": {
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbScalePercent": 150,
+    "cpuOverclock": 1,
+    "emulationSpeed": 1,
+    "rejectedCpuFlags": false
+  },
+  "seconds": 29.99974499999732,
+  "simulationFps": 46.733730570047356,
+  "visibleFps": 46.6670633367092,
+  "diagnosticOnly": true,
+  "passed": false,
+  "pageLifecycle": {
+    "start": {
+      "visibility": "visible",
+      "focused": true
+    },
+    "end": {
+      "visibility": "visible",
+      "focused": true
+    },
+    "events": []
+  },
+  "coreProfile": {
+    "stages": {
+      "cpuAdvance": {
+        "count": 2023173,
+        "totalMs": 4603.559
+      },
+      "cpuExecute": {
+        "count": 2023166,
+        "totalMs": 23078.684
+      },
+      "glDraw": {
+        "count": 520352,
+        "totalMs": 253.417
+      },
+      "glUniform": {
+        "count": 521755,
+        "totalMs": 746.396
+      },
+      "glCompile": {
+        "count": 11,
+        "totalMs": 58.956
+      },
+      "glPresent": {
+        "count": 1403,
+        "totalMs": 6241.193
+      },
+      "cpuGpuSync": {
+        "count": 1404,
+        "totalMs": 71.003
+      },
+      "cpuGpuDecode": {
+        "count": 1163519,
+        "totalMs": 1208.021
+      },
+      "cpuVideoWait": {
+        "count": 1,
+        "totalMs": 0.029
+      },
+      "coreEventVi": {
+        "count": 736603,
+        "totalMs": 1089.734
+      },
+      "coreEventDsp": {
+        "count": 23408,
+        "totalMs": 7.975
+      },
+      "coreEventAudioDma": {
+        "count": 93714,
+        "totalMs": 205.483
+      },
+      "coreEventGpuSleep": {
+        "count": 23408,
+        "totalMs": 7.947
+      },
+      "coreEventGpuSync": {
+        "count": 1163519,
+        "totalMs": 1851.369
+      },
+      "coreEventDecrementer": {
+        "count": 1404,
+        "totalMs": 0.821
+      },
+      "coreEventPatch": {
+        "count": 1522,
+        "totalMs": 5.068
+      },
+      "coreEventDvd": {
+        "count": 97,
+        "totalMs": 40.822
+      },
+      "coreEventOther": {
+        "count": 13428,
+        "totalMs": 216.441
+      },
+      "coreEventWait": {
+        "count": 2057103,
+        "totalMs": 43.294
+      }
+    },
+    "timing": "Inclusive CPU wall time. Overlapping scopes and threads must not be summed. Profiling adds overhead; these FPS are not an acceptance measurement. coreEventGpuSync is the FIFO scheduler callback, not GPU waiting."
+  },
+  "cpuLocations": {
+    "samples": 1506,
+    "unmapped": 0,
+    "topFunctions": [
+      [
+        "SelectThread",
+        105
+      ],
+      [
+        "HSD_FObjInterpretAnim",
+        35
+      ],
+      [
+        "psDispParticles",
+        34
+      ],
+      [
+        "HandleReverb",
+        33
+      ],
+      [
+        "SetupEnvelopeModelMtx",
+        30
+      ],
+      [
+        "MObjSetupTev",
+        29
+      ],
+      [
+        "HSD_SetupTevStage",
+        28
+      ],
+      [
+        "sinf",
+        20
+      ],
+      [
+        "JObjUpdateFunc",
+        19
+      ],
+      [
+        "cosf",
+        17
+      ]
+    ],
+    "interpretation": "Last-PC residency, not exact host cost. SelectThread already uses idle skipping."
+  },
+  "controllerStress": {
+    "kind": "two ordinary controller tracks sampled on native logic frames",
+    "valid": true,
+    "exercisedBothPlayers": true,
+    "startFrame": 429,
+    "lastFrame": 1831,
+    "frames": 1402,
+    "skipped": 1,
+    "inputChanges": [
+      154,
+      158
+    ],
+    "observedActionCounts": [
+      28,
+      33
+    ],
+    "gaps": [
+      {
+        "after": 764,
+        "before": 766
+      }
+    ],
+    "digests": [
+      {
+        "frame": 120,
+        "input": 3898012912,
+        "state": 3894331206
+      },
+      {
+        "frame": 240,
+        "input": 1678349471,
+        "state": 3401158577
+      },
+      {
+        "frame": 360,
+        "input": 198528212,
+        "state": 1543789491
+      },
+      {
+        "frame": 480,
+        "input": 2101414294,
+        "state": 3373192531
+      },
+      {
+        "frame": 600,
+        "input": 1617184320,
+        "state": 4049932115
+      },
+      {
+        "frame": 720,
+        "input": 2022502855,
+        "state": 145762538
+      },
+      {
+        "frame": 840,
+        "input": 1379054168,
+        "state": 1750263946
+      },
+      {
+        "frame": 960,
+        "input": 4233432753,
+        "state": 1448722154
+      },
+      {
+        "frame": 1080,
+        "input": 3634948192,
+        "state": 3559566060
+      },
+      {
+        "frame": 1200,
+        "input": 1447711555,
+        "state": 3417990184
+      },
+      {
+        "frame": 1320,
+        "input": 1583613592,
+        "state": 1346323523
+      }
+    ]
+  }
+}

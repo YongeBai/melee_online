@@ -1,0 +1,34 @@
+{
+  "core": "eae953535cf9f09f7d7b51c1bf5bcf0c9cb681a5155e103de0687d427a4368c2",
+  "passed": true,
+  "frames": 120,
+  "fullMachineBytesEqual": true,
+  "bytes": 106904914,
+  "tickDifferences": [],
+  "codegenReference": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false
+  },
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": true
+  },
+  "fixture": "Fountain Ice Climbers mirror, two human ports, low models; reflection/scenery off; full shadows and hidden animation retained;150% EFB",
+  "limits": "Browser-to-browser retained-codegen comparison; no native Dolphin or FPS claim."
+}

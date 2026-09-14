@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {instrumentBitmapTiming} from './bitmap-timing-loader.mjs';
+const fixture='const credit=Module._detachedOglCredit||(Module._detachedOglCredit=new Int32Array(new SharedArrayBuffer(12)));let bitmap;try{bitmap=canvas.transferToImageBitmap();self.postMessage({type:"detachedOglFrame",bitmap,width:bitmap.width,height:bitmap.height,credit},[bitmap]);}catch(e){throw e;}';
+test('timestamps are opt-in and preserve bitmap ownership and counters',()=>{
+ const patched=instrumentBitmapTiming(fixture);const run=new Function('Module','canvas','self','performance',patched);const module={};const bitmap={width:960,height:720};let calls=0,posted;const canvas={transferToImageBitmap:()=>bitmap};const target={postMessage:(data,transfer)=>{posted=data;assert.equal(transfer[0],bitmap);}};const clock={timeOrigin:1000,now:()=>++calls};
+ run(module,canvas,target,clock);assert.equal(calls,0);assert.equal(posted.timing,undefined);assert.equal(module._detachedOglCredit.length,4);module._detachedOglCredit[3]=1;module._detachedOglCredit[1]=5;run(module,canvas,target,clock);assert.deepEqual(posted.timing,{sequence:5,exportStartAt:1001,exportEndAt:1002});assert.equal(module._detachedOglCredit[1],5);
+});
+test('unexpected or already patched loaders are rejected',()=>{assert.throws(()=>instrumentBitmapTiming(''));assert.throws(()=>instrumentBitmapTiming(instrumentBitmapTiming(fixture)));});

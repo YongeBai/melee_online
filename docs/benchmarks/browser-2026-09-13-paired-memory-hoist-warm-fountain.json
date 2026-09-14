@@ -1,0 +1,170 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "psqhoist",
+  "coreSha256": "eae953535cf9f09f7d7b51c1bf5bcf0c9cb681a5155e103de0687d427a4368c2",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle human versus native level 9 CPU",
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "sceneryAnimation": "on",
+    "shadows": "full",
+    "efbPercent": 150,
+    "presentation": "raf-buffered",
+    "queueCapacity": 2,
+    "imageProbe": "webgl2-pbo-fence",
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "simd": false,
+    "vectorFpr": false
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 30.00047499999963,
+      "simulationFps": 57.23242715323745,
+      "gameRenderFps": 57.16576154210962,
+      "visibleFps": 57.13242873654571,
+      "p95GapMs": 30.304999999701977,
+      "maxGapMs": 36.87000000104308,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 29.999804999999704,
+      "simulationFps": 57.73370860243982,
+      "gameRenderFps": 57.70037505243841,
+      "visibleFps": 57.53370730243137,
+      "p95GapMs": 19.115000000223517,
+      "maxGapMs": 73.1100000012666,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.999175000000744,
+      "simulationFps": 58.76828279444206,
+      "gameRenderFps": 58.73494854441685,
+      "visibleFps": 58.66828004436643,
+      "p95GapMs": 18.799999998882413,
+      "maxGapMs": 36.52500000037253,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.998504999998957,
+      "simulationFps": 58.30290542812253,
+      "gameRenderFps": 58.236235439068075,
+      "visibleFps": 58.0362254719047,
+      "p95GapMs": 19.22999999858439,
+      "maxGapMs": 77.9550000000745,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.998129999998955,
+      "simulationFps": 58.33696967111153,
+      "gameRenderFps": 58.3036342598709,
+      "visibleFps": 58.170292614908355,
+      "p95GapMs": 18.869999999180436,
+      "maxGapMs": 35.81000000052154,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 30.000455000000073,
+      "simulationFps": 57.76579055217648,
+      "gameRenderFps": 57.699124896605596,
+      "visibleFps": 57.565793585463815,
+      "p95GapMs": 19.705000000074506,
+      "maxGapMs": 63.87999999895692,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.999990000000224,
+      "simulationFps": 57.56668585556152,
+      "gameRenderFps": 57.53335251111707,
+      "visibleFps": 57.43335247778373,
+      "p95GapMs": 19.440000001341105,
+      "maxGapMs": 36.330000000074506,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 29.999830000000074,
+      "simulationFps": 57.800327535189226,
+      "gameRenderFps": 57.76699401296593,
+      "visibleFps": 57.60032640184947,
+      "p95GapMs": 19.184999998658895,
+      "maxGapMs": 65.80499999970198,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "interpretation": "Only +0.46% mean and opposing pairs again; no repeatable gain established. Keep disabled. Full120-frame reference-state/tick replay passed separately.",
+  "session": "Second ABBA in already-warmed page, no reload",
+  "meanOff": 57.76701806881452,
+  "meanOn": 58.034347990149506,
+  "meanChangePercent": 0.46277258247349184
+}

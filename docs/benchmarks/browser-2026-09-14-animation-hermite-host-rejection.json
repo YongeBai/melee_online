@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "complete-host-hermite-animation",
+  "coreSha256": "dbe61de8d23c8539581589d0e0ab98ef9f32e7a664d614043b7df4486bea66d5",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "rules": {
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0
+    },
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "secondsPerRun": 40,
+  "measuredRuns": [
+    {
+      "enabled": false,
+      "simulationFps": 43.637748018836035,
+      "visibleFps": 43.60441131293929
+    },
+    {
+      "enabled": true,
+      "simulationFps": 44.339585214832766,
+      "visibleFps": 44.30624718083665
+    },
+    {
+      "enabled": true,
+      "simulationFps": 41.47243133462465,
+      "visibleFps": 41.43909336731386
+    },
+    {
+      "enabled": false,
+      "simulationFps": 44.13496632708656,
+      "visibleFps": 44.068297193661955
+    }
+  ],
+  "measuredMeans": {
+    "controlSimulationFps": 43.8863571729613,
+    "candidateSimulationFps": 42.906008274728705,
+    "simulationUpliftPercent": -2.233835208442847,
+    "controlVisibleFps": 43.83635425330063,
+    "candidateVisibleFps": 42.872670274075254,
+    "visibleUpliftPercent": -2.198367076004759
+  },
+  "inputConsistency": {
+    "passed": false,
+    "reason": "first warmup produced fewer than 1200 common tracked frames; measured native inputs otherwise matched",
+    "pollingGapsEqual": true
+  },
+  "correctness": {
+    "fullMachineReplay120Frames": "pass",
+    "fullMachineReplay600Frames": [
+      "fail: eight CoreTiming insertion-order bytes shifted by one; all gameplay/memory fingerprints equal",
+      "pass on immediate repeat"
+    ]
+  },
+  "decision": "Reject and revert. Generated guest WASM is faster and long replay exactness was inconsistent."
+}

@@ -1,0 +1,28 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -11048,9 +11048,22 @@
+   // §28ca: lever-gated min-prefix. Default 4. When bit 21 is CLEARED
+   // (?shortprefix=1), drop to 2 so short blocks that currently fall to
+   // Interpret<false> (54% of attempts in the §28bz audit) compile instead.
+-  const u32 MIN_WASM_PREFIX_INSTRUCTIONS =
+-      DolphinWebFeatureEnabled(1u << 18) && code_block.m_num_instructions == 1 &&
+-          IsFastBranchInstruction(m_code_buffer[0].inst) && !m_code_buffer[0].inst.LK ? 1u :
++  // Only replace the ordinary FastBranch/FastBranchBdnz + EndBlock path.
++  // Keep existing OS/Melee helper preferences, including the two polling
++  // helpers which have no equivalent substitution in the WASM emitter.
++  bool single_ordinary_branch = false;
++  if (DolphinWebFeatureEnabled(1u << 18) && code_block.m_num_instructions == 1)
++  {
++    const auto& op = m_code_buffer[0];
++    single_ordinary_branch = IsFastBranchInstruction(op.inst) &&
++        !GetDirectBranchOsInterruptTarget(op.inst, op.address) &&
++        !IsDirectBranchLinkTo(op.inst, op.address, MELEE_INPUT_STATUS_PC) &&
++        !IsDirectBranchLinkTo(op.inst, op.address, MELEE_STATUS_FN_PC) &&
++        !IsDirectBranchLinkTo(op.inst, op.address, MELEE_SERVICE_POLL_PC) &&
++        !IsDirectBranchLinkTo(op.inst, op.address, MELEE_SI_POLL_PC) &&
++        !IsDirectBranchLinkTo(op.inst, op.address, MELEE_INPUT_POLL_PC);
++  }
++  const u32 MIN_WASM_PREFIX_INSTRUCTIONS = single_ordinary_branch ? 1u :
+       DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_SHORT_PREFIX) ? 4u : 2u;
+ 
+   if (DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_WASMBLOCK))

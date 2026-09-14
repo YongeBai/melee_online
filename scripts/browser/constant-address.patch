@@ -1,0 +1,294 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -369,6 +369,8 @@
+ std::atomic<bool> s_dolphin_web_frsqrte_fast{false};
+ std::atomic<bool> s_dolphin_web_bswap_rotate{false};
+ std::atomic<bool> s_dolphin_web_chain_fusion{false};
++std::atomic<bool> s_dolphin_web_constant_address{false};
++std::atomic<u32> s_constant_address_ram_sites{0}, s_constant_address_other_sites{0};
+ std::atomic<bool> s_dolphin_web_call_fusion{false};
+ std::atomic<u32> s_call_fusion_blocks{0};
+ std::atomic<u32> s_chain_fusion_blocks{0}, s_chain_fusion_boundaries{0};
+@@ -4169,6 +4171,77 @@
+   EmitU32Leb(body, byte_offset);
+ }
+ 
++
++// Prove addresses only from instructions in this invocation. No live register,
++// pointer, game identity or process-memory value is assumed constant.
++struct WasmConstantAddressProof
++{
++  std::array<std::optional<u32>, 32> gpr{};
++  std::optional<u32> Address(const PPCAnalyst::CodeOp& op) const
++  {
++    const auto i=op.inst;
++    if(op.skip || i.OPCD<32 || i.OPCD>45) return {};
++    const std::optional<u32> base=i.RA?gpr[i.RA]:std::optional<u32>{0};
++    return base?std::optional<u32>{*base+static_cast<u32>(static_cast<s32>(i.SIMM_16))}:std::nullopt;
++  }
++  void Advance(const PPCAnalyst::CodeOp& op)
++  {
++    if(op.skip)return;
++    const auto i=op.inst;
++    const auto ea=Address(op);
++    std::optional<u32> result;
++    int dest=-1;
++    bool ordinary=false;
++    if(i.OPCD==14 || i.OPCD==15)
++    {
++      const std::optional<u32> base=i.RA?gpr[i.RA]:std::optional<u32>{0};
++      const u32 imm=static_cast<u32>(static_cast<s32>(i.SIMM_16));
++      if(base)result=*base+(i.OPCD==15?imm<<16:imm);
++      dest=i.RD;ordinary=true;
++    }
++    else if(i.OPCD>=24 && i.OPCD<=27)
++    {
++      const u32 imm=static_cast<u32>(i.UIMM) << ((i.OPCD&1)?16:0);
++      if(gpr[i.RS])result=i.OPCD<26?(*gpr[i.RS]|imm):(*gpr[i.RS]^imm);
++      dest=i.RA;ordinary=true;
++    }
++    else if(i.OPCD>=32 && i.OPCD<=45)ordinary=true;
++    else
++    {
++      switch(i.OPCD)
++      {
++      case 7:case 8:case 10:case 11:case 12:case 13:
++      case 20:case 21:case 23:case 28:case 29:ordinary=true;break;
++      case 31:
++        if(i.OE)break;
++        switch(i.SUBOP10)
++        {
++        case 0:case 8:case 10:case 11:case 19:case 24:case 26:case 28:case 32:
++        case 40:case 60:case 75:case 104:case 124:case 136:case 138:case 144:
++        case 202:case 235:case 266:case 316:case 444:case 476:case 536:
++        case 792:case 824:case 922:case 954:ordinary=true;break;
++        }
++        break;
++      }
++    }
++    // Calls, branches (including fused boundaries), system helpers, floating
++    // helpers and unrecognized operations cannot carry a proof across them.
++    if(!ordinary){gpr.fill(std::nullopt);return;}
++    for(int reg:op.regsOut)gpr[reg].reset();
++    if(dest>=0)gpr[dest]=result;
++    // Preserve the original update-form order, including invalid RA==RD input:
++    // the existing emitter writes RD first and RA last.
++    if(i.OPCD>=33 && i.OPCD<=45 && (i.OPCD&1) && ea)gpr[i.RA]=ea;
++  }
++};
++static std::optional<u32> s_constant_effective_address;
++struct ScopedConstantAddress
++{
++  std::optional<u32> previous=s_constant_effective_address;
++  ScopedConstantAddress(){s_constant_effective_address.reset();}
++  ~ScopedConstantAddress(){s_constant_effective_address=previous;}
++};
++
+ // Track only fallback reads in the first segment of a read-fused block.
+ // The normal RAM arm keeps its existing instructions and range check.
+ static u32 s_fusion_read_fallback_local=0;
+@@ -4185,8 +4258,31 @@
+     EmitI32Const(body,1);EmitLocalSet(body,s_fusion_read_fallback_local);
+   }
+ }
++
++bool EmitKnownAddressRead(std::vector<u8>& body, const WasmStateLayout& layout, u32 width)
++{
++  if(!s_constant_effective_address)return false;
++  const u32 physical=*s_constant_effective_address&0x3fffffffu;
++  if(physical<=layout.ram_size_real-width)
++  {
++    EmitI32Const(body,layout.ram_base+physical);
++    body.insert(body.end(),{static_cast<u8>(width==4?0x28:width==2?0x2f:0x2d),0,0});
++    if(width!=1){EmitLocalSet(body,2);if(width==4)EmitBswap32FromLocal(body,2);else EmitBswap16FromLocal(body,2);}
++    s_constant_address_ram_sites.fetch_add(1,std::memory_order_relaxed);
++  }
++  else
++  {
++    EmitFusionReadFallback(body);
++    EmitLocalGet(body,0);EmitLocalGet(body,1);body.push_back(0x10);
++    EmitU32Leb(body,width==4?0:width==2?4:2);
++    s_constant_address_other_sites.fetch_add(1,std::memory_order_relaxed);
++  }
++  return true;
++}
++
+ void EmitReadU32MaybeDirect(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
++  if(EmitKnownAddressRead(body,layout,4))return;
+   EmitLocalGet(body, 1);
+   EmitI32Const(body, 0x3fffffff);
+   body.push_back(0x71);
+@@ -4215,6 +4311,7 @@
+ 
+ void EmitReadU8MaybeDirect(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
++  if(EmitKnownAddressRead(body,layout,1))return;
+   EmitLocalGet(body, 1);
+   EmitI32Const(body, 0x3fffffff);
+   body.push_back(0x71);
+@@ -4241,6 +4338,7 @@
+ 
+ void EmitReadU16MaybeDirect(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
++  if(EmitKnownAddressRead(body,layout,2))return;
+   EmitLocalGet(body, 1);
+   EmitI32Const(body, 0x3fffffff);
+   body.push_back(0x71);
+@@ -4324,8 +4422,32 @@
+   return true;
+ }
+ 
++
++bool EmitKnownAddressWrite(std::vector<u8>& body, const WasmStateLayout& layout, u32 width)
++{
++  if(!s_constant_effective_address)return false;
++  const u32 physical=*s_constant_effective_address&0x3fffffffu;
++  if(physical<=layout.ram_size_real-width)
++  {
++    if(width!=1){if(width==4)EmitBswap32FromLocal(body,2);else EmitBswap16FromLocal(body,2);EmitLocalSet(body,2);}
++    EmitI32Const(body,layout.ram_base+physical);EmitLocalGet(body,2);
++    body.insert(body.end(),{static_cast<u8>(width==4?0x36:width==2?0x3b:0x3a),0,0});
++    s_constant_address_ram_sites.fetch_add(1,std::memory_order_relaxed);
++  }
++  else
++  {
++    const bool fifo=EmitIntegerFifoStore(body,layout,width);
++    EmitLocalGet(body,0);EmitLocalGet(body,1);EmitLocalGet(body,2);body.push_back(0x10);
++    EmitU32Leb(body,width==4?1:width==2?5:3);
++    if(fifo)body.push_back(0x0b);
++    s_constant_address_other_sites.fetch_add(1,std::memory_order_relaxed);
++  }
++  return true;
++}
++
+ void EmitWriteU32MaybeDirect(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
++  if(EmitKnownAddressWrite(body,layout,4))return;
+   EmitLocalGet(body, 1);
+   EmitI32Const(body, 0x3fffffff);
+   body.push_back(0x71);
+@@ -4357,6 +4479,7 @@
+ 
+ void EmitWriteU8MaybeDirect(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
++  if(EmitKnownAddressWrite(body,layout,1))return;
+   EmitLocalGet(body, 1);
+   EmitI32Const(body, 0x3fffffff);
+   body.push_back(0x71);
+@@ -4386,6 +4509,7 @@
+ 
+ void EmitWriteU16MaybeDirect(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
++  if(EmitKnownAddressWrite(body,layout,2))return;
+   EmitLocalGet(body, 1);
+   EmitI32Const(body, 0x3fffffff);
+   body.push_back(0x71);
+@@ -8665,6 +8789,9 @@
+                                                 bool record_emit_failure = false,
+                                                 const WasmFusionBoundary* fusion = nullptr)
+ {
++  const ScopedConstantAddress constant_address_scope;
++  WasmConstantAddressProof address_proof;
++  const bool constant_addresses=s_dolphin_web_constant_address.load(std::memory_order_relaxed);
+   const ScopedFusionReadTracking fusion_read_scope;
+   const ScopedFpuGuardProof fpu_guard_scope;
+   s_fpu_guard.active=s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed) && (s_dolphin_web_fpu_guard_wide.load(std::memory_order_relaxed) ? CanHoistFpuGuardWide(ops) : CanHoistFpuGuard(ops));
+@@ -8832,6 +8959,8 @@
+     if (op.skip)
+       continue;
+ 
++    s_constant_effective_address=constant_addresses?address_proof.Address(op):std::nullopt;
++    if(constant_addresses)address_proof.Advance(op);
+     if (s_fpu_guard.active && (op.inst.OPCD==4 || op.inst.OPCD==59))
+       EmitFirstFpuGuard(body, layout, op, downcount);
+     if (!EmitWasmSupportedIntegerInstruction(body, layout, op, downcount))
+@@ -9015,6 +9144,8 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetConstantAddress(){return s_dolphin_web_constant_address.load(std::memory_order_relaxed);}
++extern "C" void DolphinWeb_SetConstantAddress(bool value){s_dolphin_web_constant_address.store(value,std::memory_order_relaxed);}
+ extern "C" bool DolphinWeb_GetCallFusion(){return s_dolphin_web_call_fusion.load(std::memory_order_relaxed);}
+ extern "C" void DolphinWeb_SetCallFusion(bool value){s_dolphin_web_call_fusion.store(value,std::memory_order_relaxed);}
+ 
+@@ -13027,6 +13158,7 @@
+   out << "fpuguardwide:" << (DolphinWeb_GetFpuGuardWide()?1:0) << " ";
+   out << "branchfusion:" << (DolphinWeb_GetConditionalFusion()?1:0) << " emitted:" << s_conditional_fusion_emissions.load() << " ";
+   out << "fpuguard:" << (DolphinWeb_GetFpuGuardHoist()?1:0) << " emit-blocks/sites:" << s_fpu_guard_blocks.load() << "/" << s_fpu_guard_sites.load() << " ";
++  out << "constantaddr:" << DolphinWeb_GetConstantAddress() << " emit-ram/other:" << s_constant_address_ram_sites.load() << "/" << s_constant_address_other_sites.load() << " ";
+   out << "callfusion:" << DolphinWeb_GetCallFusion() << " emit-blocks:" << s_call_fusion_blocks.load() << " ";
+   out << "chainfusion:" << DolphinWeb_GetChainFusion() << " emit-blocks/boundaries:" << s_chain_fusion_blocks.load() << "/" << s_chain_fusion_boundaries.load() << " ";
+   out << "bswaprotate:" << DolphinWeb_GetBswapRotate() << " emit-sites:" << s_bswap_rotate_sites.load(std::memory_order_relaxed) << " ";
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -73,6 +73,8 @@
+ extern "C" bool DolphinWeb_GetPsqHoist();
+ extern "C" bool DolphinWeb_GetQStateCache();
+ extern "C" bool DolphinWeb_GetQStateFull();
++extern "C" bool DolphinWeb_GetConstantAddress();
++extern "C" void DolphinWeb_SetConstantAddress(bool value);
+ extern "C" bool DolphinWeb_GetCallFusion();
+ extern "C" void DolphinWeb_SetCallFusion(bool);
+ extern "C" bool DolphinWeb_GetChainFusion();
+@@ -1373,10 +1375,10 @@
+ 
+ // QA-only code-generation comparison. Generated blocks must be discarded when
+ // changing these flags, otherwise a test could unknowingly reuse old code.
+-EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags, int extra_flags = 0)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 ||
++  if (!s_runtime_initialized || flags < 0 || extra_flags < 0 || extra_flags > 1 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1393,6 +1395,7 @@
+   const bool simd = (flags & 64) != 0;
+   const bool memory_simd = (flags & 128) != 0;
+   const bool vector_fpr = (flags & 256) != 0;
++  const bool constant_address = (extra_flags & 1) != 0;
+   const bool call_fusion = (flags & 1073741824) != 0;
+   const bool chain_fusion = (flags & 536870912) != 0;
+   const bool bswap_rotate = (flags & 268435456) != 0;
+@@ -1414,7 +1417,7 @@
+   const bool counter_batch = (flags & 8388608) != 0;
+   const bool lean_dispatch = (flags & 16777216) != 0;
+   const bool cp_format_reuse = (flags & 33554432) != 0;
+-  if (call_fusion != DolphinWeb_GetCallFusion() || chain_fusion != DolphinWeb_GetChainFusion() || bswap_rotate != DolphinWeb_GetBswapRotate() || qstate_full != DolphinWeb_GetQStateFull() || qstate_cache != DolphinWeb_GetQStateCache() || next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
++  if (constant_address != DolphinWeb_GetConstantAddress() || call_fusion != DolphinWeb_GetCallFusion() || chain_fusion != DolphinWeb_GetChainFusion() || bswap_rotate != DolphinWeb_GetBswapRotate() || qstate_full != DolphinWeb_GetQStateFull() || qstate_cache != DolphinWeb_GetQStateCache() || next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1428,6 +1431,7 @@
+     DolphinWeb_SetBswapRotate(bswap_rotate);
+     DolphinWeb_SetChainFusion(chain_fusion);
+     DolphinWeb_SetCallFusion(call_fusion);
++    DolphinWeb_SetConstantAddress(constant_address);
+     DolphinWeb_SetWideBlockMap(wide_map);
+     DolphinWeb_SetConstantStateBase(constant_state_base);
+     DolphinWeb_SetBlockMsrCache(block_msr_cache);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1061,9 +1061,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0) | (payload.qstatecache === true ? 67108864 : 0) | (payload.qstatefull === true ? 134217728 : 0) | (payload.bswaprotate === true ? 268435456 : 0) | (payload.chainfusion === true ? 536870912 : 0) | (payload.callfusion === true ? 1073741824 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0) | (payload.qstatecache === true ? 67108864 : 0) | (payload.qstatefull === true ? 134217728 : 0) | (payload.bswaprotate === true ? 268435456 : 0) | (payload.chainfusion === true ? 536870912 : 0) | (payload.callfusion === true ? 1073741824 : 0), payload.constantaddr === true ? 1 : 0))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true, qstatecache:payload.qstatecache === true, qstatefull:payload.qstatefull === true, bswaprotate:payload.bswaprotate === true, chainfusion:payload.chainfusion === true, callfusion:payload.callfusion === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true, qstatecache:payload.qstatecache === true, qstatefull:payload.qstatefull === true, bswaprotate:payload.bswaprotate === true, chainfusion:payload.chainfusion === true, callfusion:payload.callfusion === true, constantaddr:payload.constantaddr === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");
+@@ -2506,7 +2506,7 @@
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
+     browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),
+     browserInvalidateGuestCode: optionalCwrap("BrowserInvalidateGuestCode", "number", ["number", "number"]),
+-    browserRollbackConfigureCodegen: optionalCwrap("BrowserRollbackConfigureCodegen", "number", ["number"]),
++    browserRollbackConfigureCodegen: optionalCwrap("BrowserRollbackConfigureCodegen", "number", ["number", "number"]),
+     browserRollbackSetUnthrottled: optionalCwrap("BrowserRollbackSetUnthrottled", "number", ["number"]),
+     browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
+     browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),

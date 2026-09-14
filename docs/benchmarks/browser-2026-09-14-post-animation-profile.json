@@ -1,0 +1,74 @@
+{
+  "date": "2026-09-14",
+  "kind": "sampled-direct-block-profile",
+  "diagnosticOnly": true,
+  "coreSha256": "172876d5a91c9d621f7f59c4d6b9d6f0c627ed7effbeacd26bbf8a1d7e1cce09",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "rules": {
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0
+    },
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "benchmark": {
+    "simulationFps": 46.8355,
+    "visibleFps": 46.7355,
+    "profilerActive": true
+  },
+  "profile": {
+    "samples": 545752,
+    "sampledUs": 237865,
+    "uniqueSampledBlocks": 10582
+  },
+  "topFunctions": [
+    {
+      "name": "HSD_FObjInterpretAnim",
+      "samples": 54100,
+      "sampledUs": 20578.054,
+      "blocks": 33
+    },
+    {
+      "name": "HandleReverb",
+      "samples": 23959,
+      "sampledUs": 9626.882,
+      "blocks": 11
+    },
+    {
+      "name": "SetupEnvelopeModelMtx",
+      "samples": 10090,
+      "sampledUs": 4206.848,
+      "blocks": 16
+    },
+    {
+      "name": "sinf",
+      "samples": 7503,
+      "sampledUs": 3666.946
+    },
+    {
+      "name": "parseFloat",
+      "samples": 9571,
+      "sampledUs": 3386.88
+    },
+    {
+      "name": "cosf",
+      "samples": 6739,
+      "sampledUs": 2785.024
+    },
+    {
+      "name": "FObjUpdateAnim",
+      "samples": 5208,
+      "sampledUs": 2250.24
+    }
+  ],
+  "interpretation": "The accepted constant/linear shortcut reduced animation samples per emulated frame by about 22% versus the prior profile, but animation remains the largest sampled guest function. Profiling depresses FPS and is used for attribution, not acceptance."
+}

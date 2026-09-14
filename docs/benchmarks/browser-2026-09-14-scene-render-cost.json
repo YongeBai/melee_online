@@ -1,0 +1,106 @@
+{
+  "kind": "render-dispatch-cost-abba",
+  "scope": "scene",
+  "diagnosticOnly": true,
+  "passed": false,
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "frames": 1200,
+  "commonInput": {
+    "startFrame": 429,
+    "stopFrame": 1629,
+    "trackedPolls": 1201,
+    "skipped": 0,
+    "inputHash": 3539968120,
+    "stateHash": 1068424315
+  },
+  "selection": {
+    "stage": 8,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "configuredEfbScale": 150,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 80,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "renderDispatch": true,
+      "warmup": true,
+      "nativeWorkFps": 37.374351913788075,
+      "elapsedMs": 32107.58016,
+      "synchronousCompileAndLinkMs": 507.361
+    },
+    {
+      "renderDispatch": true,
+      "warmup": false,
+      "nativeWorkFps": 39.47581374368709,
+      "elapsedMs": 30398.360064,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "renderDispatch": false,
+      "warmup": true,
+      "nativeWorkFps": 65.8561617132296,
+      "elapsedMs": 18221.5296,
+      "synchronousCompileAndLinkMs": 17.055
+    },
+    {
+      "renderDispatch": false,
+      "warmup": false,
+      "nativeWorkFps": 65.88181270824538,
+      "elapsedMs": 18214.435072,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "renderDispatch": false,
+      "warmup": true,
+      "nativeWorkFps": 65.64707619266453,
+      "elapsedMs": 18279.565056,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "renderDispatch": false,
+      "warmup": false,
+      "nativeWorkFps": 67.30869855547706,
+      "elapsedMs": 17828.304896,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "renderDispatch": true,
+      "warmup": true,
+      "nativeWorkFps": 41.68551222357058,
+      "elapsedMs": 28786.97984,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "renderDispatch": true,
+      "warmup": false,
+      "nativeWorkFps": 41.58087073084321,
+      "elapsedMs": 28859.424512,
+      "synchronousCompileAndLinkMs": 0
+    }
+  ],
+  "pairedMillisecondsPerNativeFrame": [
+    10.153270826666667,
+    9.19259968
+  ],
+  "interpretation": "Both orders isolate a substantial combined scene-draw/downstream-graphics cost: about 9–10 ms per native frame in this trace. With scene draws bypassed, remaining work takes about 14.9–15.2 ms per native frame. Prioritize a narrower rendering-cost breakdown; this is not a playable optimization.",
+  "restoration": "Original draw-dispatch instruction, native checkpoint, host pacing and input restored. A post-run screenshot confirmed visible stage, fighters and HUD returned.",
+  "limits": "Selected exact UI result fields. Temporarily uncapped host pacing, no image verifier. Blank/incomplete output when bypassed. No visible-FPS, GPU-only time, additive CPU share or physical-latency claim. Rolling fingerprints are not full machine equivalence. No profiler/build/test/separate sampler during timing."
+}

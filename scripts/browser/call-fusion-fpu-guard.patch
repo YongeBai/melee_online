@@ -1,0 +1,97 @@
+diff --git a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+index 6e5c888..ca709a6 100644
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -8578,11 +8578,27 @@ bool ShouldCacheMathFpr(std::span<const PPCAnalyst::CodeOp> ops)
+   return floating >= 12 && references >= 3 * used.Count();
+ }
+ 
+-bool CanCacheBlockMsr(std::span<const PPCAnalyst::CodeOp> ops)
++// Only ordinary direct calls use the normal LR/NPC emitter. OS/Melee helper
++// substitutions may return to the caller or change more state; never fuse them
++// or use them as proof that MSR remains unchanged.
++bool IsOrdinaryFusionCall(const PPCAnalyst::CodeOp& op)
++{
++  return !op.skip && op.inst.OPCD == 18 && op.inst.LK &&
++      !GetDirectBranchOsInterruptTarget(op.inst, op.address) &&
++      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_INPUT_STATUS_PC) &&
++      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_STATUS_FN_PC) &&
++      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_SERVICE_POLL_PC) &&
++      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_SI_POLL_PC) &&
++      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_INPUT_POLL_PC);
++}
++
++bool CanCacheBlockMsr(std::span<const PPCAnalyst::CodeOp> ops,
++                      std::optional<u32> fused_call_index = std::nullopt)
+ {
+   u32 floating=0;
+-  for(const auto& op:ops)
++  for(u32 op_index=0; op_index<ops.size(); ++op_index)
+   {
++    const auto& op=ops[op_index];
+     if(op.skip)continue;
+     const auto i=op.inst;
+     if(i.OPCD>=32 && i.OPCD<=47)continue; // integer D-form memory
+@@ -8593,7 +8609,9 @@ bool CanCacheBlockMsr(std::span<const PPCAnalyst::CodeOp> ops)
+     case 20:case 21:case 23:case 24:case 25:case 26:case 27:case 28:case 29:
+       break;
+     case 16:case 18:
+-      if(i.LK)return false; // linked branches may use SDK/HLE substitutions
++      if(i.LK && (!fused_call_index || *fused_call_index != op_index ||
++                  !IsOrdinaryFusionCall(op)))
++        return false; // all unproven linked branches may use SDK/HLE substitutions
+       break;
+     case 19:
+       if(i.LK || (i.SUBOP10!=16 && i.SUBOP10!=528))return false;
+@@ -8623,9 +8641,10 @@ bool CanCacheQState(std::span<const PPCAnalyst::CodeOp> ops)
+ }
+ 
+ // Avoid adding a guard to memory-only blocks or a single arithmetic check.
+-bool CanHoistFpuGuard(std::span<const PPCAnalyst::CodeOp> ops)
++bool CanHoistFpuGuard(std::span<const PPCAnalyst::CodeOp> ops,
++                      std::optional<u32> fused_call_index = std::nullopt)
+ {
+-  if (!CanCacheBlockMsr(ops)) return false;
++  if (!CanCacheBlockMsr(ops, fused_call_index)) return false;
+   u32 arithmetic=0;
+   for (const auto& op : ops)
+     if (!op.skip && (op.inst.OPCD==4 || op.inst.OPCD==59)) ++arithmetic;
+@@ -8647,19 +8666,6 @@ struct WasmFusionBoundary
+   const WasmFusionBoundary* next = nullptr;
+ };
+ 
+-// Only ordinary direct calls use the normal LR/NPC emitter. OS/Melee helper
+-// substitutions may return to the caller or change more state; never fuse them.
+-bool IsOrdinaryFusionCall(const PPCAnalyst::CodeOp& op)
+-{
+-  return !op.skip && op.inst.OPCD == 18 && op.inst.LK &&
+-      !GetDirectBranchOsInterruptTarget(op.inst, op.address) &&
+-      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_INPUT_STATUS_PC) &&
+-      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_STATUS_FN_PC) &&
+-      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_SERVICE_POLL_PC) &&
+-      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_SI_POLL_PC) &&
+-      !IsDirectBranchLinkTo(op.inst, op.address, MELEE_INPUT_POLL_PC);
+-}
+-
+ bool IsFusionSafeInstruction(const PPCAnalyst::CodeOp& op, bool register_only)
+ {
+   if (op.skip) return true;
+@@ -8794,12 +8800,16 @@ std::vector<u8> BuildWasmCachedInterpreterBlock(std::span<const PPCAnalyst::Code
+   const bool constant_addresses=s_dolphin_web_constant_address.load(std::memory_order_relaxed);
+   const ScopedFusionReadTracking fusion_read_scope;
+   const ScopedFpuGuardProof fpu_guard_scope;
+-  s_fpu_guard.active=s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed) && (s_dolphin_web_fpu_guard_wide.load(std::memory_order_relaxed) ? CanHoistFpuGuardWide(ops) : CanHoistFpuGuard(ops));
++  const std::optional<u32> fused_call_index =
++      fusion && fusion->after_ops > 0 && fusion->after_ops <= ops.size() &&
++              IsOrdinaryFusionCall(ops[fusion->after_ops - 1]) ?
++          std::optional<u32>{fusion->after_ops - 1} : std::nullopt;
++  s_fpu_guard.active=s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed) && (s_dolphin_web_fpu_guard_wide.load(std::memory_order_relaxed) ? CanHoistFpuGuardWide(ops) : CanHoistFpuGuard(ops, fused_call_index));
+   const ScopedQStateCache qstate_cache_scope;
+   const bool cache_qstate_full=s_dolphin_web_qstate_full.load(std::memory_order_relaxed);
+   const bool cache_qstate=(cache_qstate_full || s_dolphin_web_qstate_cache.load(std::memory_order_relaxed)) && CanCacheQState(ops);
+   const ScopedBlockMsrCache msr_cache_scope;
+-  const bool cache_msr=s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
++  const bool cache_msr=s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops, fused_call_index);
+   const ScopedWasmStateBase state_base_scope(
+       s_dolphin_web_constant_state_base.load(std::memory_order_relaxed) ? layout.state_base : 0);
+   AnalyzeFastmemHoistability(ops);

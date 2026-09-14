@@ -1,0 +1,25 @@
+{
+  "coreSha256": "f7a2a4b67e696b1de11884d879dc0d0cbfe98807b16ba3f4f8c2e647d0d2e3b5",
+  "passed": true,
+  "kind": "fountain-gameplay-observable-comparison",
+  "feature": "animation",
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "settings": {
+    "models": "low",
+    "reflection": false,
+    "scenery": false,
+    "efbscale": 150
+  },
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "moving platform state and positions",
+    "native camera transform and settings"
+  ],
+  "guardedProcedureAddress": "0x80002c00",
+  "visualCheck": "Lower-detail fighters, moving platforms, HUD and native framing reviewed after replay; not a native Dolphin image comparison."
+}

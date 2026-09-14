@@ -1,0 +1,78 @@
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -8,6 +8,7 @@
+ #include "dolphin_web_benchmark_pad.h"
+ 
+ #include <array>
++#include <chrono>
+ #include <algorithm>
+ #include <atomic>
+ #include <cstddef>
+@@ -497,6 +498,9 @@
+ {
+   bool active=false,valid=true,have_frame=false,completed=false;
+   u32 stop_after=0,stopped_frame=0;
++  bool timed_start=false;
++  u32 timed_start_frame=0;
++  std::chrono::steady_clock::time_point time_start{},time_stop{};
+   u32 start=0,last=0,frames=0,skipped=0,input_hash=2166136261u,state_hash=2166136261u;
+   std::array<u32,2> changes{};
+   std::array<std::array<bool,512>,2> actions{};
+@@ -519,6 +523,7 @@
+   if (!Core::IsCPUThread()) {*input=b.pads[port];return true;}
+   if (b.completed) {*input=b.pads[port];return true;}
+   const auto finish = [&](bool valid,u32 frame) {
++    if(b.timed_start)b.time_stop=std::chrono::steady_clock::now();
+     b.valid=b.valid&&valid;b.completed=true;b.stopped_frame=frame;*break_requested=true;
+   };
+   DolphinWeb::FrameBenchmark::State state;
+@@ -534,6 +539,7 @@
+       if (delta>7200) {b.valid=false;if(b.stop_after)finish(false,state.frame);*input=b.pads[port];return true;}
+       b.skipped+=delta-1;b.gaps.push_back({b.last-b.start,relative});
+     }
++    if(!b.have_frame&&b.stop_after){b.timed_start=true;b.timed_start_frame=state.frame;b.time_start=std::chrono::steady_clock::now();}
+     b.input_hash=DolphinWeb::FrameBenchmark::HashWord(b.input_hash,relative);
+     b.state_hash=DolphinWeb::FrameBenchmark::HashWord(b.state_hash,relative);
+     b.have_frame=true;b.last=state.frame;++b.frames;
+@@ -1274,6 +1280,21 @@
+   out<<"]}";result=out.str();return result.c_str();
+ }
+ 
++// Native CPU timestamps bracket exactly the requested controller-poll span.
++// Keep wall time outside deterministic input/state fingerprints.
++EMSCRIPTEN_KEEPALIVE const char* BrowserFrameBenchmarkTiming()
++{
++  static std::string result;
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);const auto& b=s_frame_benchmark;
++  const double elapsed=b.completed&&b.timed_start?std::chrono::duration<double,std::milli>(b.time_stop-b.time_start).count():0;
++  const bool valid=b.valid&&b.completed&&b.timed_start&&b.stop_after&&
++      b.timed_start_frame==b.start&&b.stopped_frame-b.start==b.stop_after&&elapsed>0;
++  result="{\"valid\":"+std::string(valid?"true":"false")+",\"frames\":"+std::to_string(b.stop_after)+
++      ",\"startFrame\":"+std::to_string(b.timed_start_frame)+",\"stopFrame\":"+std::to_string(b.stopped_frame)+
++      ",\"elapsedMs\":"+std::to_string(elapsed)+"}";
++  return result.c_str();
++}
++
+ // Private two-controller QA input. Live ownership never pauses emulation;
+ // authoritative rollback input takes precedence until it is released.
+ EMSCRIPTEN_KEEPALIVE int BrowserLiveSetPads(const u32* packed, int count, u32 frame)
+--- a/engines/wasm-dolphin/src/upstream-discio-worker.js
++++ b/engines/wasm-dolphin/src/upstream-discio-worker.js
+@@ -1076,6 +1076,9 @@
+       } else if (payload.action === "frameInputStop") {
+         if(!Number.isInteger(payload.frames) || !api.browserFrameBenchmarkStopAfterFrames?.(payload.frames))throw Error("Frame input stop requires fresh paused QA input and 120–3600 frames");
+         return {frames:payload.frames};
++      } else if (payload.action === "frameInputTiming") {
++        if(!api.browserFrameBenchmarkTiming)throw Error("Native frame timing unavailable");
++        return JSON.parse(api.browserFrameBenchmarkTiming());
+       } else if (payload.action === "frameInputStats") {
+         if(!api.browserFrameBenchmarkStats)throw Error("Frame input counters unavailable");
+         return JSON.parse(api.browserFrameBenchmarkStats());
+@@ -2458,6 +2461,7 @@
+     browserLiveReleasePads: optionalCwrap("BrowserLiveReleasePads", "number", []),
+     browserFrameBenchmarkInput: optionalCwrap("BrowserFrameBenchmarkInput", "number", ["number"]),
+     browserFrameBenchmarkStopAfterFrames: optionalCwrap("BrowserFrameBenchmarkStopAfterFrames", "number", ["number"]),
++    browserFrameBenchmarkTiming: optionalCwrap("BrowserFrameBenchmarkTiming", "string", []),
+     browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
+     browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),

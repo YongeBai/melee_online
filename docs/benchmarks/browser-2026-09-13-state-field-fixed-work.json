@@ -1,0 +1,160 @@
+{
+  "artifactScope": "Exact selected CUA stateFieldsRun fields; warmups and matching section rows omitted",
+  "coreSha256": "ae100757138b4588c8f8d34cf92cd7ea24675797105ec16738ff6f07b8e1a251",
+  "kind": "fixed-native-work-abba",
+  "feature": "counterbatch",
+  "frames": 1800,
+  "diagnosticOnly": true,
+  "passed": false,
+  "equivalencePassed": true,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 120,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "counterbatch": false,
+      "nativeWorkFps": 55.98898651147378,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 553,
+        "stopFrame": 2353,
+        "elapsedMs": 32149.179904
+      },
+      "controllerStress": {
+        "frames": 1799,
+        "inputHash": 1935959171,
+        "stateHash": 1815907177,
+        "gaps": [
+          {
+            "after": 392,
+            "before": 394
+          },
+          {
+            "after": 1393,
+            "before": 1395
+          }
+        ]
+      },
+      "referenceCapture": true
+    },
+    {
+      "counterbatch": true,
+      "nativeWorkFps": 58.27803940582616,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 553,
+        "stopFrame": 2353,
+        "elapsedMs": 30886.419968
+      },
+      "controllerStress": {
+        "frames": 1799,
+        "inputHash": 1935959171,
+        "stateHash": 1815907177,
+        "gaps": [
+          {
+            "after": 392,
+            "before": 394
+          },
+          {
+            "after": 1393,
+            "before": 1395
+          }
+        ]
+      },
+      "fullMachineBytesEqual": true,
+      "comparison": {
+        "sizeA": 107839431,
+        "sizeB": 107839431,
+        "sectionCount": 29,
+        "differingSections": []
+      }
+    },
+    {
+      "counterbatch": true,
+      "nativeWorkFps": 57.777714413457694,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 553,
+        "stopFrame": 2353,
+        "elapsedMs": 31153.88032
+      },
+      "controllerStress": {
+        "frames": 1799,
+        "inputHash": 1935959171,
+        "stateHash": 1815907177,
+        "gaps": [
+          {
+            "after": 392,
+            "before": 394
+          },
+          {
+            "after": 1393,
+            "before": 1395
+          }
+        ]
+      },
+      "fullMachineBytesEqual": true,
+      "comparison": {
+        "sizeA": 107839431,
+        "sizeB": 107839431,
+        "sectionCount": 29,
+        "differingSections": []
+      }
+    },
+    {
+      "counterbatch": false,
+      "nativeWorkFps": 57.89063828783117,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 553,
+        "stopFrame": 2353,
+        "elapsedMs": 31093.110272
+      },
+      "controllerStress": {
+        "frames": 1799,
+        "inputHash": 1935959171,
+        "stateHash": 1815907177,
+        "gaps": [
+          {
+            "after": 392,
+            "before": 394
+          },
+          {
+            "after": 1393,
+            "before": 1395
+          }
+        ]
+      },
+      "fullMachineBytesEqual": true,
+      "comparison": {
+        "sizeA": 107839431,
+        "sizeB": 107839431,
+        "sectionCount": 29,
+        "differingSections": []
+      }
+    }
+  ],
+  "decision": "Full machine equality passed in all three endpoint comparisons. Earlier intermittent state differences not reproduced or resolved. Reverse timing pair slightly favors OFF; batching remains default OFF. No visible-image FPS claim."
+}

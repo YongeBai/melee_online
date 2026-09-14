@@ -1,0 +1,49 @@
+{
+  "coreSha256": "2e26b8b3e79164f9f5f91495ed97225b0023fdefe9cae900147517c4c8d40126",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "frames": 600,
+  "startFrame": 306,
+  "endFrame": 906,
+  "polls": 601,
+  "skipped": 0,
+  "inputHash": 2617109027,
+  "stateHash": 4085548570,
+  "fingerprintsEqual": true,
+  "sizeA": 110128135,
+  "sizeB": 110128135,
+  "sections": 29,
+  "profileEnabled": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "scope": "Selected recorded native replay diagnostics, not an FPS or network test.",
+  "kind": "normal-running-browser-rush-presentation-equivalence",
+  "passed": true,
+  "fullMachineBytesEqual": true,
+  "differentSections": [],
+  "referenceEnabled": true,
+  "candidateEnabled": false,
+  "restoredEnabled": true,
+  "transitions": [
+    {
+      "enabled": true,
+      "calls": 22888,
+      "skips": 15304
+    },
+    {
+      "enabled": false,
+      "calls": 24688,
+      "skips": 16505
+    },
+    {
+      "enabled": true,
+      "calls": 26488,
+      "skips": 16505
+    }
+  ]
+}

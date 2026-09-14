@@ -1,0 +1,22 @@
+{
+  "kind":"render-dispatch-cost-abba", "scope":"drawable", "diagnosticOnly":true, "passed":false,
+  "coreSha256":"e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage":"Yoshi's Story", "characters":["Ice Climbers","Ice Climbers"], "frames":1200,
+  "startFrame":433, "stopFrame":1633,
+  "inputConsistency":{"passed":false,"checked":80,"reason":"One native polling gap shifts from relative frames 1103..1105 to 1102..1104 under bypass. All fingerprints through 1080 match, but the final input/state fingerprint differs in all four bypass intervals."},
+  "normalInput":{"polls":1200,"skipped":1,"inputHash":233545899,"stateHash":3208528558},
+  "bypassInput":{"polls":1200,"skipped":1,"inputHash":2398724938,"stateHash":1415233757},
+  "runs":[
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":42.96243155099382,"elapsedMs":27931.379968,"synchronousCompileAndLinkMs":95.861},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":43.42741479355927,"elapsedMs":27632.31488,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":68.78779614246844,"elapsedMs":17444.95488,"synchronousCompileAndLinkMs":6.294},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":69.17839867126706,"elapsedMs":17346.455296,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":69.42758845452454,"elapsedMs":17284.195328,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":69.06904243151085,"elapsedMs":17373.919744,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":43.68959348648418,"elapsedMs":27466.494976,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":44.96871328754247,"elapsedMs":26685.21984,"synchronousCompileAndLinkMs":0}
+  ],
+  "interpretation":"Bypassing HSD_DObjDisp removes material setup and mesh submission. The large observed speed difference is a useful material-path lead, but the strict input-consistency gate failed. Do not present the elapsed difference as matched-work attribution or a playable gain.",
+  "restoration":"Completed original-instruction, checkpoint, input and pacing restoration.",
+  "limits":"Selected exact UI fields. Blank/incomplete images, uncapped pacing. No image acceptance, GPU-only time or physical-latency claim. No build/test/profiler/separate resource sampler during measurement. Different experiments use different starting checkpoints."
+}

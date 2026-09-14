@@ -1,0 +1,35 @@
+{
+  "kind": "normal-running-codegen-replay-controls",
+  "coreSha256": "d8cf5bfd3bed74caa13fcdb2f726d6b81566a1653a29932a4436b60239711ed6",
+  "selection": {"stage":8,"characters":[14,14],"slotTypes":[0,0],"timeLimit":480,"items":-1,"teams":0},
+  "frames":600,
+  "unchangedControl": {
+    "passed":true,"fullMachineBytesEqual":true,"fingerprintsEqual":true,
+    "bytes":110104666,"equalSections":29,
+    "startFrame":307,"stopFrame":907,"trackedPolls":601,"skipped":0,
+    "inputHash":959556988,"stateHash":619035089,
+    "dispatcherCalls":[1591327,1586364],
+    "globalTimer":"24661025560","idleCycles":"12248474225","nextOrder":"4094103",
+    "logicalQueueEqual":true,"rawOrderCounterEqual":true,"rawIdleCounterEqual":true
+  },
+  "repeatedCandidate": {
+    "passed":true,"fullMachineBytesEqual":true,"fingerprintsEqual":true,
+    "bytes":110202822,"equalSections":29,
+    "startFrame":304,"stopFrame":904,"trackedPolls":601,"skipped":0,
+    "inputHash":3921933225,"stateHash":1337124353,
+    "dispatcherCalls":[1571491,1560108],
+    "newCallFusedBlocks":919,"newReadTrackedBlocks":120,
+    "globalTimer":"99632564463","idleCycles":"57168114009","nextOrder":"17313786",
+    "logicalQueueEqual":true,"rawOrderCounterEqual":true,"rawIdleCounterEqual":true,
+    "identicalSavedEvents":[
+      {"name":"VICallback","order":"17313785","time":"99632579904","userdata":"0"},
+      {"name":"AudioDMACallback","order":"17313779","time":"99632605392","userdata":"0"},
+      {"name":"GPUSleeper","order":"17313773","time":"99632916000","userdata":"0"},
+      {"name":"DSPCallback","order":"17313774","time":"99632916000","userdata":"0"},
+      {"name":"FinishExecutingCommand","order":"17313778","time":"99634183488","userdata":"12884901889"},
+      {"name":"DecCallback","order":"17312778","time":"99638100051","userdata":"0"},
+      {"name":"PatchEngine","order":"17313764","time":"99640440900","userdata":"0"}
+    ]
+  },
+  "limits":"Selected exact fields from visible QA output. Separate controls prepared different initial matches; each pair used its own common checkpoint. The first candidate replay had eight differing insertion-order bytes and remains an unresolved failed comparison. These passes do not erase that failure or establish whole-emulator equivalence against native Dolphin, performance, broad coverage or physical latency. Raw equality was not normalized. Original codegen restored off."
+}

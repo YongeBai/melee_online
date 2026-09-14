@@ -1,0 +1,49 @@
+{
+  "artifactScope": "Exact selected fields from CUA stepArmedReplay",
+  "coreSha256": "34f85fc775d2d94ccd2ffe61b2fdc1ff43c8aa4b91598ac24f0ece9978f8641e",
+  "passed": true,
+  "frames": 120,
+  "kind": "local-browser-late-input-correction",
+  "performanceTest": false,
+  "networkTest": false,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107055991,
+    "sizeB": 107055991,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "correctedFrame": 424,
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "reference": {
+    "stepcheck": false,
+    "blockmerge": true,
+    "fpuguard": true
+  },
+  "candidate": {
+    "stepcheck": true,
+    "blockmerge": true,
+    "fpuguard": true
+  },
+  "limits": "Stepped rollback correctness for this scene, not FPS or whole-emulator equivalence against native Dolphin."
+}

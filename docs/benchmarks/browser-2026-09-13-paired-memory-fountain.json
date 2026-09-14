@@ -1,0 +1,75 @@
+{
+  "kind": "recorded-summary-of-paired-memory-simd-abba",
+  "coreSha256": "28a5899ca069b3907eaa9ff6e5b8a35321261900180875015e25de5bd18c2857",
+  "source": "Measurements retained in the experiment handoff; full browser JSON was not persisted before its session reset.",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle human versus native level 9 CPU",
+  "settings": {
+    "reflection": false,
+    "scenery": false,
+    "efbscale": 150,
+    "source": [
+      960,
+      720
+    ],
+    "pace": "raf",
+    "probe": "async",
+    "pssimd": false
+  },
+  "passed": false,
+  "decision": "Keep disabled: opposing pair results and large upward drift; no repeatable gain established.",
+  "runs": [
+    {
+      "enabled": false,
+      "seconds": 30.00096499999985,
+      "simulationFps": 51.53167573109757,
+      "renderFps": 51.53167573109757,
+      "visibleFps": 51.49834346995197,
+      "p95GapMs": 33.19999999925494,
+      "maxGapMs": 50.915000000968575,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "seconds": 29.998565000001342,
+      "simulationFps": 54.43593718565961,
+      "renderFps": 54.40260225780556,
+      "visibleFps": 54.36926732995152,
+      "p95GapMs": 33.21499999985099,
+      "maxGapMs": 53.86500000022352,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "seconds": 29.99914999999851,
+      "simulationFps": 55.00155837749009,
+      "renderFps": 54.934889821881015,
+      "visibleFps": 54.86822126627193,
+      "p95GapMs": 32.97000000067055,
+      "maxGapMs": 36.77500000037253,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "seconds": 29.999835000000893,
+      "simulationFps": 56.23364261836606,
+      "renderFps": 56.20030910169839,
+      "visibleFps": 56.033641518360014,
+      "p95GapMs": 32.57499999925494,
+      "maxGapMs": 66.70000000111759,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false
+    }
+  ]
+}

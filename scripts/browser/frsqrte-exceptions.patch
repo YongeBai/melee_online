@@ -1,0 +1,33 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -5448,7 +5448,7 @@
+ }
+ 
+ void EmitFrsqrteExactFast(std::vector<u8>& body, const WasmStateLayout& layout,
+-                          const PPCAnalyst::CodeOp& op, u32 downcount, u32 table_address)
++                          const PPCAnalyst::CodeOp& op, u32 downcount, u32 table_address, u32 exceptions_offset)
+ {
+   const UGeckoInstruction inst = op.inst;
+   if (inst.Rc) { EmitFpCall(body, op, downcount); return; }
+@@ -5460,6 +5460,11 @@
+   EmitLocalGet(body, 2); EmitI32Const(body, 20); body.push_back(0x76);
+   EmitI32Const(body, 1); body.push_back(0x6b);
+   EmitI32Const(body, 2046); body.push_back(0x49);
++  // The canonical bridge checks pending program/data exceptions after the
++  // arithmetic, even if this operand itself raises no new exception.
++  EmitStateLoadU32(body, exceptions_offset);
++  EmitI32Const(body, EXCEPTION_DSI | EXCEPTION_PROGRAM); body.push_back(0x71);
++  body.push_back(0x45); body.push_back(0x71);
+   body.insert(body.end(), {0x04, 0x40});
+   // i contains the exponent parity and the top fifteen fraction bits.
+   EmitLocalGet(body, 2); EmitI32Const(body, 5); body.push_back(0x76);
+@@ -7750,7 +7755,8 @@
+       {
+         static_assert(sizeof(Common::BaseAndDec) == 8);
+         EmitFrsqrteExactFast(body, layout, op, downcount,
+-          static_cast<u32>(reinterpret_cast<std::uintptr_t>(Common::frsqrte_expected.data())));
++          static_cast<u32>(reinterpret_cast<std::uintptr_t>(Common::frsqrte_expected.data())),
++          static_cast<u32>(offsetof(PowerPC::PowerPCState, Exceptions)));
+       }
+       else EmitFrsqrte(body, layout, op, downcount);
+       return true;

@@ -1,0 +1,99 @@
+--- a/vendor/dolphin/Source/Core/Core/CoreTiming.h
++++ b/vendor/dolphin/Source/Core/Core/CoreTiming.h
+@@ -177,6 +177,10 @@
+   // Diagnostics from the most recent write-mode snapshot, with exact 64-bit strings.
+   // No normalization of the serialized event heap or raw state equality.
+   const std::string& GetBrowserSavedEventSnapshot() const { return m_browser_saved_events; }
++  void SetBrowserRushPresentation(bool enabled) { m_config_rush_frame_presentation = enabled; }
++  bool GetBrowserRushPresentation() const { return m_config_rush_frame_presentation; }
++  u64 GetBrowserThrottleCalls() const { return m_browser_throttle_calls.load(std::memory_order_relaxed); }
++  u64 GetBrowserThrottleSkips() const { return m_browser_throttle_skips.load(std::memory_order_relaxed); }
+   // Host pacing diagnostics only; never serialized as emulated machine state.
+   struct BrowserThrottleStats { u64 count, microseconds, maximum_microseconds; };
+   BrowserThrottleStats GetBrowserThrottleStats() const
+@@ -194,6 +198,7 @@
+ #ifdef __EMSCRIPTEN__
+   std::string DescribeBrowserEvents() const;
+   std::string m_browser_saved_events = "null";
++  std::atomic<u64> m_browser_throttle_calls{0}, m_browser_throttle_skips{0};
+   std::atomic<u64> m_browser_relax_count{0}, m_browser_relax_us{0}, m_browser_relax_max_us{0};
+ #endif
+   Globals m_globals;
+--- a/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
++++ b/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
+@@ -581,6 +581,9 @@
+ 
+ void CoreTimingManager::Throttle(const s64 target_cycle)
+ {
++#ifdef __EMSCRIPTEN__
++  m_browser_throttle_calls.fetch_add(1, std::memory_order_relaxed);
++#endif
+   const TimePoint time = Clock::now();
+ 
+   const bool already_throttled =
+@@ -594,7 +597,12 @@
+   const bool skip_throttle = already_throttled && m_config_rush_frame_presentation &&
+                              ((GetTargetHostTime(target_cycle) - time) < m_max_throttle_skip_time);
+   if (skip_throttle)
++  {
++#ifdef __EMSCRIPTEN__
++    m_browser_throttle_skips.fetch_add(1, std::memory_order_relaxed);
++#endif
+     return;
++  }
+ 
+   // Measure current performance after throttling.
+   Common::ScopeGuard perf_marker{[&] {
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1477,6 +1477,26 @@
+   return result.c_str();
+ }
+ 
++// Host-only throttle policy. This leaves the virtual clock and code cache intact.
++EMSCRIPTEN_KEEPALIVE const char* BrowserRushPresentation(int mode)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || mode < -1 || mode > 1 || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"Rush presentation control requires a paused machine and -1/0/1\"}";
++  const Core::CPUThreadGuard guard(system);
++  auto& timing = system.GetCoreTiming();
++  if (mode != -1)
++  {
++    Config::SetBase(Config::MAIN_RUSH_FRAME_PRESENTATION, mode != 0);
++    timing.SetBrowserRushPresentation(mode != 0);
++  }
++  static std::string result;
++  result = "{\"enabled\":" + std::string(timing.GetBrowserRushPresentation() ? "true" : "false") +
++      ",\"calls\":" + std::to_string(timing.GetBrowserThrottleCalls()) +
++      ",\"skips\":" + std::to_string(timing.GetBrowserThrottleSkips()) + "}";
++  return result.c_str();
++}
++
+ // Private paused QA control. Normal startup remains at its measured scale.
+ EMSCRIPTEN_KEEPALIVE int BrowserRenderScalePercent(int percent)
+ {
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1083,6 +1083,13 @@
+         if(stats.error)throw Error(stats.error);
+         if(payload.cycles!==undefined&&stats.cycles!==payload.cycles)throw Error("GPU start delay did not apply");
+         return stats;
++      } else if (payload.action === "rushPresentation") {
++        if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Rush presentation mode must be boolean");
++        if(!api.browserRushPresentation)throw Error("Rush presentation diagnostics unavailable");
++        const stats=JSON.parse(api.browserRushPresentation(payload.enabled===undefined?-1:payload.enabled?1:0));
++        if(stats.error)throw Error(stats.error);
++        if(payload.enabled!==undefined&&stats.enabled!==payload.enabled)throw Error("Rush presentation mode did not apply");
++        return stats;
+       } else if (payload.action === "timingDrift") {
+         if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Timing drift mode must be boolean");
+         if(!api.browserTimingDrift)throw Error("Timing drift diagnostics unavailable");
+@@ -2485,6 +2492,7 @@
+     browserCPFormatStats: optionalCwrap("BrowserCPFormatStats", "string", []),
+     browserGpuStartDelay: optionalCwrap("BrowserGpuStartDelay", "string", ["number"]),
+     browserTimingDrift: optionalCwrap("BrowserTimingDrift", "string", ["number"]),
++    browserRushPresentation: optionalCwrap("BrowserRushPresentation", "string", ["number"]),
+     browserFrameBenchmarkTiming: optionalCwrap("BrowserFrameBenchmarkTiming", "string", []),
+     browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),

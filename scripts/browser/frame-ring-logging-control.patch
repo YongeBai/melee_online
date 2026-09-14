@@ -1,0 +1,50 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -769,6 +769,7 @@
+ });
+ 
+ async function handleMessage(type, payload) {
++  if(type === "frameRingLogging")return controlFrameRingLogging(payload.enabled);
+   if(type === "meleeControl")return controlMelee(moduleInstance, api, payload.action, payload);
+   if(type === "meleeInspect")return inspectMelee(moduleInstance);
+   switch (type) {
+@@ -11973,6 +11974,13 @@
+ // `head` is monotonic so we can detect overflow (newEntries > capacity).
+ let frameRingDrainTimer = null;
+ let frameRingLastDrainHead = 0;
++const frameRingLogStats={batches:0,rows:0,drainMs:0,maxDrainMs:0};
++function controlFrameRingLogging(enabled){
++  if(enabled!==undefined&&typeof enabled!=="boolean")throw Error("Frame logging mode must be boolean");
++  if(enabled===false&&frameRingDrainTimer!==null){clearInterval(frameRingDrainTimer);frameRingDrainTimer=null;}
++  if(enabled===true)startFrameRingDrainLoop();
++  return{enabled:frameRingDrainTimer!==null,...frameRingLogStats};
++}
+ function startFrameRingDrainLoop() {
+   if (frameRingDrainTimer || !api?.getFrameRingHead || !api?.getFrameRingEntryPtr) {
+     return;
+@@ -11997,6 +12005,8 @@
+     if (!heap || !api?.getFrameRingHead) return;
+     const head = api.getFrameRingHead() >>> 0;
+     if (head === frameRingLastDrainHead) return;
++    const logStarted=performance.now();
++    frameRingLogStats.batches++;
+     const total = (head - frameRingLastDrainHead) >>> 0;
+     const overflowed = total > capacity;
+     const startIndex = overflowed ? head - capacity : frameRingLastDrainHead;
+@@ -12016,6 +12026,7 @@
+       const glerr = heap[off + 5] >>> 0;
+       const commit = heap[off + 6] | 0; // signed
+       const debugBits = heap[off + 7] >>> 0;
++      frameRingLogStats.rows++;
+       console.log(
+         `[frame-ring] f=${frame} prim=${prim} draw=${draw} verts=${verts} ` +
+           `xfb=0x${xfbHash.toString(16)} glerr=${glerr} commit=${commit} ` +
+@@ -12023,6 +12034,8 @@
+       );
+     }
+     frameRingLastDrainHead = head;
++    const logElapsed=performance.now()-logStarted;
++    frameRingLogStats.drainMs+=logElapsed;frameRingLogStats.maxDrainMs=Math.max(frameRingLogStats.maxDrainMs,logElapsed);
+   }, 1000);
+ }
+ 

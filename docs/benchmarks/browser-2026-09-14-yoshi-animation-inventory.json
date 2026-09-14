@@ -1,0 +1,53 @@
+{
+  "kind": "paused-stage-joint-animation-inventory",
+  "stage": 8,
+  "sceneFrame": 2897,
+  "objects": [
+    {
+      "mapId": 0,
+      "category": 0,
+      "joints": 23,
+      "jointAnimations": 0,
+      "jointChannels": 0
+    },
+    {
+      "mapId": 1,
+      "category": 2,
+      "joints": 26,
+      "jointAnimations": 22,
+      "jointChannels": 44,
+      "animationTypes": {
+        "8": 22,
+        "9": 22
+      },
+      "drawSuppressed": true
+    },
+    {
+      "mapId": 3,
+      "category": 0,
+      "joints": 22,
+      "jointAnimations": 13,
+      "jointChannels": 21,
+      "animationTypes": {
+        "2": 1,
+        "5": 1,
+        "6": 12,
+        "7": 3,
+        "8": 4
+      }
+    },
+    {
+      "mapId": 2,
+      "category": 0,
+      "joints": 5,
+      "jointAnimations": 1,
+      "jointChannels": 1,
+      "animationTypes": {
+        "4": 1
+      },
+      "identity": "Randall",
+      "drawSuppressed": false
+    }
+  ],
+  "limits": "Counts of live joint-animation structures; not CPU timing, excludes material/texture/shape channels. No animation was disabled for this inventory."
+}

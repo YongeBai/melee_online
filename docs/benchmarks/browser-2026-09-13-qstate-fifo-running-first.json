@@ -1,0 +1,68 @@
+{
+  "artifactScope": "Selected exact fields from completed live browser replay",
+  "engine": {
+    "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+    "profileEnabled": false,
+    "sourceResolution": [
+      960,
+      720
+    ]
+  },
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "performanceTest": false,
+  "networkTest": false,
+  "kind": "normal-running-browser-codegen-equivalence",
+  "passed": false,
+  "frames": 600,
+  "fullMachineBytesEqual": false,
+  "fingerprintsEqual": true,
+  "comparison": {
+    "sizeA": 105946223,
+    "sizeB": 105946223,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 1,
+    "allSectionUnmatchedBytes": 0,
+    "differences": [
+      {
+        "name": "CoreTiming",
+        "firstRelativeOffset": 12,
+        "differentBytes": 1,
+        "field": "CoreTiming.m_idled_cycles"
+      }
+    ]
+  },
+  "nativeInputBoth": {
+    "startFrame": 306,
+    "stoppedFrame": 906,
+    "frames": 601,
+    "inputHash": 2522693603,
+    "stateHash": 3768470266,
+    "skipped": 0
+  },
+  "execution": [
+    {
+      "qstatefull": 0,
+      "calls": 1491066,
+      "newQStateFullEmittedSites": 0
+    },
+    {
+      "qstatefull": 1,
+      "calls": 1491070,
+      "newQStateFullEmittedSites": 257
+    }
+  ],
+  "interpretation": "Failed exact replay gate. Gameplay, RAM, GPU and input fingerprints match; idle-cycle accounting differs. Cause unresolved; FPS testing held pending diagnosis."
+}

@@ -1,0 +1,71 @@
+{
+  "node": "v24.15.0",
+  "v8": "13.6.233.17-node.48",
+  "correctnessCases": 1000000,
+  "oldExpressionBytes": 37,
+  "rotateExpressionBytes": 23,
+  "iterationsPerRow": 20000000,
+  "rows": [
+    {
+      "variant": "old",
+      "ms": 43.052572999999995,
+      "result": 19995961
+    },
+    {
+      "variant": "rotate",
+      "ms": 28.63150300000001,
+      "result": 19995961
+    },
+    {
+      "variant": "rotate",
+      "ms": 28.713318000000015,
+      "result": 19995961
+    },
+    {
+      "variant": "old",
+      "ms": 42.986879999999985,
+      "result": 19995961
+    },
+    {
+      "variant": "old",
+      "ms": 40.20401899999996,
+      "result": 19995961
+    },
+    {
+      "variant": "rotate",
+      "ms": 25.084287000000018,
+      "result": 19995961
+    },
+    {
+      "variant": "rotate",
+      "ms": 26.769042000000013,
+      "result": 19995961
+    },
+    {
+      "variant": "old",
+      "ms": 32.76210100000003,
+      "result": 19995961
+    },
+    {
+      "variant": "old",
+      "ms": 34.08951000000002,
+      "result": 19995961
+    },
+    {
+      "variant": "rotate",
+      "ms": 21.70343600000001,
+      "result": 19995961
+    },
+    {
+      "variant": "rotate",
+      "ms": 25.628174000000058,
+      "result": 19995961
+    },
+    {
+      "variant": "old",
+      "ms": 39.595236,
+      "result": 19995961
+    }
+  ],
+  "scope": "Isolated actual old C++-emitted WASM versus mathematically equivalent rotate/mask candidate in Node V8. Not browser gameplay or an acceptance run."
+}

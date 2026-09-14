@@ -1,0 +1,243 @@
+--- /dev/null
++++ b/core/upstream/dolphin_web_benchmark_pad.h
+@@ -0,0 +1,55 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++#include <array>
++#include <cmath>
++#include <cstdint>
++#include <cstring>
++
++// Private QA input only. Reads the native game on its CPU thread and returns
++// ordinary controller states; it never writes game memory or changes rules.
++namespace DolphinWeb::FrameBenchmark
++{
++using u32=std::uint32_t;
++using Pad=std::array<u32,9>;
++struct Fighter { float x=0; u32 action=0,stocks=0; };
++struct State { u32 frame=0; std::array<Fighter,2> fighters{}; };
++inline bool Read(const std::uint8_t* ram, std::size_t bytes, State* out)
++{
++  if (!ram || bytes<0x1800000 || !out || std::memcmp(ram,"GALE01",6)!=0 || ram[7]!=2) return false;
++  const auto valid=[](u32 p,u32 n) {return !(p&3) && p>=0x80003100 && n<=0x1800000 && p<=0x81800000-n;};
++  const auto word=[&](u32 p) {const auto* b=ram+(p-0x80000000);return (u32(b[0])<<24)|(u32(b[1])<<16)|(u32(b[2])<<8)|b[3];};
++  const auto byte=[&](u32 p) {return ram[p-0x80000000];};
++  const u32 scene=word(0x804d6720);
++  if (byte(0x80479d30)!=2 || byte(0x80479d33)!=2 || !valid(scene,4) || byte(scene)!=2) return false;
++  State s{};s.frame=word(0x80479d58);
++  for (u32 port=0;port<2;++port)
++  {
++    const u32 slot=0x80453080+port*0xe90,index=byte(slot+0xc);
++    if (index>=2 || word(slot+8)!=0 || byte(slot+0x46)!=port) return false;
++    const u32 gobj=word(slot+0xb0+index*4);
++    if (!valid(gobj,0x30)) return false;
++    const u32 fp=word(gobj+0x2c);
++    if (!valid(fp,0xb4) || word(fp)!=gobj) return false;
++    const u32 bits=word(fp+0xb0);std::memcpy(&s.fighters[port].x,&bits,4);
++    if (!std::isfinite(s.fighters[port].x)) return false;
++    s.fighters[port].action=word(fp+0x10);s.fighters[port].stocks=byte(slot+0x8e);
++  }
++  *out=s;return true;
++}
++inline Pad Input(const State& state,u32 port)
++{
++  Pad p{0,128,128,128,128,0,0,0,0};if (port>=2 || !state.fighters[port].stocks) return p;
++  const auto& actor=state.fighters[port];const auto& other=state.fighters[1-port];
++  const u32 phase=(state.frame/9+port*7)%24;
++  const int inward=actor.x>0?-1:1,toward=other.x>=actor.x?1:-1;
++  if (std::fabs(actor.x)>50) {p[1]=128+inward*96;if (phase%3==0)p[0]=4;return p;}
++  if (phase<6 || phase>=20)p[1]=128+toward*80;
++  if (phase==3 || phase==7 || phase==11 || phase==17 || phase==21){p[0]=1;p[7]=255;}
++  if (phase==6 || phase==15)p[0]=4;
++  if (phase==9 || phase==18){p[0]=2;p[8]=255;}
++  if (phase==13){p[0]=32;p[5]=255;}
++  if (phase==23)p[3]=128+toward*96;
++  return p;
++}
++inline u32 HashWord(u32 hash,u32 word) {return (hash^word)*16777619u;}
++}
+--- a/core/upstream/dolphin_web_discio.cpp
++++ b/core/upstream/dolphin_web_discio.cpp
+@@ -160,11 +160,14 @@
+   return true;
+ }
+ 
++bool ReadFrameBenchmarkInput(int port, InputStateSnapshot* input);
++
+ bool ReadControllerInput(int port, InputStateSnapshot* input)
+ {
+   if (!input || port < 0 || port >= 2) return false;
+   const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+   if (s_rollback_input_owner) *input = s_rollback_inputs[port];
++  else if (ReadFrameBenchmarkInput(port,input)) {}
+   else if (s_live_input_owner) *input = s_live_inputs[port];
+   else if (port == 0) *input = s_input_state;
+   else return false;
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -5,6 +5,7 @@
+ 
+ #include "Common/BrowserRollbackOutput.h"
+ #include "dolphin_web_discio.cpp"
++#include "dolphin_web_benchmark_pad.h"
+ 
+ #include <array>
+ #include <algorithm>
+@@ -467,6 +468,55 @@
+ namespace
+ {
+ bool s_runtime_initialized = false;
++// This state is QA-only and protected by s_input_state_mutex. Read() runs
++// only at the native CPU controller poll, once per observed logic frame.
++struct FrameBenchmarkStats
++{
++  bool active=false,valid=true,have_frame=false;
++  u32 start=0,last=0,frames=0,skipped=0,input_hash=2166136261u,state_hash=2166136261u;
++  std::array<u32,2> changes{};
++  std::array<std::array<bool,512>,2> actions{};
++  std::array<DolphinWeb::FrameBenchmark::Pad,2> previous{};
++  std::array<InputStateSnapshot,2> pads{};
++  struct Digest {u32 frame,input,state;};
++  std::vector<Digest> digests;
++};
++FrameBenchmarkStats s_frame_benchmark;
++bool ReadFrameBenchmarkInput(int port,InputStateSnapshot* input)
++{
++  if (!s_frame_benchmark.active) return false;
++  auto& b=s_frame_benchmark;
++  // Frontend inspection must not sample mutable guest state or advance the
++  // script. The CPU thread is the sole producer of native poll snapshots.
++  if (!Core::IsCPUThread()) {*input=b.pads[port];return true;}
++  DolphinWeb::FrameBenchmark::State state;
++  if (!DolphinWeb::FrameBenchmark::Read(Core::System::GetInstance().GetMemory().GetRAM(),0x1800000,&state))
++  {b.valid=false;*input={};return true;}
++  if (!b.have_frame || b.last!=state.frame)
++  {
++    const u32 relative=state.frame-b.start;
++    if (relative>7200) {b.valid=false;*input={};return true;}
++    if (b.have_frame && state.frame-b.last!=1) {b.skipped+=state.frame-b.last-1;b.valid=false;}
++    b.have_frame=true;b.last=state.frame;++b.frames;
++    std::array<u32,18> packed{};
++    for (u32 p=0;p<2;++p)
++    {
++      const auto pad=DolphinWeb::FrameBenchmark::Input(state,p);
++      if (b.frames==1 || pad!=b.previous[p])++b.changes[p];
++      b.previous[p]=pad;
++      std::copy(pad.begin(),pad.end(),packed.begin()+p*9);
++      if (state.fighters[p].action<512)b.actions[p][state.fighters[p].action]=true;
++      for (u32 value:pad)b.input_hash=DolphinWeb::FrameBenchmark::HashWord(b.input_hash,value);
++      u32 x;std::memcpy(&x,&state.fighters[p].x,4);
++      for (u32 value:{x,state.fighters[p].action,state.fighters[p].stocks})
++        b.state_hash=DolphinWeb::FrameBenchmark::HashWord(b.state_hash,value);
++    }
++    DecodeTwoControllerInputs(packed.data(),18,state.frame,&b.pads);
++    if (relative && relative%120==0)b.digests.push_back({relative,b.input_hash,b.state_hash});
++  }
++  *input=b.pads[port];return true;
++}
++
+ std::string s_core_status = "Not initialized";
+ std::string s_core_title;
+ std::string s_video_backend = "Software Renderer";
+@@ -1048,6 +1098,7 @@
+     const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+     s_rollback_input_owner = false;
+     s_live_input_owner = false;
++    s_frame_benchmark.active = false;
+   }
+   if (s_runtime_initialized && Core::IsRunning(Core::System::GetInstance()))
+   {
+@@ -1140,6 +1191,33 @@
+   const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+   s_rollback_input_owner = false;
+ }
++EMSCRIPTEN_KEEPALIVE int BrowserFrameBenchmarkInput(int enabled)
++{
++  auto& system=Core::System::GetInstance();
++  if (!s_runtime_initialized || (enabled!=0 && enabled!=1)) return 0;
++  if (!enabled) {const std::lock_guard<std::mutex> lock(s_input_state_mutex);s_frame_benchmark.active=false;return 1;}
++  if (Core::GetState(system)!=Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  DolphinWeb::FrameBenchmark::State state;
++  if (s_rollback_input_owner || !DolphinWeb::FrameBenchmark::Read(system.GetMemory().GetRAM(),0x1800000,&state))return 0;
++  s_frame_benchmark={};s_frame_benchmark.start=state.frame;s_frame_benchmark.active=true;
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE const char* BrowserFrameBenchmarkStats()
++{
++  static std::string result;
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);const auto& b=s_frame_benchmark;
++  std::ostringstream out;
++  out<<"{\"active\":"<<(b.active?"true":"false")<<",\"valid\":"<<(b.valid?"true":"false")
++     <<",\"startFrame\":"<<b.start<<",\"lastFrame\":"<<b.last<<",\"frames\":"<<b.frames<<",\"skipped\":"<<b.skipped
++     <<",\"inputChanges\":["<<b.changes[0]<<","<<b.changes[1]<<"],\"observedActions\":[";
++  for (u32 p=0;p<2;++p) {if(p)out<<",";out<<"[";bool comma=false;for(u32 a=0;a<512;++a)if(b.actions[p][a]){if(comma)out<<",";comma=true;out<<a;}out<<"]";}
++  out<<"],\"digests\":[";
++  for (std::size_t i=0;i<b.digests.size();++i) {if(i)out<<",";const auto& d=b.digests[i];out<<"{\"frame\":"<<d.frame<<",\"input\":"<<d.input<<",\"state\":"<<d.state<<"}";}
++  out<<"]}";result=out.str();return result.c_str();
++}
++
+ // Private two-controller QA input. Live ownership never pauses emulation;
+ // authoritative rollback input takes precedence until it is released.
+ EMSCRIPTEN_KEEPALIVE int BrowserLiveSetPads(const u32* packed, int count, u32 frame)
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1070,6 +1070,12 @@
+       } else if (payload.action === "outputStats") {
+         if (!api.browserRollbackOutputStats) throw new Error("Replay output counters unavailable");
+         return {output: JSON.parse(api.browserRollbackOutputStats())};
++      } else if (payload.action === "frameInput") {
++        if(typeof payload.enabled!=="boolean" || !api.browserFrameBenchmarkInput?.(payload.enabled?1:0))throw Error("Frame-based QA input requires paused USA 1.02 VS with two human ports");
++        return {enabled:payload.enabled};
++      } else if (payload.action === "frameInputStats") {
++        if(!api.browserFrameBenchmarkStats)throw Error("Frame input counters unavailable");
++        return JSON.parse(api.browserFrameBenchmarkStats());
+       } else if (payload.action === "releaseLivePads") {
+         if (!api.browserLiveReleasePads?.()) throw new Error("Live controller release unavailable");
+       } else if (payload.action === "pads" || payload.action === "livePads") {
+@@ -2447,6 +2453,8 @@
+     browserRollbackSetPads: optionalCwrap("BrowserRollbackSetPads", "number", ["number", "number", "number"]),
+     browserLiveSetPads: optionalCwrap("BrowserLiveSetPads", "number", ["number", "number", "number"]),
+     browserLiveReleasePads: optionalCwrap("BrowserLiveReleasePads", "number", []),
++    browserFrameBenchmarkInput: optionalCwrap("BrowserFrameBenchmarkInput", "number", ["number"]),
++    browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
+     browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),
+     browserInvalidateGuestCode: optionalCwrap("BrowserInvalidateGuestCode", "number", ["number", "number"]),
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -480,6 +480,8 @@
+   std::array<InputStateSnapshot,2> pads{};
+   struct Digest {u32 frame,input,state;};
+   std::vector<Digest> digests;
++  struct Gap {u32 after,before;};
++  std::vector<Gap> gaps;
+ };
+ FrameBenchmarkStats s_frame_benchmark;
+ bool ReadFrameBenchmarkInput(int port,InputStateSnapshot* input)
+@@ -496,7 +498,14 @@
+   {
+     const u32 relative=state.frame-b.start;
+     if (relative>7200) {b.valid=false;*input={};return true;}
+-    if (b.have_frame && state.frame-b.last!=1) {b.skipped+=state.frame-b.last-1;b.valid=false;}
++    if (b.have_frame && state.frame-b.last!=1)
++    {
++      const u32 delta=state.frame-b.last;
++      if (delta>7200) {b.valid=false;*input={};return true;}
++      b.skipped+=delta-1;b.gaps.push_back({b.last-b.start,relative});
++    }
++    b.input_hash=DolphinWeb::FrameBenchmark::HashWord(b.input_hash,relative);
++    b.state_hash=DolphinWeb::FrameBenchmark::HashWord(b.state_hash,relative);
+     b.have_frame=true;b.last=state.frame;++b.frames;
+     std::array<u32,18> packed{};
+     for (u32 p=0;p<2;++p)
+@@ -1215,6 +1224,8 @@
+   for (u32 p=0;p<2;++p) {if(p)out<<",";out<<"[";bool comma=false;for(u32 a=0;a<512;++a)if(b.actions[p][a]){if(comma)out<<",";comma=true;out<<a;}out<<"]";}
+   out<<"],\"digests\":[";
+   for (std::size_t i=0;i<b.digests.size();++i) {if(i)out<<",";const auto& d=b.digests[i];out<<"{\"frame\":"<<d.frame<<",\"input\":"<<d.input<<",\"state\":"<<d.state<<"}";}
++  out<<"],\"gaps\":[";
++  for(std::size_t i=0;i<b.gaps.size();++i){if(i)out<<",";out<<"{\"after\":"<<b.gaps[i].after<<",\"before\":"<<b.gaps[i].before<<"}";}
+   out<<"]}";result=out.str();return result.c_str();
+ }
+ 

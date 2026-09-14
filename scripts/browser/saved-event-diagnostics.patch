@@ -1,0 +1,90 @@
+--- a/vendor/dolphin/Source/Core/Core/CoreTiming.h
++++ b/vendor/dolphin/Source/Core/Core/CoreTiming.h
+@@ -174,6 +174,9 @@
+   bool UseSyncOnSkipIdle() const;
+ 
+ #ifdef __EMSCRIPTEN__
++  // Diagnostics from the most recent write-mode snapshot, with exact 64-bit strings.
++  // No normalization of the serialized event heap or raw state equality.
++  const std::string& GetBrowserSavedEventSnapshot() const { return m_browser_saved_events; }
+   // Host pacing diagnostics only; never serialized as emulated machine state.
+   struct BrowserThrottleStats { u64 count, microseconds, maximum_microseconds; };
+   BrowserThrottleStats GetBrowserThrottleStats() const
+@@ -189,6 +192,8 @@
+ 
+ private:
+ #ifdef __EMSCRIPTEN__
++  std::string DescribeBrowserEvents() const;
++  std::string m_browser_saved_events = "null";
+   std::atomic<u64> m_browser_relax_count{0}, m_browser_relax_us{0}, m_browser_relax_max_us{0};
+ #endif
+   Globals m_globals;
+--- a/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
++++ b/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
+@@ -30,6 +30,7 @@
+ #include "Core/System.h"
+ #ifdef __EMSCRIPTEN__
+ #include "Core/WasmTimingProfile.h"
++#include <picojson.h>
+ #endif
+ 
+ #ifdef __EMSCRIPTEN__
+@@ -203,6 +204,9 @@
+   p.DoMarker("CoreTimingData");
+ 
+   MoveEvents();
++#ifdef __EMSCRIPTEN__
++  if (p.IsWriteMode()) m_browser_saved_events = DescribeBrowserEvents();
++#endif
+   p.DoEachElement(m_event_queue, [this](PointerWrap& pw, Event& ev) {
+     pw.Do(ev.time);
+     pw.Do(ev.fifo_order);
+@@ -738,6 +742,36 @@
+   ppc_state.downcount = 0;
+ }
+ 
++#ifdef __EMSCRIPTEN__
++std::string CoreTimingManager::DescribeBrowserEvents() const
++{
++  // Copy and sort only the diagnostic view. Ties retain the scheduler's fifo_order.
++  auto ordered = m_event_queue;
++  std::ranges::sort(ordered);
++  picojson::array events;
++  bool orders_valid = true;
++  for (const Event& ev : ordered)
++  {
++    orders_valid &= ev.fifo_order < m_event_fifo_id;
++    picojson::object event;
++    event["time"] = picojson::value(std::to_string(ev.time));
++    event["order"] = picojson::value(std::to_string(ev.fifo_order));
++    event["userdata"] = picojson::value(std::to_string(ev.userdata));
++    event["name"] = picojson::value(*ev.type->name);
++    events.emplace_back(event);
++  }
++  picojson::object snapshot;
++  snapshot["globalTimer"] = picojson::value(std::to_string(m_globals.global_timer));
++  snapshot["idleCycles"] = picojson::value(std::to_string(m_idled_cycles));
++  snapshot["nextOrder"] = picojson::value(std::to_string(m_event_fifo_id));
++  snapshot["ordersValid"] = picojson::value(orders_valid);
++  snapshot["guestPc"] = picojson::value(std::to_string(m_system.GetPPCState().pc));
++  snapshot["guestStackPointer"] = picojson::value(std::to_string(m_system.GetPPCState().gpr[1]));
++  snapshot["events"] = picojson::value(events);
++  return picojson::value(snapshot).serialize();
++}
++#endif
++
+ std::string CoreTimingManager::GetScheduledEventsSummary() const
+ {
+   std::string text = "Scheduled events\n";
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -67,7 +67,8 @@
+       ",\"fifoEnd\":" + std::to_string(fifo.CPEnd.load(std::memory_order_relaxed)) +
+       ",\"fifoRead\":" + std::to_string(fifo.CPReadPointer.load(std::memory_order_relaxed)) +
+       ",\"fifoWrite\":" + std::to_string(fifo.CPWritePointer.load(std::memory_order_relaxed)) +
+-      ",\"fifoDistance\":" + std::to_string(fifo.CPReadWriteDistance.load(std::memory_order_relaxed)) + "}";
++      ",\"fifoDistance\":" + std::to_string(fifo.CPReadWriteDistance.load(std::memory_order_relaxed)) +
++      ",\"savedTiming\":" + Core::System::GetInstance().GetCoreTiming().GetBrowserSavedEventSnapshot() + "}";
+   return result.c_str();
+ }
+ 

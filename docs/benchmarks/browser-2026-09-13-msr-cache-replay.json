@@ -1,0 +1,69 @@
+{
+  "coreSha256": "9491b1b2bfd888f9bc1bd9008c8350aa4bfaeac36e140a47e9e5c5603ff99645",
+  "passed": true,
+  "frames": 120,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "codegenReference": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false
+  },
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": true
+  },
+  "fullMachineBytesEqual": true,
+  "comparedBytes": 107036212,
+  "sectionDifferences": [],
+  "tickDifferences": [],
+  "referenceFrame": 427,
+  "correctedFrame": 427,
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "profileEnabled": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "sceneryAnimation": "on",
+    "shadows": "full",
+    "efbPercent": 150
+  },
+  "limits": [
+    "Browser configuration comparison, not native Dolphin conformance.",
+    "120-frame replay is not all-character/stage or sustained-FPS validation."
+  ]
+}

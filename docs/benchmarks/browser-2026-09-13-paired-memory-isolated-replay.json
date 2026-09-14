@@ -1,0 +1,46 @@
+{
+  "kind": "isolated-codegen-local-browser-late-input-correction",
+  "coreSha256": "28a5899ca069b3907eaa9ff6e5b8a35321261900180875015e25de5bd18c2857",
+  "passed": true,
+  "frames": 120,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "internalScalePercent": 150,
+  "reflection": false,
+  "scenery": false,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 109039327,
+    "sizeB": 109039327,
+    "allDifferentBytes": 0,
+    "includesGpuState": true
+  },
+  "tickDifferences": [],
+  "codegenReference": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false
+  },
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": true
+  },
+  "limitations": [
+    "Fresh retry of an isolated comparison; previous combined-switch mismatch and isolated final-capture stall remain unresolved.",
+    "Not native-Dolphin equivalence, network validation, or exhaustive gameplay coverage."
+  ]
+}

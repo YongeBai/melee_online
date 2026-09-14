@@ -4,10 +4,10 @@
   "patches": [
     {
       "name": "engine-integration.patch",
-      "sha256": "feba266ac2016a24815640f011c942f6bdf0186068bfa5fdcdd11d92cc168407",
-      "bytes": 59051,
+      "sha256": "5221312f156ba6ef961be5f1bc9dbb652381a1b81d3a858235ff33e1e827a56c",
+      "bytes": 62083,
       "baseTree": "e2962f338e7800904a69cbc74066ef3f3745ee47",
-      "resultTree": "ea0bf52f611edda99d54bf16f4d725c0f8ed7ad8"
+      "resultTree": "b486c158a98a75a73dc99c1f947159b437c18569"
     },
     {
       "name": "dolphin-integration.patch",

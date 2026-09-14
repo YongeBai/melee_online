@@ -1,0 +1,29 @@
+diff --git a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+index a19b252..3ababd4 100644
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -8593,6 +8593,15 @@ bool IsOrdinaryFusionCall(const PPCAnalyst::CodeOp& op)
+ }
+ 
+ 
++// The broad call-fusion experiment made almost one thousand larger Wasm
++// modules and lost both 720p timing pairs. Keep the same checked machinery,
++// but spend its code-size budget only on Melee's measured hottest straight-line
++// matrix routine. This address is PSMTXConcat in unmodified USA 1.02.
++bool IsMeleeHotFusionCall(const PPCAnalyst::CodeOp& op)
++{
++  return IsOrdinaryFusionCall(op) && op.branchTo == 0x80342204;
++}
++
+ bool CanCacheBlockMsr(std::span<const PPCAnalyst::CodeOp> ops,
+                       std::optional<u32> fused_call_index = std::nullopt)
+ {
+@@ -12610,7 +12619,7 @@ bool CachedInterpreter::TryWriteWasmBlock(u32 nextPC)
+         (chain_fusion || s_dolphin_web_conditional_fusion.load(std::memory_order_relaxed));
+     const u32 target = conditional ? term.address + 4 : term.branchTo;
+     const bool call_fusion = s_dolphin_web_call_fusion.load(std::memory_order_relaxed) &&
+-        IsOrdinaryFusionCall(term);
++        IsMeleeHotFusionCall(term);
+     bool safe = !term.skip && (term.inst.OPCD == 18 || conditional) && (!term.inst.LK || call_fusion) &&
+         !term.branchIsIdleLoop && target != 0xffffffffu &&
+         target != js.blockStart && target != term.address;

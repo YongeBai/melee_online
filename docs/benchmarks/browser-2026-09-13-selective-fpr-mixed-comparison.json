@@ -1,0 +1,232 @@
+{
+  "artifactScope": "Selected exact fields from completed CUA mixedRun",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "mixed arithmetic selective fprcache",
+  "coreSha256": "7560a1dab52d6dd68629f45baffee2af831a72035c6f663cd0513f2fc43bb785",
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 47.07098935252057,
+      "visibleFps": 47.00431656306941,
+      "seconds": 29.997245000001044,
+      "p95GapMs": 33.625,
+      "maxGapMs": 149.72500000149012,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 52.435614282554106,
+      "visibleFps": 52.335609932364875,
+      "seconds": 29.998695000000296,
+      "p95GapMs": 33.5,
+      "maxGapMs": 50.729999996721745,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 54.0365124814854,
+      "visibleFps": 53.93650659780591,
+      "seconds": 29.998234999999404,
+      "p95GapMs": 33.41000000014901,
+      "maxGapMs": 49.80500000342727,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 54.669919526878786,
+      "visibleFps": 54.536578259740054,
+      "seconds": 29.998214999999853,
+      "p95GapMs": 33.315000001341105,
+      "maxGapMs": 49.36999999731779,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 56.10486946289472,
+      "visibleFps": 56.07155303209728,
+      "seconds": 30.01521999999881,
+      "p95GapMs": 33.065000001341105,
+      "maxGapMs": 33.975000001490116,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 55.771053989586335,
+      "visibleFps": 55.47103038772962,
+      "seconds": 29.99763999999687,
+      "p95GapMs": 33.144999999552965,
+      "maxGapMs": 52.59499999880791,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 57.63688760807203,
+      "visibleFps": 57.17019216185282,
+      "seconds": 29.99814999999851,
+      "p95GapMs": 19.310000002384186,
+      "maxGapMs": 34.03999999910593,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 57.10221746944336,
+      "visibleFps": 56.868875074647036,
+      "seconds": 29.998835000000895,
+      "p95GapMs": 32.69999999925494,
+      "maxGapMs": 58.83999999985099,
+      "passed": false,
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "nonblackFraction": 1
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 105,
+    "mismatches": []
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "settings": {
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbPercent": 150,
+    "profiler": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "otherRejectedCpuFlags": false
+  },
+  "lastQueue": {
+    "capacity": 2,
+    "received": 1712,
+    "presented": 1707,
+    "dropped": 7,
+    "underruns": 92,
+    "meanAgeMs": 12.78965729348008,
+    "clockSkips": 1,
+    "readyClockSkips": 1
+  },
+  "passed": false,
+  "interpretation": "Opposing pairs; substantial warmup drift. No repeatable gain established. All FPS gates fail. Warm repeat running with the same browser instance."
+}

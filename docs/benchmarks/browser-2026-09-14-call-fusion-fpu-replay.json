@@ -1,0 +1,85 @@
+{
+  "kind": "normal-running-browser-codegen-equivalence",
+  "feature": "callfusion-fpu-proof",
+  "passed": false,
+  "fullMachineBytesEqual": false,
+  "fingerprintsEqual": true,
+  "executionStateEqual": true,
+  "idleAccountingOnlyDifference": true,
+  "frames": 600,
+  "coreSha256": "09569744729a89147b1b16a8c27469f562eb7f123d82e4fc7329f98fc82af051",
+  "stage": "Yoshi's Story",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "selection": {
+    "stage": 8,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "sizeA": 110165914,
+  "sizeB": 110165914,
+  "sections": {
+    "count": 29,
+    "equal": 28,
+    "difference": {
+      "name": "CoreTiming",
+      "start": 25924651,
+      "bytes": 363,
+      "differentBytes": 1,
+      "unmatchedBytes": 0,
+      "firstRelativeOffset": 12,
+      "rangeCount": 1,
+      "rangesTruncated": false,
+      "fieldsComplete": true,
+      "field": "CoreTiming.m_idled_cycles",
+      "fieldOffset": 12,
+      "fieldBytes": 8,
+      "containsWholeRange": true
+    }
+  },
+  "input": {
+    "startFrame": 305,
+    "stopFrame": 905,
+    "trackedPolls": 601,
+    "skipped": 0,
+    "inputHash": 1663430650,
+    "stateHash": 1404911955,
+    "inputChanges": [
+      65,
+      60
+    ],
+    "gaps": []
+  },
+  "nativeExecution": {
+    "dispatcherCalls": [
+      1564873,
+      1549773
+    ],
+    "callFusionBlocks": [
+      0,
+      999
+    ],
+    "newCallFusionBlocks": 999,
+    "readFusionEmissions": [
+      0,
+      123
+    ]
+  },
+  "decision": "Execution state matches under the separately audited idle-accounting classifier; preserve strict raw failure. Proceed to timing, candidate remains opt-in.",
+  "limits": "Selected exact visible QA fields. No performance or acceptance claim. Raw equality and passed remain false; the classifier does not exempt any execution clock, event queue, RAM, CPU, GPU, audio, input, or gameplay field."
+}

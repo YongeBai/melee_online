@@ -1,0 +1,131 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/FramebufferManager.h
++++ b/vendor/dolphin/Source/Core/VideoCommon/FramebufferManager.h
+@@ -74,7 +74,7 @@
+   // Use this to convert a whole native EFB rect to backbuffer coordinates
+   MathUtil::Rectangle<int> ConvertEFBRectangle(const MathUtil::Rectangle<int>& rc) const;
+ 
+-  unsigned int GetEFBScale() const;
++  float GetEFBScale() const;
+ 
+   // Use this to upscale native EFB coordinates to IDEAL internal resolution
+   int EFBToScaledX(int x) const;
+--- a/vendor/dolphin/Source/Core/VideoCommon/FramebufferManager.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/FramebufferManager.cpp
+@@ -185,19 +185,19 @@
+   return result;
+ }
+ 
+-unsigned int FramebufferManager::GetEFBScale() const
++float FramebufferManager::GetEFBScale() const
+ {
+   return m_efb_scale;
+ }
+ 
+ int FramebufferManager::EFBToScaledX(int x) const
+ {
+-  return x * static_cast<int>(m_efb_scale);
++  return static_cast<int>(std::lround(x * m_efb_scale));
+ }
+ 
+ int FramebufferManager::EFBToScaledY(int y) const
+ {
+-  return y * static_cast<int>(m_efb_scale);
++  return static_cast<int>(std::lround(y * m_efb_scale));
+ }
+ 
+ float FramebufferManager::EFBToScaledXf(float x) const
+@@ -217,12 +217,17 @@
+   else
+     m_efb_scale = efb_scale;
+ 
++#ifdef __EMSCRIPTEN__
++  // Private WebGL 720p setting: 640x480 active pixels become 960x720.
++  // Retain the full 528-line EFB (960x792); do not crop or alter the camera.
++  if (efb_scale == 150) m_efb_scale = 1.5f;
++#endif
+   const u32 max_size = g_backend_info.MaxTextureSize;
+   if (max_size < EFB_WIDTH * m_efb_scale)
+     m_efb_scale = max_size / EFB_WIDTH;
+ 
+-  u32 new_efb_width = std::max(EFB_WIDTH * static_cast<int>(m_efb_scale), 1u);
+-  u32 new_efb_height = std::max(EFB_HEIGHT * static_cast<int>(m_efb_scale), 1u);
++  u32 new_efb_width = std::max(static_cast<u32>(std::lround(EFB_WIDTH * m_efb_scale)), 1u);
++  u32 new_efb_height = std::max(static_cast<u32>(std::lround(EFB_HEIGHT * m_efb_scale)), 1u);
+ 
+   return std::make_tuple(new_efb_width, new_efb_height);
+ }
+--- a/vendor/dolphin/Source/Core/VideoCommon/Present.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Present.cpp
+@@ -80,7 +80,7 @@
+   // The reason why the threshold is 1 pixel (per internal resolution multiplier) is because of
+   // minor inaccuracies of the VI aspect ratio (and because some resolutions are rounded
+   // while other are floored).
+-  const unsigned int efb_scale = g_framebuffer_manager->GetEFBScale();
++  const float efb_scale = g_framebuffer_manager->GetEFBScale();
+   const unsigned int pixel_difference_width = std::abs(width - xfb_width);
+   const unsigned int pixel_difference_height = std::abs(height - xfb_height);
+   // We ignore this if there's an offset on both hor and ver size,
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -57,6 +57,7 @@
+ #include "VideoCommon/Statistics.h"
+ #include "VideoCommon/VideoBackendBase.h"
+ #include "VideoCommon/VideoConfig.h"
++#include "VideoCommon/FramebufferManager.h"
+ 
+ extern "C" void DolphinWeb_SetFastSoftwareRaster(int mode);
+ extern "C" std::uint32_t DolphinWeb_SetCachedInterpreterDisableMask(std::uint32_t mask);
+@@ -1180,6 +1181,19 @@
+   }
+   return 1;
+ }
++// Private paused QA control. Normal startup remains at its measured scale.
++EMSCRIPTEN_KEEPALIVE int BrowserRenderScalePercent(int percent)
++{
++  const int current = Config::Get(Config::GFX_EFB_SCALE);
++  if (percent == 0) return current == 150 ? 150 : current * 100;
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || s_video_backend != "OGL" ||
++      Core::GetState(system) != Core::State::Paused ||
++      (percent != 150 && percent != 200)) return 0;
++  const Core::CPUThreadGuard guard(system);
++  Config::SetBase(Config::GFX_EFB_SCALE, percent == 150 ? 150 : 2);
++  return percent;
++}
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetUnthrottled(int enable)
+ {
+   auto& system = Core::System::GetInstance();
+@@ -1348,7 +1362,9 @@
+       << ",\"directWasmDispatch\":" << GetPpcWasmDirectDispatch()
+       << ",\"deferredJitRetries\":" << GetPpcWasmDeferredRetries()
+       << ",\"deferredJitFullFlushes\":" << GetPpcWasmDeferredFlushes()
+-      << ",\"internalScale\":" << Config::Get(Config::GFX_EFB_SCALE)
++      << ",\"internalScale\":" << (Config::Get(Config::GFX_EFB_SCALE) == 150 ? 1.5f : static_cast<float>(Config::Get(Config::GFX_EFB_SCALE)))
++      << ",\"efbWidth\":" << (g_framebuffer_manager ? g_framebuffer_manager->GetEFBWidth() : 0)
++      << ",\"efbHeight\":" << (g_framebuffer_manager ? g_framebuffer_manager->GetEFBHeight() : 0)
+       << ",\"scaledEfbCopies\":" << Config::Get(Config::GFX_HACK_COPY_EFB_SCALED)
+       << ",\"cpuThread\":" << Config::Get(Config::MAIN_CPU_THREAD)
+       << ",\"cpuOverclock\":" << Config::Get(Config::MAIN_OVERCLOCK)
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1052,6 +1052,12 @@
+         const updated = payload.value ? mask | bit : mask & ~bit;
+         api.setCachedInterpreterDisableMask(updated >>> 0);
+         return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};
++      } else if (payload.action === "renderScale") {
++        const percent=payload.percent ?? 0;
++        if(![0,150,200].includes(percent))throw Error("Unsupported 720p render scale");
++        const applied=api.browserRenderScalePercent?.(percent);
++        if(!applied)throw Error("Render scale change requires a paused OGL core");
++        return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+             !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0)))
+@@ -2377,6 +2383,7 @@
+     getCoreStatus: optionalCwrap("GetCoreStatus", "string", []),
+     getBrowserLog: optionalCwrap("GetBrowserLog", "string", []),
+     getBrowserProfile: optionalCwrap("GetBrowserProfile", "string", []),
++    browserRenderScalePercent: optionalCwrap("BrowserRenderScalePercent", "number", ["number"]),
+     getCoreTitle: optionalCwrap("GetCoreTitle", "string", []),
+     getCoreTicksLow: optionalCwrap("GetCoreTicksLow", "number", []),
+     getCoreTicksHigh: optionalCwrap("GetCoreTicksHigh", "number", []),

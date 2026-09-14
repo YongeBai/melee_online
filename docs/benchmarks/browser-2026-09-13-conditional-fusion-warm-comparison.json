@@ -1,0 +1,155 @@
+{
+  "artifactScope": "Selected exact fields from completed browser branchWarmRun",
+  "core": "83a8df37e84c7070494b9d4948c60479cba7c1d9cb3a78a5098b542ed37e06ac",
+  "feature": "branchfusion",
+  "kind": "same-checkpoint-codegen-abba",
+  "passed": false,
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "input": "native frame polling, scripted two human ports",
+  "settings": {
+    "blockmerge": true,
+    "reflection": false,
+    "scenery": false,
+    "lowModels": true,
+    "hiddenAnimation": true,
+    "profile": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "internalResolution": [
+      960,
+      792
+    ],
+    "nativeOutput": [
+      960,
+      720
+    ],
+    "blackBackground": true,
+    "msrcache": false,
+    "fprcache": false,
+    "fpuguard": true
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 56.73641601194172,
+      "visibleFps": 56.503070000141726,
+      "seconds": 29.99836999999732,
+      "p95GapMs": 32.03999999910593,
+      "maxGapMs": 66.56499999761581,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 58.70395273282376,
+      "visibleFps": 58.570610421108086,
+      "seconds": 29.997979999996723,
+      "p95GapMs": 18.96000000089407,
+      "maxGapMs": 35.07500000298023,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 58.50232059204551,
+      "visibleFps": 58.068970069141464,
+      "seconds": 29.998810000002383,
+      "p95GapMs": 18.970000006258488,
+      "maxGapMs": 85.07000000029802,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 59.20217074626363,
+      "visibleFps": 58.83549063465953,
+      "seconds": 29.99889999999851,
+      "p95GapMs": 18.82499999552965,
+      "maxGapMs": 35.690000005066395,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 58.83488265190808,
+      "visibleFps": 58.56820896283428,
+      "seconds": 29.999210000000893,
+      "p95GapMs": 18.910000003874302,
+      "maxGapMs": 36.48499999940395,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 58.768224024606816,
+      "visibleFps": 58.601552941156434,
+      "seconds": 29.999204999998213,
+      "p95GapMs": 18.469999998807907,
+      "maxGapMs": 35.190000005066395,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 58.70194694791643,
+      "visibleFps": 58.40193699758637,
+      "seconds": 29.999004999995233,
+      "p95GapMs": 18.87000000476837,
+      "maxGapMs": 97.76500000059605,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 56.90365131763469,
+      "visibleFps": 56.67030301111832,
+      "seconds": 29.99807499999553,
+      "p95GapMs": 31.734999999403954,
+      "maxGapMs": 35.975000001490116,
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 112,
+    "mismatches": []
+  },
+  "interpretation": "Both warmed pairs favor candidate, but final baseline measurement fell sharply relative to its warmup. First comparison had opposing pairs. Third comparison required before retaining; all gates fail.",
+  "measuredLifecycle": "Visible and focused at all endpoints, no lifecycle events.",
+  "candidatePresentation": [
+    {
+      "gameRenderFps": 59.13550163506289,
+      "dropped": 7,
+      "underruns": 33,
+      "meanAgeMs": 17.121445953584555,
+      "capacity": 2
+    },
+    {
+      "gameRenderFps": 58.768224024606816,
+      "dropped": 3,
+      "underruns": 40,
+      "meanAgeMs": 15.772678977212953,
+      "capacity": 2
+    }
+  ],
+  "warmRepeatWithoutReload": true,
+  "means": {
+    "baselineSimulationFps": 57.803802025229224,
+    "candidateSimulationFps": 58.98519738543523,
+    "percent": 2.0438021701243203
+  }
+}

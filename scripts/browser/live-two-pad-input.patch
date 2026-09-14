@@ -1,0 +1,152 @@
+--- a/core/upstream/dolphin_web_discio.cpp
++++ b/core/upstream/dolphin_web_discio.cpp
+@@ -136,6 +136,40 @@
+ InputStateSnapshot s_input_state;
+ std::array<InputStateSnapshot, 2> s_rollback_inputs{};
+ bool s_rollback_input_owner = false;
++std::array<InputStateSnapshot, 2> s_live_inputs{};
++bool s_live_input_owner = false;
++
++bool DecodeTwoControllerInputs(const std::uint32_t* packed, int count, std::uint32_t frame,
++                               std::array<InputStateSnapshot, 2>* decoded)
++{
++  if (!packed || count != 18 || !decoded) return false;
++  std::array<InputStateSnapshot, 2> next{};
++  for (unsigned port = 0; port < 2; ++port)
++  {
++    const auto* p = packed + port * 9;
++    if (p[0] > 0xfffffu) return false;
++    for (unsigned field = 1; field < 9; ++field) if (p[field] > 255) return false;
++    auto& input = next[port];
++    input.mask = p[0]; input.generation = frame;
++    input.stick_x = p[1]; input.stick_y = p[2];
++    input.c_stick_x = p[3]; input.c_stick_y = p[4];
++    input.trigger_left = p[5]; input.trigger_right = p[6];
++    input.analog_a = p[7]; input.analog_b = p[8];
++  }
++  *decoded = next;
++  return true;
++}
++
++bool ReadControllerInput(int port, InputStateSnapshot* input)
++{
++  if (!input || port < 0 || port >= 2) return false;
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  if (s_rollback_input_owner) *input = s_rollback_inputs[port];
++  else if (s_live_input_owner) *input = s_live_inputs[port];
++  else if (port == 0) *input = s_input_state;
++  else return false;
++  return true;
++}
+ std::mutex s_pad_poll_mutex;
+ PadPollSnapshot s_pad_poll;
+ bool s_using_xfb_frame = false;
+@@ -1120,11 +1154,7 @@
+     return 0;
+ 
+   InputStateSnapshot input;
+-  {
+-    const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+-    if (!s_rollback_input_owner && pad_num != 0) return 0;
+-    input = s_rollback_input_owner ? s_rollback_inputs[pad_num] : s_input_state;
+-  }
++  if (!ReadControllerInput(pad_num, &input)) return 0;
+ 
+   *status = {};
+   status->isConnected = true;
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1035,6 +1035,7 @@
+   {
+     const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+     s_rollback_input_owner = false;
++    s_live_input_owner = false;
+   }
+   if (s_runtime_initialized && Core::IsRunning(Core::System::GetInstance()))
+   {
+@@ -1115,18 +1116,7 @@
+   if (!s_runtime_initialized || !packed || count != 18 ||
+       Core::GetState(system) != Core::State::Paused) return 0;
+   std::array<InputStateSnapshot, 2> next{};
+-  for (unsigned port = 0; port < 2; ++port)
+-  {
+-    const auto* p = packed + port * 9;
+-    if (p[0] > 0xfffffu) return 0;
+-    for (unsigned field = 1; field < 9; ++field) if (p[field] > 255) return 0;
+-    auto& input = next[port];
+-    input.mask = p[0]; input.generation = frame;
+-    input.stick_x = p[1]; input.stick_y = p[2];
+-    input.c_stick_x = p[3]; input.c_stick_y = p[4];
+-    input.trigger_left = p[5]; input.trigger_right = p[6];
+-    input.analog_a = p[7]; input.analog_b = p[8];
+-  }
++  if (!DecodeTwoControllerInputs(packed, count, frame, &next)) return 0;
+   const Core::CPUThreadGuard guard(system);
+   const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+   s_rollback_inputs = next;
+@@ -1138,6 +1128,27 @@
+   const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+   s_rollback_input_owner = false;
+ }
++// Private two-controller QA input. Live ownership never pauses emulation;
++// authoritative rollback input takes precedence until it is released.
++EMSCRIPTEN_KEEPALIVE int BrowserLiveSetPads(const u32* packed, int count, u32 frame)
++{
++  if (!s_runtime_initialized) return 0;
++  const auto state = Core::GetState(Core::System::GetInstance());
++  if (state != Core::State::Running && state != Core::State::Paused) return 0;
++  std::array<InputStateSnapshot, 2> next{};
++  if (!DecodeTwoControllerInputs(packed, count, frame, &next)) return 0;
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_live_inputs = next;
++  s_live_input_owner = true;
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserLiveReleasePads()
++{
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_live_input_owner = false;
++  s_live_inputs = {};
++  return 1;
++}
+ extern "C" int DolphinWeb_UseWorkerOwnedWebGL();
+ extern "C" int DolphinWeb_UseOglReadbackPresent();
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackSuppressOutput(int enable)
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1070,9 +1070,13 @@
+       } else if (payload.action === "outputStats") {
+         if (!api.browserRollbackOutputStats) throw new Error("Replay output counters unavailable");
+         return {output: JSON.parse(api.browserRollbackOutputStats())};
+-      } else if (payload.action === "pads") {
++      } else if (payload.action === "releaseLivePads") {
++        if (!api.browserLiveReleasePads?.()) throw new Error("Live controller release unavailable");
++      } else if (payload.action === "pads" || payload.action === "livePads") {
++        const live = payload.action === "livePads";
++        const setPads = live ? api.browserLiveSetPads : api.browserRollbackSetPads;
+         const fields = ["mask", "stickX", "stickY", "cStickX", "cStickY", "triggerLeft", "triggerRight", "analogA", "analogB"];
+-        if (!api.browserRollbackSetPads || !Array.isArray(payload.pads) || payload.pads.length !== 2 ||
++        if (!setPads || !Array.isArray(payload.pads) || payload.pads.length !== 2 ||
+             !Number.isInteger(payload.frame) || payload.frame < 0 || payload.frame > 0xffffffff)
+           throw new Error("Two complete pads and a frame number are required");
+         const packed = payload.pads.flatMap(pad => fields.map((field, i) => {
+@@ -1085,8 +1089,8 @@
+         if (!pointer) throw new Error("Could not allocate controller input buffer");
+         try {
+           new Uint32Array(moduleInstance.HEAPU8.buffer, pointer, 18).set(packed);
+-          if (!api.browserRollbackSetPads(pointer, 18, payload.frame))
+-            throw new Error("Authoritative pads require a paused machine");
++          if (!setPads(pointer, 18, payload.frame))
++            throw new Error(live ? "Live pads require a running or paused machine" : "Authoritative pads require a paused machine");
+         } finally { moduleInstance._free(pointer); }
+       } else if (payload.action === "capture") {
+         if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6)
+@@ -2441,6 +2445,8 @@
+     browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
+     browserRollbackGameStep: optionalCwrap("BrowserRollbackGameStep", "number", []),
+     browserRollbackSetPads: optionalCwrap("BrowserRollbackSetPads", "number", ["number", "number", "number"]),
++    browserLiveSetPads: optionalCwrap("BrowserLiveSetPads", "number", ["number", "number", "number"]),
++    browserLiveReleasePads: optionalCwrap("BrowserLiveReleasePads", "number", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
+     browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),
+     browserRollbackConfigureCodegen: optionalCwrap("BrowserRollbackConfigureCodegen", "number", ["number"]),

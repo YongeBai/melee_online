@@ -1,0 +1,19 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -5084,11 +5084,15 @@
+ 
+   EmitFpuAvailableOrFallback(body, op, layout, downcount);
+ 
++  // Capture the scalar before writing either destination lane: FD may alias FC.
++  EmitStateLoadF64(body, PsOffset(layout, inst.FC, scalar_lane));
++  EmitLocalSet(body, 6);
++
+   for (u32 lane = 0; lane < 2; ++lane)
+   {
+     EmitStateStoreU32Prefix(body);
+     EmitStateLoadF64(body, PsOffset(layout, inst.FA, lane));
+-    EmitStateLoadF64(body, PsOffset(layout, inst.FC, scalar_lane));
++    EmitLocalGet(body, 6);
+     body.push_back(0xa2);
+     if (add)
+     {

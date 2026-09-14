@@ -1,0 +1,32 @@
+{
+  "artifactScope": "Exact CUA animationCurrentReplay plus core identity and DOM framing check",
+  "coreSha256": "b317c2cc97f415883f52408055b4bdd3123a29780d6af4a02c21dee18703808e",
+  "passed": true,
+  "kind": "fountain-gameplay-observable-comparison",
+  "feature": "animation",
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "moving platform state and positions",
+    "native camera transform and settings"
+  ],
+  "visualCheck": {
+    "canvas": [
+      960,
+      720
+    ],
+    "displayRect": {
+      "x": 0,
+      "y": 90,
+      "width": 1144,
+      "height": 858
+    },
+    "aspectRatio": 1.3333333333333333,
+    "limits": "Native camera observables match; this DOM/screenshot check is not an equivalent-scene comparison against native Dolphin."
+  }
+}

@@ -1,0 +1,310 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -303,6 +303,7 @@
+ std::atomic<bool> s_dolphin_web_compact_gpr_locals{false};
+ std::atomic<bool> s_dolphin_web_paired_simd{false};
+ std::atomic<bool> s_dolphin_web_paired_memory_simd{false};
++std::atomic<bool> s_dolphin_web_vector_fpr_cache{false};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEECALL   = 1u << 1;  // 5 Melee fast call-branch helpers
+@@ -2642,7 +2643,7 @@
+ // of generated conditionals; dirty is sticky across helpers and branches.
+ struct WasmFprRegCache
+ {
+-  bool active = false;
++  bool active = false, vector = false;
+   u32 base = 0, local_base = 40, scratch_local = 0;
+   u32 locals[64] = {};
+   bool present[64] = {};
+@@ -2657,6 +2658,26 @@
+   *index = rel / sizeof(u64);
+   return s_fpr_rc.present[*index];
+ }
++// A vector local holds the exact two 64-bit register lanes. Scalar accesses
++// extract/replace one lane without changing its partner or NaN bit patterns.
++void EmitFprLaneGet(std::vector<u8>& body, u32 lane)
++{
++  EmitLocalGet(body, s_fpr_rc.locals[lane]);
++  if (s_fpr_rc.vector) body.insert(body.end(), {0xfd,0x21,static_cast<u8>(lane & 1u)});
++}
++void EmitFprLaneSet(std::vector<u8>& body, u32 lane)
++{
++  if (s_fpr_rc.vector)
++  {
++    body.push_back(0xbd); // i64.reinterpret_f64
++    EmitLocalSet(body, s_fpr_rc.scratch_local);
++    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    EmitLocalGet(body, s_fpr_rc.scratch_local);
++    body.push_back(0xbf); // f64.reinterpret_i64
++    body.insert(body.end(), {0xfd,0x22,static_cast<u8>(lane & 1u)});
++  }
++  EmitLocalSet(body, s_fpr_rc.locals[lane]);
++}
+ void ConfigureFprCacheLocals(std::vector<u8>& body, u32 used_regs)
+ {
+   if (!s_fpr_rc.active) return;
+@@ -2668,18 +2689,29 @@
+     for (u32 lane = reg * 2; lane < reg * 2 + 2; ++lane)
+     {
+       s_fpr_rc.present[lane] = true;
+-      s_fpr_rc.locals[lane] = s_fpr_rc.local_base + count++;
++      s_fpr_rc.locals[lane] = s_fpr_rc.local_base + count;
++      if (!s_fpr_rc.vector || (lane & 1u)) ++count;
+     }
+   }
+   // Unused locals are still zero-initialized by baseline WASM compilers.
+   // Declare only referenced lanes, and none for integer-only blocks.
+   body[0] += 2;
+-  EmitU32Leb(body, count); body.insert(body.end(), {0x7c, 0x01, 0x7e});
++  EmitU32Leb(body, count); body.insert(body.end(), {static_cast<u8>(s_fpr_rc.vector ? 0x7b : 0x7c), 0x01, 0x7e});
+   s_fpr_rc.scratch_local = s_fpr_rc.local_base + count;
+ }
+ void EmitFprCacheFlush(std::vector<u8>& body)
+ {
+   if (!s_fpr_rc.active) return;
++  if (s_fpr_rc.vector)
++  {
++    for (u32 i=0; i<64; i+=2)
++    {
++      if (!s_fpr_rc.present[i] || (!s_fpr_rc.dirty[i] && !s_fpr_rc.dirty[i+1])) continue;
++      EmitLocalGet(body, 0); EmitLocalGet(body, s_fpr_rc.locals[i]);
++      body.insert(body.end(), {0xfd,0x0b,0x03}); EmitU32Leb(body, s_fpr_rc.base+i*sizeof(u64));
++    }
++    return;
++  }
+   for (u32 i=0; i<64; ++i)
+   {
+     if (!s_fpr_rc.present[i] || !s_fpr_rc.dirty[i]) continue;
+@@ -2691,6 +2723,16 @@
+ void EmitFprCacheReload(std::vector<u8>& body)
+ {
+   if (!s_fpr_rc.active) return;
++  if (s_fpr_rc.vector)
++  {
++    for (u32 i=0; i<64; i+=2)
++    {
++      if (!s_fpr_rc.present[i]) continue;
++      EmitLocalGet(body, 0); body.insert(body.end(), {0xfd,0x00,0x03});
++      EmitU32Leb(body, s_fpr_rc.base+i*sizeof(u64)); EmitLocalSet(body, s_fpr_rc.locals[i]);
++    }
++    return;
++  }
+   for (u32 i=0; i<64; ++i)
+   {
+     if (!s_fpr_rc.present[i]) continue;
+@@ -2850,7 +2892,7 @@
+   u32 lane;
+   if (FprCacheIndex(offset & ~7u, &lane))
+   {
+-    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    EmitFprLaneGet(body, lane);
+     body.push_back(0xbd); // i64.reinterpret_f64
+     if (offset & 4u) body.insert(body.end(), {0x42, 0x20, 0x88}); // i64.shr_u 32
+     body.push_back(0xa7); // i32.wrap_i64
+@@ -2875,7 +2917,7 @@
+   u32 lane;
+   if (FprCacheIndex(offset, &lane))
+   {
+-    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    EmitFprLaneGet(body, lane);
+ 
+     return;
+   }
+@@ -2891,7 +2933,7 @@
+   u32 lane;
+   if (FprCacheIndex(offset, &lane))
+   {
+-    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    EmitFprLaneGet(body, lane);
+     body.push_back(0xbd); // i64.reinterpret_f64
+     
+     return;
+@@ -2932,7 +2974,7 @@
+     // lfd/stfd use two 32-bit accesses to a cached 64-bit register lane.
+     body.push_back(0xad); // i64.extend_i32_u
+     EmitLocalSet(body, s_fpr_rc.scratch_local); // dedicated scratch, no caller clobber
+-    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    EmitFprLaneGet(body, lane);
+     body.push_back(0xbd); // i64.reinterpret_f64
+     body.insert(body.end(), {0x42, 0x20, static_cast<u8>((offset & 4u) ? 0x86 : 0x88),
+                             0x42, 0x20, static_cast<u8>((offset & 4u) ? 0x88 : 0x86)});
+@@ -2940,7 +2982,7 @@
+     if (offset & 4u) body.insert(body.end(), {0x42, 0x20, 0x86});
+     body.push_back(0x84); // i64.or
+     body.push_back(0xbf); // f64.reinterpret_i64
+-    EmitLocalSet(body, s_fpr_rc.locals[lane]);
++    EmitFprLaneSet(body, lane);
+     body.push_back(0x1a); // state pointer
+     s_fpr_rc.dirty[lane] = true;
+     return;
+@@ -2968,7 +3010,7 @@
+   if (FprCacheIndex(offset, &lane))
+   {
+ 
+-    EmitLocalSet(body, s_fpr_rc.locals[lane]);
++    EmitFprLaneSet(body, lane);
+     body.push_back(0x1a); // drop the state pointer pushed by the store prefix
+     s_fpr_rc.dirty[lane] = true;
+     return;
+@@ -2986,7 +3028,7 @@
+   {
+     
+     body.push_back(0xbf); // f64.reinterpret_i64
+-    EmitLocalSet(body, s_fpr_rc.locals[lane]);
++    EmitFprLaneSet(body, lane);
+     body.push_back(0x1a); // drop the state pointer pushed by the store prefix
+     s_fpr_rc.dirty[lane] = true;
+     return;
+@@ -5054,12 +5096,30 @@
+ 
+ void EmitStateLoadPair(std::vector<u8>& body, const WasmStateLayout& layout, u32 reg)
+ {
++  u32 lane;
++  if (s_fpr_rc.vector && FprCacheIndex(PsOffset(layout, reg, 0), &lane))
++  {
++    EmitLocalGet(body, s_fpr_rc.locals[lane]);
++    return;
++  }
+   EmitLocalGet(body, 0);
+   EmitSimdOpcode(body, 0x00);  // v128.load, only eight-byte alignment required
+   EmitU32Leb(body, 3);
+   EmitU32Leb(body, PsOffset(layout, reg, 0));
+ }
+ 
++void EmitStateStorePairSuffix(std::vector<u8>& body, const WasmStateLayout& layout, u32 reg)
++{
++  u32 lane;
++  if (s_fpr_rc.vector && FprCacheIndex(PsOffset(layout, reg, 0), &lane))
++  {
++    EmitLocalSet(body, s_fpr_rc.locals[lane]); body.push_back(0x1a);
++    s_fpr_rc.dirty[lane] = s_fpr_rc.dirty[lane+1] = true;
++    return;
++  }
++  EmitSimdOpcode(body, 0x0b); EmitU32Leb(body, 3); EmitU32Leb(body, PsOffset(layout, reg, 0));
++}
++
+ // Leaves the scalar fallback arm open. NaN results use the existing scalar
+ // emitter, preserving its payload/sign behavior. No guest state is written
+ // until both vector lanes have been calculated and checked. Mul/add stay
+@@ -5067,7 +5127,7 @@
+ bool EmitPairedSingleSimd(std::vector<u8>& body, const WasmStateLayout& layout,
+                           UGeckoInstruction inst)
+ {
+-  if (!s_wasm_paired_simd_active || s_fpr_rc.active) return false;
++  if (!s_wasm_paired_simd_active || (s_fpr_rc.active && !s_fpr_rc.vector)) return false;
+   const u32 subop = inst.SUBOP5;
+   EmitStateLoadPair(body, layout, inst.FA);
+   if (subop == 20 || subop == 21)
+@@ -5101,9 +5161,7 @@
+   body.insert(body.end(), {0x04, 0x40});
+   EmitLocalGet(body, 0);
+   EmitLocalGet(body, s_wasm_paired_simd_local);
+-  EmitSimdOpcode(body, 0x0b);  // v128.store
+-  EmitU32Leb(body, 3);
+-  EmitU32Leb(body, PsOffset(layout, inst.FD, 0));
++  EmitStateStorePairSuffix(body, layout, inst.FD);
+   body.push_back(0x05);
+   return true;
+ }
+@@ -5679,7 +5737,7 @@
+ bool EmitPsqFloatMemorySimd(std::vector<u8>& body, const WasmStateLayout& layout,
+                             UGeckoInstruction inst, bool load)
+ {
+-  if (!s_wasm_paired_memory_simd_active || s_fpr_rc.active || inst.W) return false;
++  if (!s_wasm_paired_memory_simd_active || (s_fpr_rc.active && !s_fpr_rc.vector) || inst.W) return false;
+   if (load)
+   {
+     EmitRamAddress(body, layout);
+@@ -5704,8 +5762,7 @@
+   {
+     EmitLocalGet(body, 0);
+     EmitLocalGet(body, s_wasm_paired_simd_local);
+-    EmitSimdOpcode(body, 0x0b);  // v128.store
+-    EmitU32Leb(body, 3); EmitU32Leb(body, PsOffset(layout, inst.RD, 0));
++    EmitStateStorePairSuffix(body, layout, inst.RD);
+   }
+   else
+   {
+@@ -8007,11 +8064,12 @@
+     ++body[0]; body.insert(body.end(), {0x01, 0x7f});
+   }
+   s_fpr_rc = {};
+-  s_fpr_rc.active = DolphinWebFeatureEnabled(1u << 19);
++  s_fpr_rc.vector = s_dolphin_web_vector_fpr_cache.load(std::memory_order_relaxed);
++  s_fpr_rc.active = s_fpr_rc.vector || DolphinWebFeatureEnabled(1u << 19);
+   s_fpr_rc.base = layout.ps_offset;
+   s_wasm_paired_simd_active = false;
+   s_wasm_paired_memory_simd_active = false;
+-  if (!s_fpr_rc.active)
++  if (!s_fpr_rc.active || s_fpr_rc.vector)
+   {
+     const bool arithmetic = s_dolphin_web_paired_simd.load(std::memory_order_relaxed);
+     const bool memory = s_dolphin_web_paired_memory_simd.load(std::memory_order_relaxed);
+@@ -8226,6 +8284,15 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetVectorFprCache()
++{
++  return s_dolphin_web_vector_fpr_cache.load(std::memory_order_relaxed);
++}
++extern "C" void DolphinWeb_SetVectorFprCache(bool value)
++{
++  s_dolphin_web_vector_fpr_cache.store(value, std::memory_order_relaxed);
++}
++
+ extern "C" bool DolphinWeb_GetPairedMemorySimd()
+ {
+   return s_dolphin_web_paired_memory_simd.load(std::memory_order_relaxed);
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -65,6 +65,8 @@
+ extern "C" bool DolphinWeb_GetCompactGprLocals();
+ extern "C" bool DolphinWeb_GetPairedSimd();
+ extern "C" bool DolphinWeb_GetPairedMemorySimd();
++extern "C" bool DolphinWeb_GetVectorFprCache();
++extern "C" void DolphinWeb_SetVectorFprCache(bool);
+ extern "C" void DolphinWeb_SetPairedMemorySimd(bool);
+ extern "C" void DolphinWeb_SetPairedSimd(bool);
+ extern "C" void DolphinWeb_SetCompactGprLocals(bool);
+@@ -1197,7 +1199,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 255 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 511 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1212,13 +1214,15 @@
+   const bool compact = (flags & 32) != 0;
+   const bool simd = (flags & 64) != 0;
+   const bool memory_simd = (flags & 128) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd())
++  const bool vector_fpr = (flags & 256) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+     DolphinWeb_SetCompactGprLocals(compact);
+     DolphinWeb_SetPairedSimd(simd);
+     DolphinWeb_SetPairedMemorySimd(memory_simd);
++    DolphinWeb_SetVectorFprCache(vector_fpr);
+   }
+   return 1;
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

@@ -1,0 +1,20 @@
+{
+  "kind":"render-dispatch-cost-abba", "scope":"texture", "diagnosticOnly":true, "passed":false,
+  "coreSha256":"e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage":"Yoshi's Story", "characters":["Ice Climbers","Ice Climbers"], "frames":1200,
+  "commonInput":{"startFrame":429,"stopFrame":1629,"polls":1201,"skipped":0,"inputHash":95967776,"stateHash":2128002311},
+  "inputConsistency":{"passed":true,"checked":80,"mismatches":[]},
+  "runs":[
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":36.73605089827462,"elapsedMs":32665.459968,"synchronousCompileAndLinkMs":532.987},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":40.37835904984721,"elapsedMs":29718.889728,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":44.63680439218156,"elapsedMs":26883.644928,"synchronousCompileAndLinkMs":2.378},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":43.820977596977436,"elapsedMs":27384.144896,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":43.9773640274788,"elapsedMs":27286.765056,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":44.03585682701487,"elapsedMs":27250.520064,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":41.330106607780735,"elapsedMs":29034.524672,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":41.737555214444846,"elapsedMs":28751.085056,"synchronousCompileAndLinkMs":0}
+  ],
+  "interpretation":"HSD_TObjSetup bypass, including texture resource assignment, matrix/object setup and loading, saves about 1.95/1.25 ms per frame in the two orders. It cannot close the full frame-time gap alone. This is a combined-path opportunity bound, not GPU-only time or an implemented speedup.",
+  "restoration":"Original instruction, checkpoint, input and host pacing restored by the completed harness.",
+  "limits":"Selected exact UI fields. Blank/incomplete images, uncapped pacing. No image acceptance or physical-latency claim. Fingerprints are not full machine equality. No build/test/profiler/resource sampler during measurement."
+}

@@ -1,0 +1,123 @@
+{
+  "kind": "guest-function-wall-residency-selected-aggregates",
+  "core": "d516a30633080668e8f3bb38d78e00890ddfe364e5c3dda5c4274a81798812cf",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "reflection": false,
+  "scenery": false,
+  "internalScalePercent": 150,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "seconds": 30.00313,
+  "samples": 1506,
+  "unmapped": 0,
+  "simulationFps": 46.90194643077705,
+  "visibleFps": 46.90194643077705,
+  "diagnosticOnly": true,
+  "passed": false,
+  "warning": "Last committed PC, including host waits. Not exact instruction time, not additive CPU percentages. Name-based groups are rough categories and other includes unclassified functions.",
+  "groups": {
+    "matrix": 138,
+    "renderMaterial": 445,
+    "animation": 143,
+    "audio": 44,
+    "other": 736
+  },
+  "topFunctions": [
+    {
+      "name": "SetupEnvelopeModelMtx",
+      "start": "0x8036e4c4",
+      "count": 48,
+      "fraction": 0.03187250996015936
+    },
+    {
+      "name": "HSD_FObjInterpretAnim",
+      "start": "0x8036b030",
+      "count": 46,
+      "fraction": 0.03054448871181939
+    },
+    {
+      "name": "HSD_TExpSetReg",
+      "start": "0x80384f28",
+      "count": 29,
+      "fraction": 0.019256308100929615
+    },
+    {
+      "name": "psDispParticles",
+      "start": "0x803a0088",
+      "count": 27,
+      "fraction": 0.017928286852589643
+    },
+    {
+      "name": "HandleReverb",
+      "start": "0x8035c910",
+      "count": 25,
+      "fraction": 0.016600265604249667
+    },
+    {
+      "name": "HSD_SetupChannel",
+      "start": "0x803620a4",
+      "count": 21,
+      "fraction": 0.013944223107569721
+    },
+    {
+      "name": "JObjUpdateFunc",
+      "start": "0x8036fdc0",
+      "count": 18,
+      "fraction": 0.01195219123505976
+    },
+    {
+      "name": "gm_801A4D34",
+      "start": "0x801a4d34",
+      "count": 16,
+      "fraction": 0.010624169986719787
+    },
+    {
+      "name": "HSD_TObjSetup",
+      "start": "0x80360950",
+      "count": 16,
+      "fraction": 0.010624169986719787
+    },
+    {
+      "name": "cosf",
+      "start": "0x80326240",
+      "count": 15,
+      "fraction": 0.0099601593625498
+    },
+    {
+      "name": "HSD_StateInvalidate",
+      "start": "0x80361fc4",
+      "count": 15,
+      "fraction": 0.0099601593625498
+    },
+    {
+      "name": "hsd_8039930C",
+      "start": "0x8039930c",
+      "count": 15,
+      "fraction": 0.0099601593625498
+    },
+    {
+      "name": "HSD_TObjSetupTextureCoordGen",
+      "start": "0x8035f418",
+      "count": 13,
+      "fraction": 0.008632138114209827
+    },
+    {
+      "name": "sinf",
+      "start": "0x803263d4",
+      "count": 13,
+      "fraction": 0.008632138114209827
+    },
+    {
+      "name": "HSD_TExpSetupTev",
+      "start": "0x80385448",
+      "count": 13,
+      "fraction": 0.008632138114209827
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "coreSha256": "7a32b99fe130b6a77a9c06755d3707535a0a47ff5ad9b72f05117ffb6b922080",
+  "passed": false,
+  "performanceTest": false,
+  "frames": 120,
+  "delay": 3,
+  "reference": "Corrected canonical frsqrte",
+  "candidate": "Exact positive-normal frsqrte fast path; missing pending-exception guard",
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "sizeA": 107036212,
+  "sizeB": 107036212,
+  "fullMachineBytesEqual": false,
+  "referenceFrame": 422,
+  "correctedFrame": 422,
+  "fighterStateEqual": true,
+  "allGpuSectionsEqual": true,
+  "tickDifferences": {
+    "count": 114,
+    "first": {
+      "frame": 6,
+      "reference": 6546079638,
+      "corrected": 6546075531,
+      "delta": -4107
+    },
+    "minDelta": -4299,
+    "maxDelta": 112,
+    "last": {
+      "frame": 119,
+      "reference": 7461264419,
+      "corrected": 7461260380,
+      "delta": -4039
+    }
+  },
+  "differentSections": [
+    {
+      "name": "CoreTiming",
+      "bytes": 82,
+      "firstRelativeOffset": 0
+    },
+    {
+      "name": "HW Memory RAM",
+      "bytes": 1163,
+      "firstRelativeOffset": 4223391
+    },
+    {
+      "name": "HW DVDInterface",
+      "bytes": 4,
+      "firstRelativeOffset": 85
+    },
+    {
+      "name": "HW GPFifo",
+      "bytes": 19,
+      "firstRelativeOffset": 37
+    },
+    {
+      "name": "CPU registers",
+      "bytes": 12,
+      "firstRelativeOffset": 140
+    }
+  ],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "decision": "Keep default off. No FPS result. Instruction-level bit equality does not establish full-emulator timing correctness.",
+  "followup": "Pending program/data exception fallback prepared and instruction-tested. Unchanged-candidate controls timed out before fighters initialized; controls were not replay results. Newly added automatic selection omitted the existing 800ms plus native CSS settling used by the roster probe. Restoring that preload wait and gating cosmetic background writes."
+}

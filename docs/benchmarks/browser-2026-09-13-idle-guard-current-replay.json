@@ -1,0 +1,88 @@
+{
+  "artifactScope": "Selected exact fields from completed browser idleReplay",
+  "core": "83a8df37e84c7070494b9d4948c60479cba7c1d9cb3a78a5098b542ed37e06ac",
+  "passed": true,
+  "performanceTest": false,
+  "frames": 120,
+  "delay": 3,
+  "tickDifferences": [],
+  "comparison": {
+    "sizeA": 107055991,
+    "sizeB": 107055991,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "codegenReference": {
+    "blockmerge": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "fpuguard": true,
+    "branchfusion": false
+  },
+  "codegenComparison": {
+    "blockmerge": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "fpuguard": true,
+    "branchfusion": false
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "referenceFrame": 424,
+  "correctedFrame": 424,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "feature": "idlechecks",
+  "idleChecksComparison": true,
+  "optimizationExecution": {
+    "hoistedIterations": 2967478
+  }
+}

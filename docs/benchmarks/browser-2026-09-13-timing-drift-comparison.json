@@ -1,0 +1,193 @@
+{
+  "artifactScope": "Selected exact fields from the completed browser QA output",
+  "kind": "same-checkpoint-timing-drift-abba",
+  "passed": false,
+  "coreSha256": "e9ad5d9691b9957b0d99b252675a959c8770e302aba7801004c7758951bc475f",
+  "stage": "Battlefield",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "allRuns": {
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "nonblackFraction": 1,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "queueCapacity": 2,
+    "queueRateLimited": true,
+    "pageVisible": true,
+    "pageFocused": true,
+    "pageLifecycleEvents": [],
+    "nativeInputValid": true,
+    "nativeInputStart": 550,
+    "passed": false
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 105,
+    "mismatches": [],
+    "limits": "Rolling sampled gameplay fingerprints and exact polling gaps; not full-machine equality."
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.993919999999925,
+      "simulationFps": 48.27645069400744,
+      "gameRenderFps": 48.243110603749145,
+      "visibleFps": 48.243110603749145,
+      "p95GapMs": 33.75999999977648,
+      "maxGapMs": 64.67999999970198,
+      "relaxCount": 1274,
+      "relaxUs": 5783354,
+      "synchronousCompileAndLinkMs": 152.404,
+      "queueDropped": 0,
+      "queueUnderruns": 347,
+      "meanQueueAgeMs": 8.554886049706777,
+      "skippedNativePolls": 0
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 30.001150000000372,
+      "simulationFps": 52.164667021096875,
+      "gameRenderFps": 52.164667021096875,
+      "visibleFps": 52.06467085428327,
+      "p95GapMs": 33.494999999180436,
+      "maxGapMs": 75.34999999962747,
+      "relaxCount": 1220,
+      "relaxUs": 3807726,
+      "synchronousCompileAndLinkMs": 4.549,
+      "queueDropped": 2,
+      "queueUnderruns": 234,
+      "meanQueueAgeMs": 8.58058221368995,
+      "skippedNativePolls": 0
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.998450000001117,
+      "simulationFps": 51.669336249037606,
+      "gameRenderFps": 51.669336249037606,
+      "visibleFps": 51.569331082103986,
+      "p95GapMs": 33.61499999836087,
+      "maxGapMs": 70.92999999970198,
+      "relaxCount": 0,
+      "relaxUs": 0,
+      "synchronousCompileAndLinkMs": 0,
+      "queueDropped": 2,
+      "queueUnderruns": 249,
+      "meanQueueAgeMs": 8.467625969010152,
+      "skippedNativePolls": 0
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.998044999999927,
+      "simulationFps": 53.20346709260566,
+      "gameRenderFps": 53.170131586908546,
+      "visibleFps": 53.1034605755143,
+      "p95GapMs": 33.544999999925494,
+      "maxGapMs": 70.14499999955297,
+      "relaxCount": 0,
+      "relaxUs": 0,
+      "synchronousCompileAndLinkMs": 0.229,
+      "queueDropped": 2,
+      "queueUnderruns": 199,
+      "meanQueueAgeMs": 8.732628607292808,
+      "skippedNativePolls": 0
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.999060000000522,
+      "simulationFps": 53.701682652722184,
+      "gameRenderFps": 53.73501703053269,
+      "visibleFps": 53.66834827491168,
+      "p95GapMs": 33.40000000037253,
+      "maxGapMs": 69.05000000074506,
+      "relaxCount": 0,
+      "relaxUs": 0,
+      "synchronousCompileAndLinkMs": 2.12,
+      "queueDropped": 2,
+      "queueUnderruns": 184,
+      "meanQueueAgeMs": 9.0738478260485,
+      "skippedNativePolls": 0
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.99803500000015,
+      "simulationFps": 56.70371409327282,
+      "gameRenderFps": 56.70371409327282,
+      "visibleFps": 53.93686619806903,
+      "p95GapMs": 33.38499999977648,
+      "maxGapMs": 73.7649999987334,
+      "relaxCount": 0,
+      "relaxUs": 0,
+      "synchronousCompileAndLinkMs": 8.664,
+      "queueDropped": 82,
+      "queueUnderruns": 174,
+      "meanQueueAgeMs": 12.783529048239897,
+      "skippedNativePolls": 0
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.998450000001117,
+      "simulationFps": 59.93643004888363,
+      "gameRenderFps": 59.90309499323909,
+      "visibleFps": 58.90304332390287,
+      "p95GapMs": 17.355000000447035,
+      "maxGapMs": 67.8449999988079,
+      "relaxCount": 4,
+      "relaxUs": 19510,
+      "synchronousCompileAndLinkMs": 2.62,
+      "queueDropped": 31,
+      "queueUnderruns": 28,
+      "meanQueueAgeMs": 19.937536764711908,
+      "skippedNativePolls": 1
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 29.998889999998735,
+      "simulationFps": 59.868881815296355,
+      "gameRenderFps": 59.83554724858406,
+      "visibleFps": 59.03551764748878,
+      "p95GapMs": 17.404999999329448,
+      "maxGapMs": 86.49499999918044,
+      "relaxCount": 8,
+      "relaxUs": 73747,
+      "synchronousCompileAndLinkMs": 0,
+      "queueDropped": 23,
+      "queueUnderruns": 23,
+      "meanQueueAgeMs": 19.24273702034592,
+      "skippedNativePolls": 1
+    }
+  ],
+  "decision": "Keep correction off: opposing pair differences; no image FPS gate passed. Final control improves with unchanged configuration; cause of warming/host variability is not isolated.",
+  "limits": [
+    "No profiler or build during capture.",
+    "Conceded host time is pacing data, not skipped instructions. Counters bracket the image capture at paused native boundaries.",
+    "Synchronous compile/link excludes background browser optimization/tiering.",
+    "Queue age is not physical input-to-photon latency."
+  ]
+}

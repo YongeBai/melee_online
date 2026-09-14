@@ -1,0 +1,98 @@
+{
+  "kind": "same-checkpoint-fountain-animation-abba",
+  "complete": true,
+  "passed": false,
+  "coreSha256": "f7a2a4b67e696b1de11884d879dc0d0cbfe98807b16ba3f4f8c2e647d0d2e3b5",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle human versus level 9 CPU",
+  "settings": {
+    "models": "low",
+    "reflection": false,
+    "scenery": false,
+    "efbscale": 150,
+    "pace": "raf-buffered",
+    "probe": "async",
+    "emulationSpeed": 1,
+    "cpuOverclock": 1
+  },
+  "runs": [
+    {
+      "animation": true,
+      "warmup": false,
+      "seconds": 29.999020000001416,
+      "simulationFps": 57.501878394691516,
+      "gameRenderFps": 57.40187512791814,
+      "visibleFps": 57.30187186114476,
+      "p95GapMs": 19.550000000745058,
+      "maxGapMs": 49.955000000074506,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "animation": false,
+      "warmup": false,
+      "seconds": 30.010855000000447,
+      "simulationFps": 58.54548295941498,
+      "gameRenderFps": 58.47884040624547,
+      "visibleFps": 58.278912746736935,
+      "p95GapMs": 18.794999999925494,
+      "maxGapMs": 69.35999999940395,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "animation": false,
+      "warmup": false,
+      "seconds": 29.999379999998958,
+      "simulationFps": 59.23455751419068,
+      "gameRenderFps": 59.201223491954224,
+      "visibleFps": 58.967885336299,
+      "p95GapMs": 18.91499999910593,
+      "maxGapMs": 35.79999999888241,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "animation": true,
+      "warmup": false,
+      "seconds": 30.000710000000893,
+      "simulationFps": 58.5319480772271,
+      "gameRenderFps": 58.498615532763985,
+      "visibleFps": 58.36528535491153,
+      "p95GapMs": 19.015000000596046,
+      "maxGapMs": 52.20000000111759,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    }
+  ],
+  "caveat": "First disabled warmup suffered a 4.996-second image gap; the next trial initially stopped advancing, then recovered and completed. See hidden-animation-stall.json. Both measured pairs favor skipping hidden joint animation, but repeat validation is required and every target gate failed.",
+  "meanSimulationFps": {
+    "animationOn": 58.01691323595931,
+    "animationOff": 58.89002023680283
+  },
+  "relativeGain": 0.015049180525901651
+}

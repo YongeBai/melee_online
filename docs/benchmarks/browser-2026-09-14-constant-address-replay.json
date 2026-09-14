@@ -1,0 +1,304 @@
+{
+  "kind": "normal-running-browser-codegen-equivalence",
+  "feature": "constantaddr",
+  "passed": false,
+  "fullMachineBytesEqual": false,
+  "coreSha256": "521f4b2be89b1e2d4c9c9d15c8d6a787f1662b2d9f61cabf462d4dcfd8318ee8",
+  "frames": 600,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "fingerprintsEqual": true,
+  "sizeA": 110128135,
+  "sizeB": 110128135,
+  "selection": {
+    "stage": 8,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "input": {
+    "startFrame": 306,
+    "stopFrame": 906,
+    "trackedPolls": 601,
+    "skipped": 0,
+    "inputHash": 2617109027,
+    "stateHash": 4085548570
+  },
+  "sectionRows": {
+    "columns": [
+      "name",
+      "startA",
+      "bytesA",
+      "differentBytes"
+    ],
+    "rows": [
+      [
+        "Movie",
+        0,
+        54,
+        0
+      ],
+      [
+        "GPU PixelEngine",
+        54,
+        3164171,
+        0
+      ],
+      [
+        "GPU VertexManager",
+        3164225,
+        5943,
+        0
+      ],
+      [
+        "GPU FramebufferManager",
+        3170168,
+        6082641,
+        0
+      ],
+      [
+        "GPU TextureCache",
+        9252809,
+        16633917,
+        0
+      ],
+      [
+        "GPU Presenter",
+        25886726,
+        36,
+        0
+      ],
+      [
+        "video_backend",
+        25886762,
+        110,
+        0
+      ],
+      [
+        "CoreTiming",
+        25886872,
+        363,
+        2
+      ],
+      [
+        "HW Memory RAM",
+        25887235,
+        33816606,
+        0
+      ],
+      [
+        "HW Memory FakeVMEM",
+        59703841,
+        33554440,
+        0
+      ],
+      [
+        "HW Memory EXRAM",
+        93258281,
+        4,
+        0
+      ],
+      [
+        "HW Memory",
+        93258285,
+        4,
+        0
+      ],
+      [
+        "HW MemoryInterface",
+        93258289,
+        76,
+        0
+      ],
+      [
+        "HW VideoInterface",
+        93258365,
+        166,
+        0
+      ],
+      [
+        "HW SerialInterface",
+        93258531,
+        262,
+        0
+      ],
+      [
+        "HW ProcessorInterface",
+        93258793,
+        28,
+        0
+      ],
+      [
+        "HW DSP",
+        93258821,
+        16784150,
+        0
+      ],
+      [
+        "HW DVDInterface",
+        110042971,
+        154,
+        0
+      ],
+      [
+        "HW GPFifo",
+        110043125,
+        520,
+        0
+      ],
+      [
+        "HW ExpansionInterface",
+        110043645,
+        304,
+        0
+      ],
+      [
+        "HW AudioInterface",
+        110043949,
+        140,
+        0
+      ],
+      [
+        "HW HSP",
+        110044089,
+        8,
+        0
+      ],
+      [
+        "HW",
+        110044097,
+        8,
+        0
+      ],
+      [
+        "CPU registers",
+        110044105,
+        9514,
+        0
+      ],
+      [
+        "CPU instruction cache",
+        110053619,
+        37248,
+        0
+      ],
+      [
+        "CPU data cache",
+        110090867,
+        37248,
+        0
+      ],
+      [
+        "PowerPC",
+        110128115,
+        8,
+        0
+      ],
+      [
+        "Wiimote",
+        110128123,
+        4,
+        0
+      ],
+      [
+        "Gecko",
+        110128127,
+        8,
+        0
+      ]
+    ]
+  },
+  "difference": {
+    "section": "CoreTiming",
+    "offset": 12,
+    "bytes": 2,
+    "field": "CoreTiming.m_idled_cycles",
+    "fieldOffset": 12,
+    "fieldBytes": 8,
+    "containsWholeRange": true,
+    "rangesTruncated": false,
+    "fieldsComplete": true
+  },
+  "nativeExecution": {
+    "dispatcherCalls": [
+      1605353,
+      1617743
+    ],
+    "newConstantAddressSites": 539,
+    "ramSites": 219,
+    "otherSites": 320,
+    "callfusion": [
+      false,
+      false
+    ]
+  },
+  "savedTiming": {
+    "globalTimer": "15263737660",
+    "idleCycles": [
+      "4322772896",
+      "4322772647"
+    ],
+    "nextOrder": "2541673",
+    "guestPc": "2149207464",
+    "guestStackPointer": "2152655608",
+    "logicalQueueEqual": true,
+    "rawOrderCounterEqual": true,
+    "rawIdleCounterEqual": false,
+    "events": [
+      {
+        "name": "VICallback",
+        "order": "2541672",
+        "time": "15263753076",
+        "userdata": "0"
+      },
+      {
+        "name": "GPUSleeper",
+        "order": "2541636",
+        "time": "15263802000",
+        "userdata": "0"
+      },
+      {
+        "name": "DSPCallback",
+        "order": "2541637",
+        "time": "15263802000",
+        "userdata": "0"
+      },
+      {
+        "name": "AudioDMACallback",
+        "order": "2541670",
+        "time": "15263830080",
+        "userdata": "0"
+      },
+      {
+        "name": "FinishExecutingCommand",
+        "order": "2541619",
+        "time": "15264801216",
+        "userdata": "12884901889"
+      },
+      {
+        "name": "PatchEngine",
+        "order": "2540541",
+        "time": "15267552300",
+        "userdata": "0"
+      },
+      {
+        "name": "DecCallback",
+        "order": "2540618",
+        "time": "15268500061",
+        "userdata": "0"
+      }
+    ]
+  },
+  "interpretation": "Raw equality fails on two bytes of the historical idle accumulator, a difference of 249 cycles. All other serialized bytes and the actual saved event queue match. Source audit finds no execution consumer of m_idled_cycles/GetIdleTicks in this Dolphin build; this narrow accounting mismatch does not change future emulation state. No event orders or real clocks are exempted.",
+  "limits": "Selected exact visible QA fields. This is not a raw full-state PASS or whole-emulator equivalence against native Dolphin. Performance, broader coverage and physical latency are unmeasured. Original candidate flag restored off."
+}

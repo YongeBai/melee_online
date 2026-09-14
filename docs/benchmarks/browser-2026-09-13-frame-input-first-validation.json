@@ -1,0 +1,245 @@
+{
+  "coreSha256": "bb371a16ba1b736868d5f6d4d12ddf61727a345f3eb1aafff47fff8100c6f8a0",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "feature": "stateconst",
+  "passed": false,
+  "controllerMode": "native-frame feedback using ordinary controller values",
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.998175000000746,
+      "simulationFps": 49.43634071072534,
+      "gameRenderFps": 49.40300534949087,
+      "visibleFps": 49.33633462702192,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 2031,
+      "polledFrames": 1485,
+      "skipped": 0,
+      "inputChanges": [
+        148,
+        141
+      ],
+      "inputValid": true,
+      "lastDigest": 1440,
+      "sharedFingerprintDifferences": 0
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 30.000705000001936,
+      "simulationFps": 53.69873807965166,
+      "gameRenderFps": 53.69873807965166,
+      "visibleFps": 53.59874042959645,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 2158,
+      "polledFrames": 1612,
+      "skipped": 0,
+      "inputChanges": [
+        166,
+        155
+      ],
+      "inputValid": true,
+      "lastDigest": 1560,
+      "sharedFingerprintDifferences": 0
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.998854999996723,
+      "simulationFps": 47.16846692982631,
+      "gameRenderFps": 47.13513232422219,
+      "visibleFps": 47.10179771861807,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 1962,
+      "polledFrames": 1416,
+      "skipped": 0,
+      "inputChanges": [
+        142,
+        134
+      ],
+      "inputValid": true,
+      "lastDigest": 1320,
+      "sharedFingerprintDifferences": 0
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.999480000000446,
+      "simulationFps": 55.50096201667413,
+      "gameRenderFps": 55.50096201667413,
+      "visibleFps": 55.23429072770512,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 2214,
+      "polledFrames": 1667,
+      "skipped": 1,
+      "inputChanges": [
+        172,
+        162
+      ],
+      "inputValid": false,
+      "lastDigest": 1560,
+      "sharedFingerprintDifferences": 0
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 29.999294999998064,
+      "simulationFps": 56.86800306474236,
+      "gameRenderFps": 56.83466894805728,
+      "visibleFps": 56.70133248131697,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 2254,
+      "polledFrames": 1707,
+      "skipped": 1,
+      "inputChanges": [
+        176,
+        166
+      ],
+      "inputValid": false,
+      "lastDigest": 1680,
+      "sharedFingerprintDifferences": 0
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 29.99805999999866,
+      "simulationFps": 57.137028194492466,
+      "gameRenderFps": 57.10369270546417,
+      "visibleFps": 56.90367977129442,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 2262,
+      "polledFrames": 1715,
+      "skipped": 1,
+      "inputChanges": [
+        177,
+        167
+      ],
+      "inputValid": false,
+      "lastDigest": 1680,
+      "sharedFingerprintDifferences": 0
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 29.999605000000447,
+      "simulationFps": 55.26739435402484,
+      "gameRenderFps": 55.26739435402484,
+      "visibleFps": 55.16739303734084,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 2207,
+      "polledFrames": 1660,
+      "skipped": 1,
+      "inputChanges": [
+        171,
+        161
+      ],
+      "inputValid": false,
+      "lastDigest": 1560,
+      "sharedFingerprintDifferences": 0
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 30.000094999998808,
+      "simulationFps": 56.99981950057385,
+      "gameRenderFps": 56.966486272795734,
+      "visibleFps": 56.76648690612705,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "startFrame": 547,
+      "lastFrame": 2258,
+      "polledFrames": 1711,
+      "skipped": 1,
+      "inputChanges": [
+        176,
+        166
+      ],
+      "inputValid": false,
+      "lastDigest": 1680,
+      "sharedFingerprintDifferences": 0
+    }
+  ],
+  "inputConsistency": {
+    "passed": false,
+    "checked": 35,
+    "invalidRuns": [
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "reason": "First harness incorrectly required every logic frame to have a native controller poll."
+  },
+  "postRunComparison": {
+    "referenceRun": 5,
+    "sharedInputAndStateFingerprintsMatch": true,
+    "firstShared": {
+      "frame": 120,
+      "input": 195726345,
+      "state": 1292189536
+    },
+    "lastSharedByLongRuns": {
+      "frame": 1680,
+      "input": 900644452,
+      "state": 2362224716
+    }
+  },
+  "decision": "Do not use as accepted optimization evidence. Add exact gap records and frame indices to fingerprints, then repeat.",
+  "limitations": [
+    "32-bit fingerprints are not full machine conformance.",
+    "Native polling can be less frequent than observed logic frames; the cause of the specific gap is not yet mapped.",
+    "No FPS gate was relaxed."
+  ]
+}

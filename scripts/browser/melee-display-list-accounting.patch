@@ -1,0 +1,13 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -10725,6 +10725,10 @@
+     if (!result.valid || result.hex != expected[i])
+       return false;
+     const GekkoOPInfo* opinfo = PPCTables::GetOpInfo(UGeckoInstruction{result.hex}, address);
++    // The direct path is admitted only when both conditions bypass these
++    // calls. Charge the instructions the guest actually executes.
++    if (i == 11 || i == 16)
++      continue;
+     cycles += opinfo->num_cycles;
+     if ((opinfo->flags & FL_LOADSTORE) != 0)
+       ++loadstores;

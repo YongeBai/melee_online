@@ -1,0 +1,12 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -11049,7 +11049,8 @@
+   // (?shortprefix=1), drop to 2 so short blocks that currently fall to
+   // Interpret<false> (54% of attempts in the §28bz audit) compile instead.
+   const u32 MIN_WASM_PREFIX_INSTRUCTIONS =
+-      DolphinWebFeatureEnabled(1u << 18) ? 1u :
++      DolphinWebFeatureEnabled(1u << 18) && code_block.m_num_instructions == 1 &&
++          IsFastBranchInstruction(m_code_buffer[0].inst) && !m_code_buffer[0].inst.LK ? 1u :
+       DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_SHORT_PREFIX) ? 4u : 2u;
+ 
+   if (DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_WASMBLOCK))

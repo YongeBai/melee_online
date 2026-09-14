@@ -1,0 +1,161 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "callfusion",
+  "passed": false,
+  "coreSha256": "d8cf5bfd3bed74caa13fcdb2f726d6b81566a1653a29932a4436b60239711ed6",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "selection": {
+    "stage": 8,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "configuredEfbScale": 150,
+  "nonblackFraction": 1,
+  "queueCapacity": 2,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 122,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 44.99739999999851,
+      "simulationFps": 41.18015707574352,
+      "visibleFps": 41.13571006324946,
+      "p95GapMs": 33.899999998509884,
+      "synchronousCompileAndLinkMs": 141.664,
+      "queue": {
+        "dropped": 1,
+        "underruns": 839
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 919
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 44.99903500000015,
+      "simulationFps": 42.64535895047513,
+      "visibleFps": 42.60091355292383,
+      "p95GapMs": 33.86500000208616,
+      "synchronousCompileAndLinkMs": 0.58,
+      "queue": {
+        "dropped": 0,
+        "underruns": 772
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 919
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 44.99929500000179,
+      "simulationFps": 41.467316321287385,
+      "visibleFps": 41.422871180535736,
+      "p95GapMs": 33.84499999880791,
+      "synchronousCompileAndLinkMs": 43.851,
+      "queue": {
+        "dropped": 1,
+        "underruns": 824
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 2115
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 45.01479000000283,
+      "simulationFps": 41.78626624715747,
+      "visibleFps": 41.741836405321045,
+      "p95GapMs": 33.83500000089407,
+      "synchronousCompileAndLinkMs": 0,
+      "queue": {
+        "dropped": 1,
+        "underruns": 812
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 2115
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "seconds": 44.9975,
+      "simulationFps": 42.33568531585088,
+      "visibleFps": 42.224568031557304,
+      "p95GapMs": 33.88500000163913,
+      "synchronousCompileAndLinkMs": 0,
+      "queue": {
+        "dropped": 3,
+        "underruns": 788
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 2115
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "seconds": 44.99722499999776,
+      "simulationFps": 42.64707434736465,
+      "visibleFps": 42.60262716201044,
+      "p95GapMs": 33.78500000014901,
+      "synchronousCompileAndLinkMs": 0,
+      "queue": {
+        "dropped": 1,
+        "underruns": 773
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 2115
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "seconds": 44.99687999999896,
+      "simulationFps": 42.33626864796057,
+      "visibleFps": 42.29182112182098,
+      "p95GapMs": 33.78500000014901,
+      "synchronousCompileAndLinkMs": 0,
+      "queue": {
+        "dropped": 1,
+        "underruns": 787
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 2115
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "seconds": 45.014555000003426,
+      "simulationFps": 43.09717157039212,
+      "visibleFps": 43.0083114228243,
+      "p95GapMs": 33.850000001490116,
+      "synchronousCompileAndLinkMs": 0.259,
+      "queue": {
+        "dropped": 2,
+        "underruns": 750
+      },
+      "passed": false,
+      "cumulativeCallFusionBlocks": 2115
+    }
+  ],
+  "decision": "Keep off: candidate loses both measurement pairs. No 720p60 acceptance pass.",
+  "limits": "Selected exact fields from visible QA result. No profiler, native build, tests or resource sampler during these intervals. Rolling fingerprints are not full machine equivalence. Queue age is not physical input-to-photon latency. Earlier first raw replay had an unresolved eight-byte scheduler mismatch; unchanged control and repeated candidate raw replay later passed. Original flags restored."
+}

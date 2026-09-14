@@ -1,0 +1,21 @@
+{
+  "kind": "same-checkpoint-fountain-animation-abba",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "hostBootUtc": "2026-09-13 19:04:11",
+  "workload": "Fountain of Dreams, Ice Climbers mirror, two scripted native-frame controller tracks, partner AI retained",
+  "verifiedSelection": {"stage":2,"characters":[14,14],"slotTypes":[0,0],"timeLimit":480,"items":-1,"teams":0},
+  "settings": {"reflection":false,"scenery":false,"particles":true,"decorations":true,"models":"low","background":"black","efbscale":150,"fpuguard":true,"blockmerge":true,"regcache":true,"integerfifo":true,"singleprefix":true,"emulationSpeed":1,"cpuOverclock":1,"queueCapacity":2,"profiler":false,"metrics":false},
+  "diagnosticOnly": false,
+  "passed": false,
+  "inputConsistency": {"passed":true,"checked":110,"mismatches":[],"limits":"32-bit rolling fingerprints and exact polling gaps; not full machine equivalence"},
+  "sourceResolution": [960,720],
+  "nonblackFractionEachRun": 1,
+  "pageLifecycleEachRun": {"start":{"visibility":"visible","focused":true},"end":{"visibility":"visible","focused":true},"events":[]},
+  "runs": [
+    {"animation":true,"warmup":false,"seconds":30.04076000000001,"simulationFps":58.12103288998013,"gameRenderFps":58.05445667819321,"visibleFps":56.78950865424175,"p95GapMs":32.80499999993481,"maxGapMs":76.2149999999674,"queueDropped":35,"queueMeanAgeMs":14.674405389575192,"passed":false},
+    {"animation":false,"warmup":false,"seconds":29.998205000000073,"simulationFps":58.90352439420944,"gameRenderFps":58.83685373841521,"visibleFps":57.37009931094197,"p95GapMs":17.775000000023283,"maxGapMs":70.05499999993481,"queueDropped":43,"queueMeanAgeMs":17.11871370499456,"passed":false},
+    {"animation":false,"warmup":false,"seconds":29.99769000000006,"simulationFps":54.504196823155276,"gameRenderFps":54.47086092295763,"visibleFps":53.30410441603993,"p95GapMs":33.48999999999069,"maxGapMs":100.99499999999534,"queueDropped":35,"queueMeanAgeMs":13.652728124999776,"passed":false},
+    {"animation":true,"warmup":false,"seconds":30.013710000000078,"simulationFps":55.37469376494928,"gameRenderFps":55.341375657990824,"visibleFps":54.508422984029494,"p95GapMs":33.32999999995809,"maxGapMs":143.43499999993946,"queueDropped":25,"queueMeanAgeMs":14.083320097741629,"passed":false}
+  ],
+  "decision": "Opposing pairs and negative mean change; keep original hidden-scenery animation enabled. No 720p60 acceptance. Do not pair these rates against pre-restart measurements."
+}

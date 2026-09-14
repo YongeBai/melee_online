@@ -1,0 +1,109 @@
+{
+  "kind": "timing-drift-replay-summary",
+  "coreSha256": "e9ad5d9691b9957b0d99b252675a959c8770e302aba7801004c7758951bc475f",
+  "stage": "Battlefield",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "profileEnabled": false,
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "trials": [
+    {
+      "implementation": "first wrapper reapplied identical instruction flags, invalidating compiled block descriptors",
+      "passed": false,
+      "frames": 600,
+      "sizeA": 105941967,
+      "sizeB": 105941967,
+      "fingerprintsEqual": true,
+      "sceneStart": 307,
+      "sceneStop": 907,
+      "inputPolls": 601,
+      "inputHash": 3332506051,
+      "stateHash": 1170659400,
+      "inputChanges": [
+        73,
+        64
+      ],
+      "differentBytes": 1,
+      "differences": [
+        {
+          "section": "CoreTiming",
+          "relativeOffset": 12,
+          "bytes": 1,
+          "field": "CoreTiming.m_idled_cycles"
+        }
+      ],
+      "allOtherSectionsEqual": true,
+      "dispatchCalls": [
+        1490444,
+        1477517
+      ],
+      "limits": "Same idle-cycle-only variance occurred in earlier unchanged-code controls. This failure remains recorded, not filtered."
+    },
+    {
+      "implementation": "pacing-only control; instruction flags and compiled descriptors untouched",
+      "passed": true,
+      "frames": 600,
+      "sizeA": 106204563,
+      "sizeB": 106204563,
+      "sections": 29,
+      "differentBytes": 0,
+      "unmatchedBytes": 0,
+      "fullMachineBytesEqual": true,
+      "fingerprintsEqual": true,
+      "sceneStart": 306,
+      "sceneStop": 906,
+      "inputPolls": 601,
+      "skipped": 0,
+      "inputHash": 2522693603,
+      "stateHash": 3768470266,
+      "inputChanges": [
+        73,
+        64
+      ],
+      "dispatchCalls": [
+        1479912,
+        1475372
+      ],
+      "timingTransitions": [
+        {
+          "enabled": false,
+          "relaxCount": 259,
+          "relaxUs": 4147697,
+          "relaxMaxUs": 557550
+        },
+        {
+          "enabled": true,
+          "relaxCount": 819,
+          "relaxUs": 7532315,
+          "relaxMaxUs": 557550
+        },
+        {
+          "enabled": false,
+          "relaxCount": 819,
+          "relaxUs": 7532315,
+          "relaxMaxUs": 557550
+        }
+      ]
+    }
+  ],
+  "limits": "600 normal-running frames on one workload; not exhaustive match, network, latency or FPS validation. Earlier setup failure with a CPU port ended before comparison; launcher corrected to two human ports."
+}

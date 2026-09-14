@@ -1,0 +1,402 @@
+{
+  "kind": "normal-running-browser-codegen-equivalence",
+  "scope": "Selected recorded fields from the real browser replay; correctness evidence, not an FPS or network test.",
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "passed": true,
+  "fullMachineBytesEqual": true,
+  "fingerprintsEqual": true,
+  "performanceTest": false,
+  "networkTest": false,
+  "frames": 600,
+  "startFrame": 307,
+  "endFrame": 907,
+  "polls": 601,
+  "skipped": 0,
+  "inputHash": 1810390243,
+  "stateHash": 2149001623,
+  "verifiedSelection": {
+    "stage": 8,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "comparison": {
+    "sizeA": 110123914,
+    "sizeB": 110123914,
+    "retainedCode": true,
+    "sections": [
+      {
+        "name": "Movie",
+        "bytesA": 54,
+        "bytesB": 54,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "GPU PixelEngine",
+        "bytesA": 3164171,
+        "bytesB": 3164171,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "GPU VertexManager",
+        "bytesA": 5943,
+        "bytesB": 5943,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "GPU FramebufferManager",
+        "bytesA": 6082641,
+        "bytesB": 6082641,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "GPU TextureCache",
+        "bytesA": 16629696,
+        "bytesB": 16629696,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "GPU Presenter",
+        "bytesA": 36,
+        "bytesB": 36,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "video_backend",
+        "bytesA": 110,
+        "bytesB": 110,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "CoreTiming",
+        "bytesA": 363,
+        "bytesB": 363,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW Memory RAM",
+        "bytesA": 33816606,
+        "bytesB": 33816606,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW Memory FakeVMEM",
+        "bytesA": 33554440,
+        "bytesB": 33554440,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW Memory EXRAM",
+        "bytesA": 4,
+        "bytesB": 4,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW Memory",
+        "bytesA": 4,
+        "bytesB": 4,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW MemoryInterface",
+        "bytesA": 76,
+        "bytesB": 76,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW VideoInterface",
+        "bytesA": 166,
+        "bytesB": 166,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW SerialInterface",
+        "bytesA": 262,
+        "bytesB": 262,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW ProcessorInterface",
+        "bytesA": 28,
+        "bytesB": 28,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW DSP",
+        "bytesA": 16784150,
+        "bytesB": 16784150,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW DVDInterface",
+        "bytesA": 154,
+        "bytesB": 154,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW GPFifo",
+        "bytesA": 520,
+        "bytesB": 520,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW ExpansionInterface",
+        "bytesA": 304,
+        "bytesB": 304,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW AudioInterface",
+        "bytesA": 140,
+        "bytesB": 140,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW HSP",
+        "bytesA": 8,
+        "bytesB": 8,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "HW",
+        "bytesA": 8,
+        "bytesB": 8,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "CPU registers",
+        "bytesA": 9514,
+        "bytesB": 9514,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "CPU instruction cache",
+        "bytesA": 37248,
+        "bytesB": 37248,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "CPU data cache",
+        "bytesA": 37248,
+        "bytesB": 37248,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "PowerPC",
+        "bytesA": 8,
+        "bytesB": 8,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "Wiimote",
+        "bytesA": 4,
+        "bytesB": 4,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      },
+      {
+        "name": "Gecko",
+        "bytesA": 8,
+        "bytesB": 8,
+        "differentBytes": 0,
+        "unmatchedBytes": 0,
+        "rangeCount": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "config": {
+        "chainfusion": false,
+        "bswaprotate": false,
+        "qstatefull": false,
+        "qstatecache": false,
+        "cpformat": false,
+        "leandispatch": false,
+        "counterbatch": false,
+        "fusionredispatch": false,
+        "readfusion": false,
+        "stepcheck": false,
+        "fpuguardwide": false,
+        "branchfusion": false,
+        "fpuguard": true,
+        "blockmerge": true,
+        "regcache": true,
+        "fastmem": false,
+        "integerfifo": true,
+        "singleprefix": true,
+        "fprcache": false,
+        "compactgpr": false,
+        "pssimd": false,
+        "psmemsimd": false,
+        "vectorfpr": false,
+        "psqhoist": false,
+        "widemap": false,
+        "stateconst": false,
+        "msrcache": false,
+        "fifocopy": false,
+        "fifobatch": false,
+        "frsqrtefast": false
+      },
+      "execution": {
+        "stepcheck": 0,
+        "dispatcherHandle": 11379,
+        "bswaprotate": 0,
+        "byteSwapSites": 0,
+        "newByteSwapSites": 0,
+        "qstatefull": 0,
+        "qStateFullEmittedSites": 0,
+        "newQStateFullEmittedSites": 0,
+        "qstatecache": 0,
+        "qStateEmittedSites": 0,
+        "newQStateEmittedSites": 0,
+        "leandispatch": 0,
+        "leanScopes": 0,
+        "counterbatch": 0,
+        "counterBatches": 0,
+        "fusionredispatch": 0,
+        "fusionRedispatchEmissions": 0,
+        "newFusionRedispatchEmissions": 0,
+        "readfusion": 0,
+        "readFusionEmissions": 0,
+        "newReadFusionEmissions": 0,
+        "calls": 1614788,
+        "chainfusion": 0,
+        "chainFusionBlocks": 0,
+        "newChainFusionBlocks": 0,
+        "chainFusionBoundaries": 0
+      }
+    },
+    {
+      "config": {
+        "chainfusion": true,
+        "bswaprotate": false,
+        "qstatefull": false,
+        "qstatecache": false,
+        "cpformat": false,
+        "leandispatch": false,
+        "counterbatch": false,
+        "fusionredispatch": false,
+        "readfusion": false,
+        "stepcheck": false,
+        "fpuguardwide": false,
+        "branchfusion": false,
+        "fpuguard": true,
+        "blockmerge": true,
+        "regcache": true,
+        "fastmem": false,
+        "integerfifo": true,
+        "singleprefix": true,
+        "fprcache": false,
+        "compactgpr": false,
+        "pssimd": false,
+        "psmemsimd": false,
+        "vectorfpr": false,
+        "psqhoist": false,
+        "widemap": false,
+        "stateconst": false,
+        "msrcache": false,
+        "fifocopy": false,
+        "fifobatch": false,
+        "frsqrtefast": false
+      },
+      "execution": {
+        "stepcheck": 0,
+        "dispatcherHandle": 11379,
+        "bswaprotate": 0,
+        "byteSwapSites": 0,
+        "newByteSwapSites": 0,
+        "qstatefull": 0,
+        "qStateFullEmittedSites": 0,
+        "newQStateFullEmittedSites": 0,
+        "qstatecache": 0,
+        "qStateEmittedSites": 0,
+        "newQStateEmittedSites": 0,
+        "leandispatch": 0,
+        "leanScopes": 0,
+        "counterbatch": 0,
+        "counterBatches": 0,
+        "fusionredispatch": 0,
+        "fusionRedispatchEmissions": 2358,
+        "newFusionRedispatchEmissions": 2358,
+        "readfusion": 0,
+        "readFusionEmissions": 0,
+        "newReadFusionEmissions": 0,
+        "calls": 1504241,
+        "chainfusion": 1,
+        "chainFusionBlocks": 1050,
+        "newChainFusionBlocks": 1050,
+        "chainFusionBoundaries": 3266
+      }
+    }
+  ],
+  "profileEnabled": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "note": "The chain flag admits conditional fallthrough and uses existing soft redispatch; the separate fusionredispatch flag remains OFF. Emission counters are compile coverage, not runtime CPU share."
+}

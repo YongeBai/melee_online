@@ -1,0 +1,142 @@
+{
+  "artifactScope": "Selected exact fields from completed same-checkpoint queue comparison",
+  "kind": "same-checkpoint-queue-capacity-abba",
+  "passed": true,
+  "common": {
+    "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "nonblackFraction": 1,
+    "profiler": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "queueCapacity": 2,
+    "qstatefull": false,
+    "qstatecache": false,
+    "stage": 31,
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0,
+    "slotTypes": [
+      0,
+      0
+    ],
+    "pageLifecycle": {
+      "start": {
+        "visibility": "visible",
+        "focused": true
+      },
+      "end": {
+        "visibility": "visible",
+        "focused": true
+      },
+      "events": []
+    },
+    "controllerWorkload": "two scripted human tracks at native logic frames; Nana AI retained when present",
+    "validWorkload": true,
+    "characters": [
+      2,
+      20
+    ]
+  },
+  "requestedSecondsPerInterval": 30,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 115,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "capacity": 2,
+      "warmup": true,
+      "simulationFps": 58.93593633719042,
+      "gameRenderFps": 58.86926672594925,
+      "visibleFps": 58.302575030399346,
+      "passed": false,
+      "meanAgeMs": 19.005365714289248,
+      "dropped": 18,
+      "synchronousCompileAndLinkMs": 6.443
+    },
+    {
+      "capacity": 2,
+      "warmup": false,
+      "simulationFps": 47.90239511975599,
+      "gameRenderFps": 47.86906011967265,
+      "visibleFps": 47.535710118839276,
+      "passed": false,
+      "meanAgeMs": 12.784348283097483,
+      "dropped": 9,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "capacity": 3,
+      "warmup": true,
+      "simulationFps": 60.036335150090835,
+      "gameRenderFps": 59.93633014984083,
+      "visibleFps": 59.869660149674154,
+      "passed": true,
+      "meanAgeMs": 32.63648024482293,
+      "dropped": 3,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "capacity": 3,
+      "warmup": false,
+      "simulationFps": 60.035134387365694,
+      "gameRenderFps": 59.968465720639024,
+      "visibleFps": 59.868462720549026,
+      "passed": true,
+      "meanAgeMs": 32.80870061212892,
+      "dropped": 3,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "capacity": 3,
+      "warmup": true,
+      "simulationFps": 60.034473988339705,
+      "gameRenderFps": 59.967806054982304,
+      "visibleFps": 59.7678022549101,
+      "passed": true,
+      "meanAgeMs": 37.44788182834672,
+      "dropped": 7,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "capacity": 3,
+      "warmup": false,
+      "simulationFps": 60.035654711982495,
+      "gameRenderFps": 59.96898546743837,
+      "visibleFps": 59.568970000173636,
+      "passed": true,
+      "meanAgeMs": 35.73906879196302,
+      "dropped": 12,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "capacity": 2,
+      "warmup": true,
+      "simulationFps": 60.001630044281825,
+      "gameRenderFps": 59.968295805368335,
+      "visibleFps": 59.834958849714376,
+      "passed": true,
+      "meanAgeMs": 21.810748886423838,
+      "dropped": 4,
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "capacity": 2,
+      "warmup": false,
+      "simulationFps": 60.0347341437952,
+      "gameRenderFps": 59.968065921536684,
+      "visibleFps": 59.73472714363187,
+      "passed": true,
+      "meanAgeMs": 20.68244004463678,
+      "dropped": 7,
+      "synchronousCompileAndLinkMs": 0
+    }
+  ],
+  "decision": "Retain capacity2: final warmup and measurement both pass with lower queue age. Both capacity3 measured intervals pass, but add about12–15ms mean queue age relative to final control. First capacity2 measurement slowed to47.9FPS with zero synchronous compilation and no multi-second image gap; cause unresolved. No general-stage/roster or physical input-to-photon success claim.",
+  "observations": "Read-only proc sampling overlapped last19.035s of final control; details in battlefield-queue-worker-observations.json."
+}

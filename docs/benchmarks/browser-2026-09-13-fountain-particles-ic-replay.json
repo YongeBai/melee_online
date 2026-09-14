@@ -1,0 +1,53 @@
+{
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "artifactScope": "Exact CUA particleIcReplay result with inspected native matchup",
+  "passed": true,
+  "kind": "fountain-gameplay-observable-comparison",
+  "feature": "particles",
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "moving platform state and positions",
+    "native camera transform and settings"
+  ],
+  "implementation": {
+    "hook": "0x803a02c4",
+    "cave": "0x80002d00",
+    "bytes": 116,
+    "scope": "Stage bank30 only during major2/minor2/Fountain2",
+    "preserved": "Generation, updates, sorting, RNG calls, all other banks, native camera",
+    "skip": "Particle draw body only, leaving prev_kind as the last rendered particle"
+  },
+  "performanceClaim": false,
+  "coverageSnapshot": {
+    "total": 121,
+    "banks": [
+      {
+        "bank": 0,
+        "particles": 28,
+        "aboveDrawThreshold": 28,
+        "links": [
+          0
+        ]
+      },
+      {
+        "bank": 30,
+        "particles": 93,
+        "aboveDrawThreshold": 93,
+        "links": [
+          0
+        ]
+      }
+    ],
+    "limits": "Live particle count, not CPU time or executed draw count."
+  }
+}

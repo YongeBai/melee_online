@@ -1,0 +1,62 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Common/BrowserProfile.h
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Common/BrowserProfile.h
+@@ -8,11 +8,11 @@
+ 
+ namespace DolphinWeb::BrowserProfile
+ {
+-enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, CpuBranchCallbackSample, CpuEndCallbackSample, CpuGuestInterpretSample, CpuGatherSample, CpuGatherCopySample, CpuBurstSample, Count };
++enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, CpuBranchCallbackSample, CpuEndCallbackSample, CpuGuestInterpretSample, CpuGatherSample, CpuGatherCopySample, CpuBurstSample, CoreEventVi, CoreEventDsp, CoreEventAudioDma, CoreEventGpuSleep, CoreEventGpuSync, CoreEventDecrementer, CoreEventPatch, CoreEventDvd, CoreEventOther, CoreEventWait, Count };
+ constexpr std::array<const char*, static_cast<std::size_t>(Stage::Count)> names{
+     "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent",
+     "cpuGpuSync", "cpuGpuDecode", "cpuVideoWait",
+-    "cpuChainSample1024", "cpuPartialSample1024", "cpuCallbackSample1024", "cpuIdleSample1024", "cpuFpHelperSample1024", "cpuMemoryHelperSample1024", "cpuSystemHelperSample1024", "cpuInterpreterHelperSample1024", "cpuMemoryReadSample1024", "cpuMemoryWriteSample1024", "cpuFifoWriteSample1024", "cpuBranchCallbackSample1024", "cpuEndCallbackSample1024", "cpuGuestInterpretSample1024", "cpuGatherSample1024", "cpuGatherCopySample1024", "cpuBurstSample1024"};
++    "cpuChainSample1024", "cpuPartialSample1024", "cpuCallbackSample1024", "cpuIdleSample1024", "cpuFpHelperSample1024", "cpuMemoryHelperSample1024", "cpuSystemHelperSample1024", "cpuInterpreterHelperSample1024", "cpuMemoryReadSample1024", "cpuMemoryWriteSample1024", "cpuFifoWriteSample1024", "cpuBranchCallbackSample1024", "cpuEndCallbackSample1024", "cpuGuestInterpretSample1024", "cpuGatherSample1024", "cpuGatherCopySample1024", "cpuBurstSample1024", "coreEventVi", "coreEventDsp", "coreEventAudioDma", "coreEventGpuSleep", "coreEventGpuSync", "coreEventDecrementer", "coreEventPatch", "coreEventDvd", "coreEventOther", "coreEventWait"};
+ struct Counter
+ {
+   std::atomic<std::uint64_t> count{0};
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/WasmTimingProfile.h
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/WasmTimingProfile.h
+@@ -14,6 +14,8 @@
+ #include <limits>
+ #include <string_view>
+ 
++#include "Common/BrowserProfile.h"
++
+ namespace DolphinWeb::WasmTimingProfile
+ {
+ using Clock = std::chrono::steady_clock;
+@@ -351,11 +353,34 @@
+ 
+ inline std::uint32_t CurrentAttributedWaitUs();
+ 
++// Complete callback wall times measured by the existing profile-only clock.
++// Wait is a nested subset, not an additional cost. These counters are for
++// diagnostic runs; profile bookkeeping remains included in outer CPU scopes.
++inline void RecordEventAttribution(std::string_view name, std::uint32_t elapsed_us,
++                                   std::uint32_t wait_us_at_start)
++{
++  if (!s_current_slice.active) return;
++  using Stage = DolphinWeb::BrowserProfile::Stage;
++  const Stage stage = name == "VICallback" ? Stage::CoreEventVi :
++      name == "DSPCallback" ? Stage::CoreEventDsp :
++      name == "AudioDMACallback" ? Stage::CoreEventAudioDma :
++      name == "GPUSleeper" ? Stage::CoreEventGpuSleep :
++      name == "SyncGPUCallback" ? Stage::CoreEventGpuSync :
++      name == "DecCallback" ? Stage::CoreEventDecrementer :
++      name == "PatchEngine" ? Stage::CoreEventPatch :
++      name == "FinishReadDVDThread" ? Stage::CoreEventDvd : Stage::CoreEventOther;
++  DolphinWeb::BrowserProfile::Record(stage, elapsed_us);
++  const auto wait_at_end = CurrentAttributedWaitUs();
++  const auto waited = wait_at_end >= wait_us_at_start ? wait_at_end - wait_us_at_start : 0;
++  DolphinWeb::BrowserProfile::Record(Stage::CoreEventWait, std::min(waited, elapsed_us));
++}
++
+ inline void RecordCoreTimingEvent(std::string_view name, std::uint32_t elapsed_us,
+                                   std::uint32_t wait_us_at_start)
+ {
+   if (!s_current_slice.active)
+     return;
++  RecordEventAttribution(name, elapsed_us, wait_us_at_start);
+   const EventKind event = ClassifyEvent(name);
+   if (event == EventKind::VICallback)
+   {

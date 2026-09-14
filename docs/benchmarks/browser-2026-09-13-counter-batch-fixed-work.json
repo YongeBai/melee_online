@@ -1,0 +1,190 @@
+{
+  "artifactScope": "Exact selected CUA fixedWorkRun fields; warmups and matching section rows omitted",
+  "kind": "fixed-native-work-abba",
+  "coreSha256": "7c71025547024da63e581f435aaaa2df845e7f1aebcbee595cd99675188aba30",
+  "feature": "counterbatch",
+  "frames": 1800,
+  "diagnosticOnly": true,
+  "passed": false,
+  "equivalencePassed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame controller scripts; native partner AI; not human play",
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "queueCapacity": 2,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 120,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "counterbatch": false,
+      "nativeWorkFps": 54.7111968175167,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 548,
+        "stopFrame": 2348,
+        "elapsedMs": 32900.029696
+      },
+      "controllerStress": {
+        "frames": 1800,
+        "skipped": 1,
+        "inputHash": 3447159770,
+        "stateHash": 2888060802,
+        "gaps": [
+          {
+            "after": 1411,
+            "before": 1413
+          }
+        ],
+        "inputChanges": [
+          188,
+          173
+        ],
+        "exercisedBothPlayers": true
+      },
+      "referenceCapture": true
+    },
+    {
+      "counterbatch": true,
+      "nativeWorkFps": 57.71166471737696,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 548,
+        "stopFrame": 2348,
+        "elapsedMs": 31189.535232
+      },
+      "controllerStress": {
+        "frames": 1800,
+        "skipped": 1,
+        "inputHash": 3447159770,
+        "stateHash": 2888060802,
+        "gaps": [
+          {
+            "after": 1411,
+            "before": 1413
+          }
+        ],
+        "inputChanges": [
+          188,
+          173
+        ],
+        "exercisedBothPlayers": true
+      },
+      "fullMachineBytesEqual": true,
+      "comparison": {
+        "sizeA": 107005201,
+        "sizeB": 107005201,
+        "sectionCount": 29,
+        "differingSections": []
+      }
+    },
+    {
+      "counterbatch": true,
+      "nativeWorkFps": 57.09954298845426,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 548,
+        "stopFrame": 2348,
+        "elapsedMs": 31523.89504
+      },
+      "controllerStress": {
+        "frames": 1800,
+        "skipped": 1,
+        "inputHash": 3447159770,
+        "stateHash": 2888060802,
+        "gaps": [
+          {
+            "after": 1411,
+            "before": 1413
+          }
+        ],
+        "inputChanges": [
+          188,
+          173
+        ],
+        "exercisedBothPlayers": true
+      },
+      "fullMachineBytesEqual": false,
+      "comparison": {
+        "sizeA": 107005201,
+        "sizeB": 107005201,
+        "sectionCount": 29,
+        "differingSections": [
+          {
+            "name": "CoreTiming",
+            "startA": 22763938,
+            "startB": 22763938,
+            "bytesA": 363,
+            "bytesB": 363,
+            "differentBytes": 2,
+            "firstRelativeOffset": 12
+          }
+        ]
+      }
+    },
+    {
+      "counterbatch": false,
+      "nativeWorkFps": 57.074042328618006,
+      "timing": {
+        "valid": true,
+        "frames": 1800,
+        "startFrame": 548,
+        "stopFrame": 2348,
+        "elapsedMs": 31537.979904
+      },
+      "controllerStress": {
+        "frames": 1800,
+        "skipped": 1,
+        "inputHash": 3447159770,
+        "stateHash": 2888060802,
+        "gaps": [
+          {
+            "after": 1411,
+            "before": 1413
+          }
+        ],
+        "inputChanges": [
+          188,
+          173
+        ],
+        "exercisedBothPlayers": true
+      },
+      "fullMachineBytesEqual": false,
+      "comparison": {
+        "sizeA": 107005201,
+        "sizeB": 107005201,
+        "sectionCount": 29,
+        "differingSections": [
+          {
+            "name": "GPU TextureCache",
+            "startA": 9252809,
+            "startB": 9252809,
+            "bytesA": 13510983,
+            "bytesB": 13510983,
+            "differentBytes": 120,
+            "firstRelativeOffset": 5529851
+          }
+        ]
+      }
+    }
+  ],
+  "decision": "No acceptance. Reverse timing pair effectively tied. Second ON differed in CoreTiming; final unchanged OFF differed in GPU texture cache. Need field/range diagnostics before assigning cause. No distinct-visible-image measurement in this diagnostic."
+}

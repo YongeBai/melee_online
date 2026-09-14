@@ -1,0 +1,78 @@
+{
+  "kind": "same-checkpoint-tournament match-reverb-abba",
+  "accepted": false,
+  "reason": "The experiment was repeatably faster but no disabled measured run passed every strict 720p60 gate.",
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "verifiedSelection": {
+    "stage": 8,
+    "characters": [14, 14],
+    "slotTypes": [0, 0],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "resolution": [960, 720],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 111,
+    "mismatches": []
+  },
+  "codegen": {
+    "matrixfast": true,
+    "callfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true
+  },
+  "measuredRuns": [
+    {
+      "reverb": true,
+      "simulationFps": 59.30469495501728,
+      "gameRenderFps": 59.23802301015497,
+      "visibleFps": 58.571303561531955,
+      "p95GapMs": 17.62999999523163,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "dryMixPreserved": true
+    },
+    {
+      "reverb": false,
+      "simulationFps": 59.66783018935713,
+      "gameRenderFps": 59.63449620601113,
+      "visibleFps": 59.26782238920502,
+      "p95GapMs": 17.560000002384186,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "dryMixPreserved": true
+    },
+    {
+      "reverb": false,
+      "simulationFps": 59.90190687736536,
+      "gameRenderFps": 59.835238088408914,
+      "visibleFps": 59.50189414362669,
+      "p95GapMs": 17.570000000298023,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "dryMixPreserved": true
+    },
+    {
+      "reverb": true,
+      "simulationFps": 59.78582079616368,
+      "gameRenderFps": 59.75249536651142,
+      "visibleFps": 59.31926478103197,
+      "p95GapMs": 17.554999999701977,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "dryMixPreserved": true
+    }
+  ],
+  "disabledMinusEnabledPairDeltas": {
+    "simulationFps": [0.3631352343398575, 0.1160860812016722],
+    "gameRenderFps": [0.39647319585616, 0.0827427218974961],
+    "visibleFps": [0.6965188276730672, 0.1826293625947244]
+  },
+  "coreSha256": "7a2be56c2c429cb3ca695d36bcf4668ea04c9f22438f0fba9f03d90850360d19"
+}

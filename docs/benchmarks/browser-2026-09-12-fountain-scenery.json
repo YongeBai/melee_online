@@ -1,0 +1,48 @@
+{
+  "kind": "fountain-scenery-abba-selected-scalars",
+  "core": "a854a47c3d9647baf9f62948f0459ae14eff3fccbc78ca05bd5d2190723810f1",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle P1 versus CPU9",
+  "reflection": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "speed": 1,
+  "cpuClock": 1,
+  "runs": [
+    {
+      "scenery": true,
+      "simulationFps": 51.03612330807519,
+      "visibleFps": 50.969452996764836
+    },
+    {
+      "scenery": false,
+      "simulationFps": 56.601499939748265,
+      "visibleFps": 56.46816307298796
+    },
+    {
+      "scenery": false,
+      "simulationFps": 56.99981000063404,
+      "visibleFps": 56.86647711174367
+    },
+    {
+      "scenery": true,
+      "simulationFps": 51.93653608639135,
+      "visibleFps": 51.903200697375695
+    }
+  ],
+  "passed": false,
+  "scope": "600-frame all-fighter/partner, player-slot, RNG, moving-platform and native-camera probes passed on a854. Visual floor/ledges/platforms/HUD preserved. Not exhaustive gameplay validation.",
+  "allActorValidation": {
+    "passed": true,
+    "framesCompared": 600,
+    "initialActorCount": 4,
+    "core": "a854a47c3d9647baf9f62948f0459ae14eff3fccbc78ca05bd5d2190723810f1",
+    "fullMachineEquivalence": false
+  }
+}

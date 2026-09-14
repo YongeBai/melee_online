@@ -1,0 +1,158 @@
+{
+  "artifactScope": "Exact selected measured CUA queueFirstRun/queueWarmRun fields; warmup rows omitted",
+  "coreSha256": "767af3cb674006c9c2e59db2b5416e5fac83aed133b052eb4992ed11473226be",
+  "kind": "same-checkpoint-queue-capacity-abba",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "workload": "two scripted human controller tracks sampled on native logic frames; partner AI retained, not human play",
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "profiler": false,
+  "commonCodegen": {
+    "blockmerge": true,
+    "fpuguard": true,
+    "readfusion": true,
+    "branchfusion": true,
+    "fusionredispatch": false,
+    "stepcheck": false,
+    "fpuguardwide": false
+  },
+  "runs": [
+    {
+      "capacity": 2,
+      "seconds": 29.99946999999881,
+      "simulationFps": 54.50096285034586,
+      "gameRenderFps": 54.46762892811323,
+      "visibleFps": 54.40096108364797,
+      "p95GapMs": 33.32000000029802,
+      "maxGapMs": 49.86999999731779,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1633,
+        "presented": 1633,
+        "dropped": 1,
+        "underruns": 167,
+        "meanAgeMs": 10.142391304283038,
+        "p50AgeUpperMs": 10,
+        "p95AgeUpperMs": 24,
+        "p99AgeUpperMs": 29,
+        "ageOverflow256Ms": 0
+      }
+    },
+    {
+      "capacity": 3,
+      "seconds": 30.000015000000595,
+      "simulationFps": 55.76663878334617,
+      "gameRenderFps": 55.69997215001282,
+      "visibleFps": 55.53330556667945,
+      "p95GapMs": 33.190000005066395,
+      "maxGapMs": 50.685000002384186,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 3,
+        "rateLimited": true,
+        "received": 1671,
+        "presented": 1667,
+        "dropped": 5,
+        "underruns": 132,
+        "meanAgeMs": 14.896061787718095,
+        "p50AgeUpperMs": 13,
+        "p95AgeUpperMs": 41,
+        "p99AgeUpperMs": 47,
+        "ageOverflow256Ms": 0
+      }
+    },
+    {
+      "capacity": 3,
+      "seconds": 29.998529999993742,
+      "simulationFps": 57.53615260482297,
+      "gameRenderFps": 57.50281763807626,
+      "visibleFps": 57.269472870849285,
+      "p95GapMs": 17.679999999701977,
+      "maxGapMs": 49.85999999940395,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 3,
+        "rateLimited": true,
+        "received": 1724,
+        "presented": 1719,
+        "dropped": 7,
+        "underruns": 80,
+        "meanAgeMs": 18.886556137381355,
+        "p50AgeUpperMs": 15,
+        "p95AgeUpperMs": 44,
+        "p99AgeUpperMs": 47,
+        "ageOverflow256Ms": 0
+      }
+    },
+    {
+      "capacity": 2,
+      "seconds": 29.998414999999106,
+      "simulationFps": 59.63648412757985,
+      "gameRenderFps": 59.536478843967366,
+      "visibleFps": 58.936447142292444,
+      "p95GapMs": 17.42500000447035,
+      "maxGapMs": 33.98499999940395,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1787,
+        "presented": 1769,
+        "dropped": 18,
+        "underruns": 30,
+        "meanAgeMs": 18.533126060115443,
+        "p50AgeUpperMs": 20,
+        "p95AgeUpperMs": 30,
+        "p99AgeUpperMs": 31,
+        "ageOverflow256Ms": 0
+      }
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 108,
+    "mismatches": []
+  },
+  "decision": "No repeatable gain: opposing pairs with substantial throughput drift; one individual warm capacity3 interval passes, the other fails. Keep default capacity2. Capacity3 adds queue delay and is not proof of low input-to-photon latency or all-stage/all-character acceptance."
+}

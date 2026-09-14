@@ -1,0 +1,15 @@
+{
+  "kind":"startup-timing-profile-trials",
+  "coreSha256":"a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "stage":"Final Destination",
+  "fighters":["Fox","Falco"],
+  "workload":"two scripted ordinary controllers sampled on native logic frames",
+  "timing":"dolphin",
+  "queueCapacity":2,
+  "runs":[
+    {"seconds":29.998899999999907,"simulationFps":57.46877385504153,"gameRenderFps":57.40210474384079,"visibleFps":56.20206074222739,"p95GapMs":32.985000000102445,"maxGapMs":67.0449999999255,"queueDropped":34,"queueMeanAgeMs":18.016912811391293,"passed":false},
+    {"seconds":29.99938500000001,"simulationFps":58.96787550811456,"gameRenderFps":58.901207474753214,"visibleFps":57.667848857568224,"p95GapMs":19.80999999982305,"maxGapMs":61.859999999869615,"queueDropped":36,"queueMeanAgeMs":17.409378971693208,"passed":false}
+  ],
+  "eachRun":{"validControllerInput":true,"exercisedBothPlayers":true,"visible":true,"focused":true,"lifecycleEvents":[]},
+  "decision":"No target pass; return to baseline timing. Separate fresh matches and startup warming prevent a causal paired speedup estimate."
+}

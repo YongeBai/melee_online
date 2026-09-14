@@ -1,0 +1,49 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -93,6 +93,14 @@
+ #define DOLPHIN_WEB_HOT_COUNTERS 1
+ #endif
+ 
++// The dispatch counter is useful while comparing execution strategies, but it
++// sits on the hottest edge in the browser core: once for every generated PPC
++// block. Release builds compile the counter object and its atomic increment
++// away while preserving the normal (Diagnostics=true) dispatcher layout.
++#ifndef DOLPHIN_WEB_DISPATCH_COUNTERS
++#define DOLPHIN_WEB_DISPATCH_COUNTERS 1
++#endif
++
+ #ifndef DOLPHIN_WEB_HOT_DISPATCH_ORDER
+ #define DOLPHIN_WEB_HOT_DISPATCH_ORDER 1
+ #endif
+@@ -9578,8 +9586,10 @@
+   const bool profile_segments = Diagnostics && DolphinWeb::BrowserProfile::enabled.load(std::memory_order_relaxed);
+   const int s_wasm_dispatch_loop_handle =
+       s_wasm_dispatch_loop_handles[(DolphinWeb_GetWideBlockMap() ? 1 : 0) | (DolphinWeb_GetStepCheck() ? 2 : 0) | (DolphinWeb::DispatchProfile::enabled.load(std::memory_order_relaxed) ? 4 : 0)];
+-  std::conditional_t<Diagnostics, ScopedDispatchCounter, NoDispatchDiagnostics> dispatch_counter(s_wasm_dispatch_loop_calls, s_dispatch_counter_batches,
+-                                         Diagnostics && DolphinWeb_GetCounterBatch());
++  std::conditional_t<Diagnostics && DOLPHIN_WEB_DISPATCH_COUNTERS, ScopedDispatchCounter,
++                     NoDispatchDiagnostics>
++      dispatch_counter(s_wasm_dispatch_loop_calls, s_dispatch_counter_batches,
++                       Diagnostics && DolphinWeb_GetCounterBatch());
+   const bool wasm_dispatch = allow_redispatch && !(Diagnostics && s_ppc_block_profile_enabled) &&
+       !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH) &&
+       DolphinWebFeatureEnabled(1u << 27) && s_wasm_dispatch_loop_handle != 0;
+@@ -14355,6 +14365,7 @@
+   std::ostringstream out;
+   out << (s_wasm_jit_applied_mode.load(std::memory_order_acquire) < 2 ? "tier:guarded " : "tier:mixed ");
+   out << "hotcounts:" << (DOLPHIN_WEB_HOT_COUNTERS ? "on " : "off ");
++  out << "dispatchcounts:" << (DOLPHIN_WEB_DISPATCH_COUNTERS ? "on " : "off ");
+   const u32 average_prefix =
+       s_wasm_block_attempt_count == 0 ? 0 : s_wasm_prefix_instruction_sum / s_wasm_block_attempt_count;
+   out << "jit attempts:" << s_wasm_block_attempt_count
+--- a/vendor/dolphin/Source/Core/Core/CMakeLists.txt
++++ b/vendor/dolphin/Source/Core/Core/CMakeLists.txt
+@@ -986,5 +986,7 @@
+       -UDOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH
+       -DDOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH=1
+       -UDOLPHIN_WEB_HOT_COUNTERS
+-      -DDOLPHIN_WEB_HOT_COUNTERS=0)
++      -DDOLPHIN_WEB_HOT_COUNTERS=0
++      -UDOLPHIN_WEB_DISPATCH_COUNTERS
++      -DDOLPHIN_WEB_DISPATCH_COUNTERS=0)
+ endif()

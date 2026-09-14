@@ -1,0 +1,13 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1079,6 +1079,10 @@
+       } else if (payload.action === "cpFormatStats") {
+         if(!api.browserCPFormatStats)throw Error("CP format statistics unavailable");
+         const stats=JSON.parse(api.browserCPFormatStats());if(stats.error)throw Error(stats.error);return stats;
++      } else if (payload.action === "unthrottled") {
++        if(typeof payload.enabled!=="boolean")throw Error("Unthrottled mode must be boolean");
++        if(!api.browserRollbackSetUnthrottled?.(payload.enabled?1:0))throw Error("Unthrottled mode requires a paused machine");
++        return {enabled:payload.enabled};
+       } else if (payload.action === "frameInputTiming") {
+         if(!api.browserFrameBenchmarkTiming)throw Error("Native frame timing unavailable");
+         return JSON.parse(api.browserFrameBenchmarkTiming());

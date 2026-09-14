@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "constant-linear-animation-specialization",
+  "coreSha256": "172876d5a91c9d621f7f59c4d6b9d6f0c627ed7effbeacd26bbf8a1d7e1cce09",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "rules": {
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0
+    },
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "secondsPerRun": 40,
+  "runOrder": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 38.4771,
+      "visibleFps": 38.4271
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 42.152624,
+      "visibleFps": 42.077619
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 47.577736,
+      "visibleFps": 47.427727
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 48.302258,
+      "visibleFps": 47.927241
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 50.253436,
+      "visibleFps": 49.87841
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 49.95661,
+      "visibleFps": 49.65672
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 47.126178,
+      "visibleFps": 46.951174
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 48.304269,
+      "visibleFps": 48.179258
+    }
+  ],
+  "measuredMeans": {
+    "controlSimulationFps": 45.2284465,
+    "candidateSimulationFps": 49.129434,
+    "simulationUpliftPercent": 8.625
+  },
+  "inputConsistency": {
+    "passed": true,
+    "commonTrackedFrames": 120,
+    "pollingGapsEqual": true
+  },
+  "correctness": {
+    "fullMachineReplay120Frames": "pass",
+    "fullMachineReplay600Frames": "pass",
+    "acceleratedCalls600Frames": 118625
+  },
+  "decision": "Accept. The symmetric mean cancels the large monotonic browser warmup/tiering drift. This is the current accepted animation optimization; the worst-case scene remains below 60 FPS."
+}

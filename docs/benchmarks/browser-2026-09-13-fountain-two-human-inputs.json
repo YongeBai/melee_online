@@ -1,0 +1,93 @@
+{
+  "kind": "selected-fields-from-same-checkpoint-warmed-repeats",
+  "passed": false,
+  "coreSha256": "7fcee65d561ffe23bfa2e172c50b4629927cf6699ba66920af719f4794094464",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two active scripted human controllers; native partner AI retained; not human play",
+  "configuration": {
+    "reflection": false,
+    "scenery": false,
+    "blackBackground": true,
+    "internalScalePercent": 150,
+    "internalResolution": [
+      960,
+      792
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "presentationPacing": "raf-buffered",
+    "queueCapacity": 2,
+    "probe": "webgl2-pbo-fence",
+    "compactGpr": false,
+    "pairedSimd": false,
+    "fprCache": false,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true,
+    "cpuOverclock": 1,
+    "emulationSpeed": 1
+  },
+  "warmup": {
+    "simulationFps": 46.00177873544467,
+    "visibleFps": 45.935109490900544,
+    "passed": false
+  },
+  "runs": [
+    {
+      "seconds": 29.99840499999933,
+      "simulationFps": 50.86937122157108,
+      "gameRenderFps": 50.836036115921296,
+      "visibleFps": 50.76936590462173,
+      "p95GapMs": 33.52000000048429,
+      "maxGapMs": 58.71999999973923,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false,
+      "inputChanges": [
+        152,
+        156
+      ],
+      "exercisedBothPlayers": true,
+      "queue": {
+        "received": 1526,
+        "presented": 1525,
+        "dropped": 1,
+        "underruns": 276,
+        "meanAgeMs": 8.573052459001296
+      }
+    },
+    {
+      "seconds": 29.99885000000056,
+      "simulationFps": 50.90195124146331,
+      "gameRenderFps": 50.868616630303215,
+      "visibleFps": 50.83528201914312,
+      "p95GapMs": 33.53000000026077,
+      "maxGapMs": 67.61000000033528,
+      "validGameplay": true,
+      "nonblackFraction": 1,
+      "passed": false,
+      "inputChanges": [
+        150,
+        149
+      ],
+      "exercisedBothPlayers": true,
+      "queue": {
+        "received": 1527,
+        "presented": 1527,
+        "dropped": 0,
+        "underruns": 273,
+        "meanAgeMs": 8.57154878846796
+      }
+    }
+  ],
+  "limitations": [
+    "Not a controlled comparison against the earlier CPU9 workload.",
+    "Physical input-to-photon and full roster/stage coverage unmeasured."
+  ]
+}

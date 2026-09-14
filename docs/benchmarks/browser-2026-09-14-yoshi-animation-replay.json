@@ -1,0 +1,22 @@
+{
+  "kind": "yoshi-gameplay-observable-comparison",
+  "feature": "yoshianimation",
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "passed": true,
+  "performanceTest": false,
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "randallMoved": true,
+  "observedItemKinds": [210, 106],
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "Randall and main-stage/Shy Guy transforms, timers, item actors and projectiles",
+    "native camera transform and settings"
+  ],
+  "limits": "Real browser stepped replay, one scripted player versus native CPU with partner AI retained. Hidden map-1 joint animation differs intentionally. All probes match for this finite trace; not exhaustive move coverage or normal-running raw-machine equivalence. Normal background animation restored afterward."
+}

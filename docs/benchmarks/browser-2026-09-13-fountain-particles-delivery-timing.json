@@ -1,0 +1,101 @@
+{
+  "artifactScope": "Exact selected measured CUA particleTimingRun fields captured before session reset. Final input-consistency metadata was not recovered; do not infer it.",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "kind": "fountain-particles-export-delivery-diagnostic",
+  "diagnosticOnly": true,
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "runs": [
+    {
+      "particles": true,
+      "simulationFps": 49.73569577887789,
+      "visibleFps": 49.63569102865227,
+      "exportIntervalMs": {
+        "mean": 20.127669785274463,
+        "p95": 32.60986328125,
+        "max": 60.929931640625
+      },
+      "exportToMainMs": {
+        "mean": 0.696136474609375,
+        "p95": 1.52978515625,
+        "max": 10.14990234375
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 0,
+        "meanAgeMs": 14.834379194796885
+      },
+      "canvasTransferMs": {
+        "mean": 0.02642863228817114
+      }
+    },
+    {
+      "particles": false,
+      "simulationFps": 54.43355106751922,
+      "visibleFps": 54.30021720085046,
+      "exportIntervalMs": {
+        "mean": 18.38625158766296,
+        "p95": 30.460205078125,
+        "max": 75.739990234375
+      },
+      "exportToMainMs": {
+        "mean": 0.7506465011400214,
+        "p95": 1.625,
+        "max": 10.425048828125
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.744972392578433
+      },
+      "canvasTransferMs": {
+        "mean": 0.02504852856595092
+      }
+    },
+    {
+      "particles": false,
+      "simulationFps": 55.06696035711534,
+      "visibleFps": 54.90029280155506,
+      "exportIntervalMs": {
+        "mean": 18.170636826533126,
+        "p95": 30.164794921875,
+        "max": 59.46484375
+      },
+      "exportToMainMs": {
+        "mean": 0.7220377604166667,
+        "p95": 1.574951171875,
+        "max": 11.77001953125
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 4,
+        "meanAgeMs": 15.486589805503348
+      }
+    },
+    {
+      "particles": true,
+      "simulationFps": 56.306184295911855,
+      "visibleFps": 55.80612937321282,
+      "exportIntervalMs": {
+        "mean": 17.780741301295595,
+        "p95": 25.409912109375,
+        "max": 37.08984375
+      },
+      "exportToMainMs": {
+        "mean": 0.36717794855883223,
+        "p95": 0.789794921875,
+        "max": 4.56494140625
+      },
+      "queue": {
+        "capacity": 2,
+        "dropped": 14,
+        "meanAgeMs": 13.943417910390826
+      }
+    }
+  ],
+  "finding": "Frame production dominates these intervals: exports average17.78–20.13ms apart, while export-to-page delivery averages0.37–0.75ms. Does not prove GPU completion or physical input-to-photon latency. Opposing FPS pairs; no performance retention decision from instrumented timings."
+}

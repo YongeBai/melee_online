@@ -1,0 +1,200 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -308,6 +308,8 @@
+ std::atomic<bool> s_dolphin_web_psq_hoist{false};
+ std::atomic<bool> s_dolphin_web_wide_block_map{false};
+ std::atomic<bool> s_dolphin_web_constant_state_base{false};
++std::atomic<bool> s_dolphin_web_block_msr_cache{false};
++std::atomic<u32> s_block_msr_cache_load_sites{0},s_block_msr_cache_blocks{0};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEECALL   = 1u << 1;  // 5 Melee fast call-branch helpers
+@@ -2912,8 +2914,35 @@
+          (index >= SPR_GQR0 && index < SPR_GQR0 + 8);
+ }
+ 
++// A block-local snapshot of MSR. Admission excludes instructions that can
++// change it; continuing imported helpers refresh the snapshot defensively.
++// The guest CPU owns MSR. Other threads publish pending exceptions, which are
++// taken only at the existing block/timing boundaries.
++struct WasmBlockMsrCache { bool active=false; u32 offset=0, local=0; };
++static WasmBlockMsrCache s_block_msr_cache;
++struct ScopedBlockMsrCache
++{
++  WasmBlockMsrCache previous=s_block_msr_cache;
++  ScopedBlockMsrCache() {s_block_msr_cache={};}
++  ~ScopedBlockMsrCache() {s_block_msr_cache=previous;}
++};
++bool EmitBlockMsrLoad(std::vector<u8>& body,u32 offset)
++{
++  if (!s_block_msr_cache.active || offset!=s_block_msr_cache.offset) return false;
++  EmitLocalGet(body,s_block_msr_cache.local);
++  s_block_msr_cache_load_sites.fetch_add(1,std::memory_order_relaxed);
++  return true;
++}
++void EmitBlockMsrReload(std::vector<u8>& body)
++{
++  if (!s_block_msr_cache.active) return;
++  EmitLocalGet(body,0);body.insert(body.end(),{0x28,0x02});EmitU32Leb(body,s_block_msr_cache.offset);
++  EmitLocalSet(body,s_block_msr_cache.local);
++}
++
+ void EmitStateLoadU32(std::vector<u8>& body, u32 offset)
+ {
++  if(EmitBlockMsrLoad(body,offset))return;
+   u32 lane;
+   if (FprCacheIndex(offset & ~7u, &lane))
+   {
+@@ -4393,6 +4422,7 @@
+   // Each state-touching helper was preceded by the common cache flush.
+   // Reload on its continuing path; a halted block already committed its state.
+   EmitFprCacheReload(body);
++  EmitBlockMsrReload(body);
+ }
+ 
+ void EmitSystemCall(std::vector<u8>& body, const PPCAnalyst::CodeOp& op, u32 downcount)
+@@ -8096,12 +8126,47 @@
+   flush_group();
+ }
+ 
++bool CanCacheBlockMsr(std::span<const PPCAnalyst::CodeOp> ops)
++{
++  u32 floating=0;
++  for(const auto& op:ops)
++  {
++    if(op.skip)continue;
++    const auto i=op.inst;
++    if(i.OPCD>=32 && i.OPCD<=47)continue; // integer D-form memory
++    if((i.OPCD>=48 && i.OPCD<=57)||i.OPCD==60||i.OPCD==61){++floating;continue;}
++    switch(i.OPCD)
++    {
++    case 7:case 8:case 10:case 11:case 12:case 13:case 14:case 15:
++    case 20:case 21:case 23:case 24:case 25:case 26:case 27:case 28:case 29:
++      break;
++    case 16:case 18:
++      if(i.LK)return false; // linked branches may use SDK/HLE substitutions
++      break;
++    case 19:
++      if(i.LK || (i.SUBOP10!=16 && i.SUBOP10!=528))return false;
++      break;
++    case 4:
++      if(i.Rc || (!IsPairedSingleArithmeticSubop(i.SUBOP5) && !IsPairedSingleMergeSubop(i.SUBOP10)))return false;
++      ++floating;break;
++    case 59:
++      if(i.Rc || !IsSinglePrecisionArithmeticSubop(i.SUBOP5))return false;
++      ++floating;break;
++    default:
++      return false; // includes all system/SPR/MSR writes, rfi, sc and unknown ops
++    }
++  }
++  return floating>=2;
++}
++
+ std::vector<u8> BuildWasmCachedInterpreterBlock(std::span<const PPCAnalyst::CodeOp> ops,
+                                                 const WasmStateLayout& layout, u32 next_pc,
+                                                 bool write_npc,
+                                                 bool allow_interpret_fallback = false,
+                                                 bool record_emit_failure = false)
+ {
++  const ScopedBlockMsrCache msr_cache_scope;
++  const bool cache_msr=DolphinWeb_GetBlockMsrCache() && CanCacheBlockMsr(ops);
+   const ScopedWasmStateBase state_base_scope(
+       s_dolphin_web_constant_state_base.load(std::memory_order_relaxed) ? layout.state_base : 0);
+   AnalyzeFastmemHoistability(ops);
+@@ -8175,6 +8240,7 @@
+   for (int reg : used_gprs) used_gpr_mask |= 1u << reg;
+   u32 next_local = ConfigureGprCacheLocals(body, used_gpr_mask,
+       s_dolphin_web_compact_gpr_locals.load(std::memory_order_relaxed));
++  if(cache_msr){s_block_msr_cache.offset=layout.msr_offset;s_block_msr_cache.local=next_local++;++body[0];body.insert(body.end(),{0x01,0x7f});}
+   if (s_fmh_plan.active)
+   {
+     s_wasm_fmh_flag_local = next_local++;
+@@ -8226,6 +8292,7 @@
+   }
+   // Eager loads and sticky dirty stores remain unchanged across branches.
+   EmitRegCacheReloadAll(body);
++  if(cache_msr){s_block_msr_cache.active=true;EmitBlockMsrReload(body);s_block_msr_cache_blocks.fetch_add(1,std::memory_order_relaxed);}
+ 
+   u32 downcount = 0;
+   for (const PPCAnalyst::CodeOp& op : ops)
+@@ -8408,6 +8475,9 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetBlockMsrCache(){return s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed);}
++extern "C" void DolphinWeb_SetBlockMsrCache(bool value){s_dolphin_web_block_msr_cache.store(value,std::memory_order_relaxed);}
++
+ extern "C" bool DolphinWeb_GetConstantStateBase() { return s_dolphin_web_constant_state_base.load(std::memory_order_relaxed); }
+ extern "C" void DolphinWeb_SetConstantStateBase(bool value) { s_dolphin_web_constant_state_base.store(value, std::memory_order_relaxed); }
+ 
+@@ -12296,6 +12366,7 @@
+       << s_wasm_emit_state_store_f64_count << "st "
+       << "statei64:" << s_wasm_emit_state_load_i64_count << "ld/"
+       << s_wasm_emit_state_store_i64_count << "st ";
++  out << "msrcache:" << (DolphinWeb_GetBlockMsrCache()?1:0) << " emit-blocks/sites:" << s_block_msr_cache_blocks.load() << "/" << s_block_msr_cache_load_sites.load() << " ";
+   out << "stateconst:" << (DolphinWeb_GetConstantStateBase() ? 1 : 0) << " ";
+   out << "wasm-dispatch:" << s_wasm_dispatch_loop_handles[DolphinWeb_GetWideBlockMap() ? 1 : 0] << "/"
+       << s_wasm_dispatch_loop_calls.load(std::memory_order_relaxed) << "calls ";
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -70,6 +70,8 @@
+ extern "C" bool DolphinWeb_GetPsqHoist();
+ extern "C" bool DolphinWeb_GetWideBlockMap();
+ extern "C" bool DolphinWeb_GetConstantStateBase();
++extern "C" bool DolphinWeb_GetBlockMsrCache();
++extern "C" void DolphinWeb_SetBlockMsrCache(bool);
+ extern "C" void DolphinWeb_SetConstantStateBase(bool);
+ extern "C" void DolphinWeb_SetWideBlockMap(bool);
+ extern "C" void DolphinWeb_SetPsqHoist(bool);
+@@ -1294,7 +1296,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 4095 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 8191 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1313,7 +1315,8 @@
+   const bool psq_hoist = (flags & 512) != 0;
+   const bool wide_map = (flags & 1024) != 0;
+   const bool constant_state_base = (flags & 2048) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase())
++  const bool block_msr_cache = (flags & 4096) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1324,6 +1327,7 @@
+     DolphinWeb_SetPsqHoist(psq_hoist);
+     DolphinWeb_SetWideBlockMap(wide_map);
+     DolphinWeb_SetConstantStateBase(constant_state_base);
++    DolphinWeb_SetBlockMsrCache(block_msr_cache);
+   }
+   return 1;
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -8166,7 +8166,7 @@
+                                                 bool record_emit_failure = false)
+ {
+   const ScopedBlockMsrCache msr_cache_scope;
+-  const bool cache_msr=DolphinWeb_GetBlockMsrCache() && CanCacheBlockMsr(ops);
++  const bool cache_msr=s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
+   const ScopedWasmStateBase state_base_scope(
+       s_dolphin_web_constant_state_base.load(std::memory_order_relaxed) ? layout.state_base : 0);
+   AnalyzeFastmemHoistability(ops);

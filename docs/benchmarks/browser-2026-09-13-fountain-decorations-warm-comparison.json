@@ -1,0 +1,180 @@
+{
+  "artifactScope": "Exact selected CUA decoWarmRun fields; warmups omitted",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "kind": "same-checkpoint-fountain-decorations-abba",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame controller tracks; partner AI retained",
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "codegen": {
+    "fpuguard": true,
+    "blockmerge": true,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true,
+    "readfusion": false,
+    "branchfusion": false,
+    "cpformat": false,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false
+  },
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 112,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "decorations": true,
+      "seconds": 29.997719999998807,
+      "simulationFps": 58.93781260709382,
+      "gameRenderFps": 58.9044767402346,
+      "visibleFps": 58.23775940305028,
+      "p95GapMs": 19.00499999523163,
+      "maxGapMs": 69.73499999940395,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 19,
+        "meanAgeMs": 18.00654748285901
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": true,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "decorations": false,
+      "seconds": 29.999234999999405,
+      "simulationFps": 58.83483362159185,
+      "gameRenderFps": 58.80149943823684,
+      "visibleFps": 57.73480557087653,
+      "p95GapMs": 17.484999999403954,
+      "maxGapMs": 51.639999985694885,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 31,
+        "meanAgeMs": 17.648600692435696
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": false,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "decorations": false,
+      "seconds": 29.998135000005366,
+      "simulationFps": 59.27035130682897,
+      "gameRenderFps": 59.20368049546021,
+      "visibleFps": 57.903599673769364,
+      "p95GapMs": 17.49500000476837,
+      "maxGapMs": 238.12000000476837,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 40,
+        "meanAgeMs": 19.20298906787801
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": false,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "decorations": true,
+      "seconds": 29.997210000008344,
+      "simulationFps": 59.00548751032205,
+      "gameRenderFps": 59.00548751032205,
+      "visibleFps": 58.20541310340243,
+      "p95GapMs": 18.00499999523163,
+      "maxGapMs": 96.10500000417233,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 23,
+        "meanAgeMs": 16.587507154943946
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": true,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "decision": "Do not retain: opposing simulation pairs and both visible-frame pairs favor original decorations. Stable focus throughout; all gates fail."
+}

@@ -1,0 +1,58 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -54,6 +54,7 @@
+ #include "Core/PowerPC/PPCTables.h"
+ #include "Core/PowerPC/PowerPC.h"
+ #include "Core/System.h"
++#include "VideoCommon/Fifo.h"
+ 
+ #ifndef DOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH
+ #define DOLPHIN_WEB_DIRECT_WASM_BLOCK_DISPATCH 0
+@@ -593,6 +594,7 @@
+ u32 s_fast_melee_idle_poll_loop_mismatch_actual = 0;
+ u32 s_fast_melee_idle_poll_loop_blocks = 0;
+ u32 s_fast_melee_idle_poll_loop_iterations = 0;
++u32 s_fast_melee_idle_hoisted_iterations = 0;
+ u32 s_fast_melee_idle_poll_loop_exits = 0;
+ u32 s_fast_melee_idle_poll_loop_rejects = 0;
+ u32 s_fast_melee_idle_poll_loop_fallbacks = 0;
+@@ -10264,6 +10266,17 @@
+           1;
+   const u32 max_iterations = std::min(max_by_downcount, MELEE_IDLE_POLL_LOOP_MAX_BATCH);
+ 
++  // In deterministic mode these SDK globals are updated by CPU-thread events.
++  // This helper neither executes an event nor writes RAM inside a batch, and
++  // retains its existing downcount boundary. Limit the opt-in hoist to the
++  // static idle status (no dynamically addressed status object).
++  u32 idle_status_pointer = 0;
++  const bool hoist_idle_checks = DolphinWebFeatureEnabled(1u << 31) &&
++      Core::System::GetInstance().GetFifo().UseDeterministicGPUThread() &&
++      ppc_state.gpr[13] >= 0x804c0000 && ppc_state.gpr[13] < 0x804e0000 &&
++      TryReadFastRamU32Address(ppc_state.gpr[13] - 0x4408, &idle_status_pointer) &&
++      (idle_status_pointer == 0 || idle_status_pointer == MELEE_STATUS_IDLE_POINTER);
++
+   u32 iterations = 0;
+   u32 final_status = 0;
+   bool exit_loop = false;
+@@ -10304,6 +10317,13 @@
+       exit_loop = true;
+       break;
+     }
++    if (hoist_idle_checks)
++    {
++      s_fast_melee_idle_hoisted_iterations = SaturatingAddU32(
++          s_fast_melee_idle_hoisted_iterations, max_iterations - 1);
++      iterations = max_iterations;
++      break;
++    }
+   }
+ 
+   if (iterations == 0)
+@@ -11820,6 +11840,7 @@
+         << s_fast_melee_idle_poll_loop_mismatch_actual << std::dec
+         << " blocks:" << s_fast_melee_idle_poll_loop_blocks
+         << " iters:" << s_fast_melee_idle_poll_loop_iterations
++        << " hoisted:" << s_fast_melee_idle_hoisted_iterations
+         << " exits:" << s_fast_melee_idle_poll_loop_exits
+         << " rejects:" << s_fast_melee_idle_poll_loop_rejects
+         << " fallback:" << s_fast_melee_idle_poll_loop_fallbacks

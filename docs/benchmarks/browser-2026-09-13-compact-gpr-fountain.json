@@ -1,0 +1,52 @@
+{
+  "kind": "compact-gpr-abba-selected-scalars",
+  "core": "233ed07f34edbdd4fbf8d90c8d0e54205f80192f8db76adf69a5023b9f558026",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle P1 versus CPU9",
+  "reflection": false,
+  "scenery": false,
+  "internalScalePercent": 150,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "runs": [
+    {
+      "compactgpr": false,
+      "simulationFps": 49.10055647297312,
+      "visibleFps": 49.06722276185773,
+      "passed": false
+    },
+    {
+      "compactgpr": true,
+      "simulationFps": 48.79727548545237,
+      "visibleFps": 48.73061254080011,
+      "passed": false
+    },
+    {
+      "compactgpr": true,
+      "simulationFps": 50.70202808112356,
+      "visibleFps": 50.635358747683554,
+      "passed": false
+    },
+    {
+      "compactgpr": false,
+      "simulationFps": 49.96817403991575,
+      "visibleFps": 49.868171023158084,
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "replay": {
+    "passed": true,
+    "frames": 120,
+    "fullMachineBytesEqual": true,
+    "bytesCompared": 109035106,
+    "tickDifferences": []
+  },
+  "decision": "Keep compact locals OFF: adjacent pairs disagree; mean difference about0.43%."
+}

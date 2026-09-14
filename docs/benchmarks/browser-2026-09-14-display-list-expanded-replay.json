@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-14",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "feature": "displaylistfast-expanded-dirty-continuation",
+  "coreSha256": "172876d5a91c9d621f7f59c4d6b9d6f0c627ed7effbeacd26bbf8a1d7e1cce09",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "frames": 600,
+    "retained": ["animstatefast", "blockmerge", "fpuguard", "integerfifo", "singleprefix"]
+  },
+  "coverage": {
+    "runs": 195619,
+    "dirtyCalls": 161963,
+    "continuations": 161963,
+    "suffixes": 22697,
+    "flushContinuations": 139266,
+    "tails": 139266,
+    "fallbacks": 0
+  },
+  "comparison": {
+    "bytesPerState": 110029153,
+    "fullMachineBytesEqual": false,
+    "fingerprintsEqual": true,
+    "differentSections": ["CoreTiming"],
+    "differentBytes": 17,
+    "allRamEqual": true,
+    "allCpuStateEqual": true,
+    "allGpuStateEqual": true,
+    "framebufferEqual": true,
+    "textureCacheEqual": true,
+    "audioEqual": true
+  },
+  "savedScheduler": {
+    "logicalQueueEqual": true,
+    "globalTimerEqual": true,
+    "eventTimesTypesPayloadsAndExecutionOrderEqual": true,
+    "eventNames": ["VICallback", "AudioDMACallback", "FinishExecutingCommand", "GPUSleeper", "DSPCallback", "DecCallback", "PatchEngine"],
+    "rawInsertionOrdinalsEqual": false,
+    "rawIdleCounterEqual": false
+  },
+  "decision": "Retain as a candidate. The strict raw byte gate remains failed and is not normalized, but all execution-visible state and the logical scheduler queue match. Require broader gameplay and image-performance coverage before enabling by default.",
+  "limits": "Two normal-running repeats produced the same difference class. This is strong equivalence evidence for the measured workload, not exhaustive roster, costume, move, stage, or rollback certification."
+}

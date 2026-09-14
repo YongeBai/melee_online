@@ -1,0 +1,110 @@
+--- a/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
++++ b/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
+@@ -622,6 +622,15 @@
+   {
+     // Core is running too slow.. i.e. CPU bottleneck.
+     const DT adjustment = min_target - target_time;
++#ifdef __EMSCRIPTEN__
++    const u64 adjustment_us = static_cast<u64>(DT_us(adjustment).count());
++    m_browser_relax_count.fetch_add(1, std::memory_order_relaxed);
++    m_browser_relax_us.fetch_add(adjustment_us, std::memory_order_relaxed);
++    u64 previous_max = m_browser_relax_max_us.load(std::memory_order_relaxed);
++    while (adjustment_us > previous_max &&
++           !m_browser_relax_max_us.compare_exchange_weak(previous_max, adjustment_us,
++                                                        std::memory_order_relaxed)) {}
++#endif
+     DEBUG_LOG_FMT(CORE, "Core can not keep up with timings! [relaxing timings by {} us]",
+                   DT_us(adjustment).count());
+ 
+--- a/vendor/dolphin/Source/Core/Core/CoreTiming.h
++++ b/vendor/dolphin/Source/Core/Core/CoreTiming.h
+@@ -16,6 +16,7 @@
+ // inside callback:
+ //   ScheduleEvent(periodInCycles - cyclesLate, callback, "whatever")
+ 
++#include <atomic>
+ #include <mutex>
+ #include <string>
+ #include <tuple>
+@@ -172,7 +173,24 @@
+ 
+   bool UseSyncOnSkipIdle() const;
+ 
++#ifdef __EMSCRIPTEN__
++  // Host pacing diagnostics only; never serialized as emulated machine state.
++  struct BrowserThrottleStats { u64 count, microseconds, maximum_microseconds; };
++  BrowserThrottleStats GetBrowserThrottleStats() const
++  {
++    return {m_browser_relax_count.load(std::memory_order_relaxed),
++            m_browser_relax_us.load(std::memory_order_relaxed),
++            m_browser_relax_max_us.load(std::memory_order_relaxed)};
++  }
++  // Caller owns the paused CPU and also updates the corresponding Config value.
++  void SetBrowserCorrectTimeDrift(bool enabled) { m_correct_time_drift = enabled; }
++  bool GetBrowserCorrectTimeDrift() const { return m_correct_time_drift; }
++#endif
++
+ private:
++#ifdef __EMSCRIPTEN__
++  std::atomic<u64> m_browser_relax_count{0}, m_browser_relax_us{0}, m_browser_relax_max_us{0};
++#endif
+   Globals m_globals;
+ 
+   Core::System& m_system;
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1443,6 +1443,30 @@
+   const Core::CPUThreadGuard guard(system);
+   return DolphinWeb_CPFormatStats();
+ }
++// Query (-1) or configure (0/1) host pacing while owning the paused CPU.
++// This does not alter the virtual clock, instructions, GPU mode or JIT cache.
++EMSCRIPTEN_KEEPALIVE const char* BrowserTimingDrift(int mode)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || mode < -1 || mode > 1 ||
++      Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"Timing drift control requires a paused machine and -1/0/1\"}";
++  const Core::CPUThreadGuard guard(system);
++  auto& timing = system.GetCoreTiming();
++  if (mode != -1)
++  {
++    Config::SetBase(Config::MAIN_CORRECT_TIME_DRIFT, mode != 0);
++    timing.SetBrowserCorrectTimeDrift(mode != 0);
++  }
++  const auto stats = timing.GetBrowserThrottleStats();
++  static std::string result;
++  result = "{\"enabled\":" + std::string(timing.GetBrowserCorrectTimeDrift() ? "true" : "false") +
++      ",\"relaxCount\":" + std::to_string(stats.count) +
++      ",\"relaxUs\":" + std::to_string(stats.microseconds) +
++      ",\"relaxMaxUs\":" + std::to_string(stats.maximum_microseconds) + "}";
++  return result.c_str();
++}
++
+ // Private paused QA control. Normal startup remains at its measured scale.
+ EMSCRIPTEN_KEEPALIVE int BrowserRenderScalePercent(int percent)
+ {
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1076,6 +1076,13 @@
+       } else if (payload.action === "frameInputStop") {
+         if(!Number.isInteger(payload.frames) || !api.browserFrameBenchmarkStopAfterFrames?.(payload.frames))throw Error("Frame input stop requires fresh paused QA input and 120–3600 frames");
+         return {frames:payload.frames};
++      } else if (payload.action === "timingDrift") {
++        if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Timing drift mode must be boolean");
++        if(!api.browserTimingDrift)throw Error("Timing drift diagnostics unavailable");
++        const stats=JSON.parse(api.browserTimingDrift(payload.enabled===undefined?-1:payload.enabled?1:0));
++        if(stats.error)throw Error(stats.error);
++        if(payload.enabled!==undefined&&stats.enabled!==payload.enabled)throw Error("Timing drift mode did not apply");
++        return stats;
+       } else if (payload.action === "cpFormatStats") {
+         if(!api.browserCPFormatStats)throw Error("CP format statistics unavailable");
+         const stats=JSON.parse(api.browserCPFormatStats());if(stats.error)throw Error(stats.error);return stats;
+@@ -2469,6 +2476,7 @@
+     browserFrameBenchmarkInput: optionalCwrap("BrowserFrameBenchmarkInput", "number", ["number"]),
+     browserFrameBenchmarkStopAfterFrames: optionalCwrap("BrowserFrameBenchmarkStopAfterFrames", "number", ["number"]),
+     browserCPFormatStats: optionalCwrap("BrowserCPFormatStats", "string", []),
++    browserTimingDrift: optionalCwrap("BrowserTimingDrift", "string", ["number"]),
+     browserFrameBenchmarkTiming: optionalCwrap("BrowserFrameBenchmarkTiming", "string", []),
+     browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
+     browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),

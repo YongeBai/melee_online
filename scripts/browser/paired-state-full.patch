@@ -1,0 +1,186 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -309,6 +309,7 @@
+ std::atomic<bool> s_dolphin_web_vector_fpr_cache{false};
+ std::atomic<bool> s_dolphin_web_psq_hoist{false};
+ std::atomic<bool> s_dolphin_web_qstate_cache{false};
++std::atomic<bool> s_dolphin_web_qstate_full{false};
+ std::atomic<u32> s_qstate_cache_blocks{0}, s_qstate_cache_sites{0};
+ std::atomic<bool> s_dolphin_web_wide_block_map{false};
+ std::atomic<bool> s_dolphin_web_constant_state_base{false};
+@@ -4488,6 +4489,8 @@
+   return true;
+ }
+ 
++void EmitQStateCacheRefreshAfterHelper(std::vector<u8>& body);
++
+ void EmitImportedHaltCheck(std::vector<u8>& body)
+ {
+   body.push_back(0x04);
+@@ -4499,6 +4502,7 @@
+   // Reload on its continuing path; a halted block already committed its state.
+   EmitFprCacheReload(body);
+   EmitBlockMsrReload(body);
++  EmitQStateCacheRefreshAfterHelper(body);
+ }
+ 
+ void EmitSystemCall(std::vector<u8>& body, const PPCAnalyst::CodeOp& op, u32 downcount)
+@@ -5789,8 +5793,9 @@
+ 
+ // Q0 load/store type and HID2.PSE are invariant within admitted blocks.
+ // Cache exact eligibility, including asymmetric load/store quantization types.
+-// MSR, address bounds, fallback, arithmetic and cycle checks stay per-access.
+-struct WasmQStateCache { bool active=false; u32 local=0; };
++// Partial mode keeps MSR checks per-access. Full mode refreshes all eligibility
++// after continuing helpers. Address, arithmetic, fallback and cycle checks stay.
++struct WasmQStateCache { bool active=false; u32 local=0; bool full=false; u32 msr_offset=0, spr_offset=0; };
+ static WasmQStateCache s_qstate_cache;
+ struct ScopedQStateCache
+ {
+@@ -5805,10 +5810,27 @@
+   EmitI32Const(body, 0x00070007);
+   EmitStateLoadU32(body, SprOffset(layout, SPR_HID2));
+   EmitI32Const(body, 1u << 31); body.push_back(0x71);
+-  body.push_back(0x1b); // PSE ? GQR0 : non-float types in both directions
++  if (s_qstate_cache.full)
++  {
++    body.push_back(0x45); body.push_back(0x45); // normalize PSE to a boolean
++    EmitStateLoadU32(body, layout.msr_offset);
++    EmitI32Const(body, (1u << 13) | 1u); body.push_back(0x71);
++    EmitI32Const(body, 1u << 13); body.push_back(0x46);
++    body.push_back(0x71);
++  }
++  body.push_back(0x1b); // valid mode ? GQR0 : non-float types in both directions
+   EmitLocalSet(body, s_qstate_cache.local);
+ }
+ 
++void EmitQStateCacheRefreshAfterHelper(std::vector<u8>& body)
++{
++  if (!s_qstate_cache.active || !s_qstate_cache.full) return;
++  WasmStateLayout layout{};
++  layout.msr_offset=s_qstate_cache.msr_offset;
++  layout.spr_offset=s_qstate_cache.spr_offset;
++  EmitQStateCacheReload(body, layout);
++}
++
+ bool EmitCachedPsqTypeCondition(std::vector<u8>& body, UGeckoInstruction inst, bool store)
+ {
+   if (!s_qstate_cache.active || inst.I != 0) return false;
+@@ -5822,6 +5844,14 @@
+ void EmitPsqFloatFastPathCondition(std::vector<u8>& body, const WasmStateLayout& layout,
+                                    UGeckoInstruction inst, bool store)
+ {
++  if (s_qstate_cache.active && s_qstate_cache.full && inst.I==0)
++  {
++    EmitCachedPsqTypeCondition(body, inst, store);
++    EmitIsMem1AddressForSize(body, layout, inst.W ? sizeof(u32) : sizeof(u64));
++    body.push_back(0x71);
++    return;
++  }
++
+   EmitStateLoadU32(body, layout.msr_offset);
+   EmitI32Const(body, 1u << 13);
+   body.push_back(0x71);
+@@ -8595,7 +8625,8 @@
+   const ScopedFpuGuardProof fpu_guard_scope;
+   s_fpu_guard.active=s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed) && (s_dolphin_web_fpu_guard_wide.load(std::memory_order_relaxed) ? CanHoistFpuGuardWide(ops) : CanHoistFpuGuard(ops));
+   const ScopedQStateCache qstate_cache_scope;
+-  const bool cache_qstate=s_dolphin_web_qstate_cache.load(std::memory_order_relaxed) && CanCacheQState(ops);
++  const bool cache_qstate_full=s_dolphin_web_qstate_full.load(std::memory_order_relaxed);
++  const bool cache_qstate=(cache_qstate_full || s_dolphin_web_qstate_cache.load(std::memory_order_relaxed)) && CanCacheQState(ops);
+   const ScopedBlockMsrCache msr_cache_scope;
+   const bool cache_msr=s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
+   const ScopedWasmStateBase state_base_scope(
+@@ -8715,6 +8746,9 @@
+   if (cache_qstate)
+   {
+     s_qstate_cache.local=next_local++;
++    s_qstate_cache.full=cache_qstate_full;
++    s_qstate_cache.msr_offset=layout.msr_offset;
++    s_qstate_cache.spr_offset=layout.spr_offset;
+     ++body[0]; body.insert(body.end(), {0x01,0x7f});
+   }
+   if (!s_psq_hoist.groups.empty())
+@@ -8972,6 +9006,8 @@
+ extern "C" bool DolphinWeb_GetWideBlockMap() { return s_dolphin_web_wide_block_map.load(std::memory_order_relaxed); }
+ extern "C" void DolphinWeb_SetWideBlockMap(bool value) { s_dolphin_web_wide_block_map.store(value, std::memory_order_relaxed); }
+ 
++extern "C" bool DolphinWeb_GetQStateFull() { return s_dolphin_web_qstate_full.load(std::memory_order_relaxed); }
++extern "C" void DolphinWeb_SetQStateFull(bool value) { s_dolphin_web_qstate_full.store(value,std::memory_order_relaxed); }
+ extern "C" bool DolphinWeb_GetQStateCache() { return s_dolphin_web_qstate_cache.load(std::memory_order_relaxed); }
+ extern "C" void DolphinWeb_SetQStateCache(bool value) { s_dolphin_web_qstate_cache.store(value,std::memory_order_relaxed); }
+ extern "C" bool DolphinWeb_GetPsqHoist() { return s_dolphin_web_psq_hoist.load(std::memory_order_relaxed); }
+@@ -12822,6 +12858,7 @@
+   out << "fpuguardwide:" << (DolphinWeb_GetFpuGuardWide()?1:0) << " ";
+   out << "branchfusion:" << (DolphinWeb_GetConditionalFusion()?1:0) << " emitted:" << s_conditional_fusion_emissions.load() << " ";
+   out << "fpuguard:" << (DolphinWeb_GetFpuGuardHoist()?1:0) << " emit-blocks/sites:" << s_fpu_guard_blocks.load() << "/" << s_fpu_guard_sites.load() << " ";
++  out << "qstatefull:" << (DolphinWeb_GetQStateFull()?1:0) << " emit-blocks/sites:" << s_qstate_cache_blocks.load() << "/" << s_qstate_cache_sites.load() << " ";
+   out << "qstatecache:" << (DolphinWeb_GetQStateCache()?1:0) << " emit-blocks/sites:" << s_qstate_cache_blocks.load() << "/" << s_qstate_cache_sites.load() << " ";
+   out << "msrcache:" << (DolphinWeb_GetBlockMsrCache()?1:0) << " emit-blocks/sites:" << s_block_msr_cache_blocks.load() << "/" << s_block_msr_cache_load_sites.load() << " ";
+   out << "stateconst:" << (DolphinWeb_GetConstantStateBase() ? 1 : 0) << " ";
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -71,6 +71,7 @@
+ extern "C" bool DolphinWeb_GetVectorFprCache();
+ extern "C" bool DolphinWeb_GetPsqHoist();
+ extern "C" bool DolphinWeb_GetQStateCache();
++extern "C" bool DolphinWeb_GetQStateFull();
+ extern "C" bool DolphinWeb_GetWideBlockMap();
+ extern "C" bool DolphinWeb_GetConstantStateBase();
+ extern "C" bool DolphinWeb_GetBlockMsrCache();
+@@ -104,6 +105,7 @@
+ extern "C" void DolphinWeb_SetWideBlockMap(bool);
+ extern "C" void DolphinWeb_SetPsqHoist(bool);
+ extern "C" void DolphinWeb_SetQStateCache(bool);
++extern "C" void DolphinWeb_SetQStateFull(bool);
+ extern "C" void DolphinWeb_SetVectorFprCache(bool);
+ extern "C" void DolphinWeb_SetPairedMemorySimd(bool);
+ extern "C" void DolphinWeb_SetPairedSimd(bool);
+@@ -1367,7 +1369,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 134217727 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 268435455 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1384,6 +1386,7 @@
+   const bool simd = (flags & 64) != 0;
+   const bool memory_simd = (flags & 128) != 0;
+   const bool vector_fpr = (flags & 256) != 0;
++  const bool qstate_full = (flags & 134217728) != 0;
+   const bool qstate_cache = (flags & 67108864) != 0;
+   const bool psq_hoist = (flags & 512) != 0;
+   const bool wide_map = (flags & 1024) != 0;
+@@ -1401,7 +1404,7 @@
+   const bool counter_batch = (flags & 8388608) != 0;
+   const bool lean_dispatch = (flags & 16777216) != 0;
+   const bool cp_format_reuse = (flags & 33554432) != 0;
+-  if (qstate_cache != DolphinWeb_GetQStateCache() || next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
++  if (qstate_full != DolphinWeb_GetQStateFull() || qstate_cache != DolphinWeb_GetQStateCache() || next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1411,6 +1414,7 @@
+     DolphinWeb_SetVectorFprCache(vector_fpr);
+     DolphinWeb_SetPsqHoist(psq_hoist);
+     DolphinWeb_SetQStateCache(qstate_cache);
++    DolphinWeb_SetQStateFull(qstate_full);
+     DolphinWeb_SetWideBlockMap(wide_map);
+     DolphinWeb_SetConstantStateBase(constant_state_base);
+     DolphinWeb_SetBlockMsrCache(block_msr_cache);
+--- a/engines/wasm-dolphin/src/upstream-discio-worker.js
++++ b/engines/wasm-dolphin/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0) | (payload.qstatecache === true ? 67108864 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0) | (payload.qstatecache === true ? 67108864 : 0) | (payload.qstatefull === true ? 134217728 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true, qstatecache:payload.qstatecache === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true, qstatecache:payload.qstatecache === true, qstatefull:payload.qstatefull === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

@@ -1,0 +1,11 @@
+{
+  "kind":"stadium-gameplay-observable-comparison",
+  "feature":"stadiumscreen",
+  "coreSha256":"a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "passed":true,"fullMachineEquivalence":false,"framesCompared":600,"initialActorCount":2,
+  "workload":"Fox/Falco; ordinary scripted P1 controls versus native CPU9, same restored state and inputs",
+  "checked":["fighter actors: action, facing, damage and motion state","player slots: positions, actions, stocks and damage","match settings and timers","RNG seed","stage transformation state and stage joint transforms","native camera transform and settings"],
+  "patch":{"textureCopyCalls":["801d2f60","801d300c","801d30c0"],"boardDrawCall":"801d509c","retainedWrapper":"801d5074","retainedStateUpdateCall":"801d5090"},
+  "visualCheck":{"canvas":[960,720],"displayedRect":[160,0,959.984375,720],"viewport":[1280,720],"observed":"Video board absent; native floor, fighters, hit effects and HUD visible with 4:3 framing. No equivalent native-Dolphin screenshot comparison in this test."},
+  "limitations":["600 frames do not establish transformation coverage or exhaustive move/roster compatibility.","Graphics state intentionally differs; not full machine equivalence."]
+}

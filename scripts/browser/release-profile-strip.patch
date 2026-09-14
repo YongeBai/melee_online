@@ -1,0 +1,119 @@
+--- a/vendor/dolphin/Source/Core/Common/BrowserProfile.h
++++ b/vendor/dolphin/Source/Core/Common/BrowserProfile.h
+@@ -6,6 +6,10 @@
+ #include <chrono>
+ #include <cstdint>
+ 
++#ifndef DOLPHIN_WEB_BROWSER_PROFILE
++#define DOLPHIN_WEB_BROWSER_PROFILE 1
++#endif
++
+ namespace DolphinWeb::BrowserProfile
+ {
+ enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, CpuBranchCallbackSample, CpuEndCallbackSample, CpuGuestInterpretSample, CpuGatherSample, CpuGatherCopySample, CpuBurstSample, CoreEventVi, CoreEventDsp, CoreEventAudioDma, CoreEventGpuSleep, CoreEventGpuSync, CoreEventDecrementer, CoreEventPatch, CoreEventDvd, CoreEventOther, CoreEventWait, Count };
+@@ -19,11 +23,23 @@
+   std::atomic<std::uint64_t> total_us{0};
+   std::atomic<std::uint64_t> max_us{0};
+ };
++#if DOLPHIN_WEB_BROWSER_PROFILE
+ inline std::atomic<bool> enabled{false};
++#else
++// Match the tiny portion of std::atomic<bool>'s interface used by the core so
++// release translation units can constant-fold every profiling guard away.
++struct DisabledFlag
++{
++  constexpr bool load(std::memory_order = std::memory_order_seq_cst) const { return false; }
++  constexpr void store(bool, std::memory_order = std::memory_order_seq_cst) const {}
++};
++inline constexpr DisabledFlag enabled{};
++#endif
+ inline std::array<Counter, static_cast<std::size_t>(Stage::Count)> counters;
+ 
+ inline void Record(Stage stage, std::uint64_t us)
+ {
++#if DOLPHIN_WEB_BROWSER_PROFILE
+   if (!enabled.load(std::memory_order_relaxed))
+     return;
+   auto& counter = counters[static_cast<std::size_t>(stage)];
+@@ -31,12 +47,17 @@
+   counter.total_us.fetch_add(us, std::memory_order_relaxed);
+   auto old = counter.max_us.load(std::memory_order_relaxed);
+   while (us > old && !counter.max_us.compare_exchange_weak(old, us, std::memory_order_relaxed)) {}
++#else
++  (void)stage;
++  (void)us;
++#endif
+ }
+ 
+ // CPU wall time of GL calls, not GPU execution time. Nested scopes overlap.
+ class Scope
+ {
+ public:
++#if DOLPHIN_WEB_BROWSER_PROFILE
+   explicit Scope(Stage stage) : m_stage(stage), m_active(enabled.load(std::memory_order_relaxed)),
+     m_start(m_active ? Clock::now() : Clock::time_point{}) {}
+   ~Scope()
+@@ -49,6 +70,9 @@
+   Stage m_stage;
+   bool m_active;
+   Clock::time_point m_start;
++#else
++  explicit constexpr Scope(Stage) {}
++#endif
+ };
+ // CPU-thread-only sampling. These totals are raw sampled microseconds, not
+ // complete wall time. Multiply by 1024 for an estimate; nested helpers overlap
+@@ -57,6 +81,7 @@
+ class SampleScope
+ {
+ public:
++#if DOLPHIN_WEB_BROWSER_PROFILE
+   explicit SampleScope(Stage stage, bool active) : m_stage(stage),
+     m_active(active && ((++sample_sequences[static_cast<std::size_t>(stage)] & 1023u) == 0)),
+     m_start(m_active ? Clock::now() : Clock::time_point{}) {}
+@@ -70,5 +95,9 @@
+   Stage m_stage;
+   bool m_active;
+   Clock::time_point m_start;
++#else
++  explicit constexpr SampleScope(Stage, bool) {}
++  explicit constexpr SampleScope(Stage) {}
++#endif
+ };
+ }  // namespace DolphinWeb::BrowserProfile
+--- a/vendor/dolphin/Source/Core/Core/CMakeLists.txt
++++ b/vendor/dolphin/Source/Core/Core/CMakeLists.txt
+@@ -880,6 +880,21 @@
+   target_compile_definitions(core PRIVATE DOLPHIN_WASM_MEMORY_PAGES=${DOLPHIN_WASM_MEMORY_PAGES})
+   target_compile_definitions(dolphin_web_core PRIVATE DOLPHIN_WASM_MEMORY_PAGES=${DOLPHIN_WASM_MEMORY_PAGES})
+ 
++  # Profiling is valuable in lab builds but even its disabled runtime guards
++  # sit in several million-per-second CPU and FIFO helpers. Release browser
++  # builds compile those scopes out; diagnostics can opt back in at configure
++  # time with -DDOLPHIN_WEB_BROWSER_PROFILE=ON.
++  option(DOLPHIN_WEB_BROWSER_PROFILE "Compile browser wall-time profiling" OFF)
++  if(DOLPHIN_WEB_BROWSER_PROFILE)
++    set(DOLPHIN_WEB_BROWSER_PROFILE_VALUE 1)
++  else()
++    set(DOLPHIN_WEB_BROWSER_PROFILE_VALUE 0)
++  endif()
++  target_compile_definitions(core PRIVATE
++    DOLPHIN_WEB_BROWSER_PROFILE=${DOLPHIN_WEB_BROWSER_PROFILE_VALUE})
++  target_compile_definitions(dolphin_web_core PRIVATE
++    DOLPHIN_WEB_BROWSER_PROFILE=${DOLPHIN_WEB_BROWSER_PROFILE_VALUE})
++
+   # Day-14 (wasm-dolphin): enable the WebGPU scaffold backend on the
+   # wasm target. HAS_WEBGPU gates both the include of WebGPU/VideoBackend.h
+   # and the registry push_back in VideoBackendBase.cpp. Day-15+ will
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -984,7 +984,8 @@
+ int CoreInit()
+ {
+   EnsureRuntime();
+-  const bool profile = EM_ASM_INT({ return Module['dolphinCoreLog'] === true; }) != 0;
++  const bool profile = DOLPHIN_WEB_BROWSER_PROFILE &&
++                       EM_ASM_INT({ return Module['dolphinCoreLog'] === true; }) != 0;
+   DolphinWeb::BrowserProfile::enabled.store(profile, std::memory_order_relaxed);
+   if (profile)
+     DolphinWeb::WasmTimingProfile::SetEnabled(true);

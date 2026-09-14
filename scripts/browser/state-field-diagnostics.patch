@@ -1,0 +1,261 @@
+--- /dev/null
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Common/BrowserStateDiff.h
+@@ -0,0 +1,44 @@
++// Copyright 2026 Dolphin Emulator Project
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++#include <algorithm>
++#include <cstddef>
++#include <cstdint>
++#include <span>
++#include <vector>
++
++namespace BrowserStateDiff
++{
++struct Range { std::size_t offset, length; };
++struct Summary
++{
++  std::size_t different_bytes = 0, unmatched_bytes = 0, range_count = 0;
++  std::vector<Range> ranges;
++};
++// Diagnostic only. Raw checkpoint equality remains a full memcmp.
++inline Summary Compare(std::span<const std::uint8_t> a, std::span<const std::uint8_t> b,
++                       std::size_t limit = 32)
++{
++  Summary result;
++  const auto common = std::min(a.size(), b.size());
++  const auto total = std::max(a.size(), b.size());
++  result.unmatched_bytes = total - common;
++  bool in_range = false;
++  for (std::size_t i = 0; i < total; ++i)
++  {
++    const bool different = i >= common || a[i] != b[i];
++    if (different && i < common) ++result.different_bytes;
++    if (different)
++    {
++      if (!in_range)
++      {
++        ++result.range_count;
++        if (result.ranges.size() < limit) result.ranges.push_back({i, 0});
++      }
++      if (result.range_count <= limit) ++result.ranges.back().length;
++    }
++    in_range = different;
++  }
++  return result;
++}
++}
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/State.h
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/State.h
+@@ -89,6 +89,8 @@
+ bool BrowserLoadingState();
+ std::string BrowserCaptureProfile(unsigned slot);
+ void BrowserRecordSection(PointerWrap& p, const char* name);
++// Record metadata about a just-serialized field without changing checkpoint bytes.
++void BrowserRecordField(PointerWrap& p, const std::string& name, std::size_t bytes);
+ std::string BrowserCompare(unsigned a, unsigned b);
+ void BrowserClear();
+ bool BrowserRelease(Core::System& system, unsigned slot);
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/State.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/State.cpp
+@@ -3,6 +3,7 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "Core/State.h"
++#include "Common/BrowserStateDiff.h"
+ 
+ #include <algorithm>
+ #include <atomic>
+@@ -159,6 +160,17 @@
+ struct BrowserStateSection { const char* name; std::size_t end; u64 write_us; };
+ static std::vector<BrowserStateSection>* browser_sections_recording = nullptr;
+ static u8* browser_section_base = nullptr;
++struct BrowserStateField { std::string name; std::size_t start, end; };
++struct BrowserStateFields { std::vector<BrowserStateField> fields; bool complete = true; };
++static BrowserStateFields* browser_fields_recording = nullptr;
++void BrowserRecordField(PointerWrap& p, const std::string& name, std::size_t bytes)
++{
++  if (!browser_fields_recording || !p.IsWriteMode()) return;
++  const auto end = p.GetOffsetFromPreviousPosition(browser_section_base);
++  if (bytes > end || browser_fields_recording->fields.size() >= 32768)
++  { browser_fields_recording->complete = false; return; }
++  browser_fields_recording->fields.push_back({name, end - bytes, end});
++}
+ void BrowserRecordSection(PointerWrap& p, const char* name)
+ {
+   if (browser_sections_recording && p.IsWriteMode())
+@@ -315,6 +327,7 @@
+   bool enabled;
+ };
+ static std::array<std::vector<BrowserStateSection>, 6> browser_state_sections;
++static std::array<BrowserStateFields, 6> browser_state_fields;
+ static std::array<u64, 6> browser_measure_us{}, browser_allocate_us{};
+ static std::size_t browser_required_size = 0;
+ std::size_t BrowserRequiredSize() { return browser_required_size; }
+@@ -353,9 +366,12 @@
+   browser_state_sections[slot].clear();
+   browser_section_base = buffer.data();
+   browser_sections_recording = &browser_state_sections[slot];
++  browser_state_fields[slot] = {};
++  browser_fields_recording = &browser_state_fields[slot];
+   browser_write_started = BrowserClockUs();
+   browser_state_sizes[slot] = SaveToBuffer(system, buffer);
+   browser_sections_recording = nullptr;
++  browser_fields_recording = nullptr;
+   if (gpu_resident && g_texture_cache->BrowserStateFailed()) browser_state_sizes[slot] = 0;
+   return browser_state_sizes[slot];
+ }
+@@ -443,14 +459,35 @@
+     const auto& sb = sections_b[n];
+     if (std::strcmp(sa.name, sb.name)) return R"({"error":"Section order differs"})";
+     const auto size_a = sa.end - start_a, size_b = sb.end - start_b;
+-    const auto common = std::min(size_a, size_b);
+-    std::size_t different = 0, first = common;
+-    for (std::size_t i = 0; i < common; ++i)
+-      if (x[start_a+i] != y[start_b+i]) { ++different; if (first == common) first = i; }
++    if (sa.end < start_a || sb.end < start_b || sa.end > browser_state_sizes[a] || sb.end > browser_state_sizes[b])
++      return R"({"error":"Invalid section bounds"})";
++    const auto diff = BrowserStateDiff::Compare({x + start_a, size_a}, {y + start_b, size_b});
+     if (n) report += ",";
+-    report += fmt::format(R"({{"name":"{}","startA":{},"startB":{},"bytesA":{},"bytesB":{},"differentBytes":{},"firstRelativeOffset":{}}})",
+-      sa.name, start_a, start_b, size_a, size_b, different,
+-      first == common ? -1 : static_cast<int>(first));
++    report += fmt::format(R"({{"name":"{}","startA":{},"startB":{},"bytesA":{},"bytesB":{},"differentBytes":{},"unmatchedBytes":{},"firstRelativeOffset":{},"rangeCount":{},"rangesTruncated":{},"fieldsComplete":{},"ranges":[)",
++      sa.name, start_a, start_b, size_a, size_b, diff.different_bytes, diff.unmatched_bytes,
++      diff.ranges.empty() ? -1 : static_cast<int>(diff.ranges.front().offset), diff.range_count,
++      diff.range_count > diff.ranges.size(), browser_state_fields[a].complete && browser_state_fields[b].complete);
++    const auto fieldAt = [](const BrowserStateFields& fields, std::size_t offset, std::size_t bytes,
++                            std::size_t section_start) {
++      for (const auto& field : fields.fields)
++      {
++        if (offset >= field.start && offset < field.end)
++          return fmt::format(R"({{"name":"{}","startRelativeOffset":{},"bytes":{},"containsWholeRange":{}}})",
++            field.name, field.start - section_start, field.end - field.start, bytes <= field.end - offset);
++      }
++      return std::string("null");
++    };
++    bool comma = false;
++    for (const auto& range : diff.ranges)
++    {
++      if (comma) report += ",";
++      comma = true;
++      report += fmt::format(R"({{"offset":{},"bytes":{},"fieldA":{},"fieldB":{}}})",
++        range.offset, range.length,
++        fieldAt(browser_state_fields[a], start_a + range.offset, range.length, start_a),
++        fieldAt(browser_state_fields[b], start_b + range.offset, range.length, start_b));
++    }
++    report += "]}";
+     start_a = sa.end;
+     start_b = sb.end;
+   }
+@@ -479,6 +516,7 @@
+   browser_states_gpu[slot] = false;
+   browser_states[slot].reset();
+   browser_state_sections[slot].clear();
++  browser_state_fields[slot] = {};
+   if (g_texture_cache)
+   {
+     auto release = [slot] { g_texture_cache->BrowserReleaseState(slot); };
+@@ -500,6 +538,7 @@
+   browser_states_gpu.fill(false);
+   for (auto& state : browser_states) state.reset();
+   browser_state_sizes.fill(0);
++  for (auto& fields : browser_state_fields) fields = {};
+ }
+ namespace
+ {
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ #include "Core/CoreTiming.h"
++#include "Core/State.h"
+ 
+ #include <algorithm>
+ #include <mutex>
+@@ -185,8 +186,11 @@
+ {
+   std::lock_guard lk(m_ts_write_lock);
+   p.Do(m_globals.slice_length);
++  State::BrowserRecordField(p, "CoreTiming.m_globals.slice_length", sizeof(m_globals.slice_length));
+   p.Do(m_globals.global_timer);
++  State::BrowserRecordField(p, "CoreTiming.m_globals.global_timer", sizeof(m_globals.global_timer));
+   p.Do(m_idled_cycles);
++  State::BrowserRecordField(p, "CoreTiming.m_idled_cycles", sizeof(m_idled_cycles));
+   p.Do(m_fake_dec_start_value);
+   p.Do(m_fake_dec_start_ticks);
+   p.Do(m_globals.fake_TB_start_value);
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
+@@ -34,6 +34,7 @@
+ #include "Core/FifoPlayer/FifoRecorder.h"
+ #include "Core/HW/Memmap.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ #include "VideoCommon/AbstractFramebuffer.h"
+ #include "VideoCommon/AbstractGfx.h"
+@@ -530,6 +531,7 @@
+   // If we're in measure mode, skip the actual readback to save some time.
+   const bool skip_readback = p.IsMeasureMode();
+   p.Do(config);
++  State::BrowserRecordField(p, "Texture config", sizeof(config));
+ 
+   if (skip_readback || CheckReadbackTexture(config.width, config.height, config.format))
+   {
+@@ -554,6 +556,8 @@
+     // but when writing we'll use this pointer directly to avoid
+     // needing to allocate/free an extra buffer.
+     u8* texture_data = p.DoExternal(total_size);
++    State::BrowserRecordField(p, fmt::format("Texture pixels {}x{} layers={} levels={} format={}",
++        config.width, config.height, config.layers, config.levels, static_cast<int>(config.format)), total_size);
+ 
+     if (!skip_readback && p.IsMeasureMode())
+     {
+@@ -899,25 +903,45 @@
+ void TCacheEntry::DoState(PointerWrap& p)
+ {
+   p.Do(addr);
++  State::BrowserRecordField(p, "TCacheEntry.addr", sizeof(addr));
+   p.Do(size_in_bytes);
++  State::BrowserRecordField(p, "TCacheEntry.size_in_bytes", sizeof(size_in_bytes));
+   p.Do(base_hash);
++  State::BrowserRecordField(p, "TCacheEntry.base_hash", sizeof(base_hash));
+   p.Do(hash);
++  State::BrowserRecordField(p, "TCacheEntry.hash", sizeof(hash));
+   p.Do(format);
++  State::BrowserRecordField(p, "TCacheEntry.format", sizeof(format));
+   p.Do(memory_stride);
++  State::BrowserRecordField(p, "TCacheEntry.memory_stride", sizeof(memory_stride));
+   p.Do(is_efb_copy);
++  State::BrowserRecordField(p, "TCacheEntry.is_efb_copy", sizeof(is_efb_copy));
+   p.Do(is_custom_tex);
++  State::BrowserRecordField(p, "TCacheEntry.is_custom_tex", sizeof(is_custom_tex));
+   p.Do(may_have_overlapping_textures);
++  State::BrowserRecordField(p, "TCacheEntry.may_have_overlapping_textures", sizeof(may_have_overlapping_textures));
+   p.Do(invalidated);
++  State::BrowserRecordField(p, "TCacheEntry.invalidated", sizeof(invalidated));
+   p.Do(has_arbitrary_mips);
++  State::BrowserRecordField(p, "TCacheEntry.has_arbitrary_mips", sizeof(has_arbitrary_mips));
+   p.Do(should_force_safe_hashing);
++  State::BrowserRecordField(p, "TCacheEntry.should_force_safe_hashing", sizeof(should_force_safe_hashing));
+   p.Do(is_xfb_copy);
++  State::BrowserRecordField(p, "TCacheEntry.is_xfb_copy", sizeof(is_xfb_copy));
+   p.Do(is_xfb_container);
++  State::BrowserRecordField(p, "TCacheEntry.is_xfb_container", sizeof(is_xfb_container));
+   p.Do(id);
++  State::BrowserRecordField(p, "TCacheEntry.id", sizeof(id));
+   p.Do(reference_changed);
++  State::BrowserRecordField(p, "TCacheEntry.reference_changed", sizeof(reference_changed));
+   p.Do(native_width);
++  State::BrowserRecordField(p, "TCacheEntry.native_width", sizeof(native_width));
+   p.Do(native_height);
++  State::BrowserRecordField(p, "TCacheEntry.native_height", sizeof(native_height));
+   p.Do(native_levels);
++  State::BrowserRecordField(p, "TCacheEntry.native_levels", sizeof(native_levels));
+   p.Do(frameCount);
++  State::BrowserRecordField(p, "TCacheEntry.frameCount", sizeof(frameCount));
+ }
+ 
+ RcTcacheEntry TextureCacheBase::DoPartialTextureUpdates(RcTcacheEntry& entry_to_update,

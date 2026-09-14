@@ -1,0 +1,96 @@
+{
+  "artifactScope": "Exact selected measured rows from CUA redispatchRun, warmups omitted",
+  "coreSha256": "767af3cb674006c9c2e59db2b5416e5fac83aed133b052eb4992ed11473226be",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "fusionredispatch",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two ordinary human-controller scripts on native logic frames; native partner AI retained",
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "profiler": false,
+  "runs": [
+    {
+      "fusionredispatch": false,
+      "simulationFps": 57.93602735861184,
+      "gameRenderFps": 57.869357591801005,
+      "visibleFps": 57.36933434071978,
+      "p95GapMs": 17.609999999403954,
+      "queue": {
+        "capacity": 2,
+        "dropped": 15,
+        "meanAgeMs": 14.701678281033391,
+        "received": 1736,
+        "presented": 1722
+      },
+      "passed": false
+    },
+    {
+      "fusionredispatch": true,
+      "simulationFps": 56.901991569699284,
+      "gameRenderFps": 56.835322569617624,
+      "visibleFps": 56.6019810693318,
+      "p95GapMs": 32.84499999880791,
+      "queue": {
+        "capacity": 2,
+        "dropped": 8,
+        "meanAgeMs": 15.040361977683894,
+        "received": 1705,
+        "presented": 1699
+      },
+      "passed": false
+    },
+    {
+      "fusionredispatch": true,
+      "simulationFps": 58.071021993316165,
+      "gameRenderFps": 58.00435032627447,
+      "visibleFps": 57.30429782233668,
+      "p95GapMs": 17.765000000596046,
+      "queue": {
+        "capacity": 2,
+        "dropped": 21,
+        "meanAgeMs": 15.886072674341673,
+        "received": 1740,
+        "presented": 1720
+      },
+      "passed": false
+    },
+    {
+      "fusionredispatch": false,
+      "simulationFps": 59.63875051984185,
+      "gameRenderFps": 59.572077797069525,
+      "visibleFps": 58.705332401029345,
+      "p95GapMs": 17.435000002384186,
+      "queue": {
+        "capacity": 2,
+        "dropped": 25,
+        "meanAgeMs": 18.608084563022135,
+        "received": 1787,
+        "presented": 1762
+      },
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 111,
+    "mismatches": []
+  },
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false,
+    "fpuguardwide": false
+  },
+  "decision": "Repair loses both timing pairs; keep disabled despite95% fewer dispatcher entries. No warmed repetition or gain claim. Last control passes simulation/render thresholds but loses25queued images and fails visible FPS. Next isolate presentation capacity2vs3 while measuring queue delay; configuration stays fixed."
+}

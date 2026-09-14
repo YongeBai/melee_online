@@ -1,0 +1,21 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -5952,6 +5952,18 @@
+ void EmitPsqGatherPipeFloatStoreCondition(std::vector<u8>& body, const WasmStateLayout& layout,
+                                           UGeckoInstruction inst)
+ {
++  if (s_qstate_cache.active && s_qstate_cache.full && inst.I == 0)
++  {
++    EmitCachedPsqTypeCondition(body, inst, true);
++    EmitLocalGet(body, 1);
++    EmitI32Const(body, 0x0ffff000);
++    body.push_back(0x71);
++    EmitI32Const(body, GPFifo::GATHER_PIPE_PHYSICAL_ADDRESS);
++    body.push_back(0x46);
++    body.push_back(0x71);
++    return;
++  }
++
+   EmitStateLoadU32(body, layout.msr_offset);
+   EmitI32Const(body, 1u << 13);
+   body.push_back(0x71);

@@ -1,0 +1,166 @@
+{
+  "kind": "same-checkpoint-fountain-modeldetail-abba",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "idle human versus level 9 CPU",
+  "coreSha256": "28a5899ca069b3907eaa9ff6e5b8a35321261900180875015e25de5bd18c2857",
+  "settings": {
+    "reflection": false,
+    "scenery": false,
+    "efbscale": 150,
+    "pace": "raf-buffered",
+    "probe": "async",
+    "pssimd": false,
+    "psmemsimd": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1
+  },
+  "runs": [
+    {
+      "modeldetail": true,
+      "warmup": true,
+      "seconds": 30.015160000000147,
+      "simulationFps": 47.04289432406801,
+      "gameRenderFps": 47.04289432406801,
+      "visibleFps": 46.976261329274706,
+      "p95GapMs": 33.69499999843538,
+      "maxGapMs": 66.96499999985099,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "modeldetail": true,
+      "warmup": false,
+      "seconds": 30.000030000001193,
+      "simulationFps": 48.866617800046924,
+      "gameRenderFps": 48.833284500046894,
+      "visibleFps": 48.833284500046894,
+      "p95GapMs": 33.619999999180436,
+      "maxGapMs": 50.02999999932945,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "modeldetail": false,
+      "warmup": true,
+      "seconds": 30.00000500000082,
+      "simulationFps": 53.866657688888914,
+      "gameRenderFps": 53.83332436111114,
+      "visibleFps": 53.79999103333336,
+      "p95GapMs": 33.33500000089407,
+      "maxGapMs": 56.73499999940395,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "modeldetail": false,
+      "warmup": false,
+      "seconds": 30.000064999999477,
+      "simulationFps": 54.233215828033316,
+      "gameRenderFps": 54.19988256692205,
+      "visibleFps": 54.16654930581078,
+      "p95GapMs": 33.27500000037253,
+      "maxGapMs": 52.03500000014901,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "modeldetail": false,
+      "warmup": true,
+      "seconds": 29.999224999999626,
+      "simulationFps": 53.86805825817234,
+      "gameRenderFps": 53.83472406370565,
+      "visibleFps": 53.80138986923896,
+      "p95GapMs": 33.399999998509884,
+      "maxGapMs": 66.29999999888241,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "modeldetail": false,
+      "warmup": false,
+      "seconds": 29.999640000000596,
+      "simulationFps": 56.10067320807738,
+      "gameRenderFps": 56.06733947473925,
+      "visibleFps": 55.96733827472485,
+      "p95GapMs": 33.16000000014901,
+      "maxGapMs": 56.00999999977648,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "modeldetail": true,
+      "warmup": true,
+      "seconds": 29.999150000000373,
+      "simulationFps": 52.76816176458267,
+      "gameRenderFps": 52.73482748677814,
+      "visibleFps": 52.66815893116906,
+      "p95GapMs": 33.44500000029802,
+      "maxGapMs": 62.005000000819564,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    },
+    {
+      "modeldetail": true,
+      "warmup": false,
+      "seconds": 30.00004000000097,
+      "simulationFps": 53.23326235564848,
+      "gameRenderFps": 53.19992906675953,
+      "visibleFps": 53.16659577787058,
+      "p95GapMs": 33.41499999910593,
+      "maxGapMs": 50.05499999970198,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "passed": false
+    }
+  ],
+  "meanSimulationFps": {
+    "normal": 51.0499400778477,
+    "low": 55.166944518055345
+  },
+  "relativeGain": 0.08064660671353363,
+  "decision": "Retain opt-in for further testing: both pairs favor lower detail, but all target gates fail. Warmup drift still present; all-roster and active-player validation pending."
+}

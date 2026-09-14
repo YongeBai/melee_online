@@ -1,0 +1,263 @@
+{
+  "coreSha256": "eae953535cf9f09f7d7b51c1bf5bcf0c9cb681a5155e103de0687d427a4368c2",
+  "seconds": 30.0128049999997,
+  "diagnosticOnly": true,
+  "passed": false,
+  "simulationFps": 40.71595440679444,
+  "visibleFps": 40.64931618354273,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two active scripted human controller tracks, native Nana partner AI",
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "sceneryAnimation": "on",
+    "shadows": "full",
+    "internalEfb": [
+      960,
+      792
+    ],
+    "output": [
+      960,
+      720
+    ],
+    "emulationSpeed": 1,
+    "cpuClock": 1,
+    "corelog": true,
+    "pcsample": true
+  },
+  "stages": {
+    "cpuAdvance": {
+      "count": 1874176,
+      "totalMs": 4095.264,
+      "fractionOfWallTime": 0.13645055835334421
+    },
+    "cpuExecute": {
+      "count": 1874175,
+      "totalMs": 23729.225,
+      "fractionOfWallTime": 0.7906366965700219
+    },
+    "glDraw": {
+      "count": 513724,
+      "totalMs": 245.916,
+      "fractionOfWallTime": 0.008193702654583683
+    },
+    "glUniform": {
+      "count": 514946,
+      "totalMs": 708.299,
+      "fractionOfWallTime": 0.023599893445481256
+    },
+    "glCompile": {
+      "count": 9,
+      "totalMs": 52.605,
+      "fractionOfWallTime": 0.0017527518670780863
+    },
+    "glPresent": {
+      "count": 1222,
+      "totalMs": 5761.307,
+      "fractionOfWallTime": 0.19196163104381803
+    },
+    "cpuGpuSync": {
+      "count": 1222,
+      "totalMs": 9.521,
+      "fractionOfWallTime": 0.00031723126178976257
+    },
+    "cpuGpuDecode": {
+      "count": 1124889,
+      "totalMs": 1256.949,
+      "fractionOfWallTime": 0.041880424039006436
+    },
+    "cpuVideoWait": {
+      "count": 0,
+      "totalMs": 0,
+      "fractionOfWallTime": 0
+    }
+  },
+  "sampledScopes": {
+    "cpuChain": {
+      "count": 3371,
+      "totalMs": 22.386
+    },
+    "cpuPartial": {
+      "count": 486,
+      "totalMs": 0.14
+    },
+    "cpuCallback": {
+      "count": 605,
+      "totalMs": 0.137
+    },
+    "cpuIdle": {
+      "count": 0,
+      "totalMs": 0
+    },
+    "cpuFpHelper": {
+      "count": 1255,
+      "totalMs": 0.331
+    },
+    "cpuSystemHelper": {
+      "count": 247,
+      "totalMs": 0.08
+    },
+    "cpuMemoryRead": {
+      "count": 124,
+      "totalMs": 0.049
+    },
+    "cpuMemoryWrite": {
+      "count": 70,
+      "totalMs": 0.357
+    }
+  },
+  "samples": 1514,
+  "topFunctions": [
+    {
+      "name": "SelectThread",
+      "count": 75,
+      "fraction": 0.04953764861294584
+    },
+    {
+      "name": "HSD_FObjInterpretAnim",
+      "count": 51,
+      "fraction": 0.03368560105680317
+    },
+    {
+      "name": "SetupEnvelopeModelMtx",
+      "count": 38,
+      "fraction": 0.02509907529722589
+    },
+    {
+      "name": "MObjSetupTev",
+      "count": 28,
+      "fraction": 0.018494055482166448
+    },
+    {
+      "name": "HSD_TExpSetReg",
+      "count": 27,
+      "fraction": 0.0178335535006605
+    },
+    {
+      "name": "psDispParticles",
+      "count": 26,
+      "fraction": 0.017173051519154558
+    },
+    {
+      "name": "HandleReverb",
+      "count": 21,
+      "fraction": 0.013870541611624834
+    },
+    {
+      "name": "sinf",
+      "count": 20,
+      "fraction": 0.013210039630118891
+    },
+    {
+      "name": "hsd_8039930C",
+      "count": 19,
+      "fraction": 0.012549537648612946
+    },
+    {
+      "name": "__GXSetDirtyState",
+      "count": 17,
+      "fraction": 0.011228533685601057
+    },
+    {
+      "name": "HSD_TObjAssignResources",
+      "count": 16,
+      "fraction": 0.010568031704095112
+    },
+    {
+      "name": "JObjUpdateFunc",
+      "count": 16,
+      "fraction": 0.010568031704095112
+    },
+    {
+      "name": "PSMTXConcat",
+      "count": 14,
+      "fraction": 0.009247027741083224
+    },
+    {
+      "name": "HSD_SetupPEMode",
+      "count": 14,
+      "fraction": 0.009247027741083224
+    },
+    {
+      "name": "HSD_SetupTevStage",
+      "count": 14,
+      "fraction": 0.009247027741083224
+    },
+    {
+      "name": "GXSetTevOrder",
+      "count": 14,
+      "fraction": 0.009247027741083224
+    },
+    {
+      "name": "HSD_SetupChannelMode",
+      "count": 14,
+      "fraction": 0.009247027741083224
+    },
+    {
+      "name": "cosf",
+      "count": 13,
+      "fraction": 0.008586525759577279
+    },
+    {
+      "name": "HSD_JObjMakeMatrix",
+      "count": 13,
+      "fraction": 0.008586525759577279
+    },
+    {
+      "name": "DSPSendMailToDSP",
+      "count": 10,
+      "fraction": 0.0066050198150594455
+    },
+    {
+      "name": "GXLoadTexObjPreLoaded",
+      "count": 10,
+      "fraction": 0.0066050198150594455
+    },
+    {
+      "name": "HSD_TObjSetup",
+      "count": 10,
+      "fraction": 0.0066050198150594455
+    },
+    {
+      "name": "lbShadow_8000EFEC",
+      "count": 10,
+      "fraction": 0.0066050198150594455
+    },
+    {
+      "name": "__fill_mem",
+      "count": 10,
+      "fraction": 0.0066050198150594455
+    },
+    {
+      "name": "__GXSetSUTexRegs",
+      "count": 10,
+      "fraction": 0.0066050198150594455
+    }
+  ],
+  "schedulerLocations": [
+    {
+      "pc": "0x8034b164",
+      "count": 73
+    },
+    {
+      "pc": "0x8034b02c",
+      "count": 1
+    },
+    {
+      "pc": "0x8034b16c",
+      "count": 1
+    }
+  ],
+  "limits": [
+    "Profiling materially slows execution; FPS is not an acceptance or regression comparison.",
+    "Scopes are inclusive and overlap across threads; do not sum them. Sampled scopes run every1024calls and have timer quantization/periodic bias.",
+    "Last committed guest PC includes host waits and is not an exact CPU stack.",
+    "SelectThread at8034b164 is lwz/cmplwi/beq busy-wait already recognized by PPCAnalyst and CheckIdle. Its residency does not establish unoptimized spinning.",
+    "Old Melee idle-helper lifetime iteration counts do not establish active-workload timing cost."
+  ]
+}

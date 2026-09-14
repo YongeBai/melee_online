@@ -1,0 +1,27 @@
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1174,6 +1174,24 @@
+     ",\"audioSamplesSkipped\":" + std::to_string(DolphinWeb::RollbackOutput::audio_skipped.load()) + "}";
+   return result.c_str();
+ }
++// Private, paused guest-code installation. Invalidate guest instruction cache
++// lines and generated blocks before making a new procedure reachable.
++EMSCRIPTEN_KEEPALIVE int BrowserInvalidateGuestCode(u32 address, u32 bytes)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused ||
++      address < 0x80001840u || address >= 0x81800000u || (address & 3u) ||
++      bytes == 0 || (bytes & 3u) || bytes > 0x100000u || bytes > 0x81800000u - address)
++    return 0;
++  const Core::CPUThreadGuard guard(system);
++  auto& jit = system.GetJitInterface();
++  auto& icache = system.GetPowerPC().GetPPCState().iCache;
++  for (u32 line = address & ~31u; line < address + bytes; line += 32)
++    icache.Invalidate(system.GetMemory(), jit, line);
++  jit.InvalidateICache(address, bytes, true);
++  return 1;
++}
++
+ // QA-only code-generation comparison. Generated blocks must be discarded when
+ // changing these flags, otherwise a test could unknowingly reuse old code.
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)

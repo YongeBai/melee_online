@@ -1,0 +1,24 @@
+{
+  "kind": "fixed-native-work-abba-summary",
+  "feature": "animstatefast-linear-op2-resume",
+  "coreSha256": "5b8ab91c3e38dccc68832423fade49c51082b9f499a2ee587f722e2bc964d12c",
+  "stage": "Yoshi's Story",
+  "characters": ["Ice Climbers", "Ice Climbers"],
+  "framesPerRun": 1200,
+  "sourceResolution": [960, 720],
+  "inputConsistency": {"passed": true, "checked": 80, "mismatches": []},
+  "measuredRuns": [
+    {"enabled": false, "nativeWorkFps": 58.28623908834975},
+    {"enabled": true, "nativeWorkFps": 58.81366901185257, "fullMachineBytesEqual": true},
+    {"enabled": true, "nativeWorkFps": 59.25532383960442, "onlyIdleCycleAccumulatorDiffered": true},
+    {"enabled": false, "nativeWorkFps": 59.82629430661969, "fullMachineBytesEqual": true}
+  ],
+  "measuredMeans": {
+    "disabledFps": 59.05626669748472,
+    "enabledFps": 59.03449642572849,
+    "relativeChangePercent": -0.03686360986504544
+  },
+  "pairedDifferencesFps": [0.5274299235028153, -0.5709704670152647],
+  "decision": "Reject as a hill-climb gain. The opposing pairs disagree and their mean is effectively zero despite high execution coverage.",
+  "limits": "Uncapped exact native-frame diagnostic without image-cadence acceptance. The separate 600-frame normal-running replay matched every one of 110,178,708 bytes. One candidate endpoint here differed only in CoreTiming.m_idled_cycles, a historical host-idle accumulator; all gameplay, CPU register, RAM and GPU sections matched."
+}

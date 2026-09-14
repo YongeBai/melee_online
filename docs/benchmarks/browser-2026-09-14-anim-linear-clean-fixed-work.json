@@ -1,0 +1,25 @@
+{
+  "kind": "fixed-native-work-abba-summary",
+  "feature": "animstatefast-linear-resume",
+  "coreSha256": "3495b5149231560efc2c9db6bd05e823e6f6a3bf009ffa1dc91a8a0332e01145",
+  "stage": "Yoshi's Story",
+  "characters": ["Ice Climbers", "Ice Climbers"],
+  "framesPerRun": 1200,
+  "singleEmulatorTab": true,
+  "sourceResolution": [960, 720],
+  "inputConsistency": {"passed": true, "checked": 80, "mismatches": []},
+  "runs": [
+    {"enabled": false, "warmup": true, "nativeWorkFps": 53.24442746377897},
+    {"enabled": false, "warmup": false, "nativeWorkFps": 56.74137050909302},
+    {"enabled": true, "warmup": true, "nativeWorkFps": 57.017865987251305},
+    {"enabled": true, "warmup": false, "nativeWorkFps": 56.452789257950094, "fullMachineBytesEqual": true},
+    {"enabled": true, "warmup": true, "nativeWorkFps": 58.03516228841355},
+    {"enabled": true, "warmup": false, "nativeWorkFps": 58.08925570592945, "fullMachineBytesEqual": true},
+    {"enabled": false, "warmup": true, "nativeWorkFps": 57.633482526696135},
+    {"enabled": false, "warmup": false, "nativeWorkFps": 57.4760942976284}
+  ],
+  "measuredMeans": {"disabledFps": 57.10873240336071, "enabledFps": 57.27102248193977, "relativeChangePercent": 0.2841773534238533},
+  "pairedDifferencesFps": [-0.2885812511429258, 0.6131614083010505],
+  "decision": "Reject as a hill-climb gain. Adjacent pairs disagree and the mean change is only 0.28%. Keep opt-in disabled.",
+  "limits": "Uncapped exact native-frame diagnostic without image-cadence acceptance. A closing reference snapshot differed only in the historical idle-cycle accumulator; both candidate snapshots matched their reference captures byte-for-byte."
+}

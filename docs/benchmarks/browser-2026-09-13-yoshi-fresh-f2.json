@@ -1,0 +1,103 @@
+{
+  "kind": "fresh-match-observations",
+  "coreSha256": "f2e807d6a316978c18c21d708891520a10d36d11e3ab8bf34cf530f4b739c0f7",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 8,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "runs": [
+    {
+      "seconds": 44.99726999999955,
+      "simulationFps": 42.98038525448364,
+      "gameRenderFps": 42.95816168403148,
+      "visibleFps": 42.95816168403148,
+      "p95GapMs": 33.899999998509884,
+      "maxGapMs": 83.67500000074506,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 522.582,
+        "uniqueInstances": 7974,
+        "reusedInstances": 191
+      },
+      "queue": {
+        "capacity": 2,
+        "received": 1933,
+        "presented": 1933,
+        "dropped": 0,
+        "underruns": 765,
+        "meanAgeMs": 7.930312985013756
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "seconds": 44.998554999999705,
+      "simulationFps": 46.8459487199092,
+      "gameRenderFps": 46.77927991243305,
+      "visibleFps": 46.73483404078228,
+      "p95GapMs": 33.730000000447035,
+      "maxGapMs": 92.44999999925494,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 123.796,
+        "uniqueInstances": 1469,
+        "reusedInstances": 19
+      },
+      "queue": {
+        "capacity": 2,
+        "received": 2106,
+        "presented": 2104,
+        "dropped": 2,
+        "underruns": 583,
+        "meanAgeMs": 8.661875000000425
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "scope": "Selected exact fields from two visible 45-second fresh matches, same page session. Different checkpoints/input trajectories; not a causal A/B. No builds or profiler ran. Synchronous JIT counters exclude byte generation and background browser tiering.",
+  "conclusion": "Earlier core is also slow. This cannot isolate a native-build regression. FIFO queue almost never drops images; simulation production is slow. Logger inactive."
+}

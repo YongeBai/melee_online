@@ -1,0 +1,25 @@
+{
+  "kind": "render-dispatch-cost-abba",
+  "scope": "mesh",
+  "diagnosticOnly": true,
+  "passed": false,
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage": "Yoshi's Story",
+  "characters": ["Ice Climbers", "Ice Climbers"],
+  "frames": 1200,
+  "commonInput": {"startFrame":427,"stopFrame":1627,"trackedPolls":1201,"skipped":0,"inputHash":2820127817,"stateHash":1739447161},
+  "inputConsistency": {"passed":true,"checked":80,"mismatches":[]},
+  "runs": [
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":37.13184959347259,"elapsedMs":32317.26976,"synchronousCompileAndLinkMs":435.937},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":39.78114404663574,"elapsedMs":30165.044992,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":47.494449203402326,"elapsedMs":25266.110464,"synchronousCompileAndLinkMs":16.837},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":48.326269776733355,"elapsedMs":24831.215104,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":49.19689209142668,"elapsedMs":24391.784704,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":49.692600249719234,"elapsedMs":24148.46464,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":41.60868154777159,"elapsedMs":28840.135168,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":43.19920313298408,"elapsedMs":27778.290176,"synchronousCompileAndLinkMs":0}
+  ],
+  "interpretation": "Bypassing HSD_PObjDisp removes mesh skinning/matrix setup and primitive submission while retaining outer material and scene traversal. Both orders improve native work rate. The paired elapsed differences are about 4.45 and 3.02 ms per frame. There is substantial drift; these are combined-path opportunity bounds, not additive CPU time or a playable improvement.",
+  "restoration": "Benchmark completed its original-instruction, checkpoint, input and host-pacing restoration.",
+  "limits": "Selected exact UI fields. Temporarily uncapped host pacing, blank/incomplete images during bypass, no image acceptance or latency claim. Fingerprints are not full machine equality. No build/test/profiler/resource sampler during measurement. Scene and mesh experiments used different starting checkpoints and must not be subtracted as an exact attribution."
+}

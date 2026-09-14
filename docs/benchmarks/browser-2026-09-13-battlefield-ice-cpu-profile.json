@@ -1,0 +1,51 @@
+{
+  "artifactScope":"Selected exact fields from cold and warm completed live CPU diagnostics; not performance acceptance",
+  "coreSha256":"b9f28907ed7e4256d09d239872d68088a32e40f5df62a76481459dc2dd622e88",
+  "stage":"Battlefield","fighters":["Ice Climbers","Ice Climbers"],
+  "qstatecache":false,"qstatefull":false,"diagnosticOnly":true,
+  "configuration":{"enabled":true,"jitRequestedMode":2,"jitAppliedMode":2,"jitModeFlushes":1,"directWasmDispatch":1,"internalScale":1.5,"efbWidth":960,"efbHeight":792,"cpuThread":1,"cpuOverclock":1,"emulationSpeed":1},
+  "cold":{"seconds":29.99933999999985,"simulationFps":34.23408648323613,"lastPcSamples":1496,"cpuExecuteMs":24084.842,"cpuAdvanceMs":4066.828,"cpuGpuSyncMs":285.506,"cpuGpuDecodeMs":1426.092,"coreEventGpuSyncMs":1936.44,"glCompileMs":6.242,"mainLoopPc":{"pc":"0x801a4da8","samples":97}},
+  "warm":{
+    "seconds":29.999115000000224,"simulationFps":38.23446124993992,"lastPcSamples":1506,
+    "stages":{
+      "cpuExecute":{"count":1616862,"totalMs":23730.397},
+      "cpuAdvance":{"count":1616862,"totalMs":4223.293},
+      "cpuGpuSync":{"count":1149,"totalMs":216.144},
+      "cpuGpuDecode":{"count":913740,"totalMs":1472.556},
+      "cpuVideoWait":{"count":1,"totalMs":0.199},
+      "coreEventGpuSync":{"count":913740,"totalMs":2023.505},
+      "coreEventVi":{"count":602506,"totalMs":1079.371},
+      "coreEventDsp":{"count":19146,"totalMs":9.885},
+      "coreEventAudioDma":{"count":76654,"totalMs":41.214},
+      "coreEventDvd":{"count":77,"totalMs":54.764},
+      "glDraw":{"count":404548,"totalMs":254.642},
+      "glUniform":{"count":405696,"totalMs":812.202},
+      "glPresent":{"count":1148,"totalMs":1275.474},
+      "glCompile":{"count":1,"totalMs":0.78},
+      "cpuChainSample1024":{"count":2772,"totalMs":20.934,"estimatedCalls":2838528},
+      "cpuFpHelperSample1024":{"count":2347,"totalMs":0.748,"estimatedCalls":2403328},
+      "cpuGatherSample1024":{"count":3681,"totalMs":1.487,"estimatedCalls":3769344},
+      "cpuGatherCopySample1024":{"count":4203,"totalMs":1.223,"estimatedCalls":4303872},
+      "cpuBurstSample1024":{"count":4203,"totalMs":1.457,"estimatedCalls":4303872}
+    },
+    "topSampledFunctions":[
+      {"name":"SelectThread","start":"0x8034b02c","count":65},
+      {"name":"HSD_FObjInterpretAnim","start":"0x8036b030","count":51},
+      {"name":"gm_801A4D34","start":"0x801a4d34","count":39},
+      {"name":"SetupEnvelopeModelMtx","start":"0x8036e4c4","count":38},
+      {"name":"HSD_SetupTevStage","start":"0x80362548","count":29},
+      {"name":"psDispParticles","start":"0x803a0088","count":29},
+      {"name":"HandleReverb","start":"0x8035c910","count":26},
+      {"name":"HSD_TExpSetReg","start":"0x80384f28","count":20},
+      {"name":"HSD_JObjMakeMatrix","start":"0x8036f1f8","count":19},
+      {"name":"JObjUpdateFunc","start":"0x8036fdc0","count":18},
+      {"name":"sinf","start":"0x803263d4","count":17},
+      {"name":"HSD_SetupChannel","start":"0x803620a4","count":15},
+      {"name":"__GXSetDirtyState","start":"0x8033d050","count":13},
+      {"name":"HSD_JObjDispAll","start":"0x803709dc","count":13},
+      {"name":"__GXSetSUTexRegs","start":"0x8033f3ac","count":12},
+      {"name":"HSD_StateInvalidate","start":"0x80361fc4","count":11}
+    ]
+  },
+  "limits":["Inclusive timings overlap across scopes and threads and must not be summed.","Sample1024 values are raw sampled times; do not multiply into additive CPU percentages.","Last committed PC is residency, not an exact native stack or self-time measurement. Idle/scheduler locations are already optimized and are not proof of wasted spinning.","Profiling materially reduces throughput; these FPS values cannot be compared directly with acceptance runs.","No long stall cause is established by this later profile."]
+}

@@ -1,0 +1,181 @@
+{
+  "artifactScope": "Selected exact fields from completed browser QA",
+  "kind": "same-checkpoint-queue-capacity-abba",
+  "passed": true,
+  "stage": "Battlefield",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "coreSha256": "e9ad5d9691b9957b0d99b252675a959c8770e302aba7801004c7758951bc475f",
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "allRuns": {
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "nonblackFraction": 1,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "nativeInputStart": 546,
+    "nativeInputValid": true,
+    "queueRateLimited": true,
+    "pageVisible": true,
+    "pageFocused": true,
+    "pageLifecycleEvents": []
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 119,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "capacity": 2,
+      "warmup": true,
+      "seconds": 29.999395000001417,
+      "simulationFps": 60.00121002439933,
+      "gameRenderFps": 59.96787601883021,
+      "visibleFps": 59.40119792415533,
+      "p95GapMs": 17.355000000447035,
+      "maxGapMs": 64.02000000141561,
+      "meanQueueAgeMs": 20.410272013494225,
+      "queueDropped": 16,
+      "compileMs": 35.245,
+      "wallStartMs": 1789338238668.1802,
+      "wallEndMs": 1789338268667.575,
+      "passed": false
+    },
+    {
+      "capacity": 2,
+      "warmup": false,
+      "seconds": 29.99851999999955,
+      "simulationFps": 59.96962516817586,
+      "gameRenderFps": 59.902955212458046,
+      "visibleFps": 59.069580765985336,
+      "p95GapMs": 17.49500000104308,
+      "maxGapMs": 57.419999999925494,
+      "meanQueueAgeMs": 19.221486181614303,
+      "queueDropped": 25,
+      "compileMs": 0,
+      "wallStartMs": 1789338270666.58,
+      "wallEndMs": 1789338300665.1,
+      "passed": false
+    },
+    {
+      "capacity": 3,
+      "warmup": true,
+      "seconds": 29.998710000000894,
+      "simulationFps": 59.96924534421468,
+      "gameRenderFps": 59.96924534421468,
+      "visibleFps": 59.835906277301476,
+      "p95GapMs": 17.35499999858439,
+      "maxGapMs": 58.94500000029802,
+      "meanQueueAgeMs": 31.538415924278823,
+      "queueDropped": 3,
+      "compileMs": 0,
+      "wallStartMs": 1789338302664.865,
+      "wallEndMs": 1789338332663.575,
+      "passed": true
+    },
+    {
+      "capacity": 3,
+      "warmup": false,
+      "seconds": 29.998709999999033,
+      "simulationFps": 59.9359105774901,
+      "gameRenderFps": 59.9359105774901,
+      "visibleFps": 59.50255861002215,
+      "p95GapMs": 17.355000000447035,
+      "maxGapMs": 69.64499999955297,
+      "meanQueueAgeMs": 34.89169652853474,
+      "queueDropped": 11,
+      "compileMs": 0,
+      "wallStartMs": 1789338334596.79,
+      "wallEndMs": 1789338364595.5,
+      "passed": true
+    },
+    {
+      "capacity": 3,
+      "warmup": true,
+      "seconds": 29.998830000000076,
+      "simulationFps": 60.002340091263406,
+      "gameRenderFps": 59.96900545787937,
+      "visibleFps": 59.70232839080709,
+      "p95GapMs": 17.34999999962747,
+      "maxGapMs": 78.80499999970198,
+      "meanQueueAgeMs": 32.59124162945539,
+      "queueDropped": 8,
+      "compileMs": 0,
+      "wallStartMs": 1789338366544.78,
+      "wallEndMs": 1789338396543.61,
+      "passed": true
+    },
+    {
+      "capacity": 3,
+      "warmup": false,
+      "seconds": 29.99924499999918,
+      "simulationFps": 60.00151003800426,
+      "gameRenderFps": 60.00151003800426,
+      "visibleFps": 59.6681683155709,
+      "p95GapMs": 17.365000000223517,
+      "maxGapMs": 64.25500000081956,
+      "meanQueueAgeMs": 28.84691233947636,
+      "queueDropped": 7,
+      "compileMs": 0,
+      "wallStartMs": 1789338398543.11,
+      "wallEndMs": 1789338428542.355,
+      "passed": true
+    },
+    {
+      "capacity": 2,
+      "warmup": true,
+      "seconds": 29.997924999998883,
+      "simulationFps": 59.970814648015384,
+      "gameRenderFps": 59.970814648015384,
+      "visibleFps": 59.70412953562844,
+      "p95GapMs": 17.384999999776483,
+      "maxGapMs": 56.190000001341105,
+      "meanQueueAgeMs": 22.166732700898137,
+      "queueDropped": 7,
+      "compileMs": 0,
+      "wallStartMs": 1789338430642.22,
+      "wallEndMs": 1789338460640.145,
+      "passed": true
+    },
+    {
+      "capacity": 2,
+      "warmup": false,
+      "seconds": 29.99928500000015,
+      "simulationFps": 60.03476416187889,
+      "gameRenderFps": 59.96809590628547,
+      "visibleFps": 59.63475462831835,
+      "p95GapMs": 17.369999999180436,
+      "maxGapMs": 71.58999999985099,
+      "meanQueueAgeMs": 17.191751396654997,
+      "queueDropped": 9,
+      "compileMs": 0,
+      "wallStartMs": 1789338462557.34,
+      "wallEndMs": 1789338492556.625,
+      "passed": true
+    }
+  ],
+  "decision": "Keep two-image default for coverage: last control warmup and measured interval passed at lower delay. Both three-image measured intervals passed, but first is close to threshold; broader and longer coverage remains necessary.",
+  "limits": [
+    "This is a warmed workload, not cold-start or all-stage/roster proof.",
+    "No build or profiler during capture. Read-only one-second /proc thread observations overlapped parts of the first three modes.",
+    "Queue age is not physical input-to-photon latency."
+  ]
+}

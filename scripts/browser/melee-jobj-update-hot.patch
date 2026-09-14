@@ -1,0 +1,420 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.h
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.h
+@@ -3,6 +3,7 @@
+ 
+ #pragma once
+ 
++#include <array>
+ #include <cstddef>
+ 
+ #include "Common/CommonTypes.h"
+@@ -78,6 +79,7 @@
+   bool TryWriteMeleeTitleLoop(u32 index, PowerPC::PowerPCManager& power_pc);
+   bool TryWriteMeleeMatrixConcat(PowerPC::PowerPCManager& power_pc);
+   bool TryWriteMeleeAnimStateProbe(PowerPC::PowerPCManager& power_pc);
++  bool TryWriteMeleeJObjUpdate(PowerPC::PowerPCManager& power_pc);
+   bool TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_pc);
+   bool TryWriteOsInterruptFunction(u32 index, PowerPC::PowerPCManager& power_pc);
+   bool TryWriteDcbxLoop(u32 index, PowerPC::PowerPCManager& power_pc);
+@@ -97,6 +99,7 @@
+   struct MeleeTitleLoopOperands;
+   struct MeleeMatrixConcatOperands;
+   struct MeleeAnimStateProbeOperands;
++  struct MeleeJObjUpdateOperands;
+   struct MeleeDisplayListOperands;
+   struct OsInterruptFunctionOperands;
+   struct DcbxLoopOperands;
+@@ -167,6 +170,10 @@
+                                      const MeleeAnimStateProbeOperands& operands);
+   static s32 FastMeleeAnimStateProbe(std::ostream& stream,
+                                      const MeleeAnimStateProbeOperands& operands);
++  static s32 FastMeleeJObjUpdate(PowerPC::PowerPCState& ppc_state,
++                                 const MeleeJObjUpdateOperands& operands);
++  static s32 FastMeleeJObjUpdate(std::ostream& stream,
++                                 const MeleeJObjUpdateOperands& operands);
+   static s32 FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+                                   const MeleeDisplayListOperands& operands);
+   static s32 FastMeleeDisplayList(std::ostream& stream,
+@@ -322,6 +329,23 @@
+   u32 linear_update_prefix_fp;
+ };
+ 
++struct CachedInterpreter::MeleeJObjUpdateOperands
++{
++  PowerPC::PowerPCManager& power_pc;
++  u32 current_pc;
++  // Complete-function accounting for the six guarded paths below. Each
++  // triplet is cycles/load-stores/floating-point instructions.
++  std::array<u32, 3> rotation_x_independent;
++  std::array<u32, 3> rotation_x_dirty;
++  std::array<u32, 3> rotation_independent;
++  std::array<u32, 3> rotation_dirty;
++  std::array<u32, 3> translation_independent;
++  std::array<u32, 3> translation_dirty;
++  std::array<u32, 3> scale_independent;
++  std::array<u32, 3> scale_dirty;
++  std::array<u32, 3> scale_clamp_extra;
++};
++
+ struct CachedInterpreter::MeleeDisplayListOperands
+ {
+   PowerPC::PowerPCManager& power_pc;
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -388,6 +388,12 @@
+ std::atomic<u32> s_melee_anim_probe_linear_direct{0};
+ std::array<std::atomic<u32>, 8> s_melee_anim_probe_states{};
+ std::array<std::atomic<u32>, 8> s_melee_anim_probe_ops{};
++std::atomic<u32> s_melee_jobj_update_compiles{0}, s_melee_jobj_update_runs{0};
++std::atomic<u32> s_melee_jobj_update_direct{0}, s_melee_jobj_update_fallback{0};
++std::atomic<u32> s_melee_jobj_update_rotation{0}, s_melee_jobj_update_translation{0};
++std::atomic<u32> s_melee_jobj_update_scale{0}, s_melee_jobj_update_clamps{0};
++std::atomic<u32> s_melee_jobj_update_independent{0}, s_melee_jobj_update_dirty{0};
++std::array<std::atomic<u32>, 11> s_melee_jobj_update_types{};
+ std::atomic<bool> s_dolphin_web_melee_display_list_fast{false};
+ std::atomic<u32> s_melee_display_list_compiles{0}, s_melee_display_list_runs{0};
+ std::atomic<u32> s_melee_display_list_fallbacks{0}, s_melee_display_list_dirty{0};
+@@ -9779,6 +9785,14 @@
+       else
+         break;
+     }
++    else if (callback == AnyCallbackCast(FastMeleeJObjUpdate))
++    {
++      if (FastMeleeJObjUpdate(
++              ppc_state, *reinterpret_cast<const MeleeJObjUpdateOperands*>(payload)))
++        normal_entry = payload + sizeof(MeleeJObjUpdateOperands);
++      else
++        break;
++    }
+     else if (callback == AnyCallbackCast(FastMeleeDisplayList))
+     {
+       if (FastMeleeDisplayList(
+@@ -10564,6 +10578,127 @@
+   return true;
+ }
+ 
++bool CachedInterpreter::TryWriteMeleeJObjUpdate(PowerPC::PowerPCManager& power_pc)
++{
++  constexpr u32 start = 0x8036fdc0;
++  constexpr u32 end = 0x80370780;
++  // FNV-1a over every instruction byte in the unmodified GALE01 1.02
++  // JObjUpdateFunc. The shortcut below is tied to the complete switch body,
++  // not merely its entry opcode or symbol name.
++  constexpr u32 expected_signature = 0xe00c9b9e;
++  if (!s_dolphin_web_melee_anim_state_fast.load(std::memory_order_relaxed) ||
++      js.blockStart != start || IsDebuggingEnabled() || IsBranchWatchEnabled() ||
++      IsProfilingEnabled() || jo.memcheck)
++  {
++    return false;
++  }
++
++  u32 signature = 2166136261u;
++  const auto read = [&](u32 address) -> std::optional<UGeckoInstruction> {
++    const auto result = m_system.GetMMU().TryReadInstruction(address);
++    if (!result.valid)
++      return std::nullopt;
++    return UGeckoInstruction{result.hex};
++  };
++  for (u32 address = start; address < end; address += sizeof(u32))
++  {
++    const auto inst = read(address);
++    if (!inst)
++      return false;
++    for (s32 shift = 24; shift >= 0; shift -= 8)
++    {
++      signature ^= (inst->hex >> shift) & 0xff;
++      signature *= 16777619u;
++    }
++  }
++  if (signature != expected_signature)
++    return false;
++
++  using Metric = std::array<u32, 3>;
++  const auto add_instruction = [&](Metric& metric, u32 address) {
++    const auto inst = read(address);
++    if (!inst)
++      return false;
++    const GekkoOPInfo* opinfo = PPCTables::GetOpInfo(*inst, address);
++    metric[0] += opinfo->num_cycles;
++    if ((opinfo->flags & FL_LOADSTORE) != 0)
++      ++metric[1];
++    if ((opinfo->flags & FL_USE_FPU) != 0)
++      ++metric[2];
++    return true;
++  };
++  const auto add_addresses = [&](Metric& metric, std::initializer_list<u32> addresses) {
++    for (const u32 address : addresses)
++      if (!add_instruction(metric, address))
++        return false;
++    return true;
++  };
++  Metric common{};
++  for (u32 address = start; address <= 0x8036fe08; address += sizeof(u32))
++    if (!add_instruction(common, address))
++      return false;
++  for (u32 address = 0x80370768; address <= 0x8037077c; address += sizeof(u32))
++    if (!add_instruction(common, address))
++      return false;
++
++  const auto make_path = [&](std::initializer_list<u32> addresses) -> std::optional<Metric> {
++    Metric metric = common;
++    if (!add_addresses(metric, addresses))
++      return std::nullopt;
++    return metric;
++  };
++  const auto rotation_x_independent = make_path({
++      0x80370004, 0x80370008, 0x8037000c, 0x80370030, 0x80370034, 0x80370038,
++      0x8037004c, 0x80370050, 0x80370054, 0x80370068, 0x8037006c, 0x80370070,
++      0x80370074});
++  const auto rotation_x_dirty = make_path({
++      0x80370004, 0x80370008, 0x8037000c, 0x80370030, 0x80370034, 0x80370038,
++      0x8037004c, 0x80370050, 0x80370054, 0x80370068, 0x8037006c, 0x80370070,
++      0x80370074, 0x80370078, 0x8037007c, 0x80370080, 0x80370094, 0x80370098,
++      0x8037009c, 0x803700a0, 0x803700a4, 0x803700a8, 0x803700ac, 0x803700b0,
++      0x803700b4});
++  const auto rotation_independent = make_path({
++      0x803700c4, 0x803700c8, 0x803700cc, 0x803700e0, 0x803700e4, 0x803700e8,
++      0x803700fc, 0x80370100, 0x80370104, 0x80370108});
++  const auto rotation_dirty = make_path({
++      0x803700c4, 0x803700c8, 0x803700cc, 0x803700e0, 0x803700e4, 0x803700e8,
++      0x803700fc, 0x80370100, 0x80370104, 0x80370108, 0x8037010c, 0x80370110,
++      0x80370114, 0x80370128, 0x8037012c, 0x80370130, 0x80370134, 0x80370138,
++      0x8037013c, 0x80370140, 0x80370144, 0x80370148});
++  const auto translation_independent = make_path({
++      0x803701ec, 0x803701f0, 0x803701f4, 0x80370208, 0x8037020c, 0x80370210,
++      0x80370214});
++  const auto translation_dirty = make_path({
++      0x803701ec, 0x803701f0, 0x803701f4, 0x80370208, 0x8037020c, 0x80370210,
++      0x80370214, 0x80370218, 0x8037021c, 0x80370220, 0x80370234, 0x80370238,
++      0x8037023c, 0x80370240, 0x80370244, 0x80370248, 0x8037024c, 0x80370250,
++      0x80370254});
++  const auto scale_independent = make_path({
++      0x80370354, 0x80370358, 0x8037035c, 0x80370360, 0x80370364, 0x80370368,
++      0x8037036c, 0x80370370, 0x80370374, 0x8037037c, 0x80370380, 0x80370384,
++      0x80370398, 0x8037039c, 0x803703a0, 0x803703a4});
++  const auto scale_dirty = make_path({
++      0x80370354, 0x80370358, 0x8037035c, 0x80370360, 0x80370364, 0x80370368,
++      0x8037036c, 0x80370370, 0x80370374, 0x8037037c, 0x80370380, 0x80370384,
++      0x80370398, 0x8037039c, 0x803703a0, 0x803703a4, 0x803703a8, 0x803703ac,
++      0x803703b0, 0x803703c4, 0x803703c8, 0x803703cc, 0x803703d0, 0x803703d4,
++      0x803703d8, 0x803703dc, 0x803703e0, 0x803703e4});
++  Metric scale_clamp_extra{};
++  if (!add_instruction(scale_clamp_extra, 0x80370378) || !rotation_x_independent ||
++      !rotation_x_dirty || !rotation_independent || !rotation_dirty ||
++      !translation_independent || !translation_dirty || !scale_independent || !scale_dirty)
++  {
++    return false;
++  }
++
++  Write(FastMeleeJObjUpdate,
++        {power_pc, start, *rotation_x_independent, *rotation_x_dirty,
++         *rotation_independent, *rotation_dirty, *translation_independent,
++         *translation_dirty, *scale_independent, *scale_dirty, scale_clamp_extra});
++  s_melee_jobj_update_compiles.fetch_add(1, std::memory_order_relaxed);
++  return true;
++}
++
+ bool CachedInterpreter::TryWriteMeleeDisplayList(PowerPC::PowerPCManager& power_pc)
+ {
+   constexpr u32 start = 0x803410d8;
+@@ -12436,6 +12571,150 @@
+   return 0;
+ }
+ 
++s32 CachedInterpreter::FastMeleeJObjUpdate(PowerPC::PowerPCState& ppc_state,
++                                           const MeleeJObjUpdateOperands& operands)
++{
++  const auto& [power_pc, current_pc, rotation_x_independent, rotation_x_dirty,
++               rotation_independent, rotation_dirty, translation_independent,
++               translation_dirty, scale_independent, scale_dirty, scale_clamp_extra] = operands;
++  (void)power_pc;
++  (void)current_pc;
++  constexpr s32 fallback_size = sizeof(AnyCallback) + sizeof(operands);
++  s_melee_jobj_update_runs.fetch_add(1, std::memory_order_relaxed);
++
++  auto& memory = Core::System::GetInstance().GetMemory();
++  u8* const ram = memory.GetRAM();
++  const u32 ram_size = memory.GetRamSizeReal();
++  const u32 obj = ppc_state.gpr[3];
++  const u32 type = ppc_state.gpr[4];
++  const u32 value_address = ppc_state.gpr[5];
++  const u32 old_sp = ppc_state.gpr[1];
++  const u32 new_sp = old_sp - 160;
++  u32 obj_offset = 0, value_offset = 0, stack_offset = 0, epsilon_offset = 0;
++  const bool recognized = (type >= 1 && type <= 3) || (type >= 5 && type <= 10);
++  if (!recognized || !ppc_state.msr.FP || ppc_state.msr.LE || obj == 0 || value_address == 0 ||
++      !TryFastAlignedRamOffset(ppc_state, ram, ram_size, obj, 68, &obj_offset) ||
++      !TryFastAlignedRamOffset(ppc_state, ram, ram_size, value_address, 4, &value_offset) ||
++      !TryFastAlignedRamOffset(ppc_state, ram, ram_size, new_sp, 168, &stack_offset) ||
++      (type >= 8 && !TryFastAlignedRamOffset(ppc_state, ram, ram_size,
++                                            ppc_state.gpr[2] - 5276, 4, &epsilon_offset)))
++  {
++    s_melee_jobj_update_fallback.fetch_add(1, std::memory_order_relaxed);
++    return fallback_size;
++  }
++  const auto overlaps = [](u32 a, u32 as, u32 b, u32 bs) {
++    return a < b + bs && b < a + as;
++  };
++  if (overlaps(obj_offset, 68, value_offset, 4) ||
++      overlaps(obj_offset, 68, stack_offset, 168) ||
++      overlaps(value_offset, 4, stack_offset, 168) ||
++      (type >= 8 && (overlaps(epsilon_offset, 4, obj_offset, 68) ||
++                     overlaps(epsilon_offset, 4, value_offset, 4) ||
++                     overlaps(epsilon_offset, 4, stack_offset, 168))))
++  {
++    s_melee_jobj_update_fallback.fetch_add(1, std::memory_order_relaxed);
++    return fallback_size;
++  }
++
++  constexpr u32 JOBJ_MTX_DIRTY = 1u << 6;
++  constexpr u32 JOBJ_USE_QUATERNION = 1u << 17;
++  constexpr u32 JOBJ_JOINT1 = 1u << 21;
++  constexpr u32 JOBJ_USER_DEF_MTX = 1u << 23;
++  constexpr u32 JOBJ_MTX_INDEP_SRT = 1u << 25;
++  const u32 flags = ReadRamU32BE(ram, obj_offset + 20);
++  const bool independent = (flags & JOBJ_MTX_INDEP_SRT) != 0;
++  const bool already_dirty = (flags & JOBJ_USER_DEF_MTX) == 0 && (flags & JOBJ_MTX_DIRTY) != 0;
++  // The first update to a dependent joint recursively dirties descendants.
++  // Leave that semantically important path in guest code. Subsequent channels
++  // on the already-dirty joint and independent-SRT joints are pure field stores.
++  if ((!independent && !already_dirty) ||
++      (type <= 3 && (flags & JOBJ_USE_QUATERNION) != 0) ||
++      (type == 1 && (flags & JOBJ_JOINT1) != 0))
++  {
++    s_melee_jobj_update_fallback.fetch_add(1, std::memory_order_relaxed);
++    return fallback_size;
++  }
++
++  u32 value_bits = ReadRamU32BE(ram, value_offset);
++  double value = std::bit_cast<double>(ConvertToDouble(value_bits));
++  if (type >= 8 && !std::isfinite(value))
++  {
++    // Ordered compare exception details for NaNs stay on the guest path.
++    s_melee_jobj_update_fallback.fetch_add(1, std::memory_order_relaxed);
++    return fallback_size;
++  }
++
++  const u32 old_lr = LR(ppc_state);
++  const u64 old_f31 = ppc_state.ps[31].PS0AsU64();
++  WriteRamU32BE(ram, stack_offset + 164, old_lr);
++  WriteRamU32BE(ram, stack_offset, old_sp);
++  WriteRamU32BE(ram, stack_offset + 152, static_cast<u32>(old_f31 >> 32));
++  WriteRamU32BE(ram, stack_offset + 156, static_cast<u32>(old_f31));
++  for (u32 reg = 27; reg <= 31; ++reg)
++    WriteRamU32BE(ram, stack_offset + 132 + (reg - 27) * 4, ppc_state.gpr[reg]);
++
++  std::array<u32, 3> metric{};
++  u32 field_offset = 0;
++  u32 case_target = 0;
++  if (type <= 3)
++  {
++    field_offset = 28 + (type - 1) * 4;
++    case_target = type == 1 ? 0x80370004 : type == 2 ? 0x803700c4 : 0x80370158;
++    metric = type == 1 ? (independent ? rotation_x_independent : rotation_x_dirty) :
++                         (independent ? rotation_independent : rotation_dirty);
++    s_melee_jobj_update_rotation.fetch_add(1, std::memory_order_relaxed);
++  }
++  else if (type <= 7)
++  {
++    field_offset = 56 + (type - 5) * 4;
++    case_target = type == 5 ? 0x803701ec : type == 6 ? 0x80370264 : 0x803702dc;
++    metric = independent ? translation_independent : translation_dirty;
++    s_melee_jobj_update_translation.fetch_add(1, std::memory_order_relaxed);
++  }
++  else
++  {
++    field_offset = 44 + (type - 8) * 4;
++    case_target = type == 8 ? 0x80370354 : type == 9 ? 0x803703f4 : 0x80370494;
++    metric = independent ? scale_independent : scale_dirty;
++    const u32 absolute_bits = value_bits & 0x7fffffff;
++    WriteRamU32BE(ram, stack_offset + 52 - (type - 8) * 4, absolute_bits);
++    const u32 epsilon_bits = ReadRamU32BE(ram, epsilon_offset);
++    const double epsilon = std::bit_cast<double>(ConvertToDouble(epsilon_bits));
++    ppc_state.ps[0].Fill(epsilon);
++    ppc_state.ps[1].Fill(ConvertToDouble(absolute_bits));
++    if (std::isfinite(value) && std::bit_cast<float>(absolute_bits) <
++                                    std::bit_cast<float>(epsilon_bits))
++    {
++      value_bits = epsilon_bits;
++      value = epsilon;
++      WriteRamU32BE(ram, value_offset, value_bits);
++      for (u32 i = 0; i < metric.size(); ++i)
++        metric[i] += scale_clamp_extra[i];
++      s_melee_jobj_update_clamps.fetch_add(1, std::memory_order_relaxed);
++    }
++    s_melee_jobj_update_scale.fetch_add(1, std::memory_order_relaxed);
++  }
++
++  WriteRamU32BE(ram, obj_offset + field_offset, value_bits);
++  ppc_state.ps[31].SetPS1(value);
++  ppc_state.gpr[0] = old_lr;
++  ppc_state.gpr[3] = independent ? 0x80400000 : 1;
++  ppc_state.gpr[4] = independent ? type : flags;
++  CTR(ppc_state) = case_target;
++  FastUpdateCR0(ppc_state, 1);
++  LR(ppc_state) = old_lr;
++  ppc_state.pc = old_lr & ~3u;
++  ppc_state.npc = ppc_state.pc;
++  ppc_state.downcount -= static_cast<int>(metric[0]);
++  UpdatePerformanceMonitorIfNeeded(metric[0], metric[1], metric[2], ppc_state);
++  s_melee_jobj_update_direct.fetch_add(1, std::memory_order_relaxed);
++  (independent ? s_melee_jobj_update_independent : s_melee_jobj_update_dirty)
++      .fetch_add(1, std::memory_order_relaxed);
++  if (type < s_melee_jobj_update_types.size())
++    s_melee_jobj_update_types[type].fetch_add(1, std::memory_order_relaxed);
++  return 0;
++}
++
+ s32 CachedInterpreter::FastMeleeDisplayList(PowerPC::PowerPCState& ppc_state,
+                                              const MeleeDisplayListOperands& operands)
+ {
+@@ -13866,6 +14145,16 @@
+   out << " ops:";
+   for (u32 i = 0; i < s_melee_anim_probe_ops.size(); ++i)
+     out << (i ? "/" : "") << s_melee_anim_probe_ops[i].load();
++  out << " jobj-update compile/run/direct/fallback:"
++      << s_melee_jobj_update_compiles.load() << "/" << s_melee_jobj_update_runs.load() << "/"
++      << s_melee_jobj_update_direct.load() << "/" << s_melee_jobj_update_fallback.load()
++      << " classes:" << s_melee_jobj_update_rotation.load() << "/"
++      << s_melee_jobj_update_translation.load() << "/" << s_melee_jobj_update_scale.load()
++      << " clamp:" << s_melee_jobj_update_clamps.load() << " modes:"
++      << s_melee_jobj_update_independent.load() << "/" << s_melee_jobj_update_dirty.load()
++      << " types:";
++  for (u32 i = 0; i < s_melee_jobj_update_types.size(); ++i)
++    out << (i ? "/" : "") << s_melee_jobj_update_types[i].load();
+   out << " ";
+   out << "displaylistfast:" << DolphinWeb_GetMeleeDisplayListFast()
+       << " compile/run/fallback/dirty/flush/memory:"
+@@ -14884,7 +15173,7 @@
+ #ifdef __EMSCRIPTEN__
+   const bool wrote_melee_fast_path =
+       TryWriteMeleeMatrixConcat(power_pc) || TryWriteMeleeAnimStateProbe(power_pc) ||
+-      TryWriteMeleeDisplayList(power_pc);
++      TryWriteMeleeJObjUpdate(power_pc) || TryWriteMeleeDisplayList(power_pc);
+   if (!wrote_melee_fast_path && TryWriteWasmBlock(nextPC))
+     return true;
+ #endif
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter_Disassembler.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter_Disassembler.cpp
+@@ -198,6 +198,13 @@
+   return sizeof(AnyCallback) + sizeof(operands);
+ }
+ 
++s32 CachedInterpreter::FastMeleeJObjUpdate(std::ostream& stream,
++                                           const MeleeJObjUpdateOperands& operands)
++{
++  fmt::println(stream, "FastMeleeJObjUpdate(current_pc=0x{:08x})", operands.current_pc);
++  return sizeof(AnyCallback) + sizeof(operands);
++}
++
+ s32 CachedInterpreter::FastOsInterruptFunction(std::ostream& stream,
+                                                const OsInterruptFunctionOperands& operands)
+ {
+@@ -330,6 +337,7 @@
+       LOOKUP_KV(CachedInterpreter::FastMeleeTitleLoop),
+       LOOKUP_KV(CachedInterpreter::FastMeleeMatrixConcat),
+       LOOKUP_KV(CachedInterpreter::FastMeleeAnimStateProbe),
++      LOOKUP_KV(CachedInterpreter::FastMeleeJObjUpdate),
+       LOOKUP_KV(CachedInterpreter::FastOsInterruptFunction),
+       LOOKUP_KV(CachedInterpreter::FastOsInterruptCallBranch),
+       LOOKUP_KV(CachedInterpreter::FastMeleeInputStatusCallBranch),

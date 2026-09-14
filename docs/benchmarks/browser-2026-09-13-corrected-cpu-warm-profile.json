@@ -1,0 +1,200 @@
+{
+  "coreSha256": "b317c2cc97f415883f52408055b4bdd3123a29780d6af4a02c21dee18703808e",
+  "artifactScope": "Selected exact fields from completed CUA correctedProfile/correctedWarmProfile",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "settings": {
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbPercent": 150,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "rejectedCpuFlags": false,
+    "corelog": true,
+    "pcsample": true
+  },
+  "diagnosticOnly": true,
+  "passed": false,
+  "limits": "Inclusive CPU timing and overlapping scopes/threads cannot be summed. Instrumentation lowers FPS. Last-PC samples show wall residency, not exact self time; SelectThread already has idle skipping. Helper totals are raw one-in-1024 sampled microsecond timings with quantization/clock/periodic bias.",
+  "seconds": 29.99882999999821,
+  "simulationFps": 42.23498049757526,
+  "visibleFps": 42.168311230807184,
+  "samples": 1510,
+  "stages": {
+    "cpuAdvance": {
+      "count": 1986481,
+      "totalMs": 4644.719
+    },
+    "cpuExecute": {
+      "count": 1986480,
+      "totalMs": 23001.246
+    },
+    "glDraw": {
+      "count": 560713,
+      "totalMs": 248.772
+    },
+    "glUniform": {
+      "count": 561981,
+      "totalMs": 739.689
+    },
+    "glCompile": {
+      "count": 0,
+      "totalMs": 0
+    },
+    "glPresent": {
+      "count": 1268,
+      "totalMs": 514.418
+    },
+    "cpuGpuSync": {
+      "count": 1269,
+      "totalMs": 14.202
+    },
+    "cpuGpuDecode": {
+      "count": 1209618,
+      "totalMs": 1555.921
+    },
+    "cpuFpHelperSample1024": {
+      "count": 1742,
+      "totalMs": 0.532
+    },
+    "coreEventVi": {
+      "count": 665656,
+      "totalMs": 889.215
+    },
+    "coreEventDsp": {
+      "count": 21153,
+      "totalMs": 6.784
+    },
+    "coreEventAudioDma": {
+      "count": 84687,
+      "totalMs": 161.504
+    },
+    "coreEventGpuSleep": {
+      "count": 21153,
+      "totalMs": 6.721
+    },
+    "coreEventGpuSync": {
+      "count": 1209618,
+      "totalMs": 2195.927
+    },
+    "coreEventDecrementer": {
+      "count": 1269,
+      "totalMs": 0.828
+    },
+    "coreEventPatch": {
+      "count": 1472,
+      "totalMs": 4.013
+    },
+    "coreEventDvd": {
+      "count": 83,
+      "totalMs": 24.926
+    },
+    "coreEventOther": {
+      "count": 12227,
+      "totalMs": 219.672
+    },
+    "coreEventWait": {
+      "count": 2017318,
+      "totalMs": 25.775
+    }
+  },
+  "top": [
+    {
+      "name": "SelectThread",
+      "count": 78,
+      "fraction": 0.051655629139072845
+    },
+    {
+      "name": "HSD_FObjInterpretAnim",
+      "count": 44,
+      "fraction": 0.02913907284768212
+    },
+    {
+      "name": "SetupEnvelopeModelMtx",
+      "count": 38,
+      "fraction": 0.025165562913907286
+    },
+    {
+      "name": "psDispParticles",
+      "count": 31,
+      "fraction": 0.02052980132450331
+    },
+    {
+      "name": "MObjSetupTev",
+      "count": 30,
+      "fraction": 0.019867549668874173
+    },
+    {
+      "name": "sinf",
+      "count": 24,
+      "fraction": 0.015894039735099338
+    },
+    {
+      "name": "HandleReverb",
+      "count": 24,
+      "fraction": 0.015894039735099338
+    },
+    {
+      "name": "HSD_TExpSetReg",
+      "count": 21,
+      "fraction": 0.01390728476821192
+    },
+    {
+      "name": "HSD_SetupTevStage",
+      "count": 20,
+      "fraction": 0.013245033112582781
+    },
+    {
+      "name": "HSD_TObjSetup",
+      "count": 19,
+      "fraction": 0.012582781456953643
+    },
+    {
+      "name": "__GXSetSUTexRegs",
+      "count": 17,
+      "fraction": 0.011258278145695364
+    },
+    {
+      "name": "JObjUpdateFunc",
+      "count": 16,
+      "fraction": 0.010596026490066225
+    },
+    {
+      "name": "PSMTXConcat",
+      "count": 15,
+      "fraction": 0.009933774834437087
+    },
+    {
+      "name": "HSD_JObjMakeMatrix",
+      "count": 15,
+      "fraction": 0.009933774834437087
+    },
+    {
+      "name": "HSD_TObjAssignResources",
+      "count": 15,
+      "fraction": 0.009933774834437087
+    }
+  ],
+  "warmRepeatWithoutReload": true
+}

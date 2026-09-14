@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "direct-animation-callback-entry",
+  "coreSha256": "948a490efdf16c82b19050952025a705d7d7781d5585d92dbe2dceab4ceb850e",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "rules": {
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0
+    },
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "secondsPerRun": 40,
+  "measuredRuns": [
+    {
+      "enabled": false,
+      "simulationFps": 47.8714697708089,
+      "visibleFps": 47.70478638024201
+    },
+    {
+      "enabled": true,
+      "simulationFps": 56.60239616812469,
+      "visibleFps": 56.16904448957014
+    },
+    {
+      "enabled": true,
+      "simulationFps": 56.56990057932319,
+      "visibleFps": 56.069871994355694
+    },
+    {
+      "enabled": false,
+      "simulationFps": 56.23793547104936,
+      "visibleFps": 55.63788636703105
+    }
+  ],
+  "measuredMeans": {
+    "controlSimulationFps": 52.054702620929135,
+    "candidateSimulationFps": 56.586148373723944,
+    "simulationUpliftPercent": 8.705161156703811,
+    "controlVisibleFps": 51.671336373636535,
+    "candidateVisibleFps": 56.11945824196292
+  },
+  "inputConsistency": {
+    "passed": true,
+    "commonTrackedFrames": 104,
+    "pollingGapsEqual": true
+  },
+  "correctness": {
+    "fullMachineReplay120Frames": "pass",
+    "fullMachineReplay600Frames": "pass"
+  },
+  "decision": "Reject. Total uplift is only 0.08 percentage point above the accepted interpolation-only 8.625%, within drift; complexity is not justified."
+}

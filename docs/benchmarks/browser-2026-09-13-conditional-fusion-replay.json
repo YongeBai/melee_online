@@ -1,0 +1,92 @@
+{
+  "artifactScope": "Selected exact browser replay and following compiler diagnostics",
+  "core": "83a8df37e84c7070494b9d4948c60479cba7c1d9cb3a78a5098b542ed37e06ac",
+  "passed": true,
+  "performanceTest": false,
+  "frames": 120,
+  "delay": 3,
+  "tickDifferences": [],
+  "comparison": {
+    "sizeA": 107060212,
+    "sizeB": 107060212,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "codegenReference": {
+    "blockmerge": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "fpuguard": true,
+    "branchfusion": false
+  },
+  "codegenComparison": {
+    "blockmerge": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "fpuguard": true,
+    "branchfusion": true
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "referenceFrame": 425,
+  "correctedFrame": 425,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "compilerDiagnostics": {
+    "conditionalFusionEmissions": 2053,
+    "mergedBlocks": 4060,
+    "fpuGuardBlocks": 151,
+    "fpuGuardSites": 724,
+    "compileFailures": 0,
+    "emitFailures": 0,
+    "meaning": "Compilation coverage only; not dynamic cost share."
+  }
+}

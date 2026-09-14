@@ -1,0 +1,26 @@
+{
+  "kind": "fresh-yoshi-background-control",
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "passed": false,
+  "stage": "Yoshi's Story",
+  "characters": ["Ice Climbers", "Ice Climbers"],
+  "sourceResolution": [960, 720],
+  "seconds": 44.9979450000003,
+  "simulationFps": 35.82385817841213,
+  "gameRenderFps": 35.80163494132875,
+  "visibleFps": 35.80163494132875,
+  "p95GapMs": 34.46499999985099,
+  "maxGapMs": 94.52499999850988,
+  "nonblackFraction": 1,
+  "pageFocusedAndVisibleThroughout": true,
+  "synchronousCompileAndLinkMs": 589.724,
+  "queue": {"capacity": 2, "received": 1611, "presented": 1611, "dropped": 0, "underruns": 1077, "meanAgeMs": 7.843770949716878},
+  "controller": {"startFrame": 429, "lastFrame": 2041, "trackedFrames": 1613, "skipped": 0},
+  "liveObjectCheckAfterMeasurement": {
+    "map1": {"category": 2, "gobj": 2160244800, "classification": "decorative background"},
+    "map2": {"category": 0, "gobj": 2160355456, "classification": "Randall", "drawCallbackPreserved": true},
+    "blackBackgroundToggleWrites": [[2160244828, 2149688844]]
+  },
+  "correction": "The initial claim that the old category-2 filter hid Randall was false. A misleading decompilation table comment identified map 1 as Randall. Actual callbacks and this live inventory identify map 2, category 0. The explicit preservation guard now uses map 2. The temporary wrong map-1 guard measured 33.46884957941046 visible FPS in a separate fresh 44.99706500000134-second run; this is not a controlled causal comparison.",
+  "limits": "Selected exact fields from the real UI result. No profiler, build, test or separate sampler during capture. Native camera code was unchanged; the post-run screenshot had Randall outside the crop, so it did not visually verify his appearance. Physical input-to-photon latency unmeasured."
+}

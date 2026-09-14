@@ -1,0 +1,56 @@
+{
+  "kind": "vector-fpr-bundle-120-frame-replay-summary",
+  "core": "84a3cf8ee86919fc9e54e4f0bbcf4dbea1d4a8ad2cffe36063761134b4ec5bec",
+  "passed": false,
+  "fullMachineBytesEqual": false,
+  "frames": 120,
+  "delay": 3,
+  "referenceFrame": 425,
+  "correctedFrame": 425,
+  "bytesPerState": 107031991,
+  "tickDifferences": [],
+  "codegenReference": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false
+  },
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": true,
+    "psmemsimd": true,
+    "vectorfpr": true
+  },
+  "differingSections": [
+    {
+      "name": "GPU TextureCache",
+      "differentBytes": 6,
+      "firstRelativeOffset": 5529851,
+      "bytes": 13537773
+    }
+  ],
+  "allOtherSectionsIdentical": true,
+  "fighterObservablesIdentical": true,
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "fixture": "Fountain Ice Climbers mirror, two human ports, low models, reflection/scenery off, hidden animation/full shadows retained",
+  "decision": "Rejected pending isolation. Check retained-codegen replay stability and vector cache separately; no FPS acceptance claim."
+}

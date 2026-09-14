@@ -1,0 +1,128 @@
+{
+  "kind": "selected-measured-fields-from-same-checkpoint-codegen-abba",
+  "feature": "pssimd",
+  "coreSha256": "198908c3b44b721c5bbdb81c5b9923ba8186a9262ea6e3e3f33f3e109ef86b34",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two active scripted human controller tracks; native partner AI retained; not human play",
+  "configuration": {
+    "reflection": false,
+    "scenery": false,
+    "blackBackground": true,
+    "internalScalePercent": 150,
+    "internalResolution": [
+      960,
+      792
+    ],
+    "probe": "webgl2-pbo-fence",
+    "presentationPacing": "raf-buffered",
+    "queueCapacity": 2,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprCache": false,
+    "compactGpr": false,
+    "cpuOverclock": 1,
+    "emulationSpeed": 1
+  },
+  "runs": [
+    {
+      "pssimd": false,
+      "seconds": 29.999300000000744,
+      "simulationFps": 50.43451013856865,
+      "gameRenderFps": 50.367841916310134,
+      "visibleFps": 50.33450780518087,
+      "p95GapMs": 33.43999999947846,
+      "maxGapMs": 46.080000000074506,
+      "inputChanges": [
+        149,
+        152
+      ],
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false
+    },
+    {
+      "pssimd": true,
+      "seconds": 29.99968999999948,
+      "simulationFps": 52.7672119278575,
+      "gameRenderFps": 52.73387825007617,
+      "visibleFps": 52.60054353895082,
+      "p95GapMs": 33.4850000012666,
+      "maxGapMs": 58.28000000119209,
+      "inputChanges": [
+        158,
+        143
+      ],
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false
+    },
+    {
+      "pssimd": true,
+      "seconds": 29.99834999999963,
+      "simulationFps": 54.50299766487224,
+      "gameRenderFps": 54.43632733133723,
+      "visibleFps": 54.30298666426721,
+      "p95GapMs": 32.94500000029802,
+      "maxGapMs": 70.59500000067055,
+      "inputChanges": [
+        159,
+        155
+      ],
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false
+    },
+    {
+      "pssimd": false,
+      "seconds": 29.99884500000067,
+      "simulationFps": 55.63547529913111,
+      "gameRenderFps": 55.56880606569895,
+      "visibleFps": 55.56880606569895,
+      "p95GapMs": 32.705000000074506,
+      "maxGapMs": 56.91499999910593,
+      "inputChanges": [
+        164,
+        166
+      ],
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false
+    }
+  ],
+  "meanSimulationFps": {
+    "off": 53.03499271884988,
+    "on": 53.63510479636487,
+    "percent": 1.131539850860963
+  },
+  "decision": "Keep arithmetic SIMD off: opposing pair results and upward drift do not establish a repeatable win.",
+  "limitations": [
+    "Live QA inputs arrive through browser messages; exact per-frame input sequence can vary between runs.",
+    "No physical input-to-photon measurement or exhaustive character/stage coverage."
+  ]
+}

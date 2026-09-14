@@ -1,0 +1,142 @@
+{
+  "artifactScope": "Selected exact fields from completed fresh-match browser captures",
+  "coreSha256": "e9ad5d9691b9957b0d99b252675a959c8770e302aba7801004c7758951bc475f",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "allRuns": {
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "nonblackFraction": 1,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "nativeInputValid": true,
+    "exercisedBothPlayers": true,
+    "skippedNativePolls": 1,
+    "pageVisible": true,
+    "pageFocused": true,
+    "pageLifecycleEvents": [],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0,
+    "queueRateLimited": true
+  },
+  "runs": [
+    {
+      "stage": "Final Destination",
+      "trial": "first",
+      "capacity": 2,
+      "seconds": 29.999414999999107,
+      "simulationFps": 59.60116222266512,
+      "gameRenderFps": 59.567828239319105,
+      "visibleFps": 58.96781653909093,
+      "p95GapMs": 17.515000000596046,
+      "maxGapMs": 71.34999999962747,
+      "meanQueueAgeMs": 21.417319209041274,
+      "queueDropped": 17,
+      "queueUnderruns": 26,
+      "synchronousCompileAndLinkMs": 41.59,
+      "inputStart": 430,
+      "passed": false
+    },
+    {
+      "stage": "Final Destination",
+      "trial": "repeat",
+      "capacity": 2,
+      "seconds": 29.999480000000446,
+      "simulationFps": 60.00104001802609,
+      "gameRenderFps": 59.93437219578384,
+      "visibleFps": 59.60103308457258,
+      "p95GapMs": 17.37999999895692,
+      "maxGapMs": 76.73499999940395,
+      "meanQueueAgeMs": 22.005539407502795,
+      "queueDropped": 10,
+      "queueUnderruns": 7,
+      "synchronousCompileAndLinkMs": 25.009,
+      "inputStart": 429,
+      "passed": true
+    },
+    {
+      "stage": "Dream Land 64",
+      "trial": "first",
+      "capacity": 2,
+      "seconds": 30.000234999999403,
+      "simulationFps": 59.99953000368283,
+      "gameRenderFps": 59.96619693145856,
+      "visibleFps": 59.66619928144015,
+      "p95GapMs": 17.390000000596046,
+      "maxGapMs": 62.28500000014901,
+      "meanQueueAgeMs": 20.860167504195175,
+      "queueDropped": 8,
+      "queueUnderruns": 6,
+      "synchronousCompileAndLinkMs": 53.981,
+      "inputStart": 426,
+      "passed": true
+    },
+    {
+      "stage": "Yoshi's Story",
+      "trial": "first",
+      "capacity": 2,
+      "seconds": 29.999830000000074,
+      "simulationFps": 59.56700421302373,
+      "gameRenderFps": 59.50033716857714,
+      "visibleFps": 58.500331501878364,
+      "p95GapMs": 17.40000000037253,
+      "maxGapMs": 66.50999999977648,
+      "meanQueueAgeMs": 17.581022209530285,
+      "queueDropped": 30,
+      "queueUnderruns": 37,
+      "synchronousCompileAndLinkMs": 27.025,
+      "inputStart": 428,
+      "passed": false
+    },
+    {
+      "stage": "Yoshi's Story",
+      "trial": "repeat",
+      "capacity": 2,
+      "seconds": 30.000289999999104,
+      "simulationFps": 59.499424838895,
+      "gameRenderFps": 59.46609182778077,
+      "visibleFps": 58.19943740544015,
+      "p95GapMs": 17.480000000447035,
+      "maxGapMs": 67.31000000052154,
+      "meanQueueAgeMs": 17.551193474530194,
+      "queueDropped": 37,
+      "queueUnderruns": 46,
+      "synchronousCompileAndLinkMs": 23.795,
+      "inputStart": 428,
+      "passed": false
+    },
+    {
+      "stage": "Yoshi's Story",
+      "trial": "three-image trial",
+      "capacity": 3,
+      "seconds": 29.99925,
+      "simulationFps": 59.60149003725093,
+      "gameRenderFps": 59.56815587056343,
+      "visibleFps": 59.168145870313424,
+      "p95GapMs": 17.445000000298023,
+      "maxGapMs": 65.93000000156462,
+      "meanQueueAgeMs": 28.919206081108225,
+      "queueDropped": 12,
+      "queueUnderruns": 18,
+      "synchronousCompileAndLinkMs": 10.09,
+      "inputStart": 426,
+      "passed": false
+    }
+  ],
+  "limits": [
+    "These are fresh-match coverage trials, not same-checkpoint causal comparisons. Both failures and passes are retained.",
+    "Warmed core; no cold-start performance guarantee.",
+    "Three-image Yoshi trial still failed. The accepted Fountain/Ice Climbers exception does not cover it.",
+    "No build, profiler or resource sampler ran during these six image intervals.",
+    "Full roster, other stage matchups, longer sessions and physical input latency remain open."
+  ]
+}

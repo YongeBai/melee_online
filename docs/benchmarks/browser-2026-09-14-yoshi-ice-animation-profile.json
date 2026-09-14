@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-14",
+  "kind": "sampled-direct-block-profile",
+  "diagnosticOnly": true,
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "profile": {
+    "sampleEvery": 1024,
+    "samples": 613617,
+    "sampledUs": 220569,
+    "uniqueSampledBlocks": 10757,
+    "jitUniqueInstancesDuringMeasurement": 7466,
+    "synchronousCompileAndLinkMs": 371.631
+  },
+  "topFunctions": [
+    {"name": "HSD_FObjInterpretAnim", "samples": 70171, "sampledUs": 22745.092, "blocks": 43},
+    {"name": "HandleReverb", "samples": 25658, "sampledUs": 8510.976, "blocks": 11},
+    {"name": "SetupEnvelopeModelMtx", "samples": 11333, "sampledUs": 3844.096, "blocks": 17},
+    {"name": "parseFloat", "samples": 10835, "sampledUs": 3268.608, "blocks": 7},
+    {"name": "sinf", "samples": 8105, "sampledUs": 2808.832, "blocks": 9},
+    {"name": "cosf", "samples": 7246, "sampledUs": 2486.784, "blocks": 8},
+    {"name": "FObjUpdateAnim", "samples": 6330, "sampledUs": 1959.68, "blocks": 7}
+  ],
+  "interpretation": "HSD_FObjInterpretAnim alone accounts for 11.44% of sampled complete-block visits (70171/613617), matching the earlier 11.44% Yoshi profile (46206/404085). parseFloat and FObjUpdateAnim are in the same animation path. Sampled visits are not an exact production CPU percentage. The same run compiled 7466 new standalone WebAssembly instances and blocked for 371.631 ms, so whole-function specialization and module consolidation are the highest-ROI structural targets."
+}

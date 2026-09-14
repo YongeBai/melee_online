@@ -1,0 +1,31 @@
+{
+  "core": "83a8df37e84c7070494b9d4948c60479cba7c1d9cb3a78a5098b542ed37e06ac",
+  "feature": "idlechecks",
+  "passed": false,
+  "performanceTest": false,
+  "warmedComparison": {
+    "completed": false,
+    "error": "Idle guard execution did not match the configured mode",
+    "performanceResultAvailable": false,
+    "limits": "The rejecting check did not include raw interval counters; cannot distinguish zero iterations from another condition solely from that error."
+  },
+  "followingLiveDiagnostic": {
+    "before": {
+      "presentationFrame": 24751,
+      "ppcPc": 2150624532,
+      "blocks": 1202452,
+      "iterations": 30814493,
+      "hoisted": 3141151
+    },
+    "after": {
+      "presentationFrame": 28255,
+      "ppcPc": 2151008836,
+      "blocks": 1202452,
+      "iterations": 30814493,
+      "hoisted": 3141151
+    },
+    "intervention": "One ordinary GC Jump button pulse between reads; no FPS acceptance measurement.",
+    "finding": "Presentation advanced3504frames and guestPC changed while eligible idle counters stayed unchanged. The current steady scene does not exercise this optimization."
+  },
+  "decision": "Keep idle guard hoisting disabled; first controlled comparison was inconclusive and the later workload does not exercise the path."
+}

@@ -1,0 +1,88 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -312,6 +312,7 @@
+ std::atomic<bool> s_dolphin_web_block_msr_cache{false};
+ std::atomic<bool> s_dolphin_web_frsqrte_fast{false};
+ std::atomic<u32> s_block_msr_cache_load_sites{0},s_block_msr_cache_blocks{0};
++std::atomic<u32> s_selective_fpr_selected{0}, s_selective_fpr_rejected{0};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEECALL   = 1u << 1;  // 5 Melee fast call-branch helpers
+@@ -8175,6 +8176,55 @@
+   flush_group();
+ }
+ 
++// Cache only arithmetic blocks with enough reuse to amortize eager loads and
++// exit flushes. This is a measured experiment; the runtime flag stays opt-in.
++bool ShouldCacheMathFpr(std::span<const PPCAnalyst::CodeOp> ops)
++{
++  u32 floating = 0, references = 0;
++  BitSet32 used;
++  for (const auto& op : ops)
++  {
++    if (op.skip) continue;
++    const auto i = op.inst;
++    bool fp = false;
++    if (i.OPCD >= 32 && i.OPCD <= 45) {} // ordinary integer memory
++    else if ((i.OPCD >= 48 && i.OPCD <= 57) || i.OPCD == 60 || i.OPCD == 61)
++      fp = true;
++    else switch (i.OPCD)
++    {
++    case 7: case 8: case 10: case 11: case 12: case 13: case 14: case 15:
++    case 20: case 21: case 23: case 24: case 25: case 26: case 27: case 28: case 29:
++      break;
++    case 16: case 18:
++      if (i.LK) return false; // SDK/HLE substitutions may touch many FPRs.
++      break;
++    case 19:
++      if (i.LK || (i.SUBOP10 != 16 && i.SUBOP10 != 528)) return false;
++      break;
++    case 4:
++      if (i.Rc || (!IsPairedSingleArithmeticSubop(i.SUBOP5) &&
++                   !IsPairedSingleMergeSubop(i.SUBOP10))) return false;
++      fp = true;
++      break;
++    case 59:
++      if (i.Rc || !IsSinglePrecisionArithmeticSubop(i.SUBOP5)) return false;
++      fp = true;
++      break;
++    default:
++      return false; // Includes canonical frsqrte and system helper calls.
++    }
++    if (fp) ++floating;
++    used |= op.fregsIn;
++    references += op.fregsIn.Count();
++    if (op.fregOut >= 0 && op.fregOut < 32)
++    {
++      used[op.fregOut] = true;
++      ++references;
++    }
++  }
++  return floating >= 12 && references >= 3 * used.Count();
++}
++
+ bool CanCacheBlockMsr(std::span<const PPCAnalyst::CodeOp> ops)
+ {
+   u32 floating=0;
+@@ -8297,7 +8347,12 @@
+   }
+   s_fpr_rc = {};
+   s_fpr_rc.vector = s_dolphin_web_vector_fpr_cache.load(std::memory_order_relaxed);
+-  s_fpr_rc.active = s_fpr_rc.vector || DolphinWebFeatureEnabled(1u << 19);
++  const bool selective_fpr = DolphinWebFeatureEnabled(1u << 19);
++  const bool cache_math_fpr = selective_fpr && ShouldCacheMathFpr(ops);
++  if (selective_fpr)
++    (cache_math_fpr ? s_selective_fpr_selected : s_selective_fpr_rejected)
++        .fetch_add(1, std::memory_order_relaxed);
++  s_fpr_rc.active = s_fpr_rc.vector || cache_math_fpr;
+   s_fpr_rc.base = layout.ps_offset;
+   s_wasm_paired_simd_active = false;
+   s_wasm_paired_memory_simd_active = false;
+@@ -12418,6 +12473,7 @@
+       << s_wasm_emit_state_store_f64_count << "st "
+       << "statei64:" << s_wasm_emit_state_load_i64_count << "ld/"
+       << s_wasm_emit_state_store_i64_count << "st ";
++  out << "selective-fpr emit-selected/rejected:" << s_selective_fpr_selected.load() << "/" << s_selective_fpr_rejected.load() << " ";
+   out << "msrcache:" << (DolphinWeb_GetBlockMsrCache()?1:0) << " emit-blocks/sites:" << s_block_msr_cache_blocks.load() << "/" << s_block_msr_cache_load_sites.load() << " ";
+   out << "stateconst:" << (DolphinWeb_GetConstantStateBase() ? 1 : 0) << " ";
+   out << "wasm-dispatch:" << s_wasm_dispatch_loop_handles[DolphinWeb_GetWideBlockMap() ? 1 : 0] << "/"

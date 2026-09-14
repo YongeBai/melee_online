@@ -1,0 +1,17 @@
+{
+  "artifactScope":"Selected exact fields from completed live browser replay",
+  "coreSha256":"5ed9a8d93fd3ac2d408153ed03236e7f99f563724eb2122849efb77e0dc00412",
+  "passed":true,
+  "kind":"normal-running-browser-codegen-equivalence",
+  "performanceTest":false,"networkTest":false,"frames":600,
+  "fullMachineBytesEqual":true,"fingerprintsEqual":true,
+  "comparison":{"sizeA":106208784,"sizeB":106208784,"sectionsCompared":29,"allSectionDifferentBytes":0,"allSectionUnmatchedBytes":0},
+  "verifiedSelection":{"stage":31,"characters":[14,14],"slotTypes":[0,0],"timeLimit":480,"items":-1,"teams":0},
+  "nativeInputBoth":{"startFrame":308,"stoppedFrame":908,"frames":601,"inputHash":409931775,"stateHash":132713654,"skipped":0},
+  "commonCodegen":{"cpformat":false,"leandispatch":false,"counterbatch":false,"fusionredispatch":false,"readfusion":false,"stepcheck":false,"fpuguardwide":false,"branchfusion":false,"fpuguard":true,"blockmerge":true,"regcache":true,"fastmem":false,"integerfifo":true,"singleprefix":true,"fprcache":false,"compactgpr":false,"pssimd":false,"psmemsimd":false,"vectorfpr":false,"psqhoist":false,"widemap":false,"stateconst":false,"msrcache":false,"fifocopy":false,"fifobatch":false,"frsqrtefast":false},
+  "runs":[
+    {"qstatecache":false,"execution":{"dispatcherHandle":11378,"calls":1491650,"qStateEmittedSites":172,"newQStateEmittedSites":0}},
+    {"qstatecache":true,"execution":{"dispatcherHandle":11378,"calls":1491651,"qStateEmittedSites":344,"newQStateEmittedSites":172}}
+  ],
+  "limits":["Compiled site counts are not runtime cost shares or execution counts.","This deterministic workload does not prove equivalence for every possible game interaction or establish FPS/latency."]
+}

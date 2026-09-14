@@ -1,0 +1,31 @@
+--- a/Source/Core/Common/BrowserProfile.h
++++ b/Source/Core/Common/BrowserProfile.h
+@@ -8,11 +8,11 @@
+ 
+ namespace DolphinWeb::BrowserProfile
+ {
+-enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, Count };
++enum class Stage { CpuAdvance, CpuExecute, GlDraw, GlUniform, GlCompile, GlPresent, CpuGpuSync, CpuGpuDecode, CpuVideoWait, CpuChainSample, CpuPartialSample, CpuCallbackSample, CpuIdleSample, CpuFpHelperSample, CpuMemoryHelperSample, CpuSystemHelperSample, CpuInterpreterHelperSample, CpuMemoryReadSample, CpuMemoryWriteSample, CpuFifoWriteSample, CpuBranchCallbackSample, CpuEndCallbackSample, CpuGuestInterpretSample, Count };
+ constexpr std::array<const char*, static_cast<std::size_t>(Stage::Count)> names{
+     "cpuAdvance", "cpuExecute", "glDraw", "glUniform", "glCompile", "glPresent",
+     "cpuGpuSync", "cpuGpuDecode", "cpuVideoWait",
+-    "cpuChainSample1024", "cpuPartialSample1024", "cpuCallbackSample1024", "cpuIdleSample1024", "cpuFpHelperSample1024", "cpuMemoryHelperSample1024", "cpuSystemHelperSample1024", "cpuInterpreterHelperSample1024", "cpuMemoryReadSample1024", "cpuMemoryWriteSample1024", "cpuFifoWriteSample1024"};
++    "cpuChainSample1024", "cpuPartialSample1024", "cpuCallbackSample1024", "cpuIdleSample1024", "cpuFpHelperSample1024", "cpuMemoryHelperSample1024", "cpuSystemHelperSample1024", "cpuInterpreterHelperSample1024", "cpuMemoryReadSample1024", "cpuMemoryWriteSample1024", "cpuFifoWriteSample1024", "cpuBranchCallbackSample1024", "cpuEndCallbackSample1024", "cpuGuestInterpretSample1024"};
+ struct Counter
+ {
+   std::atomic<std::uint64_t> count{0};
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -8183,6 +8183,12 @@
+             ? CpuStage::CpuChainSample : CpuStage::CpuPartialSample;
+       else if (callback == AnyCallbackCast(FastMeleeIdlePollLoop) || callback == AnyCallbackCast(FastMeleeTitleLoop))
+         sampled_stage = CpuStage::CpuIdleSample;
++      else if (callback == AnyCallbackCast(FastBranch) || callback == AnyCallbackCast(FastBranchBdnz))
++        sampled_stage = CpuStage::CpuBranchCallbackSample;
++      else if (callback == AnyCallbackCast(EndBlock<false>) || callback == AnyCallbackCast(EndBlock<true>))
++        sampled_stage = CpuStage::CpuEndCallbackSample;
++      else if (callback == AnyCallbackCast(Interpret<false>) || callback == AnyCallbackCast(Interpret<true>))
++        sampled_stage = CpuStage::CpuGuestInterpretSample;
+     }
+     const DolphinWeb::BrowserProfile::SampleScope sampled_callback(sampled_stage, profile_segments);
+ #endif

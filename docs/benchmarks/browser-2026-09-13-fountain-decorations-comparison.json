@@ -1,0 +1,187 @@
+{
+  "artifactScope": "Exact selected CUA decoFpsRun fields; warmups omitted",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "kind": "same-checkpoint-fountain-decorations-abba",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame controller tracks; partner AI retained",
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "codegen": {
+    "fpuguard": true,
+    "blockmerge": true,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true,
+    "readfusion": false,
+    "branchfusion": false,
+    "cpformat": false,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false
+  },
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 110,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "decorations": true,
+      "seconds": 29.998960000000896,
+      "simulationFps": 55.80193446705986,
+      "gameRenderFps": 55.735265489201964,
+      "visibleFps": 55.63526202241512,
+      "p95GapMs": 32.854999996721745,
+      "maxGapMs": 35.99500000476837,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.279586826113169
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": true,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "decorations": false,
+      "seconds": 29.99807999999821,
+      "simulationFps": 57.23699650111282,
+      "gameRenderFps": 57.203661034309604,
+      "visibleFps": 57.003648233490345,
+      "p95GapMs": 31.100000001490116,
+      "maxGapMs": 35.6600000038743,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 4,
+        "meanAgeMs": 16.218310929212148
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": false,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "decorations": false,
+      "seconds": 29.99877999999374,
+      "simulationFps": 57.43566905055337,
+      "gameRenderFps": 57.40233436160935,
+      "visibleFps": 56.80230996061692,
+      "p95GapMs": 32.42499999701977,
+      "maxGapMs": 67.27000000327826,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 17,
+        "meanAgeMs": 16.700695014677265
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": false,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": false
+        },
+        "events": [
+          {
+            "type": "blur",
+            "atMs": 10673.729999996722,
+            "visibility": "visible",
+            "focused": false
+          }
+        ]
+      }
+    },
+    {
+      "decorations": true,
+      "seconds": 29.999,
+      "simulationFps": 58.935297843261445,
+      "gameRenderFps": 58.86862895429848,
+      "visibleFps": 58.26860895363179,
+      "p95GapMs": 17.42000000178814,
+      "maxGapMs": 34.685000002384186,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "dropped": 18,
+        "meanAgeMs": 16.66385648930802
+      },
+      "cosmeticCoverage": {
+        "drawCount": 38,
+        "decorations": true,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": false
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": false
+        },
+        "events": []
+      }
+    }
+  ],
+  "decision": "Inconclusive: opposing pairs and focus changed in the third measured interval, then remained unfocused in the fourth. Every FPS gate fails. Repeat while retaining this result and its lifecycle limitation."
+}

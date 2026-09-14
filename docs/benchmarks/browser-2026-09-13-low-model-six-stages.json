@@ -1,0 +1,130 @@
+{
+  "core": "84a3cf8ee86919fc9e54e4f0bbcf4dbea1d4a8ad2cffe36063761134b4ec5bec",
+  "passed": true,
+  "acceptance720p60": false,
+  "returnedToCss": true,
+  "fixture": "Ice Climbers mirror; low models; hosted startup; normal CPU flags/full shadows; stage-specific reflection/scenery simplifications only where applicable",
+  "stages": [
+    {
+      "name": "Battlefield",
+      "stage": 31,
+      "startFrame": 148,
+      "endFrame": 451,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "rules": {
+        "pauser": 0,
+        "elapsed": 24,
+        "timeRemaining": 479,
+        "stage": 31,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      }
+    },
+    {
+      "name": "Final Destination",
+      "stage": 32,
+      "startFrame": 143,
+      "endFrame": 449,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "rules": {
+        "pauser": 0,
+        "elapsed": 20,
+        "timeRemaining": 479,
+        "stage": 32,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      }
+    },
+    {
+      "name": "Dream Land 64",
+      "stage": 28,
+      "startFrame": 148,
+      "endFrame": 450,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "rules": {
+        "pauser": 0,
+        "elapsed": 24,
+        "timeRemaining": 479,
+        "stage": 28,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      }
+    },
+    {
+      "name": "Yoshi's Story",
+      "stage": 8,
+      "startFrame": 144,
+      "endFrame": 450,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "rules": {
+        "pauser": 0,
+        "elapsed": 21,
+        "timeRemaining": 479,
+        "stage": 8,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      }
+    },
+    {
+      "name": "Fountain of Dreams",
+      "stage": 2,
+      "startFrame": 146,
+      "endFrame": 451,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "rules": {
+        "pauser": 0,
+        "elapsed": 22,
+        "timeRemaining": 479,
+        "stage": 2,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      }
+    },
+    {
+      "name": "Pokémon Stadium",
+      "stage": 3,
+      "startFrame": 144,
+      "endFrame": 450,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "rules": {
+        "pauser": 0,
+        "elapsed": 20,
+        "timeRemaining": 479,
+        "stage": 3,
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      }
+    }
+  ],
+  "limits": "Loading, fixed-rule and300-frame progression smoke only. Ran during an independent core build; no FPS claim. Does not cover every matchup or Pokémon Stadium transformations."
+}

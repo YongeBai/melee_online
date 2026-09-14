@@ -1,8 +1,11 @@
+import {isLoadedMeleeMatch} from "./browser-scene-ready.js";
 import { AudioController } from "/engine/src/audio.js";
+import { characterSelectReady } from "./melee-startup.js";
 import { readGamepadInput, selectPreferredGamepad } from "/engine/src/input.js";
 
 const params = new URLSearchParams(location.search);
 const nativeEngine = params.get("engine") !== "wasm";
+const hostedGame = !nativeEngine && document.documentElement.dataset.hostedGame;
 document.getElementById("gameViewport").classList.toggle("native", nativeEngine);
 document.body.classList.toggle("native-engine", nativeEngine);
 if (!nativeEngine && !params.has("video")) {
@@ -46,7 +49,32 @@ const actions = [];
 let testForms = [false, false];
 let nativeSceneKey = "",
   nativeSceneSince = 0;
-const audio = new AudioController();
+let runtimeSettingsMatch = "",
+  runtimeSettingsFrame = -1;
+let queueClockApplied = false;
+const appliedRuntimeSettings = new Set();
+async function applyRuntimeSettingOnce(key, action, enabled) {
+  if (appliedRuntimeSettings.has(key)) return;
+  await host.adapter.request("meleeControl", { action, enabled });
+  appliedRuntimeSettings.add(key);
+}
+const audio = new AudioController({ outputEnabled: nativeEngine });
+// Start quietly, before the first user gesture enables the audio context.
+let volume = 0.25;
+try {
+  const saved = localStorage.getItem("melee.volume");
+  if (saved !== null && saved.trim() !== "" && Number.isFinite(Number(saved)))
+    volume = Math.max(0, Math.min(1, Number(saved)));
+} catch { /* Audio controls also work when browser storage is unavailable. */ }
+audio.volume = volume;
+const volumeControl = $("volume");
+if (volumeControl) {
+  volumeControl.value = String(Math.round(volume * 100));
+  volumeControl.addEventListener("input", () => {
+    audio.setVolume(Number(volumeControl.value) / 100);
+    try { localStorage.setItem("melee.volume", String(audio.volume)); } catch {}
+  });
+}
 const browserStatus = [];
 if (nativeEngine) audio.targetLeadSeconds = 0.08;
 const Host = nativeEngine
@@ -62,7 +90,8 @@ const host = new Host({
       browserStatus.push(String(message));
       if (browserStatus.length > 64) browserStatus.shift();
     }
-    if (!ready && !message.includes("MEM1 signature")) status.textContent = message;
+    if (!ready && !message.includes("MEM1 signature"))
+      status.textContent = hostedGame ? "Starting Melee…" : message;
     if (nativeEngine && host.mode === "error") {
       status.textContent = message;
       loading.hidden = false;
@@ -407,6 +436,12 @@ async function tick() {
   if (tickBusy || paused || host.mode !== "dolphin") return;
   tickBusy = true;
   try {
+    if (!nativeEngine && !queueClockApplied && host.adapter.presentationQueue &&
+        params.get("queueclock") === "raf") {
+      host.adapter.presentationQueue.setRateLimited(false);
+      host.adapter.bitmapPresentationPacing = "raf-buffered-native-clock";
+      queueClockApplied = true;
+    }
     const state = await host.adapter.request("meleeInspect", {});
     gameState = state;
     const scene = `${state.major}:${state.minor}`;
@@ -428,6 +463,47 @@ async function tick() {
         ((state.renderFrame - sceneSample.render) * 1000) / (now - sceneSample.time),
       );
       sceneSample = { scene, frame: state.sceneFrame, render: state.renderFrame, time: now };
+    }
+    const loadedMatch = isLoadedMeleeMatch(state);
+    if (!loadedMatch) {
+      runtimeSettingsMatch = "";
+      runtimeSettingsFrame = -1;
+      appliedRuntimeSettings.clear();
+    } else {
+      const matchKey = `${state.major}:${state.minor}:${state.sceneKind}:${state.match?.stage}`;
+      if (matchKey !== runtimeSettingsMatch || state.sceneFrame < runtimeSettingsFrame) {
+        runtimeSettingsMatch = matchKey;
+        appliedRuntimeSettings.clear();
+      }
+      runtimeSettingsFrame = state.sceneFrame;
+      const stage = state.match?.stage;
+      // Frozen Stadium is the tournament variant. Its video board is purely
+      // decorative and remains one of the neutral map's hottest stage-local
+      // render paths, so the frozen profile suppresses it as one setting.
+      if ((params.get("stadiumscreen") === "off" || params.get("stadiumfreeze") === "1") && stage === 3)
+        await applyRuntimeSettingOnce("stadium-screen", "stadiumScreen", false);
+      if (params.get("stadiumfreeze") === "1" && stage === 3)
+        await applyRuntimeSettingOnce("stadium-transformations", "stadiumTransformations", false);
+      if (params.get("stadiumfreeze") === "1" && stage === 3)
+        await applyRuntimeSettingOnce("stadium-decoration", "stadiumDecoration", false);
+      if (params.get("background") === "black")
+        await applyRuntimeSettingOnce("stage-background", "stageBackground", false);
+      if (params.get("backgroundanimation") === "off" && [31, 32].includes(stage))
+        await applyRuntimeSettingOnce("background-animation", "staticBackgroundAnimation", false);
+      if (params.get("reflection") === "off" && stage === 2)
+        await applyRuntimeSettingOnce("fountain-reflection", "fountainReflection", false);
+      if (params.get("models") === "low")
+        await applyRuntimeSettingOnce("model-detail", "modelDetail", false);
+      if (params.get("particles") === "off" && stage === 2)
+        await applyRuntimeSettingOnce("fountain-particles", "fountainParticles", false);
+      if (params.get("decorations") === "off" && stage === 2)
+        await applyRuntimeSettingOnce("fountain-decorations", "fountainDecorations", false);
+      if (params.get("scenery") === "off" && stage === 2)
+        await applyRuntimeSettingOnce("fountain-scenery", "fountainScenery", false);
+      if (params.get("sceneryanimation") === "off" && params.get("scenery") === "off" && stage === 2)
+        await applyRuntimeSettingOnce("fountain-animation", "fountainAnimation", false);
+      if (params.get("reverb") === "off")
+        await applyRuntimeSettingOnce("aux-reverb", "auxReverb", false);
     }
     if (state.major !== 1) {
       menuSeenAt = 0;
@@ -453,8 +529,9 @@ async function tick() {
     }
     if (state.major === 2) {
       bootStep = 2;
-      if (!ready) {
+      if (!ready && (nativeEngine || characterSelectReady(state))) {
         ready = true;
+        audio.setOutputEnabled(true);
         loading.hidden = true;
         clearTimeout(pulseTimer);
         host.setInputState(neutral());
@@ -504,21 +581,28 @@ discPicker.onchange = () => {
   browserDisc = discPicker.files?.[0];
   if (browserDisc) begin.click();
 };
+let booting = false;
 begin.onclick = async () => {
-  if (!nativeEngine && !browserDisc) {
+  if (booting) return;
+  if (!nativeEngine && !browserDisc && !hostedGame) {
     discPicker.click();
     return;
   }
   begin.hidden = true;
+  booting = true;
   try {
-    await audio.setMuted(false);
-    status.textContent = "Opening your local Melee disc…";
+    if (!hostedGame) await audio.setMuted(false);
+    status.textContent = hostedGame ? "Loading Melee…" : "Opening your local Melee disc…";
     if (nativeEngine) {
       await host.mountFile();
     } else {
       const { browserCapabilities, requireBrowserBackend } = await import("./browser-capabilities.js");
       capabilities = await browserCapabilities();
       requireBrowserBackend(capabilities, host.videoBackend, host.oglProxyMode);
+      if (hostedGame && !browserDisc) {
+        const { loadHostedGame } = await import("./browser-hosted-game.js");
+        browserDisc = await loadHostedGame(hostedGame, message => { status.textContent = message; });
+      }
       const file = browserDisc;
       const header = new Uint8Array(await file.slice(0, 8).arrayBuffer());
       if (String.fromCharCode(...header.slice(0, 6)) !== "GALE01" || header[7] !== 2)
@@ -541,14 +625,36 @@ begin.onclick = async () => {
     }
     begin.hidden = false;
     begin.textContent = "Retry";
+    booting = false;
   }
 };
-begin.hidden = false;
+begin.hidden = Boolean(hostedGame);
 if (!nativeEngine) begin.textContent = "Open Melee disc";
 status.textContent = "Your local copy · 4 stocks · 8 minutes · No items";
+if (hostedGame) {
+  loading.querySelector('h1')?.setAttribute('hidden', '');
+  status.textContent = 'Loading Melee…';
+  // Boot independently of autoplay policy. The first interaction enables sound.
+  let enablingAudio = false;
+  const enableAudio = async () => {
+    if (enablingAudio) return;
+    enablingAudio = true;
+    try {
+      await audio.setMuted(false);
+      window.removeEventListener('pointerdown', enableAudio);
+      window.removeEventListener('keydown', enableAudio);
+    } catch { enablingAudio = false; }
+  };
+  window.addEventListener('pointerdown', enableAudio);
+  window.addEventListener('keydown', enableAudio);
+  void begin.onclick();
+}
 if (params.has("qa")) {
   const panel = document.createElement("div");
   panel.id = "qa";
+  const qaToggle=document.createElement("button");qaToggle.textContent="Toggle diagnostics";
+  Object.assign(qaToggle.style,{position:"fixed",left:"8px",top:"8px",zIndex:1000});
+  qaToggle.onclick=()=>{panel.style.display=panel.style.display==="none"?"":"none";};document.body.append(qaToggle);
   const output = document.createElement("pre");
   // StKind IDs from melee/src/melee/gr/forward.h (not the separate GrKind IDs).
   const stageSelector = document.createElement("select");
@@ -719,6 +825,179 @@ if (params.has("qa")) {
       host.setInputState(sample());
     }
     await waitForSss();
+    const gpuStartDelay = Number(params.get("gpustartdelay"));
+    if (!nativeEngine && [2000, 4000, 8000].includes(gpuStartDelay)) {
+      await host.adapter.request("browserRollback", { action: "pause" });
+      try {
+        const applied = await host.adapter.request("browserRollback", {
+          action: "gpuStartDelay",
+          cycles: gpuStartDelay,
+        });
+        if (applied.cycles !== gpuStartDelay)
+          throw Error("GPU service batching was not applied");
+      } finally {
+        await host.adapter.request("start", {});
+      }
+    }
+    // Retained CPU optimizations must also apply to cosmetic QA/acceptance
+    // runs; setting a query parameter alone does not configure the native core.
+    if(!nativeEngine && params.get('matrixfast')==='1'){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request('browserRollback',{action:'pause'});
+      try{
+        const config={...browserCodegenConfig(host),matrixfast:true};
+        const applied=await host.adapter.request('browserRollback',{action:'codegen',...config});
+        if(applied.matrixfast!==true)throw Error('Retained Melee matrix specialization was not applied');
+        host.matrixFast=true;
+      }finally{await host.adapter.request('start',{});}
+    }
+    if(!nativeEngine && params.get('animstatefast')==='1'){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request('browserRollback',{action:'pause'});
+      try{
+        const config={...browserCodegenConfig(host),animstatefast:true};
+        const applied=await host.adapter.request('browserRollback',{action:'codegen',...config});
+        if(applied.animstatefast!==true)throw Error('Melee animation-state specialization was not applied');
+        host.meleeAnimStateFast=true;
+      }finally{await host.adapter.request('start',{});}
+    }
+    if(!nativeEngine && params.get('animcallbackfast')==='1'){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request('browserRollback',{action:'pause'});
+      try{
+        const config={...browserCodegenConfig(host),animcallbackfast:true};
+        const applied=await host.adapter.request('browserRollback',{action:'codegen',...config});
+        if(applied.animcallbackfast!==true)throw Error('Melee animation callback continuation was not applied');
+        host.meleeAnimCallbackFast=true;
+      }finally{await host.adapter.request('start',{});}
+    }
+    if(!nativeEngine && params.get('displaylistfast')==='1'){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request('browserRollback',{action:'pause'});
+      try{
+        const config={...browserCodegenConfig(host),displaylistfast:true};
+        const applied=await host.adapter.request('browserRollback',{action:'codegen',...config});
+        if(applied.displaylistfast!==true)throw Error('Melee display-list specialization was not applied');
+        host.displayListFast=true;
+      }finally{await host.adapter.request('start',{});}
+    }
+    if(!nativeEngine && params.get('gxmatrixfast')==='1'){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request('browserRollback',{action:'pause'});
+      try{
+        const config={...browserCodegenConfig(host),gxmatrixfast:true};
+        const applied=await host.adapter.request('browserRollback',{action:'codegen',...config});
+        if(applied.gxmatrixfast!==true)throw Error('Melee GX matrix specialization was not applied');
+        host.gxMatrixFast=true;
+      }finally{await host.adapter.request('start',{});}
+    }
+    // Release play does not need atomic diagnostic-counter publications from
+    // the compiled PPC dispatcher or the Melee-specific hot callbacks. The
+    // lean mode keeps execution, timing, exceptions and frame stepping intact.
+    // It remains query-selectable so the benchmark can restore its control.
+    if(!nativeEngine && params.get('leandispatch')==='1'){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request('browserRollback',{action:'pause'});
+      try{
+        const config={...browserCodegenConfig(host),leandispatch:true};
+        const applied=await host.adapter.request('browserRollback',{action:'codegen',...config});
+        if(applied.leandispatch!==true)throw Error('Lean release dispatcher was not applied');
+        host.leanDispatch=true;
+      }finally{await host.adapter.request('start',{});}
+    }
+    if(!nativeEngine && params.get('retainedfpuguard')==='1'){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request('browserRollback',{action:'pause'});
+      try{
+        const config={...browserCodegenConfig(host),fpuguard:true};
+        const applied=await host.adapter.request('browserRollback',{action:'codegen',...config});
+        if(applied.fpuguard!==true)throw Error('Retained FPU guard was not applied');
+        host.fpuGuardHoist=true;
+      }finally{await host.adapter.request('start',{});}
+    }
+    if(!nativeEngine && params.get("efbscale")==="150"){
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"renderScale",percent:150});}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("compactgpr")==="1"){
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),compactgpr:true});host.compactGprLocals=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("pssimd")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),pssimd:true});host.pairedSimd=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("frsqrtefast")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),frsqrtefast:true});host.frsqrteFast=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("fifobatch")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),fifobatch:true});host.fifoBatch=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("fifocopy")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),fifocopy:true});host.fifoCopy=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("msrcache")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),msrcache:true});host.blockMsrCache=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("stateconst")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),stateconst:true});host.constantStateBase=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("widemap")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),widemap:true});host.wideBlockMap=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if (!nativeEngine && params.get("qstatefull") === "1") {
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),qstatefull:true});host.qStateFull=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if (!nativeEngine && params.get("qstatecache") === "1") {
+      const {browserCodegenConfig}=await import('./browser-benchmark.js');
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),qstatecache:true});host.qStateCache=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("psqhoist")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),psqhoist:true});host.pairedMemoryHoist=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("vectorfpr")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),vectorfpr:true});host.vectorFprCache=true;}
+      finally{await host.adapter.request("start",{});}
+    }
+    if(!nativeEngine && params.get("psmemsimd")==="1"){
+      const {browserCodegenConfig}=await import("./browser-benchmark.js");
+      await host.adapter.request("browserRollback",{action:"pause"});
+      try{await host.adapter.request("browserRollback",{action:"codegen",...browserCodegenConfig(host),psmemsimd:true});host.pairedMemorySimd=true;}
+      finally{await host.adapter.request("start",{});}
+    }
     await host.adapter.request("meleeControl", { action: "selectStage", stage: Number(stageSelector.value) });
   }
   verify.onclick = async () => {
@@ -756,6 +1035,8 @@ if (params.has("qa")) {
           throw new Error("Native fighter selection differs: " + JSON.stringify(start.fighters));
         if (start.fighters.some((f) => f.stocks !== 4)) throw new Error("Initial stocks differ");
         await waitForGame((s) => s.major === 2 && s.minor === 2 && s.sceneFrame > 240);
+        const modelDetail=params.get('models')==='low' ? await host.adapter.request('meleeControl',{action:'modelDetail',enabled:false}) : null;
+        if(modelDetail && modelDetail.objects.length < 2)throw Error('Native low-detail tables were not verified for both fighters');
         const motion = new Set();
         for (const code of ["KeyD", "KeyP", "KeyO", "Space", "KeyI", "KeyU", "KeyK"]) {
           window.dispatchEvent(new KeyboardEvent("keydown", { code, bubbles: true }));
@@ -766,6 +1047,7 @@ if (params.has("qa")) {
           await delay(100);
         }
         results.push({
+          modelDetail: modelDetail?.objects,
           player: names[p],
           cpu: names[p + 1],
           rules: start.match,
@@ -870,6 +1152,205 @@ if (params.has("qa")) {
   };
   panel.append(checkInput);
 
+  if(!nativeEngine){
+
+    const stadiumToggle=document.createElement('button');stadiumToggle.textContent='Toggle Stadium video board';
+    stadiumToggle.onclick=async()=>{try{const enabled=params.get('stadiumscreen')==='off';params.set('stadiumscreen',enabled?'on':'off');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'stadiumScreen',enabled}),null,2);}catch(error){output.textContent=error.message;}};
+    const stadiumReplay=document.createElement('button');stadiumReplay.textContent='Verify Stadium video board gameplay';
+    stadiumReplay.onclick=async()=>{stadiumReplay.disabled=true;const saved=params.get('stadiumscreen');params.delete('stadiumscreen');try{
+      const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='3';
+      testForms=selectors.map(select=>Number(select.value)===19);
+      await host.adapter.request('meleeControl',{action:'select',player:Number(selectors[0].value),cpu:Number(selectors[1].value)});await delay(800);await waitForCss();
+      await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+      const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+      const result=await verifyFountainReflectionState(host,{feature:'stadiumscreen',frames:Number(params.get('cosmeticframes')||600),onProgress:text=>{progress.textContent=text;}});
+      output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: Stadium replay matched gameplay, RNG, stage transforms and native camera.':'FAILED: Stadium screen changed a gameplay probe.';
+    }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(saved===null)params.delete('stadiumscreen');else params.set('stadiumscreen',saved);host.setInputState(neutral());stadiumReplay.disabled=false;}};
+    panel.append(stadiumToggle,stadiumReplay);
+    const stadiumDecorationReplay=document.createElement('button');stadiumDecorationReplay.textContent='Verify frozen Stadium decoration';
+    stadiumDecorationReplay.onclick=async()=>{stadiumDecorationReplay.disabled=true;try{
+      const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='3';
+      testForms=selectors.map(select=>Number(select.value)===19);
+      await host.adapter.request('meleeControl',{action:'select',player:Number(selectors[0].value),cpu:Number(selectors[1].value)});await delay(800);await waitForCss();
+      await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+      await host.adapter.request('meleeControl',{action:'stadiumTransformations',enabled:false});
+      const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+      const result=await verifyFountainReflectionState(host,{feature:'stadiumdecoration',frames:Number(params.get('cosmeticframes')||600),onProgress:text=>{progress.textContent=text;}});
+      output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: Frozen Stadium decoration replay matched gameplay, RNG, stage transforms and native camera.':'FAILED: Frozen Stadium decoration changed a gameplay probe.';
+    }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(params.get('stadiumfreeze')==='1')await host.adapter.request('meleeControl',{action:'stadiumDecoration',enabled:false});host.setInputState(neutral());stadiumDecorationReplay.disabled=false;}};
+    panel.append(stadiumDecorationReplay);
+    const particleToggle=document.createElement('button');particleToggle.textContent='Toggle Fountain particles';
+    particleToggle.onclick=async()=>{try{const enabled=params.get('particles')==='off';params.set('particles',enabled?'on':'off');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'fountainParticles',enabled}),null,2);}catch(error){output.textContent=error.message;}};
+    const particleReplay=document.createElement('button');particleReplay.textContent='Verify Fountain particles gameplay';
+    particleReplay.onclick=async()=>{particleReplay.disabled=true;const saved=params.get('particles');params.delete('particles');try{
+      const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='2';
+      await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+      const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+      const result=await verifyFountainReflectionState(host,{feature:'particles',onProgress:text=>{progress.textContent=text;}});
+      output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: 600 particle frames matched gameplay, RNG, platforms and native camera.':'FAILED: particles changed a gameplay probe.';
+    }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(saved===null)params.delete('particles');else params.set('particles',saved);host.setInputState(neutral());particleReplay.disabled=false;}};
+    panel.append(particleToggle,particleReplay);
+    const decorationToggle=document.createElement('button');decorationToggle.textContent='Toggle Fountain decorations';
+    decorationToggle.onclick=async()=>{try{const enabled=params.get('decorations')==='off';params.set('decorations',enabled?'on':'off');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'fountainDecorations',enabled}),null,2);}catch(error){output.textContent=error.message;}};
+    const decorationReplay=document.createElement('button');decorationReplay.textContent='Verify Fountain decorations gameplay';
+    decorationReplay.onclick=async()=>{decorationReplay.disabled=true;const saved=params.get('decorations');params.delete('decorations');try{
+      const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='2';
+      await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+      const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+      const result=await verifyFountainReflectionState(host,{feature:'decorations',onProgress:text=>{progress.textContent=text;}});
+      output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: 600 decoration frames matched gameplay, RNG, platforms and native camera.':'FAILED: decorations changed a gameplay probe.';
+    }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(saved===null)params.delete('decorations');else params.set('decorations',saved);host.setInputState(neutral());decorationReplay.disabled=false;}};
+    panel.append(decorationToggle,decorationReplay);
+    const geometryInspect=document.createElement('button');geometryInspect.textContent='Inspect Fountain main geometry';
+    geometryInspect.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'fountainGeometryInspect'}),null,2);}catch(error){output.textContent=error.message;}};
+    const geometrySelection=document.createElement('input');geometrySelection.type='number';geometrySelection.value='-1';geometrySelection.min='-2';geometrySelection.setAttribute('aria-label','Fountain diagnostic joint');
+    const geometryView=document.createElement('button');geometryView.textContent='Show diagnostic joint';
+    geometryView.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'fountainGeometryView',selection:Number(geometrySelection.value)}),null,2);}catch(error){output.textContent=error.message;}};
+    const geometryStart=document.createElement('button');geometryStart.textContent='Prepare Fountain geometry';
+    geometryStart.onclick=async()=>{geometryStart.disabled=true;try{
+      progress.textContent='Preparing native Fountain geometry…';
+      const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='2';
+      await startTestMatch({online:true});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+      output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'fountainGeometryInspect'}),null,2);progress.textContent='Geometry diagnostic ready; visibility changes are diagnostic only.';
+    }catch(error){progress.textContent='FAILED: '+error.message;}finally{geometryStart.disabled=false;}};
+    panel.append(geometryStart,geometryInspect,geometrySelection,geometryView);
+    const reflectionButton=document.createElement('button');reflectionButton.textContent='Toggle Fountain reflection';
+    reflectionButton.onclick=async()=>{try{const enabled=params.get('reflection')==='off';params.set('reflection',enabled?'on':'off');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'fountainReflection',enabled}),null,2);}catch(error){output.textContent=error.message;}};
+    panel.append(reflectionButton);
+  }
+  if(!nativeEngine){
+    const reflectionReplay=document.createElement('button');reflectionReplay.textContent='Verify Fountain reflection gameplay';
+    reflectionReplay.onclick=async()=>{
+      reflectionReplay.disabled=true;
+      const savedCosmetic=params.get('reflection');params.delete('reflection');
+      try{
+        const state=await waitForGame(s=>s.major===2);
+        if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='2';
+        await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+        const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+        const result=await verifyFountainReflectionState(host,{onProgress:text=>{progress.textContent=text;}});
+        output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: 600 frames matched gameplay, RNG, platform and camera probes.':'FAILED: reflection changed a gameplay probe.';
+      }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(savedCosmetic===null)params.delete('reflection');else params.set('reflection',savedCosmetic);host.setInputState(neutral());reflectionReplay.disabled=false;}
+    };
+    panel.append(reflectionReplay);
+  }
+  if(!nativeEngine){
+    const sceneryReplay=document.createElement('button');sceneryReplay.textContent='Verify Fountain scenery gameplay';
+    sceneryReplay.onclick=async()=>{
+      sceneryReplay.disabled=true;
+      const savedCosmetic=params.get('scenery');params.delete('scenery');
+      try{
+        const state=await waitForGame(s=>s.major===2);
+        if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='2';
+        await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+        const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+        const result=await verifyFountainReflectionState(host,{feature:"scenery",onProgress:text=>{progress.textContent=text;}});
+        output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: 600 scenery frames matched gameplay, RNG, platform and camera probes.':'FAILED: scenery changed a gameplay probe.';
+      }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(savedCosmetic===null)params.delete('scenery');else params.set('scenery',savedCosmetic);host.setInputState(neutral());sceneryReplay.disabled=false;}
+    };
+    panel.append(sceneryReplay);
+  }
+  if(!nativeEngine){
+    const sceneryButton=document.createElement('button');sceneryButton.textContent='Toggle Fountain scenery';
+    sceneryButton.onclick=async()=>{try{const enabled=params.get('scenery')==='off';params.set('scenery',enabled?'on':'off');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'fountainScenery',enabled}),null,2);}catch(error){output.textContent=error.message;}};
+    panel.append(sceneryButton);
+    const modelButton=document.createElement('button');modelButton.textContent='Toggle model detail';
+    modelButton.onclick=async()=>{try{const enabled=params.get('models')==='low';params.set('models',enabled?'normal':'low');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'modelDetail',enabled}),null,2);}catch(error){output.textContent=error.message;}};
+    panel.append(modelButton);
+    const modelReplay=document.createElement('button');modelReplay.textContent='Verify model detail gameplay';
+    modelReplay.onclick=async()=>{
+      modelReplay.disabled=true;const saved=params.get('models');params.delete('models');
+      try{
+        const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='2';
+        await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+        const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+        const result=await verifyFountainReflectionState(host,{feature:'modeldetail',onProgress:text=>{progress.textContent=text;}});
+        output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: 600 model-detail frames matched gameplay and camera probes.':'FAILED: model detail changed a gameplay probe.';
+      }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(saved===null)params.delete('models');else params.set('models',saved);host.setInputState(neutral());modelReplay.disabled=false;}
+    };
+    panel.append(modelReplay);
+    const animationReplay=document.createElement('button');animationReplay.textContent='Verify hidden scenery animation';
+    animationReplay.onclick=async()=>{
+      animationReplay.disabled=true;progress.textContent='Preparing scenery animation replay…';
+      const saved=params.get('sceneryanimation');params.delete('sceneryanimation');
+      try{
+        if(params.get('scenery')!=='off')throw Error('Hidden scenery is required');
+        const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='2';
+        await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+        await host.adapter.request('meleeControl',{action:'fountainScenery',enabled:false});
+        const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+        const result=await verifyFountainReflectionState(host,{feature:'animation',onProgress:text=>{progress.textContent=text;}});
+        output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: 600 hidden-animation frames matched gameplay and camera probes.':'FAILED: hidden animation changed gameplay.';
+      }catch(error){progress.textContent='FAILED: '+error.message;}finally{if(saved===null)params.delete('sceneryanimation');else params.set('sceneryanimation',saved);host.setInputState(neutral());animationReplay.disabled=false;}
+    };
+    panel.append(animationReplay);
+
+  }
+  let queueSelector,queueCompare,queueCandidate;
+  if(!nativeEngine && params.get('pace')==='raf'){
+    queueSelector=document.createElement('select');queueSelector.setAttribute('aria-label','Presentation queue capacity');
+    for(const n of[2,3,4])queueSelector.add(new Option(n+' images',String(n)));
+    queueSelector.value=['2','3','4'].includes(params.get('queuecapacity'))?params.get('queuecapacity'):'2';
+    queueCompare=document.createElement('input');queueCompare.type='checkbox';queueCompare.setAttribute('aria-label','Compare presentation queues');queueCompare.checked=params.get('benchmarkqueuecapacitycompare')==='1';
+    const label=document.createElement('label');label.append(queueCompare,' Compare presentation queues');
+    queueCandidate=document.createElement('select');queueCandidate.setAttribute('aria-label','Comparison queue capacity');
+    for(const n of[3,4])queueCandidate.add(new Option(n+' images',String(n)));
+    queueCandidate.value=params.get('benchmarkqueuecapacity')==='4'?'4':'3';
+    panel.append(queueSelector,label,queueCandidate);
+  }
+  const yoshiAnimationReplay=document.createElement('button');yoshiAnimationReplay.textContent='Verify Yoshi background animation';
+  yoshiAnimationReplay.onclick=async()=>{
+    yoshiAnimationReplay.disabled=true;progress.textContent='Preparing Yoshi background replay…';
+    try{
+      if(params.get('background')!=='black')throw Error('Black background is required');
+      const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='8';
+      await host.adapter.request('meleeControl',{action:'select',player:Number(selectors[0].value),cpu:Number(selectors[1].value)});
+      await delay(800);await waitForCss();await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+      await host.adapter.request('meleeControl',{action:'stageBackground',enabled:false});
+      const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+      const result=await verifyFountainReflectionState(host,{feature:'yoshianimation',frames:Number(params.get('cosmeticframes')||600),onProgress:text=>{progress.textContent=text;}});
+      output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: Yoshi gameplay, items, RNG, stage and camera probes matched.':'FAILED: Yoshi gameplay probe changed.';
+    }catch(error){progress.textContent='FAILED: '+error.message;}finally{host.setInputState(neutral());yoshiAnimationReplay.disabled=false;}
+  };panel.append(yoshiAnimationReplay);
+  const cpuCompare=document.createElement('input');cpuCompare.type='checkbox';cpuCompare.checked=true;cpuCompare.setAttribute('aria-label','Compare CPU optimization');
+  const cpuCompareLabel=document.createElement('label');cpuCompareLabel.append(cpuCompare,' Compare CPU optimization');panel.append(cpuCompareLabel);
+  const animationInventoryButton=document.createElement('button');animationInventoryButton.textContent='Inspect stage animation';
+  animationInventoryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'stageAnimationInventory'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(animationInventoryButton);
+  const renderLinkInventoryButton=document.createElement('button');renderLinkInventoryButton.textContent='Inspect render links';
+  renderLinkInventoryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'renderLinkInventory'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(renderLinkInventoryButton);
+  const staticReplay=document.createElement('button');staticReplay.textContent='Verify Battlefield background animation';
+  staticReplay.onclick=async()=>{staticReplay.disabled=true;try{
+    const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='31';
+    await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+    await host.adapter.request('meleeControl',{action:'stageBackground',enabled:false});
+    const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+    const result=await verifyFountainReflectionState(host,{feature:'staticbackground',onProgress:text=>{progress.textContent=text;}});
+    output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: Battlefield map-1 animation does not change gameplay, RNG, actors, or native camera.':'FAILED: Battlefield map-1 animation changed a gameplay probe.';
+  }catch(error){progress.textContent='FAILED: '+error.message;}finally{host.setInputState(neutral());staticReplay.disabled=false;}};panel.append(staticReplay);
+  const headroomCheck=document.createElement('input');headroomCheck.type='checkbox';headroomCheck.setAttribute('aria-label','Measure uncapped execution');
+  const headroomLabel=document.createElement('label');headroomLabel.append(headroomCheck,' Measure uncapped execution (diagnostic)');panel.append(headroomLabel);
+  const renderCostCheck=document.createElement('input');renderCostCheck.type='checkbox';renderCostCheck.setAttribute('aria-label','Measure render dispatch cost');
+  const renderCostLabel=document.createElement('label');renderCostLabel.append(renderCostCheck,' Compare scene draws bypassed (blank-output diagnostic)');panel.append(renderCostLabel);
+  const renderCostScope=document.createElement('select');renderCostScope.setAttribute('aria-label','Render diagnostic scope');
+  for(const[value,label]of[['scene','Scene draw callbacks'],['link-stage','Stage GX link 3'],['link-fighters','Fighter GX link 5'],['link-effects','Effects GX links 7–8'],['link-hud','HUD GX link 11'],['link-shadows','Shadow GX link 4'],['link-environment','Fog/light GX links 0,10'],['drawable','Materials and meshes'],['mesh','Mesh skinning and submission'],['texture','Texture setup and loading'],['tev','Material combiner setup']])renderCostScope.add(new Option(label,value));
+  renderCostScope.value=[...renderCostScope.options].some(o=>o.value===params.get('rendercostscope'))?params.get('rendercostscope'):'scene';panel.append(renderCostScope);
+  const timingDriftCompare=document.createElement('input');timingDriftCompare.type='checkbox';timingDriftCompare.setAttribute('aria-label','Compare time-drift correction');
+  const timingDriftLabel=document.createElement('label');timingDriftLabel.append(timingDriftCompare,' Compare time-drift correction');panel.append(timingDriftLabel);
+  const gpuScheduleCompare=document.createElement('input');gpuScheduleCompare.type='checkbox';gpuScheduleCompare.setAttribute('aria-label','Compare GPU command scheduling');
+  const gpuScheduleLabel=document.createElement('label');gpuScheduleLabel.append(gpuScheduleCompare,' Compare GPU command scheduling');panel.append(gpuScheduleLabel);
+  const rushCompare=document.createElement('input');rushCompare.type='checkbox';rushCompare.setAttribute('aria-label','Compare rush presentation');
+  const rushLabel=document.createElement('label');rushLabel.append(rushCompare,' Compare rush presentation');panel.append(rushLabel);
+  const frameLogCompare=document.createElement('input');frameLogCompare.type='checkbox';frameLogCompare.setAttribute('aria-label','Compare frame logging');
+  const frameLogLabel=document.createElement('label');frameLogLabel.append(frameLogCompare,' Compare frame logging');panel.append(frameLogLabel);
+  const logStatus=document.createElement('button');logStatus.textContent='Inspect frame logging';logStatus.onclick=async()=>{output.textContent=JSON.stringify(await host.adapter.request('frameRingLogging',{}));};panel.append(logStatus);
+  const checkpointControl=document.createElement('input');checkpointControl.type='checkbox';checkpointControl.setAttribute('aria-label','Repeat identical checkpoint');
+  const checkpointLabel=document.createElement('label');checkpointLabel.append(checkpointControl,' Repeat identical checkpoint');panel.append(checkpointLabel);
+  const manualCheckpoint=document.createElement('input');manualCheckpoint.type='checkbox';manualCheckpoint.setAttribute('aria-label','Pause between checkpoint runs');
+  const manualLabel=document.createElement('label');manualLabel.append(manualCheckpoint,' Pause between checkpoint runs (diagnostic only)');panel.append(manualLabel);
+  const continueCheckpoint=document.createElement('button');continueCheckpoint.textContent='Continue checkpoint measurement';continueCheckpoint.disabled=true;panel.append(continueCheckpoint);
+  const dispatchProfileCheck=document.createElement('input');dispatchProfileCheck.type='checkbox';dispatchProfileCheck.setAttribute('aria-label','Profile compiled blocks');
+  const dispatchProfileLabel=document.createElement('label');dispatchProfileLabel.append(dispatchProfileCheck,' Profile compiled blocks (diagnostic)');panel.append(dispatchProfileLabel);
+  const durationInput=document.createElement('input');durationInput.type='number';durationInput.min='30';durationInput.max='120';durationInput.value=String(Math.max(30,Math.min(120,Number(params.get('benchmarkSeconds'))||30)));durationInput.setAttribute('aria-label','Benchmark seconds');panel.append(durationInput);
   const bench = document.createElement("button");
   bench.textContent = "Benchmark 720p60";
   bench.onclick = async () => {
@@ -877,6 +1358,12 @@ if (params.has("qa")) {
     progress.textContent = "Preparing a fresh match for measurement…";
     output.textContent = "";
     try {
+      if(queueSelector){
+        if(!host.adapter.presentationQueue)throw Error('Presentation queue is not ready');
+        host.adapter.presentationQueue.setCapacity(Number(queueSelector.value));
+        params.set('benchmarkqueuecapacitycompare',queueCompare.checked?'1':'0');
+        params.set('benchmarkqueuecapacity',queueCandidate.value);
+      }
       if (paused) await setPaused(false);
       const initial = await waitForGame(
         (s) =>
@@ -888,12 +1375,24 @@ if (params.has("qa")) {
         await control("quit");
       }
       await waitForCss();
-      const cpuWorkload = params.get("benchmarkcpu") === "1" || params.get("inputprobe") !== "1";
+      testForms=selectors.map(select=>Number(select.value)===19);
+      await host.adapter.request('meleeControl',{action:'select',player:Number(selectors[0].value),cpu:Number(selectors[1].value)});
+          // Selection reloads CSS and its fighter archives. Let native preload finish.
+          await delay(800);
+          await waitForCss();
+      const cpuWorkload = !["two","frame"].includes(params.get("benchmarkinput")) && (params.get("benchmarkcpu") === "1" || params.get("inputprobe") !== "1");
       await startTestMatch({online: !cpuWorkload});
-      await waitForGame(
+      const matchStart=await waitForGame(
         (s) =>
-          s.major === 2 && s.minor === 2 && s.sceneKind === 2 && s.match?.timeRemaining === 480,
+          isLoadedMeleeMatch(s) && s.match?.timeRemaining >= 474 && s.match.timeRemaining <= 480,
       );
+      const matchPrewarmFrames = Number(params.get("matchprewarm") || 0);
+      if (!nativeEngine && matchPrewarmFrames > 0) {
+        const { prewarmBrowserMatch } = await import("./browser-match-prewarm.js");
+        await prewarmBrowserMatch(host, matchPrewarmFrames, {
+          onProgress: (text) => { progress.textContent = text; },
+        });
+      }
       await waitForGame(
         (s) =>
           s.major === 2 &&
@@ -902,21 +1401,129 @@ if (params.has("qa")) {
           s.match?.timeRemaining <= 474 &&
           s.match?.timeRemaining >= 460,
       );
+      const {verifyBenchmarkSelection}=await import('./browser-benchmark.js');
+      const verifiedSelection=verifyBenchmarkSelection(matchStart,{stage:Number(stageSelector.value),characters:selectors.map(select=>Number(select.value))});
       if (!nativeEngine) {
         if (params.get("ogltestclear") === "1") throw Error("Disable the test pattern before benchmarking gameplay");
-        const { measureBrowserGameplay, measureBrowserDelivery, summarizeCoreProfile } = await import("./browser-benchmark.js");
+        const { measureBrowserGameplay, measureBrowserDelivery, measureBrowserRepeated, compareBrowserCodegen, summarizeCoreProfile, sampleBrowserCpuLocations, measureBrowserNativeInput, compareBrowserQueueCapacity, compareBrowserQueueClock, compareBrowserRenderScale, compareBrowserProbe, measureBrowserGameplayAsync, compareBrowserPacing, compareFountainReflection } = await import("./browser-benchmark.js");
         const capacityProbe = params.get("probe") === "capacity";
-        const duration = capacityProbe ? 10 : Math.max(30, Math.min(120, Number(params.get("benchmarkSeconds")) || 30));
+        const duration = capacityProbe ? 10 : Math.max(30, Math.min(120, Number(durationInput.value) || 30));
         progress.textContent = `Measuring ${duration} seconds of visible browser gameplay…`;
         const profileBefore = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
-        const measure = params.get("probe") === "delivery" ? measureBrowserDelivery : measureBrowserGameplay;
-        const result = await measure(host, duration,
-          () => host.adapter.request("meleeInspect", {}), {sampleWidth:Number(params.get("samplegrid") || 32)});
-        const profileAfter = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
-        result.coreProfile = summarizeCoreProfile(profileBefore, profileAfter, result.seconds);
+        const imageMeasure = params.get("probe") === "async" ? (h,s,i,o={})=>measureBrowserGameplayAsync(h,s,i,{...o,harvestInTask:params.get("imageharvest")==="task",workerProbe:params.get("imageharvest")==="worker"}) : params.get("probe") === "delivery" ? measureBrowserDelivery : measureBrowserGameplay;
+        const {measureWithJitCounters}=await import('./browser-jit-measurement.js');
+        const baseMeasure=(...args)=>measureWithJitCounters(host,()=>imageMeasure(...args));
+        const frameStress=params.get("benchmarkinput")==="frame";
+        const twoPlayerStress=params.get("benchmarkinput")==="two" || frameStress;
+        const stress = params.get("benchmarkinput") === "stress" || twoPlayerStress;
+        const {withBenchmarkInput,withTwoPlayerBenchmarkInput} = stress ? await import("./browser-benchmark-input.js") : {};
+        const measure = frameStress ? baseMeasure : twoPlayerStress ? (...args)=>withTwoPlayerBenchmarkInput(host,()=>gameState,()=>baseMeasure(...args)) : stress ? (...args) => withBenchmarkInput(()=>gameState,pad=>host.setInputState(pad),()=>baseMeasure(...args)) : baseMeasure;
+        const repeats = Number(params.get("benchmarkrepeats")) || 1;
+        const codegenAB = cpuCompare.checked && (params.get("benchmarkgxmatrixfastcompare") === "1" || params.get("benchmarkdisplaylistfastcompare") === "1" || params.get("benchmarkanimstatefastcompare") === "1" || params.get("benchmarkanimcallbackfastcompare") === "1" || params.get("benchmarkmatrixfastcompare") === "1" || params.get("benchmarkconstantaddrcompare") === "1" || params.get("benchmarkcallfusioncompare") === "1" || params.get("benchmarkchainfusioncompare") === "1" || params.get("benchmarkbswaprotatecompare") === "1" || params.get("benchmarkqstatefullcompare") === "1" || params.get("benchmarkqstatecachecompare") === "1" || params.get("benchmarkcpformatcompare") === "1" || params.get("benchmarkleandispatchcompare") === "1" || params.get("benchmarkcounterbatchcompare") === "1" || params.get("benchmarkfusionredispatchcompare") === "1" || params.get("benchmarkreadbranchfastcompare") === "1" || params.get("benchmarkreadbranchcompare") === "1" || params.get("benchmarkreadfusioncompare") === "1" || params.get("benchmarkstepcheckcompare") === "1" || params.get("benchmarkfpuguardwidecompare") === "1" || params.get("benchmarkidlecheckscompare") === "1" || params.get("benchmarkbranchfusioncompare") === "1" || params.get("benchmarkfpuguardcompare") === "1" || params.get("benchmarkblockmergecompare") === "1" || params.get("benchmarkfrsqrtefastcompare") === "1" || params.get("benchmarkfifobatchcompare") === "1" || params.get("benchmarkfifocopycompare") === "1" || params.get("benchmarkmsrcachecompare") === "1" || params.get("benchmarkstateconstcompare") === "1" || params.get("benchmarkwidemapcompare") === "1" || params.get("benchmarkpsqhoistcompare") === "1" || params.get("benchmarkvectorfpronlycompare") === "1" || params.get("benchmarkvectorfprarithcompare") === "1" || params.get("benchmarkvectorfprcompare") === "1" || params.get("benchmarkfifocompare") === "1" || params.get("benchmarkprefixcompare") === "1" || params.get("benchmarkfprcompare") === "1" || params.get("benchmarkregcachecompare") === "1" || params.get("benchmarkcompactgprcompare") === "1" || params.get("benchmarkpssimdcompare") === "1" || params.get("benchmarkpsmemsimdcompare") === "1");
+        const scaleAB = params.get("benchmarkscalecompare") === "1";
+        const probeAB = params.get("benchmarkworkerprobecompare") === "1" || params.get("benchmarkharvestcompare") === "1" || params.get("benchmarkprobecompare") === "1" || params.get("benchmarkasynccompare") === "1" || params.get("benchmarkasynccontrol") === "1" || params.get("benchmarkprobecontext") === "1";
+        const pacingAB=params.get("benchmarkpacingcompare")==="1";
+        const fixedWorkAB=params.get("benchmarkfixedwork")==="1";
+        if(fixedWorkAB&&!frameStress)throw Error("Fixed work requires native-frame inputs");
+        const queueCapacityAB=params.get("benchmarkqueuecapacitycompare")==="1";
+        if(queueCapacityAB&&!frameStress)throw Error("Queue-capacity comparison requires native-frame inputs");
+        const queueClockAB=params.get("benchmarkqueueclockcompare")==="1";
+        if(queueClockAB&&!frameStress)throw Error("Queue-clock comparison requires native-frame inputs");
+        const stadiumAB=params.get("benchmarkstadiumscreencompare")==="1";
+        const particlesAB=params.get("benchmarkparticlescompare")==="1";
+        const decorationsAB=params.get("benchmarkdecorationscompare")==="1";
+        const sceneryAB=params.get("benchmarkscenerycompare")==="1";
+        const modelAB=params.get("benchmarkmodelcompare")==="1";
+        const animationAB=params.get("benchmarkanimationcompare")==="1";
+        const shadowAB=params.get("benchmarkshadowcompare")==="1";
+        const yoshiAnimationAB=params.get('benchmarkyoshianimationcompare')==='1';
+        const staticBackgroundAB=params.get('benchmarkstaticbackgroundcompare')==='1';
+        const reverbAB=params.get('benchmarkreverbcompare')==='1';
+        if(yoshiAnimationAB&&params.get('background')!=='black')throw Error('Yoshi animation comparison requires a black background');
+        if(staticBackgroundAB&&params.get('background')!=='black')throw Error('Static background comparison requires a black background');
+        const reflectionAB=reverbAB||staticBackgroundAB||yoshiAnimationAB||stadiumAB||params.get("benchmarkreflectioncompare")==="1"||sceneryAB||modelAB||animationAB||shadowAB||decorationsAB||particlesAB;
+        if(frameStress&&(scaleAB||pacingAB||repeats>1))throw Error("Native-frame input supports single runs, codegen and cosmetic comparisons");
+        if(animationAB&&(params.get("scenery")!=="off"||params.get("sceneryanimation")==="off"))throw Error("Animation comparison requires scenery off and animation initially on");
+        if(modelAB&&params.get("models")==="low")throw Error("Start model comparison at normal detail");
+        if(params.get("benchmarkreflectioncompare")==="1"&&params.get("reflection")==="off")throw Error("Start reflection comparison with reflections enabled");
+        if(stadiumAB&&params.get("stadiumscreen")==="off")throw Error("Start Stadium screen comparison with screen enabled");
+        if(particlesAB&&params.get("particles")==="off")throw Error("Start particle comparison with particles enabled");
+        if(decorationsAB&&params.get("decorations")==="off")throw Error("Start decoration comparison with decorations enabled");
+        if(sceneryAB&&params.get("scenery")==="off")throw Error("Start scenery comparison with scenery enabled");
+        if(stress && ((!frameStress && probeAB) || pacingAB))throw Error("Use a standard or codegen benchmark for controller stress");
+        const pcSampling = params.get("pcsample") === "1";
+        if(pcSampling && ((gpuScheduleCompare.checked || rushCompare.checked || frameLogCompare.checked || checkpointControl.checked || dispatchProfileCheck.checked) || timingDriftCompare.checked || headroomCheck.checked || codegenAB || scaleAB || probeAB || pacingAB || fixedWorkAB || queueCapacityAB || queueClockAB || reflectionAB || repeats>1))throw Error("PC sampling requires a single diagnostic run");
+        const pcSamples = pcSampling ? sampleBrowserCpuLocations(host, duration) : null;
+        if(checkpointControl.checked&&(!frameStress||headroomCheck.checked||frameLogCompare.checked||rushCompare.checked||gpuScheduleCompare.checked||timingDriftCompare.checked||codegenAB||scaleAB||probeAB||pacingAB||fixedWorkAB||queueCapacityAB||queueClockAB||reflectionAB||repeats>1))throw Error('Unchanged checkpoint control requires native inputs and no other comparison');
+        if(dispatchProfileCheck.checked&&(checkpointControl.checked||headroomCheck.checked||frameLogCompare.checked||rushCompare.checked||gpuScheduleCompare.checked||timingDriftCompare.checked||codegenAB||scaleAB||probeAB||pacingAB||fixedWorkAB||queueCapacityAB||queueClockAB||reflectionAB||repeats>1||!frameStress))throw Error('Dispatch profiling requires a single native-input diagnostic');
+        if(headroomCheck.checked && (frameLogCompare.checked||rushCompare.checked||gpuScheduleCompare.checked||timingDriftCompare.checked||scaleAB||probeAB||pacingAB||fixedWorkAB||queueCapacityAB||queueClockAB||reflectionAB||repeats>1||!frameStress))throw Error('Uncapped comparison requires native input and no unrelated comparison');
+        if(renderCostCheck.checked&&(!headroomCheck.checked||cpuCompare.checked))throw Error('Render-cost diagnostic requires uncapped execution and CPU comparison unchecked');
+        const result = dispatchProfileCheck.checked
+          ? await (await import('./browser-dispatch-profile.js')).profileDirectBlocks(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure:baseMeasure})
+          : checkpointControl.checked
+          ? await (await import('./browser-checkpoint-control.js')).measureCheckpointControl(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure:baseMeasure,beforeRun:manualCheckpoint.checked?async(index)=>{progress.textContent='PAUSED: checkpoint '+(index+1)+'/4 ready for diagnostic measurement';await new Promise(resolve=>{continueCheckpoint.disabled=false;continueCheckpoint.onclick=()=>{continueCheckpoint.disabled=true;continueCheckpoint.onclick=null;resolve();};});}:undefined,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : headroomCheck.checked && renderCostCheck.checked
+          ? await (await import('./browser-render-cost.js')).measureBrowserRenderCost(host,()=>host.adapter.request('meleeInspect',{}),{scope:renderCostScope.value,frames:Number(params.get('workframes')||1200),onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : headroomCheck.checked && cpuCompare.checked
+          ? await (await import('./browser-headroom-comparison.js')).compareBrowserHeadroomCodegen(host,()=>host.adapter.request('meleeInspect',{}),{feature:params.get('benchmarkmatrixfastcompare')==='1'?'matrixfast':params.get('benchmarkconstantaddrcompare')==='1'?'constantaddr':params.get('benchmarkcallfusioncompare')==='1'?'callfusion':params.get('benchmarkbswaprotatecompare')==='1'?'bswaprotate':'chainfusion',frames:Number(params.get('workframes')||1200),onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : headroomCheck.checked
+          ? await measureWithJitCounters(host,()=>(import('./browser-headroom.js?qa='+Date.now()).then(({measureBrowserHeadroom})=>measureBrowserHeadroom(host,()=>host.adapter.request('meleeInspect',{}),{onProgress:text=>{progress.textContent=text;}}))))
+          : frameLogCompare.checked
+          ? await (await import('./browser-frame-ring-logging.js')).compareBrowserFrameRingLogging(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure:baseMeasure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : rushCompare.checked
+          ? await (await import('./browser-rush-presentation.js')).compareBrowserRushPresentation(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure:baseMeasure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : gpuScheduleCompare.checked
+          ? await (await import('./browser-gpu-start-delay.js')).compareBrowserGpuStartDelay(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure:baseMeasure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : timingDriftCompare.checked
+          ? await (await import('./browser-timing-drift.js')).compareBrowserTimingDrift(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure:baseMeasure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : fixedWorkAB
+          ? await (await import("./browser-fixed-work.js")).compareFixedNativeWork(host,Number(params.get("workframes")||1800),()=>host.adapter.request("meleeInspect",{}),{feature:params.get("benchmarkgxmatrixfastcompare")==="1"?"gxmatrixfast":params.get("benchmarkdisplaylistfastcompare")==="1"?"displaylistfast":params.get("benchmarkanimstatefastcompare")==="1"?"animstatefast":params.get("benchmarkanimcallbackfastcompare")==="1"?"animcallbackfast":params.get("benchmarkmatrixfastcompare")==="1"?"matrixfast":"counterbatch",retainedFpuGuard:params.get("retainedfpuguard")==="1",retainedBranchFusion:params.get("retainedbranchfusion")==="1",retainedReadFusion:params.get("retainedreadfusion")==="1",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : queueCapacityAB
+          ? await compareBrowserQueueCapacity(host,duration,()=>host.adapter.request("meleeInspect",{}),{candidateCapacity:Number(params.get("benchmarkqueuecapacity")||3),measure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : queueClockAB
+          ? await compareBrowserQueueClock(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : reflectionAB
+          ? await compareFountainReflection(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,frameInput:frameStress,feature:reverbAB?'reverb':staticBackgroundAB?'staticbackground':yoshiAnimationAB?'yoshianimation':stadiumAB?"stadiumscreen":particlesAB?"particles":decorationsAB?"decorations":shadowAB?"shadowdiag":animationAB?"animation":modelAB?"modeldetail":sceneryAB?"scenery":"reflection",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : pacingAB
+          ? await compareBrowserPacing(host,duration,()=>host.adapter.request("meleeInspect",{}),{onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : probeAB
+          ? await compareBrowserProbe(host,duration,()=>host.adapter.request("meleeInspect",{}),{frameInput:frameStress,mode:params.get("benchmarkworkerprobecompare")==="1"?"worker":params.get("benchmarkharvestcompare")==="1"?"harvest":params.get("benchmarkprobecontext")==="1"?"context":params.get("benchmarkasynccontrol")==="1"?"async-overhead":params.get("benchmarkasynccompare")==="1"?"async":"overhead",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : scaleAB
+          ? await compareBrowserRenderScale(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,
+              onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);},
+            })
+          : codegenAB
+          ? await compareBrowserCodegen(host, duration, () => host.adapter.request("meleeInspect", {}), {measure,frameInput:frameStress,retainedFpuGuard:params.get("retainedfpuguard")==="1",retainedBranchFusion:params.get("retainedbranchfusion")==="1",retainedReadFusion:params.get("retainedreadfusion")==="1",
+              onProgress: text => { progress.textContent = text; },
+              onResult: result => { output.textContent = JSON.stringify(result, null, 2); },
+              feature: params.get("benchmarkgxmatrixfastcompare") === "1" ? "gxmatrixfast" : params.get("benchmarkdisplaylistfastcompare") === "1" ? "displaylistfast" : params.get("benchmarkanimstatefastcompare") === "1" ? "animstatefast" : params.get("benchmarkanimcallbackfastcompare") === "1" ? "animcallbackfast" : params.get("benchmarkmatrixfastcompare") === "1" ? "matrixfast" : params.get("benchmarkconstantaddrcompare") === "1" ? "constantaddr" : params.get("benchmarkcallfusioncompare") === "1" ? "callfusion" : params.get("benchmarkchainfusioncompare") === "1" ? "chainfusion" : params.get("benchmarkbswaprotatecompare") === "1" ? "bswaprotate" : params.get("benchmarkqstatefullcompare") === "1" ? "qstatefull" : params.get("benchmarkqstatecachecompare") === "1" ? "qstatecache" : params.get("benchmarkcpformatcompare") === "1" ? "cpformat" : params.get("benchmarkleandispatchcompare") === "1" ? "leandispatch" : params.get("benchmarkcounterbatchcompare") === "1" ? "counterbatch" : params.get("benchmarkfusionredispatchcompare") === "1" ? "fusionredispatch" : params.get("benchmarkreadbranchfastcompare") === "1" ? "readbranchfusionfast" : params.get("benchmarkreadbranchcompare") === "1" ? "readbranchfusion" : params.get("benchmarkreadfusioncompare") === "1" ? "readfusion" : params.get("benchmarkstepcheckcompare") === "1" ? "stepcheck" : params.get("benchmarkfpuguardwidecompare") === "1" ? "fpuguardwide" : params.get("benchmarkidlecheckscompare") === "1" ? "idlechecks" : params.get("benchmarkbranchfusioncompare") === "1" ? "branchfusion" : params.get("benchmarkfpuguardcompare") === "1" ? "fpuguard" : params.get("benchmarkblockmergecompare") === "1" ? "blockmerge" : params.get("benchmarkfrsqrtefastcompare") === "1" ? "frsqrtefast" : params.get("benchmarkfifobatchcompare") === "1" ? "fifobatch" : params.get("benchmarkfifocopycompare") === "1" ? "fifocopy" : params.get("benchmarkmsrcachecompare") === "1" ? "msrcache" : params.get("benchmarkstateconstcompare") === "1" ? "stateconst" : params.get("benchmarkwidemapcompare") === "1" ? "widemap" : params.get("benchmarkpsqhoistcompare") === "1" ? "psqhoist" : params.get("benchmarkvectorfpronlycompare") === "1" ? "vectorfpronly" : params.get("benchmarkvectorfprarithcompare") === "1" ? "vectorfprarith" : params.get("benchmarkvectorfprcompare") === "1" ? "vectorfpr" : params.get("benchmarkpsmemsimdcompare") === "1" ? "psmemsimd" : params.get("benchmarkpssimdcompare") === "1" ? "pssimd" : params.get("benchmarkcompactgprcompare") === "1" ? "compactgpr" : params.get("benchmarkregcachecompare") === "1" ? "regcache" : params.get("benchmarkfprcompare") === "1" ? "fprcache" : params.get("benchmarkprefixcompare") === "1" ? "singleprefix" : "integerfifo",
+            })
+          : repeats > 1
+          ? await measureBrowserRepeated(host, duration, () => host.adapter.request("meleeInspect", {}), {
+              runs: repeats, measure, onProgress: text => { progress.textContent = text; },
+            })
+          : frameStress
+          ? await measureBrowserNativeInput(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure})
+          : await measure(host, duration, () => host.adapter.request("meleeInspect", {}));
+        if(result.dispatchProfile){
+          const response=await fetch('./qa-function-symbols.json');if(!response.ok)throw Error('QA function symbols unavailable');
+          const {aggregateTimedBlocks}=await import('./browser-dispatch-profile.js');result.timedFunctions=aggregateTimedBlocks(result.dispatchProfile,await response.json());
+        }
+        if(pcSamples) {
+          result.cpuLocations=await pcSamples;result.diagnosticOnly=true;result.passed=false;
+          const {aggregateGuestFunctions}=await import('./browser-cpu-profile.js');
+          const response=await fetch('./qa-function-symbols.json');if(!response.ok)throw Error('QA function symbols unavailable');
+          result.cpuFunctions=aggregateGuestFunctions(result.cpuLocations.locations,await response.json(),result.cpuLocations.samples);
+        }
+        if (repeats === 1 && !(gpuScheduleCompare.checked || rushCompare.checked || frameLogCompare.checked) && !timingDriftCompare.checked && !headroomCheck.checked && !codegenAB && !scaleAB && !probeAB && !pacingAB && !fixedWorkAB && !queueCapacityAB && !queueClockAB && !reflectionAB) {
+          const profileAfter = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
+          result.coreProfile = summarizeCoreProfile(profileBefore, profileAfter, result.seconds);
+        }
         if (capacityProbe) { result.diagnosticOnly = true; result.passed = false; }
+        result.verifiedSelection=verifiedSelection;
         result.stage = stageSelector.selectedOptions[0].textContent;
-        result.workload = cpuWorkload ? "human versus level 9 CPU" : "two human controller ports (idle)";
+        result.workload = frameStress ? "two scripted human controller tracks at native logic frames; partner AI retained (not human play)" : twoPlayerStress ? "two active scripted human controllers; native partner AI retained (not human play)" : stress ? "scripted normal P1 controls versus level 9 CPU (not human play)" : cpuWorkload ? "idle human versus level 9 CPU" : "two human controller ports (idle)";
+        result.fighters = selectors.map(select=>select.selectedOptions[0].textContent);
         result.engine = {
           coreSha256: host.adapter.expectedCoreSha256,
           backend: host.videoBackend,
@@ -930,19 +1537,35 @@ if (params.has("qa")) {
           jitRequested: host.ppcWasmJit,
           jitTier: host.ppcWasmJitTier,
           interpreterDisableMask: host.cachedInterpreterDisableMask,
+          compactGprLocals: host.compactGprLocals === true,
+          pairedSimd: host.pairedSimd === true,
+          pairedMemorySimd: host.pairedMemorySimd === true,
+          vectorFprCache: host.vectorFprCache === true,
+          pairedMemoryHoist: host.pairedMemoryHoist === true,
+          qStateCache: host.qStateCache === true,
+          qStateFull: host.qStateFull === true,
+          wideBlockMap: host.wideBlockMap === true,
+          constantStateBase: host.constantStateBase === true,
+          blockMsrCache: host.blockMsrCache === true,
+          fifoCopy: host.fifoCopy === true,
+          fifoBatch: host.fifoBatch === true,
+          frsqrteFast: host.frsqrteFast === true,
           profiler: host.ppcProfile,
           metrics: host.collectMetrics,
           emulationSpeed: host.emulationSpeed,
           cpuOverclock: host.cpuOverclock,
           cpuThread: host.cpuThread,
+          initialInternalResolution: profileBefore ? [profileBefore.efbWidth,profileBefore.efbHeight] : null,
           capabilities,
         };
         output.textContent = JSON.stringify(result, null, 2);
-        progress.textContent = result.diagnosticOnly
-          ? capacityProbe ? "Diagnostic capacity run; normal-speed acceptance was not tested." : "Diagnostic delivery run; distinct image cadence was not measured."
+        progress.textContent = result.kind === "uncapped-native-work-headroom"
+          ? `Diagnostic complete: ${result.nativeWorkFps.toFixed(2)} native FPS without host pacing. Normal image-cadence acceptance remains separate.`
+          : result.diagnosticOnly
+          ? capacityProbe ? "Diagnostic capacity run; normal-speed acceptance was not tested." : (result.cpuLocations ? "CPU residency diagnostic complete; not a performance acceptance run." : "Diagnostic run; acceptance is disabled. See image cadence and timing results.")
           : result.passed
-          ? "PASS: sustained browser gameplay at 720p60."
-          : "Below target; see actual image cadence, source resolution, and simulation speed.";
+          ? "PASS: this workload met the 720p60 measurement gate."
+          : result.invalidReason ? "INVALID: "+result.invalidReason : "Below target; see actual image cadence, source resolution, and simulation speed.";
         return;
       }
       const before = await host.adapter.request("meleeInspect", {}),
@@ -987,9 +1610,39 @@ if (params.has("qa")) {
   };
   panel.append(bench);
   if (!nativeEngine) {
+    const delivery = document.createElement('button');
+    delivery.textContent = 'Measure frame delivery';
+    delivery.onclick = async () => {
+      if (bench.disabled) return;
+      delivery.disabled = true;
+      const previousProbe = params.get('probe');
+      params.set('probe', 'delivery');
+      try { await bench.onclick(); }
+      finally {
+        if (previousProbe === null) params.delete('probe'); else params.set('probe', previousProbe);
+        delivery.disabled = false;
+      }
+    };
+    panel.append(delivery);
+  }
+  if (!nativeEngine) {
     const rollbackCheck = document.createElement("button");
     rollbackCheck.textContent = "Verify browser state replay";
-    rollbackCheck.onclick = async () => {
+    const replayControlCheck=document.createElement('input');replayControlCheck.type='checkbox';replayControlCheck.setAttribute('aria-label','Compare unchanged codegen in replay');
+    const replayControlLabel=document.createElement('label');replayControlLabel.append(replayControlCheck,' Compare unchanged codegen in replay');panel.append(replayControlLabel);
+    const replayEventsCheck=document.createElement('input');replayEventsCheck.type='checkbox';replayEventsCheck.setAttribute('aria-label','Inspect scheduler in replay');
+    const replayEventsLabel=document.createElement('label');replayEventsLabel.append(replayEventsCheck,' Inspect scheduler in replay');panel.append(replayEventsLabel);
+    const runningCheck = document.createElement("button");
+    runningCheck.textContent = "Verify normal-running state";
+    const timingDriftCheck=document.createElement('button');timingDriftCheck.textContent='Verify time-drift gameplay';
+    const gpuScheduleCheck=document.createElement('button');gpuScheduleCheck.textContent='Verify GPU scheduling gameplay';
+    const rushCheck=document.createElement('button');rushCheck.textContent='Verify rush presentation gameplay';
+    const runBrowserReplay = async (running = params.get("runningcodegen") === "1", timingDrift = false, gpuScheduling = false, rushPresentation = false) => {
+      if (bench.disabled || rollbackCheck.disabled) return;
+      runningCheck.disabled = true;
+      timingDriftCheck.disabled = true;
+      gpuScheduleCheck.disabled = true;
+      rushCheck.disabled = true;
       rollbackCheck.disabled = true;
       progress.textContent = "Preparing browser state replay…";
       let lastAction = "prepare";
@@ -1018,7 +1671,7 @@ if (params.has("qa")) {
         return {records, state: previous};
       };
       try {
-        let current = await waitForGame(() => true);
+        let current = await waitForGame(s=>s.major!==2 || (s.minor===0&&s.sceneKind===8) || (s.minor===1&&s.sceneKind===9) || isLoadedMeleeMatch(s));
         if (current.major !== 2) {
           await waitForCss();
           current = await host.adapter.request("meleeInspect", {});
@@ -1030,7 +1683,12 @@ if (params.has("qa")) {
         }
         if (current.major === 2 && current.minor === 0) {
           await waitForCss();
-          await startTestMatch();
+          testForms=selectors.map(select=>Number(select.value)===19);
+          await host.adapter.request('meleeControl',{action:'select',player:Number(selectors[0].value),cpu:Number(selectors[1].value)});
+          // Selection reloads CSS and its fighter archives. Let native preload finish.
+          await delay(800);
+          await waitForCss();
+          await startTestMatch({online: running || params.get("inputprobe") === "1"});
         } else if (current.major === 2 && current.minor === 1) {
           await host.adapter.request("meleeControl", {action:"selectStage", stage:Number(stageSelector.value)});
           pulse(1);
@@ -1041,21 +1699,36 @@ if (params.has("qa")) {
         // Align with the existing Dolphin frame-step boundary before capture.
         await command("step");
         const initial = await host.adapter.request("meleeInspect", {});
-        if (params.get("timelineprobe") === "1") {
+        const {verifyBenchmarkSelection}=await import('./browser-benchmark.js');
+        const verifiedSelection=verifyBenchmarkSelection(initial,{stage:Number(stageSelector.value),characters:selectors.map(select=>Number(select.value))});
+        if (params.get("timelineprobe") === "1" || running) {
           const {verifyBrowserRollbackTimeline} = await import("./browser-rollback-probe.js");
-          const dispatchBefore = params.get("wasmdispatchcompare") === "1"
+          const {browserCodegenConfig}=await import("./browser-benchmark.js");
+          const dispatchBefore = params.get("wasmdispatchcompare") === "1" || params.get("idlecheckcompare") === "1"
             ? (await host.adapter.request("rendererDiagnostics", {})).cpuDetails : "";
-          const result = await verifyBrowserRollbackTimeline(command,
+          const verify = rushPresentation
+            ? async(_send,inspect,options)=>(await import('./browser-rush-presentation.js')).verifyBrowserRushPresentation(host,inspect,{onProgress:options.onProgress})
+            : gpuScheduling
+            ? async(_send,inspect,options)=>(await import('./browser-gpu-start-delay.js')).verifyBrowserGpuStartDelay(host,inspect,{onProgress:options.onProgress,candidateCycles:Number(params.get('gpureplaycycles')||4000),frames:options.frames})
+            : timingDrift
+            ? async(_send,inspect,options)=>(await import('./browser-timing-drift.js')).verifyBrowserTimingDrift(host,inspect,{onProgress:options.onProgress})
+            : running
+            ? (await import('./browser-running-replay.js')).verifyBrowserRunningCodegen : verifyBrowserRollbackTimeline;
+          const result = await verify(command,
             () => host.adapter.request("meleeInspect", {}),
-            {frames:Number(params.get("timelineframes") || 40),
+            {unchangedControl:replayControlCheck.checked,inspectSavedEvents:replayEventsCheck.checked,resume:()=>host.adapter.request("start",{}),diagnostics:()=>host.adapter.request("rendererDiagnostics",{}),originalCodegen:browserCodegenConfig(host),
+              frames:Number(params.get(running?"runningframes":"timelineframes") || (running?600:40)),
               delay:Number(params.get("timelinedelay") || 3),
+              prewarmFrames:Number(params.get("replayprewarm") || 0),
               checkpointPolicy:params.get("checkpoints") || "periodic",
               batchAdvance:params.get("batchadvance") === "1",
               cacheFastPathComparison:params.get("cachecompare") === "1",
               cacheLoopComparison:params.get("batchcompare") === "1",
               inlineDispatchComparison:params.get("dispatchcompare") === "1",
               wasmDispatchComparison:params.get("wasmdispatchcompare") === "1",
-              codegenComparison:params.get("codegencompare") === "1" ? {regcache:params.get("regalloc") === "1",fastmem:params.get("fastmemhoist") === "1"} : null,
+              idleChecksComparison:params.get("idlecheckcompare") === "1",
+              codegenReference:params.get("codegenreference")==="retained" ? {...browserCodegenConfig(host),gxmatrixfast:params.get("retainedgxmatrixfast")==="1",displaylistfast:params.get("retaineddisplaylistfast")==="1",animstatefast:params.get("retainedanimstatefast")==="1",animcallbackfast:params.get("retainedanimcallbackfast")==="1",matrixfast:params.get("matrixfast") === "1",constantaddr:false,callfusion:params.get("callfusion") === "1",chainfusion:false,bswaprotate:false,qstatefull:false,qstatecache:false,cpformat:false,leandispatch:false,counterbatch:false,fusionredispatch:false,readfusion:params.get("retainedreadfusion")==="1",stepcheck:false,fpuguardwide:false,branchfusion:params.get("retainedbranchfusion")==="1",fpuguard:params.get("retainedfpuguard")==="1",blockmerge:params.get("retainedblockmerge")==="1",fprcache:false,pssimd:false,psmemsimd:false,vectorfpr:false,psqhoist:false,widemap:params.get("retainedwidemap")==="1",stateconst:false,msrcache:false,fifocopy:false,fifobatch:false,frsqrtefast:false} : null,
+              codegenComparison:params.get("codegencompare") === "1" ? {gxmatrixfast:params.get("gxmatrixfast") === "1",displaylistfast:params.get("displaylistfast") === "1",animstatefast:params.get("animstatefast") === "1",animcallbackfast:params.get("animcallbackfast") === "1",matrixfast:params.get("matrixfast") === "1",constantaddr:params.get("constantaddr") === "1",callfusion:params.get("callfusion") === "1",chainfusion:params.get("chainfusion") === "1",bswaprotate:params.get("bswaprotate") === "1",qstatefull:params.get("qstatefull") === "1",qstatecache:params.get("qstatecache") === "1",cpformat:params.get("cpformat") === "1",leandispatch:params.get("leandispatch") === "1",counterbatch:params.get("counterbatch") === "1",fusionredispatch:params.get("fusionredispatch") === "1",readfusion:params.get("readfusion") === "1",stepcheck:params.get("stepcheck") === "1",fpuguardwide:params.get("fpuguardwide") === "1",branchfusion:params.get("branchfusion") === "1",fpuguard:params.get("fpuguard") === "1",blockmerge:params.get("blockmerge") === "1",regcache:params.get("regalloc") === "1",fastmem:params.get("fastmemhoist") === "1",integerfifo:params.get("integerfifo") === "1",singleprefix:params.get("singleprefix") === "1",fprcache:params.get("fprcache") === "1",compactgpr:params.get("compactgpr") === "1",pssimd:params.get("pssimd") === "1",psmemsimd:params.get("psmemsimd") === "1",vectorfpr:params.get("vectorfpr") === "1",psqhoist:params.get("psqhoist") === "1",widemap:params.get("widemap") === "1",stateconst:params.get("stateconst") === "1",msrcache:params.get("msrcache") === "1",fifocopy:params.get("fifocopy") === "1",fifobatch:params.get("fifobatch") === "1",frsqrtefast:params.get("frsqrtefast") === "1"} : null,
               onProgress: context => { progress.textContent = "Replay: " + context; }});
           const diagnostics = await host.adapter.request("rendererDiagnostics", {});
           if (params.get("wasmdispatchcompare") === "1") {
@@ -1065,13 +1738,23 @@ if (params.has("qa")) {
             result.optimizationExecution = {dispatcherHandle:Number(after?.[1] || 0), calls};
             result.passed = result.passed && result.optimizationExecution.dispatcherHandle > 0 && calls > 0;
           }
+          if (params.get("idlecheckcompare") === "1") {
+            const before = /hoisted:(\d+)/.exec(dispatchBefore || "");
+            const after = /hoisted:(\d+)/.exec(diagnostics.cpuDetails || "");
+            const iterations = Number(after?.[1] || 0) - Number(before?.[1] || 0);
+            result.optimizationExecution = {hoistedIterations:iterations};
+            result.passed = result.passed && iterations > 0;
+          }
+          result.verifiedSelection=verifiedSelection;
           result.engine = {coreSha256:host.adapter.expectedCoreSha256,
             profileEnabled:diagnostics.coreProfile?.enabled,
             sourceResolution:host.oglSabEnabled ? [host.oglSabWidth,host.oglSabHeight] :
               [host.adapter.presentedWidth,host.adapter.presentedHeight]};
           output.textContent = JSON.stringify(result, null, 2);
-          progress.textContent = result.passed ? "PASS: late inputs corrected to identical full state." :
-            "Replay or optimization execution check failed; see diagnostics.";
+          progress.textContent = result.passed ? (running ? "PASS: normal-running configurations produced identical full state." : "PASS: late inputs corrected to identical full state.") :
+            running && result.executionStateEqual && result.idleAccountingOnlyDifference && !result.optimizationExecution
+              ? "Execution state matches; raw snapshot differs only in unused idle accounting."
+              : "Replay or optimization execution check failed; see diagnostics.";
           return;
         }
         const gpuResident = params.get("gpucheckpoint") === "1";
@@ -1122,13 +1805,28 @@ if (params.has("qa")) {
         if (params.get("wasmdispatchcompare") === "1") {
           try { await host.adapter.request("browserRollback", {action:"wasmDispatch", value:params.get("wasmdispatch") === "1"}); } catch {}
         }
+        if (params.get("idlecheckcompare") === "1") {
+          try { await host.adapter.request("browserRollback", {action:"idleBatchChecks", value:!!(Number(params.get("disable")) & 0x80000000)}); } catch {}
+        }
         if (params.get("codegencompare") === "1") {
-          try { await host.adapter.request("browserRollback", {action:"codegen", regcache:params.get("regalloc") === "1",fastmem:params.get("fastmemhoist") === "1"}); } catch {}
+          try { const {browserCodegenConfig}=await import("./browser-benchmark.js"); await host.adapter.request("browserRollback", {action:"codegen", ...browserCodegenConfig(host)}); } catch {}
         }
         try { await host.adapter.request("start", {}); } catch {}
         rollbackCheck.disabled = false;
+        runningCheck.disabled = false;
+        timingDriftCheck.disabled = false;
+        rushCheck.disabled = false;
+        gpuScheduleCheck.disabled = false;
       }
     };
+    rollbackCheck.onclick = () => runBrowserReplay();
+    runningCheck.onclick = () => runBrowserReplay(true);
+    timingDriftCheck.onclick = () => runBrowserReplay(true,true);
+    gpuScheduleCheck.onclick = () => runBrowserReplay(true,false,true);
+    rushCheck.onclick=()=>runBrowserReplay(true,false,false,true);panel.append(rushCheck);
+    panel.append(gpuScheduleCheck);
+    panel.append(timingDriftCheck);
+    panel.append(runningCheck);
     panel.append(rollbackCheck);
   }
   const menuCheck = document.createElement("button");
@@ -1446,6 +2144,7 @@ if (params.has("qa")) {
         cursor: s.cssCursor,
         renderFrame: s.renderFrame,
         match: s.match,
+        camera: s.camera,
         tapJump: s.tapJump,
         fighters: s.fighters,
         pad: s.master.slice(0, 32),

@@ -1,0 +1,17 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1043,12 +1043,12 @@
+       let stepTiming;
+       if (payload.action === "pause") {
+         if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
+-      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch" || payload.action === "inlineDispatch" || payload.action === "wasmDispatch") {
++      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch" || payload.action === "inlineDispatch" || payload.action === "wasmDispatch" || payload.action === "idleBatchChecks") {
+         if (typeof payload.value !== "boolean" || api.getCoreStateName() !== "Paused" ||
+             !api.getCachedInterpreterDisableMask || !api.setCachedInterpreterDisableMask)
+           throw new Error("Cache fast-path comparison requires a paused machine");
+         const mask = api.getCachedInterpreterDisableMask();
+-        const bit = 1 << ({cacheFastPath:24, cacheLoopBatch:25, inlineDispatch:26, wasmDispatch:27}[payload.action]);
++        const bit = 1 << ({cacheFastPath:24, cacheLoopBatch:25, inlineDispatch:26, wasmDispatch:27, idleBatchChecks:31}[payload.action]);
+         const updated = payload.value ? mask | bit : mask & ~bit;
+         api.setCachedInterpreterDisableMask(updated >>> 0);
+         return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};

@@ -1,0 +1,59 @@
+{
+  "artifactScope": "Selected exact fields from completed warm live browser replay; first cold replay separately retained as failed",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "passed": true,
+  "performanceTest": false,
+  "networkTest": false,
+  "frames": 600,
+  "fullMachineBytesEqual": true,
+  "fingerprintsEqual": true,
+  "comparison": {
+    "sizeA": 106245761,
+    "sizeB": 106245761,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0,
+    "allSectionUnmatchedBytes": 0
+  },
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "nativeInputBoth": {
+    "startFrame": 306,
+    "stoppedFrame": 906,
+    "frames": 601,
+    "inputHash": 52055267,
+    "stateHash": 1408789512,
+    "skipped": 0
+  },
+  "execution": [
+    {
+      "qstatefull": 0,
+      "calls": 1484971,
+      "newQStateFullEmittedSites": 0
+    },
+    {
+      "qstatefull": 1,
+      "calls": 1484971,
+      "newQStateFullEmittedSites": 257
+    }
+  ],
+  "engine": {
+    "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+    "profileEnabled": false,
+    "sourceResolution": [
+      960,
+      720
+    ]
+  }
+}

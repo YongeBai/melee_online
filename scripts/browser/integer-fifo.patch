@@ -1,0 +1,102 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -317,6 +317,7 @@
+ constexpr u32 DOLPHIN_WEB_DISABLE_WASMSUBFE   = 1u << 13; // subfex only (SUBOP10=136)
+ constexpr u32 DOLPHIN_WEB_DISABLE_WASMADDZE   = 1u << 14; // addzex only (SUBOP10=202)
+ constexpr u32 DOLPHIN_WEB_DISABLE_BLOCK_REDISPATCH = 1u << 15; // §28bt in-place block re-dispatch
++constexpr u32 DOLPHIN_WEB_ENABLE_INTEGER_FIFO = 1u << 16; // opt-in checked integer FIFO stores
+ constexpr u32 DOLPHIN_WEB_DISABLE_BLOCK_MERGE = 1u << 17; // §28bx adjacent-block merge (default-off)
+ constexpr u32 DOLPHIN_WEB_DISABLE_REGALLOC    = 1u << 20; // §28by GPR regalloc / dead-store-skip (default-off)
+ constexpr u32 DOLPHIN_WEB_DISABLE_SHORT_PREFIX = 1u << 21; // §28ca lower JIT min-prefix 4→2 (default-off)
+@@ -3942,6 +3943,49 @@
+   EmitSignExtendI16(body);
+ }
+ 
++// Match the general MMU path only for the canonical BAT-mapped FIFO address.
++// DBAT changes invalidate generated code through MMU::DBATUpdated/ClearSafe.
++// Flush at 32 bytes after each integer store, matching MMU Write8/16/32.
++bool EmitIntegerFifoStore(std::vector<u8>& body, const WasmStateLayout& layout, u32 bytes)
++{
++  if (!DolphinWebFeatureEnabled(DOLPHIN_WEB_ENABLE_INTEGER_FIFO) ||
++      !Core::System::GetInstance().GetMMU().IsOptimizableGatherPipeWrite(0xcc008000u))
++    return false;
++  EmitLocalGet(body, 1);
++  EmitI32Const(body, 0xcc008000u);
++  body.push_back(0x46);
++  EmitStateLoadU32(body, layout.msr_offset);
++  EmitI32Const(body, (1u << 4) | 1u); // DR on, little-endian off
++  body.push_back(0x71);
++  EmitI32Const(body, 1u << 4);
++  body.push_back(0x46);
++  body.push_back(0x71);
++  body.push_back(0x04); body.push_back(0x40);
++  if (bytes == 4) EmitBswap32FromLocal(body, 2);
++  else if (bytes == 2) EmitBswap16FromLocal(body, 2);
++  else EmitLocalGet(body, 2);
++  EmitLocalSet(body, 3);
++  EmitStateLoadU32(body, layout.gather_pipe_ptr_offset);
++  EmitLocalGet(body, 3);
++  body.push_back(bytes == 4 ? 0x36 : bytes == 2 ? 0x3b : 0x3a);
++  body.push_back(0x00); EmitU32Leb(body, 0);
++  EmitStateStoreU32Prefix(body);
++  EmitStateLoadU32(body, layout.gather_pipe_ptr_offset);
++  EmitI32Const(body, bytes); body.push_back(0x6a);
++  EmitStateStoreU32Suffix(body, layout.gather_pipe_ptr_offset);
++  EmitStateLoadU32(body, layout.gather_pipe_ptr_offset);
++  EmitStateLoadU32(body, layout.gather_pipe_base_ptr_offset);
++  body.push_back(0x6b);
++  EmitI32Const(body, GPFifo::GATHER_PIPE_SIZE);
++  body.push_back(0x4f);
++  body.push_back(0x04); body.push_back(0x40);
++  EmitLocalGet(body, 0); EmitI32Const(body, 0); EmitI32Const(body, 0);
++  body.push_back(0x10); EmitU32Leb(body, WASM_IMPORT_FASTCHECK_GPFIFO_INDEX);
++  body.push_back(0x0b);
++  body.push_back(0x05); // caller emits unchanged MMU fallback
++  return true;
++}
++
+ void EmitWriteU32MaybeDirect(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
+   EmitLocalGet(body, 1);
+@@ -3963,11 +4007,13 @@
+   body.push_back(0x00);
+   EmitU32Leb(body, 0);
+   body.push_back(0x05);
++  const bool integer_fifo = EmitIntegerFifoStore(body, layout, 4);
+   EmitLocalGet(body, 0);
+   EmitLocalGet(body, 1);
+   EmitLocalGet(body, 2);
+   body.push_back(0x10);
+   EmitU32Leb(body, 1);
++  if (integer_fifo) body.push_back(0x0b);
+   body.push_back(0x0b);
+ }
+ 
+@@ -3990,11 +4036,13 @@
+   body.push_back(0x00);
+   EmitU32Leb(body, 0);
+   body.push_back(0x05);
++  const bool integer_fifo = EmitIntegerFifoStore(body, layout, 1);
+   EmitLocalGet(body, 0);
+   EmitLocalGet(body, 1);
+   EmitLocalGet(body, 2);
+   body.push_back(0x10);
+   EmitU32Leb(body, 3);
++  if (integer_fifo) body.push_back(0x0b);
+   body.push_back(0x0b);
+ }
+ 
+@@ -4019,11 +4067,13 @@
+   body.push_back(0x00);
+   EmitU32Leb(body, 0);
+   body.push_back(0x05);
++  const bool integer_fifo = EmitIntegerFifoStore(body, layout, 2);
+   EmitLocalGet(body, 0);
+   EmitLocalGet(body, 1);
+   EmitLocalGet(body, 2);
+   body.push_back(0x10);
+   EmitU32Leb(body, 5);
++  if (integer_fifo) body.push_back(0x0b);
+   body.push_back(0x0b);
+ }
+ 

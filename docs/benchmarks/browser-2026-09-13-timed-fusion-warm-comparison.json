@@ -1,0 +1,168 @@
+{
+  "artifactScope": "Exact selected fields from completed CUA fusionWarmRun",
+  "core": "c78752db8943f5cc1d6cf7f174b15dcdba77120ba44e0c9ee59949ffc7446941",
+  "feature": "blockmerge",
+  "kind": "same-checkpoint-codegen-abba",
+  "passed": false,
+  "stage": "Fountain of Dreams",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "input": "native frame polling, scripted two human ports",
+  "settings": {
+    "reflection": false,
+    "scenery": false,
+    "lowModels": true,
+    "hiddenAnimation": true,
+    "profile": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "internalResolution": [
+      960,
+      792
+    ],
+    "nativeOutput": [
+      960,
+      720
+    ],
+    "blackBackground": true
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 56.835161531028966,
+      "visibleFps": 56.46848306953846,
+      "seconds": 29.99903500000015,
+      "p95GapMs": 33.105000000447035,
+      "maxGapMs": 34.42500000074506,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 56.53485977454472,
+      "visibleFps": 55.9015093407497,
+      "seconds": 29.99919000000134,
+      "p95GapMs": 33.08999999985099,
+      "maxGapMs": 82.92999999970198,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 58.73553591593018,
+      "visibleFps": 57.802167581284294,
+      "seconds": 29.998875,
+      "p95GapMs": 17.515000000596046,
+      "maxGapMs": 49.62000000104308,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 58.536796760472086,
+      "visibleFps": 57.90342595269932,
+      "seconds": 29.99822500000149,
+      "p95GapMs": 17.58999999985099,
+      "maxGapMs": 34.25,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "simulationFps": 59.1693687345076,
+      "visibleFps": 58.10265335450521,
+      "seconds": 29.998629999998958,
+      "p95GapMs": 17.475000001490116,
+      "maxGapMs": 49.74000000208616,
+      "passed": false
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "simulationFps": 58.6687787426979,
+      "visibleFps": 57.868749941661115,
+      "seconds": 29.99892000000179,
+      "p95GapMs": 17.550000000745058,
+      "maxGapMs": 104.21499999985099,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "simulationFps": 57.46799800862111,
+      "visibleFps": 56.6679794748584,
+      "seconds": 29.9993049999997,
+      "p95GapMs": 32.74500000104308,
+      "maxGapMs": 50.45999999716878,
+      "passed": false
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "simulationFps": 57.77190465269339,
+      "visibleFps": 57.13851389193103,
+      "seconds": 29.997279999997467,
+      "p95GapMs": 19.574999999254942,
+      "maxGapMs": 50.25999999791384,
+      "passed": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 112,
+    "mismatches": []
+  },
+  "interpretation": "Both warmed pairs and both first-comparison pairs favor fusion. Retain as an opt-in experimental gain, with full replay evidence. All FPS gates still fail; all-stage/roster/latency certification remains outstanding.",
+  "warmRepeatWithoutReload": true,
+  "means": {
+    "baselineSimulationFps": 57.153382213619054,
+    "candidateSimulationFps": 58.602787751585,
+    "percent": 2.535992590164793
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "candidatePresentation": [
+    {
+      "gameRenderFps": 58.47012614912759,
+      "queue": {
+        "capacity": 2,
+        "received": 1754,
+        "presented": 1738,
+        "dropped": 17,
+        "underruns": 61,
+        "meanAgeMs": 16.223239355556608,
+        "clockSkips": 2,
+        "readyClockSkips": 2
+      }
+    },
+    {
+      "gameRenderFps": 58.60210967594484,
+      "queue": {
+        "capacity": 2,
+        "received": 1758,
+        "presented": 1737,
+        "dropped": 21,
+        "underruns": 58,
+        "meanAgeMs": 17.096686816313742,
+        "clockSkips": 3,
+        "readyClockSkips": 3
+      }
+    }
+  ],
+  "measuredCandidateLifecycle": "Visible and focused at both endpoints, no lifecycle events."
+}

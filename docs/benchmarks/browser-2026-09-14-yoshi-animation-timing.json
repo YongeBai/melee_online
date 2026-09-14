@@ -1,0 +1,220 @@
+{
+  "kind": "same-checkpoint-yoshi-yoshianimation-abba",
+  "feature": "yoshianimation",
+  "passed": false,
+  "coreSha256": "e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "nonblackFraction": 1,
+  "pageFocusedAndVisibleThroughout": true,
+  "queueCapacity": 2,
+  "inputStartFrame": 549,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 126,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "animation": true,
+      "warmup": true,
+      "seconds": 44.997419999998066,
+      "simulationFps": 41.71350268526686,
+      "gameRenderFps": 41.66905569252816,
+      "visibleFps": 41.62460869978947,
+      "p95GapMs": 33.83000000193715,
+      "maxGapMs": 101.28500000014901,
+      "compileMs": 160.536,
+      "queue": {
+        "dropped": 3,
+        "underruns": 813,
+        "meanAgeMs": 8.584452749571568
+      },
+      "trackedFrames": 1877,
+      "skipped": 1,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": true,
+        "stableAtEnd": true
+      },
+      "passed": false
+    },
+    {
+      "animation": true,
+      "warmup": false,
+      "seconds": 44.997239999998364,
+      "simulationFps": 42.447047863381606,
+      "gameRenderFps": 42.42482427811282,
+      "visibleFps": 42.40260069284404,
+      "p95GapMs": 33.9049999974668,
+      "maxGapMs": 98.875,
+      "compileMs": 0.576,
+      "queue": {
+        "dropped": 0,
+        "underruns": 784,
+        "meanAgeMs": 8.462133123674107
+      },
+      "trackedFrames": 1910,
+      "skipped": 2,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": true,
+        "stableAtEnd": true
+      },
+      "passed": false
+    },
+    {
+      "animation": false,
+      "warmup": true,
+      "seconds": 44.996704999998215,
+      "simulationFps": 43.403178077152035,
+      "gameRenderFps": 43.358730378148294,
+      "visibleFps": 43.314282679144554,
+      "p95GapMs": 33.83499999716878,
+      "maxGapMs": 92.83000000193715,
+      "compileMs": 13.539,
+      "queue": {
+        "dropped": 2,
+        "underruns": 743,
+        "meanAgeMs": 8.48861282052329
+      },
+      "trackedFrames": 1952,
+      "skipped": 2,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": false,
+        "stableAtEnd": true
+      },
+      "passed": false
+    },
+    {
+      "animation": false,
+      "warmup": false,
+      "seconds": 44.99715499999747,
+      "simulationFps": 43.780545681168306,
+      "gameRenderFps": 43.71387479942033,
+      "visibleFps": 43.69165117217101,
+      "p95GapMs": 33.82999999821186,
+      "maxGapMs": 126.35000000149012,
+      "compileMs": 0.78,
+      "queue": {
+        "dropped": 2,
+        "underruns": 720,
+        "meanAgeMs": 8.27817395727964
+      },
+      "trackedFrames": 1969,
+      "skipped": 2,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": false,
+        "stableAtEnd": true
+      },
+      "passed": false
+    },
+    {
+      "animation": false,
+      "warmup": true,
+      "seconds": 44.9965150000006,
+      "simulationFps": 44.2478711962465,
+      "gameRenderFps": 44.22564725290333,
+      "visibleFps": 44.114527536187495,
+      "p95GapMs": 33.82500000298023,
+      "maxGapMs": 101.74500000104308,
+      "compileMs": 0.404,
+      "queue": {
+        "dropped": 4,
+        "underruns": 701,
+        "meanAgeMs": 8.221973816726322
+      },
+      "trackedFrames": 1991,
+      "skipped": 2,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": false,
+        "stableAtEnd": true
+      },
+      "passed": false
+    },
+    {
+      "animation": false,
+      "warmup": false,
+      "seconds": 44.99760000000149,
+      "simulationFps": 43.91345316194496,
+      "gameRenderFps": 43.86900634700372,
+      "visibleFps": 43.80233612459186,
+      "p95GapMs": 33.82000000029802,
+      "maxGapMs": 101.71499999985099,
+      "compileMs": 0,
+      "queue": {
+        "dropped": 3,
+        "underruns": 716,
+        "meanAgeMs": 7.892625570694152
+      },
+      "trackedFrames": 1975,
+      "skipped": 2,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": false,
+        "stableAtEnd": true
+      },
+      "passed": false
+    },
+    {
+      "animation": true,
+      "warmup": true,
+      "seconds": 44.99712000000104,
+      "simulationFps": 43.625014223131494,
+      "gameRenderFps": 43.58056693406055,
+      "visibleFps": 43.55834328952508,
+      "p95GapMs": 33.809999998658895,
+      "maxGapMs": 98.80000000074506,
+      "compileMs": 0.552,
+      "queue": {
+        "dropped": 1,
+        "underruns": 732,
+        "meanAgeMs": 8.49454360024995
+      },
+      "trackedFrames": 1962,
+      "skipped": 2,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": true,
+        "stableAtEnd": true
+      },
+      "passed": false
+    },
+    {
+      "animation": true,
+      "warmup": false,
+      "seconds": 44.99760000000149,
+      "simulationFps": 44.1801340515924,
+      "gameRenderFps": 44.11346382918054,
+      "visibleFps": 44.0690170142393,
+      "p95GapMs": 33.80499999970198,
+      "maxGapMs": 95.70500000193715,
+      "compileMs": 0,
+      "queue": {
+        "dropped": 2,
+        "underruns": 707,
+        "meanAgeMs": 8.492502520165045
+      },
+      "trackedFrames": 1987,
+      "skipped": 2,
+      "cosmeticCoverage": {
+        "mapId": 1,
+        "animation": true,
+        "stableAtEnd": true
+      },
+      "passed": false
+    }
+  ],
+  "decision": "Retain normal background animation: first paired disabled gain +1.289 visible FPS, reverse -0.267 FPS. All image gates fail; no repeatable improvement.",
+  "limits": "Selected exact real-browser fields. No profiler/build/test/sampler during image capture. Finite native-frame controller scripts, not human play; matching rolling fingerprints do not establish full machine equivalence. The separate 600-frame cosmetic gameplay replay passed. Physical input-to-photon latency unmeasured."
+}

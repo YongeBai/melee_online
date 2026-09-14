@@ -1,0 +1,24 @@
+{
+  "coreSha256": "f2e807d6a316978c18c21d708891520a10d36d11e3ab8bf34cf530f4b739c0f7",
+  "observations": [
+    {
+      "id": 137,
+      "enabled": false,
+      "batches": 0,
+      "rows": 0,
+      "drainMs": 0,
+      "maxDrainMs": 0
+    },
+    {
+      "id": 1966,
+      "enabled": false,
+      "batches": 0,
+      "rows": 0,
+      "drainMs": 0,
+      "maxDrainMs": 0
+    }
+  ],
+  "bootStatus": "frame-ring drain disabled: no HEAPU32 or null ptr",
+  "diagnosticFrame": 2490,
+  "decision": "No active log-drain cost in this running build. Do not run a synthetic enable/disable test and misrepresent it as removing an existing bottleneck. Logger remains inactive."
+}

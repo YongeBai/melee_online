@@ -1,0 +1,131 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.h
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.h
+@@ -317,6 +317,9 @@
+   u32 linear_prefix_cycles;
+   u32 linear_prefix_loadstores;
+   u32 linear_prefix_fp;
++  u32 linear_update_prefix_cycles;
++  u32 linear_update_prefix_loadstores;
++  u32 linear_update_prefix_fp;
+ };
+ 
+ struct CachedInterpreter::MeleeDisplayListOperands
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -10478,8 +10478,8 @@
+       {0x8036b69c, 0x54000636}, {0x8036b6a0, 0x5060073e}, {0x8036b6a4, 0x981f0010},
+       {0x8036b6a8, 0x4bfffa04}, {0x8036b0ac, 0x2c030004}, {0x8036b0b0, 0x41820540},
+   }};
+-  // Instructions on the dominant linear-key path between the state-4/5 entry
+-  // and the original linear interpolation body at 0x8036aeec.
++  // Instructions on the constant-key path between the state-4/5 entry and
++  // the original constant interpolation body at 0x8036aeec.
+   constexpr std::array<std::pair<u32, u32>, 29> linear_prefix = {{
+       {0x8036b5f0, 0xa01f001a}, {0x8036b5f4, 0xc03f001c}, {0x8036b5f8, 0x90010074},
+       {0x8036b5fc, 0x93a10070}, {0x8036b600, 0xc8010070}, {0x8036b604, 0xec00f828},
+@@ -10492,6 +10492,20 @@
+       {0x8036ae9c, 0x2c000002}, {0x8036aea0, 0x4182008c}, {0x8036aea4, 0x40800010},
+       {0x8036aea8, 0x2c000001}, {0x8036aeac, 0x40800040},
+   }};
++  // The true linear-key path takes the op==2 branch at 0x8036aea0 and resumes
++  // at 0x8036af2c. Keep the two instruction sequences separate so cycle and
++  // performance-monitor accounting remains identical to the guest path.
++  constexpr std::array<std::pair<u32, u32>, 26> linear_update_prefix = {{
++      {0x8036b5f0, 0xa01f001a}, {0x8036b5f4, 0xc03f001c}, {0x8036b5f8, 0x90010074},
++      {0x8036b5fc, 0x93a10070}, {0x8036b600, 0xc8010070}, {0x8036b604, 0xec00f828},
++      {0x8036b608, 0xfc000840}, {0x8036b60c, 0x4c401382}, {0x8036b610, 0x4082004c},
++      {0x8036b65c, 0x387f0000}, {0x8036b660, 0x389c0000}, {0x8036b664, 0x38bb0000},
++      {0x8036b668, 0x4bfff809}, {0x8036ae70, 0x7c0802a6}, {0x8036ae74, 0x90010004},
++      {0x8036ae78, 0x9421ffc8}, {0x8036ae7c, 0x93e10034}, {0x8036ae80, 0x7cbf2b79},
++      {0x8036ae84, 0x93c10030}, {0x8036ae88, 0x3bc40000}, {0x8036ae8c, 0x93a1002c},
++      {0x8036ae90, 0x3ba30000}, {0x8036ae94, 0x41820180}, {0x8036ae98, 0x881d0012},
++      {0x8036ae9c, 0x2c000002}, {0x8036aea0, 0x4182008c},
++  }};
+   if (!s_dolphin_web_melee_anim_state_fast.load(std::memory_order_relaxed) ||
+       js.blockStart != start || IsDebuggingEnabled() || IsBranchWatchEnabled() ||
+       IsProfilingEnabled() || jo.memcheck)
+@@ -10532,12 +10546,20 @@
+   {
+     return false;
+   }
++  u32 linear_update_prefix_cycles = 0, linear_update_prefix_loadstores = 0;
++  u32 linear_update_prefix_fp = 0;
++  if (!accumulate(linear_update_prefix, linear_update_prefix_cycles,
++                  linear_update_prefix_loadstores, linear_update_prefix_fp))
++  {
++    return false;
++  }
+   Write(FastMeleeAnimStateProbe,
+         {power_pc, start, prefix_cycles, prefix_loadstores, prefix_fp,
+          state4_cycles, state4_loadstores, state4_fp,
+          state4_cycles + extra_cycles, state4_loadstores + extra_loadstores,
+          state4_fp + extra_fp, linear_prefix_cycles, linear_prefix_loadstores,
+-         linear_prefix_fp});
++         linear_prefix_fp, linear_update_prefix_cycles, linear_update_prefix_loadstores,
++         linear_update_prefix_fp});
+   s_melee_anim_probe_compiles.fetch_add(1, std::memory_order_relaxed);
+   return true;
+ }
+@@ -12234,7 +12256,9 @@
+   const auto& [power_pc, current_pc, prefix_cycles, prefix_loadstores, prefix_fp,
+                state4_cycles, state4_loadstores, state4_fp,
+                state5_cycles, state5_loadstores, state5_fp,
+-               linear_prefix_cycles, linear_prefix_loadstores, linear_prefix_fp] = operands;
++               linear_prefix_cycles, linear_prefix_loadstores, linear_prefix_fp,
++               linear_update_prefix_cycles, linear_update_prefix_loadstores,
++               linear_update_prefix_fp] = operands;
+   (void)power_pc;
+   (void)current_pc;
+   constexpr s32 fallback_size = sizeof(AnyCallback) + sizeof(operands);
+@@ -12352,13 +12376,12 @@
+     }
+     target = 0x8036b5f0;
+ 
+-    // Linear keys account for most animation updates. Recreate the exact
+-    // FObjUpdateAnim prologue frame and resume in Melee's original linear case.
+-    // Its interpolation, object callback, epilogue, and outer state transition
+-    // remain guest code.
++    // Recreate the exact FObjUpdateAnim prologue frame and resume in Melee's
++    // original constant/linear case. Its interpolation, object callback,
++    // epilogue, and outer state transition remain guest code.
+     const u32 inner_sp = new_sp - 56;
+     u32 inner_stack_offset = 0;
+-    if (op == 1 && obj_update != 0 &&
++    if ((op == 1 || op == 2) && obj_update != 0 &&
+         TryFastAlignedRamOffset(ppc_state, ram, ram_size, inner_sp, 56, &inner_stack_offset) &&
+         !overlaps(offset, 48, inner_stack_offset, 56) &&
+         !overlaps(inner_stack_offset, 56, zero_offset, 4) &&
+@@ -12375,7 +12398,7 @@
+       WriteRamU32BE(ram, inner_stack_offset + 52, fobj);
+       WriteRamU32BE(ram, stack_offset + 4, 0x8036b66c);
+ 
+-      ppc_state.gpr[0] = 1;
++      ppc_state.gpr[0] = op;
+       ppc_state.gpr[1] = inner_sp;
+       ppc_state.gpr[3] = fobj;
+       ppc_state.gpr[4] = obj;
+@@ -12385,10 +12408,20 @@
+       ppc_state.gpr[31] = obj_update;
+       LR(ppc_state) = 0x8036b66c;
+       FastUpdateCR0(ppc_state, 0);
+-      cycles += linear_prefix_cycles;
+-      loadstores += linear_prefix_loadstores;
+-      fp += linear_prefix_fp;
+-      target = 0x8036aeec;
++      if (op == 1)
++      {
++        cycles += linear_prefix_cycles;
++        loadstores += linear_prefix_loadstores;
++        fp += linear_prefix_fp;
++        target = 0x8036aeec;
++      }
++      else
++      {
++        cycles += linear_update_prefix_cycles;
++        loadstores += linear_update_prefix_loadstores;
++        fp += linear_update_prefix_fp;
++        target = 0x8036af2c;
++      }
+       s_melee_anim_probe_linear_direct.fetch_add(1, std::memory_order_relaxed);
+     }
+   }

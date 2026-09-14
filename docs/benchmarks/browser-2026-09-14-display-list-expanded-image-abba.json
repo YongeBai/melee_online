@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "displaylistfast-expanded-dirty-continuation",
+  "coreSha256": "172876d5a91c9d621f7f59c4d6b9d6f0c627ed7effbeacd26bbf8a1d7e1cce09",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "input": "two deterministic controller tracks indexed by native logic frame",
+    "retained": ["animstatefast", "blockmerge", "fpuguard", "integerfifo", "singleprefix"]
+  },
+  "measuredRuns": [
+    {"enabled": false, "simulationFps": 42.239922761273185, "visibleFps": 42.17324569298388},
+    {"enabled": true, "simulationFps": 47.23164873784949, "visibleFps": 47.23164873784949},
+    {"enabled": true, "simulationFps": 48.03117993543481, "visibleFps": 47.99784809647892},
+    {"enabled": false, "simulationFps": 44.40278257438966, "visibleFps": 44.40278257438966}
+  ],
+  "symmetricMeans": {
+    "disabledSimulationFps": 43.32135266783142,
+    "enabledSimulationFps": 47.63141433664215,
+    "simulationChangePercent": 9.949068923048802,
+    "disabledVisibleFps": 43.28801413368677,
+    "enabledVisibleFps": 47.614748417164205,
+    "visibleChangePercent": 9.995220063657231
+  },
+  "coverageAtEndOfEnabledLegs": {
+    "compiledBlocks": 2,
+    "runs": 1979074,
+    "successful": 1979074,
+    "fallbacks": 0,
+    "dirtyCalls": 1637698,
+    "continuations": 1637698,
+    "suffixes": 232479,
+    "flushContinuations": 1405219,
+    "tails": 1405219
+  },
+  "inputConsistency": {
+    "passed": false,
+    "reason": "The first warmup produced 1138 common tracked frames instead of 1200. Measured legs had no native polling gaps."
+  },
+  "decision": "Retain as a strong candidate and run full-machine replay. Both candidate measurements exceeded both controls and the symmetric mean improved 9.95%, but every image gate still failed below 60 FPS.",
+  "limits": "Browser tiering and thermal drift remain material. This comparison establishes a large candidate effect, not final all-stage acceptance or physical latency."
+}

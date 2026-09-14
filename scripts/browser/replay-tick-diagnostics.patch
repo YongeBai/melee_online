@@ -1,0 +1,12 @@
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1147,7 +1147,8 @@
+       } else if (payload.action === "clear") {
+         api.browserRollbackClear();
+       } else throw new Error("Unknown browser rollback action");
+-      return {state: api.getCoreStateName(), milliseconds: performance.now() - started, ...stepTiming};
++      return {state: api.getCoreStateName(), milliseconds: performance.now() - started, ...stepTiming,
++        coreTicks:readCoreTicks(), ppcPc:api.getPpcPc?.() ?? 0};
+     }
+     case "validationSetCorePaused": {
+       // Harness-only checkpoint barrier. The app never sends this message;

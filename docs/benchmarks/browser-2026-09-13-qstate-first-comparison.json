@@ -1,0 +1,308 @@
+{
+  "artifactScope": "Selected exact fields from completed live browser OFF/ON/ON/OFF comparison",
+  "coreSha256": "5ed9a8d93fd3ac2d408153ed03236e7f99f563724eb2122849efb77e0dc00412",
+  "feature": "qstatecache",
+  "passed": false,
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "inputConsistency": {
+    "passed": false,
+    "checked": 90,
+    "mismatches": [
+      {
+        "run": 0,
+        "reason": "fewer than 1200 common tracked frames"
+      }
+    ]
+  },
+  "warmupSimulationFps": [
+    36.76966339423366,
+    50.471705425256914,
+    52.00074534401608,
+    44.00009533353912
+  ],
+  "warmupInputFrames": [
+    1104,
+    1515,
+    1562,
+    1321
+  ],
+  "allMeasured": {
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "nonblackFraction": 1,
+    "queueCapacity": 2,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "inputValid": true,
+    "inputSkipped": 0,
+    "exercisedBothPlayers": true,
+    "pageLifecycle": {
+      "start": {
+        "visibility": "visible",
+        "focused": true
+      },
+      "end": {
+        "visibility": "visible",
+        "focused": true
+      },
+      "events": []
+    }
+  },
+  "runs": [
+    {
+      "enabled": false,
+      "seconds": 29.999330000000075,
+      "simulationFps": 45.23434356700621,
+      "gameRenderFps": 45.26767764480062,
+      "visibleFps": 45.23434356700621,
+      "p95GapMs": 33.8199999993667,
+      "maxGapMs": 68.07500000018626,
+      "passed": false,
+      "wallStartMs": 1789332076756.25,
+      "wallEndMs": 1789332106755.58,
+      "inputFrames": 1359,
+      "inputChanges": [
+        152,
+        144
+      ],
+      "queue": {
+        "received": 1358,
+        "presented": 1357,
+        "dropped": 1,
+        "underruns": 435,
+        "meanAgeMs": 8.420747973473691,
+        "p95AgeUpperMs": 16
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 0,
+        "emittedSites": 0
+      }
+    },
+    {
+      "enabled": true,
+      "seconds": 29.998709999999964,
+      "simulationFps": 49.402124291344585,
+      "gameRenderFps": 49.402124291344585,
+      "visibleFps": 49.20211569097477,
+      "p95GapMs": 33.65499999932945,
+      "maxGapMs": 66.26500000059605,
+      "passed": false,
+      "wallStartMs": 1789332141604.04,
+      "wallEndMs": 1789332171602.75,
+      "inputFrames": 1484,
+      "inputChanges": [
+        163,
+        157
+      ],
+      "queue": {
+        "received": 1480,
+        "presented": 1476,
+        "dropped": 4,
+        "underruns": 313,
+        "meanAgeMs": 10.750115176137198,
+        "p95AgeUpperMs": 17
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 172
+      }
+    },
+    {
+      "enabled": true,
+      "seconds": 29.999224999999626,
+      "simulationFps": 48.43458456010174,
+      "gameRenderFps": 48.46791875456843,
+      "visibleFps": 48.201245198834904,
+      "p95GapMs": 33.88499999977648,
+      "maxGapMs": 68.20000000018626,
+      "passed": false,
+      "wallStartMs": 1789332206484.435,
+      "wallEndMs": 1789332236483.66,
+      "inputFrames": 1456,
+      "inputChanges": [
+        160,
+        154
+      ],
+      "queue": {
+        "received": 1453,
+        "presented": 1447,
+        "dropped": 7,
+        "underruns": 341,
+        "meanAgeMs": 14.858192812723482,
+        "p95AgeUpperMs": 24
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 172
+      }
+    },
+    {
+      "enabled": false,
+      "seconds": 29.9976799999997,
+      "simulationFps": 40.16977312912238,
+      "gameRenderFps": 40.16977312912238,
+      "visibleFps": 40.03642948388049,
+      "p95GapMs": 34.97000000067055,
+      "maxGapMs": 81.84499999973923,
+      "passed": false,
+      "wallStartMs": 1789332273247.52,
+      "wallEndMs": 1789332303245.2,
+      "inputFrames": 1206,
+      "inputChanges": [
+        135,
+        129
+      ],
+      "queue": {
+        "received": 1205,
+        "presented": 1201,
+        "dropped": 4,
+        "underruns": 581,
+        "meanAgeMs": 13.45471273937482,
+        "p95AgeUpperMs": 23
+      },
+      "qStateCoverage": {
+        "emittedBlocks": 14,
+        "emittedSites": 172
+      }
+    }
+  ],
+  "postRunJit": {
+    "uniqueInstances": 27774,
+    "capacity": 65536,
+    "reusedInstances": 48138,
+    "emitFailures": 0,
+    "compileFailures": 0
+  },
+  "limits": [
+    "Both measured pairs favor the candidate, but all FPS gates fail and short first warmup invalidates required common input coverage. Warm repeat required before retaining.",
+    "Compiled coverage is cumulative, not CPU cost share or runtime execution count.",
+    "Host IO pressure was elevated; this observation does not establish causality. No other applications, CPU affinity or OS settings were changed.",
+    "Queue age is not physical input-to-photon latency."
+  ],
+  "hostSnapshot": {
+    "time": "2026-09-13T20:42:13.956Z",
+    "cpuPressure": "some avg10=0.00 avg60=0.01 avg300=0.07 total=17427361\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0",
+    "memoryPressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=35\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=35",
+    "ioPressure": "some avg10=55.39 avg60=58.13 avg300=68.00 total=2497433849\nfull avg10=47.60 avg60=48.60 avg300=58.40 total=2161455822",
+    "load": "4.45 3.44 3.27 5/2684 30849",
+    "cpuFreq": [
+      {
+        "cpu": "cpu0",
+        "khz": "4396052"
+      },
+      {
+        "cpu": "cpu1",
+        "khz": "605264"
+      },
+      {
+        "cpu": "cpu10",
+        "khz": "2356022"
+      },
+      {
+        "cpu": "cpu11",
+        "khz": "2361738"
+      },
+      {
+        "cpu": "cpu12",
+        "khz": "4406177"
+      },
+      {
+        "cpu": "cpu13",
+        "khz": "1493896"
+      },
+      {
+        "cpu": "cpu14",
+        "khz": "3919478"
+      },
+      {
+        "cpu": "cpu15",
+        "khz": "4435549"
+      },
+      {
+        "cpu": "cpu16",
+        "khz": "2366558"
+      },
+      {
+        "cpu": "cpu17",
+        "khz": "2367091"
+      },
+      {
+        "cpu": "cpu18",
+        "khz": "2364475"
+      },
+      {
+        "cpu": "cpu19",
+        "khz": "2367059"
+      },
+      {
+        "cpu": "cpu2",
+        "khz": "2051510"
+      },
+      {
+        "cpu": "cpu20",
+        "khz": "2368645"
+      },
+      {
+        "cpu": "cpu21",
+        "khz": "2366940"
+      },
+      {
+        "cpu": "cpu22",
+        "khz": "2368280"
+      },
+      {
+        "cpu": "cpu23",
+        "khz": "2372557"
+      },
+      {
+        "cpu": "cpu3",
+        "khz": "605264"
+      },
+      {
+        "cpu": "cpu4",
+        "khz": "2366417"
+      },
+      {
+        "cpu": "cpu5",
+        "khz": "2367153"
+      },
+      {
+        "cpu": "cpu6",
+        "khz": "2386415"
+      },
+      {
+        "cpu": "cpu7",
+        "khz": "2366977"
+      },
+      {
+        "cpu": "cpu8",
+        "khz": "2367404"
+      },
+      {
+        "cpu": "cpu9",
+        "khz": "2367024"
+      }
+    ],
+    "thermal": [
+      {
+        "type": "acpitz",
+        "temp": "77000"
+      }
+    ]
+  }
+}

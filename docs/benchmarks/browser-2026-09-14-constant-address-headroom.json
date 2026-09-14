@@ -1,0 +1,415 @@
+{
+  "kind": "uncapped-checkpoint-codegen-abba",
+  "feature": "constantaddr",
+  "frames": 1200,
+  "diagnosticOnly": true,
+  "passed": false,
+  "coreSha256": "521f4b2be89b1e2d4c9c9d15c8d6a787f1662b2d9f61cabf462d4dcfd8318ee8",
+  "stage": "Yoshi's Story",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "verifiedSelection": {
+    "stage": 8,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "workload": "two scripted human controller tracks at native logic frames; partner AI retained (not human play)",
+  "runs": [
+    {
+      "enabled": false,
+      "warmup": true,
+      "frames": 1200,
+      "nativeWorkFps": 28.600318183192105,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 41957.575168
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 755.351,
+        "delta": {
+          "uniqueInstances": 7496,
+          "reusedInstances": 171
+        }
+      },
+      "coverage": {
+        "enabled": false,
+        "sites": 0,
+        "ramSites": 0,
+        "otherSites": 0
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "frames": 1200,
+      "nativeWorkFps": 30.068997042269118,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 39908.21504
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 0.309,
+        "delta": {
+          "uniqueInstances": 1,
+          "reusedInstances": 0
+        }
+      },
+      "coverage": {
+        "enabled": false,
+        "sites": 0,
+        "ramSites": 0,
+        "otherSites": 0
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "frames": 1200,
+      "nativeWorkFps": 29.027035325558312,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 41340.770304
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 94.673,
+        "delta": {
+          "uniqueInstances": 256,
+          "reusedInstances": 21893
+        }
+      },
+      "coverage": {
+        "enabled": true,
+        "sites": 549,
+        "ramSites": 227,
+        "otherSites": 322
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "frames": 1200,
+      "nativeWorkFps": 29.80162171429253,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 40266.265088
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 0,
+        "delta": {
+          "uniqueInstances": 0,
+          "reusedInstances": 0
+        }
+      },
+      "coverage": {
+        "enabled": true,
+        "sites": 549,
+        "ramSites": 227,
+        "otherSites": 322
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    },
+    {
+      "enabled": true,
+      "warmup": true,
+      "frames": 1200,
+      "nativeWorkFps": 30.88948572317624,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 38848.17024
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 0,
+        "delta": {
+          "uniqueInstances": 0,
+          "reusedInstances": 0
+        }
+      },
+      "coverage": {
+        "enabled": true,
+        "sites": 549,
+        "ramSites": 227,
+        "otherSites": 322
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    },
+    {
+      "enabled": true,
+      "warmup": false,
+      "frames": 1200,
+      "nativeWorkFps": 31.780246204397905,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 37759.304704
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 0,
+        "delta": {
+          "uniqueInstances": 0,
+          "reusedInstances": 0
+        }
+      },
+      "coverage": {
+        "enabled": true,
+        "sites": 549,
+        "ramSites": 227,
+        "otherSites": 322
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    },
+    {
+      "enabled": false,
+      "warmup": true,
+      "frames": 1200,
+      "nativeWorkFps": 30.522495505688696,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 39315.265024
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 0,
+        "delta": {
+          "uniqueInstances": 0,
+          "reusedInstances": 22149
+        }
+      },
+      "coverage": {
+        "enabled": false,
+        "sites": 549,
+        "ramSites": 227,
+        "otherSites": 322
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    },
+    {
+      "enabled": false,
+      "warmup": false,
+      "frames": 1200,
+      "nativeWorkFps": 30.39244238802137,
+      "timing": {
+        "valid": true,
+        "frames": 1200,
+        "startFrame": 429,
+        "stopFrame": 1629,
+        "elapsedMs": 39483.500032
+      },
+      "jitWork": {
+        "synchronousCompileAndLinkMs": 0,
+        "delta": {
+          "uniqueInstances": 0,
+          "reusedInstances": 0
+        }
+      },
+      "coverage": {
+        "enabled": false,
+        "sites": 549,
+        "ramSites": 227,
+        "otherSites": 322
+      },
+      "controllerStress": {
+        "active": true,
+        "valid": true,
+        "completed": true,
+        "stopAfterFrames": 1200,
+        "stoppedFrame": 1629,
+        "inputHash": 2623304136,
+        "stateHash": 1136119730,
+        "startFrame": 429,
+        "lastFrame": 1629,
+        "frames": 1201,
+        "skipped": 0,
+        "inputChanges": [
+          129,
+          126
+        ],
+        "gaps": []
+      },
+      "passed": false,
+      "diagnosticOnly": true
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 80,
+    "mismatches": [],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "pairedMeasurementDeltaFps": [
+    -0.2673753279765876,
+    1.387803816376536
+  ],
+  "baselineDriftFps": 0.32344534575225126,
+  "decision": "Reject as too small and inconsistent: first measurement pair loses; second wins amid material host drift. Raw replay also remains a formal failure on unused idle accounting.",
+  "limits": "Exact native-frame count and common checkpoint, uncapped host pacing, no image verifier. Native-work FPS is not visible FPS or input-to-photon latency. Selected exact QA fields are transcribed; no acceptance pass."
+}

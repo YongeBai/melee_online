@@ -1,0 +1,55 @@
+{
+  "artifactScope": "Exact selected fields from CUA redispatchArmedReplay",
+  "coreSha256": "767af3cb674006c9c2e59db2b5416e5fac83aed133b052eb4992ed11473226be",
+  "passed": true,
+  "kind": "local-browser-late-input-correction",
+  "frames": 120,
+  "performanceTest": false,
+  "networkTest": false,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107060212,
+    "sizeB": 107060212,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "correctedFrame": 425,
+  "reference": {
+    "fusionredispatch": false,
+    "readfusion": true,
+    "branchfusion": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false
+  },
+  "candidate": {
+    "fusionredispatch": true,
+    "readfusion": true,
+    "branchfusion": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "stepcheck": false
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "limits": "Local stepped replay in this scene, not FPS, physical latency, or native-Dolphin whole-emulator equivalence."
+}

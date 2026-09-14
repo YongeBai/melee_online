@@ -1,0 +1,40 @@
+{
+  "artifactScope": "Exact CUA animationReplay result plus tested configuration",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "passed": true,
+  "kind": "fountain-gameplay-observable-comparison",
+  "feature": "animation",
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "moving platform state and positions",
+    "native camera transform and settings"
+  ],
+  "settings": {
+    "stage": "Fountain of Dreams",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "background": "black",
+    "reflection": "off",
+    "scenery": "off",
+    "models": "low",
+    "particles": "normal",
+    "decorations": "normal",
+    "retainedFpuGuard": true,
+    "blockmerge": true,
+    "emulationSpeed": 1,
+    "cpuClock": 1
+  },
+  "environment": {
+    "hostBootUtc": "2026-09-13T19:04:11Z",
+    "sameAsEarlierTimingSession": false
+  },
+  "performanceClaim": false
+}

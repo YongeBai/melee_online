@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-tournament match-reverb-abba",
+  "passed": false,
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "resolution": [960, 720],
+  "coreSha256": "1922d5587a438092c76ccc134e19cb08b3fa74d1de1612b6ff3bb8078bc34c2e",
+  "commonCodegen": {
+    "leandispatch": true,
+    "animstatefast": true,
+    "displaylistfast": true,
+    "gxmatrixfast": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "regcache": true,
+    "integerfifo": true,
+    "singleprefix": true
+  },
+  "measuredRuns": [
+    {"reverb": true, "simulationFps": 56.23718558053107, "visibleFps": 55.170445842192606, "p95GapMs": 33.17499999701977, "dropped": 31, "underruns": 138},
+    {"reverb": false, "simulationFps": 58.93488528532539, "visibleFps": 58.16819842923802, "p95GapMs": 18.04500000178814, "dropped": 20, "underruns": 46},
+    {"reverb": false, "simulationFps": 59.06977767495403, "visibleFps": 57.56969867079324, "p95GapMs": 18.689999997615818, "dropped": 42, "underruns": 63},
+    {"reverb": true, "simulationFps": 59.499953859221854, "visibleFps": 58.53382918849541, "p95GapMs": 18, "dropped": 26, "underruns": 36}
+  ],
+  "means": {
+    "reverbOn": {"simulationFps": 57.86856971987646, "visibleFps": 56.85213751534401, "p95GapMs": 25.587499998509884, "dropped": 28.5, "underruns": 87},
+    "reverbOff": {"simulationFps": 59.002331480139716, "visibleFps": 57.86894855001563, "p95GapMs": 18.367499999701977, "dropped": 31, "underruns": 54.5}
+  },
+  "offMinusOn": {
+    "simulationFps": 1.1337617602632548,
+    "visibleFps": 1.016811034671619,
+    "p95GapMs": -7.219999998807907,
+    "simulationPairDeltas": [2.6976997047943243, -0.4301761842678218],
+    "visiblePairDeltas": [2.9977525870454116, -0.9641305177021735]
+  },
+  "inputConsistency": {"passed": true, "checked": 102, "mismatches": []},
+  "interpretation": "The combined counter-free dry-audio legs reached 58.935 and 59.070 simulation FPS, but neither passed the strict visible 60 FPS gate. The symmetric mean favors dry audio, while the two adjacent pairs oppose because the browser warmed strongly across the run. Treat this run as near-target evidence, not an isolated causal estimate; the earlier independent reverb A/B/B/A had both pairs positive."
+}

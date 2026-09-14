@@ -1,0 +1,66 @@
+{
+  "artifactScope": "Exact selected fields from CUA readRunningReplay",
+  "coreSha256": "3cbc3b2f2ab66c25ff3489a63c73f0c00e47189f1ca78760f0e0f39c652992bc",
+  "passed": true,
+  "kind": "normal-running-browser-codegen-equivalence",
+  "frames": 600,
+  "performanceTest": false,
+  "networkTest": false,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 106880524,
+    "sizeB": 106880524,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "fingerprintsEqual": true,
+  "stop": {
+    "startFrame": 306,
+    "stoppedFrame": 906,
+    "nativeFramesObserved": 601,
+    "skipped": 0,
+    "inputHash": 524154778,
+    "stateHash": 2799371749
+  },
+  "runs": [
+    {
+      "readfusion": false,
+      "stepcheck": false,
+      "dispatcherHandle": 11378,
+      "calls": 1609846,
+      "newReadFusionEmissions": 0
+    },
+    {
+      "readfusion": true,
+      "stepcheck": false,
+      "dispatcherHandle": 11378,
+      "calls": 1598001,
+      "newReadFusionEmissions": 145
+    }
+  ],
+  "commonCodegen": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "branchfusion": false,
+    "fpuguardwide": false
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "limits": "Complete state equivalence between browser configurations in this scene. Compile emissions establish admission, not dynamic per-block cost or FPS. Native Dolphin equivalence and broad roster/stage performance are not established."
+}

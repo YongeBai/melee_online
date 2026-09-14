@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "host-entry-to-original-guest-spline-body",
+  "coreSha256": "54f7b313554f27d9fcd622283fe4512fdd4b8faafc6e4de521135fe66ca37bcf",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "sourceResolution": [
+      960,
+      720
+    ],
+    "rules": {
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0
+    },
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "secondsPerRun": 40,
+  "measuredRuns": [
+    {
+      "enabled": false,
+      "simulationFps": 43.53707752199763,
+      "visibleFps": 43.47040512150453
+    },
+    {
+      "enabled": true,
+      "simulationFps": 38.90194509725486,
+      "visibleFps": 38.90194509725486
+    },
+    {
+      "enabled": true,
+      "simulationFps": 43.2045796854355,
+      "visibleFps": 43.17124281839427
+    },
+    {
+      "enabled": false,
+      "simulationFps": 41.33733616538699,
+      "visibleFps": 41.30399960396329
+    }
+  ],
+  "measuredMeans": {
+    "controlSimulationFps": 42.43720684369231,
+    "candidateSimulationFps": 41.05326239134518,
+    "simulationUpliftPercent": -3.261158203565495
+  },
+  "inputConsistency": {
+    "passed": false,
+    "reason": "one candidate measured run produced fewer than 1200 common tracked frames",
+    "pollingGapsEqual": true
+  },
+  "correctness": {
+    "fullMachineReplay120Frames": "pass",
+    "fullMachineReplay600Frames": "pass",
+    "directCoverage120Frames": {
+      "beforeApprox": 27441,
+      "after": 59021,
+      "common": 62471
+    }
+  },
+  "decision": "Reject and revert. Higher direct coverage made performance worse; crossing into C++ and then returning to compact guest spline WASM costs more than the saved dispatches."
+}

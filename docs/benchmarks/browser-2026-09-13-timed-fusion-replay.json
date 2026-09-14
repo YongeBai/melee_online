@@ -1,0 +1,104 @@
+{
+  "artifactScope": "Exact selected fields from completed CUA fusionReplay and following fusionDiag",
+  "core": "c78752db8943f5cc1d6cf7f174b15dcdba77120ba44e0c9ee59949ffc7446941",
+  "passed": true,
+  "performanceTest": false,
+  "networkTest": false,
+  "frames": 120,
+  "delay": 6,
+  "checkpointPolicy": "periodic",
+  "codegenReference": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "blockmerge": false
+  },
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "blockmerge": true
+  },
+  "tickDifferences": [],
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107055991,
+    "sizeB": 107055991,
+    "retainedCode": true,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "stats": {
+    "rollbacks": 47,
+    "resimulatedFrames": 334,
+    "maxDepth": 9,
+    "stalls": 1
+  },
+  "output": {
+    "videoSkipped": 334,
+    "audioSamplesSkipped": 446880,
+    "suppressed": false
+  },
+  "referenceFrame": 428,
+  "correctedFrame": 428,
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "engine": {
+    "coreSha256": "c78752db8943f5cc1d6cf7f174b15dcdba77120ba44e0c9ee59949ffc7446941",
+    "profileEnabled": false,
+    "sourceResolution": [
+      960,
+      720
+    ]
+  },
+  "diagnostic": {
+    "compiled": 60009,
+    "merged": 1368,
+    "emitFailures": 0,
+    "compileFailures": 0,
+    "coverage": "Successful fused emissions, not dynamic execution counts or cost share."
+  },
+  "notes": [
+    "An initial roster mismatch [2,20] was rejected before replay. Native Choose fighters applied the requested IC mirror; this rerun passed.",
+    "Existing camera/projection code unchanged; post-replay screenshot inspected but no equivalent-scene native Dolphin comparison in this trial.",
+    "No performance gain established by replay."
+  ]
+}

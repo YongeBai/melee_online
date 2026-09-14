@@ -27,7 +27,7 @@ for (const patch of manifest.patches) {
   run('git', ['apply', file], cwd);
 }
 for (const name of ['melee-memory.js', 'melee-tap-jump.js', 'melee-css-layout.js',
-  'melee-foreground.js', 'melee-probe-controls.js'])
+  'melee-foreground.js', 'melee-probe-controls.js', 'melee-background.js'])
   fs.copyFileSync(path.join(root, 'scripts/engine', name), path.join(engine, 'src', name));
 console.log('Browser engine source ready: ' + engine);
 console.log('The integration patches replace the historical incremental patch sequence; do not apply it again.');

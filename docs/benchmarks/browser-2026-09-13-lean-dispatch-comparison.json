@@ -1,0 +1,130 @@
+{
+  "artifactScope": "Exact selected CUA leanFpsRun fields; warmups omitted",
+  "coreSha256": "a959f40c9da57d5f43e6f62417409449711d805a5a3f953f0b3b2f99665aedbd",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "leandispatch",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame human-controller scripts with native partner AI; not human play",
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 110,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "leandispatch": false,
+      "seconds": 29.998015000000596,
+      "simulationFps": 56.403732046935986,
+      "gameRenderFps": 56.403732046935986,
+      "visibleFps": 56.27038989079666,
+      "p95GapMs": 32.25499999523163,
+      "maxGapMs": 43.064999997615814,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.316699230288034
+      },
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false,
+      "pageVisibleAndFocused": true,
+      "pageLifecycleEvents": []
+    },
+    {
+      "leandispatch": true,
+      "seconds": 29.99694999999553,
+      "simulationFps": 57.67253004056272,
+      "gameRenderFps": 57.605856595429124,
+      "visibleFps": 57.50584642772872,
+      "p95GapMs": 20.490000002086163,
+      "maxGapMs": 50.560000002384186,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.573290845752625
+      },
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false,
+      "pageVisibleAndFocused": true,
+      "pageLifecycleEvents": []
+    },
+    {
+      "leandispatch": true,
+      "seconds": 29.99872499999404,
+      "simulationFps": 56.23572335158695,
+      "gameRenderFps": 56.23572335158695,
+      "visibleFps": 56.06904960128586,
+      "p95GapMs": 32.50500000268221,
+      "maxGapMs": 50.86499999463558,
+      "queue": {
+        "capacity": 2,
+        "dropped": 3,
+        "meanAgeMs": 15.59393345218858
+      },
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false,
+      "pageVisibleAndFocused": true,
+      "pageLifecycleEvents": []
+    },
+    {
+      "leandispatch": false,
+      "seconds": 29.997984999999403,
+      "simulationFps": 58.67060737579658,
+      "gameRenderFps": 58.637271803423964,
+      "visibleFps": 58.43725836918829,
+      "p95GapMs": 18.900000005960464,
+      "maxGapMs": 35.21000000089407,
+      "queue": {
+        "capacity": 2,
+        "dropped": 4,
+        "meanAgeMs": 15.896713226914677
+      },
+      "validGameplay": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "exercisedBothPlayers": true,
+      "passed": false,
+      "pageVisibleAndFocused": true,
+      "pageLifecycleEvents": []
+    }
+  ],
+  "meanSimulationGainPercent": -1.0133328041964207,
+  "decision": "Opposing pairs; reverse pair loses substantially. No retained gain, default OFF. Every strict 720p60 gate fails. Next comparison removes the unproven read+conditional fusion combination and keeps retained FPU/unconditional fusion settings."
+}

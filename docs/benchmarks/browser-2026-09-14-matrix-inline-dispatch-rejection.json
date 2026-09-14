@@ -1,0 +1,27 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "matrixfast-inline-dispatch",
+  "coreSha256": "136c0463b959066153237d97ccbff7fbca65d30646d063de67e7c5de1bc5fe66",
+  "stage": "Battlefield",
+  "characters": ["Fox", "Falco"],
+  "sourceResolution": [960, 720],
+  "input": "two deterministic controller tracks indexed by native logic frame",
+  "runs": [
+    {"enabled": false, "simulationFps": 59.70016915048104, "gameRenderFps": 59.70016915048104, "visibleFps": 59.13350087825425, "p95GapMs": 17.530000001192093, "passed": false},
+    {"enabled": true, "simulationFps": 59.96652674477033, "gameRenderFps": 59.96652674477033, "visibleFps": 59.033195589209704, "p95GapMs": 17.489999994635582, "passed": false},
+    {"enabled": true, "simulationFps": 59.301274977418494, "gameRenderFps": 59.23460687738767, "visibleFps": 58.7679301771719, "p95GapMs": 17.59000000357628, "passed": false},
+    {"enabled": false, "simulationFps": 59.96662668892388, "gameRenderFps": 59.96662668892388, "visibleFps": 59.566626955590316, "p95GapMs": 17.475000001490116, "passed": false}
+  ],
+  "averages": {
+    "disabledVisibleFps": 59.35006391692228,
+    "enabledVisibleFps": 58.9005628831908,
+    "enabledMinusDisabledVisibleFps": -0.44950103373148
+  },
+  "coverage": {
+    "enabledCumulativeFastRunsAtEnd": 6050151,
+    "enabledCumulativeFallbacksAtEnd": 179,
+    "fallbacksWereFpOnly": true
+  },
+  "decision": "Reject invoking the exact matrix helper from inside the generated Wasm dispatch loop. Both measured pairs regressed. Restore the previously replay-validated direct cached-interpreter callback implementation. The independent animation decoder was also removed because its prior A/B pairs disagreed and it did not show a reliable gain.",
+  "scope": "Selected measurement fields from the visible real-browser run. The same match checkpoint was restored for every run. Each listed run lasted 30 seconds; warmups are omitted. No profiler, test, build, or sampler ran during image measurement. Physical input-to-photon latency remains unmeasured."
+}

@@ -20,14 +20,15 @@ test('actual inline dispatch rejects collisions, flag changes and invalidated en
 #include <vector>
 using u32=uint32_t;using u8=uint8_t;using CPUEmuFeatureFlags=u32;
 struct JitBlock {u32 effectiveAddress,feature_flags;const u8* normalEntry;};
-struct JitBaseBlockCache {static constexpr size_t FAST_BLOCK_MAP_FALLBACK_MASK=(1u<<18)-1;};
+struct JitBaseBlockCache {static inline size_t mask=(1u<<16)-1;static size_t GetFastBlockMapFallbackMask(){return mask;}};
 ${method}
 int main(){
- std::vector<JitBlock*> map(1u<<18,nullptr);std::array<u8,4> entries{};u32 rng=98765;
+ std::vector<JitBlock*> map(1u<<20,nullptr);std::array<u8,4> entries{};u32 rng=98765;
  auto random=[&](){rng=rng*1664525+1013904223;return rng;};
+ for(unsigned bits : {16u,20u}){JitBaseBlockCache::mask=(1u<<bits)-1;
  for(int i=0;i<200000;i++){
-   u32 pc=random()&~3u,flags=random()&7,index=(pc>>2)&JitBaseBlockCache::FAST_BLOCK_MAP_FALLBACK_MASK;
-   JitBlock b{pc,flags,&entries[0]},collision{pc^(1u<<20),flags,&entries[1]};
+   u32 pc=random()&~3u,flags=random()&7,index=(pc>>2)&JitBaseBlockCache::GetFastBlockMapFallbackMask();
+   JitBlock b{pc,flags,&entries[0]},collision{pc^(1u<<(bits+2)),flags,&entries[1]};
    assert(LookupBrowserCachedBlock(map.data(),pc,flags)==nullptr);
    map[index]=&b;assert(LookupBrowserCachedBlock(map.data(),pc,flags)==&entries[0]);
    // PC aliases have the same array index but must go to the slow path.
@@ -38,6 +39,7 @@ int main(){
    assert(LookupBrowserCachedBlock(map.data(),pc,flags)==&entries[2]);
    // Code invalidation and cache clear remove the live map entry. No copy is retained.
    map[index]=nullptr;assert(LookupBrowserCachedBlock(map.data(),pc,flags)==nullptr);
+ }
  }
 }
 `);

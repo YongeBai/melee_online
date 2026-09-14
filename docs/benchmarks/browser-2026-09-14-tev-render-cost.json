@@ -1,0 +1,20 @@
+{
+  "kind":"render-dispatch-cost-abba", "scope":"tev", "diagnosticOnly":true, "passed":false,
+  "coreSha256":"e9d4e787d3a45566a9a4a3df70933568c2d4539f68ba82543351619e3beb27dd",
+  "stage":"Yoshi's Story", "characters":["Ice Climbers","Ice Climbers"], "frames":1200,
+  "commonInput":{"startFrame":427,"stopFrame":1627,"inputHash":1316680998,"stateHash":1540535725},
+  "inputConsistency":{"passed":true,"checked":80,"mismatches":[]},
+  "runs":[
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":40.76104962272355,"elapsedMs":29439.869952,"synchronousCompileAndLinkMs":139.06},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":42.278381863323695,"elapsedMs":28383.300096,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":44.13250133188359,"elapsedMs":27190.844928,"synchronousCompileAndLinkMs":0.992},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":43.18495526259742,"elapsedMs":27787.454976,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":true,"nativeWorkFps":43.96439359637574,"elapsedMs":27294.815232,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":false,"warmup":false,"nativeWorkFps":44.48561025507247,"elapsedMs":26975.014912,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":true,"nativeWorkFps":42.44931890916797,"elapsedMs":28269.0048,"synchronousCompileAndLinkMs":0},
+    {"renderDispatch":true,"warmup":false,"nativeWorkFps":41.73693831496881,"elapsedMs":28751.510016,"synchronousCompileAndLinkMs":0}
+  ],
+  "interpretation":"HSD_TExpSetupTev bypass removes compiled material combiner setup and constant updates. Both orders improve, with elapsed differences about 0.50/1.48 ms per frame. This alone cannot close the frame-time gap; the larger render opportunity is distributed across paths.",
+  "restoration":"Completed original-instruction, checkpoint, input and host-pacing restoration.",
+  "limits":"Selected exact UI fields. Incomplete rendering, uncapped pacing, no image acceptance or physical-latency claim. Fingerprints are not full machine equality. No build/test/profiler/resource sampler ran during measurement; one short Node parse-only syntax check ran while preparing the next candidate. Different scopes use different checkpoints and are not additive CPU shares."
+}

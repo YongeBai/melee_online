@@ -1,0 +1,113 @@
+{
+  "artifactScope": "Exact selected CUA leanRetainedRun fields; warmups omitted",
+  "coreSha256": "a959f40c9da57d5f43e6f62417409449711d805a5a3f953f0b3b2f99665aedbd",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "leandispatch",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame controller scripts; native partner AI; not human play",
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "commonCodegen": {
+    "readfusion": false,
+    "branchfusion": false,
+    "fpuguard": true,
+    "blockmerge": true,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 108,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "leandispatch": false,
+      "seconds": 29.996875,
+      "simulationFps": 53.27221585581832,
+      "gameRenderFps": 53.20554224398375,
+      "visibleFps": 53.13886863214918,
+      "p95GapMs": 33.399999998509884,
+      "maxGapMs": 49.23499999940395,
+      "queue": {
+        "capacity": 2,
+        "dropped": 1,
+        "meanAgeMs": 15.15750783698686
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "leandispatch": true,
+      "seconds": 29.998880000002682,
+      "simulationFps": 56.36877110078272,
+      "gameRenderFps": 56.36877110078272,
+      "visibleFps": 56.23543278948578,
+      "p95GapMs": 32.064999997615814,
+      "maxGapMs": 39.480000004172325,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.653622630308272
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "leandispatch": true,
+      "seconds": 29.998935000002383,
+      "simulationFps": 56.16866065411543,
+      "gameRenderFps": 56.16866065411543,
+      "visibleFps": 56.03532258728073,
+      "p95GapMs": 31.87000000476837,
+      "maxGapMs": 35.90500000119209,
+      "queue": {
+        "capacity": 2,
+        "dropped": 2,
+        "meanAgeMs": 15.976429845424597
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    },
+    {
+      "leandispatch": false,
+      "seconds": 29.998785000003874,
+      "simulationFps": 57.86901036157884,
+      "gameRenderFps": 57.86901036157884,
+      "visibleFps": 57.70233694463881,
+      "p95GapMs": 19.229999996721745,
+      "maxGapMs": 35.41499999910593,
+      "queue": {
+        "capacity": 2,
+        "dropped": 3,
+        "meanAgeMs": 15.816480946755059
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false
+    }
+  ],
+  "decision": "Opposing pairs again; reverse pair loses. Keep lean dispatch disabled. No cross-run claim about removing read/branch fusion. Next examine redundant vertex-format invalidation on CPU FIFO preprocessing, with actual opportunity counters and unchanged command/timing semantics."
+}

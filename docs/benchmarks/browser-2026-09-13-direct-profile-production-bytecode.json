@@ -1,0 +1,33 @@
+{
+  "scope": "Actual C++ generated production dispatcher bytecode before/after sampled-profiler addition, using identical fixture layout and 128-page shared memory. The outer C++ dispatcher gains a profile-mode selection; this only proves generated hot-loop bytes are unchanged when profiling is off.",
+  "cases": [
+    {
+      "bits": 16,
+      "hoist": false,
+      "equal": true,
+      "bytes": 373,
+      "sha256": "b0aa02a8e0f283eb576908de835eb87cffd1f81a184a500bd952601a9fb65ab7"
+    },
+    {
+      "bits": 16,
+      "hoist": true,
+      "equal": true,
+      "bytes": 628,
+      "sha256": "9dba39803bf1af90abef0cd4e6a3352857599a27cdc1dc67ab1e309ae75cf1c4"
+    },
+    {
+      "bits": 20,
+      "hoist": false,
+      "equal": true,
+      "bytes": 373,
+      "sha256": "9e319345236a2038cb52c87e05fc61098d869c6d422abb3c98b2305b068e3d51"
+    },
+    {
+      "bits": 20,
+      "hoist": true,
+      "equal": true,
+      "bytes": 628,
+      "sha256": "b9a25c7b6c3a5b4977932dc0247e9363ede68ab900ee16b192e3fbeb65b37e28"
+    }
+  ]
+}

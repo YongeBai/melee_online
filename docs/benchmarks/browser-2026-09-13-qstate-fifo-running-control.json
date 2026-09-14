@@ -1,0 +1,64 @@
+{
+  "artifactScope": "Selected exact fields from completed unchanged-code browser replay control",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "passed": false,
+  "performanceTest": false,
+  "networkTest": false,
+  "frames": 600,
+  "fullMachineBytesEqual": false,
+  "fingerprintsEqual": true,
+  "sameConfigurations": true,
+  "qstatefullBoth": false,
+  "qstatecacheBoth": false,
+  "comparison": {
+    "sizeA": 105879860,
+    "sizeB": 105879860,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 2,
+    "allSectionUnmatchedBytes": 0,
+    "differences": [
+      {
+        "name": "CoreTiming",
+        "firstRelativeOffset": 12,
+        "differentBytes": 2,
+        "field": "CoreTiming.m_idled_cycles"
+      }
+    ]
+  },
+  "verifiedSelection": {
+    "stage": 31,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "nativeInputBoth": {
+    "startFrame": 303,
+    "stoppedFrame": 903,
+    "frames": 601,
+    "inputHash": 3764828464,
+    "stateHash": 3262091666,
+    "skipped": 0
+  },
+  "dispatcherCalls": [
+    1484261,
+    1479268
+  ],
+  "newEmittedSitesBoth": 0,
+  "engine": {
+    "coreSha256": "96d238172526a82f7657dd0119e3bc94e11bcd4fd4d7f4149adfa42716c93838",
+    "profileEnabled": false,
+    "sourceResolution": [
+      960,
+      720
+    ]
+  },
+  "interpretation": "Identical code configurations reproduce isolated idle-cycle accounting mismatch. This is baseline replay variability, not evidence specific to Q0 candidate. Exact gate remains failed for this run; do not exclude field or label PASS."
+}

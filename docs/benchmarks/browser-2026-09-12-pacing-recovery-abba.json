@@ -1,0 +1,73 @@
+{
+  "kind": "same-checkpoint-presentation-abba-selected-scalars",
+  "coreSha256": "2aaff4b8fdbe7ad76fabaf8724da6b79b13353a31d7413c6692f4c0210a9528f",
+  "stage": "Battlefield",
+  "workload": "idle human Fox versus level 9 CPU Falco",
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "probe": "webgl2-pbo-fence; timing instrumentation off",
+  "capacity": 2,
+  "scope": "Two 30-second measured queue runs passed the existing gate. This is not all-stage/all-roster or latency acceptance.",
+  "runs": [
+    {
+      "paced": false,
+      "seconds": 29.99942,
+      "simulationFps": 60.034494000216554,
+      "gameRenderFps": 60.00116002242632,
+      "visibleFps": 57.56777964373903,
+      "p95GapMs": 17.525,
+      "passed": false
+    },
+    {
+      "paced": true,
+      "seconds": 29.998815,
+      "simulationFps": 60.00237009361881,
+      "gameRenderFps": 59.9690354435668,
+      "visibleFps": 59.635688943046695,
+      "p95GapMs": 17.375,
+      "maxGapMs": 42.85,
+      "nonblackFraction": 1,
+      "passed": true,
+      "queue": {
+        "received": 1800,
+        "presented": 1791,
+        "dropped": 8,
+        "underruns": 8,
+        "meanAgeMs": 21.424134561696857,
+        "maxAgeMs": 52.415
+      }
+    },
+    {
+      "paced": true,
+      "seconds": 29.998525,
+      "simulationFps": 60.002950145048985,
+      "gameRenderFps": 59.969615172746174,
+      "visibleFps": 59.70293539432374,
+      "p95GapMs": 17.3,
+      "maxGapMs": 51.65,
+      "nonblackFraction": 1,
+      "passed": true,
+      "queue": {
+        "received": 1800,
+        "presented": 1793,
+        "dropped": 6,
+        "underruns": 5,
+        "meanAgeMs": 19.945538204125395,
+        "maxAgeMs": 35.885
+      }
+    },
+    {
+      "paced": false,
+      "seconds": 29.99812,
+      "simulationFps": 60.00376023564122,
+      "gameRenderFps": 59.970424813288076,
+      "visibleFps": 58.00363489445317,
+      "p95GapMs": 17.485,
+      "passed": false
+    }
+  ]
+}

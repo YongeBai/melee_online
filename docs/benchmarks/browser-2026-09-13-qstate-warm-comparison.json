@@ -1,0 +1,16 @@
+{
+  "artifactScope":"Selected exact fields from completed warm live browser OFF/ON/ON/OFF repeat",
+  "coreSha256":"5ed9a8d93fd3ac2d408153ed03236e7f99f563724eb2122849efb77e0dc00412",
+  "feature":"qstatecache","passed":false,
+  "verifiedSelection":{"stage":31,"characters":[14,14],"slotTypes":[0,0],"timeLimit":480,"items":-1,"teams":0},
+  "inputConsistency":{"passed":true,"checked":92,"mismatches":[]},
+  "allMeasured":{"sourceResolution":[960,720],"nonblackFraction":1,"queueCapacity":2,"emulationSpeed":1,"cpuOverclock":1,"inputValid":true,"inputSkipped":1,"exercisedBothPlayers":true,"pageLifecycle":{"start":{"visibility":"visible","focused":true},"end":{"visibility":"visible","focused":true},"events":[]}},
+  "runs":[
+    {"enabled":false,"seconds":30.00018500000052,"simulationFps":48.76636594074252,"gameRenderFps":48.76636594074252,"visibleFps":48.46636779073112,"p95GapMs":33.705000000074506,"maxGapMs":91.59999999962747,"passed":false,"inputFrames":1464,"inputChanges":[172,162],"queue":{"received":1462,"presented":1455,"dropped":7,"underruns":329,"meanAgeMs":9.16064261169048,"p95AgeUpperMs":19},"qStateCoverage":{"emittedBlocks":14,"emittedSites":172}},
+    {"enabled":true,"seconds":29.99927999999933,"simulationFps":47.63447656077185,"gameRenderFps":47.63447656077185,"visibleFps":47.43447176065665,"p95GapMs":33.755000000819564,"maxGapMs":78.00999999977648,"passed":false,"inputFrames":1429,"inputChanges":[169,158],"queue":{"received":1428,"presented":1424,"dropped":4,"underruns":362,"meanAgeMs":9.235860252794103,"p95AgeUpperMs":21},"qStateCoverage":{"emittedBlocks":28,"emittedSites":344}},
+    {"enabled":true,"seconds":29.99931000000052,"simulationFps":48.201108625497554,"gameRenderFps":48.13444042546229,"visibleFps":47.901101725338854,"p95GapMs":33.794999999925494,"maxGapMs":97.05499999970198,"passed":false,"inputFrames":1446,"inputChanges":[170,160],"queue":{"received":1445,"presented":1438,"dropped":7,"underruns":344,"meanAgeMs":9.48571974963859,"p95AgeUpperMs":21},"qStateCoverage":{"emittedBlocks":28,"emittedSites":344}},
+    {"enabled":false,"seconds":29.998930000000634,"simulationFps":44.53492174554132,"gameRenderFps":44.50158722327669,"visibleFps":44.2682455674243,"p95GapMs":33.85499999951571,"maxGapMs":84.0699999993667,"passed":false,"inputFrames":1336,"inputChanges":[154,144],"queue":{"received":1335,"presented":1329,"dropped":6,"underruns":462,"meanAgeMs":8.841222723857678,"p95AgeUpperMs":17},"qStateCoverage":{"emittedBlocks":28,"emittedSites":344}}
+  ],
+  "conclusion":"Opposing timing pairs despite valid common input coverage. Keep the partial Q0-state cache disabled. All FPS gates fail.",
+  "limits":["32-bit fingerprints are sampled observables, not full machine equivalence; see separate 600/120-frame complete-state replays.","Scene/checkpoint and host variability limit comparisons with earlier fresh-match runs.","Compiled sites are not execution counts or CPU cost shares; queue age is not physical input-to-photon latency."]
+}

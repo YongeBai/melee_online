@@ -1,0 +1,32 @@
+{
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "artifactScope": "Exact selected CUA decoRetainedReplay fields plus verified fresh-match configuration",
+  "passed": true,
+  "kind": "fountain-gameplay-observable-comparison",
+  "feature": "decorations",
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "moving platform state and positions",
+    "native camera transform and settings"
+  ],
+  "codegenSetup": "QA startTestMatch now explicitly applies and verifies fpuguard=true when retainedfpuguard=1 before entering the match.",
+  "meshChange": {
+    "joints": [
+      11,
+      12,
+      13,
+      37
+    ],
+    "draws": 38,
+    "identified": "two decorative pillars, large stars and fountain centerpiece",
+    "untouched": "all floor, ledge and platform meshes; joints, transforms, animation, gameplay processes, collision and camera"
+  },
+  "performanceClaim": false,
+  "retainedFpuGuard": true
+}

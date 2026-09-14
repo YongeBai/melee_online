@@ -1,0 +1,16 @@
+{
+  "kind": "six-stage-native-input-coverage",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "workload": "Fox/Falco, two scripted ordinary controllers sampled on native logic frames",
+  "settings": {"timing":"baseline","emulationSpeed":1,"cpuOverclock":1,"models":"low","background":"black","fountainReflection":false,"fountainScenery":false,"particles":true,"decorations":true,"hiddenAnimation":true,"queueCapacity":2,"efbscale":150,"profiler":false,"frameTiming":false},
+  "eachRun": {"sourceResolution":[960,720],"nonblackFraction":1,"validControllerInput":true,"exercisedBothPlayers":true,"visible":true,"focused":true,"lifecycleEvents":[],"characters":[2,20],"slotTypes":[0,0],"timeLimit":480,"items":-1,"teams":0,"passed":false},
+  "runs": [
+    {"stage":"Battlefield","stageId":31,"seconds":29.999314999999942,"simulationFps":59.268019953122376,"gameRenderFps":59.234685858660555,"visibleFps":58.034658458034905,"p95GapMs":17.484999999869615,"maxGapMs":67.07000000006519,"queueDropped":34,"queueMeanAgeMs":19.901630309992736},
+    {"stage":"Final Destination","stageId":32,"seconds":29.998824999999954,"simulationFps":59.96901545310534,"gameRenderFps":59.935680814165316,"visibleFps":59.168984118544735,"p95GapMs":17.544999999925494,"maxGapMs":51.21999999997206,"queueDropped":23,"queueMeanAgeMs":20.26845439189315},
+    {"stage":"Dream Land 64","stageId":28,"seconds":29.998625,"simulationFps":59.86941068132289,"gameRenderFps":59.80274095896062,"visibleFps":58.86936484588877,"p95GapMs":17.619999999878928,"maxGapMs":49.85499999998137,"queueDropped":28,"queueMeanAgeMs":18.791590265989257},
+    {"stage":"Yoshi's Story","stageId":8,"seconds":29.999074999999955,"simulationFps":59.8018438901867,"gameRenderFps":59.768509529043904,"visibleFps":58.60180688904583,"p95GapMs":18.520000000018626,"maxGapMs":53.89999999990687,"queueDropped":34,"queueMeanAgeMs":17.77942581011979},
+    {"stage":"Fountain of Dreams","stageId":2,"seconds":29.99788000000012,"simulationFps":59.00416962798681,"gameRenderFps":58.93749824987609,"visibleFps":58.037434645381374,"p95GapMs":21.069999999832362,"maxGapMs":53.78000000002794,"queueDropped":27,"queueMeanAgeMs":18.021908725606387},
+    {"stage":"Pokémon Stadium","stageId":3,"seconds":29.99951500000013,"simulationFps":53.63420041957322,"gameRenderFps":53.600866547342285,"visibleFps":53.300861697263876,"p95GapMs":33.47999999998137,"maxGapMs":76.3499999998603,"queueDropped":7,"queueMeanAgeMs":10.107300000002288}
+  ],
+  "limitations": ["One fresh-match 30-second run per stage; no same-checkpoint cross-stage comparison or repeatability claim.","Stadium interval does not establish transformation coverage.","Only Fox/Falco in this sweep, not full roster coverage or physical input latency."]
+}

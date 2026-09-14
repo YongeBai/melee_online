@@ -1,0 +1,62 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -26,6 +26,7 @@
+ #include "Core/HW/Memmap.h"
+ #include "Core/Host.h"
+ #include "Core/System.h"
++#include "Core/State.h"
+ 
+ #include "VideoCommon/AsyncRequests.h"
+ #include "VideoCommon/CPMemory.h"
+@@ -60,7 +61,13 @@
+   static std::string result;
+   result = "{\"cycles\":" + std::to_string(s_browser_gpu_start_delay.load(std::memory_order_relaxed)) +
+       ",\"starts\":" + std::to_string(s_browser_gpu_starts.load(std::memory_order_relaxed)) +
+-      ",\"callbacks\":" + std::to_string(s_browser_gpu_callbacks.load(std::memory_order_relaxed)) + "}";
++      ",\"callbacks\":" + std::to_string(s_browser_gpu_callbacks.load(std::memory_order_relaxed));
++  const auto& fifo = Core::System::GetInstance().GetCommandProcessor().GetFifo();
++  result += ",\"fifoBase\":" + std::to_string(fifo.CPBase.load(std::memory_order_relaxed)) +
++      ",\"fifoEnd\":" + std::to_string(fifo.CPEnd.load(std::memory_order_relaxed)) +
++      ",\"fifoRead\":" + std::to_string(fifo.CPReadPointer.load(std::memory_order_relaxed)) +
++      ",\"fifoWrite\":" + std::to_string(fifo.CPWritePointer.load(std::memory_order_relaxed)) +
++      ",\"fifoDistance\":" + std::to_string(fifo.CPReadWriteDistance.load(std::memory_order_relaxed)) + "}";
+   return result.c_str();
+ }
+ 
+@@ -115,10 +122,18 @@
+ void FifoManager::DoState(PointerWrap& p)
+ {
+   DolphinWeb::TransferSnapshotMemory(p, m_video_buffer, FIFO_SIZE);
++  // Diagnostics describe saved storage; never omit or normalize snapshot bytes.
++  const auto used = static_cast<size_t>(m_video_buffer_write_ptr - m_video_buffer);
++  if (used <= FIFO_SIZE)
++    State::BrowserRecordField(p, "GPU FIFO unused suffix", FIFO_SIZE - used);
++  State::BrowserRecordField(p, "GPU FIFO full storage", FIFO_SIZE);
++
+   u8* write_ptr = m_video_buffer_write_ptr;
+   p.DoPointer(write_ptr, m_video_buffer);
++  State::BrowserRecordField(p, "GPU FIFO write offset", sizeof(ptrdiff_t));
+   m_video_buffer_write_ptr = write_ptr;
+   p.DoPointer(m_video_buffer_read_ptr, m_video_buffer);
++  State::BrowserRecordField(p, "GPU FIFO read offset", sizeof(ptrdiff_t));
+   if (p.IsReadMode() && m_use_deterministic_gpu_thread)
+   {
+     // We're good and paused, right?
+--- a/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
++++ b/vendor/dolphin/Source/Core/Core/CoreTiming.cpp
+@@ -198,6 +198,7 @@
+   p.Do(m_last_oc_factor);
+   m_globals.last_OC_factor_inverted = 1.0f / m_last_oc_factor;
+   p.Do(m_event_fifo_id);
++  State::BrowserRecordField(p, "CoreTiming.next_event_order", sizeof(m_event_fifo_id));
+ 
+   p.DoMarker("CoreTimingData");
+ 
+@@ -205,6 +206,7 @@
+   p.DoEachElement(m_event_queue, [this](PointerWrap& pw, Event& ev) {
+     pw.Do(ev.time);
+     pw.Do(ev.fifo_order);
++    State::BrowserRecordField(pw, "CoreTiming.event.order", sizeof(ev.fifo_order));
+ 
+     // this is why we can't have (nice things) pointers as userdata
+     pw.Do(ev.userdata);

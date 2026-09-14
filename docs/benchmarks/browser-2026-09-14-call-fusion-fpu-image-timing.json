@@ -1,0 +1,28 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "callfusion-with-retained-fpu-guard",
+  "coreSha256": "09569744729a89147b1b16a8c27469f562eb7f123d82e4fc7329f98fc82af051",
+  "stage": "Battlefield",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "sourceResolution": [960, 720],
+  "passed": false,
+  "inputConsistency": {"passed": true, "checked": 90, "mismatches": []},
+  "runs": [
+    {"enabled": false, "warmup": true, "simulationFps": 48.535857, "visibleFps": 48.435852},
+    {"enabled": false, "warmup": false, "simulationFps": 49.135897, "visibleFps": 49.002556, "p95GapMs": 33.755000},
+    {"enabled": true, "warmup": true, "simulationFps": 44.336622, "visibleFps": 44.269950, "emittedBlocks": 991},
+    {"enabled": true, "warmup": false, "simulationFps": 46.601165, "visibleFps": 46.601165, "p95GapMs": 33.825000, "emittedBlocks": 995},
+    {"enabled": true, "warmup": true, "simulationFps": 43.892824, "visibleFps": 43.826168, "emittedBlocks": 995},
+    {"enabled": true, "warmup": false, "simulationFps": 46.502488, "visibleFps": 46.269142, "p95GapMs": 33.820000, "emittedBlocks": 995},
+    {"enabled": false, "warmup": true, "simulationFps": 46.135417, "visibleFps": 46.035413},
+    {"enabled": false, "warmup": false, "simulationFps": 48.468613, "visibleFps": 48.301940, "p95GapMs": 33.860000}
+  ],
+  "coverage": {
+    "normalSpeed": true,
+    "nonblackFraction": 1,
+    "tournamentRules": {"stocks": 4, "timeLimitSeconds": 480, "items": "off", "teams": false},
+    "frameInput": "two human controller slots sampled on native logic frames"
+  },
+  "scope": "Selected fields from eight focused 30-second visible image captures. The comparison restored one checkpoint, retained the accepted FPU guard in both modes, and compiled 995 call-fused blocks. No profiler or build ran during capture.",
+  "decision": "Keep call fusion off. It loses both measured pairs: -2.53 and -1.97 simulation FPS, while all shared gameplay fingerprints match. The prior uncapped fixed-work gain does not survive full 720p rendering and presentation."
+}

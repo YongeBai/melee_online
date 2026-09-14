@@ -1,0 +1,17 @@
+{
+  "kind":"same-checkpoint-queue-capacity-abba",
+  "coreSha256":"a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "stage":"Final Destination","fighters":["Fox","Falco"],
+  "workload":"two scripted native-frame controller tracks",
+  "codegen":{"fpuguard":true,"blockmerge":true,"regcache":true,"integerfifo":true,"singleprefix":true,"readfusion":false,"branchfusion":false,"fusionredispatch":false,"counterbatch":false,"leandispatch":false,"cpformat":false},
+  "inputConsistency":{"passed":true,"checked":114,"mismatches":[],"limits":"Rolling sampled native-input/gameplay fingerprints and exact polling gaps, not full machine equality"},
+  "passed":false,
+  "eachRun":{"visible":true,"focused":true,"lifecycleEvents":[]},
+  "runs":[
+    {"capacity":2,"seconds":29.998284999999917,"simulationFps":60.03676543509087,"gameRenderFps":59.97009495709521,"visibleFps":59.37006065513428,"p95GapMs":19.34499999997206,"maxGapMs":58.15499999979511,"queueDropped":16,"queueMeanAgeMs":18.785735129069078,"queueP95AgeUpperMs":33,"passed":false},
+    {"capacity":3,"seconds":29.999319999999834,"simulationFps":59.26801007489536,"gameRenderFps":59.20134189708333,"visibleFps":58.667996474587085,"p95GapMs":28.119999999878928,"maxGapMs":55.25499999988824,"queueDropped":14,"queueMeanAgeMs":25.368560477005886,"queueP95AgeUpperMs":47,"passed":false},
+    {"capacity":3,"seconds":30.00662000000011,"simulationFps":59.98676292098188,"gameRenderFps":59.98676292098188,"visibleFps":59.35356931237152,"p95GapMs":19.34000000008382,"maxGapMs":49.705000000074506,"queueDropped":16,"queueMeanAgeMs":29.50913299663033,"queueP95AgeUpperMs":44,"passed":false},
+    {"capacity":2,"seconds":30.016100000000325,"simulationFps":59.73460909311938,"gameRenderFps":59.66797818504005,"visibleFps":58.60188365577077,"p95GapMs":21.145000000018626,"maxGapMs":120.03499999991618,"queueDropped":32,"queueMeanAgeMs":19.701551136364817,"queueP95AgeUpperMs":31,"passed":false}
+  ],
+  "decision":"Opposing pairs; no repeatable visible-FPS gain. Keep capacity two. Queue age is not physical input-to-photon latency."
+}

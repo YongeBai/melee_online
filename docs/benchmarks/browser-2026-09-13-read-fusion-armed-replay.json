@@ -1,0 +1,51 @@
+{
+  "artifactScope": "Exact selected fields from CUA readArmedReplay",
+  "coreSha256": "3cbc3b2f2ab66c25ff3489a63c73f0c00e47189f1ca78760f0e0f39c652992bc",
+  "passed": true,
+  "kind": "local-browser-late-input-correction",
+  "frames": 120,
+  "performanceTest": false,
+  "networkTest": false,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107055991,
+    "sizeB": 107055991,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "tickDifferences": [],
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "correctedFrame": 422,
+  "reference": {
+    "readfusion": false,
+    "stepcheck": false,
+    "blockmerge": true,
+    "fpuguard": true
+  },
+  "candidate": {
+    "readfusion": true,
+    "stepcheck": false,
+    "blockmerge": true,
+    "fpuguard": true
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "limits": "Local delayed-input browser comparison. No FPS, physical latency, broad roster/stage or native-Dolphin equivalence claim."
+}

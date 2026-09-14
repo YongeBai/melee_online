@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-14",
+  "kind": "sampled-direct-block-profile",
+  "diagnosticOnly": true,
+  "coreSha256": "172876d5a91c9d621f7f59c4d6b9d6f0c627ed7effbeacd26bbf8a1d7e1cce09",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "retained": ["animstatefast", "displaylistfast", "blockmerge", "fpuguard", "integerfifo", "singleprefix"]
+  },
+  "benchmark": {
+    "seconds": 30.00393,
+    "simulationFps": 58.2590347331,
+    "visibleFps": 57.125849847,
+    "profilerActive": true
+  },
+  "profile": {
+    "samples": 679115,
+    "sampledUs": 253498,
+    "uniqueSampledBlocks": 11069
+  },
+  "topFunctions": [
+    {"name":"HSD_FObjInterpretAnim","samples":68303,"sampledUs":21854.206,"blocks":35},
+    {"name":"HandleReverb","samples":29827,"sampledUs":10637.318,"blocks":11},
+    {"name":"SetupEnvelopeModelMtx","samples":13280,"sampledUs":4780.8,"blocks":17},
+    {"name":"parseFloat","samples":11958,"sampledUs":3633.152,"blocks":6},
+    {"name":"cosf","samples":8229,"sampledUs":3435.008,"blocks":8},
+    {"name":"sinf","samples":7925,"sampledUs":2937.088,"blocks":7},
+    {"name":"HSD_AObjInterpretAnim","samples":6251,"sampledUs":2791.936,"blocks":6},
+    {"name":"mpRemap2d","samples":5574,"sampledUs":2629.632,"blocks":6},
+    {"name":"HSD_JObjDispSub","samples":4295,"sampledUs":2110.976,"blocks":5},
+    {"name":"HSD_TExpSetReg","samples":5617,"sampledUs":2045.44,"blocks":6},
+    {"name":"HSD_StateInvalidate","samples":5527,"sampledUs":1964.542,"blocks":2},
+    {"name":"HSD_SetupChannel","samples":4007,"sampledUs":1929.984,"blocks":7},
+    {"name":"GXLoadPosMtxImm","samples":2283,"sampledUs":955.648,"blocks":2},
+    {"name":"HSD_Index2PosNrmMtx","samples":2569,"sampledUs":950.016,"blocks":3},
+    {"name":"__GXSetMatrixIndex","samples":2065,"sampledUs":1052.928,"blocks":3}
+  ],
+  "interpretation": "Profiling is attribution-only and its FPS is not acceptance. Residual GX matrix wrappers motivated an isolated direct FIFO submission experiment."
+}

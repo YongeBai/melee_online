@@ -1,0 +1,217 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -301,6 +301,7 @@
+ // attempt; we don't promise instant per-block synchronization.
+ std::atomic<u32> s_dolphin_web_disable_mask{0};
+ std::atomic<bool> s_dolphin_web_compact_gpr_locals{false};
++std::atomic<bool> s_dolphin_web_paired_simd{false};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEECALL   = 1u << 1;  // 5 Melee fast call-branch helpers
+@@ -5037,6 +5038,74 @@
+   body.push_back(0x0b);
+ }
+ 
++// Private SIMD experiment. FPR cache and SIMD are mutually exclusive because
++// the vector path reads the contiguous pair in CPU state. Allocate one result
++// local only in blocks containing eligible paired arithmetic.
++static bool s_wasm_paired_simd_active = false;
++static u32 s_wasm_paired_simd_local = 0;
++
++void EmitSimdOpcode(std::vector<u8>& body, u32 opcode)
++{
++  body.push_back(0xfd);
++  EmitU32Leb(body, opcode);
++}
++
++void EmitStateLoadPair(std::vector<u8>& body, const WasmStateLayout& layout, u32 reg)
++{
++  EmitLocalGet(body, 0);
++  EmitSimdOpcode(body, 0x00);  // v128.load, only eight-byte alignment required
++  EmitU32Leb(body, 3);
++  EmitU32Leb(body, PsOffset(layout, reg, 0));
++}
++
++// Leaves the scalar fallback arm open. NaN results use the existing scalar
++// emitter, preserving its payload/sign behavior. No guest state is written
++// until both vector lanes have been calculated and checked. Mul/add stay
++// separate operations with the same f64 -> f32 -> f64 rounding sequence.
++bool EmitPairedSingleSimd(std::vector<u8>& body, const WasmStateLayout& layout,
++                          UGeckoInstruction inst)
++{
++  if (!s_wasm_paired_simd_active || s_fpr_rc.active) return false;
++  const u32 subop = inst.SUBOP5;
++  EmitStateLoadPair(body, layout, inst.FA);
++  if (subop == 20 || subop == 21)
++  {
++    EmitStateLoadPair(body, layout, inst.FB);
++    EmitSimdOpcode(body, subop == 21 ? 0xf0 : 0xf1);  // f64x2.add/sub
++  }
++  else
++  {
++    if (subop >= 12 && subop <= 15)
++    {
++      EmitStateLoadF64(body, PsOffset(layout, inst.FC, subop & 1));
++      EmitSimdOpcode(body, 0x14);  // f64x2.splat
++    }
++    else EmitStateLoadPair(body, layout, inst.FC);
++    EmitSimdOpcode(body, 0xf2);  // f64x2.mul
++    if (subop == 14 || subop == 15 || subop >= 28)
++    {
++      EmitStateLoadPair(body, layout, inst.FB);
++      EmitSimdOpcode(body, subop == 28 || subop == 30 ? 0xf1 : 0xf0);
++    }
++  }
++  EmitSimdOpcode(body, 0x5e);  // f32x4.demote_f64x2_zero
++  EmitSimdOpcode(body, 0x5f);  // f64x2.promote_low_f32x4
++  if (subop == 30 || subop == 31) EmitSimdOpcode(body, 0xed);  // f64x2.neg
++  EmitLocalSet(body, s_wasm_paired_simd_local);
++  EmitLocalGet(body, s_wasm_paired_simd_local);
++  EmitLocalGet(body, s_wasm_paired_simd_local);
++  EmitSimdOpcode(body, 0x47);  // f64x2.eq
++  EmitSimdOpcode(body, 0xc3);  // i64x2.all_true
++  body.insert(body.end(), {0x04, 0x40});
++  EmitLocalGet(body, 0);
++  EmitLocalGet(body, s_wasm_paired_simd_local);
++  EmitSimdOpcode(body, 0x0b);  // v128.store
++  EmitU32Leb(body, 3);
++  EmitU32Leb(body, PsOffset(layout, inst.FD, 0));
++  body.push_back(0x05);
++  return true;
++}
++
+ void EmitPairedSingleAddSub(std::vector<u8>& body, const WasmStateLayout& layout,
+                             const PPCAnalyst::CodeOp& op, u32 downcount)
+ {
+@@ -5044,6 +5113,7 @@
+   const u8 opcode = inst.SUBOP5 == 21 ? 0xa0 : 0xa1;
+ 
+   EmitFpuAvailableOrFallback(body, op, layout, downcount);
++  const bool simd = EmitPairedSingleSimd(body, layout, inst);
+ 
+   for (u32 lane = 0; lane < 2; ++lane)
+   {
+@@ -5056,6 +5126,7 @@
+     EmitStateStoreF64Suffix(body, PsOffset(layout, inst.FD, lane));
+   }
+ 
++  if (simd) body.push_back(0x0b);
+   body.push_back(0x05);
+   EmitFpCall(body, op, downcount);
+   body.push_back(0x0b);
+@@ -5070,6 +5141,7 @@
+   const bool negate = inst.SUBOP5 == 30 || inst.SUBOP5 == 31;
+ 
+   EmitFpuAvailableOrFallback(body, op, layout, downcount);
++  const bool simd = EmitPairedSingleSimd(body, layout, inst);
+ 
+   for (u32 lane = 0; lane < 2; ++lane)
+   {
+@@ -5089,6 +5161,7 @@
+     EmitStateStoreF64Suffix(body, PsOffset(layout, inst.FD, lane));
+   }
+ 
++  if (simd) body.push_back(0x0b);
+   body.push_back(0x05);
+   EmitFpCall(body, op, downcount);
+   body.push_back(0x0b);
+@@ -5102,6 +5175,7 @@
+   const bool add = inst.SUBOP5 == 14 || inst.SUBOP5 == 15;
+ 
+   EmitFpuAvailableOrFallback(body, op, layout, downcount);
++  const bool simd = EmitPairedSingleSimd(body, layout, inst);
+ 
+   // Capture the scalar before writing either destination lane: FD may alias FC.
+   EmitStateLoadF64(body, PsOffset(layout, inst.FC, scalar_lane));
+@@ -5123,6 +5197,7 @@
+     EmitStateStoreF64Suffix(body, PsOffset(layout, inst.FD, lane));
+   }
+ 
++  if (simd) body.push_back(0x0b);
+   body.push_back(0x05);
+   EmitFpCall(body, op, downcount);
+   body.push_back(0x0b);
+@@ -7869,6 +7944,18 @@
+   s_fpr_rc = {};
+   s_fpr_rc.active = DolphinWebFeatureEnabled(1u << 19);
+   s_fpr_rc.base = layout.ps_offset;
++  s_wasm_paired_simd_active = false;
++  if (s_dolphin_web_paired_simd.load(std::memory_order_relaxed) && !s_fpr_rc.active)
++  {
++    for (const auto& op : ops)
++      if (!op.skip && op.inst.OPCD == 4 && IsPairedSingleArithmeticSubop(op.inst.SUBOP5))
++        s_wasm_paired_simd_active = true;
++    if (s_wasm_paired_simd_active)
++    {
++      s_wasm_paired_simd_local = next_local++;
++      ++body[0]; body.insert(body.end(), {0x01, 0x7b});
++    }
++  }
+   s_fpr_rc.local_base = next_local;
+   if (s_fpr_rc.active)
+   {
+@@ -8065,6 +8152,15 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetPairedSimd()
++{
++  return s_dolphin_web_paired_simd.load(std::memory_order_relaxed);
++}
++extern "C" void DolphinWeb_SetPairedSimd(bool value)
++{
++  s_dolphin_web_paired_simd.store(value, std::memory_order_relaxed);
++}
++
+ extern "C" bool DolphinWeb_GetCompactGprLocals()
+ {
+   return s_dolphin_web_compact_gpr_locals.load(std::memory_order_relaxed);
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -63,6 +63,8 @@
+ extern "C" std::uint32_t DolphinWeb_SetCachedInterpreterDisableMask(std::uint32_t mask);
+ extern "C" std::uint32_t DolphinWeb_GetCachedInterpreterDisableMask();
+ extern "C" bool DolphinWeb_GetCompactGprLocals();
++extern "C" bool DolphinWeb_GetPairedSimd();
++extern "C" void DolphinWeb_SetPairedSimd(bool);
+ extern "C" void DolphinWeb_SetCompactGprLocals(bool);
+ extern "C" void NotifyWebGpuOwnershipTraceLoadRequested();
+ extern "C" int GetPpcWasmJitRequestedMode();
+@@ -1175,7 +1177,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 63 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 127 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1188,11 +1190,13 @@
+   const u32 next = (previous & ~(regcache_disable | fastmem_enable | integer_fifo_enable | single_prefix_enable | fpr_cache_enable)) |
+       ((flags & 1) ? 0 : regcache_disable) | ((flags & 2) ? fastmem_enable : 0) | ((flags & 4) ? integer_fifo_enable : 0) | ((flags & 8) ? single_prefix_enable : 0) | ((flags & 16) ? fpr_cache_enable : 0);
+   const bool compact = (flags & 32) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals())
++  const bool simd = (flags & 64) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+     DolphinWeb_SetCompactGprLocals(compact);
++    DolphinWeb_SetPairedSimd(simd);
+   }
+   return 1;
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

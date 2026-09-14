@@ -1,0 +1,68 @@
+{
+  "artifactScope": "Exact selected fields from CUA redispatchRunningReplay",
+  "coreSha256": "767af3cb674006c9c2e59db2b5416e5fac83aed133b052eb4992ed11473226be",
+  "passed": true,
+  "kind": "normal-running-browser-codegen-equivalence",
+  "performanceTest": false,
+  "networkTest": false,
+  "frames": 600,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 107518700,
+    "sizeB": 107518700,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "fingerprintsEqual": true,
+  "stop": {
+    "startFrame": 309,
+    "stoppedFrame": 909,
+    "nativeFramesObserved": 601,
+    "skipped": 0,
+    "inputHash": 2752152140,
+    "stateHash": 2134856501
+  },
+  "commonCodegen": {
+    "readfusion": true,
+    "branchfusion": true,
+    "blockmerge": true,
+    "fpuguard": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "stepcheck": false,
+    "fpuguardwide": false
+  },
+  "execution": [
+    {
+      "fusionredispatch": false,
+      "dispatcherHandle": 11378,
+      "calls": 29573162,
+      "newFusionRedispatchEmissions": 0,
+      "newReadFusionEmissions": 1792
+    },
+    {
+      "fusionredispatch": true,
+      "dispatcherHandle": 11378,
+      "calls": 1498321,
+      "newFusionRedispatchEmissions": 3901,
+      "newReadFusionEmissions": 1792
+    }
+  ],
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "interpretation": "95% fewer C++ entries into the WASM dispatcher with identical native state and input. Emission counts show the same1792 read-fused admissions on both paths. This is a control-flow count, not a 95% CPU time or FPS gain."
+}

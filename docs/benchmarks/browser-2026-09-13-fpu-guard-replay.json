@@ -1,0 +1,89 @@
+{
+  "artifactScope": "Exact selected fields from completed CUA fpuReplay and following fpuDiag",
+  "core": "b0774ca5e829ecc0387da27fc65a94186829316d190d42fc1ddefcdb3efdfd3a",
+  "passed": true,
+  "performanceTest": false,
+  "frames": 120,
+  "delay": 3,
+  "tickDifferences": [],
+  "comparison": {
+    "sizeA": 107060212,
+    "sizeB": 107060212,
+    "sectionsCompared": 29,
+    "allSectionDifferentBytes": 0
+  },
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "codegenReference": {
+    "blockmerge": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "fpuguard": false
+  },
+  "codegenComparison": {
+    "blockmerge": true,
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": false,
+    "psmemsimd": false,
+    "vectorfpr": false,
+    "psqhoist": false,
+    "widemap": false,
+    "stateconst": false,
+    "msrcache": false,
+    "fifocopy": false,
+    "fifobatch": false,
+    "frsqrtefast": false,
+    "fpuguard": true
+  },
+  "verifiedSelection": {
+    "stage": 2,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "referenceFrame": 422,
+  "correctedFrame": 422,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "compilerDiagnostics": {
+    "fpuGuardBlocks": 77,
+    "fpuGuardSites": 374,
+    "mergedBlocks": 1683,
+    "compileFailures": 0,
+    "emitFailures": 0,
+    "meaning": "Compilation coverage only; not dynamic cost share."
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-14",
+  "candidateCoreSha256": "e1bfba10f5284af19174f3dff6265b9edd4d72966754aa9d8f2f8d92fa0fdb11",
+  "scene": {
+    "stage": "Battlefield",
+    "fighters": ["Fox", "Falco"],
+    "sourceResolution": [960, 720],
+    "input": "matched native-frame controller workload"
+  },
+  "correctness": {
+    "frames": 600,
+    "fullMachineBytesEqual": true,
+    "fingerprintsEqual": true,
+    "snapshotBytes": 103252952,
+    "newRamTraceBlocks": 2758,
+    "newRamTraceBoundaries": 5366
+  },
+  "steadyState": {
+    "off": {
+      "simulationFps": [59.402178079851126, 60.00681077302512],
+      "gameRenderFps": [59.368843524250764, 60.00681077302512],
+      "visibleFps": [54.935347629402166, 55.80633401891336],
+      "averageSimulationFps": 59.704494426438124,
+      "averageGameRenderFps": 59.68782714863794,
+      "averageVisibleFps": 55.37084082415777
+    },
+    "on": {
+      "simulationFps": [58.17163064581973, 60.00465036040889],
+      "gameRenderFps": [58.138294467799206, 59.971314443542],
+      "visibleFps": [54.03794457127437, 53.970849407501106],
+      "averageSimulationFps": 59.08814050311431,
+      "averageGameRenderFps": 59.054804455670606,
+      "averageVisibleFps": 54.00439698938774
+    },
+    "averageDelta": {
+      "simulationFps": -0.616353923323813,
+      "gameRenderFps": -0.633022692967335,
+      "visibleFps": -1.36644383477003
+    },
+    "inputConsistencyPassed": true
+  },
+  "coldCompile": {
+    "referenceCompileAndLinkMs": 373.942,
+    "candidateCompileAndLinkMs": 156.502,
+    "largestObservedGapMs": 182.38500000536442
+  },
+  "decision": "reject broad RAM-bearing trace fusion; investigate hot selective traces or a shared/AOT module"
+}

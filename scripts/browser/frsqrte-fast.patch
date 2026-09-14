@@ -1,0 +1,150 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -29,6 +29,7 @@
+ #include <fmt/ostream.h>
+ 
+ #include "Common/CommonTypes.h"
++#include "Common/FloatUtils.h"
+ #include "Common/GekkoDisassembler.h"
+ #include "Common/Logging/Log.h"
+ #include "Core/Config/MainSettings.h"
+@@ -309,6 +310,7 @@
+ std::atomic<bool> s_dolphin_web_wide_block_map{false};
+ std::atomic<bool> s_dolphin_web_constant_state_base{false};
+ std::atomic<bool> s_dolphin_web_block_msr_cache{false};
++std::atomic<bool> s_dolphin_web_frsqrte_fast{false};
+ std::atomic<u32> s_block_msr_cache_load_sites{0},s_block_msr_cache_blocks{0};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+@@ -5445,6 +5447,54 @@
+   EmitFpCall(body, op, downcount);
+ }
+ 
++void EmitFrsqrteExactFast(std::vector<u8>& body, const WasmStateLayout& layout,
++                          const PPCAnalyst::CodeOp& op, u32 downcount, u32 table_address)
++{
++  const UGeckoInstruction inst = op.inst;
++  if (inst.Rc) { EmitFpCall(body, op, downcount); return; }
++  EmitFpuAvailableOrFallback(body, op, layout, downcount);
++  EmitStateLoadU32(body, PsOffset(layout, inst.FB, 0) + 4);
++  EmitLocalSet(body, 2);
++  // Only positive normal doubles. Exceptional/subnormal inputs retain the
++  // canonical handler, including exception enables and destination suppression.
++  EmitLocalGet(body, 2); EmitI32Const(body, 20); body.push_back(0x76);
++  EmitI32Const(body, 1); body.push_back(0x6b);
++  EmitI32Const(body, 2046); body.push_back(0x49);
++  body.insert(body.end(), {0x04, 0x40});
++  // i contains the exponent parity and the top fifteen fraction bits.
++  EmitLocalGet(body, 2); EmitI32Const(body, 5); body.push_back(0x76);
++  EmitI32Const(body, 0xffff); body.push_back(0x71); EmitLocalSet(body, 3);
++  const auto table_load = [&](u32 offset) {
++    EmitLocalGet(body, 3); EmitI32Const(body, 11); body.push_back(0x76);
++    EmitI32Const(body, 3); body.push_back(0x74);
++    EmitI32Const(body, table_address); body.push_back(0x6a);
++    body.insert(body.end(), {0x28, 0x02}); EmitU32Leb(body, offset);
++  };
++  table_load(0); table_load(4);
++  EmitLocalGet(body, 3); EmitI32Const(body, 2047); body.push_back(0x71);
++  body.push_back(0x6c); body.push_back(0x6a); EmitLocalSet(body, 7);
++  // Write exact estimate bits, preserving PS1 and FD==FB aliases.
++  EmitStateStoreU32Prefix(body);
++  EmitLocalGet(body, 7); EmitI32Const(body, 26); body.push_back(0x74);
++  EmitStateStoreU32Suffix(body, PsOffset(layout, inst.FD, 0));
++  EmitStateStoreU32Prefix(body);
++  EmitI32Const(body, 0x3ff00000);
++  EmitLocalGet(body, 2); EmitI32Const(body, 0x7ff00000); body.push_back(0x71);
++  EmitI32Const(body, 0x3fe00000); body.push_back(0x6b);
++  EmitI32Const(body, 1); body.push_back(0x75); body.push_back(0x6b);
++  EmitI32Const(body, 0x7ff00000); body.push_back(0x71);
++  EmitLocalGet(body, 7); EmitI32Const(body, 6); body.push_back(0x76); body.push_back(0x72);
++  EmitStateStoreU32Suffix(body, PsOffset(layout, inst.FD, 0) + 4);
++  // Every accepted input yields a positive normal result. No FI/FR or
++  // exception bits change on this path in Interpreter::frsqrtex.
++  EmitStateStoreU32Prefix(body); EmitStateLoadU32(body, layout.fpscr_offset);
++  EmitI32Const(body, ~static_cast<u32>(FPRF_MASK)); body.push_back(0x71);
++  EmitI32Const(body, Common::PPC_FPCLASS_PN << FPRF_SHIFT); body.push_back(0x72);
++  EmitStateStoreU32Suffix(body, layout.fpscr_offset);
++  body.push_back(0x05); EmitFpCall(body, op, downcount); body.push_back(0x0b);
++  body.push_back(0x05); EmitFpCall(body, op, downcount); body.push_back(0x0b);
++}
++
+ bool IsPairedQuantizedFloatMemoryCandidate(UGeckoInstruction inst)
+ {
+   switch (inst.OPCD)
+@@ -7696,7 +7746,13 @@
+     }
+     if (inst.SUBOP10 == 26 && !inst.Rc)
+     {
+-      EmitFrsqrte(body, layout, op, downcount);
++      if (s_dolphin_web_frsqrte_fast.load(std::memory_order_relaxed))
++      {
++        static_assert(sizeof(Common::BaseAndDec) == 8);
++        EmitFrsqrteExactFast(body, layout, op, downcount,
++          static_cast<u32>(reinterpret_cast<std::uintptr_t>(Common::frsqrte_expected.data())));
++      }
++      else EmitFrsqrte(body, layout, op, downcount);
+       return true;
+     }
+     if ((inst.SUBOP10 == 40 || inst.SUBOP10 == 136 || inst.SUBOP10 == 264) && !inst.Rc)
+@@ -8462,6 +8518,9 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetFrsqrteFast(){return s_dolphin_web_frsqrte_fast.load(std::memory_order_relaxed);}
++extern "C" void DolphinWeb_SetFrsqrteFast(bool value){s_dolphin_web_frsqrte_fast.store(value,std::memory_order_relaxed);}
++
+ extern "C" bool DolphinWeb_GetBlockMsrCache(){return s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed);}
+ extern "C" void DolphinWeb_SetBlockMsrCache(bool value){s_dolphin_web_block_msr_cache.store(value,std::memory_order_relaxed);}
+ 
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -73,6 +73,8 @@
+ extern "C" bool DolphinWeb_GetBlockMsrCache();
+ extern "C" bool DolphinWeb_GetFifoCopy();
+ extern "C" bool DolphinWeb_GetFifoBatch();
++extern "C" bool DolphinWeb_GetFrsqrteFast();
++extern "C" void DolphinWeb_SetFrsqrteFast(bool);
+ extern "C" void DolphinWeb_SetFifoBatch(bool);
+ extern "C" void DolphinWeb_SetFifoCopy(bool);
+ extern "C" void DolphinWeb_SetBlockMsrCache(bool);
+@@ -1300,7 +1302,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 32767 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 65535 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1322,7 +1324,8 @@
+   const bool block_msr_cache = (flags & 4096) != 0;
+   const bool fifo_copy = (flags & 8192) != 0;
+   const bool fifo_batch = (flags & 16384) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch())
++  const bool frsqrte_fast = (flags & 32768) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1336,6 +1339,7 @@
+     DolphinWeb_SetBlockMsrCache(block_msr_cache);
+     DolphinWeb_SetFifoCopy(fifo_copy);
+     DolphinWeb_SetFifoBatch(fifo_batch);
++    DolphinWeb_SetFrsqrteFast(frsqrte_fast);
+   }
+   return 1;
+ }
+--- a/engines/wasm-dolphin/src/upstream-discio-worker.js
++++ b/engines/wasm-dolphin/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

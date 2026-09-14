@@ -1,0 +1,36 @@
+{
+  "kind": "local-browser-late-input-correction",
+  "coreSha256": "198908c3b44b721c5bbdb81c5b9923ba8186a9262ea6e3e3f33f3e109ef86b34",
+  "passed": true,
+  "frames": 120,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "reflection": false,
+  "scenery": false,
+  "internalScalePercent": 150,
+  "fullMachineBytesEqual": true,
+  "comparison": {
+    "sizeA": 108908029,
+    "sizeB": 108908029,
+    "allSectionsDifferentBytes": 0,
+    "includesGpuState": true
+  },
+  "tickDifferences": [],
+  "codegenComparison": {
+    "regcache": true,
+    "fastmem": false,
+    "integerfifo": true,
+    "singleprefix": true,
+    "fprcache": false,
+    "compactgpr": false,
+    "pssimd": true
+  },
+  "networkTest": false,
+  "performanceTest": false,
+  "limitations": [
+    "Compared browser scalar configuration versus optimized browser SIMD configuration; not whole-emulator versus native Dolphin equivalence."
+  ]
+}

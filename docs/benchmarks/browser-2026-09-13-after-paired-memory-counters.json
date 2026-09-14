@@ -1,0 +1,34 @@
+{
+  "coreSha256": "eae953535cf9f09f7d7b51c1bf5bcf0c9cb681a5155e103de0687d427a4368c2",
+  "interval": "Lifetime through boot, setup and first eight-trial ABBA; not a measured time share",
+  "profileEnabled": false,
+  "hotOpcodeCountersEnabled": false,
+  "jit": {
+    "attempts": 88222,
+    "compiled": 88098,
+    "full": 88094,
+    "partial": 4,
+    "uniqueInstances": 35354,
+    "instanceLimit": 65536,
+    "reused": 52744,
+    "moduleCompileUs": 1136575,
+    "moduleInstantiateUs": 215119
+  },
+  "idle": {
+    "blocks": 1893660,
+    "iterations": 48575311,
+    "hoisted": 0,
+    "rejects": 10395,
+    "fallbacks": 5,
+    "throttle": 231
+  },
+  "imports": {
+    "lfs": 7230,
+    "stfs": 397,
+    "lfd": 19949,
+    "psqNonfloat": 34038,
+    "gpfifo": 70181198
+  },
+  "psqFallback": "34038 quantized store type5 scale0 at804ee828",
+  "warning": "Counts identify frequency, not CPU duration. Zero hot-opcode counts are unavailable because those counters were compiled out."
+}

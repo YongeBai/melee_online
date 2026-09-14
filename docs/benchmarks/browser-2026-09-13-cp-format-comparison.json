@@ -1,0 +1,138 @@
+{
+  "artifactScope": "Exact selected CUA cpFpsRun fields; warmups omitted",
+  "coreSha256": "a1d25a5f8bba553d6dba70e76b523fb1ea5e007d12b7de7a6cf00a277949c8f0",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "cpformat",
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "workload": "two native-frame controller scripts plus native partner AI",
+  "emulationSpeed": 1,
+  "cpuClock": 1,
+  "profiler": false,
+  "commonCodegen": {
+    "readfusion": false,
+    "branchfusion": false,
+    "fpuguard": true,
+    "blockmerge": true,
+    "leandispatch": false,
+    "counterbatch": false,
+    "fusionredispatch": false,
+    "stepcheck": false
+  },
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 109,
+    "mismatches": []
+  },
+  "runs": [
+    {
+      "cpformat": false,
+      "seconds": 29.999134999997914,
+      "simulationFps": 54.3682342840923,
+      "gameRenderFps": 54.33489998962015,
+      "visibleFps": 54.301565695147985,
+      "p95GapMs": 33.14000000059605,
+      "maxGapMs": 36.939999997615814,
+      "queue": {
+        "capacity": 2,
+        "dropped": 0,
+        "meanAgeMs": 15.18007055207904
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "cpFormat": {
+        "writes": 948659,
+        "unchanged": 779511,
+        "avoided": 0,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    },
+    {
+      "cpformat": true,
+      "seconds": 29.99944999999553,
+      "simulationFps": 56.66770557461064,
+      "gameRenderFps": 56.63437163015499,
+      "visibleFps": 56.60103768569934,
+      "p95GapMs": 32.33000000566244,
+      "maxGapMs": 36.9100000038743,
+      "queue": {
+        "capacity": 2,
+        "dropped": 1,
+        "meanAgeMs": 15.197775161892544
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "cpFormat": {
+        "writes": 988894,
+        "unchanged": 812582,
+        "avoided": 812582,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    },
+    {
+      "cpformat": true,
+      "seconds": 29.9993049999997,
+      "simulationFps": 58.10134601451658,
+      "gameRenderFps": 58.068011908943134,
+      "visibleFps": 57.9013413810759,
+      "p95GapMs": 19.08500000089407,
+      "maxGapMs": 97.01000000536442,
+      "queue": {
+        "capacity": 2,
+        "dropped": 4,
+        "meanAgeMs": 16.69363348686294
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "cpFormat": {
+        "writes": 1013842,
+        "unchanged": 832978,
+        "avoided": 832978,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    },
+    {
+      "cpformat": false,
+      "seconds": 29.999710000000896,
+      "simulationFps": 57.83389239429142,
+      "gameRenderFps": 57.80055873873275,
+      "visibleFps": 57.66722411649807,
+      "p95GapMs": 19.269999995827675,
+      "maxGapMs": 57.20000000298023,
+      "queue": {
+        "capacity": 2,
+        "dropped": 3,
+        "meanAgeMs": 15.690658578779365
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "cpFormat": {
+        "writes": 1009365,
+        "unchanged": 829376,
+        "avoided": 0,
+        "interval": "Paused diagnostic boundaries bracket measurement; includes small start/stop overhead."
+      }
+    }
+  ],
+  "decision": "Both pairs favor reuse, but warm reverse gain only +0.26745 simulation FPS (~0.46%). Repeat before retention; all strict acceptance gates fail. Suppressed dirty marks are not actual cache lookups saved."
+}

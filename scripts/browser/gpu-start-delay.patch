@@ -1,0 +1,106 @@
+--- a/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -8,6 +8,7 @@
+ #endif
+ 
+ #include <atomic>
++#include <string>
+ #include <cstring>
+ 
+ #include "Common/Assert.h"
+@@ -46,6 +47,23 @@
+ #endif
+ 
+ #ifdef __EMSCRIPTEN__
++// Private scheduling experiment: only the initial deterministic GPU service
++// event moves. Existing FIFO reads, CP status, MMIO synchronization, command
++// ordering and all non-deterministic/single-core paths remain unchanged.
++static std::atomic<int> s_browser_gpu_start_delay{1000};
++static std::atomic<u64> s_browser_gpu_starts{0}, s_browser_gpu_callbacks{0};
++extern "C" const char* DolphinWeb_GpuStartDelay(int cycles)
++{
++  if (cycles != -1 && cycles != 1000 && cycles != 2000 && cycles != 4000 && cycles != 8000)
++    return "{\"error\":\"GPU start delay must be -1,1000,2000,4000 or 8000\"}";
++  if (cycles != -1) s_browser_gpu_start_delay.store(cycles, std::memory_order_relaxed);
++  static std::string result;
++  result = "{\"cycles\":" + std::to_string(s_browser_gpu_start_delay.load(std::memory_order_relaxed)) +
++      ",\"starts\":" + std::to_string(s_browser_gpu_starts.load(std::memory_order_relaxed)) +
++      ",\"callbacks\":" + std::to_string(s_browser_gpu_callbacks.load(std::memory_order_relaxed)) + "}";
++  return result.c_str();
++}
++
+ static std::atomic<bool> s_browser_fifo_batch{false};
+ extern "C" bool DolphinWeb_GetFifoBatch(){return s_browser_fifo_batch.load(std::memory_order_relaxed);}
+ extern "C" void DolphinWeb_SetFifoBatch(bool value){s_browser_fifo_batch.store(value,std::memory_order_relaxed);}
+@@ -619,8 +637,15 @@
+     if (m_syncing_suspended)
+     {
+       m_syncing_suspended = false;
+-      m_system.GetCoreTiming().ScheduleEvent(GPU_TIME_SLOT_SIZE, m_event_sync_gpu,
+-                                             GPU_TIME_SLOT_SIZE);
++      int delay = GPU_TIME_SLOT_SIZE;
++#ifdef __EMSCRIPTEN__
++      if (is_dual_core && m_use_deterministic_gpu_thread)
++      {
++        delay = s_browser_gpu_start_delay.load(std::memory_order_relaxed);
++        s_browser_gpu_starts.fetch_add(1, std::memory_order_relaxed);
++      }
++#endif
++      m_system.GetCoreTiming().ScheduleEvent(delay, m_event_sync_gpu, delay);
+     }
+   }
+ }
+@@ -799,6 +824,10 @@
+   int next = -1;
+ 
+   auto& fifo = system.GetFifo();
++#ifdef __EMSCRIPTEN__
++  if (system.IsDualCoreMode() && fifo.m_use_deterministic_gpu_thread)
++    s_browser_gpu_callbacks.fetch_add(1, std::memory_order_relaxed);
++#endif
+   if (!system.IsDualCoreMode() || fifo.m_use_deterministic_gpu_thread)
+   {
+     next = fifo.RunGpuOnCpu(int(ticks));
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1443,6 +1443,16 @@
+   const Core::CPUThreadGuard guard(system);
+   return DolphinWeb_CPFormatStats();
+ }
++extern "C" const char* DolphinWeb_GpuStartDelay(int cycles);
++EMSCRIPTEN_KEEPALIVE const char* BrowserGpuStartDelay(int cycles)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"GPU scheduling control requires paused CPU ownership\"}";
++  const Core::CPUThreadGuard guard(system);
++  return DolphinWeb_GpuStartDelay(cycles);
++}
++
+ // Query (-1) or configure (0/1) host pacing while owning the paused CPU.
+ // This does not alter the virtual clock, instructions, GPU mode or JIT cache.
+ EMSCRIPTEN_KEEPALIVE const char* BrowserTimingDrift(int mode)
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1076,6 +1076,13 @@
+       } else if (payload.action === "frameInputStop") {
+         if(!Number.isInteger(payload.frames) || !api.browserFrameBenchmarkStopAfterFrames?.(payload.frames))throw Error("Frame input stop requires fresh paused QA input and 120–3600 frames");
+         return {frames:payload.frames};
++      } else if (payload.action === "gpuStartDelay") {
++        if(payload.cycles!==undefined&&![1000,2000,4000,8000].includes(payload.cycles))throw Error("Unsupported GPU start delay");
++        if(!api.browserGpuStartDelay)throw Error("GPU scheduling diagnostics unavailable");
++        const stats=JSON.parse(api.browserGpuStartDelay(payload.cycles===undefined?-1:payload.cycles));
++        if(stats.error)throw Error(stats.error);
++        if(payload.cycles!==undefined&&stats.cycles!==payload.cycles)throw Error("GPU start delay did not apply");
++        return stats;
+       } else if (payload.action === "timingDrift") {
+         if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Timing drift mode must be boolean");
+         if(!api.browserTimingDrift)throw Error("Timing drift diagnostics unavailable");
+@@ -2476,6 +2483,7 @@
+     browserFrameBenchmarkInput: optionalCwrap("BrowserFrameBenchmarkInput", "number", ["number"]),
+     browserFrameBenchmarkStopAfterFrames: optionalCwrap("BrowserFrameBenchmarkStopAfterFrames", "number", ["number"]),
+     browserCPFormatStats: optionalCwrap("BrowserCPFormatStats", "string", []),
++    browserGpuStartDelay: optionalCwrap("BrowserGpuStartDelay", "string", ["number"]),
+     browserTimingDrift: optionalCwrap("BrowserTimingDrift", "string", ["number"]),
+     browserFrameBenchmarkTiming: optionalCwrap("BrowserFrameBenchmarkTiming", "string", []),
+     browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),

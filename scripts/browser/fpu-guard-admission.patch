@@ -1,0 +1,37 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -8317,6 +8317,16 @@
+   return floating>=2;
+ }
+ 
++// Avoid adding a guard to memory-only blocks or a single arithmetic check.
++bool CanHoistFpuGuard(std::span<const PPCAnalyst::CodeOp> ops)
++{
++  if (!CanCacheBlockMsr(ops)) return false;
++  u32 arithmetic=0;
++  for (const auto& op : ops)
++    if (!op.skip && (op.inst.OPCD==4 || op.inst.OPCD==59)) ++arithmetic;
++  return arithmetic>=2;
++}
++
+ // Two original blocks may share register locals, but keep the original
+ // architectural timing boundary. A register-only prefix cannot invalidate B.
+ struct WasmFusionBoundary
+@@ -8407,7 +8417,7 @@
+                                                 const WasmFusionBoundary* fusion = nullptr)
+ {
+   const ScopedFpuGuardProof fpu_guard_scope;
+-  s_fpu_guard.active=s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
++  s_fpu_guard.active=s_dolphin_web_fpu_guard_hoist.load(std::memory_order_relaxed) && CanHoistFpuGuard(ops);
+   const ScopedBlockMsrCache msr_cache_scope;
+   const bool cache_msr=s_dolphin_web_block_msr_cache.load(std::memory_order_relaxed) && CanCacheBlockMsr(ops);
+   const ScopedWasmStateBase state_base_scope(
+@@ -8550,7 +8560,7 @@
+     if (op.skip)
+       continue;
+ 
+-    if (s_fpu_guard.active && (op.opinfo->flags & FL_USE_FPU))
++    if (s_fpu_guard.active && (op.inst.OPCD==4 || op.inst.OPCD==59))
+       EmitFirstFpuGuard(body, layout, op, downcount);
+     if (!EmitWasmSupportedIntegerInstruction(body, layout, op, downcount))
+     {

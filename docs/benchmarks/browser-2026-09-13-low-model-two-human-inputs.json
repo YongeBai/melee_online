@@ -1,0 +1,79 @@
+{
+  "core": "84a3cf8ee86919fc9e54e4f0bbcf4dbea1d4a8ad2cffe36063761134b4ec5bec",
+  "kind": "same-checkpoint-warmed-repeats-summary",
+  "workload": "Fountain Ice Climbers mirror, two active scripted human controller tracks with native partner AI, low models, reflection/scenery off, full shadows and hidden animation retained;150% EFB;RAF queue2;async probe",
+  "emulationSpeed": 1,
+  "cpuOverclock": 1,
+  "warmup": {
+    "simulationFps": 47.877537455345056,
+    "visibleFps": 47.844219753566804
+  },
+  "runs": [
+    {
+      "seconds": 29.99716000000015,
+      "simulationFps": 53.071690786727544,
+      "gameRenderFps": 53.038354297539904,
+      "visibleFps": 53.038354297539904,
+      "p95GapMs": 33.43999999947846,
+      "maxGapMs": 50.31000000052154,
+      "inputChanges": [
+        160,
+        154
+      ],
+      "distinctActionCounts": [
+        28,
+        31
+      ],
+      "queue": {
+        "capacity": 2,
+        "received": 1592,
+        "presented": 1592,
+        "dropped": 0,
+        "underruns": 209,
+        "meanAgeMs": 9.053668341715236
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "exercisedBothPlayers": true,
+      "passed": false
+    },
+    {
+      "seconds": 29.997169999999926,
+      "simulationFps": 51.80488692766697,
+      "gameRenderFps": 51.8382234057414,
+      "visibleFps": 51.80488692766697,
+      "p95GapMs": 33.47499999962747,
+      "maxGapMs": 58.98499999940395,
+      "inputChanges": [
+        157,
+        154
+      ],
+      "distinctActionCounts": [
+        28,
+        37
+      ],
+      "queue": {
+        "capacity": 2,
+        "received": 1555,
+        "presented": 1555,
+        "dropped": 0,
+        "underruns": 244,
+        "meanAgeMs": 9.059048231506655
+      },
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "validGameplay": true,
+      "exercisedBothPlayers": true,
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "limits": "Not human tournament play or a causal model-detail A/B. Physical input-to-photon latency unmeasured; queue age only receipt-to-canvas. Visual review after measurement showed original framing and readable fighters/platforms/HUD; no native-Dolphin image comparison."
+}

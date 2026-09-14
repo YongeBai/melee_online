@@ -1,0 +1,30 @@
+{
+  "kind": "normal-running-browser-codegen-equivalence",
+  "feature": "animstatefast-linear-op2-resume",
+  "coreSha256": "5b8ab91c3e38dccc68832423fade49c51082b9f499a2ee587f722e2bc964d12c",
+  "stage": "Yoshi's Story",
+  "characters": ["Ice Climbers", "Ice Climbers"],
+  "frames": 600,
+  "sourceResolution": [960, 720],
+  "passed": true,
+  "fullMachineBytesEqual": true,
+  "fingerprintsEqual": true,
+  "verifiedSelection": {
+    "stage": 8,
+    "characters": [14, 14],
+    "slotTypes": [0, 0],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "candidateCoverage": {
+    "newCompiles": 1,
+    "runs": 421903,
+    "direct": 421903,
+    "fallbacks": 0,
+    "common": 322643,
+    "callbacks": 322643,
+    "directConstantOrLinearResumes": 162503
+  },
+  "limits": "Exact endpoint equality of 110,178,708-byte complete-machine captures after two ordinary native-input tracks. Coverage counter combines constant op 1 and true-linear op 2 resumes; it is an execution count, not CPU time."
+}

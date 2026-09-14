@@ -1,0 +1,156 @@
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/Fifo.cpp
+@@ -45,6 +45,27 @@
+ #include "dolphin_web_raster_profile.h"
+ #endif
+ 
++#ifdef __EMSCRIPTEN__
++static std::atomic<bool> s_browser_fifo_batch{false};
++extern "C" bool DolphinWeb_GetFifoBatch(){return s_browser_fifo_batch.load(std::memory_order_relaxed);}
++extern "C" void DolphinWeb_SetFifoBatch(bool value){s_browser_fifo_batch.store(value,std::memory_order_relaxed);}
++
++// Prefetch only contiguous, aligned MEM1 bursts already queued in this callback.
++// Keep every 32-byte decode, interrupt cycle origin, CP update and GPU wakeup.
++// The original path owns wraparound, breakpoints, other RAM and invalid ranges.
++static u32 BrowserFifoPrefetchBytes(u32 base,u32 end,u32 read,u32 distance,
++                                   size_t room,u32 ram_size,bool breakpoint)
++{
++  if(breakpoint || ((base|end|read|distance)&31u) || base>read || read>end ||
++     distance<64 || room<64 || ram_size<64)return 32;
++  const u32 offset=read&0x3fffffffu;
++  if(offset>ram_size-64)return 32;
++  const auto bytes=std::min({size_t{256},size_t{distance},size_t{end-read}+32,
++                             room,size_t{ram_size-offset}})&~size_t{31};
++  return static_cast<u32>(std::max(bytes,size_t{32}));
++}
++#endif
++
+ namespace Fifo
+ {
+ #ifdef __EMSCRIPTEN__
+@@ -281,7 +302,7 @@
+ }
+ 
+ // The deterministic_gpu_thread version.
+-void FifoManager::ReadDataFromFifoOnCPU(u32 read_ptr)
++void FifoManager::ReadDataFromFifoOnCPU(u32 read_ptr, bool prefetched)
+ {
+   u8* write_ptr = m_video_buffer_write_ptr;
+   if (GPFifo::GATHER_PIPE_SIZE > static_cast<size_t>(m_video_buffer + FIFO_SIZE - write_ptr))
+@@ -310,7 +331,8 @@
+     }
+   }
+   auto& memory = m_system.GetMemory();
+-  memory.CopyFromEmu(m_video_buffer_write_ptr, read_ptr, GPFifo::GATHER_PIPE_SIZE);
++  if (!prefetched)
++    memory.CopyFromEmu(m_video_buffer_write_ptr, read_ptr, GPFifo::GATHER_PIPE_SIZE);
+   m_video_buffer_pp_read_ptr = OpcodeDecoder::RunFifo<true>(
+       DataReader(m_video_buffer_pp_read_ptr, write_ptr + GPFifo::GATHER_PIPE_SIZE), nullptr);
+   // This would have to be locked if the GPU thread didn't spin.
+@@ -612,13 +634,42 @@
+   auto& fifo = command_processor.GetFifo();
+   bool reset_simd_state = false;
+   int available_ticks = int(ticks * m_config_sync_gpu_overclock) + m_sync_ticks.load();
++#ifdef __EMSCRIPTEN__
++  u32 prefetched_bytes = 0;
++  const bool batch = s_browser_fifo_batch.load(std::memory_order_relaxed);
++#endif
+   while (fifo.bFF_GPReadEnable.load(std::memory_order_relaxed) &&
+          fifo.CPReadWriteDistance.load(std::memory_order_relaxed) && !AtBreakpoint(m_system) &&
+          available_ticks >= 0)
+   {
+     if (m_use_deterministic_gpu_thread)
+     {
+-      ReadDataFromFifoOnCPU(fifo.CPReadPointer.load(std::memory_order_relaxed));
++      bool prefetched = false;
++#ifdef __EMSCRIPTEN__
++      if (batch)
++      {
++        if (prefetched_bytes == 0)
++        {
++          const u32 read = fifo.CPReadPointer.load(std::memory_order_relaxed);
++          auto& memory = m_system.GetMemory();
++          const u32 bytes = BrowserFifoPrefetchBytes(
++              fifo.CPBase.load(std::memory_order_relaxed),
++              fifo.CPEnd.load(std::memory_order_relaxed), read,
++              fifo.CPReadWriteDistance.load(std::memory_order_relaxed),
++              static_cast<size_t>(m_video_buffer + FIFO_SIZE - m_video_buffer_write_ptr),
++              memory.GetRamSizeReal(), fifo.bFF_BPEnable.load(std::memory_order_relaxed));
++          if (bytes > GPFifo::GATHER_PIPE_SIZE)
++          {
++            memory.CopyFromEmu(m_video_buffer_write_ptr, read, bytes);
++            prefetched_bytes = bytes;
++          }
++        }
++        prefetched = prefetched_bytes != 0;
++        if (prefetched)
++          prefetched_bytes -= GPFifo::GATHER_PIPE_SIZE;
++      }
++#endif
++      ReadDataFromFifoOnCPU(fifo.CPReadPointer.load(std::memory_order_relaxed), prefetched);
+       m_gpu_mainloop.Wakeup();
+     }
+     else
+--- a/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/Fifo.h
++++ b/engines/wasm-dolphin/vendor/dolphin/Source/Core/VideoCommon/Fifo.h
+@@ -80,7 +80,7 @@
+ private:
+   void RefreshConfig();
+   void ReadDataFromFifo(u32 read_ptr);
+-  void ReadDataFromFifoOnCPU(u32 read_ptr);
++  void ReadDataFromFifoOnCPU(u32 read_ptr, bool prefetched = false);
+   int RunGpuOnCpu(int ticks);
+   int WaitForGpuThread(int ticks);
+   static void SyncGPUCallback(Core::System& system, u64 ticks, s64 cyclesLate);
+--- a/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
++++ b/engines/wasm-dolphin/core/upstream/dolphin_web_core.cpp
+@@ -72,6 +72,8 @@
+ extern "C" bool DolphinWeb_GetConstantStateBase();
+ extern "C" bool DolphinWeb_GetBlockMsrCache();
+ extern "C" bool DolphinWeb_GetFifoCopy();
++extern "C" bool DolphinWeb_GetFifoBatch();
++extern "C" void DolphinWeb_SetFifoBatch(bool);
+ extern "C" void DolphinWeb_SetFifoCopy(bool);
+ extern "C" void DolphinWeb_SetBlockMsrCache(bool);
+ extern "C" void DolphinWeb_SetConstantStateBase(bool);
+@@ -1298,7 +1300,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 16383 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 32767 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1319,7 +1321,8 @@
+   const bool constant_state_base = (flags & 2048) != 0;
+   const bool block_msr_cache = (flags & 4096) != 0;
+   const bool fifo_copy = (flags & 8192) != 0;
+-  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy())
++  const bool fifo_batch = (flags & 16384) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1332,6 +1335,7 @@
+     DolphinWeb_SetConstantStateBase(constant_state_base);
+     DolphinWeb_SetBlockMsrCache(block_msr_cache);
+     DolphinWeb_SetFifoCopy(fifo_copy);
++    DolphinWeb_SetFifoBatch(fifo_batch);
+   }
+   return 1;
+ }
+--- a/engines/wasm-dolphin/src/upstream-discio-worker.js
++++ b/engines/wasm-dolphin/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

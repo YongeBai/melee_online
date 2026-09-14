@@ -1,0 +1,206 @@
+{
+  "kind": "same-checkpoint-gpu-start-delay-abba",
+  "coreSha256": "f2e807d6a316978c18c21d708891520a10d36d11e3ab8bf34cf530f4b739c0f7",
+  "stage": "Yoshi's Story",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "passed": false,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "nonblackFraction": 1,
+  "normalSpeed": true,
+  "cpuClock": 1,
+  "activeTwoHumanNativeFrameInputs": true,
+  "profileEnabled": false,
+  "backgroundBuilds": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 176,
+    "mismatches": [],
+    "limits": "32-bit rolling sampled fingerprints plus exact polling gaps, not full-machine equivalence."
+  },
+  "runs": [
+    {
+      "cycles": 1000,
+      "warmup": true,
+      "seconds": 45.013835000000896,
+      "simulationFps": 59.71497429623462,
+      "gameRenderFps": 59.64832811956472,
+      "visibleFps": 58.75971243063266,
+      "p95GapMs": 17.455000000074506,
+      "maxGapMs": 68.49000000022352,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.472112622803312,
+        "dropped": 41,
+        "underruns": 48
+      },
+      "gpuScheduling": {
+        "callbacks": 2162417,
+        "callbacksPerNativeFrame": 804.4706101190476
+      },
+      "synchronousCompileAndLinkMs": 222.865
+    },
+    {
+      "cycles": 1000,
+      "warmup": false,
+      "seconds": 44.9975549999997,
+      "simulationFps": 59.91436645835575,
+      "gameRenderFps": 59.89214302866051,
+      "visibleFps": 59.15876984871773,
+      "p95GapMs": 17.380000000819564,
+      "maxGapMs": 64.72000000067055,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.82050319189794,
+        "dropped": 32,
+        "underruns": 31
+      },
+      "gpuScheduling": {
+        "callbacks": 2169809,
+        "callbacksPerNativeFrame": 804.825296735905
+      },
+      "synchronousCompileAndLinkMs": 0.65
+    },
+    {
+      "cycles": 4000,
+      "warmup": true,
+      "seconds": 45.01451500000059,
+      "simulationFps": 59.84736256738442,
+      "gameRenderFps": 59.82514751075213,
+      "visibleFps": 58.82546996229917,
+      "p95GapMs": 17.5,
+      "maxGapMs": 68.97499999962747,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 20.178405058513604,
+        "dropped": 44,
+        "underruns": 45
+      },
+      "gpuScheduling": {
+        "callbacks": 745879,
+        "callbacksPerNativeFrame": 276.8667409057164
+      },
+      "synchronousCompileAndLinkMs": 0.219
+    },
+    {
+      "cycles": 4000,
+      "warmup": false,
+      "seconds": 44.99764499999955,
+      "simulationFps": 59.98091677908982,
+      "gameRenderFps": 59.936470008597716,
+      "visibleFps": 59.403108762692504,
+      "p95GapMs": 17.359999999403954,
+      "maxGapMs": 64.90499999932945,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 20.307625280499526,
+        "dropped": 23,
+        "underruns": 20
+      },
+      "gpuScheduling": {
+        "callbacks": 746874,
+        "callbacksPerNativeFrame": 276.7224898110411
+      },
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "cycles": 4000,
+      "warmup": true,
+      "seconds": 44.99806499999948,
+      "simulationFps": 59.9803569331266,
+      "gameRenderFps": 59.95813375530773,
+      "visibleFps": 59.38033113201714,
+      "p95GapMs": 17.345000000670552,
+      "maxGapMs": 68.08500000089407,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 20.665488215501316,
+        "dropped": 26,
+        "underruns": 18
+      },
+      "gpuScheduling": {
+        "callbacks": 747134,
+        "callbacksPerNativeFrame": 276.81882178584664
+      },
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "cycles": 4000,
+      "warmup": false,
+      "seconds": 44.99755000000074,
+      "simulationFps": 60.00326684452721,
+      "gameRenderFps": 59.95881998019793,
+      "visibleFps": 59.2698935830941,
+      "p95GapMs": 17.384999999776483,
+      "maxGapMs": 72.43999999947846,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.43300787106818,
+        "dropped": 30,
+        "underruns": 22
+      },
+      "gpuScheduling": {
+        "callbacks": 747229,
+        "callbacksPerNativeFrame": 276.7514814814815
+      },
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "cycles": 1000,
+      "warmup": true,
+      "seconds": 44.996984999999405,
+      "simulationFps": 59.892901713304475,
+      "gameRenderFps": 59.8706780020936,
+      "visibleFps": 59.07062439850215,
+      "p95GapMs": 17.369999999180436,
+      "maxGapMs": 75.38499999977648,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.655030086497142,
+        "dropped": 36,
+        "underruns": 33
+      },
+      "gpuScheduling": {
+        "callbacks": 2167102,
+        "callbacksPerNativeFrame": 804.1194805194805
+      },
+      "synchronousCompileAndLinkMs": 0
+    },
+    {
+      "cycles": 1000,
+      "warmup": false,
+      "seconds": 44.99723499999941,
+      "simulationFps": 59.93701612999189,
+      "gameRenderFps": 59.870345366777215,
+      "visibleFps": 58.64804804117486,
+      "p95GapMs": 17.419999999925494,
+      "maxGapMs": 73.17999999970198,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "meanAgeMs": 19.649130681814682,
+        "dropped": 55,
+        "underruns": 49
+      },
+      "gpuScheduling": {
+        "callbacks": 2167360,
+        "callbacksPerNativeFrame": 803.6188357434186
+      },
+      "synchronousCompileAndLinkMs": 0
+    }
+  ],
+  "scope": "Selected recorded diagnostics from all eight visible, focused 45-second image captures. No camera or rules changes. GPU delay restored to 1000. Raw correctness audit remains open.",
+  "decision": "Both visible-FPS pairs favor 4000, but no acceptance interval passed; candidate remains off pending correctness and broader validation."
+}

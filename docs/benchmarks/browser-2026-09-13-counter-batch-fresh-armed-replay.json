@@ -1,0 +1,47 @@
+{
+  "artifactScope": "Exact selected CUA counterUnchangedReplay/counterArmedReplay2/counterPrewarmedReplay fields",
+  "coreSha256": "648ffd7b3b46f82b38ceb6b3b4e9893fd7678ceb0647116a15af63e53762c58c",
+  "kind": "local-browser-late-input-correction",
+  "passed": true,
+  "performanceTest": false,
+  "networkTest": false,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "frames": 120,
+  "prewarmFrames": 0,
+  "codegenReference": {
+    "counterbatch": false,
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "fusionredispatch": false
+  },
+  "codegenComparison": {
+    "counterbatch": true,
+    "readfusion": true,
+    "branchfusion": true,
+    "fpuguard": true,
+    "blockmerge": true,
+    "fusionredispatch": false
+  },
+  "comparison": {
+    "sizeA": 107055991,
+    "sizeB": 107055991,
+    "sections": 29,
+    "differentBytes": 0
+  },
+  "tickDifferences": [],
+  "referenceFrame": 423,
+  "correctedFrame": 423,
+  "stats": {
+    "rollbacks": 48,
+    "resimulatedFrames": 199,
+    "maxDepth": 6,
+    "stalls": 1
+  },
+  "limits": "These passes do not erase the initial14tick/idle-cycle discrepancy; different fresh match checkpoints. Candidate remains disabled pending attribution. Timing measurements may assess ROI but cannot establish acceptance."
+}

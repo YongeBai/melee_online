@@ -1,0 +1,278 @@
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -300,6 +300,7 @@
+ // we're toggling discrete categories that take effect on the next compile
+ // attempt; we don't promise instant per-block synchronization.
+ std::atomic<u32> s_dolphin_web_disable_mask{0};
++std::atomic<bool> s_dolphin_web_compact_gpr_locals{false};
+ 
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEELOOP   = 1u << 0;  // MeleeIdlePollLoop + MeleeTitleLoop
+ constexpr u32 DOLPHIN_WEB_DISABLE_MELEECALL   = 1u << 1;  // 5 Melee fast call-branch helpers
+@@ -2611,11 +2612,29 @@
+ {
+   bool active = false;
+   u32 gpr_base = 0;       // == layout.gpr_offset
++  u32 locals[32] = {};
+   bool present[32] = {};  // GPR loaded into local WASM_GPR_LOCAL_BASE+i at prologue
+   bool dirty[32] = {};    // GPR local written since prologue (sticky, never cleared)
+ };
+ static WasmGprRegCache s_gpr_rc;
+ 
++// Preserve the cache algorithm while avoiding unused WASM locals. The
++// default layout stays byte-compatible; compact mode is private QA opt-in.
++u32 ConfigureGprCacheLocals(std::vector<u8>& body, u32 used, bool compact)
++{
++  u32 count = 0;
++  for (u32 reg = 0; reg < 32; ++reg)
++  {
++    s_gpr_rc.present[reg] = s_gpr_rc.active && (used & (1u << reg));
++    s_gpr_rc.dirty[reg] = false;
++    s_gpr_rc.locals[reg] = WASM_GPR_LOCAL_BASE + (compact ? count : reg);
++    if (s_gpr_rc.present[reg]) ++count;
++  }
++  if (!compact) count = 32;
++  if (count) { ++body[0]; EmitU32Leb(body, count); body.push_back(0x7f); }
++  return WASM_GPR_LOCAL_BASE + count;
++}
++
+ // Opt-in bit19: paired-single register cache. Use f64 locals for FP arithmetic,
+ // preserving loaded NaN payloads and bitcasting integer/FP aliases. Eager loads cover both arms
+ // of generated conditionals; dirty is sticky across helpers and branches.
+@@ -2686,11 +2705,11 @@
+ // whether it is any covered access (→ emit the if(flag) fast/slow split).
+ // Keyed by CodeOp* (stable for the lifetime of one BuildWasmCachedInterpreterBlock
+ // call — the same `ops` span is what the emit loop iterates). One i32 flag local
+-// (WASM_FMH_FLAG_LOCAL) is reused across groups: groups never nest and are
++// (s_wasm_fmh_flag_local) is reused across groups: groups never nest and are
+ // emitted strictly in order, so each group recomputes the flag before its first
+ // access. Scoped to 32-bit D-form (lwz/lwzu/stw/stwu); other widths in a group
+ // still emit their existing checked path (counted as "slow").
+-constexpr u32 WASM_FMH_FLAG_LOCAL = 40;  // i32 scratch local appended after GPR locals 8..39
++u32 s_wasm_fmh_flag_local = 40;  // Assigned after this block's GPR locals.
+ struct WasmFastmemHoistPlan
+ {
+   bool active = false;
+@@ -2732,7 +2751,7 @@
+     if (!s_gpr_rc.present[i] || !s_gpr_rc.dirty[i])
+       continue;
+     EmitLocalGet(body, 0);
+-    EmitLocalGet(body, WASM_GPR_LOCAL_BASE + i);
++    EmitLocalGet(body, s_gpr_rc.locals[i]);
+     body.push_back(0x36);  // i32.store
+     body.push_back(0x02);  // align=2
+     EmitU32Leb(body, s_gpr_rc.gpr_base + i * static_cast<u32>(sizeof(u32)));
+@@ -2753,7 +2772,7 @@
+     body.push_back(0x28);  // i32.load
+     body.push_back(0x02);
+     EmitU32Leb(body, s_gpr_rc.gpr_base + i * static_cast<u32>(sizeof(u32)));
+-    EmitLocalSet(body, WASM_GPR_LOCAL_BASE + i);
++    EmitLocalSet(body, s_gpr_rc.locals[i]);
+   }
+ }
+ 
+@@ -2772,7 +2791,7 @@
+     body.push_back(0x28);  // i32.load
+     body.push_back(0x02);
+     EmitU32Leb(body, s_gpr_rc.gpr_base + static_cast<u32>(bit) * static_cast<u32>(sizeof(u32)));
+-    EmitLocalSet(body, WASM_GPR_LOCAL_BASE + static_cast<u32>(bit));
++    EmitLocalSet(body, s_gpr_rc.locals[static_cast<u32>(bit)]);
+   }
+ }
+ 
+@@ -2839,7 +2858,7 @@
+   if (RegCacheGprIndex(offset, &gpr_index) && s_gpr_rc.present[gpr_index])
+   {
+     // §28cx C1: GPR is resident in a WASM local — read it directly.
+-    EmitLocalGet(body, WASM_GPR_LOCAL_BASE + gpr_index);
++    EmitLocalGet(body, s_gpr_rc.locals[gpr_index]);
+     return;
+   }
+   ++s_wasm_emit_state_load_u32_count;
+@@ -2930,7 +2949,7 @@
+     // §28cx C1: stack is [state_ptr (from the prefix), value]. Move the value
+     // into the GPR local and drop the state_ptr the prefix pushed — so the 129
+     // EmitStateStoreU32Prefix call sites need no change.
+-    EmitLocalSet(body, WASM_GPR_LOCAL_BASE + gpr_index);
++    EmitLocalSet(body, s_gpr_rc.locals[gpr_index]);
+     body.push_back(0x1a);  // drop (the now-unused state_ptr)
+     s_gpr_rc.dirty[gpr_index] = true;
+     return;
+@@ -4204,7 +4223,7 @@
+ }
+ 
+ // §28cz Emit the once-per-group bounds-check that sets the flag local. After
+-// this runs, WASM_FMH_FLAG_LOCAL is 1 iff EVERY address in [base+omin, base+omax]
++// this runs, s_wasm_fmh_flag_local is 1 iff EVERY address in [base+omin, base+omax]
+ // (each masked to the low 30 bits, the same 0x3FFFFFFF RAM mask the checked path
+ // uses) is a valid maxsize-byte MEM1 access. CORRECTNESS: the `lo <= hi` term
+ // rejects the case where masking makes base+omin and base+omax straddle the
+@@ -4236,7 +4255,7 @@
+   EmitI32Const(body, layout.ram_size_real - maxsize);
+   body.push_back(0x4d);  // i32.le_u
+   body.push_back(0x71);  // i32.and  -> flag value
+-  EmitLocalSet(body, WASM_FMH_FLAG_LOCAL);
++  EmitLocalSet(body, s_wasm_fmh_flag_local);
+ }
+ 
+ // §28cz Flag-gated 32-bit LOAD. Leaves the big-endian loaded value on the stack
+@@ -4246,7 +4265,7 @@
+ // OOB access. EA must already be in local 1.
+ void EmitFmhReadU32(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
+-  EmitLocalGet(body, WASM_FMH_FLAG_LOCAL);
++  EmitLocalGet(body, s_wasm_fmh_flag_local);
+   body.push_back(0x04);  // if
+   body.push_back(0x7f);  // (result i32)
+   EmitLoadU32BigEndianFromRamAddress(body, layout);
+@@ -4259,7 +4278,7 @@
+ // then-arm = direct masked store; else-arm = existing checked emitter. Void.
+ void EmitFmhWriteU32(std::vector<u8>& body, const WasmStateLayout& layout)
+ {
+-  EmitLocalGet(body, WASM_FMH_FLAG_LOCAL);
++  EmitLocalGet(body, s_wasm_fmh_flag_local);
+   body.push_back(0x04);  // if
+   body.push_back(0x40);  // (void)
+   EmitStoreU32BigEndianToRamAddress(body, layout);
+@@ -7831,23 +7850,26 @@
+   EmitU32Leb(exports, WASM_IMPORT_FAST_MELEE_SERVICE_POLL_CALL_INDEX + 1);
+   EmitSection(bytes, 7, exports);
+ 
+-  // §28by — `0x01, 0x7f` group adds a 4th i32 local at index 7 (regalloc
+-  // scratch). §28cx C1 — appended `0x20, 0x7f` group adds 32 i32 locals at
+-  // indices 8..39 (WASM_GPR_LOCAL_BASE + GPR index), one per PowerPC GPR.
+-  // Leading local-group count bumped 4 → 5. WASM locals are zero-initialised;
+-  // the prologue below overwrites the referenced ones with their live values.
+-  // §28cz — when the fastmem-hoist plan is active for this block, append a 6th
+-  // group `0x01, 0x7f` (one i32 at index WASM_FMH_FLAG_LOCAL=40, the per-group
+-  // range-check flag) and bump the leading group count 5 → 6. When the plan is
+-  // inactive the locals section is byte-identical to today (no extra local).
+-  std::vector<u8> body = s_fmh_plan.active
+-      ? std::vector<u8>{0x06, 0x03, 0x7f, 0x02, 0x7e, 0x01, 0x7c, 0x01, 0x7f, 0x20, 0x7f, 0x01, 0x7f}
+-      : std::vector<u8>{0x05, 0x03, 0x7f, 0x02, 0x7e, 0x01, 0x7c, 0x01, 0x7f, 0x20, 0x7f};
+-
++  // Fixed scratch locals occupy indices1..7; cache locals follow.
++  std::vector<u8> body{0x04, 0x03, 0x7f, 0x02, 0x7e, 0x01, 0x7c, 0x01, 0x7f};
++  s_gpr_rc = {};
++  s_gpr_rc.active = !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_REGALLOC);
++  s_gpr_rc.gpr_base = layout.gpr_offset;
++  BitSet32 used_gprs;
++  for (const auto& op : ops) used_gprs |= op.regsIn | op.regsOut;
++  u32 used_gpr_mask = 0;
++  for (int reg : used_gprs) used_gpr_mask |= 1u << reg;
++  u32 next_local = ConfigureGprCacheLocals(body, used_gpr_mask,
++      s_dolphin_web_compact_gpr_locals.load(std::memory_order_relaxed));
++  if (s_fmh_plan.active)
++  {
++    s_wasm_fmh_flag_local = next_local++;
++    ++body[0]; body.insert(body.end(), {0x01, 0x7f});
++  }
+   s_fpr_rc = {};
+   s_fpr_rc.active = DolphinWebFeatureEnabled(1u << 19);
+   s_fpr_rc.base = layout.ps_offset;
+-  s_fpr_rc.local_base = s_fmh_plan.active ? 41 : 40;
++  s_fpr_rc.local_base = next_local;
+   if (s_fpr_rc.active)
+   {
+     BitSet32 used;
+@@ -7861,35 +7883,8 @@
+     ConfigureFprCacheLocals(body, used_mask);
+     EmitFprCacheReload(body);
+   }
+-
+-  // §28cx C1: set up the GPR register cache for this block, then eagerly load
+-  // every GPR the block reads or writes into its local. Eager (not lazy) load
+-  // guarantees a GPR is resident on every control-flow path before any
+-  // conditional WASM block, so reads/stores inside an `if` are always valid.
+-  s_gpr_rc.active = !DolphinWebHelperDisabled(DOLPHIN_WEB_DISABLE_REGALLOC);
+-  s_gpr_rc.gpr_base = layout.gpr_offset;
+-  for (u32 i = 0; i < 32; ++i)
+-  {
+-    s_gpr_rc.present[i] = false;
+-    s_gpr_rc.dirty[i] = false;
+-  }
+-  if (s_gpr_rc.active)
+-  {
+-    BitSet32 used_gprs;
+-    for (const PPCAnalyst::CodeOp& op : ops)
+-      used_gprs |= op.regsIn | op.regsOut;
+-    for (int bit : used_gprs)
+-    {
+-      if (bit < 0 || bit >= 32)
+-        continue;
+-      s_gpr_rc.present[bit] = true;
+-      EmitLocalGet(body, 0);
+-      body.push_back(0x28);  // i32.load
+-      body.push_back(0x02);  // align=2
+-      EmitU32Leb(body, layout.gpr_offset + static_cast<u32>(bit) * static_cast<u32>(sizeof(u32)));
+-      EmitLocalSet(body, WASM_GPR_LOCAL_BASE + static_cast<u32>(bit));
+-    }
+-  }
++  // Eager loads and sticky dirty stores remain unchanged across branches.
++  EmitRegCacheReloadAll(body);
+ 
+   u32 downcount = 0;
+   for (const PPCAnalyst::CodeOp& op : ops)
+@@ -8070,6 +8065,15 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetCompactGprLocals()
++{
++  return s_dolphin_web_compact_gpr_locals.load(std::memory_order_relaxed);
++}
++extern "C" void DolphinWeb_SetCompactGprLocals(bool value)
++{
++  s_dolphin_web_compact_gpr_locals.store(value, std::memory_order_relaxed);
++}
++
+ extern "C" std::uint32_t DolphinWeb_GetCachedInterpreterDisableMask()
+ {
+   return s_dolphin_web_disable_mask.load(std::memory_order_relaxed);
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -62,6 +62,8 @@
+ extern "C" void DolphinWeb_SetFastSoftwareRaster(int mode);
+ extern "C" std::uint32_t DolphinWeb_SetCachedInterpreterDisableMask(std::uint32_t mask);
+ extern "C" std::uint32_t DolphinWeb_GetCachedInterpreterDisableMask();
++extern "C" bool DolphinWeb_GetCompactGprLocals();
++extern "C" void DolphinWeb_SetCompactGprLocals(bool);
+ extern "C" void NotifyWebGpuOwnershipTraceLoadRequested();
+ extern "C" int GetPpcWasmJitRequestedMode();
+ extern "C" int GetPpcWasmDirectDispatch();
+@@ -1162,7 +1164,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 31 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 63 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1174,10 +1176,12 @@
+   const u32 previous = DolphinWeb_GetCachedInterpreterDisableMask();
+   const u32 next = (previous & ~(regcache_disable | fastmem_enable | integer_fifo_enable | single_prefix_enable | fpr_cache_enable)) |
+       ((flags & 1) ? 0 : regcache_disable) | ((flags & 2) ? fastmem_enable : 0) | ((flags & 4) ? integer_fifo_enable : 0) | ((flags & 8) ? single_prefix_enable : 0) | ((flags & 16) ? fpr_cache_enable : 0);
+-  if (next != previous)
++  const bool compact = (flags & 32) != 0;
++  if (next != previous || compact != DolphinWeb_GetCompactGprLocals())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
++    DolphinWeb_SetCompactGprLocals(compact);
+   }
+   return 1;
+ }
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1060,9 +1060,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

@@ -1,0 +1,229 @@
+--- a/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -368,6 +368,8 @@
+ std::atomic<u32> s_fpu_guard_blocks{0}, s_fpu_guard_sites{0};
+ std::atomic<bool> s_dolphin_web_frsqrte_fast{false};
+ std::atomic<bool> s_dolphin_web_bswap_rotate{false};
++std::atomic<bool> s_dolphin_web_chain_fusion{false};
++std::atomic<u32> s_chain_fusion_blocks{0}, s_chain_fusion_boundaries{0};
+ std::atomic<u32> s_bswap_rotate_sites{0};
+ std::atomic<u32> s_block_msr_cache_load_sites{0},s_block_msr_cache_blocks{0};
+ std::atomic<u32> s_selective_fpr_selected{0}, s_selective_fpr_rejected{0};
+@@ -8516,6 +8518,7 @@
+   bool check_target = false;
+   bool track_reads = false;
+   bool soft_exit = false;
++  const WasmFusionBoundary* next = nullptr;
+ };
+ 
+ bool IsFusionSafeInstruction(const PPCAnalyst::CodeOp& op, bool register_only)
+@@ -8841,7 +8844,8 @@
+     {
+       EmitFusionBoundary(body, *fusion, downcount);
+       s_fusion_read_fallback_local=0; // B is the final segment; no extra read guard.
+-      downcount = 0; // A was committed; B helpers count only B instructions.
++      downcount = 0; // Every original segment commits its own budget.
++      fusion = fusion->next;
+     }
+   }
+ 
+@@ -8996,6 +9000,9 @@
+   return s_dolphin_web_disable_mask.exchange(mask, std::memory_order_relaxed);
+ }
+ 
++extern "C" bool DolphinWeb_GetChainFusion(){return s_dolphin_web_chain_fusion.load(std::memory_order_relaxed);}
++extern "C" void DolphinWeb_SetChainFusion(bool value){s_dolphin_web_chain_fusion.store(value,std::memory_order_relaxed);}
++
+ extern "C" bool DolphinWeb_GetBswapRotate(){return s_dolphin_web_bswap_rotate.load(std::memory_order_relaxed);}
+ extern "C" void DolphinWeb_SetBswapRotate(bool value){s_dolphin_web_bswap_rotate.store(value,std::memory_order_relaxed);}
+ 
+@@ -12423,6 +12430,9 @@
+   u32 merge_downcount = 0, merge_loadstores = 0, merge_fpinst = 0, merge_next_pc = 0;
+   bool merge_write_npc = false;
+   WasmFusionBoundary fusion;
++  std::array<WasmFusionBoundary, 6> extra_fusions{};
++  u32 fusion_boundaries = 0;
++  const bool chain_fusion = s_dolphin_web_chain_fusion.load(std::memory_order_relaxed);
+   if (prefix_count < MIN_WASM_PREFIX_INSTRUCTIONS)
+   {
+     ++s_wasm_block_too_short_count;
+@@ -12437,7 +12447,7 @@
+   {
+     const auto& term = m_code_buffer[prefix_count - 1];
+     const bool conditional = term.inst.OPCD == 16 &&
+-        s_dolphin_web_conditional_fusion.load(std::memory_order_relaxed);
++        (chain_fusion || s_dolphin_web_conditional_fusion.load(std::memory_order_relaxed));
+     const u32 target = conditional ? term.address + 4 : term.branchTo;
+     bool safe = !term.skip && (term.inst.OPCD == 18 || conditional) && !term.inst.LK &&
+         !term.branchIsIdleLoop && target != 0xffffffffu &&
+@@ -12485,12 +12495,75 @@
+         fusion.target_pc = target;
+         fusion.check_target = conditional;
+         fusion.track_reads = track_reads;
+-        fusion.soft_exit = conditional && s_dolphin_web_fusion_redispatch.load(std::memory_order_relaxed);
++        fusion.soft_exit = conditional && (chain_fusion || s_dolphin_web_fusion_redispatch.load(std::memory_order_relaxed));
+         // A commits its own budget inside the function. Final operands cover B.
+         merge_downcount = cycles; merge_loadstores = loads; merge_fpinst = fp;
+         merge_next_pc = successor; merge_write_npc = !ended;
+         did_merge = true;
++        fusion_boundaries = 1;
++      }
++    }
++  }
++
++  // Extend only register-only intermediate segments. Each original boundary
++  // still commits PC/cycles and checks pause/step/timing. The final segment may
++  // access memory; it cannot be extended without passing the stricter proof.
++  // Limit both code size and branch depth, and never traverse a cycle.
++  if (did_merge && chain_fusion)
++  {
++    WasmFusionBoundary* previous = &fusion;
++    std::array<u32, 8> visited{js.blockStart, fusion.target_pc};
++    u32 visited_count = 2;
++    while (fusion_boundaries < 7 && merge_storage.size() < 64)
++    {
++      const auto& term = merge_storage.back();
++      const bool conditional = term.inst.OPCD == 16;
++      const u32 target = conditional ? term.address + 4 : term.branchTo;
++      bool safe = !merge_write_npc && !term.skip && term.canEndBlock &&
++          (term.inst.OPCD == 18 || conditional) && !term.inst.LK &&
++          !term.branchIsIdleLoop && target != 0xffffffffu && target != term.address;
++      for (u32 i = 0; safe && i < visited_count; ++i) safe = target != visited[i];
++      for (u32 i = previous->after_ops; safe && i < merge_storage.size(); ++i)
++        safe = IsFusionSafeInstruction(merge_storage[i], true);
++      if (!safe) break;
++
++      PPCAnalyst::CodeBuffer next_buffer(m_code_buffer.size());
++      PPCAnalyst::CodeBlock next_block;
++      const u32 successor = analyzer.Analyze(target, &next_block, &next_buffer,
++                                             next_buffer.size());
++      u32 count = 0, cycles = 0, loads = 0, fp = 0;
++      bool ended = false;
++      safe = !next_block.m_memory_exception && next_block.m_num_instructions > 0 &&
++             merge_storage.size() + next_block.m_num_instructions <= 64;
++      for (u32 i = 0; safe && i < next_block.m_num_instructions; ++i)
++      {
++        const auto& op = next_buffer[i];
++        if (op.branchIsIdleLoop || !IsFusionSafeInstruction(op, false) ||
++            HLE::TryReplaceFunction(m_ppc_symbol_db, op.address, PowerPC::CoreMode::JIT) ||
++            (s_wasm_jit_direct_only && (!IsPpcWasmDirectInstructionCandidate(op) ||
++             ((op.opinfo->flags & FL_USE_FPU) && !m_ppc_state.msr.FP))))
++        { safe = false; break; }
++        cycles += op.opinfo->num_cycles;
++        if (op.opinfo->flags & FL_LOADSTORE) ++loads;
++        if (op.opinfo->flags & FL_USE_FPU) ++fp;
++        ++count;
++        if (op.canEndBlock) { ended = true; break; }
+       }
++      if (!safe || !count || (!ended && count != next_block.m_num_instructions)) break;
++      auto& boundary = extra_fusions[fusion_boundaries - 1];
++      boundary.after_ops = static_cast<u32>(merge_storage.size());
++      boundary.target_pc = target;
++      boundary.check_target = conditional;
++      boundary.soft_exit = conditional;
++      previous->next = &boundary;
++      previous = &boundary;
++      ++fusion_boundaries;
++      visited[visited_count++] = target;
++      for (u32 i = 0; i < count; ++i) merge_storage.push_back(next_buffer[i]);
++      for (auto [from, to] : next_block.m_physical_addresses)
++        code_block.m_physical_addresses.insert(from, to);
++      merge_downcount = cycles; merge_loadstores = loads; merge_fpinst = fp;
++      merge_next_pc = successor; merge_write_npc = !ended;
+     }
+   }
+ 
+@@ -12548,6 +12621,14 @@
+     fusion.step_armed = addr(&s_browser_game_step_armed);
+     fusion.step_start = addr(&s_browser_game_step_start_native);
+     fusion.step_counter = addr(m_system.GetMemory().GetRAM()) + 0x00479d58;
++    for (u32 i = 0; i + 1 < fusion_boundaries; ++i)
++    {
++      auto& b = extra_fusions[i];
++      b.pc_offset=fusion.pc_offset; b.npc_offset=fusion.npc_offset;
++      b.downcount_offset=fusion.downcount_offset; b.cpu_state=fusion.cpu_state;
++      b.running_state=fusion.running_state; b.step_armed=fusion.step_armed;
++      b.step_start=fusion.step_start; b.step_counter=fusion.step_counter;
++    }
+   }
+   const std::vector<u8> bytes =
+       BuildWasmCachedInterpreterBlock(ops, layout, block_next_pc, write_npc,
+@@ -12614,6 +12695,11 @@
+   if (did_merge)
+   {
+     ++s_wasm_block_merge_count;
++    if (chain_fusion && fusion_boundaries > 1)
++    {
++      s_chain_fusion_blocks.fetch_add(1, std::memory_order_relaxed);
++      s_chain_fusion_boundaries.fetch_add(fusion_boundaries, std::memory_order_relaxed);
++    }
+     if (fusion.check_target) s_conditional_fusion_emissions.fetch_add(1,std::memory_order_relaxed);
+     if (fusion.track_reads) s_read_fusion_emissions.fetch_add(1,std::memory_order_relaxed);
+     if (fusion.soft_exit) s_fusion_redispatch_emissions.fetch_add(1,std::memory_order_relaxed);
+@@ -12917,6 +13003,7 @@
+   out << "fpuguardwide:" << (DolphinWeb_GetFpuGuardWide()?1:0) << " ";
+   out << "branchfusion:" << (DolphinWeb_GetConditionalFusion()?1:0) << " emitted:" << s_conditional_fusion_emissions.load() << " ";
+   out << "fpuguard:" << (DolphinWeb_GetFpuGuardHoist()?1:0) << " emit-blocks/sites:" << s_fpu_guard_blocks.load() << "/" << s_fpu_guard_sites.load() << " ";
++  out << "chainfusion:" << DolphinWeb_GetChainFusion() << " emit-blocks/boundaries:" << s_chain_fusion_blocks.load() << "/" << s_chain_fusion_boundaries.load() << " ";
+   out << "bswaprotate:" << DolphinWeb_GetBswapRotate() << " emit-sites:" << s_bswap_rotate_sites.load(std::memory_order_relaxed) << " ";
+   out << "qstatefull:" << (DolphinWeb_GetQStateFull()?1:0) << " emit-blocks/sites:" << s_qstate_cache_blocks.load() << "/" << s_qstate_cache_sites.load() << " ";
+   out << "qstatecache:" << (DolphinWeb_GetQStateCache()?1:0) << " emit-blocks/sites:" << s_qstate_cache_blocks.load() << "/" << s_qstate_cache_sites.load() << " ";
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -73,6 +73,8 @@
+ extern "C" bool DolphinWeb_GetPsqHoist();
+ extern "C" bool DolphinWeb_GetQStateCache();
+ extern "C" bool DolphinWeb_GetQStateFull();
++extern "C" bool DolphinWeb_GetChainFusion();
++extern "C" void DolphinWeb_SetChainFusion(bool);
+ extern "C" bool DolphinWeb_GetBswapRotate();
+ extern "C" void DolphinWeb_SetBswapRotate(bool);
+ extern "C" bool DolphinWeb_GetWideBlockMap();
+@@ -1372,7 +1374,7 @@
+ EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags)
+ {
+   auto& system = Core::System::GetInstance();
+-  if (!s_runtime_initialized || flags < 0 || flags > 536870911 ||
++  if (!s_runtime_initialized || flags < 0 || flags > 1073741823 ||
+       Core::GetState(system) != Core::State::Paused ||
+       s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
+   const Core::CPUThreadGuard guard(system);
+@@ -1389,6 +1391,7 @@
+   const bool simd = (flags & 64) != 0;
+   const bool memory_simd = (flags & 128) != 0;
+   const bool vector_fpr = (flags & 256) != 0;
++  const bool chain_fusion = (flags & 536870912) != 0;
+   const bool bswap_rotate = (flags & 268435456) != 0;
+   const bool qstate_full = (flags & 134217728) != 0;
+   const bool qstate_cache = (flags & 67108864) != 0;
+@@ -1408,7 +1411,7 @@
+   const bool counter_batch = (flags & 8388608) != 0;
+   const bool lean_dispatch = (flags & 16777216) != 0;
+   const bool cp_format_reuse = (flags & 33554432) != 0;
+-  if (bswap_rotate != DolphinWeb_GetBswapRotate() || qstate_full != DolphinWeb_GetQStateFull() || qstate_cache != DolphinWeb_GetQStateCache() || next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
++  if (chain_fusion != DolphinWeb_GetChainFusion() || bswap_rotate != DolphinWeb_GetBswapRotate() || qstate_full != DolphinWeb_GetQStateFull() || qstate_cache != DolphinWeb_GetQStateCache() || next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
+   {
+     system.GetJitInterface().ClearCache(guard);
+     DolphinWeb_SetCachedInterpreterDisableMask(next);
+@@ -1420,6 +1423,7 @@
+     DolphinWeb_SetQStateCache(qstate_cache);
+     DolphinWeb_SetQStateFull(qstate_full);
+     DolphinWeb_SetBswapRotate(bswap_rotate);
++    DolphinWeb_SetChainFusion(chain_fusion);
+     DolphinWeb_SetWideBlockMap(wide_map);
+     DolphinWeb_SetConstantStateBase(constant_state_base);
+     DolphinWeb_SetBlockMsrCache(block_msr_cache);
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1061,9 +1061,9 @@
+         return {percent:applied};
+       } else if (payload.action === "codegen") {
+         if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
+-            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0) | (payload.qstatecache === true ? 67108864 : 0) | (payload.qstatefull === true ? 134217728 : 0) | (payload.bswaprotate === true ? 268435456 : 0)))
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0) | (payload.qstatecache === true ? 67108864 : 0) | (payload.qstatefull === true ? 134217728 : 0) | (payload.bswaprotate === true ? 268435456 : 0) | (payload.chainfusion === true ? 536870912 : 0)))
+           throw new Error("Codegen comparison requires a paused cached-interpreter machine");
+-        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true, qstatecache:payload.qstatecache === true, qstatefull:payload.qstatefull === true, bswaprotate:payload.bswaprotate === true};
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true, qstatecache:payload.qstatecache === true, qstatefull:payload.qstatefull === true, bswaprotate:payload.bswaprotate === true, chainfusion:payload.chainfusion === true};
+       } else if (payload.action === "suppress") {
+         if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
+           throw new Error("Output suppression requires paused detached OGL core");

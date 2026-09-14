@@ -1,0 +1,448 @@
+{
+  "kind": "same-checkpoint-queue-clock-abba",
+  "coreSha256": "e4cfba3a4eed0fb96b12ca13fb97ff361bcb6d96a3ee75c099f87e27690342f2",
+  "artifactScope": "Selected exact fields from completed browser result, plus separately observed host stall evidence; full raw result retained in CUA queueClockRun.",
+  "passed": false,
+  "invalidComparison": true,
+  "stage": "Fountain of Dreams",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "settings": {
+    "models": "low",
+    "reflection": "off",
+    "scenery": "off",
+    "hiddenAnimation": "normal",
+    "shadows": "full",
+    "efbScalePercent": 150,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "otherRejectedCpuFlags": false
+  },
+  "inputConsistency": {
+    "passed": false,
+    "checked": 95,
+    "mismatches": [
+      {
+        "run": 3,
+        "reason": "fewer than 1200 common tracked frames"
+      },
+      {
+        "run": 4,
+        "reason": "fewer than 1200 common tracked frames"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "rateLimited": true,
+      "warmup": true,
+      "seconds": 29.99904999999702,
+      "simulationFps": 57.201811390699724,
+      "gameRenderFps": 57.168477001777404,
+      "visibleFps": 56.90180189039885,
+      "p95GapMs": 31.29000000283122,
+      "maxGapMs": 66.46499999985099,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1715,
+        "presented": 1709,
+        "dropped": 6,
+        "underruns": 92,
+        "meanAgeMs": 16.367691632541145,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "setupTimingMs": {
+        "pause": 0.3100000023841858,
+        "restore": 21.53500000014901,
+        "settle 120 frames": 2181.269999999553
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "rateLimited": true,
+      "warmup": false,
+      "seconds": 29.99838500000164,
+      "simulationFps": 59.469868127897634,
+      "gameRenderFps": 59.43653300002325,
+      "visibleFps": 59.069846593405046,
+      "p95GapMs": 19.025000002235174,
+      "maxGapMs": 35.55500000342727,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1784,
+        "presented": 1774,
+        "dropped": 10,
+        "underruns": 27,
+        "meanAgeMs": 16.562728297553342,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "setupTimingMs": {
+        "pause": 0.13500000163912773,
+        "restore": 19.445000000298023,
+        "settle 120 frames": 2008.1350000016391
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "rateLimited": false,
+      "warmup": true,
+      "seconds": 29.997980000000446,
+      "simulationFps": 59.53734218103931,
+      "gameRenderFps": 59.47067102518148,
+      "visibleFps": 59.30399313553691,
+      "p95GapMs": 19.234999999403954,
+      "maxGapMs": 61.599999997764826,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1786,
+        "presented": 1781,
+        "dropped": 5,
+        "underruns": 20,
+        "meanAgeMs": 16.30071027512081,
+        "clockSkips": 0,
+        "readyClockSkips": 0
+      },
+      "setupTimingMs": {
+        "pause": 0.09999999776482582,
+        "restore": 19.385000001639128,
+        "settle 120 frames": 1904.550000000745
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "rateLimited": false,
+      "warmup": false,
+      "seconds": 30.556789999999104,
+      "simulationFps": 36.35853111534401,
+      "gameRenderFps": 36.325805164745134,
+      "visibleFps": 36.16217541175079,
+      "p95GapMs": 18.78999999910593,
+      "maxGapMs": 4992.414999999106,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1111,
+        "presented": 1108,
+        "dropped": 3,
+        "underruns": 23,
+        "meanAgeMs": 16.814079422335602,
+        "clockSkips": 0,
+        "readyClockSkips": 0
+      },
+      "setupTimingMs": {
+        "pause": 0.125,
+        "restore": 20.050000000745058,
+        "settle 120 frames": 2027.094999998808
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "rateLimited": false,
+      "warmup": true,
+      "seconds": 31.985885000001637,
+      "simulationFps": 0.7503309662996278,
+      "gameRenderFps": 0.7190671760371433,
+      "visibleFps": 0.5627482247247209,
+      "p95GapMs": 4002.035000000149,
+      "maxGapMs": 4997.25,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 24,
+        "presented": 22,
+        "dropped": 4,
+        "underruns": 5,
+        "meanAgeMs": 183.8154545455155,
+        "clockSkips": 0,
+        "readyClockSkips": 0
+      },
+      "setupTimingMs": {
+        "pause": 11003.300000000745,
+        "restore": 1014.089999999851,
+        "settle 120 frames": 170008.79000000283
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": false
+        },
+        "events": [
+          {
+            "type": "blur",
+            "atMs": 7.7650000005960464,
+            "visibility": "visible",
+            "focused": false
+          }
+        ]
+      }
+    },
+    {
+      "rateLimited": false,
+      "warmup": false,
+      "seconds": 29.997800000000744,
+      "simulationFps": 59.93772876677475,
+      "gameRenderFps": 59.93772876677475,
+      "visibleFps": 59.47102787537605,
+      "p95GapMs": 18.54500000178814,
+      "maxGapMs": 34.774999998509884,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1798,
+        "presented": 1786,
+        "dropped": 12,
+        "underruns": 16,
+        "meanAgeMs": 19.854624860055434,
+        "clockSkips": 0,
+        "readyClockSkips": 0
+      },
+      "setupTimingMs": {
+        "pause": 3001.394999999553,
+        "restore": 2004.164999999106,
+        "settle 120 frames": 22129.335000000894
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "rateLimited": true,
+      "warmup": true,
+      "seconds": 30.000845000002535,
+      "simulationFps": 59.998310047595254,
+      "gameRenderFps": 59.93164525865348,
+      "visibleFps": 59.49832413053196,
+      "p95GapMs": 18.804999999701977,
+      "maxGapMs": 35.059999998658895,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1801,
+        "presented": 1788,
+        "dropped": 14,
+        "underruns": 14,
+        "meanAgeMs": 17.006719798708055,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "setupTimingMs": {
+        "pause": 0.0949999988079071,
+        "restore": 19.405000001192093,
+        "settle 120 frames": 1899.690000001341
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "rateLimited": true,
+      "warmup": false,
+      "seconds": 29.998849999997766,
+      "simulationFps": 60.002300088174515,
+      "gameRenderFps": 59.968965477014414,
+      "visibleFps": 59.53561553193316,
+      "p95GapMs": 18.719999998807907,
+      "maxGapMs": 35.04999999701977,
+      "passed": true,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "queue": {
+        "capacity": 2,
+        "received": 1800,
+        "presented": 1788,
+        "dropped": 12,
+        "underruns": 13,
+        "meanAgeMs": 16.971266778546408,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "setupTimingMs": {
+        "pause": 0.08500000089406967,
+        "restore": 22.96499999985099,
+        "settle 120 frames": 1859.2050000019372
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "stallEvidence": {
+    "runIndex3": {
+      "probeSamples": 1129,
+      "harvestMaxMs": 1990.2999999970198,
+      "completionMaxMs": 4992.339999999851,
+      "pageVisibleAndFocusedThroughout": true
+    },
+    "runIndex4": {
+      "probeSamples": 24,
+      "harvestMeanMs": 874.2537499996834,
+      "harvestMaxMs": 1005.5249999985099,
+      "completionMaxMs": 4994.510000001639
+    },
+    "hostSamples": {
+      "intervalSeconds": 2,
+      "ticksPerSecond": 100,
+      "rendererPid": 24139,
+      "beforeClick": [
+        {
+          "tid": 24139,
+          "ticks": 1
+        },
+        {
+          "tid": 139312,
+          "ticks": 2
+        },
+        {
+          "tid": 139340,
+          "ticks": 0
+        },
+        {
+          "tid": 139344,
+          "ticks": 0
+        }
+      ],
+      "afterClick": [
+        {
+          "tid": 24139,
+          "ticks": 21
+        },
+        {
+          "tid": 139312,
+          "ticks": 11
+        },
+        {
+          "tid": 139340,
+          "ticks": 53
+        },
+        {
+          "tid": 139344,
+          "ticks": 170
+        }
+      ],
+      "limits": "Thread roles inferred from CPU history, not independently identified. Read-only /proc interval samples."
+    },
+    "interventions": [
+      "open_in_codex returned queued",
+      "navigate_to_codex_page returned navigated",
+      "open_in_codex still queued",
+      "markHandoff",
+      "clicked Toggle diagnostics to hide the QA panel; this only changes CSS display, sends no emulator RPC",
+      "clicked Toggle diagnostics after the benchmark to read results"
+    ],
+    "interpretation": "Workers became active after UI click. Browser activation/occlusion/throttling or probe/wakeup interaction remains a hypothesis, not a proven cause."
+  },
+  "decision": "Keep secondary queue clock enabled. Only one ready-image clock skip per normal 30-second trial versus 10–14 queue drops. No repeatable gain established; do not use invalid comparison or one passing baseline trial to claim the full goal."
+}
