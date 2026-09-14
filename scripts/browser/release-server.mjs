@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createServer} from 'node:http';
 import {fileURLToPath} from 'node:url';
-const types={'.js':'text/javascript; charset=utf-8','.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.wasm':'application/wasm','.txt':'text/plain; charset=utf-8','.wgsl':'text/plain'};
+const types={'.js':'text/javascript; charset=utf-8','.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.wasm':'application/wasm','.txt':'text/plain; charset=utf-8','.wgsl':'text/plain','.br':'application/octet-stream','.gz':'application/octet-stream'};
 export function createReleaseHandler(root){
   const files=JSON.parse(fs.readFileSync(path.join(root,'files.json')));
   const allowed=new Map(files.filter(f=>(types[path.extname(f.path)]||/^source\/source\.tar\.gz\.part\d{3}$/.test(f.path))&&!['server.mjs'].includes(f.path)).map(f=>['/'+f.path,f]));
