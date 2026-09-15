@@ -1,0 +1,19 @@
+{
+  "kind": "browser-dispatch-profile-selected-fields",
+  "diagnosticOnly": true,
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "seconds": 30,
+  "simulationFps": 57.669,
+  "distinctVisibleFps": 57.302,
+  "sampledCompleteBlockVisits": 535792,
+  "sampledHostMicroseconds": 205184,
+  "regions": [
+    {"name": "HSD_PObjDisp wrapper", "guestAddress": "0x8036e8ac–0x8036e9f0", "blocks": 1, "visits": 510, "sampledHostMicroseconds": 199.424},
+    {"name": "SetupEnvelopeModelMtx", "guestAddress": "0x8036e4c4–0x8036e83c", "blocks": 19, "visits": 14068, "sampledHostMicroseconds": 4721.152},
+    {"name": "HSD_FObjInterpretAnim", "guestAddress": "0x8036b030–0x8036b6cc", "blocks": 29, "visits": 46482, "sampledHostMicroseconds": 18806.526}
+  ],
+  "interpretation": "The PObjDisp entry wrapper accounts for about 0.10% of sampled complete-block host time, while envelope matrix setup accounts for about 2.3% and animation interpretation 9.2%. Fusing only the wrapper is unlikely to capture the measured combined mesh-ablation opportunity. Complete-block wall samples are diagnostic, not exact CPU shares or additive per-frame costs.",
+  "limits": "The same-origin static package intentionally lacks private qa-function-symbols.json, so the raw dispatch sample used exact revision-locked addresses instead of shipped symbol metadata. Match workload is scripted native-frame inputs, not human play. The ignored experimental core's source metadata is not reconciled with the retained engine patch."
+}

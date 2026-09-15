@@ -1465,6 +1465,7 @@ if (params.has("qa")) {
         if(queueCapacityAB&&!frameStress)throw Error("Queue-capacity comparison requires native-frame inputs");
         const queueClockAB=params.get("benchmarkqueueclockcompare")==="1";
         if(queueClockAB&&!frameStress)throw Error("Queue-clock comparison requires native-frame inputs");
+        const retainedConfigAB=params.get('benchmarkretainedconfigcompare')==='1';
         const stadiumAB=params.get("benchmarkstadiumscreencompare")==="1";
         const particlesAB=params.get("benchmarkparticlescompare")==="1";
         const decorationsAB=params.get("benchmarkdecorationscompare")==="1";
@@ -1474,10 +1475,14 @@ if (params.has("qa")) {
         const shadowAB=params.get("benchmarkshadowcompare")==="1";
         const yoshiAnimationAB=params.get('benchmarkyoshianimationcompare')==='1';
         const staticBackgroundAB=params.get('benchmarkstaticbackgroundcompare')==='1';
+        const stageBackgroundAB=params.get('benchmarkstagebackgroundcompare')==='1';
         const reverbAB=params.get('benchmarkreverbcompare')==='1';
         if(yoshiAnimationAB&&params.get('background')!=='black')throw Error('Yoshi animation comparison requires a black background');
         if(staticBackgroundAB&&params.get('background')!=='black')throw Error('Static background comparison requires a black background');
-        const reflectionAB=reverbAB||staticBackgroundAB||yoshiAnimationAB||stadiumAB||params.get("benchmarkreflectioncompare")==="1"||sceneryAB||modelAB||animationAB||shadowAB||decorationsAB||particlesAB;
+        if(stageBackgroundAB&&params.get('background')==='black')throw Error('Stage background comparison must start with a visible background');
+        const reflectionAB=stageBackgroundAB||reverbAB||staticBackgroundAB||yoshiAnimationAB||stadiumAB||params.get("benchmarkreflectioncompare")==="1"||sceneryAB||modelAB||animationAB||shadowAB||decorationsAB||particlesAB;
+        if(retainedConfigAB&&(!frameStress||headroomCheck.checked||checkpointControl.checked||dispatchProfileCheck.checked||queueCapacityAB||queueClockAB||codegenAB||reflectionAB||scaleAB||probeAB||pacingAB||fixedWorkAB||repeats>1))
+          throw Error('Retained CPU group comparison requires only native-frame inputs and one codegen comparison');
         if(frameStress&&(scaleAB||pacingAB||repeats>1))throw Error("Native-frame input supports single runs, codegen and cosmetic comparisons");
         if(animationAB&&(params.get("scenery")!=="off"||params.get("sceneryanimation")==="off"))throw Error("Animation comparison requires scenery off and animation initially on");
         if(modelAB&&params.get("models")==="low")throw Error("Start model comparison at normal detail");
@@ -1488,7 +1493,7 @@ if (params.has("qa")) {
         if(sceneryAB&&params.get("scenery")==="off")throw Error("Start scenery comparison with scenery enabled");
         if(stress && ((!frameStress && probeAB) || pacingAB))throw Error("Use a standard or codegen benchmark for controller stress");
         const pcSampling = params.get("pcsample") === "1";
-        if(pcSampling && ((gpuScheduleCompare.checked || rushCompare.checked || frameLogCompare.checked || checkpointControl.checked || dispatchProfileCheck.checked) || timingDriftCompare.checked || headroomCheck.checked || codegenAB || scaleAB || probeAB || pacingAB || fixedWorkAB || queueCapacityAB || queueClockAB || reflectionAB || repeats>1))throw Error("PC sampling requires a single diagnostic run");
+        if(pcSampling && ((gpuScheduleCompare.checked || rushCompare.checked || frameLogCompare.checked || checkpointControl.checked || dispatchProfileCheck.checked) || timingDriftCompare.checked || headroomCheck.checked || codegenAB || retainedConfigAB || scaleAB || probeAB || pacingAB || fixedWorkAB || queueCapacityAB || queueClockAB || reflectionAB || repeats>1))throw Error("PC sampling requires a single diagnostic run");
         const pcSamples = pcSampling ? sampleBrowserCpuLocations(host, duration) : null;
         if(checkpointControl.checked&&(!frameStress||headroomCheck.checked||frameLogCompare.checked||rushCompare.checked||gpuScheduleCompare.checked||timingDriftCompare.checked||codegenAB||scaleAB||probeAB||pacingAB||fixedWorkAB||queueCapacityAB||queueClockAB||reflectionAB||repeats>1))throw Error('Unchanged checkpoint control requires native inputs and no other comparison');
         if(dispatchProfileCheck.checked&&(checkpointControl.checked||headroomCheck.checked||frameLogCompare.checked||rushCompare.checked||gpuScheduleCompare.checked||timingDriftCompare.checked||codegenAB||scaleAB||probeAB||pacingAB||fixedWorkAB||queueCapacityAB||queueClockAB||reflectionAB||repeats>1||!frameStress))throw Error('Dispatch profiling requires a single native-input diagnostic');
@@ -1518,8 +1523,10 @@ if (params.has("qa")) {
           ? await compareBrowserQueueCapacity(host,duration,()=>host.adapter.request("meleeInspect",{}),{candidateCapacity:Number(params.get("benchmarkqueuecapacity")||3),measure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : queueClockAB
           ? await compareBrowserQueueClock(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          : retainedConfigAB
+          ? await (await import('./browser-retained-config.js')).compareRetainedBrowserConfig(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : reflectionAB
-          ? await compareFountainReflection(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,frameInput:frameStress,feature:reverbAB?'reverb':staticBackgroundAB?'staticbackground':yoshiAnimationAB?'yoshianimation':stadiumAB?"stadiumscreen":particlesAB?"particles":decorationsAB?"decorations":shadowAB?"shadowdiag":animationAB?"animation":modelAB?"modeldetail":sceneryAB?"scenery":"reflection",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          ? await compareFountainReflection(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,frameInput:frameStress,feature:stageBackgroundAB?'stagebackground':reverbAB?'reverb':staticBackgroundAB?'staticbackground':yoshiAnimationAB?'yoshianimation':stadiumAB?"stadiumscreen":particlesAB?"particles":decorationsAB?"decorations":shadowAB?"shadowdiag":animationAB?"animation":modelAB?"modeldetail":sceneryAB?"scenery":"reflection",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : pacingAB
           ? await compareBrowserPacing(host,duration,()=>host.adapter.request("meleeInspect",{}),{onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : probeAB
@@ -1542,8 +1549,10 @@ if (params.has("qa")) {
           ? await measureBrowserNativeInput(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure})
           : await measure(host, duration, () => host.adapter.request("meleeInspect", {}));
         if(result.dispatchProfile){
-          const response=await fetch('./qa-function-symbols.json');if(!response.ok)throw Error('QA function symbols unavailable');
-          const {aggregateTimedBlocks}=await import('./browser-dispatch-profile.js');result.timedFunctions=aggregateTimedBlocks(result.dispatchProfile,await response.json());
+          const response=await fetch('./qa-function-symbols.json');
+          if(response.ok){
+            const {aggregateTimedBlocks}=await import('./browser-dispatch-profile.js');result.timedFunctions=aggregateTimedBlocks(result.dispatchProfile,await response.json());
+          }else result.profileSymbolsMissing=true;
         }
         if(pcSamples) {
           result.cpuLocations=await pcSamples;result.diagnosticOnly=true;result.passed=false;
@@ -1551,7 +1560,7 @@ if (params.has("qa")) {
           const response=await fetch('./qa-function-symbols.json');if(!response.ok)throw Error('QA function symbols unavailable');
           result.cpuFunctions=aggregateGuestFunctions(result.cpuLocations.locations,await response.json(),result.cpuLocations.samples);
         }
-        if (repeats === 1 && !(gpuScheduleCompare.checked || rushCompare.checked || frameLogCompare.checked) && !timingDriftCompare.checked && !headroomCheck.checked && !codegenAB && !scaleAB && !probeAB && !pacingAB && !fixedWorkAB && !queueCapacityAB && !queueClockAB && !reflectionAB) {
+        if (repeats === 1 && !(gpuScheduleCompare.checked || rushCompare.checked || frameLogCompare.checked) && !timingDriftCompare.checked && !headroomCheck.checked && !codegenAB && !retainedConfigAB && !scaleAB && !probeAB && !pacingAB && !fixedWorkAB && !queueCapacityAB && !queueClockAB && !reflectionAB) {
           const profileAfter = (await host.adapter.request("rendererDiagnostics", {})).coreProfile;
           result.coreProfile = summarizeCoreProfile(profileBefore, profileAfter, result.seconds);
         }

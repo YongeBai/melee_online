@@ -1,0 +1,21 @@
+{
+  "kind": "same-checkpoint-retained-browser-config-abba-selected-fields",
+  "browser": "installed Google Chrome, standalone persistent profile",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "sourceResolution": [960, 720],
+  "secondsPerLeg": 30,
+  "retainedCandidate": ["integerfifo", "singleprefix", "fpuguard", "blockmerge", "animstatefast", "displaylistfast", "leandispatch"],
+  "excludedExperiments": ["gxmatrixfast", "animcallbackfast", "animfusion", "hotfusion"],
+  "passed": false,
+  "inputConsistency": {"passed": true, "checked": 103, "mismatches": []},
+  "measuredRuns": [
+    {"candidate": false, "simulationFps": 53.43677109894017, "distinctVisibleFps": 52.870067974372496, "newJitInstances": 1033, "queueUnderruns": 200},
+    {"candidate": true, "simulationFps": 53.83219388522649, "distinctVisibleFps": 53.198873957165, "newJitInstances": 538, "queueUnderruns": 190},
+    {"candidate": true, "simulationFps": 55.1411909530414, "distinctVisibleFps": 54.274400768773525, "newJitInstances": 0, "queueUnderruns": 159},
+    {"candidate": false, "simulationFps": 57.56871035588687, "distinctVisibleFps": 56.26866420424843, "newJitInstances": 7, "queueUnderruns": 98}
+  ],
+  "decision": "Reject a bundled settings promotion from this comparison. The reversed baseline is faster than both candidates, and every image acceptance leg fails. The matching sampled controller/gameplay digests do not remove strong time-order and JIT-coverage drift.",
+  "limits": "Scripted native-frame controller input is not human play. Sampled rolling fingerprints are not full machine equivalence. The experimental binary has a prebuilt cache but source metadata different from the retained patch. No other stage, browser or device is certified."
+}

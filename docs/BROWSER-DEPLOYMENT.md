@@ -20,7 +20,7 @@ With two older emulator tabs still running, consecutive 30-second Dream Land
 Ice Climbers measurements fell to roughly 45 simulation/visible FPS. After
 closing those tabs, a 30-second, native-frame-input run reached **58.27
 simulation / 57.90 distinct visible FPS** at 960×720, with 1,039 new JIT
-instances and 61 presentation underruns. This still fails sustained 60 FPS;
+instances and 61 presentation underruns. This still fails sustained 60 FPS.
 An isolated warm control reached 58.96 simulation / 58.30 distinct visible
 FPS with 294 new JIT instances. A diagnostic delivery-only run without image
 verification reached 58.58 simulation / 57.91 delivered FPS while the browser's
@@ -29,17 +29,94 @@ after a quit action and had to be retried; this is a harness reliability issue,
 not a completed performance measurement. These results point to sustained
 emulation and presentation work rather than cold JIT compilation or the pixel
 verifier alone.
+
 The three-image queue trial reached 57.90 simulation / 57.70 distinct visible
 FPS and increased mean image age from 16.43 to 19.69 ms versus the warm
 two-image control; the two-image setting was restored. A current-core named
 profile could not be completed from this static package because the private
-`qa-function-symbols.json` fixture is excluded; do not infer a new hotspot from
-that failed diagnostic. A Dream Land screenshot shows noticeable stage
+`qa-function-symbols.json` fixture is excluded; the QA runtime now keeps raw
+dispatch samples when that symbol map is absent, and the follow-up diagnostic
+completed. A Dream Land screenshot shows noticeable stage
 perspective during a widely separated, native-frame-input match. The read-only
 native camera has zero pitch/yaw offsets and FOV 30, but equivalent-scene native
 Dolphin image comparison is still required to determine whether projection is
 correct.
-the binary and its prebuilt JIT cache are ignored local experiments whose
+An uncapped Dream Land IC/IC mesh ablation with matched native controller input
+found 2.79 and 3.33 ms per frame of combined `HSD_PObjDisp` skinning, matrix,
+and primitive-submission opportunity. The 80 sampled input fingerprints agreed
+in both orders, and playable drawing was restored; bypassed output was
+incomplete and cannot count as a playable performance result. See
+[the selected measured fields](benchmarks/browser-2026-09-14-dreamland-mesh-render-cost.json).
+The follow-up stage GX-link ablation did not confirm a reliable stage-only gain:
+the first matched-input pair ran 63.57 normal versus 68.51 bypassed native-work
+FPS, but the reversed pair ran 66.07 normal versus 57.49 bypassed. All 80 input
+fingerprints still matched. Reject a Dream Land-only stage cut from this trace;
+the mesh path across stage, fighters and effects is the stronger general lead.
+
+A 30-second, native-frame-input dispatch diagnostic on the same Dream Land
+IC/IC workload sampled 535,792 complete-block visits. Its revision-locked
+`HSD_PObjDisp` entry wrapper took only 199.424 of 205,184 sampled host
+microseconds (about 0.10%), while envelope matrix setup took 4,721.152
+(about 2.3%) and animation interpretation 18,806.526 (about 9.2%). These
+estimates guide which downstream routines to investigate; sampled wall time
+is neither an exact CPU share nor an additive frame budget. See
+[the selected dispatch profile](benchmarks/browser-2026-09-14-dreamland-dispatch-profile.json).
+
+Standalone installed Google Chrome on this host reached 60.022 simulation /
+59.455 distinct visible FPS in a second warm 30-second Dream Land IC/IC run
+with the ignored prebuilt-cache binary; the first run was 59.468 / 58.668.
+The warm run still lost 15 image presentations and fails the strict 60
+distinct-image target. A fresh Chrome-profile restart with the QA panel hidden
+reached only 59.201 / 58.501 in its second run, so panel hiding is not a
+repeatable performance gain. The configured two-image presentation queue has
+an optional 59.94-Hz secondary clock.
+The installed-Chrome same-checkpoint queue A/B/B/A confirmed a small
+presentation gain but not a solution: three images averaged 59.536 distinct
+visible FPS versus 59.136 for two images and still failed cohort acceptance.
+Mean queued-image age rose 20.10 to 33.79 ms, with 115 matching sampled input
+and gameplay fingerprints. Keep two images for latency; queue age alone is not
+input-to-photon latency. See
+[the selected queue comparison](benchmarks/browser-2026-09-14-chrome-dreamland-queue-capacity.json).
+The following native-RAF clock A/B/B/A on the same Chrome and native scene
+passed its matched-input check (117 sampled fingerprints). Both native-RAF
+candidate legs reached about 60 simulation / 59.70 and 59.67 distinct visible
+FPS, compared with 59.80 / 59.34 and 59.97 / 59.60 for clocked controls. Its
+symmetric visible mean gained about 0.22 FPS and mean queued-image age changed
+by only 0.06 ms. Both native-RAF legs passed the internal tolerant gate, while
+the user's strict 60-distinct-image goal still fails. The static release now
+defaults to bitmap presentation on a two-image native-RAF queue. See
+[the selected clock comparison](benchmarks/browser-2026-09-14-chrome-dreamland-queue-clock.json).
+The rebuilt plain `/play/?qa=1` package verified the hosted game, native
+Dream Land IC/IC match, tournament rules, 960×720 output and the RAF defaults.
+Its first/warm 30-second runs were only 44.01/43.84 and 50.17/49.94
+simulation/distinct-visible FPS. A tuned query on the same release jumped to
+59.67/58.84 on its first pass but then fell to 43.04/42.80 despite only 263
+new JIT instances and a visible/focused page. These sequential results are
+heavily confounded and must not be used to claim a ten-FPS configuration gain.
+A same-checkpoint Dream Land IC/IC A/B/B/A then compared a retained CPU group
+to actual release defaults, leaving the replay-unverified GX matrix shortcut
+off. The first baseline was 53.44/52.87, candidates 53.83/53.20 and
+55.14/54.27, but reversed baseline 57.57/56.27 beat both. All 103 sampled
+input/gameplay fingerprints matched; every strict image gate failed. Do not
+promote that bundle from these data. See
+[the retained CPU group](benchmarks/browser-2026-09-14-chrome-dreamland-retained-cpu-group.json).
+A native-map-3 Dream Land stage-background on/off/off/on then found
+52.80/52.27, 57.10/55.97, 56.83/55.67 and 58.56/57.19
+simulation/distinct-visible FPS. The final normal-background control beat
+both black-background legs despite 108 matching sampled input/gameplay
+fingerprints, so no FPS gain can be attributed to that callback. Normal
+background was restored. The off-mode screenshot showed black sky but retained
+the tree/platforms; the QA overlay blocked a full HUD/camera inspection, and
+the camera-pitch concern remains open. See
+[the background control](benchmarks/browser-2026-09-14-chrome-dreamland-background-control.json).
+An unobstructed follow-up browser image after a fresh `background=black`
+match still showed a colorful backdrop, with the central tree trunk/canopy
+occupying much of the native view. This may be a restore/timing issue in the
+one-time cosmetic setting; the earlier explicitly disabled callback did show
+black sky. No equivalent-scene native Dolphin comparison or projection fix is
+established, and the camera invariants remain required.
+
+The binary and its prebuilt JIT cache are ignored local experiments whose
 candidate source metadata must be reconciled with the retained engine patch
 before a reproducible release can claim that core.
 

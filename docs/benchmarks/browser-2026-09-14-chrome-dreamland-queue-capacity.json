@@ -1,0 +1,30 @@
+{
+  "kind": "same-checkpoint-queue-capacity-abba-selected-fields",
+  "browser": "installed Google Chrome, standalone persistent profile",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "sourceResolution": [960, 720],
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "nativeTournamentSettings": {"timeLimitSeconds": 480, "items": -1, "teams": 0},
+  "secondsPerLeg": 30,
+  "referenceCapacity": 2,
+  "candidateCapacity": 3,
+  "passed": false,
+  "inputConsistency": {"passed": true, "checked": 115, "mismatches": []},
+  "measuredRuns": [
+    {"capacity": 2, "simulationFps": 59.369998360828035, "distinctVisibleFps": 59.0701498842582, "queueUnderruns": 26, "meanQueuedImageAgeMs": 19.7213416009482, "passed": false},
+    {"capacity": 3, "simulationFps": 59.9688455347208, "distinctVisibleFps": 59.402158278417154, "queueUnderruns": 16, "meanQueuedImageAgeMs": 33.6093325855412, "passed": false},
+    {"capacity": 3, "simulationFps": 60.004050273390476, "distinctVisibleFps": 59.670694438538305, "queueUnderruns": 8, "meanQueuedImageAgeMs": 33.967138470140654, "passed": true},
+    {"capacity": 2, "simulationFps": 59.868792008785654, "distinctVisibleFps": 59.202101674612095, "queueUnderruns": 22, "meanQueuedImageAgeMs": 20.47023353967386, "passed": false}
+  ],
+  "symmetricMeans": {
+    "twoImageSimulationFps": 59.619395184806844,
+    "threeImageSimulationFps": 59.98644790405564,
+    "twoImageDistinctVisibleFps": 59.13612577943515,
+    "threeImageDistinctVisibleFps": 59.53642635847773,
+    "twoImageQueuedAgeMs": 20.09578757031103,
+    "threeImageQueuedAgeMs": 33.788235527980925
+  },
+  "decision": "Keep the two-image queue. The candidate improves distinct visible FPS by about 0.40 while adding about 13.69 ms to measured queued-image age and still failing the 60 distinct-image target. One candidate leg passes the internal 59.5-tolerant QA gate, but the other fails and the full comparison is false.",
+  "limits": "Queue age is only one component of input-to-photon latency. The 115 matching rolling fingerprints and exact native polling gaps are not full machine equivalence. This experimental binary has a prebuilt cache but source metadata different from the retained patch. No other stage, matchup, browser or Vercel environment is certified."
+}

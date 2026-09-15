@@ -1,0 +1,27 @@
+{
+  "kind": "same-checkpoint-queue-clock-abba-selected-fields",
+  "browser": "installed Google Chrome, standalone persistent profile",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "sourceResolution": [960, 720],
+  "nativeTournamentSettings": {"timeLimitSeconds": 480, "items": -1, "teams": 0},
+  "secondsPerLeg": 30,
+  "queueCapacity": 2,
+  "passedInternalToleranceGate": true,
+  "inputConsistency": {"passed": true, "checked": 117, "mismatches": []},
+  "measuredRuns": [
+    {"secondaryClock": true, "simulationFps": 59.80340879430306, "distinctVisibleFps": 59.336715526120095, "readyImageClockSkips": 1, "queueUnderruns": 20, "meanQueuedImageAgeMs": 19.631016853937272, "passed": false},
+    {"secondaryClock": false, "simulationFps": 60.003050155046566, "distinctVisibleFps": 59.703034904271334, "readyImageClockSkips": 0, "queueUnderruns": 10, "meanQueuedImageAgeMs": 20.09449469569773, "passed": true},
+    {"secondaryClock": false, "simulationFps": 60.002690120612144, "distinctVisibleFps": 59.66934184216429, "readyImageClockSkips": 0, "queueUnderruns": 10, "meanQueuedImageAgeMs": 19.568171412622142, "passed": true},
+    {"secondaryClock": true, "simulationFps": 59.96949551661061, "distinctVisibleFps": 59.60301526623132, "readyImageClockSkips": 1, "queueUnderruns": 11, "meanQueuedImageAgeMs": 19.912430167618577, "passed": true}
+  ],
+  "symmetricMeans": {
+    "secondaryClockDistinctVisibleFps": 59.469865396175705,
+    "nativeRafDistinctVisibleFps": 59.68618837321781,
+    "secondaryClockQueuedImageAgeMs": 19.771723510777926,
+    "nativeRafQueuedImageAgeMs": 19.831333054159935
+  },
+  "decision": "Promote two-image native-RAF presentation to the static browser release defaults: both candidate legs pass the internal 59.5-tolerant gate, 117 sampled native input/gameplay fingerprints agree, and queued-image age is unchanged to a tenth of a millisecond. This still misses the user's strict 60 distinct-image target.",
+  "limits": "Queue age is not full input-to-photon latency. Sampled rolling fingerprints are not full machine equivalence. The tested experimental binary has a prebuilt cache but its source metadata differs from the retained patch. Other tournament stages, matchups, browsers and Vercel devices are not certified."
+}

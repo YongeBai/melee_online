@@ -1,0 +1,21 @@
+{
+  "kind": "same-checkpoint-dream-land-stagebackground-abba-selected-fields",
+  "browser": "installed Google Chrome, standalone persistent profile",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "sourceResolution": [960, 720],
+  "secondsPerLeg": 30,
+  "callback": {"mapId": 3, "objects": 1, "sameAtEveryEndOfLeg": true},
+  "passed": false,
+  "inputConsistency": {"passed": true, "checked": 108, "mismatches": []},
+  "measuredRuns": [
+    {"backgroundDraw": true, "simulationFps": 52.80300977155855, "distinctVisibleFps": 52.269646036492304, "newJitInstances": 156, "queueUnderruns": 226},
+    {"backgroundDraw": false, "simulationFps": 57.10383547428383, "distinctVisibleFps": 55.970426013615025, "newJitInstances": 154, "queueUnderruns": 107},
+    {"backgroundDraw": false, "simulationFps": 56.832689229522344, "distinctVisibleFps": 55.66603578492805, "newJitInstances": 0, "queueUnderruns": 118},
+    {"backgroundDraw": true, "simulationFps": 58.55982492712305, "distinctVisibleFps": 57.1933179140257, "newJitInstances": 0, "queueUnderruns": 72}
+  ],
+  "visualInspection": "The off-mode screenshot showed black sky while the central Dream Land tree and platforms remained. The QA panel covered the lower native image; an unobstructed post-run native scene is still needed. The unusual tree perspective and camera-pitch concern remain unresolved by this cosmetic change.",
+  "decision": "Reject a performance promotion for background suppression. Both off legs beat the first on control, but the reversed on control beats both off legs. The drift and cold-to-warm JIT coverage undermine the apparent gain. Normal background is restored.",
+  "limits": "Scripted native-frame input is not human play. Sampled rolling fingerprints are not full machine equivalence. The ignored experimental core and prebuilt cache have source metadata different from the retained patch. No camera projection comparison with an equivalent native Dolphin image was made."
+}

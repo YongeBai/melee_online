@@ -1,0 +1,24 @@
+{
+  "kind": "render-dispatch-cost-abba",
+  "scope": "mesh",
+  "diagnosticOnly": true,
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "framesPerRun": 1200,
+  "inputConsistency": {"passed": true, "checked": 80, "mismatches": []},
+  "runs": [
+    {"drawing": true, "warmup": true, "nativeWorkFps": 56.43458941539689, "elapsedMs": 21263.555072},
+    {"drawing": true, "warmup": false, "nativeWorkFps": 59.9132295389515, "elapsedMs": 20028.965376},
+    {"drawing": false, "warmup": true, "nativeWorkFps": 74.94168697406523, "elapsedMs": 16012.449792},
+    {"drawing": false, "warmup": false, "nativeWorkFps": 71.95389903327577, "elapsedMs": 16677.345024},
+    {"drawing": false, "warmup": true, "nativeWorkFps": 74.88797118972279, "elapsedMs": 16023.935232},
+    {"drawing": false, "warmup": false, "nativeWorkFps": 74.77001342032017, "elapsedMs": 16049.21472},
+    {"drawing": true, "warmup": true, "nativeWorkFps": 61.39836193754761, "elapsedMs": 19544.49536},
+    {"drawing": true, "warmup": false, "nativeWorkFps": 59.848314303761164, "elapsedMs": 20050.690048}
+  ],
+  "pairedOpportunityMsPerFrame": [2.79301696, 3.3345627733333335],
+  "interpretation": "Temporarily bypassing HSD_PObjDisp removed mesh skinning, matrix setup and primitive submission. Both matched-input orders improved; this is a combined-path opportunity bound, not GPU-only CPU attribution or a playable gain.",
+  "restoration": "Original render function, native checkpoint, input and pacing restored. A post-run screenshot showed the Dream Land tree, platforms, Ice Climbers and HUD again.",
+  "limits": "Uncapped host pacing, incomplete output during bypass, no image acceptance or latency claim. Rolling input fingerprints are not full machine equivalence; these values cannot be subtracted from other independently measured scopes. The ignored experimental core's source metadata has not been reconciled with the retained source patch."
+}

@@ -542,19 +542,20 @@ export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>
 // restores all machine/graphics state before changing only that pass.
 export async function compareFountainReflection(host,seconds,inspect,{measure=measureBrowserGameplayAsync,feature="reflection",frameInput=false,onProgress=()=>{},onResult=()=>{}}={}){
  const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
- if(!['reverb','reflection','scenery','modeldetail','animation','shadowdiag','decorations','particles','stadiumscreen','yoshianimation','staticbackground'].includes(feature))throw Error('Unknown cosmetic feature');
- const reverb=feature==='reverb',yoshi=feature==='yoshianimation',stadium=feature==='stadiumscreen',staticBackground=feature==='staticbackground';
+ if(!['reverb','reflection','scenery','modeldetail','animation','shadowdiag','decorations','particles','stadiumscreen','yoshianimation','staticbackground','stagebackground'].includes(feature))throw Error('Unknown cosmetic feature');
+ const reverb=feature==='reverb',yoshi=feature==='yoshianimation',stadium=feature==='stadiumscreen',staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground';
  let stageName=reverb?'Tournament match':yoshi?'Yoshi':stadium?'Stadium':staticBackground?'Tournament stage':'Fountain';
- const reflection=enabled=>host.adapter.request('meleeControl',{action:reverb?'auxReverb':yoshi?'yoshiBackgroundAnimation':stadium?'stadiumScreen':staticBackground?'staticBackgroundAnimation':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='shadowdiag'?'shadowDiagnostic':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
+ const reflection=enabled=>host.adapter.request('meleeControl',{action:stageBackground?'stageBackground':reverb?'auxReverb':yoshi?'yoshiBackgroundAnimation':stadium?'stadiumScreen':staticBackground?'staticBackgroundAnimation':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='shadowdiag'?'shadowDiagnostic':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
  const codegen=browserCodegenConfig(host);
  const runs=[];let captured=false;
  try{
   await command('pause');await command('step');
   const inspectedStage=(await inspect()).match?.stage;
   if(reverb){if(!Number.isInteger(inspectedStage))throw Error('Reverb comparison requires a live tournament match');}
+  else if(stageBackground){const stages={2:'Fountain',3:'Stadium',8:'Yoshi',28:'Dream Land',31:'Battlefield',32:'Final Destination'};stageName=stages[inspectedStage];if(!stageName)throw Error('Stage background comparison requires a neutral tournament stage');}
   else if(staticBackground){if(![31,32].includes(inspectedStage))throw Error('Static background comparison requires Battlefield or Final Destination');stageName=inspectedStage===31?'Battlefield':'Final Destination';}
   else if(inspectedStage!==(yoshi?8:stadium?3:2))throw Error('Cosmetic comparison requires '+stageName);
-  const initial=await reflection(true);if(initial.objects.length<1)throw Error('Fountain reflection camera was not identified');
+  const initial=await reflection(true);if(initial.objects.length<1)throw Error('Cosmetic render callback was not identified');
   await command('capture',{slot:5});captured=true;
   for(const[index,enabled]of[true,false,false,true].entries())for(const warmup of[true,false]){
    const label=stageName+' '+feature+' '+(enabled?'on':'off')+' '+(warmup?'warmup':'measurement')+' '+(index+1)+'/4';
@@ -593,6 +594,12 @@ export async function compareFountainReflection(host,seconds,inspect,{measure=me
     await command('pause');const verified=await reflection(enabled);
     if(verified.objects.length!==1||verified.writes.length)throw Error('Standard reverb state changed during measurement');
     result.cosmeticCoverage={reverb:enabled,dryMixPreserved:verified.dryMixPreserved,stableAtEnd:true};
+   }
+   if(stageBackground){
+    await command('pause');const verified=await reflection(enabled);
+    if(verified.objects.length!==initial.objects.length||verified.writes.length)throw Error('Stage background callback changed during measurement');
+    result.cosmeticCoverage={stage:inspectedStage,objects:verified.objects.length,draw:enabled,
+      mapIds:verified.objects.map(object=>object.mapId),preservedGameplay:verified.objects.filter(object=>object.preservedGameplay),stableAtEnd:true};
    }
    if(feature==='particles'){
     await command('pause');const verified=await reflection(enabled);

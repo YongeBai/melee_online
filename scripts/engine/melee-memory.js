@@ -174,7 +174,7 @@ export function controlMelee(module, api, action, options = {}) {
     if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause render diagnostic');
     try{
       const current=inspectMelee(module);
-      if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==8)throw Error('Render-cost fixture requires a live Yoshi match');
+      if(current.major!==2||current.minor!==2||current.sceneKind!==2||![8,28].includes(current.match?.stage))throw Error('Render-cost fixture requires a live Yoshi or Dream Land match');
       const scope=options.scope||'scene';
       if(options.enabled===false){
         for(const other of Object.keys(RENDER_COST_SCOPES))if(other!==scope&&planRenderCostDiagnostic(u32,true,other).writes.length)throw Error('Another render diagnostic hook is active');
