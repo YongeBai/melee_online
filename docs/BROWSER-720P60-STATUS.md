@@ -42,8 +42,9 @@ Fighter, collision,
 HSD polygon display and scene code passed; sampled 32-bit object layouts
 passed offset assertions. A 1.1 KiB WASM harness linked and executed the
 actual decompiled `mpCollInterpolateECB` routine, yielding the six expected
-ECB/previous-ECB values. Its non-NaN test did not exercise unresolved
-report/assert fallbacks. This is a real source-function execution proof,
+ECB/previous-ECB values. A web-target build with probe-only report/assert
+shims also loaded and passed in headless Chrome from a local static page.
+This is a real in-browser source-function execution proof,
 not a linked game or an FPS result. A full client-side port still needs
 browser platform services and exact gameplay/rendering parity. Keep the
 automatic hosted startup and emulator play path while validating a native
