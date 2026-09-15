@@ -16,8 +16,8 @@ export function convertSceneAsset(input) {
   const image=nativeArchiveImage(archive,publics);
   {
     const out=new DataView(image.buffer,32,archive.dataSize);
-    const writes=new Map(),pointerSlots=new Set();
-    const claim=(at,size)=>{for(let i=0;i<size;i+=4)if(archive.relocations.has(at+i))pointerSlots.add(at+i);};
+    const writes=new Map(),pointerSlots=new Set(),descriptorSlots=new Set();
+    const claim=(at,size)=>{for(let i=0;i<size;i+=4){descriptorSlots.add(at+i);if(archive.relocations.has(at+i))pointerSlots.add(at+i);}};
     const word=at=>{writes.set(at,4);out.setUint32(at,d.getUint32(at),true);};
     const half=at=>{writes.set(at,2);out.setUint16(at,d.getUint16(at),true);};
     const ptr=at=>archive.relocations.has(at)?d.getUint32(at):null;
@@ -67,7 +67,7 @@ export function convertSceneAsset(input) {
     }
     const metrics=[model.tree.nodes.reduce((n,node)=>n+[...node.rotation,...node.scale,...node.translation].reduce((n,v,i)=>n+(i+1)*v,0),0),
       inverseSum,0,dobjs.size,materialSum,textureSum,model.meshes.length,weightSum];
-    return {image,rootOffset:model.tree.nodes[0].offset,model,metrics,archive,writes,pointerSlots};
+    return {image,rootOffset:model.tree.nodes[0].offset,model,metrics,archive,writes,pointerSlots,descriptorSlots};
   }
 }
 

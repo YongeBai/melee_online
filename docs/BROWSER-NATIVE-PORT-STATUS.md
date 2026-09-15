@@ -5,6 +5,20 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original auxiliary mesh loading and fighter-part visibility now run in the
+browser. All 27 entries bind 313 auxiliary display objects to their primary
+skeletons; geometry/reference checks and teardown pass. The port releases the
+temporary descriptor ID aliases after resolution to avoid stale joint pointers.
+Visibility import covers all 127 costumes. Runtime checks on the 27 default
+models pass 87,649 comparisons across hide/show, cached updates and mixed part
+selections. Alternate costume models and texture-animation setup are pending.
+
+The 66 targeted tests pass. The 81 diagnostic 960×720 images remain unchanged;
+this asset viewer does not yet draw the new visibility decisions or run a match.
+Full fighter creation, action-state execution and the gameplay renderer remain
+necessary before native gameplay FPS or latency can be measured.
+[Auxiliary/visibility checkpoint](benchmarks/browser-2026-09-15-native-port-visibility.json).
+
 Original ftParts_SetupParts now replaces the temporary bone assignment in the
 collision fixture. All 27 components pass: 1,894 part slots and 1,753 fighter
 material objects. Checks cover reserved slots, joint identity, hierarchy depth,

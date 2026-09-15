@@ -3,6 +3,10 @@
  * integration steps; no replacement collision algorithm is used here. */
 #include <melee/ft/fighter.h>
 #include <melee/ft/ftcoll.h>
+#include <melee/ft/ftmetal.h>
+#include <melee/ft/ftdata.h>
+#include <melee/ft/ftanim.h>
+#include <sysdolphin/baselib/id.h>
 #include <melee/ft/ftparts.h>
 #include <melee/ft/ftmaterial.h>
 #include <melee/ft/kinds/ftCommon/types.h>
@@ -22,7 +26,7 @@ _Static_assert(offsetof(Fighter,x1670)==0x1670,"Dynamics collider array offset")
 _Static_assert(offsetof(Fighter,x1828)==0x1828,"Dynamics collider array extent");
 _Static_assert(sizeof(((Fighter*)0)->x1670)/sizeof(Fighter_x1670_t)==11,"Dynamics collider capacity");
 typedef struct { ftData_x30 hurt; int count; ftData_x38* dynamics; } CollisionData;
-typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; FighterBone parts[140]; HSD_DObj* displays[124]; } CollisionFixture;
+typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; FighterBone parts[140]; HSD_DObj* displays[124]; HSD_DObj* auxiliary[32]; } CollisionFixture;
 static CollisionFixture* context(HSD_GObj* object){if(!object||!object->user_data)abort();return object->user_data;}
 int portCollisionAttach(HSD_GObj* object,CollisionData* data,unsigned count,HSD_JObj** parts,unsigned kind)
 {
@@ -75,4 +79,52 @@ double portCollisionRead(HSD_GObj* object,unsigned index,unsigned field)
     case 18:return c->b_pos.x;case 19:return c->b_pos.y;case 20:return c->b_pos.z;
     default:abort();
     }
+}
+
+int portCollisionAuxiliary(HSD_GObj* object,HSD_Joint* descriptor)
+{
+    CollisionFixture* c=context(object);if(!descriptor||c->fighter.x203C.data)return -1;
+    c->data.x5C=descriptor;c->fighter.x203C.data=c->auxiliary;
+    ftPartsPObjSetDefaultClass();ft_800C85B8(object);ftPartsPObjClearDefaultClass();
+    /* These aliases exist only while the auxiliary envelopes resolve. The
+     * primary joints own different IDs; retaining these temporary aliases
+     * would leave pointers to freed fighter joints in the global table. */
+    HSD_Joint* joint=descriptor;int depth=0;
+    while(joint){HSD_IDRemoveByIDFromTable(NULL,(u32)joint);ftAnim_GetNextJointInTree(&joint,&depth);}
+    return c->fighter.x203C.count;
+}
+unsigned portCollisionAuxiliaryRead(HSD_GObj* object,unsigned index,unsigned field)
+{
+    Fighter* fp=&context(object)->fighter;if(index>=fp->x203C.count)abort();
+    HSD_DObj* d=fp->x203C.data[index];
+    switch(field){case 0:return (uintptr_t)d;case 1:return d->flags;case 2:return d->mobj&&HSD_MOBJ_METHOD(d->mobj)==&ftMObj;default:abort();}
+}
+
+unsigned portCostumeCount(unsigned kind)
+{
+    if(kind>=27)abort();return CostumeListsForeachCharacter[kind].numCostumes;
+}
+int portVisibilityAttach(HSD_GObj* object,struct ftData_x8* data,unsigned costume)
+{
+    Fighter* fp=&context(object)->fighter;
+    if(!fp->x203C.data||!data||costume>=portCostumeCount(fp->kind))return -1;
+    fp->ft_data->x8=data;fp->x619_costume_id=costume;ftParts_800749CC(object);return fp->x5AC.model_num;
+}
+void portVisibilitySelect(HSD_GObj* object,unsigned group,int value)
+{
+    Fighter* fp=&context(object)->fighter;if(group>=fp->x5AC.model_num||value < -1||value>127)abort();
+    ftParts_80074A4C(object,group,value);ftParts_80074A8C(object);
+}
+void portVisibilityApply(HSD_GObj* object,unsigned channel,unsigned operation)
+{
+    Fighter* fp=&context(object)->fighter;if(channel>=5)abort();
+    DObjList* list=channel==2?&fp->x203C:&fp->dobj_list;
+    switch(operation){case 0:ftParts_80074D7C(&fp->x5AC,channel,list);break;
+    case 1:ftParts_80074B6C(fp,&fp->x5AC,channel,list);break;
+    case 2:ftParts_80074CA0(&fp->x5AC,channel,list);break;default:abort();}
+}
+unsigned portVisibilityRead(HSD_GObj* object,unsigned auxiliary,unsigned index)
+{
+    Fighter* fp=&context(object)->fighter;DObjList* list=auxiliary?&fp->x203C:&fp->dobj_list;
+    if(index>=list->count)abort();return list->data[index]->flags;
 }

@@ -30,6 +30,7 @@ try {
     if(!verification.commonInitialization?.passed||verification.commonInitialization.globals!==23||verification.commonInitialization.models.length!==3)throw Error('Incomplete original common initialization');
     if(!verification.characterCollision?.passed||verification.characterCollision.rows.length!==27||verification.characterCollision.frames!==864||verification.characterCollision.capacityChecks!==11)throw Error('Incomplete original character collision initialization');
     if(verification.characterCollision.rows.some(r=>!r.originalParts||!r.fighterMaterials))throw Error('Incomplete original part/material setup');
+    if(verification.characterCollision.rows.some(r=>!r.auxiliaryDisplays||!r.visibilityChecks||!r.importedCostumes))throw Error('Incomplete auxiliary model/visibility coverage');
     if(!verification.motions?.passed||verification.motions.components.length!==27||verification.motions.rows!==8767||verification.motions.sceneClips.length!==39||verification.motions.liveOwners!==0)throw Error('Incomplete original motion loader coverage');
   } else if(!verification.passed||verification.stages.length!==6||verification.fighters.length!==27||verification.poses.models!==27||
     (allAnimations?!verification.animations.allAnimations:verification.animations.clips.length!==27))

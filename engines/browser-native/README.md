@@ -114,8 +114,16 @@ assembly fallback or gameplay mismatch.
   and rewind checks. Eleven synthetic colliders exercise the native array limit;
   the portable header replaces its one-entry placeholder without changing layout.
   Original ftParts_SetupParts now supplies the part mapping and fighter material
-  classes; display indices, depth and flags are checked. Material drawing,
-  dynamic-bone simulation and combat remain pending.
+  classes; display indices, depth and flags are checked.
+  `auxiliary-assets.mjs` imports the separate refraction model and original
+  ft_800C85B8/lbRefract_PObjLoad bind its 313 display objects to the primary bones.
+  Temporary descriptor ID aliases are removed after reference resolution.
+  `visibility-assets.mjs` imports all 127 costumes' selection tables. Original
+  initialization, selection, hide/show and cached-update routines pass 87,649
+  flag comparisons on the 27 default models, including mixed selections.
+  Alternate costume models, material drawing, dynamic-bone simulation and combat
+  remain pending. The fixture owns fixed-capacity display arrays; it does not
+  claim the full Fighter_Create allocation/initialization lifecycle.
 - `shared-assets.mjs` imports all 23 PlCo sections, including three shared
   models and HSD joint animation. Generated probes check all 536 common-parameter
   field offsets. Original bone lookup, remapping, part groups and landing

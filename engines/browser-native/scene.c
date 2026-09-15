@@ -158,3 +158,12 @@ void portLightColor(GXLightObj* light,unsigned r,unsigned g,unsigned b,unsigned 
 {
     GXColor color={(u8)r,(u8)g,(u8)b,(u8)a};GXInitLightColor(light,color);
 }
+
+/* WASM linear memory is coherent: rewritten GX command bytes are read from
+ * the same buffer by the browser renderer. There is no GameCube data cache to
+ * flush, and this is not a GPU upload or synchronization operation. */
+void DCFlushRange(void* address,u32 length)
+{
+    if(length&&!address)abort();
+    __asm__ __volatile__("" ::: "memory");
+}

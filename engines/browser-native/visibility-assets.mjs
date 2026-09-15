@@ -1,0 +1,43 @@
+import {inspectArchive,nativeSubgraphImage} from './archive.mjs';
+import {fighterArchives} from './fighter-assets.mjs';
+
+// Import only FtPartsDesc and its visibility graph, preserving source offsets.
+// Texture animation and the other ftData.x8 fields have separate lifecycles.
+export function convertVisibility(input,name,costumes) {
+  if(!Number.isInteger(costumes)||costumes<1||costumes>6)throw Error('Invalid costume count');
+  const a=inspectArchive(input),d=a.data,root=a.publics.get('ftData'+fighterArchives[name.slice(2,4)]);
+  const bytes=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),out=new DataView(bytes.buffer),pointers=new Set(),words=new Set(),packed=new Set();
+  const bounds=(at,n,align=4)=>{if(!Number.isInteger(at)||at<0||at%align||at+n>d.byteLength)throw Error('Visibility descriptor out of bounds');};
+  function word(at){bounds(at,4);if(a.relocations.has(at))throw Error('Visibility scalar is a pointer');words.add(at);out.setUint32(at,d.getUint32(at),true);return d.getUint32(at);}
+  function pointer(at){bounds(at,4);const value=d.getUint32(at);if(!a.relocations.has(at)){if(value)throw Error('Unresolved visibility pointer');return null;}bounds(value,1,1);pointers.add(at);out.setUint32(at,value,true);return value;}
+  if(root===undefined)throw Error('Missing fighter visibility root');
+  const desc=pointer(root+8);if(desc===null)throw Error('Missing fighter part descriptor');
+  const models=word(desc),table=pointer(desc+4);if(models<1||models>11||table===null)throw Error('Invalid visibility group count');
+  bounds(table,costumes*16);const rows=[];
+  for(let costume=0;costume<costumes;costume++) {
+    const channels=[];
+    for(let channel=0;channel<4;channel++) {
+      const lookup=pointer(table+costume*16+channel*4);if(lookup===null){channels.push(null);continue;}
+      bounds(lookup,models*8);const groups=[];
+      for(let group=0;group<models;group++) {
+        const count=word(lookup+group*8),alternatives=pointer(lookup+group*8+4);
+        if(count>128||(count&&alternatives===null))throw Error('Invalid visibility alternatives');
+        if(count)bounds(alternatives,count*8);const variants=[];
+        for(let variant=0;variant<count;variant++) {
+          const n=word(alternatives+variant*8),indices=pointer(alternatives+variant*8+4);
+          if(n>124||(n&&indices===null))throw Error('Invalid visibility index count');
+          if(n)bounds(indices,n,1);const values=[];
+          for(let j=0;j<n;j++){packed.add(indices+j);const value=d.getUint8(indices+j);if(value>=(channel===2?32:124))throw Error('Visibility index exceeds display capacity');values.push(value);}
+          variants.push(values);
+        }
+        groups.push(variants);
+      }
+      channels.push(groups);
+    }
+    rows.push(channels);
+  }
+  for(const at of packed)if(words.has(at&~3)||a.relocations.has(at&~3))throw Error('Visibility indices overlap typed descriptors');
+  // The root+8 pointer is used only to find the subgraph, not exposed in it.
+  pointers.delete(root+8);
+  return {image:nativeSubgraphImage(bytes,pointers,new Map([['native_visibility',desc]])),models,rows};
+}
