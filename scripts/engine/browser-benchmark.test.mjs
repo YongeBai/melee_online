@@ -9,7 +9,6 @@ test("delivery diagnostics use the active transport, never stale bitmap counts",
   assert.equal(browserDeliveryCounter({oglSabEnabled:false, oglSabFramesDrawn:60,
     adapter:{detachedOglFramesDrawn:10}}), 10);
 });
-
 const before = { major: 2, minor: 2, sceneFrame: 100, renderFrame: 100 };
 const after = { ...before, sceneFrame: 1900, renderFrame: 1900 };
 const samples = () => Array.from({ length: 1801 }, (_, i) => ({
@@ -76,7 +75,7 @@ test('FIFO A/B/B/A uses one state and restores original codegen settings',async(
  assert.deepEqual(result.runs.map(r=>[r.integerfifo,r.warmup]),[[false,true],[false,false],[true,true],[true,false],[true,true],[true,false],[false,true],[false,false]]);
  assert.equal(calls.filter(([t,d])=>d.action==='capture').length,1);
  assert.equal(calls.filter(([t,d])=>d.action==='restore').length,8);
- assert.deepEqual(calls.at(-2),['browserRollback',{action:'codegen',gxmatrixfast:false,displaylistfast:false,animstatefast:false,animcallbackfast:false,matrixfast:false,constantaddr:false,callfusion:false,chainfusion:false,bswaprotate:false,qstatefull:false,qstatecache:false,cpformat:false,leandispatch:false,counterbatch:false,fusionredispatch:false,readfusion:false,stepcheck:false,fpuguardwide:false,branchfusion:false,fpuguard:false,blockmerge:true,regcache:true,fastmem:true,integerfifo:true,singleprefix:false,fprcache:false,compactgpr:false,pssimd:false,psmemsimd:false,vectorfpr:false,psqhoist:false,widemap:false,stateconst:false,msrcache:false,fifocopy:false,fifobatch:false,frsqrtefast:false}]);
+ assert.deepEqual(calls.at(-2),['browserRollback',{action:'codegen',gxmatrixfast:false,displaylistfast:false,animstatefast:false,animcallbackfast:false,animfusion:false,hotfusion:false,matrixfast:false,constantaddr:false,callfusion:false,chainfusion:false,bswaprotate:false,qstatefull:false,qstatecache:false,cpformat:false,leandispatch:false,counterbatch:false,fusionredispatch:false,readfusion:false,stepcheck:false,fpuguardwide:false,branchfusion:false,fpuguard:false,blockmerge:true,regcache:true,fastmem:true,integerfifo:true,singleprefix:false,fprcache:false,compactgpr:false,pssimd:false,psmemsimd:false,vectorfpr:false,psqhoist:false,widemap:false,stateconst:false,msrcache:false,fifocopy:false,fifobatch:false,frsqrtefast:false}]);
  assert.deepEqual(calls.at(-1),['start',{}]);
 });
 
@@ -560,4 +559,17 @@ test('particle comparison verifies installed hook, uses one checkpoint, and rest
  assert.equal(enabled,true);assert.equal(calls.at(-1)[0],'start');
  await assert.rejects(compareFountainReflection(host,30,async()=>({match:{stage:2}}),{feature:'particles',measure:async()=>{if(++measured===2)drift=true;return {passed:true};}}),/Particle hook changed/);
  assert.equal(enabled,true);assert.equal(calls.at(-2)[1].action,'release');assert.equal(calls.at(-1)[0],'start');
+});
+
+test('hot-function fusion compares independently and verifies compiled coverage',async()=>{
+ const {compareBrowserCodegen}=await import('./browser-benchmark.js');let enabled=false;const changes=[];
+ const host={meleeAnimFusion:true,cachedInterpreterDisableMask:(1<<16)|(1<<18),adapter:{request:async(type,data)=>{
+  if(data.action==='codegen'){enabled=data.hotfusion;changes.push(data);return data;}
+  if(type==='rendererDiagnostics')return{cpuDetails:`hotfusion:${enabled?1:0} emitted:${enabled?37:0}`};return{};
+ }}};
+ const result=await compareBrowserCodegen(host,1,()=>{},{feature:'hotfusion',measure:async()=>({passed:true})});
+ assert.deepEqual(changes.map(d=>d.hotfusion),[false,true,true,false,false]);
+ assert.ok(changes.every(d=>d.animfusion===true));
+ assert.deepEqual(result.runs.filter(r=>!r.warmup).map(r=>r.hotFusionCoverage.enabled),[false,true,true,false]);
+ assert.equal(result.runs[2].hotFusionCoverage.emittedBlocks,37);
 });

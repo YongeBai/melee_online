@@ -185,7 +185,7 @@ export async function measureBrowserRepeated(host, seconds, inspect, {
 
 export function browserCodegenConfig(host) {
  const mask=host.cachedInterpreterDisableMask>>>0;
- return {gxmatrixfast:host.gxMatrixFast===true,displaylistfast:host.displayListFast===true,animstatefast:host.meleeAnimStateFast===true,animcallbackfast:host.meleeAnimCallbackFast===true,matrixfast:host.matrixFast===true,constantaddr:host.constantAddress===true,callfusion:host.callFusion===true,chainfusion:host.chainFusion===true,bswaprotate:host.byteSwapRotate===true,qstatefull:host.qStateFull===true,qstatecache:host.qStateCache===true,cpformat:host.cpFormatReuse===true,leandispatch:host.leanDispatch===true,counterbatch:host.dispatchCounterBatch===true,fusionredispatch:host.fusionRedispatch===true,readfusion:host.readOnlyFusion===true,stepcheck:host.dispatchStepCheck===true,fpuguardwide:host.fpuGuardWide===true,branchfusion:host.conditionalFusion===true,fpuguard:host.fpuGuardHoist===true,blockmerge:!(mask&(1<<17)),regcache:!(mask&(1<<20)),fastmem:!!(mask&(1<<23)),integerfifo:!!(mask&(1<<16)),singleprefix:!!(mask&(1<<18)),fprcache:!!(mask&(1<<19)),compactgpr:host.compactGprLocals===true,pssimd:host.pairedSimd===true,psmemsimd:host.pairedMemorySimd===true,vectorfpr:host.vectorFprCache===true,psqhoist:host.pairedMemoryHoist===true,widemap:host.wideBlockMap===true,stateconst:host.constantStateBase===true,msrcache:host.blockMsrCache===true,fifocopy:host.fifoCopy===true,fifobatch:host.fifoBatch===true,frsqrtefast:host.frsqrteFast===true};
+ return {gxmatrixfast:host.gxMatrixFast===true,displaylistfast:host.displayListFast===true,animstatefast:host.meleeAnimStateFast===true,animcallbackfast:host.meleeAnimCallbackFast===true,animfusion:host.meleeAnimFusion===true,hotfusion:host.meleeHotFusion===true,matrixfast:host.matrixFast===true,constantaddr:host.constantAddress===true,callfusion:host.callFusion===true,chainfusion:host.chainFusion===true,bswaprotate:host.byteSwapRotate===true,qstatefull:host.qStateFull===true,qstatecache:host.qStateCache===true,cpformat:host.cpFormatReuse===true,leandispatch:host.leanDispatch===true,counterbatch:host.dispatchCounterBatch===true,fusionredispatch:host.fusionRedispatch===true,readfusion:host.readOnlyFusion===true,stepcheck:host.dispatchStepCheck===true,fpuguardwide:host.fpuGuardWide===true,branchfusion:host.conditionalFusion===true,fpuguard:host.fpuGuardHoist===true,blockmerge:!(mask&(1<<17)),regcache:!(mask&(1<<20)),fastmem:!!(mask&(1<<23)),integerfifo:!!(mask&(1<<16)),singleprefix:!!(mask&(1<<18)),fprcache:!!(mask&(1<<19)),compactgpr:host.compactGprLocals===true,pssimd:host.pairedSimd===true,psmemsimd:host.pairedMemorySimd===true,vectorfpr:host.vectorFprCache===true,psqhoist:host.pairedMemoryHoist===true,widemap:host.wideBlockMap===true,stateconst:host.constantStateBase===true,msrcache:host.blockMsrCache===true,fifocopy:host.fifoCopy===true,fifobatch:host.fifoBatch===true,frsqrtefast:host.frsqrteFast===true};
 }
 
 export function parseBlockMapCounters(details) {
@@ -196,7 +196,7 @@ export function parseBlockMapCounters(details) {
 
 export async function compareBrowserCodegen(host, seconds, inspect, {onProgress=()=>{}, onResult=()=>{}, measure=measureBrowserGameplay, feature="integerfifo", frameInput=false, retainedFpuGuard=false, retainedBranchFusion=false,retainedReadFusion=false}={}) {
   const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
-  if (!["gxmatrixfast","displaylistfast","animstatefast","animcallbackfast","matrixfast","constantaddr","callfusion","chainfusion","bswaprotate","qstatefull","qstatecache","cpformat","leandispatch","counterbatch","fusionredispatch","readbranchfusionfast","readbranchfusion","readfusion","stepcheck","fpuguardwide","idlechecks","branchfusion","fpuguard","blockmerge","integerfifo","singleprefix","fprcache","regcache","compactgpr","pssimd","psmemsimd","vectorfpr","vectorfpronly","vectorfprarith","psqhoist","widemap","stateconst","msrcache","fifocopy","fifobatch","frsqrtefast"].includes(feature)) throw Error("Unsupported codegen comparison");
+  if (!["gxmatrixfast","displaylistfast","animstatefast","animcallbackfast","animfusion","hotfusion","matrixfast","constantaddr","callfusion","chainfusion","bswaprotate","qstatefull","qstatecache","cpformat","leandispatch","counterbatch","fusionredispatch","readbranchfusionfast","readbranchfusion","readfusion","stepcheck","fpuguardwide","idlechecks","branchfusion","fpuguard","blockmerge","integerfifo","singleprefix","fprcache","regcache","compactgpr","pssimd","psmemsimd","vectorfpr","vectorfpronly","vectorfprarith","psqhoist","widemap","stateconst","msrcache","fifocopy","fifobatch","frsqrtefast"].includes(feature)) throw Error("Unsupported codegen comparison");
   const original=browserCodegenConfig(host);
   const common={...original,...(retainedFpuGuard?{fpuguard:true}:{}),...(retainedBranchFusion?{branchfusion:true}:{}),...(retainedReadFusion?{readfusion:true}:{})};
   const originalIdleChecks=!!((host.cachedInterpreterDisableMask>>>0)&0x80000000);
@@ -252,6 +252,18 @@ export async function compareBrowserCodegen(host, seconds, inspect, {onProgress=
           const match=/constantaddr:(\d+) emit-ram\/other:(\d+)\/(\d+)/.exec(details);
           if(!match||Number(match[1])!==Number(enabled)||(enabled&&Number(match[2])+Number(match[3])<=0))throw Error('Constant address coverage unavailable');
           result.constantAddressCoverage={enabled,ramSites:Number(match[2]),otherSites:Number(match[3]),scope:'Cumulative compilation coverage, not runtime share.'};
+        }
+        if(feature==='animfusion'){
+          const details=(await host.adapter.request('rendererDiagnostics',{})).cpuDetails||'';
+          const match=/animfusion:(\d+) emitted:(\d+)/.exec(details);
+          if(!match||Number(match[1])!==Number(enabled)||(enabled&&Number(match[2])<=0))throw Error('Melee animation fusion coverage unavailable');
+          result.animFusionCoverage={enabled,emittedBlocks:Number(match[2]),scope:'Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share.'};
+        }
+        if(feature==='hotfusion'){
+          const details=(await host.adapter.request('rendererDiagnostics',{})).cpuDetails||'';
+          const match=/hotfusion:(\d+) emitted:(\d+)/.exec(details);
+          if(!match||Number(match[1])!==Number(enabled)||(enabled&&Number(match[2])<=0))throw Error('Melee hot-function fusion coverage unavailable');
+          result.hotFusionCoverage={enabled,emittedBlocks:Number(match[2]),scope:'Cumulative revision-locked hot-function compilation coverage, not runtime share.'};
         }
         if(feature==='callfusion'){
           const details=(await host.adapter.request('rendererDiagnostics',{})).cpuDetails||'';

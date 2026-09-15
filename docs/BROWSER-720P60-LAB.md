@@ -1354,3 +1354,138 @@ warmed strongly between the opening and closing controls. Retain the earlier,
 smaller repeatable reverb evidence; use this run only as combined near-target
 evidence. Artifact:
 `benchmarks/browser-2026-09-14-counter-free-reverb-image-abba.json`.
+
+An animation boundary experiment leaves spline and other unsupported tracks in
+generated guest WASM before mutating host state, avoiding about half of the
+`FastMeleeAnimStateProbe` C++ entries in a 120-frame Yoshi IC/IC replay. A
+30-second 960x720 OFF/ON/ON/OFF comparison measured symmetric means of
+53.2771->55.0881 simulation FPS (+3.399%) and 52.5110->54.3880 visible FPS
+(+3.574%). All 104 shared native-input/gameplay fingerprints and polling gaps
+matched. The 120-frame replay matched RAM, CPU registers and caches, timing,
+fighters, inputs, and gameplay state, but three bytes differed in one GPU
+TextureCache `Texture config` descriptor; its unchanged-codegen control was
+fully exact. Keep this as an unpromoted candidate, repeat the strict replay,
+then measure it on the accepted counter-suppressed/two-image-queue baseline.
+Artifact: `benchmarks/browser-2026-09-14-animation-guest-fallback-image-abba.json`.
+
+The immediate strict-replay repeat passed all 109,580,237 bytes across 29
+sections, including the complete 16,086,019-byte texture cache. Inputs,
+gameplay fingerprints, scene frame and timing were exact. The candidate reduced
+animation host-callback entries from 63,170 to 30,923 over 120 frames. On the
+counter-suppressed, dry-audio, two-image-queue stack, a second OFF/ON/ON/OFF
+comparison measured symmetric means of 53.9351->57.3375 simulation FPS
+(+6.308%) and 53.1850->56.3374 visible FPS (+5.927%). All strict FPS gates
+still failed. Retain the candidate and test it with the independently retained
+FPU guard. Artifact:
+`benchmarks/browser-2026-09-14-animation-guest-fallback-retained-stack.json`.
+
+Persistent generated-block bundling sharply reduced remaining JIT construction
+without closing the throughput gap. A warmed 34,449-function, 20.39 MiB bundle
+reduced synchronous compile/link work to 23.186 ms over 30 seconds and measured
+59.4702 simulation / 58.5035 visible FPS on Yoshi IC/IC. A following direct
+GPU-pthread-to-page bitmap port trial measured 59.2364 simulation / 58.6364
+visible FPS with 17 dropped images and 39 queue underruns. The +0.133 visible
+FPS and -0.234 simulation FPS changes are within observed run variation; retain
+the port as a presentation simplification, not as a material CPU win.
+
+Reducing the Emscripten pthread pool from 16 to 8 did not compose with the warm
+bundle. A cold adjacent pair weakly favored eight workers by 0.662 FPS, but the
+combined eight-worker bundle/direct-port run reached only 58.5335 simulation /
+58.2335 visible FPS, below both 16-worker bundled runs. The original 16-worker
+wrapper is restored. A delivery-only run without timed pixel verification
+measured 56.9207 simulation / 56.4209 delivered FPS while requestAnimationFrame
+continued at 60.0201 FPS. This rejects JIT construction, verifier readback and
+worker-pool size as explanations for the full remaining gap. The hot emulator
+worker and animation/matrix profiles remain the evidence for CPU execution as
+the active constraint. Artifact:
+`benchmarks/browser-2026-09-14-bundle-worker-delivery.json`.
+
+The revision-locked `parseFloat` specialization at 0x8036ac10 passed the strict
+120-frame replay: all bytes in all 29 machine-state sections matched. It covers
+the complete 0x1cc-byte GALE01 1.02 function and its raw f32, S8, U8, S16 and
+U16 encodings while preserving memory, stack, volatile registers, floating
+state and original instruction charges. Warm 960x720 samples varied from about
+58.4 to 59.5 simulation FPS. The best guarded-tier run reached 59.94 simulation
+/ 59.30 visible FPS, but a repeat reached 59.34 / 58.40, so the strict sustained
+gate remains unmet. Mixed JIT tiering reached only 51.37 FPS from a fresh load
+because of compilation work, and `pace=latest` reduced latency while lowering
+visible delivery to 57.37 FPS. Keep the exact specialization and reject both
+mixed tiering and latest-only presentation as release defaults.
+
+Rebuilding with direct WASM dispatch explicitly selected produced the identical
+core bytes, confirming that direct dispatch was already compiled in. This was a
+configuration false lead rather than an additional optimization.
+
+Deferring the gather-pipe check until a complete 32-byte burst was also rejected.
+The corrected candidate preserved gameplay fingerprints and fighter state, but
+the strict replay changed 23 CoreTiming bytes, 19 RAM bytes and 12 HW GPFifo
+bytes. A check boundary is observable GPU scheduling state even when the same
+FIFO bytes are eventually submitted, so the experiment was removed.
+
+The warmed post-`parseFloat` profile measured 58.9363 simulation / 58.4696
+visible FPS. `parseFloat` is absent from the hot list. `HSD_FObjInterpretAnim`
+now accounts for 25,091.844 of 240,777 sampled microseconds (10.42%) across 41
+blocks; the next function, `SetupEnvelopeModelMtx`, is only 1.95%. The best
+remaining structural target is therefore a function-local generated-WASM path
+that keeps spline math in guest WASM while eliminating repeated block-map and
+indirect-dispatch work. Any such path must retain every original block timing,
+pause, step, exception and branch boundary and pass the complete replay before
+timing. Artifact:
+`benchmarks/browser-2026-09-14-post-parsefloat-profile.json`.
+
+A revision-locked hot-store fusion experiment allowed direct MEM1 integer stores
+inside the accepted 14 hot-function fused ranges while keeping imported and
+non-MEM1 writes on exact checked fallback exits. The isolated 600-frame Dream
+Land IC/IC replay passed byte-for-byte across 105,788,668 machine-state bytes;
+both configurations used lean dispatch and all input/state hashes matched. The
+30-second A/B/B/A symmetric mean fell from 47.9658 to 47.0412 simulation FPS
+(-1.928%) and from 47.9158 to 46.9912 visible FPS (-1.930%). Other loaded
+browser workers depressed the absolute rates, but alternating order still
+rejects the candidate: it lost about the same amount in simulation and visible
+delivery. Remove hot-store fusion and keep stores as fusion boundaries.
+Artifact: `benchmarks/browser-2026-09-14-hot-store-fusion.json`.
+
+A revision-locked Dream Land IC/IC replay then measured the remaining animation
+branch mix with lean counter suppression disabled. Both 600-frame legs matched
+all 105,768,125 machine-state bytes. Of 2,646,401 cumulative interpreter calls,
+87.70% were active state 5. Opcode 4 (`HSD_A_OP_SPL`) alone was 20.39%; the
+unsupported spline/slope opcodes 3–5 totaled 30.95%. Opcodes 1–2, which the
+accepted direct interpolation handles, totaled 56.75%. This rules out another
+generic optimization guess and identifies the local spline control-flow path as
+the only remaining animation target of comparable size. Earlier C++ entry and
+host-Hermite versions regressed, so the next experiment retains the original
+PowerPC math in generated WebAssembly and fuses only revision-locked local
+conditional fallthroughs. Counter timing is diagnostic only. Artifact:
+`benchmarks/browser-2026-09-14-animation-op-distribution.json`.
+
+The revision-locked animation conditional-fallthrough fusion keeps the original
+PowerPC spline math in generated WebAssembly and removes only local block-map
+and indirect-dispatch boundaries inside `HSD_FObjInterpretAnim`. Every original
+segment still commits its PC and cycle budget, checks the normal stop boundary,
+and redispatches to the actual NPC when a conditional branch is taken. An
+immediate 600-frame Dream Land IC/IC repeat matched all 105,809,375 bytes across
+29 machine-state sections, including RAM, CPU, GPU, DSP and CoreTiming, with
+identical input and gameplay hashes. The first candidate attempt and an
+unchanged-codegen control both differed only in absolute CoreTiming ordering
+counters, exposing checkpoint reapplication noise; the immediate candidate
+repeat was byte-for-byte exact, so promotion rests on that exact repeat rather
+than on ignoring any state section.
+
+The 30-second 960x720 OFF/ON/ON/OFF comparison measured symmetric simulation
+means of 57.5365 -> 59.1031 FPS (+2.723%) and visible means of
+57.1865 -> 58.7531 FPS (+2.740%). Candidate measurement legs reached
+59.0024/59.2039 simulation and 58.5690/58.9372 visible FPS. All 111 shared
+native-input/gameplay checks matched, the source image remained 960x720 and
+nonblack, and no camera or projection code changed. Retain the fusion. The
+strict sustained visible-FPS gate still fails on Dream Land IC/IC by about
+0.56-0.93 FPS in the two measured candidate legs. Artifact:
+`benchmarks/browser-2026-09-14-animation-conditional-fusion.json`.
+
+The previously accumulated native changes were living only in the ignored
+engine checkout, so the candidate manifest could list historical patches
+without reproducing the actual source used to build it. Two consolidated
+patches now close that provenance gap: `browser-720p60-engine.patch` applies to
+the pinned wasm-dolphin checkout, and `browser-720p60-vendor.patch` applies
+after the locked upstream Dolphin snapshot. Both patches were applied in a
+fresh temporary worktree and every changed or added source file was compared
+byte-for-byte with the benchmarked checkout.

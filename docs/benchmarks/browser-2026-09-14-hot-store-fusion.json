@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-14",
+  "feature": "hotstorefusion",
+  "decision": "reject",
+  "coreSha256": "af8607ae831506428ff6f141c6ac8b064d073e20b5e9d2f10cce23ad38ed5cfd",
+  "scene": {
+    "stage": "Dream Land 64",
+    "stageId": 28,
+    "characters": ["Ice Climbers", "Ice Climbers"],
+    "characterIds": [14, 14],
+    "resolution": [960, 720],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "replay": {
+    "frames": 600,
+    "passed": true,
+    "fullMachineBytesEqual": true,
+    "fingerprintsEqual": true,
+    "inputHash": 1476679224,
+    "stateHash": 16327259,
+    "reference": {"hotstorefusion": false, "leandispatch": true},
+    "candidate": {"hotstorefusion": true, "leandispatch": true},
+    "machineStateBytes": 105788668
+  },
+  "abba": {
+    "benchmarkSeconds": 30,
+    "order": [false, true, true, false],
+    "warmups": [
+      {"enabled": false, "simulationFps": 48.29934795880064, "visibleFps": 48.23268219212183},
+      {"enabled": true, "simulationFps": 43.296846546339765, "visibleFps": 43.23018473487504},
+      {"enabled": true, "simulationFps": 47.16294865421701, "visibleFps": 47.09628724269161},
+      {"enabled": false, "simulationFps": 48.23092982533469, "visibleFps": 48.164266480724685}
+    ],
+    "measured": [
+      {"enabled": false, "simulationFps": 46.70028798511296, "visibleFps": 46.6669544462228},
+      {"enabled": true, "simulationFps": 45.09667787806164, "visibleFps": 45.030016122144325},
+      {"enabled": true, "simulationFps": 48.985664940382634, "visibleFps": 48.95231867425576},
+      {"enabled": false, "simulationFps": 49.231347668982, "visibleFps": 49.16468369109577}
+    ],
+    "symmetricMean": {
+      "offSimulationFps": 47.96581782704748,
+      "onSimulationFps": 47.04117140922214,
+      "simulationDeltaFps": -0.92464641782534,
+      "simulationDeltaPercent": -1.9277162208953,
+      "offVisibleFps": 47.91581906865928,
+      "onVisibleFps": 46.99116739820004,
+      "visibleDeltaFps": -0.92465167045924,
+      "visibleDeltaPercent": -1.9297427578929
+    },
+    "environmentNote": "Several already-loaded in-app-browser emulator workers depressed absolute FPS. The symmetric A/B/B/A order controls a monotonic drift well enough to reject the candidate, but these values are not acceptance measurements."
+  },
+  "hypothesis": "Allow revision-locked hot-function fusion to cross direct MEM1 integer-store boundaries, retaining exact fallback exits for imported or non-MEM1 stores.",
+  "conclusion": "The candidate is state-exact but slower. Crossing these store boundaries adds generated-WASM work or code-shape cost without recovering enough dispatch overhead. Remove the experiment and keep store instructions as checked fusion boundaries."
+}

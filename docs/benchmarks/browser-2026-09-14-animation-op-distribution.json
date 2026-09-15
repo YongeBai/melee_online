@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-14",
+  "kind": "revision-locked-animation-path-diagnostic",
+  "coreSha256": "af8607ae831506428ff6f141c6ac8b064d073e20b5e9d2f10cce23ad38ed5cfd",
+  "workload": {
+    "resolution": [960, 720],
+    "stage": "Dream Land 64",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "framesPerReplayLeg": 600,
+    "rules": {"timeLimit": 480, "items": -1, "teams": 0},
+    "input": "two deterministic ordinary controller tracks on native logic frames"
+  },
+  "correctness": {
+    "passed": true,
+    "fullMachineBytesEqual": true,
+    "bytesPerState": 105768125,
+    "sectionsCompared": 29,
+    "inputHash": 1467200671,
+    "stateHash": 604938437
+  },
+  "cumulativeCountersAfterBothReplayLegs": {
+    "calls": 2646401,
+    "states": [0, 322171, 3210, 0, 0, 2321013, 0, 0],
+    "opcodes": [322171, 1452917, 48924, 156798, 539484, 122850, 3250, 0],
+    "constantOrLinearDirect": 1342334
+  },
+  "shares": {
+    "state5Percent": 87.7045,
+    "opcode1Percent": 54.902,
+    "opcode2Percent": 1.849,
+    "opcode3Percent": 5.925,
+    "opcode4Percent": 20.386,
+    "opcode5Percent": 4.642,
+    "opcode6Percent": 0.123,
+    "unhandledSplineSlopeOpcodes3To5Percent": 30.953
+  },
+  "interpretation": "Opcode 4 (HSD_A_OP_SPL) is the largest unsupported active branch. Prior host-entry and host-Hermite experiments already rejected C++ handling. Keep its original PowerPC arithmetic in generated WebAssembly and target local conditional-dispatch overhead. Counter publishing disables lean dispatch and is diagnostic only; its timing is not an acceptance measurement."
+}

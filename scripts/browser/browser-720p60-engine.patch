@@ -1,0 +1,3060 @@
+diff --git a/core/upstream/dolphin_web_benchmark_pad.h b/core/upstream/dolphin_web_benchmark_pad.h
+new file mode 100644
+index 0000000..be1e3a4
+--- /dev/null
++++ b/core/upstream/dolphin_web_benchmark_pad.h
+@@ -0,0 +1,55 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++#pragma once
++#include <array>
++#include <cmath>
++#include <cstdint>
++#include <cstring>
++
++// Private QA input only. Reads the native game on its CPU thread and returns
++// ordinary controller states; it never writes game memory or changes rules.
++namespace DolphinWeb::FrameBenchmark
++{
++using u32=std::uint32_t;
++using Pad=std::array<u32,9>;
++struct Fighter { float x=0; u32 action=0,stocks=0; };
++struct State { u32 frame=0; std::array<Fighter,2> fighters{}; };
++inline bool Read(const std::uint8_t* ram, std::size_t bytes, State* out)
++{
++  if (!ram || bytes<0x1800000 || !out || std::memcmp(ram,"GALE01",6)!=0 || ram[7]!=2) return false;
++  const auto valid=[](u32 p,u32 n) {return !(p&3) && p>=0x80003100 && n<=0x1800000 && p<=0x81800000-n;};
++  const auto word=[&](u32 p) {const auto* b=ram+(p-0x80000000);return (u32(b[0])<<24)|(u32(b[1])<<16)|(u32(b[2])<<8)|b[3];};
++  const auto byte=[&](u32 p) {return ram[p-0x80000000];};
++  const u32 scene=word(0x804d6720);
++  if (byte(0x80479d30)!=2 || byte(0x80479d33)!=2 || !valid(scene,4) || byte(scene)!=2) return false;
++  State s{};s.frame=word(0x80479d58);
++  for (u32 port=0;port<2;++port)
++  {
++    const u32 slot=0x80453080+port*0xe90,index=byte(slot+0xc);
++    if (index>=2 || word(slot+8)!=0 || byte(slot+0x46)!=port) return false;
++    const u32 gobj=word(slot+0xb0+index*4);
++    if (!valid(gobj,0x30)) return false;
++    const u32 fp=word(gobj+0x2c);
++    if (!valid(fp,0xb4) || word(fp)!=gobj) return false;
++    const u32 bits=word(fp+0xb0);std::memcpy(&s.fighters[port].x,&bits,4);
++    if (!std::isfinite(s.fighters[port].x)) return false;
++    s.fighters[port].action=word(fp+0x10);s.fighters[port].stocks=byte(slot+0x8e);
++  }
++  *out=s;return true;
++}
++inline Pad Input(const State& state,u32 port)
++{
++  Pad p{0,128,128,128,128,0,0,0,0};if (port>=2 || !state.fighters[port].stocks) return p;
++  const auto& actor=state.fighters[port];const auto& other=state.fighters[1-port];
++  const u32 phase=(state.frame/9+port*7)%24;
++  const int inward=actor.x>0?-1:1,toward=other.x>=actor.x?1:-1;
++  if (std::fabs(actor.x)>50) {p[1]=128+inward*96;if (phase%3==0)p[0]=4;return p;}
++  if (phase<6 || phase>=20)p[1]=128+toward*80;
++  if (phase==3 || phase==7 || phase==11 || phase==17 || phase==21){p[0]=1;p[7]=255;}
++  if (phase==6 || phase==15)p[0]=4;
++  if (phase==9 || phase==18){p[0]=2;p[8]=255;}
++  if (phase==13){p[0]=32;p[5]=255;}
++  if (phase==23)p[3]=128+toward*96;
++  return p;
++}
++inline u32 HashWord(u32 hash,u32 word) {return (hash^word)*16777619u;}
++}
+diff --git a/core/upstream/dolphin_web_core.cpp b/core/upstream/dolphin_web_core.cpp
+index b07b82e..616f2ee 100644
+--- a/core/upstream/dolphin_web_core.cpp
++++ b/core/upstream/dolphin_web_core.cpp
+@@ -1,9 +1,15 @@
+ // Copyright 2026
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include "Common/BrowserProfile.h"
++
++#include "Common/BrowserRollbackOutput.h"
++#include "Common/BrowserDispatchProfile.h"
+ #include "dolphin_web_discio.cpp"
++#include "dolphin_web_benchmark_pad.h"
+ 
+ #include <array>
++#include <chrono>
+ #include <algorithm>
+ #include <atomic>
+ #include <cstddef>
+@@ -33,16 +39,21 @@
+ #include "Core/ConfigManager.h"
+ #include "Core/Core.h"
+ #include "Core/CoreTiming.h"
++#include "Core/WasmTimingProfile.h"
+ #include "Core/HW/GBAPad.h"
+ #include "Core/HW/ProcessorInterface.h"
+ #include "Core/HW/EXI/EXI_Device.h"
+ #include "Core/HW/GCKeyboard.h"
+ #include "Core/HW/GCPad.h"
+ #include "Core/HW/SystemTimers.h"
++#include "Core/HW/SI/SI_Device.h"
+ #include "Core/Host.h"
+ #include "Core/PowerPC/PowerPC.h"
++#include "Core/PowerPC/JitInterface.h"
+ #include "Core/State.h"
++#include "Core/HW/Memmap.h"
+ #include "Core/System.h"
++#include "Core/HW/CPU.h"
+ 
+ #include "InputCommon/ControllerInterface/ControllerInterface.h"
+ 
+@@ -50,11 +61,85 @@
+ #include "VideoCommon/Statistics.h"
+ #include "VideoCommon/VideoBackendBase.h"
+ #include "VideoCommon/VideoConfig.h"
++#include "VideoCommon/FramebufferManager.h"
+ 
+ extern "C" void DolphinWeb_SetFastSoftwareRaster(int mode);
+ extern "C" std::uint32_t DolphinWeb_SetCachedInterpreterDisableMask(std::uint32_t mask);
+ extern "C" std::uint32_t DolphinWeb_GetCachedInterpreterDisableMask();
++extern "C" bool DolphinWeb_GetCompactGprLocals();
++extern "C" bool DolphinWeb_GetPairedSimd();
++extern "C" bool DolphinWeb_GetPairedMemorySimd();
++extern "C" bool DolphinWeb_GetVectorFprCache();
++extern "C" bool DolphinWeb_GetPsqHoist();
++extern "C" bool DolphinWeb_GetQStateCache();
++extern "C" bool DolphinWeb_GetQStateFull();
++extern "C" bool DolphinWeb_GetConstantAddress();
++extern "C" void DolphinWeb_SetConstantAddress(bool value);
++extern "C" bool DolphinWeb_GetCallFusion();
++extern "C" void DolphinWeb_SetCallFusion(bool);
++extern "C" bool DolphinWeb_GetMeleeMatrixFast();
++extern "C" void DolphinWeb_SetMeleeMatrixFast(bool);
++extern "C" bool DolphinWeb_GetMeleeAnimStateFast();
++extern "C" void DolphinWeb_SetMeleeAnimStateFast(bool);
++extern "C" bool DolphinWeb_GetMeleeAnimCallbackFast();
++extern "C" void DolphinWeb_SetMeleeAnimCallbackFast(bool);
++extern "C" bool DolphinWeb_GetMeleeDisplayListFast();
++extern "C" void DolphinWeb_SetMeleeDisplayListFast(bool);
++extern "C" bool DolphinWeb_GetMeleeGxMatrixFast();
++extern "C" void DolphinWeb_SetMeleeGxMatrixFast(bool);
++extern "C" bool DolphinWeb_GetChainFusion();
++extern "C" void DolphinWeb_SetChainFusion(bool);
++extern "C" bool DolphinWeb_GetBswapRotate();
++extern "C" void DolphinWeb_SetBswapRotate(bool);
++extern "C" bool DolphinWeb_GetWideBlockMap();
++extern "C" bool DolphinWeb_GetConstantStateBase();
++extern "C" bool DolphinWeb_GetBlockMsrCache();
++extern "C" bool DolphinWeb_GetFpuGuardHoist();
++extern "C" bool DolphinWeb_GetConditionalFusion();
++extern "C" bool DolphinWeb_GetFpuGuardWide();
++extern "C" bool DolphinWeb_GetStepCheck();
++extern "C" bool DolphinWeb_GetReadFusion();
++extern "C" bool DolphinWeb_GetFusionRedispatch();
++extern "C" bool DolphinWeb_GetCounterBatch();
++extern "C" bool DolphinWeb_GetLeanDispatch();
++extern "C" bool DolphinWeb_GetCPFormatReuse();
++extern "C" bool DolphinWeb_GetMeleeAnimFusion();
++extern "C" void DolphinWeb_SetMeleeAnimFusion(bool);
++extern "C" bool DolphinWeb_GetMeleeHotFusion();
++extern "C" void DolphinWeb_SetMeleeHotFusion(bool);
++extern "C" void DolphinWeb_SetCPFormatReuse(bool);
++extern "C" const char* DolphinWeb_CPFormatStats();
++extern "C" void DolphinWeb_SetLeanDispatch(bool);
++extern "C" void DolphinWeb_SetCounterBatch(bool);
++extern "C" void DolphinWeb_SetFusionRedispatch(bool);
++extern "C" void DolphinWeb_SetReadFusion(bool);
++extern "C" void DolphinWeb_SetStepCheck(bool);
++extern "C" void DolphinWeb_SetFpuGuardWide(bool);
++extern "C" void DolphinWeb_SetConditionalFusion(bool);
++extern "C" void DolphinWeb_SetFpuGuardHoist(bool);
++extern "C" bool DolphinWeb_GetFifoCopy();
++extern "C" bool DolphinWeb_GetFifoBatch();
++extern "C" bool DolphinWeb_GetFrsqrteFast();
++extern "C" void DolphinWeb_SetFrsqrteFast(bool);
++extern "C" void DolphinWeb_SetFifoBatch(bool);
++extern "C" void DolphinWeb_SetFifoCopy(bool);
++extern "C" void DolphinWeb_SetBlockMsrCache(bool);
++extern "C" void DolphinWeb_SetConstantStateBase(bool);
++extern "C" void DolphinWeb_SetWideBlockMap(bool);
++extern "C" void DolphinWeb_SetPsqHoist(bool);
++extern "C" void DolphinWeb_SetQStateCache(bool);
++extern "C" void DolphinWeb_SetQStateFull(bool);
++extern "C" void DolphinWeb_SetVectorFprCache(bool);
++extern "C" void DolphinWeb_SetPairedMemorySimd(bool);
++extern "C" void DolphinWeb_SetPairedSimd(bool);
++extern "C" void DolphinWeb_SetCompactGprLocals(bool);
+ extern "C" void NotifyWebGpuOwnershipTraceLoadRequested();
++extern "C" int GetPpcWasmJitRequestedMode();
++extern "C" int GetPpcWasmDirectDispatch();
++extern "C" std::uint32_t GetPpcWasmDeferredRetries();
++extern "C" std::uint32_t GetPpcWasmDeferredFlushes();
++extern "C" int GetPpcWasmJitAppliedMode();
++extern "C" std::uint32_t GetPpcWasmJitModeFlushes();
+ 
+ #ifdef __EMSCRIPTEN__
+ #include <emscripten/emscripten.h>
+@@ -439,9 +524,82 @@ std::string FormatSize(u64 bytes, int decimals)
+ namespace
+ {
+ bool s_runtime_initialized = false;
++// This state is QA-only and protected by s_input_state_mutex. Read() runs
++// only at the native CPU controller poll, once per observed logic frame.
++struct FrameBenchmarkStats
++{
++  bool active=false,valid=true,have_frame=false,completed=false;
++  u32 stop_after=0,stopped_frame=0;
++  bool timed_start=false;
++  u32 timed_start_frame=0;
++  std::chrono::steady_clock::time_point time_start{},time_stop{};
++  u32 start=0,last=0,frames=0,skipped=0,input_hash=2166136261u,state_hash=2166136261u;
++  std::array<u32,2> changes{};
++  std::array<std::array<bool,512>,2> actions{};
++  std::array<DolphinWeb::FrameBenchmark::Pad,2> previous{};
++  std::array<InputStateSnapshot,2> pads{};
++  struct Digest {u32 frame,input,state;};
++  std::vector<Digest> digests;
++  struct Gap {u32 after,before;};
++  std::vector<Gap> gaps;
++};
++FrameBenchmarkStats s_frame_benchmark;
++void RequestFrameBenchmarkBreak(){Core::System::GetInstance().GetCPU().Break();}
++bool ReadFrameBenchmarkInput(int port,InputStateSnapshot* input,bool* break_requested)
++{
++  *break_requested=false;
++  if (!s_frame_benchmark.active) return false;
++  auto& b=s_frame_benchmark;
++  // Frontend inspection must not sample mutable guest state or advance the
++  // script. The CPU thread is the sole producer of native poll snapshots.
++  if (!Core::IsCPUThread()) {*input=b.pads[port];return true;}
++  if (b.completed) {*input=b.pads[port];return true;}
++  const auto finish = [&](bool valid,u32 frame) {
++    if(b.timed_start)b.time_stop=std::chrono::steady_clock::now();
++    b.valid=b.valid&&valid;b.completed=true;b.stopped_frame=frame;*break_requested=true;
++  };
++  DolphinWeb::FrameBenchmark::State state;
++  if (!DolphinWeb::FrameBenchmark::Read(Core::System::GetInstance().GetMemory().GetRAM(),0x1800000,&state))
++  {b.valid=false;if(b.stop_after)finish(false,b.last);*input=b.pads[port];return true;}
++  if (!b.have_frame || b.last!=state.frame)
++  {
++    const u32 relative=state.frame-b.start;
++    if (relative>7200) {b.valid=false;if(b.stop_after)finish(false,state.frame);*input=b.pads[port];return true;}
++    if (b.have_frame && state.frame-b.last!=1)
++    {
++      const u32 delta=state.frame-b.last;
++      if (delta>7200) {b.valid=false;if(b.stop_after)finish(false,state.frame);*input=b.pads[port];return true;}
++      b.skipped+=delta-1;b.gaps.push_back({b.last-b.start,relative});
++    }
++    if(!b.have_frame&&b.stop_after){b.timed_start=true;b.timed_start_frame=state.frame;b.time_start=std::chrono::steady_clock::now();}
++    b.input_hash=DolphinWeb::FrameBenchmark::HashWord(b.input_hash,relative);
++    b.state_hash=DolphinWeb::FrameBenchmark::HashWord(b.state_hash,relative);
++    b.have_frame=true;b.last=state.frame;++b.frames;
++    std::array<u32,18> packed{};
++    for (u32 p=0;p<2;++p)
++    {
++      const auto pad=DolphinWeb::FrameBenchmark::Input(state,p);
++      if (b.frames==1 || pad!=b.previous[p])++b.changes[p];
++      b.previous[p]=pad;
++      std::copy(pad.begin(),pad.end(),packed.begin()+p*9);
++      if (state.fighters[p].action<512)b.actions[p][state.fighters[p].action]=true;
++      for (u32 value:pad)b.input_hash=DolphinWeb::FrameBenchmark::HashWord(b.input_hash,value);
++      u32 x;std::memcpy(&x,&state.fighters[p].x,4);
++      for (u32 value:{x,state.fighters[p].action,state.fighters[p].stocks})
++        b.state_hash=DolphinWeb::FrameBenchmark::HashWord(b.state_hash,value);
++    }
++    DecodeTwoControllerInputs(packed.data(),18,state.frame,&b.pads);
++    if (relative && relative%120==0)b.digests.push_back({relative,b.input_hash,b.state_hash});
++    if (b.stop_after && relative>=b.stop_after)finish(relative==b.stop_after,state.frame);
++  }
++  *input=b.pads[port];return true;
++}
++
+ std::string s_core_status = "Not initialized";
+ std::string s_core_title;
+ std::string s_video_backend = "Software Renderer";
++std::mutex s_browser_log_mutex;
++std::vector<std::string> s_browser_log;
+ 
+ // Dolphin's own ERROR_LOG_FMT / WARN_LOG_FMT output is otherwise discarded in
+ // this build: Emscripten's print is routed to postStatus and no LogListener is
+@@ -459,6 +617,13 @@ public:
+   {
+     if (msg == nullptr)
+       return;
++    {
++      const std::lock_guard<std::mutex> lock(s_browser_log_mutex);
++      if (level != Common::Log::LogLevel::LNOTICE &&
++          (level == Common::Log::LogLevel::LERROR || std::strstr(msg, "Video")) &&
++          s_browser_log.size() < 64 && (s_browser_log.empty() || s_browser_log.back() != msg))
++        s_browser_log.emplace_back(std::string(msg).substr(0, 4096));
++    }
+     const int severity = static_cast<int>(level);
+     EM_ASM({
+       var text = "[dolphin] " + UTF8ToString($1);
+@@ -590,6 +755,11 @@ void EnsureRuntime()
+   Config::SetBase(Config::GFX_PREFER_GLES, s_video_backend == "OGL");
+   Config::SetBase(Config::MAIN_CPU_CORE, s_cpu_core);
+   Config::SetBase(Config::MAIN_CPU_THREAD, s_cpu_thread);
++  Config::SetBase(Config::MAIN_MMU, EM_ASM_INT({ return Module['dolphinBrowserMmu'] ? 1 : 0; }) != 0);
++  if (EM_ASM_INT({ return Module['dolphinBrowserNoIcache'] ? 1 : 0; }))
++    Config::SetBase(Config::MAIN_DISABLE_ICACHE, true);
++  if (EM_ASM_INT({ return Module['dolphinRollbackDeterminism'] ? 1 : 0; }))
++    Config::SetBase(Config::MAIN_GPU_DETERMINISM_MODE, std::string("fake-completion"));
+   Config::SetBase(Config::MAIN_SKIP_IPL, true);
+   Config::SetBase(Config::MAIN_DSP_HLE, true);
+   Config::SetBase(Config::MAIN_DSP_THREAD, false);
+@@ -608,19 +778,24 @@ void EnsureRuntime()
+   Config::SetBase(Config::MAIN_CORRECT_TIME_DRIFT, correct_time_drift);
+   Config::SetBase(Config::MAIN_OVERCLOCK_ENABLE, true);
+   Config::SetBase(Config::MAIN_OVERCLOCK, s_cpu_overclock);
++  const bool normal_timing = EM_ASM_INT({ return Module['dolphinTimingProfile'] === 'dolphin'; }) != 0;
+   Config::SetBase(Config::MAIN_PRECISION_FRAME_TIMING, false);
+-  Config::SetBase(Config::MAIN_RUSH_FRAME_PRESENTATION, true);
+-  Config::SetBase(Config::MAIN_SMOOTH_EARLY_PRESENTATION, true);
+-  Config::SetBase(Config::MAIN_SYNC_ON_SKIP_IDLE, false);
++  Config::SetBase(Config::MAIN_RUSH_FRAME_PRESENTATION, !normal_timing);
++  Config::SetBase(Config::MAIN_SMOOTH_EARLY_PRESENTATION, !normal_timing);
++  Config::SetBase(Config::MAIN_SYNC_ON_SKIP_IDLE, normal_timing);
+   Config::SetBase(Config::MAIN_ACCURATE_FMADDS, false);
+   Config::SetBase(Config::MAIN_ENABLE_CHEATS, false);
+   Config::SetBase(Config::MAIN_OSD_MESSAGES, false);
+   Config::SetBase(Config::MAIN_SLOT_A, ExpansionInterface::EXIDeviceType::MemoryCardFolder);
+   Config::SetBase(Config::MAIN_SLOT_B, ExpansionInterface::EXIDeviceType::None);
++  Config::SetBase(Config::GetInfoForSIDevice(1), SerialInterface::SIDEVICE_GC_CONTROLLER);
+   Config::SetBase(Config::MAIN_AUDIO_BACKEND, std::string("Web Audio"));
+   Config::SetBase(Config::MAIN_AUDIO_MUTED, false);
+   Config::SetBase(Config::GFX_HACK_SKIP_XFB_COPY_TO_RAM, s_video_backend == "OGL");
+-  Config::SetBase(Config::GFX_HACK_COPY_EFB_SCALED, false);
++  const int render_height = EM_ASM_INT({ return Module['dolphinRenderHeight'] || 480; });
++  const bool high_resolution_ogl = s_video_backend == "OGL" && render_height == 720;
++  Config::SetBase(Config::GFX_EFB_SCALE, high_resolution_ogl ? 2 : 1);
++  Config::SetBase(Config::GFX_HACK_COPY_EFB_SCALED, high_resolution_ogl);
+   // §28cx: ubershaders DISCRIMINATOR (May-30). The UBO const-index fix made the
+   // uber pixel shaders translate (fail 27->0) and 7195 draws execute, but the EFB
+   // is still all-zero (nz=0/max=0) => draws write nothing. Flip WebGPU back to
+@@ -817,6 +992,11 @@ extern "C"
+ int CoreInit()
+ {
+   EnsureRuntime();
++  const bool profile = DOLPHIN_WEB_BROWSER_PROFILE &&
++                       EM_ASM_INT({ return Module['dolphinCoreLog'] === true; }) != 0;
++  DolphinWeb::BrowserProfile::enabled.store(profile, std::memory_order_relaxed);
++  if (profile)
++    DolphinWeb::WasmTimingProfile::SetEnabled(true);
+   return 1;
+ }
+ 
+@@ -988,8 +1168,23 @@ int BootDisc(const char* path)
+   return booted ? 1 : 0;
+ }
+ 
++extern "C" void DolphinWeb_CancelGameFrameStep();
+ void StopCore()
+ {
++  DolphinWeb::RollbackOutput::suppressed.store(false);
++  DolphinWeb_CancelGameFrameStep();
++  {
++    const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++    s_rollback_input_owner = false;
++    s_live_input_owner = false;
++    s_frame_benchmark.active = false;
++  }
++  if (s_runtime_initialized && Core::IsRunning(Core::System::GetInstance()))
++  {
++    const Core::CPUThreadGuard guard(Core::System::GetInstance());
++    Core::SetIsThrottlerTempDisabled(false);
++  }
++  State::BrowserClear();
+   if (s_runtime_initialized)
+     Core::Stop(Core::System::GetInstance());
+   s_core_status = "Stopped";
+@@ -1006,6 +1201,424 @@ int SetCorePaused(int paused)
+   return 1;
+ }
+ 
++
++// Explicit paused-machine API. RunFrame() remains a presentation poll and
++// must never be mistaken for an emulation step by the network scheduler.
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackCapture(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return static_cast<int>(State::BrowserSave(system, static_cast<unsigned>(slot)));
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackCaptureGpu(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return static_cast<int>(State::BrowserSave(system, static_cast<unsigned>(slot), true));
++}
++EMSCRIPTEN_KEEPALIVE const char* BrowserRollbackCaptureProfile(int slot)
++{
++  static std::string result;
++  result = State::BrowserCaptureProfile(static_cast<unsigned>(slot));
++  return result.c_str();
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackRequiredSize()
++{
++  return static_cast<int>(State::BrowserRequiredSize());
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackRestore(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return State::BrowserLoad(system, static_cast<unsigned>(slot)) ? 1 : 0;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackEqual(int a, int b)
++{
++  return a >= 0 && b >= 0 && State::BrowserEqual(static_cast<unsigned>(a), static_cast<unsigned>(b));
++}
++EMSCRIPTEN_KEEPALIVE const char* BrowserRollbackCompare(int a, int b)
++{
++  static std::string result;
++  result = State::BrowserCompare(static_cast<unsigned>(a), static_cast<unsigned>(b));
++  return result.c_str();
++}
++extern "C" void DolphinWeb_ArmGameFrameStep(const u8* counter);
++extern "C" u32 DolphinWeb_GameFrameStepSignal();
++EMSCRIPTEN_KEEPALIVE u32 BrowserRollbackStepSignal()
++{
++  return DolphinWeb_GameFrameStepSignal();
++}
++extern "C" void DolphinWeb_CancelGameFrameStep();
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetPads(const u32* packed, int count, u32 frame)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || !packed || count != 18 ||
++      Core::GetState(system) != Core::State::Paused) return 0;
++  std::array<InputStateSnapshot, 2> next{};
++  if (!DecodeTwoControllerInputs(packed, count, frame, &next)) return 0;
++  const Core::CPUThreadGuard guard(system);
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_rollback_inputs = next;
++  s_rollback_input_owner = true;
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE void BrowserRollbackReleasePads()
++{
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_rollback_input_owner = false;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserFrameBenchmarkInput(int enabled)
++{
++  auto& system=Core::System::GetInstance();
++  if (!s_runtime_initialized || (enabled!=0 && enabled!=1)) return 0;
++  if (!enabled) {const std::lock_guard<std::mutex> lock(s_input_state_mutex);s_frame_benchmark.active=false;return 1;}
++  if (Core::GetState(system)!=Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  DolphinWeb::FrameBenchmark::State state;
++  if (s_rollback_input_owner || !DolphinWeb::FrameBenchmark::Read(system.GetMemory().GetRAM(),0x1800000,&state))return 0;
++  s_frame_benchmark={};s_frame_benchmark.start=state.frame;s_frame_benchmark.active=true;
++  return 1;
++}
++// QA only: stop at a native controller poll without arming per-frame stepping.
++// CPUThreadGuard waits for the old run loop before the target is published.
++EMSCRIPTEN_KEEPALIVE int BrowserFrameBenchmarkStopAfterFrames(int frames)
++{
++  auto& system=Core::System::GetInstance();
++  if (!s_runtime_initialized || frames<120 || frames>3600 || Core::GetState(system)!=Core::State::Paused)return 0;
++  const Core::CPUThreadGuard guard(system);
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  auto& b=s_frame_benchmark;
++  if (!b.active || b.have_frame || b.stop_after || s_rollback_input_owner)return 0;
++  b.stop_after=frames;return 1;
++}
++EMSCRIPTEN_KEEPALIVE const char* BrowserFrameBenchmarkStats()
++{
++  static std::string result;
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);const auto& b=s_frame_benchmark;
++  std::ostringstream out;
++  out<<"{\"active\":"<<(b.active?"true":"false")<<",\"valid\":"<<(b.valid?"true":"false")
++     <<",\"completed\":"<<(b.completed?"true":"false")<<",\"stopAfterFrames\":"<<b.stop_after<<",\"stoppedFrame\":"<<b.stopped_frame
++     <<",\"inputHash\":"<<b.input_hash<<",\"stateHash\":"<<b.state_hash
++     <<",\"startFrame\":"<<b.start<<",\"lastFrame\":"<<b.last<<",\"frames\":"<<b.frames<<",\"skipped\":"<<b.skipped
++     <<",\"inputChanges\":["<<b.changes[0]<<","<<b.changes[1]<<"],\"observedActions\":[";
++  for (u32 p=0;p<2;++p) {if(p)out<<",";out<<"[";bool comma=false;for(u32 a=0;a<512;++a)if(b.actions[p][a]){if(comma)out<<",";comma=true;out<<a;}out<<"]";}
++  out<<"],\"digests\":[";
++  for (std::size_t i=0;i<b.digests.size();++i) {if(i)out<<",";const auto& d=b.digests[i];out<<"{\"frame\":"<<d.frame<<",\"input\":"<<d.input<<",\"state\":"<<d.state<<"}";}
++  out<<"],\"gaps\":[";
++  for(std::size_t i=0;i<b.gaps.size();++i){if(i)out<<",";out<<"{\"after\":"<<b.gaps[i].after<<",\"before\":"<<b.gaps[i].before<<"}";}
++  out<<"]}";result=out.str();return result.c_str();
++}
++
++// Native CPU timestamps bracket exactly the requested controller-poll span.
++// Keep wall time outside deterministic input/state fingerprints.
++EMSCRIPTEN_KEEPALIVE const char* BrowserFrameBenchmarkTiming()
++{
++  static std::string result;
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);const auto& b=s_frame_benchmark;
++  const double elapsed=b.completed&&b.timed_start?std::chrono::duration<double,std::milli>(b.time_stop-b.time_start).count():0;
++  const bool valid=b.valid&&b.completed&&b.timed_start&&b.stop_after&&
++      b.timed_start_frame==b.start&&b.stopped_frame-b.start==b.stop_after&&elapsed>0;
++  result="{\"valid\":"+std::string(valid?"true":"false")+",\"frames\":"+std::to_string(b.stop_after)+
++      ",\"startFrame\":"+std::to_string(b.timed_start_frame)+",\"stopFrame\":"+std::to_string(b.stopped_frame)+
++      ",\"elapsedMs\":"+std::to_string(elapsed)+"}";
++  return result.c_str();
++}
++
++// Private two-controller QA input. Live ownership never pauses emulation;
++// authoritative rollback input takes precedence until it is released.
++EMSCRIPTEN_KEEPALIVE int BrowserLiveSetPads(const u32* packed, int count, u32 frame)
++{
++  if (!s_runtime_initialized) return 0;
++  const auto state = Core::GetState(Core::System::GetInstance());
++  if (state != Core::State::Running && state != Core::State::Paused) return 0;
++  std::array<InputStateSnapshot, 2> next{};
++  if (!DecodeTwoControllerInputs(packed, count, frame, &next)) return 0;
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_live_inputs = next;
++  s_live_input_owner = true;
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserLiveReleasePads()
++{
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  s_live_input_owner = false;
++  s_live_inputs = {};
++  return 1;
++}
++extern "C" int DolphinWeb_UseWorkerOwnedWebGL();
++extern "C" int DolphinWeb_UseOglReadbackPresent();
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackSuppressOutput(int enable)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused ||
++      s_video_backend != "OGL" || !DolphinWeb_UseWorkerOwnedWebGL()) return 0;
++  const Core::CPUThreadGuard guard(system);
++  if (enable)
++    DolphinWeb::RollbackOutput::presentation_epoch.fetch_add(1, std::memory_order_release);
++  DolphinWeb::RollbackOutput::suppressed.store(enable != 0, std::memory_order_release);
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE const char* BrowserRollbackOutputStats()
++{
++  static std::string result;
++  result = "{\"suppressed\":" + std::string(DolphinWeb::RollbackOutput::suppressed.load() ? "true" : "false") +
++    ",\"videoSkipped\":" + std::to_string(DolphinWeb::RollbackOutput::video_skipped.load()) +
++    ",\"audioSamplesSkipped\":" + std::to_string(DolphinWeb::RollbackOutput::audio_skipped.load()) + "}";
++  return result.c_str();
++}
++// Private, paused guest-code installation. Invalidate guest instruction cache
++// lines and generated blocks before making a new procedure reachable.
++EMSCRIPTEN_KEEPALIVE int BrowserInvalidateGuestCode(u32 address, u32 bytes)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused ||
++      address < 0x80001840u || address >= 0x81800000u || (address & 3u) ||
++      bytes == 0 || (bytes & 3u) || bytes > 0x100000u || bytes > 0x81800000u - address)
++    return 0;
++  const Core::CPUThreadGuard guard(system);
++  auto& jit = system.GetJitInterface();
++  auto& icache = system.GetPowerPC().GetPPCState().iCache;
++  for (u32 line = address & ~31u; line < address + bytes; line += 32)
++    icache.Invalidate(system.GetMemory(), jit, line);
++  jit.InvalidateICache(address, bytes, true);
++  return 1;
++}
++
++// QA-only code-generation comparison. Generated blocks must be discarded when
++// changing these flags, otherwise a test could unknowingly reuse old code.
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackConfigureCodegen(int flags, int extra_flags = 0)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || flags < 0 || extra_flags < 0 || extra_flags > 255 ||
++      Core::GetState(system) != Core::State::Paused ||
++      s_cpu_core != PowerPC::CPUCore::CachedInterpreter) return 0;
++  const Core::CPUThreadGuard guard(system);
++  constexpr u32 regcache_disable = 1u << 20;
++  constexpr u32 fastmem_enable = 1u << 23;
++  constexpr u32 integer_fifo_enable = 1u << 16;
++  constexpr u32 single_prefix_enable = 1u << 18;
++  constexpr u32 fpr_cache_enable = 1u << 19;
++  constexpr u32 block_merge_disable = 1u << 17;
++  const u32 previous = DolphinWeb_GetCachedInterpreterDisableMask();
++  const u32 next = (previous & ~(regcache_disable | fastmem_enable | integer_fifo_enable | single_prefix_enable | fpr_cache_enable | block_merge_disable)) |
++      ((flags & 1) ? 0 : regcache_disable) | ((flags & 2) ? fastmem_enable : 0) | ((flags & 4) ? integer_fifo_enable : 0) | ((flags & 8) ? single_prefix_enable : 0) | ((flags & 16) ? fpr_cache_enable : 0) | ((flags & 65536) ? 0 : block_merge_disable);
++  const bool compact = (flags & 32) != 0;
++  const bool simd = (flags & 64) != 0;
++  const bool memory_simd = (flags & 128) != 0;
++  const bool vector_fpr = (flags & 256) != 0;
++  const bool constant_address = (extra_flags & 1) != 0;
++  const bool melee_matrix_fast = (extra_flags & 2) != 0;
++  const bool melee_anim_state_fast = (extra_flags & 4) != 0;
++  const bool melee_display_list_fast = (extra_flags & 8) != 0;
++  const bool melee_gx_matrix_fast = (extra_flags & 16) != 0;
++  const bool melee_anim_callback_fast = (extra_flags & 32) != 0;
++  const bool melee_anim_fusion = (extra_flags & 64) != 0;
++  const bool melee_hot_fusion = (extra_flags & 128) != 0;
++  const bool call_fusion = (flags & 1073741824) != 0;
++  const bool chain_fusion = (flags & 536870912) != 0;
++  const bool bswap_rotate = (flags & 268435456) != 0;
++  const bool qstate_full = (flags & 134217728) != 0;
++  const bool qstate_cache = (flags & 67108864) != 0;
++  const bool psq_hoist = (flags & 512) != 0;
++  const bool wide_map = (flags & 1024) != 0;
++  const bool constant_state_base = (flags & 2048) != 0;
++  const bool block_msr_cache = (flags & 4096) != 0;
++  const bool fifo_copy = (flags & 8192) != 0;
++  const bool fifo_batch = (flags & 16384) != 0;
++  const bool frsqrte_fast = (flags & 32768) != 0;
++  const bool fpu_guard = (flags & 131072) != 0;
++  const bool branch_fusion = (flags & 262144) != 0;
++  const bool fpu_wide = (flags & 524288) != 0;
++  const bool step_check = (flags & 1048576) != 0;
++  const bool read_fusion = (flags & 2097152) != 0;
++  const bool fusion_redispatch = (flags & 4194304) != 0;
++  const bool counter_batch = (flags & 8388608) != 0;
++  const bool lean_dispatch = (flags & 16777216) != 0;
++  const bool cp_format_reuse = (flags & 33554432) != 0;
++  if (constant_address != DolphinWeb_GetConstantAddress() || melee_matrix_fast != DolphinWeb_GetMeleeMatrixFast() || melee_anim_state_fast != DolphinWeb_GetMeleeAnimStateFast() || melee_display_list_fast != DolphinWeb_GetMeleeDisplayListFast() || melee_gx_matrix_fast != DolphinWeb_GetMeleeGxMatrixFast() || melee_anim_fusion != DolphinWeb_GetMeleeAnimFusion() || melee_hot_fusion != DolphinWeb_GetMeleeHotFusion() || call_fusion != DolphinWeb_GetCallFusion() || chain_fusion != DolphinWeb_GetChainFusion() || bswap_rotate != DolphinWeb_GetBswapRotate() || qstate_full != DolphinWeb_GetQStateFull() || qstate_cache != DolphinWeb_GetQStateCache() || next != previous || compact != DolphinWeb_GetCompactGprLocals() || simd != DolphinWeb_GetPairedSimd() || memory_simd != DolphinWeb_GetPairedMemorySimd() || vector_fpr != DolphinWeb_GetVectorFprCache() || psq_hoist != DolphinWeb_GetPsqHoist() || wide_map != DolphinWeb_GetWideBlockMap() || constant_state_base != DolphinWeb_GetConstantStateBase() || block_msr_cache != DolphinWeb_GetBlockMsrCache() || fifo_copy != DolphinWeb_GetFifoCopy() || fifo_batch != DolphinWeb_GetFifoBatch() || frsqrte_fast != DolphinWeb_GetFrsqrteFast() || fpu_guard != DolphinWeb_GetFpuGuardHoist() || branch_fusion != DolphinWeb_GetConditionalFusion() || fpu_wide != DolphinWeb_GetFpuGuardWide() || step_check != DolphinWeb_GetStepCheck() || read_fusion != DolphinWeb_GetReadFusion() || fusion_redispatch != DolphinWeb_GetFusionRedispatch())
++  {
++    system.GetJitInterface().ClearCache(guard);
++    DolphinWeb_SetCachedInterpreterDisableMask(next);
++    DolphinWeb_SetCompactGprLocals(compact);
++    DolphinWeb_SetPairedSimd(simd);
++    DolphinWeb_SetPairedMemorySimd(memory_simd);
++    DolphinWeb_SetVectorFprCache(vector_fpr);
++    DolphinWeb_SetPsqHoist(psq_hoist);
++    DolphinWeb_SetQStateCache(qstate_cache);
++    DolphinWeb_SetQStateFull(qstate_full);
++    DolphinWeb_SetBswapRotate(bswap_rotate);
++    DolphinWeb_SetChainFusion(chain_fusion);
++    DolphinWeb_SetCallFusion(call_fusion);
++    DolphinWeb_SetMeleeMatrixFast(melee_matrix_fast);
++    DolphinWeb_SetMeleeAnimStateFast(melee_anim_state_fast);
++    DolphinWeb_SetMeleeDisplayListFast(melee_display_list_fast);
++    DolphinWeb_SetMeleeGxMatrixFast(melee_gx_matrix_fast);
++    DolphinWeb_SetMeleeAnimFusion(melee_anim_fusion);
++    DolphinWeb_SetMeleeHotFusion(melee_hot_fusion);
++    DolphinWeb_SetConstantAddress(constant_address);
++    DolphinWeb_SetWideBlockMap(wide_map);
++    DolphinWeb_SetConstantStateBase(constant_state_base);
++    DolphinWeb_SetBlockMsrCache(block_msr_cache);
++    DolphinWeb_SetFifoCopy(fifo_copy);
++    DolphinWeb_SetFifoBatch(fifo_batch);
++    DolphinWeb_SetFrsqrteFast(frsqrte_fast);
++    DolphinWeb_SetFpuGuardHoist(fpu_guard);
++    DolphinWeb_SetConditionalFusion(branch_fusion);
++    DolphinWeb_SetFpuGuardWide(fpu_wide);
++    DolphinWeb_SetStepCheck(step_check);
++    DolphinWeb_SetReadFusion(read_fusion);
++    DolphinWeb_SetFusionRedispatch(fusion_redispatch);
++  }
++  // Counter publication does not change emitted code. Preserve the warm JIT.
++  if(counter_batch != DolphinWeb_GetCounterBatch())DolphinWeb_SetCounterBatch(counter_batch);
++  if(lean_dispatch != DolphinWeb_GetLeanDispatch())DolphinWeb_SetLeanDispatch(lean_dispatch);
++  if(cp_format_reuse != DolphinWeb_GetCPFormatReuse())DolphinWeb_SetCPFormatReuse(cp_format_reuse);
++  // The callback continuation is selected inside an existing host callback;
++  // toggling it does not change generated code, so preserve the warm JIT.
++  if(melee_anim_callback_fast != DolphinWeb_GetMeleeAnimCallbackFast())
++    DolphinWeb_SetMeleeAnimCallbackFast(melee_anim_callback_fast);
++  return 1;
++}
++// CPU-owned opportunity counters. Never sample concurrently with preprocessing.
++EMSCRIPTEN_KEEPALIVE const char* BrowserCPFormatStats()
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"CP statistics require paused CPU ownership\"}";
++  const Core::CPUThreadGuard guard(system);
++  return DolphinWeb_CPFormatStats();
++}
++extern "C" const char* DolphinWeb_GpuStartDelay(int cycles);
++EMSCRIPTEN_KEEPALIVE const char* BrowserGpuStartDelay(int cycles)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"GPU scheduling control requires paused CPU ownership\"}";
++  const Core::CPUThreadGuard guard(system);
++  return DolphinWeb_GpuStartDelay(cycles);
++}
++
++// Query (-1) or configure (0/1) host pacing while owning the paused CPU.
++// This does not alter the virtual clock, instructions, GPU mode or JIT cache.
++EMSCRIPTEN_KEEPALIVE const char* BrowserTimingDrift(int mode)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || mode < -1 || mode > 1 ||
++      Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"Timing drift control requires a paused machine and -1/0/1\"}";
++  const Core::CPUThreadGuard guard(system);
++  auto& timing = system.GetCoreTiming();
++  if (mode != -1)
++  {
++    Config::SetBase(Config::MAIN_CORRECT_TIME_DRIFT, mode != 0);
++    timing.SetBrowserCorrectTimeDrift(mode != 0);
++  }
++  const auto stats = timing.GetBrowserThrottleStats();
++  static std::string result;
++  result = "{\"enabled\":" + std::string(timing.GetBrowserCorrectTimeDrift() ? "true" : "false") +
++      ",\"relaxCount\":" + std::to_string(stats.count) +
++      ",\"relaxUs\":" + std::to_string(stats.microseconds) +
++      ",\"relaxMaxUs\":" + std::to_string(stats.maximum_microseconds) + "}";
++  return result.c_str();
++}
++
++// Opt-in direct-block profiler. Call only while CPU ownership is paused.
++EMSCRIPTEN_KEEPALIVE const char* BrowserDispatchProfile(int mode)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || mode < -1 || mode > 1 || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"Dispatch profiling requires a paused machine and -1/0/1\"}";
++  const Core::CPUThreadGuard guard(system);
++  if (mode == 1) DolphinWeb::DispatchProfile::Reset();
++  if (mode != -1) DolphinWeb::DispatchProfile::enabled.store(mode != 0, std::memory_order_relaxed);
++  static std::string result;
++  result = DolphinWeb::DispatchProfile::Report();
++  return result.c_str();
++}
++
++// Host-only throttle policy. This leaves the virtual clock and code cache intact.
++EMSCRIPTEN_KEEPALIVE const char* BrowserRushPresentation(int mode)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || mode < -1 || mode > 1 || Core::GetState(system) != Core::State::Paused)
++    return "{\"error\":\"Rush presentation control requires a paused machine and -1/0/1\"}";
++  const Core::CPUThreadGuard guard(system);
++  auto& timing = system.GetCoreTiming();
++  if (mode != -1)
++  {
++    Config::SetBase(Config::MAIN_RUSH_FRAME_PRESENTATION, mode != 0);
++    timing.SetBrowserRushPresentation(mode != 0);
++  }
++  static std::string result;
++  result = "{\"enabled\":" + std::string(timing.GetBrowserRushPresentation() ? "true" : "false") +
++      ",\"calls\":" + std::to_string(timing.GetBrowserThrottleCalls()) +
++      ",\"skips\":" + std::to_string(timing.GetBrowserThrottleSkips()) + "}";
++  return result.c_str();
++}
++
++// Private paused QA control. Normal startup remains at its measured scale.
++EMSCRIPTEN_KEEPALIVE int BrowserRenderScalePercent(int percent)
++{
++  const int current = Config::Get(Config::GFX_EFB_SCALE);
++  if (percent == 0) return current == 150 ? 150 : current * 100;
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || s_video_backend != "OGL" ||
++      Core::GetState(system) != Core::State::Paused ||
++      (percent != 150 && percent != 200)) return 0;
++  const Core::CPUThreadGuard guard(system);
++  Config::SetBase(Config::GFX_EFB_SCALE, percent == 150 ? 150 : 2);
++  return percent;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackSetUnthrottled(int enable)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  Core::SetIsThrottlerTempDisabled(enable != 0);
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackGameStep()
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused ||
++      SConfig::GetInstance().GetGameID() != "GALE01" || SConfig::GetInstance().GetRevision() != 2 ||
++      s_cpu_core != PowerPC::CPUCore::CachedInterpreter)
++    return 0;
++  {
++    const Core::CPUThreadGuard guard(system);
++    auto& memory = system.GetMemory();
++    if (!memory.GetRAM() || memory.GetRamSize() < 0x00479d58 + sizeof(u32)) return 0;
++    DolphinWeb_ArmGameFrameStep(memory.GetRAM() + 0x00479d58);
++  }
++  Core::SetState(system, Core::State::Running);
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackStep()
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || Core::GetState(system) != Core::State::Paused) return 0;
++  Core::DoFrameStep(system);
++  return 1;
++}
++EMSCRIPTEN_KEEPALIVE void BrowserRollbackClear()
++{
++  DolphinWeb::RollbackOutput::suppressed.store(false);
++  DolphinWeb_CancelGameFrameStep();
++  BrowserRollbackReleasePads();
++  State::BrowserClear();
++}
++EMSCRIPTEN_KEEPALIVE int BrowserRollbackRelease(int slot)
++{
++  auto& system = Core::System::GetInstance();
++  if (!s_runtime_initialized || slot < 0 || Core::GetState(system) != Core::State::Paused) return 0;
++  const Core::CPUThreadGuard guard(system);
++  return State::BrowserRelease(system, static_cast<unsigned>(slot)) ? 1 : 0;
++}
++
+ int ResetCore()
+ {
+   if (!s_runtime_initialized || !Core::IsRunning(Core::System::GetInstance()))
+@@ -1105,6 +1718,53 @@ const char* GetCoreStatus()
+   return s_core_status.c_str();
+ }
+ 
++EMSCRIPTEN_KEEPALIVE const char* GetBrowserLog()
++{
++  static std::string snapshot;
++  const std::lock_guard<std::mutex> lock(s_browser_log_mutex);
++  snapshot.clear();
++  for (const auto& line : s_browser_log)
++    snapshot += line + "\n";
++  return snapshot.c_str();
++}
++
++EMSCRIPTEN_KEEPALIVE const char* GetBrowserProfile()
++{
++  static std::string result;
++  if (!s_runtime_initialized)
++    return "{}";
++  std::ostringstream out;
++  out << "{\"enabled\":" << (DolphinWeb::BrowserProfile::enabled.load() ? "true" : "false")
++      << ",\"jitRequestedMode\":" << GetPpcWasmJitRequestedMode()
++      << ",\"jitAppliedMode\":" << GetPpcWasmJitAppliedMode()
++      << ",\"jitModeFlushes\":" << GetPpcWasmJitModeFlushes()
++      << ",\"directWasmDispatch\":" << GetPpcWasmDirectDispatch()
++      << ",\"deferredJitRetries\":" << GetPpcWasmDeferredRetries()
++      << ",\"deferredJitFullFlushes\":" << GetPpcWasmDeferredFlushes()
++      << ",\"internalScale\":" << (Config::Get(Config::GFX_EFB_SCALE) == 150 ? 1.5f : static_cast<float>(Config::Get(Config::GFX_EFB_SCALE)))
++      << ",\"efbWidth\":" << (g_framebuffer_manager ? g_framebuffer_manager->GetEFBWidth() : 0)
++      << ",\"efbHeight\":" << (g_framebuffer_manager ? g_framebuffer_manager->GetEFBHeight() : 0)
++      << ",\"scaledEfbCopies\":" << Config::Get(Config::GFX_HACK_COPY_EFB_SCALED)
++      << ",\"cpuThread\":" << Config::Get(Config::MAIN_CPU_THREAD)
++      << ",\"cpuOverclock\":" << Config::Get(Config::MAIN_OVERCLOCK)
++      << ",\"emulationSpeed\":" << Config::Get(Config::MAIN_EMULATION_SPEED)
++      << ",\"syncOnSkipIdle\":" << Config::Get(Config::MAIN_SYNC_ON_SKIP_IDLE)
++      << ",\"rushPresentation\":" << Config::Get(Config::MAIN_RUSH_FRAME_PRESENTATION)
++      << ",\"smoothPresentation\":" << Config::Get(Config::MAIN_SMOOTH_EARLY_PRESENTATION)
++      << ",\"correctTimeDrift\":" << Config::Get(Config::MAIN_CORRECT_TIME_DRIFT)
++      << ",\"stages\":{";
++  for (std::size_t i = 0; i < DolphinWeb::BrowserProfile::counters.size(); ++i)
++  {
++    const auto& c = DolphinWeb::BrowserProfile::counters[i];
++    if (i) out << ',';
++    out << '\"' << DolphinWeb::BrowserProfile::names[i] << "\":{\"count\":" << c.count.load()
++        << ",\"totalUs\":" << c.total_us.load() << ",\"maxUs\":" << c.max_us.load() << '}';
++  }
++  out << "}}";
++  result = out.str();
++  return result.c_str();
++}
++
+ const char* GetCoreTitle()
+ {
+   return s_core_title.c_str();
+diff --git a/core/upstream/dolphin_web_discio.cpp b/core/upstream/dolphin_web_discio.cpp
+index be24a6b..320e4ae 100644
+--- a/core/upstream/dolphin_web_discio.cpp
++++ b/core/upstream/dolphin_web_discio.cpp
+@@ -7,6 +7,7 @@
+ #include <atomic>
+ #include <chrono>
+ #include <cstdint>
++#include <cstring>
+ #include <limits>
+ #include <memory>
+ #include <mutex>
+@@ -53,6 +54,8 @@ constexpr int METADATA_FRAME_WIDTH = 320;
+ constexpr int METADATA_FRAME_HEIGHT = 240;
+ constexpr int MAX_XFB_WIDTH = 720;
+ constexpr int MAX_XFB_HEIGHT = 576;
++constexpr int MAX_GL_WIDTH = 960;
++constexpr int MAX_GL_HEIGHT = 720;
+ 
+ constexpr std::uint32_t INPUT_A = 1u << 0;
+ constexpr std::uint32_t INPUT_B = 1u << 1;
+@@ -100,7 +103,7 @@ double s_raw_size = -1.0;
+ double s_data_size = -1.0;
+ int s_root_entry_count = -1;
+ std::vector<RootEntry> s_root_entries;
+-std::array<std::uint32_t, MAX_XFB_WIDTH * MAX_XFB_HEIGHT> s_framebuffer{};
++std::array<std::uint32_t, MAX_GL_WIDTH * MAX_GL_HEIGHT> s_framebuffer{};
+ int s_frame_width = METADATA_FRAME_WIDTH;
+ int s_frame_height = METADATA_FRAME_HEIGHT;
+ std::uint32_t s_frame = 0;
+@@ -131,6 +134,51 @@ struct PadPollSnapshot
+ 
+ std::mutex s_input_state_mutex;
+ InputStateSnapshot s_input_state;
++std::array<InputStateSnapshot, 2> s_rollback_inputs{};
++bool s_rollback_input_owner = false;
++std::array<InputStateSnapshot, 2> s_live_inputs{};
++bool s_live_input_owner = false;
++
++bool DecodeTwoControllerInputs(const std::uint32_t* packed, int count, std::uint32_t frame,
++                               std::array<InputStateSnapshot, 2>* decoded)
++{
++  if (!packed || count != 18 || !decoded) return false;
++  std::array<InputStateSnapshot, 2> next{};
++  for (unsigned port = 0; port < 2; ++port)
++  {
++    const auto* p = packed + port * 9;
++    if (p[0] > 0xfffffu) return false;
++    for (unsigned field = 1; field < 9; ++field) if (p[field] > 255) return false;
++    auto& input = next[port];
++    input.mask = p[0]; input.generation = frame;
++    input.stick_x = p[1]; input.stick_y = p[2];
++    input.c_stick_x = p[3]; input.c_stick_y = p[4];
++    input.trigger_left = p[5]; input.trigger_right = p[6];
++    input.analog_a = p[7]; input.analog_b = p[8];
++  }
++  *decoded = next;
++  return true;
++}
++
++bool ReadFrameBenchmarkInput(int port, InputStateSnapshot* input, bool* break_requested);
++void RequestFrameBenchmarkBreak();
++
++bool ReadControllerInput(int port, InputStateSnapshot* input)
++{
++  if (!input || port < 0 || port >= 2) return false;
++  bool break_requested=false;
++  {
++  const std::lock_guard<std::mutex> lock(s_input_state_mutex);
++  if (s_rollback_input_owner) *input = s_rollback_inputs[port];
++  else if (ReadFrameBenchmarkInput(port,input,&break_requested)) {}
++  else if (s_live_input_owner) *input = s_live_inputs[port];
++  else if (port == 0) *input = s_input_state;
++  else return false;
++  }
++  // Break can notify FIFO/audio; never hold the controller mutex across it.
++  if (break_requested)RequestFrameBenchmarkBreak();
++  return true;
++}
+ std::mutex s_pad_poll_mutex;
+ PadPollSnapshot s_pad_poll;
+ bool s_using_xfb_frame = false;
+@@ -296,6 +344,24 @@ void CopyRgbaToPresentationBuffer(const std::uint8_t* rgba, std::uint32_t source
+                                   std::uint32_t source_height, int target_width,
+                                   int target_height)
+ {
++  // The 720-line release preserves source dimensions. Avoid two integer
++  // divisions per pixel; this loop also permits vectorized opaque RGBA copy.
++  if (source_width == static_cast<std::uint32_t>(target_width) &&
++      source_height == static_cast<std::uint32_t>(target_height))
++  {
++    for (int y = 0; y < target_height; ++y)
++    {
++      const auto* row = rgba + static_cast<std::size_t>(target_height - 1 - y) * target_width * 4;
++      auto* output = s_framebuffer.data() + static_cast<std::size_t>(y) * target_width;
++      for (int x = 0; x < target_width; ++x)
++      {
++        std::uint32_t pixel;
++        std::memcpy(&pixel, row + x * 4, sizeof(pixel));
++        output[x] = pixel | 0xff000000u;
++      }
++    }
++    return;
++  }
+   for (int y = 0; y < target_height; ++y)
+   {
+     const std::uint32_t sampled_y =
+@@ -976,7 +1042,7 @@ void DolphinWeb_OnGlBackbuffer(const std::uint8_t* rgba, std::uint32_t width, st
+   }
+   s_last_xfb_profile_time = callback_start;
+ 
+-  if (!rgba || width == 0 || height == 0 || width > MAX_XFB_WIDTH || height > MAX_XFB_HEIGHT)
++  if (!rgba || width == 0 || height == 0 || width > MAX_GL_WIDTH || height > MAX_GL_HEIGHT)
+   {
+     return;
+   }
+@@ -1027,6 +1093,7 @@ void DolphinWeb_OnGlBackbuffer(const std::uint8_t* rgba, std::uint32_t width, st
+   s_video_stats = out.str();
+ }
+ 
++extern "C" int DolphinWeb_UseOglReadbackPresent();
+ void DolphinWeb_OnOglSwap(int worker_owned, int commit_result, std::uint32_t width,
+                           std::uint32_t height, std::uint32_t debug_bits,
+                           std::uint32_t readback_rgba, int gl_error)
+@@ -1039,8 +1106,13 @@ void DolphinWeb_OnOglSwap(int worker_owned, int commit_result, std::uint32_t wid
+   s_last_ogl_debug_bits.store(debug_bits, std::memory_order_relaxed);
+   s_last_ogl_readback_rgba.store(readback_rgba, std::memory_order_relaxed);
+   s_last_ogl_gl_error.store(gl_error, std::memory_order_relaxed);
+-  ++s_frame;
+-  PublishFrameSignal();
++  // Readback publishes only complete pixel frames, once. A second signal
++  // here used to expose the same image twice and force a lossy time throttle.
++  if (!DolphinWeb_UseOglReadbackPresent())
++  {
++    ++s_frame;
++    PublishFrameSignal();
++  }
+ 
+   // Day-1 instrumentation: push a frame-ring entry. xfb_hash uses the most
+   // recently published readback hash; for direct OGL contexts where readback
+@@ -1087,14 +1159,11 @@ const char* GetVideoStats()
+ 
+ int DolphinWeb_GetPadStatus(int pad_num, GCPadStatus* status)
+ {
+-  if (!status || pad_num != 0)
++  if (!status || pad_num < 0 || pad_num >= 2)
+     return 0;
+ 
+   InputStateSnapshot input;
+-  {
+-    const std::lock_guard<std::mutex> lock(s_input_state_mutex);
+-    input = s_input_state;
+-  }
++  if (!ReadControllerInput(pad_num, &input)) return 0;
+ 
+   *status = {};
+   status->isConnected = true;
+@@ -1165,6 +1234,7 @@ int DolphinWeb_GetPadStatus(int pad_num, GCPadStatus* status)
+   else if ((mask & INPUT_C_STICK_DOWN) && !(mask & INPUT_C_STICK_UP))
+     status->substickY = 0x20;
+ 
++  if (pad_num == 0)
+   {
+     const std::lock_guard<std::mutex> lock(s_pad_poll_mutex);
+     ++s_pad_poll.poll_count;
+diff --git a/src/app.js b/src/app.js
+index 941cf54..bcca175 100644
+--- a/src/app.js
++++ b/src/app.js
+@@ -1240,3 +1240,8 @@ function writeU32BE(bytes, offset, value) {
+   bytes[offset + 2] = (value >>> 8) & 0xff;
+   bytes[offset + 3] = value & 0xff;
+ }
++
++// Local test harness, enabled explicitly; not part of upstream's release.
++if (new URLSearchParams(location.search).get('probe') === '1') {
++  await import('./melee-probe-controls.js');
++}
+diff --git a/src/core-host.js b/src/core-host.js
+index cc93295..3c1cb34 100644
+--- a/src/core-host.js
++++ b/src/core-host.js
+@@ -65,7 +65,7 @@ const VISIBLE_SAMPLE_INTERVAL_MS = 250;
+ const SAFE_JIT_WARMUP_FRAMES = 5000;
+ 
+ export class EmulatorHost {
+-  constructor({ canvas, onFrame = () => {}, onStatus = () => {}, onMode = () => {} }) {
++  constructor({ canvas, onFrame = () => {}, onStatus = () => {}, onMode = () => {}, pixelPresenterFactory }) {
+     this.canvas = canvas;
+     this.onFrame = onFrame;
+     this.onStatus = onStatus;
+@@ -90,6 +90,9 @@ export class EmulatorHost {
+     this.cpuOverclock = requestedCpuOverclock();
+     this.emulationSpeed = requestedEmulationSpeed();
+     this.presentationScale = requestedPresentationScale();
++    const renderHeight = Number(new URLSearchParams(window.location.search).get("renderheight"));
++    this.renderHeight = [480, 720].includes(renderHeight) ? renderHeight : 0;
++    this.timingProfile = new URLSearchParams(window.location.search).get("timing") === "dolphin" ? "dolphin" : "baseline";
+     this.presentationQueueSize = requestedPresentationQueueSize();
+     this.presenterBackend = requestedPresenterBackend();
+     this.presentationPacing = requestedPresentationPacing(this.videoBackend);
+@@ -204,8 +207,10 @@ export class EmulatorHost {
+       this.oglSabEnabled || this.usesDetachedWgpu;
+     // SAB mode keeps the visible canvas on the main thread so we can paint
+     // it directly via putImageData. The host owns a 2D context here.
++    this.oglPixelPresenter = this.oglSabEnabled && new URLSearchParams(location.search).get("sabpresenter") === "webgl"
++      ? pixelPresenterFactory?.(canvas) : null;
+     this.context =
+-      this.canvasOwnedByAdapter && !this.oglSabEnabled
++      this.oglPixelPresenter || (this.canvasOwnedByAdapter && !this.oglSabEnabled)
+         ? null
+         : canvas.getContext("2d", { alpha: false });
+     if (this.context) {
+@@ -220,8 +225,8 @@ export class EmulatorHost {
+     // up to its display size.
+     if (this.oglSabEnabled) {
+       const scale = Math.min(1, Math.max(0.25, Number(this.presentationScale) || 0.5));
+-      this.oglSabWidth = Math.max(160, Math.round(320 * scale));
+-      this.oglSabHeight = Math.max(120, Math.round(240 * scale));
++      this.oglSabWidth = Math.max(160, Math.round((this.renderHeight ? this.renderHeight * 4 / 3 : 320) * scale));
++      this.oglSabHeight = Math.max(120, Math.round((this.renderHeight || 240) * scale));
+       canvas.width = this.oglSabWidth;
+       canvas.height = this.oglSabHeight;
+       const pixelBytes = this.oglSabWidth * this.oglSabHeight * 4;
+@@ -234,6 +239,7 @@ export class EmulatorHost {
+       // a regular Uint8ClampedArray and copy SAB → ImageData.data per paint
+       // (one TypedArray.set, ~76 KB at present=half — < 0.1 ms).
+       this.oglImageData = new ImageData(this.oglSabWidth, this.oglSabHeight);
++      this.oglUploadBytes = new Uint8Array(this.oglImageData.data.buffer);
+     } else {
+       this.oglPixelSab = null;
+       this.oglMetaSab = null;
+@@ -256,8 +262,8 @@ export class EmulatorHost {
+       // owns its own canvas sizing above (matched to readback size); skip
+       // this so the SAB-sized canvas isn't clobbered.
+       const oglScale = Math.min(1, Math.max(0.25, Number(this.presentationScale) || 0.5));
+-      canvas.width = Math.max(160, Math.round(640 * oglScale));
+-      canvas.height = Math.max(120, Math.round(480 * oglScale));
++      canvas.width = Math.max(160, Math.round((this.renderHeight ? this.renderHeight * 4 / 3 : 640) * oglScale));
++      canvas.height = Math.max(120, Math.round((this.renderHeight || 480) * oglScale));
+     }
+     // Defer transferControlToOffscreen until the adapter actually posts the
+     // canvas to the worker, AND replace the canvas DOM node with a fresh
+@@ -320,6 +326,8 @@ export class EmulatorHost {
+             cpuOverclock: this.cpuOverclock,
+             emulationSpeed: this.emulationSpeed,
+             presentationScale: this.presentationScale,
++            renderHeight: this.renderHeight,
++            timingProfile: this.timingProfile,
+             oglTestClear: this.oglTestClear,
+             fastSoftwareRaster: this.fastSoftwareRaster,
+             xfbFastPaths: this.xfbFastPaths
+@@ -352,6 +360,7 @@ export class EmulatorHost {
+                 ? canvas
+                 : null,
+             oglPixelSab: this.oglPixelSab,
++            onSharedFrame: () => { if (this.mode === "dolphin") this.renderDolphin(); },
+             oglMetaSab: this.oglMetaSab,
+             oglSabWidth: this.oglSabWidth || 0,
+             oglSabHeight: this.oglSabHeight || 0,
+@@ -366,6 +375,8 @@ export class EmulatorHost {
+             cpuOverclock: this.cpuOverclock,
+             emulationSpeed: this.emulationSpeed,
+             presentationScale: this.presentationScale,
++            renderHeight: this.renderHeight,
++            timingProfile: this.timingProfile,
+             presentationQueueSize: this.presentationQueueSize,
+             presenterBackend: this.presenterBackend,
+             presentationPacing: this.presentationPacing,
+@@ -795,19 +806,23 @@ export class EmulatorHost {
+       const currentGen = Atomics.load(this.oglMetaView, 0) | 0;
+       const sabT2 = performance.now();
+       let copiedThisFrame = false;
+-      if (currentGen !== this.oglLastSeenGen && this.context) {
+-        this.oglLastSeenGen = currentGen;
++      if (currentGen !== this.oglLastSeenGen && (this.context || this.oglPixelPresenter) &&
++          Atomics.compareExchange(this.oglMetaView, 1, 0, 2) === 0) {
++        this.oglLastSeenGen = Atomics.load(this.oglMetaView, 0);
+         // Copy SAB-backed bytes into the non-shared ImageData buffer
+         // (Chrome refuses to construct ImageData over a SAB view directly).
+         const copyStartedAt = this.collectMetrics ? performance.now() : 0;
+         this.oglImageData.data.set(this.oglPixelView);
++        Atomics.store(this.oglMetaView, 1, 0);
+         const putStartedAt = this.collectMetrics ? performance.now() : 0;
+-        this.context.putImageData(this.oglImageData, 0, 0);
++        if (this.oglPixelPresenter) this.oglPixelPresenter.draw(this.oglUploadBytes, this.oglSabWidth, this.oglSabHeight);
++        else this.context.putImageData(this.oglImageData, 0, 0);
+         if (this.collectMetrics) {
+           this.hostCausalStats.rgbaCopyLastMs = putStartedAt - copyStartedAt;
+           this.hostCausalStats.putImageDataLastMs = performance.now() - putStartedAt;
+           this.hostCausalStats.drawImageLastMs = 0;
+         }
++        this.oglSabFramesDrawn = (this.oglSabFramesDrawn || 0) + 1;
+         copiedThisFrame = true;
+       }
+       const sabT3 = performance.now();
+@@ -1463,6 +1478,11 @@ function requestedCachedInterpreterDisableMask() {
+   if (params.get("fastmemhoist") === "1") {
+     mask |= CACHED_INTERPRETER_DISABLE_BITS.fastmemhoist;
+   }
++  if (params.get("dcbfast") === "1") mask |= 1 << 24;
++  if (params.get("dcbbatch") === "1") mask |= 1 << 25;
++  if (params.get("inlinedispatch") === "1") mask |= 1 << 26;
++  if (params.get("wasmdispatch") === "1") mask |= 1 << 27;
++  if (params.get("oglsync") === "1") mask |= 1 << 28;
+   return mask >>> 0;
+ }
+ 
+diff --git a/src/jit-block-bundle.js b/src/jit-block-bundle.js
+new file mode 100644
+index 0000000..a9a1f0a
+--- /dev/null
++++ b/src/jit-block-bundle.js
+@@ -0,0 +1,194 @@
++// Packs the one-function modules emitted by the browser PPC JIT into one
++// multi-function module. Every source module has the same imports and function
++// type; only its code body differs. A single bundle instance supplies all of
++// the compiled functions through an exported table, avoiding thousands of
++// WebAssembly.Instance constructions on the emulation thread.
++
++function readU32Leb(bytes, cursor) {
++  let value = 0;
++  let shift = 0;
++  for (let i = 0; i < 5; i += 1) {
++    if (cursor.offset >= bytes.length) throw new Error("jit-bundle: truncated LEB128");
++    const byte = bytes[cursor.offset++];
++    value |= (byte & 0x7f) << shift;
++    if ((byte & 0x80) === 0) return value >>> 0;
++    shift += 7;
++  }
++  throw new Error("jit-bundle: invalid u32 LEB128");
++}
++
++function writeU32Leb(out, value) {
++  let remaining = Number(value) >>> 0;
++  do {
++    let byte = remaining & 0x7f;
++    remaining >>>= 7;
++    if (remaining) byte |= 0x80;
++    out.push(byte);
++  } while (remaining);
++}
++
++function writeSection(out, id, payload) {
++  out.push(id);
++  writeU32Leb(out, payload.length);
++  appendBytes(out, payload);
++}
++
++function appendBytes(out, bytes) {
++  // V8 limits the number of arguments accepted by Array#push. Real Melee
++  // bundles are several MiB, so spread syntax can overflow the call stack.
++  for (let offset = 0; offset < bytes.length; offset += 16384) {
++    out.push(...bytes.slice(offset, offset + 16384));
++  }
++}
++
++function bytesEqual(a, b) {
++  if (!a || !b || a.length !== b.length) return false;
++  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
++  return true;
++}
++
++function skipName(bytes, cursor) {
++  const length = readU32Leb(bytes, cursor);
++  cursor.offset += length;
++  if (cursor.offset > bytes.length) throw new Error("jit-bundle: truncated name");
++}
++
++function parseImportShape(payload) {
++  const cursor = { offset: 0 };
++  const count = readU32Leb(payload, cursor);
++  let functions = 0;
++  let tables = 0;
++  for (let i = 0; i < count; i += 1) {
++    skipName(payload, cursor);
++    skipName(payload, cursor);
++    if (cursor.offset >= payload.length) throw new Error("jit-bundle: truncated import");
++    const kind = payload[cursor.offset++];
++    if (kind === 0) {
++      readU32Leb(payload, cursor);
++      functions += 1;
++    } else if (kind === 1) {
++      cursor.offset += 1;
++      const flags = readU32Leb(payload, cursor);
++      readU32Leb(payload, cursor);
++      if (flags & 1) readU32Leb(payload, cursor);
++      tables += 1;
++    } else if (kind === 2) {
++      const flags = readU32Leb(payload, cursor);
++      readU32Leb(payload, cursor);
++      if (flags & 1) readU32Leb(payload, cursor);
++    } else if (kind === 3) {
++      cursor.offset += 2;
++    } else {
++      throw new Error(`jit-bundle: unsupported import kind ${kind}`);
++    }
++    if (cursor.offset > payload.length) throw new Error("jit-bundle: truncated import descriptor");
++  }
++  if (cursor.offset !== payload.length) throw new Error("jit-bundle: trailing import bytes");
++  return { functions, tables };
++}
++
++function parseSingleFunctionModule(input) {
++  const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
++  if (bytes.length < 8 || !bytesEqual(bytes.subarray(0, 8), new Uint8Array([
++    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
++  ]))) throw new Error("jit-bundle: invalid WebAssembly header");
++  const sections = new Map();
++  const cursor = { offset: 8 };
++  while (cursor.offset < bytes.length) {
++    const id = bytes[cursor.offset++];
++    const size = readU32Leb(bytes, cursor);
++    const end = cursor.offset + size;
++    if (end > bytes.length) throw new Error("jit-bundle: truncated section");
++    if (id !== 0) {
++      if (sections.has(id)) throw new Error(`jit-bundle: duplicate section ${id}`);
++      sections.set(id, bytes.slice(cursor.offset, end));
++    }
++    cursor.offset = end;
++  }
++  const type = sections.get(1);
++  const imports = sections.get(2);
++  const functions = sections.get(3);
++  const code = sections.get(10);
++  if (!type || !imports || !functions || !code) {
++    throw new Error("jit-bundle: source module is missing a required section");
++  }
++  if (sections.has(4) || sections.has(5) || sections.has(6) || sections.has(8) || sections.has(9)) {
++    throw new Error("jit-bundle: source module owns unsupported runtime state");
++  }
++  const functionCursor = { offset: 0 };
++  if (readU32Leb(functions, functionCursor) !== 1) {
++    throw new Error("jit-bundle: source module must define exactly one function");
++  }
++  const typeIndex = readU32Leb(functions, functionCursor);
++  if (functionCursor.offset !== functions.length) throw new Error("jit-bundle: invalid function section");
++  const codeCursor = { offset: 0 };
++  if (readU32Leb(code, codeCursor) !== 1) {
++    throw new Error("jit-bundle: source module must contain exactly one body");
++  }
++  const bodyStart = codeCursor.offset;
++  const bodySize = readU32Leb(code, codeCursor);
++  codeCursor.offset += bodySize;
++  if (codeCursor.offset !== code.length) throw new Error("jit-bundle: invalid code body");
++  return {
++    type,
++    imports,
++    typeIndex,
++    body: code.slice(bodyStart),
++    importShape: parseImportShape(imports),
++  };
++}
++
++export function buildJitBlockBundle(entries) {
++  const list = Array.from(entries || [], ({ hash, key, bytes }) => ({
++    hash: String(hash ?? key ?? ""),
++    module: parseSingleFunctionModule(bytes),
++  }));
++  if (!list.length) throw new Error("jit-bundle: at least one block is required");
++  const template = list[0].module;
++  if (template.importShape.tables !== 0) {
++    throw new Error("jit-bundle: source modules may not import a table");
++  }
++  const seen = new Set();
++  for (const entry of list) {
++    if (!entry.hash || seen.has(entry.hash)) throw new Error("jit-bundle: hashes must be unique");
++    seen.add(entry.hash);
++    if (!bytesEqual(entry.module.type, template.type) ||
++        !bytesEqual(entry.module.imports, template.imports)) {
++      throw new Error("jit-bundle: source module ABI mismatch");
++    }
++  }
++
++  const count = list.length;
++  const output = [0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00];
++  writeSection(output, 1, template.type);
++  writeSection(output, 2, template.imports);
++
++  const functionSection = [];
++  writeU32Leb(functionSection, count);
++  for (const entry of list) writeU32Leb(functionSection, entry.module.typeIndex);
++  writeSection(output, 3, functionSection);
++
++  const tableSection = [0x01, 0x70, 0x00];
++  writeU32Leb(tableSection, count);
++  writeSection(output, 4, tableSection);
++
++  // Export a single funcref table rather than thousands of named functions.
++  writeSection(output, 7, [0x01, 0x01, 0x74, 0x01, 0x00]);
++
++  const elementSection = [0x01, 0x00, 0x41, 0x00, 0x0b];
++  writeU32Leb(elementSection, count);
++  const firstFunction = template.importShape.functions;
++  for (let i = 0; i < count; i += 1) writeU32Leb(elementSection, firstFunction + i);
++  writeSection(output, 9, elementSection);
++
++  const codeSection = [];
++  writeU32Leb(codeSection, count);
++  for (const entry of list) appendBytes(codeSection, entry.module.body);
++  writeSection(output, 10, codeSection);
++
++  return {
++    bytes: Uint8Array.from(output),
++    indexByHash: new Map(list.map((entry, index) => [entry.hash, index])),
++    entryCount: count,
++  };
++}
+diff --git a/src/melee-css-layout.js b/src/melee-css-layout.js
+new file mode 100644
+index 0000000..6197273
+--- /dev/null
++++ b/src/melee-css-layout.js
+@@ -0,0 +1,122 @@
++// HSD JOBJ traversal uses the depth-first numbering of lb_80011E24.
++export function cssJoints(heap, root) {
++  const v = new DataView(heap.buffer, heap.byteOffset, heap.byteLength),
++    at = (a) => a - 0x80000000;
++  const valid = (a) => a >= 0x80003100 && a + 0x88 < 0x81800000;
++  const u = (a) => v.getUint32(at(a));
++  const list = [];
++  function walk(p) {
++    if (!valid(p) || list.length > 300) return;
++    list.push({
++      index: list.length,
++      address: p,
++      parent: u(p + 12),
++      flags: u(p + 20),
++      child: u(p + 16),
++      next: u(p + 8),
++      x: v.getFloat32(at(p + 56)),
++      y: v.getFloat32(at(p + 60)),
++      z: v.getFloat32(at(p + 64)),
++    });
++    if (!(u(p + 20) & 0x1000)) walk(u(p + 16));
++    walk(u(p + 8));
++  }
++  walk(root ?? u(0x804d6cc0));
++  return list;
++}
++const bases = new Map();
++export function applyCssLayout(heap) {
++  const v = new DataView(heap.buffer, heap.byteOffset, heap.byteLength),
++    a = (p) => p - 0x80000000;
++  const u = (p) => v.getUint32(a(p)),
++    w = (p, n) => v.setUint32(a(p), n),
++    f = (p, n) => v.setFloat32(a(p), n);
++  const list = cssJoints(heap);
++  if (list.length < 173) return false;
++  const root = list[0].address,
++    gobj = u(0x804d6cbc),
++    stub = 0x80001c00,
++    table = 0x80001c80;
++  if (gobj < 0x80003100 || gobj >= 0x81800000 || ![0x80391070, stub].includes(u(gobj + 28)))
++    throw Error("Unexpected native CSS render callback");
++  if (u(gobj + 28) === stub) return true;
++  // Set transforms immediately before the native renderer, after CSS animations.
++  // Keeping the original JOBJ callback also keeps native portraits, masks and lighting.
++  const writes = new Map(),
++    flags = new Map();
++  const mark = (p, mask, seen = new Set()) => {
++    if (seen.has(p) || p < 0x80003100 || p + 136 >= 0x81800000) return;
++    seen.add(p);
++    flags.set(p + 20, (flags.get(p + 20) || 0) | mask);
++    let c = u(p + 16);
++    while (c && !seen.has(c)) {
++      mark(c, mask, seen);
++      c = u(c + 8);
++    }
++  };
++  const bits = (n) => {
++    const b = new DataView(new ArrayBuffer(4));
++    b.setFloat32(0, n);
++    return b.getUint32(0);
++  };
++  for (const i of [0x2a, 0x2f, 0x34, 0x39, 0x43, 0x5d, 0x75, 0x78, 0x79, 0x8d, 0xa7]) {
++    const j = list[i],
++      key = `${root}:${i}`;
++    if (!bases.has(key)) bases.set(key, j.x);
++    writes.set(j.address + 56, bits(bases.get(key) + 30.8));
++    mark(j.address, 64);
++  }
++  for (const i of [
++    0x2b, 0x2c, 0x30, 0x31, 0x35, 0x36, 0x3a, 0x3b, 0x49, 0x4f, 0x63, 0x69, 0x7a, 0x7d, 0x7e, 0x7f,
++    0x82, 0x83, 0x94, 0x9c, 0xa9, 0xab,
++  ]) {
++    const j = list[i];
++    mark(j.address, 16);
++  }
++  // Nameplate text/backgrounds are SIS entities, separate from the JOBJ cards.
++  for (let port = 1; port < 4; port++) {
++    const tag = u(0x803f0e8c + port * 12);
++    if (tag < 0x80003100 || tag + 8 >= 0x81800000) continue;
++    for (const offset of [0, 4]) {
++      const text = u(tag + offset);
++      if (text < 0x80003100 || text + 0xa0 >= 0x81800000) continue;
++      if (port === 1) writes.set(text, bits(v.getFloat32(a(text)) + 30.8));
++      else flags.set(text + 0x4c, 0x00010000); // HSD_Text.hidden at +0x4d
++    }
++  }
++  const entries = [
++    ...[...writes].map(([p, n]) => [p, n, 0]),
++    ...[...flags].map(([p, n]) => [p, n, 1]),
++  ];
++  if (entries.length * 12 > 0xb80) throw Error("Native room layout table is too large");
++  const code = [
++    0x3d808000,
++    0x618c1c80, // lis/ori r12,table
++    0x39600000 | entries.length, // li r11,count
++    0x814c0000,
++    0x812c0004,
++    0x810c0008, // lwz r10,address;r9,value;r8,operation
++    0x2c080000,
++    0x4182000c, // cmpwi r8,0;beq store
++    0x810a0000,
++    0x7d294378, // lwz r8,0(r10);or r9,r9,r8
++    0x912a0000, // stw r9,0(r10)
++    0x398c000c,
++    0x356bffff, // addi r12,12;addic. r11,-1
++    0x4082ffd8, // bne loop (-40)
++    (0x48000000 | ((0x80391070 - (stub + 56)) & 0x3fffffc)) >>> 0,
++  ];
++  if (u(stub) !== 0 && u(stub) !== code[0]) throw Error("Native CSS code area is occupied");
++  code.forEach((n, i) => w(stub + i * 4, n));
++  entries.flat().forEach((n, i) => w(table + i * 4, n));
++  const door = 0x803f0dfc + 0x24;
++  for (const [i, offset] of [20, 24, 28, 32].entries())
++    f(door + offset, [-19.4, -13.4, -11.4, -6][i] + 30.8);
++  for (let port = 2; port < 4; port++)
++    for (const offset of [20, 24, 28, 32]) f(0x803f0dfc + port * 0x24 + offset, 1000);
++  const cursor = u(0x804a0bc4);
++  if (cursor >= 0x80003100 && cursor + 24 < 0x81800000)
++    f(cursor + 12, v.getFloat32(a(cursor + 12)) + 30.8);
++  w(gobj + 28, stub);
++  return true;
++}
+diff --git a/src/melee-foreground.js b/src/melee-foreground.js
+new file mode 100644
+index 0000000..c9cc852
+--- /dev/null
++++ b/src/melee-foreground.js
+@@ -0,0 +1,70 @@
++// GALE01: draw a keyed aperture using Melee's own GX rectangle routine, then
++// render the original animated hands last. The browser composites controls
++// beneath this native foreground; hand geometry, animation and colors stay native.
++export function applyCssForeground(heap) {
++  const v = new DataView(heap.buffer, heap.byteOffset, heap.byteLength);
++  const at = (p) => p - 0x80000000;
++  const u = (p) => v.getUint32(at(p));
++  const w = (p, n) => v.setUint32(at(p), n >>> 0);
++  const f = (p, n) => v.setFloat32(at(p), n);
++  const valid = (p) => p >= 0x80003100 && p + 0x30 < 0x81800000;
++  const cursors = [0, 1].map((i) => u(0x804a0bc0 + i * 4));
++  if (!cursors.every(valid)) return false;
++  const objects = cursors.map(u);
++  if (!objects.every(valid)) return false;
++  // 0x80001800 is Dolphin’s HBReload hook, so executable code starts after it.
++  const stub = 0x80001840,
++    data = 0x80001b00,
++    noop = 0x80001afc;
++  if (u(objects[0] + 28) === stub) return true;
++  if (objects.some((p) => u(p + 28) !== 0x80391070)) throw Error("Unexpected CSS hand renderer");
++  if (u(stub) !== 0 && u(stub) !== 0x2c040002) throw Error("Foreground code area occupied");
++  const code = [];
++  const emit = (...ops) => code.push(...ops);
++  const call = (addr) => emit((0x48000001 | ((addr - (stub + code.length * 4)) & 0x3fffffc)) >>> 0);
++  const base = () => emit(0x3d808000);
++  const loadf = (reg, off) => emit(0xc00c0000 | (reg << 21) | (0x1b00 + off));
++  emit(0x2c040002, 0x4c820020); // Only final camera pass; other passes render below the aperture.
++  emit(0x9421ffd0, 0x7c0802a6, 0x90010034); // stack and LR
++  base();
++  loadf(1, 12);
++  loadf(2, 12);
++  emit(0x38600001);
++  call(0x80391a04);
++  for (const off of [16, 32, 48]) {
++    base();
++    for (let n = 0; n < 4; n++) loadf(n + 1, off + n * 4);
++    emit(0x386c1b08); // color pointer
++    call(0x80391580);
++  }
++  emit(0x3860ffff);
++  call(0x80361fc4); // Invalidate GX state caches before the native models.
++  for (const port of [0, 1])
++    for (const pass of [0, 1, 2]) {
++      base();
++      emit(0x806c0000 | (0x1b00 + port * 4), 0x38800000 | pass);
++      call(0x80391070);
++    }
++  base();
++  emit(0x38000001, 0x900c1b40); // Captured CSS is ready only after this pass actually rendered.
++  emit(0x80010034, 0x7c0803a6, 0x38210030, 0x4e800020);
++  if (code.length * 4 > 0x2bc) throw Error("Foreground stub exceeds reserved space");
++  code.forEach((n, i) => w(stub + i * 4, n));
++  objects.forEach((p, i) => w(data + i * 4, p));
++  w(data + 64, 0);
++  w(data + 8, 0xff00ffff);
++  f(data + 12, 1);
++  // World coordinates in the native CSS camera. The same apertures cover the
++  // central room panel and the controller indicators on the two nameplates.
++  [
++    [-14.91, -2.32, 29.82, -22.61],
++    [-20.04, -21.22, 2.98, -2.61],
++    [24.71, -21.22, 2.98, -2.61],
++  ]
++    .flat()
++    .forEach((n, i) => f(data + 16 + i * 4, n));
++  w(noop, 0x4e800020);
++  w(objects[0] + 28, stub);
++  w(objects[1] + 28, noop);
++  return true;
++}
+diff --git a/src/melee-memory.js b/src/melee-memory.js
+new file mode 100644
+index 0000000..aea5cab
+--- /dev/null
++++ b/src/melee-memory.js
+@@ -0,0 +1,279 @@
++import { installTapJumpHooks, TAP_JUMP_FLAG } from "./melee-tap-jump.js";
++import { applyCssLayout } from "./melee-css-layout.js";
++import { applyCssForeground } from "./melee-foreground.js";
++// GALE01 revision 1.02. MEM1 is located by matching original executable bytes.
++const signature = [
++  124, 8, 2, 166, 60, 96, 128, 76, 144, 1, 0, 4, 148, 33, 255, 40, 219, 225, 0, 208, 219, 193, 0,
++  200, 219, 161, 0, 192, 190, 225, 0, 156,
++];
++let mem1;
++export function inspectMelee(module) {
++  const heap = module.HEAPU8;
++  if (mem1 === undefined) {
++    outer: for (let p = 0; p < heap.length - signature.length; p += 4) {
++      if (heap[p] !== signature[0] || heap[p + 1] !== signature[1]) continue;
++      for (let i = 2; i < signature.length; i++) if (heap[p + i] !== signature[i]) continue outer;
++      const base = p - 0x37750c;
++      if (base < 0 || base + 0x1800000 > heap.length) continue;
++      if (String.fromCharCode(...heap.subarray(base, base + 6)) !== "GALE01") continue;
++      mem1 = base;
++      break;
++    }
++  }
++  if (mem1 === undefined) throw new Error("Melee MEM1 signature not found");
++  const read = (address, length) =>
++    Array.from(heap.subarray(mem1 + address - 0x80000000, mem1 + address - 0x80000000 + length));
++  const view = new DataView(heap.buffer);
++  const u32 = (a) => view.getUint32(mem1 + a - 0x80000000);
++  const ptr = u32(0x804d6720);
++  const major = read(0x80479d30, 1)[0];
++  const minor = read(0x80479d33, 1)[0];
++  const sceneKind = ptr >= 0x80000000 && ptr < 0x81800000 ? read(ptr, 1)[0] : -1;
++  const valid = (p) => p >= 0x80003100 && p < 0x81800000;
++  const fighters = [];
++  const cursor = major === 2 && minor === 0 && sceneKind === 8 ? u32(0x804a0bc0) : 0;
++  const cssCursor =
++    valid(cursor) && cursor + 0x14 <= 0x81800000
++      ? {
++          x: view.getFloat32(mem1 + cursor + 0xc - 0x80000000),
++          y: view.getFloat32(mem1 + cursor + 0x10 - 0x80000000),
++        }
++      : undefined;
++  const cssCursors = [0, 1].map((port) => {
++    const c = major === 2 && minor === 0 && sceneKind === 8 ? u32(0x804a0bc0 + port * 4) : 0;
++    return valid(c) && c + 0x14 <= 0x81800000
++      ? {
++          x: view.getFloat32(mem1 + c + 12 - 0x80000000),
++          y: view.getFloat32(mem1 + c + 16 - 0x80000000),
++        }
++      : undefined;
++  });
++  let match;
++  if (major === 2 && minor === 2 && sceneKind === 2) {
++    const rules = 0x8046b6a0 + 0x24c8;
++    match = {
++      pauser: view.getInt8(mem1 + 0x46b6a1),
++      elapsed: u32(0x8046b6a0 + 0x24),
++      timeRemaining: u32(0x8046b6a0 + 0x28),
++      stage: view.getUint16(mem1 + rules + 14 - 0x80000000),
++      timeLimit: u32(rules + 16),
++      items: view.getInt8(mem1 + rules + 11 - 0x80000000),
++      teams: read(rules + 8, 1)[0],
++      cpuLevel: read(0x80480530 + 0x60 + 0x24 + 15, 1)[0],
++    };
++    for (let i = 0; i < 2; i++) {
++      const slot = 0x80453080 + i * 0xe90,
++        index = read(slot + 0xc, 1)[0];
++      const gobj = index < 2 ? u32(slot + 0xb0 + index * 4) : 0;
++      const fp = valid(gobj) ? u32(gobj + 0x2c) : 0;
++      if (valid(fp))
++        fighters.push({
++          port: i,
++          playerId: read(fp + 0xc, 1)[0],
++          controllerIndex: read(slot + 0x46, 1)[0],
++          character: u32(slot + 4),
++          slotType: u32(slot + 8),
++          stocks: read(slot + 0x8e, 1)[0],
++          action: u32(fp + 0x10),
++          x: view.getFloat32(mem1 + fp + 0xb0 - 0x80000000),
++          y: view.getFloat32(mem1 + fp + 0xb4 - 0x80000000),
++          air: u32(fp + 0xe0),
++        });
++    }
++  }
++  return {
++    mem1,
++    major,
++    minor,
++    mainPointer: u32(0x804d3ee0).toString(16),
++    sceneKind,
++    cssCursor,
++    cssCursors,
++    cssReady: major === 2 && minor === 0 && sceneKind === 8 && valid(u32(0x804d6cc0)),
++    cssPlayerKinds: major === 2 && minor === 0 ? [0, 1].map((i) => read(0x80480820 + i * 0x24 + 1, 1)[0]) : undefined,
++    cssCharacters:
++      major === 2 && minor === 0
++        ? [0, 1].map((i) => read(0x804807b0 + 16 + 0x60 + i * 0x24, 1)[0])
++        : undefined,
++    // SDK default-thread saved FPSCR, useful for replay desync diagnosis.
++    osContextFpscr: u32(0x804a855c).toString(16),
++    sceneFrame: u32(0x80479d58),
++    renderFrame: u32(0x80479d5c),
++    tapJump: read(TAP_JUMP_FLAG, 1)[0] === 0,
++    tapJumpByPort: [0, 1].map((port) => read(TAP_JUMP_FLAG + port, 1)[0] === 0),
++    tapJumpHooks: [
++      0x800cae88, 0x800cb818, 0x800cafb0, 0x800d7420, 0x800caf04, 0x800cb060, 0x800cb988,
++    ].map((a) => u32(a).toString(16)),
++    fighters,
++    match,
++    master: read(0x804c1fac, 68),
++    copy: read(0x804c20bc, 68),
++    game: read(0x804c21cc, 68),
++    scene: read(0x80479d58, 64),
++    scenePointer: read(0x804d6720, 4),
++  };
++}
++
++// Addresses use GALE01 symbols, verified against the supplied DOL. In particular
++// GetSaveData returns main+0x1868, despite the current decomp header's 0x1898
++// comment. Rules/scene changes only affect data; tap jump uses checked PPC hooks.
++export function controlMelee(module, api, action, options = {}) {
++  const state = inspectMelee(module);
++  const heap = module.HEAPU8,
++    v = new DataView(heap.buffer);
++  const at = (a) => {
++    if (a < 0x80000000 || a >= 0x81800000)
++      throw new Error("Invalid Melee address " + a.toString(16));
++    return mem1 + a - 0x80000000;
++  };
++  const u32 = (a) => v.getUint32(at(a));
++  const b = (a, n) => v.setUint8(at(a), n);
++  const h = (a, n) => v.setUint16(at(a), n);
++  const w = (a, n) => v.setUint32(at(a), n);
++  const f = (a, n) => v.setFloat32(at(a), n);
++  const main = u32(0x804d3ee0);
++  const rules = main + 0x1850,
++    vs = main + 0x590;
++  if (action === "inspect") return state;
++  if (action === "roomLayout") {
++    if (state.major === 2 && state.minor === 0 && state.sceneKind === 8) {
++      applyCssLayout(heap);
++      applyCssForeground(heap);
++    }
++    return state;
++  }
++  if (action === "tapJump") {
++    const port = options.online ? options.port : 0;
++    if (![0, 1].includes(port)) throw Error("Invalid controller port");
++    b(TAP_JUMP_FLAG + port, options.enabled === false ? 1 : 0);
++    return state;
++  }
++  api.setCorePaused(1);
++  try {
++    if (action === "prepare" || action === "enterCss") {
++      installTapJumpHooks(u32, w, options.online);
++      b(TAP_JUMP_FLAG, options.tapJump === false ? 1 : 0);
++      h(main + 0x1868, 0x7ff); // all eleven unlockable fighters
++      h(main + 0x186a, 0xffff);
++      b(rules + 2, 1);
++      b(rules + 4, 4);
++      b(rules + 5, 0);
++      b(rules + 6, 10);
++      b(rules + 8, 8);
++      b(rules + 9, 0);
++      b(rules + 10, 1);
++      b(main + 0x1cb0, 255);
++      w(main + 0x1cb8, 0);
++      w(main + 0x1cbc, 0);
++      b(vs + 8 + 8, 0);
++      h(vs + 8 + 14, 0x1f);
++      for (let i = 0; i < 6; i++) {
++        const p = vs + 8 + 0x60 + i * 0x24;
++        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online && !options.cpu ? 0 : 1) : 3);
++        b(p + 2, 4);
++        b(p + 4, 0); // Native automatic player ID uses the fighter slot.
++        b(p + 7, i); // Controller/color index: owner P1, guest P2.
++        if (i < 2) {
++          b(p, i === 0 ? 2 : 20);
++          b(p + 3, 0);
++          b(p + 8, 9);
++          b(p + 14, 4);
++          b(p + 15, 9);
++        }
++        f(p + 0x18, 1);
++        f(p + 0x1c, 1);
++        f(p + 0x20, 1);
++      }
++      if (action === "enterCss") {
++        if (state.major !== 1) throw new Error("Enter CSS requires the native main menu");
++        const info = u32(0x804d6720);
++        b(u32(info + 8), 2); // MenuExitData::pending_mode, consumed by onExit
++        b(0x80479d31, 2);
++        b(0x80479d3c, 1);
++        w(0x80479d64, 1);
++      }
++    } else if (action === "lockCss" || action === "start") {
++      if (state.major !== 2 || state.minor !== 0) throw new Error("Not at VS character select");
++      // The router stores the next state plus one: 2 enters native stage select.
++      b(0x80479d35, 2);
++      b(0x804807b0 + 16 + 8, 0);
++      b(rules + 2, 1);
++      b(rules + 4, 4);
++      b(rules + 8, 8);
++      b(main + 0x1cb0, 255);
++      w(main + 0x1cb8, 0);
++      w(main + 0x1cbc, 0);
++      for (let i = 0; i < 6; i++) {
++        const p = 0x804807b0 + 16 + 0x60 + i * 0x24;
++        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online && !options.cpu ? 0 : 1) : 3);
++        b(p + 2, 4);
++        if (options.online) {
++          b(p + 4, 0);
++          b(p + 7, i);
++        }
++        if (i === 1) b(p + 15, 9);
++      }
++      if (action === "start")
++        for (let i = 0; i < 2; i++) {
++          const p = 0x804807b0 + 16 + 0x60 + i * 0x24;
++          if (heap[at(p)] === 18 && options.startingSheik?.[i]) b(p, 19);
++        }
++    } else if (action === "selectStage") {
++      // QA uses the original SSS force-stage path. Normal play uses WASD / A.
++      if (state.major !== 2 || state.minor !== 1 || state.sceneKind !== 9)
++        throw new Error("Stage selection requires the native stage select screen");
++      if (!Number.isInteger(options.stage) || options.stage < 2 || options.stage > 32)
++        throw new Error("Invalid stage");
++      const sss = u32(u32(0x804d6720) + 4);
++      b(sss + 3, options.stage);
++    } else if (action === "quit") {
++      if (state.major !== 2 || state.minor !== 2 || state.sceneKind !== 2)
++        throw new Error("No active match");
++      // Native OUTCOME_NO_CONTEST, consumed by gm_GetMatchOutcome. The game runs
++      // its own match-end callbacks, resource cleanup, and scene transition.
++      b(0x8046b6a8, 7);
++    } else if (action === "returnCss") {
++      if (state.major !== 2 || state.minor !== 4) throw new Error("Not at results");
++      for (let i = 0; i < 2; i++) {
++        const p = vs + 8 + 0x60 + i * 0x24;
++        if (heap[at(p)] === 19) b(p, 18);
++      }
++      b(0x80479d35, 1);
++      w(0x80479d64, 1);
++    } else if (action === "opponent") {
++      if (state.major !== 2 || state.minor !== 0 || state.sceneKind !== 8)
++        throw new Error("Change opponent at character select");
++      b(0x80480820 + 0x24 + 1, options.cpu ? 1 : 0);
++      b(0x80480820 + 0x24 + 15, 9);
++      b(0x80479d35, 1);
++      w(0x80479d64, 1);
++    } else if (action === "select") {
++      if (state.major !== 2 || state.minor !== 0 || state.sceneKind !== 8)
++        throw new Error("Selection requires character select");
++      if (![options.player, options.cpu].every((n) => Number.isInteger(n) && n >= 0 && n < 26))
++        throw new Error("Invalid fighter");
++      const css = 0x804807b0;
++      for (let i = 0; i < 6; i++) {
++        const p = css + 16 + 0x60 + i * 0x24;
++        b(p + 1, i === 0 ? 0 : i === 1 ? (options.online ? 0 : 1) : 3);
++        b(p + 2, 4);
++        if (options.online) {
++          b(p + 4, 0);
++          b(p + 7, i);
++        }
++        if (i < 2) {
++          const char = i === 0 ? options.player : options.cpu;
++          b(p, char === 19 ? 18 : char);
++          b(p + 15, 9);
++          b(p + 3, i === 1 && options.player === options.cpu ? 1 : 0);
++        }
++      }
++      b(css + 3, 0);
++      b(0x80479d35, 1);
++      w(0x80479d64, 1);
++    } else throw new Error("Unknown Melee action");
++  } finally {
++    api.setCorePaused(0);
++  }
++  return inspectMelee(module);
++}
+diff --git a/src/melee-probe-controls.js b/src/melee-probe-controls.js
+new file mode 100644
+index 0000000..72b05d1
+--- /dev/null
++++ b/src/melee-probe-controls.js
+@@ -0,0 +1,37 @@
++// Local integration probe. Visible button pulses let browser QA deliver inputs
++// across at least one emulated frame; this does not simulate game outcomes.
++import {inputStateFromPressed} from './input.js';
++const panel = document.createElement('div');
++panel.setAttribute('aria-label', 'Melee engine test inputs');
++panel.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:9999;display:flex;gap:6px;padding:8px;background:#10151eee;border:1px solid #b2becc;flex-wrap:wrap';
++let releaseTimer;
++for (const [name,control] of [['A','A'],['B','B'],['Start','START'],['Up','STICK_UP'],['Down','STICK_DOWN'],['Left','STICK_LEFT'],['Right','STICK_RIGHT']]) {
++  const button = document.createElement('button');
++  button.textContent = `GC ${name}`;
++  button.style.cssText = 'color:white;background:#293650;border:1px solid #a0acc1;padding:8px';
++  button.addEventListener('click', () => {
++    clearTimeout(releaseTimer);
++    window.__host.setInputState(inputStateFromPressed(new Set([control])));
++    releaseTimer = setTimeout(() => window.__host.setInputState(inputStateFromPressed(new Set())), 160);
++  });
++  panel.append(button);
++}
++document.body.append(panel);
++for (const [name,control] of [['A','A'],['Start','START']]) {
++  const button = document.createElement('button');
++  button.textContent = `Hold GC ${name}`;
++  button.setAttribute('aria-pressed','false');
++  button.style.cssText = 'color:white;background:#45362b;border:1px solid #d0bc92;padding:8px';
++  button.addEventListener('click', () => {
++    clearTimeout(releaseTimer);
++    const held = button.getAttribute('aria-pressed') !== 'true';
++    button.setAttribute('aria-pressed',String(held));
++    window.__host.setInputState(inputStateFromPressed(new Set(held ? [control] : [])));
++  });
++  panel.append(button);
++}
++
++const inspectButton=document.createElement('button');inspectButton.textContent='Inspect Melee input';
++const report=document.createElement('pre');report.style.cssText='max-width:90vw;max-height:160px;overflow:auto;font-size:10px;white-space:pre-wrap';
++inspectButton.onclick=async()=>{try{report.textContent=JSON.stringify(await window.__host.adapter.request('meleeInspect',{}));}catch(e){report.textContent=e.message;}};
++panel.append(inspectButton,report);
+diff --git a/src/melee-tap-jump.js b/src/melee-tap-jump.js
+new file mode 100644
+index 0000000..281919c
+--- /dev/null
++++ b/src/melee-tap-jump.js
+@@ -0,0 +1,68 @@
++// GALE01 1.02 jump checks, verified against the original DOL. These hooks skip
++// only the stick-jump branch for port 1. They preserve analog aiming, attack
++// windows, button jumps, jump counts, and the level-9 CPU's original input.
++export const TAP_JUMP_FLAG = 0x80002f00;
++const hooks = [
++  { at: 0x800cae88, original: 0xc0240624, fighter: 4, buttons: 0x800caeb4 },
++  { at: 0x800cb818, original: 0xc0230624, fighter: 3, buttons: 0x800cb83c },
++  { at: 0x800cafb0, original: 0xc03f0624, fighter: 31, buttons: 0x800cafe8 },
++  { at: 0x800d7420, original: 0xc03c0624, fighter: 28, buttons: 0x800d7434 },
++  // MWCC inlined the same checks in these callers; patching only the exported
++  // functions leaves standing/running and aerial tap jumps enabled.
++  { at: 0x800caf04, original: 0xc0240624, fighter: 4, buttons: 0x800caf30 },
++  { at: 0x800cb060, original: 0xc0240624, fighter: 4, buttons: 0x800cb08c },
++  { at: 0x800cb988, original: 0xc03e0624, fighter: 30, buttons: 0x800cb9ac },
++];
++const branch = (from, to) => (0x48000000 | ((to - from) & 0x03fffffc)) >>> 0;
++export function installTapJumpHooks(read, write, online = false) {
++  // The vanilla executable starts at 0x80003100. This is the unused low-memory
++  // code-handler area. Refuse to overwrite a disc mod using the same space.
++  for (let i = 0; i < hooks.length; i++) {
++    const hook = hooks[i],
++      cave = 0x80002800 + i * 0x80;
++    const current = read(hook.at);
++    if (current === branch(hook.at, cave)) continue;
++    if (current !== hook.original) throw new Error("Tap-jump hook does not match Melee 1.02");
++    for (let j = 0; j < 64; j += 4)
++      if (read(cave + j) !== 0) throw new Error("Melee code-handler area already in use");
++  }
++  for (let i = 0; i < hooks.length; i++) {
++    const h = hooks[i],
++      cave = 0x80002800 + i * 0x80;
++    // Use volatile r0/r12 and CR0; replay the displaced lfs on the normal path.
++    const words = online ? [
++      // Read the fighter's assigned controller port, then that port's flag.
++      (0x8800000c | (h.fighter << 16)) >>> 0,
++      0x28000001, // cmplwi r0,1
++      0x41810028, // bgt normal
++      0x3d808000, // lis r12,0x8000
++      0x398c2f00, // addi r12,r12,flag
++      0x7c0c00ae, // lbzx r0,r12,r0
++      0x2c000000,
++      0x41820014, // beq normal
++      (0x80000004 | (h.fighter << 16)) >>> 0,
++      0x2c00000b, // Nana keeps AI stick jumps
++      0x41820008,
++      branch(cave+44,h.buttons),
++      h.original,
++      branch(cave+52,h.at+4),
++    ] : [
++      0x3d808000, // lis r12,0x8000
++      0x880c2f00, // lbz r0,flag(r12)
++      0x2c000000, // cmpwi r0,0 (tap jump enabled)
++      0x41820024, // beq normal (+36)
++      (0x8800000c | (h.fighter << 16)) >>> 0, // lbz r0,player_id(fp)
++      0x2c000000,
++      0x40820018, // bne normal: preserve CPU input
++      (0x80000004 | (h.fighter << 16)) >>> 0, // lwz r0,kind(fp)
++      0x2c00000b, // cmpwi r0,Nana: AI partner retains stick jumps
++      0x4182000c,
++      branch(cave + 40, h.buttons),
++      0x60000000,
++      h.original,
++      branch(cave + 52, h.at + 4),
++    ];
++    words.forEach((word, j) => write(cave + j * 4, word));
++    write(h.at, branch(h.at, cave));
++  }
++}
+diff --git a/src/upstream-discio-worker.js b/src/upstream-discio-worker.js
+index 5ff41f5..4f89dca 100644
+--- a/src/upstream-discio-worker.js
++++ b/src/upstream-discio-worker.js
+@@ -1,3 +1,4 @@
++import { inspectMelee, controlMelee } from './melee-memory.js';
+ import {
+   DEFAULT_UPSTREAM_CORE_SHA256,
+   DEFAULT_UPSTREAM_CORE_URL,
+@@ -10,6 +11,7 @@ import {
+ } from "./upstream-worker-protocol.js";
+ import { parseDolHeader } from "./dol.js";
+ import { decodePrebuiltCache } from "./prebuilt-jit-cache-format.js";
++import { buildJitBlockBundle } from "./jit-block-bundle.js";
+ import {
+   JIT_CACHE_ENTRY_KEY_SCHEMA,
+   canonicalCoreFingerprint,
+@@ -666,6 +668,10 @@ function wgpuRuntimeConfigPayload() {
+ 
+ function rendererDiagnosticsPayload() {
+   return {
++    coreLog: api?.getBrowserLog?.() || "",
++    coreProfile: JSON.parse(api?.getBrowserProfile?.() || "{}"),
++    cpuDetails: api?.getPpcWasmHelperStats?.() || "",
++    cpuBlocks: api?.getPpcProfileStats?.() || "",
+     ...rendererDiagnostics,
+     coreSelection: { ...rendererDiagnostics.coreSelection },
+     activePresenterBackend: renderBackend,
+@@ -722,11 +728,12 @@ self.addEventListener("message", async (event) => {
+   if (data && data.type === "detachedOglFrame" && data.bitmap) {
+     try {
+       self.postMessage(
+-        { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height },
++        { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit },
+         [data.bitmap]
+       );
+     } catch (err) {
+       try { data.bitmap.close(); } catch {}
++      if (data.credit) Atomics.sub(data.credit, 0, 1);
+     }
+     return;
+   }
+@@ -756,13 +763,16 @@ self.addEventListener("message", async (event) => {
+     self.postMessage(
+       buildWorkerErrorReply(
+         data,
+-        error instanceof Error ? error.message : String(error)
++        error instanceof Error ? (type === "browserRollback" ? error.stack || error.message : error.message) : String(error)
+       )
+     );
+   }
+ });
+ 
+ async function handleMessage(type, payload) {
++  if(type === "frameRingLogging")return controlFrameRingLogging(payload.enabled);
++  if(type === "meleeControl")return controlMelee(moduleInstance, api, payload.action, payload);
++  if(type === "meleeInspect")return inspectMelee(moduleInstance);
+   switch (type) {
+     case "load":
+       if (!moduleInstance) {
+@@ -873,6 +883,11 @@ async function handleMessage(type, payload) {
+         cpuOverclock: payload.cpuOverclock,
+         emulationSpeed: payload.emulationSpeed,
+         presentationScale: payload.presentationScale,
++        renderHeight: payload.renderHeight,
++        timingProfile: payload.timingProfile,
++        rollbackDeterminism: payload.rollbackDeterminism,
++        browserNoIcache: payload.browserNoIcache,
++        browserMmu: payload.browserMmu,
+         presentationQueueSize: payload.presentationQueueSize,
+         presentationPacing: payload.presentationPacing,
+         legacyTickQueue: payload.legacyTickQueue,
+@@ -886,6 +901,8 @@ async function handleMessage(type, payload) {
+         coreLog: payload.coreLog,
+         cachedInterpreterDisableMask: payload.cachedInterpreterDisableMask,
+         noJitCache: payload.noJitCache,
++        jitBundle: payload.jitBundle,
++        directBitmapPort: payload.directBitmapPort,
+         reportedCoreSelection: payload.coreSelection,
+         wgpuReplayDiagnostics: payload.wgpuReplayDiagnostics,
+         wgpuDeepReplayDiagnostics: payload.wgpuDeepReplayDiagnostics,
+@@ -943,6 +960,13 @@ async function handleMessage(type, payload) {
+         inputGeneration: payload.inputGeneration
+       }, payload.inputSentAtEpochMs, "post");
+       return {};
++    // Local fix: the adapter sends these messages, but upstream omitted them.
++    case "start":
++    case "pause": {
++      if (!api?.setCorePaused) throw new Error("SetCorePaused export unavailable");
++      api.setCorePaused(type === "pause" ? 1 : 0);
++      return framePayload();
++    }
+     case "runFrame":
+       if (!presentationLoopActive) {
+         api?.pumpHostJobs?.();
+@@ -1009,6 +1033,183 @@ async function handleMessage(type, payload) {
+       }
+       return { loaded, ...framePayload() };
+     }
++    case "browserRollback": {
++      if (payload.action === "advance") {
++        // Keep the pad installation, completed frame step, and inspection in
++        // this worker. The main thread needs one round trip instead of three.
++        await handleMessage("browserRollback", {action:"pads", pads:payload.pads, frame:payload.frame});
++        const timing = await handleMessage("browserRollback", {action:"step", unthrottled:payload.unthrottled});
++        return {...timing, game:inspectMelee(moduleInstance)};
++      }
++      if (!api?.browserRollbackCapture || !api?.browserRollbackStep)
++        throw new Error("This core has no browser rollback probe API");
++      const started = performance.now();
++      let stepTiming;
++      if (payload.action === "pause") {
++        if (!api.setCorePaused(1)) throw new Error("Could not pause the machine");
++      } else if (payload.action === "cacheFastPath" || payload.action === "cacheLoopBatch" || payload.action === "inlineDispatch" || payload.action === "wasmDispatch" || payload.action === "idleBatchChecks") {
++        if (typeof payload.value !== "boolean" || api.getCoreStateName() !== "Paused" ||
++            !api.getCachedInterpreterDisableMask || !api.setCachedInterpreterDisableMask)
++          throw new Error("Cache fast-path comparison requires a paused machine");
++        const mask = api.getCachedInterpreterDisableMask();
++        const bit = 1 << ({cacheFastPath:24, cacheLoopBatch:25, inlineDispatch:26, wasmDispatch:27, idleBatchChecks:31}[payload.action]);
++        const updated = payload.value ? mask | bit : mask & ~bit;
++        api.setCachedInterpreterDisableMask(updated >>> 0);
++        return {enabled: Boolean(api.getCachedInterpreterDisableMask() & bit)};
++      } else if (payload.action === "renderScale") {
++        const percent=payload.percent ?? 0;
++        if(![0,150,200].includes(percent))throw Error("Unsupported 720p render scale");
++        const applied=api.browserRenderScalePercent?.(percent);
++        if(!applied)throw Error("Render scale change requires a paused OGL core");
++        return {percent:applied};
++      } else if (payload.action === "codegen") {
++        if (typeof payload.regcache !== "boolean" || typeof payload.fastmem !== "boolean" ||
++            !api.browserRollbackConfigureCodegen?.((payload.regcache ? 1 : 0) | (payload.fastmem ? 2 : 0) | (payload.integerfifo === true ? 4 : 0) | (payload.singleprefix === true ? 8 : 0) | (payload.fprcache === true ? 16 : 0) | (payload.compactgpr === true ? 32 : 0) | (payload.pssimd === true ? 64 : 0) | (payload.psmemsimd === true ? 128 : 0) | (payload.vectorfpr === true ? 256 : 0) | (payload.psqhoist === true ? 512 : 0) | (payload.widemap === true ? 1024 : 0) | (payload.stateconst === true ? 2048 : 0) | (payload.msrcache === true ? 4096 : 0) | (payload.fifocopy === true ? 8192 : 0) | (payload.fifobatch === true ? 16384 : 0) | (payload.frsqrtefast === true ? 32768 : 0) | (payload.blockmerge === true ? 65536 : 0) | (payload.fpuguard === true ? 131072 : 0) | (payload.branchfusion === true ? 262144 : 0) | (payload.fpuguardwide === true ? 524288 : 0) | (payload.stepcheck === true ? 1048576 : 0) | (payload.readfusion === true ? 2097152 : 0) | (payload.fusionredispatch === true ? 4194304 : 0) | (payload.counterbatch === true ? 8388608 : 0) | (payload.leandispatch === true ? 16777216 : 0) | (payload.cpformat === true ? 33554432 : 0) | (payload.qstatecache === true ? 67108864 : 0) | (payload.qstatefull === true ? 134217728 : 0) | (payload.bswaprotate === true ? 268435456 : 0) | (payload.chainfusion === true ? 536870912 : 0) | (payload.callfusion === true ? 1073741824 : 0), (payload.constantaddr === true ? 1 : 0) | (payload.matrixfast === true ? 2 : 0) | (payload.animstatefast === true ? 4 : 0) | (payload.displaylistfast === true ? 8 : 0) | (payload.gxmatrixfast === true ? 16 : 0) | (payload.animcallbackfast === true ? 32 : 0) | (payload.animfusion === true ? 64 : 0) | (payload.hotfusion === true ? 128 : 0)))
++          throw new Error("Codegen comparison requires a paused cached-interpreter machine");
++        return {regcache:payload.regcache, fastmem:payload.fastmem, integerfifo:payload.integerfifo === true, singleprefix:payload.singleprefix === true, fprcache:payload.fprcache === true, compactgpr:payload.compactgpr === true, pssimd:payload.pssimd === true, psmemsimd:payload.psmemsimd === true, vectorfpr:payload.vectorfpr === true, psqhoist:payload.psqhoist === true, widemap:payload.widemap === true, stateconst:payload.stateconst === true, msrcache:payload.msrcache === true, fifocopy:payload.fifocopy === true, fifobatch:payload.fifobatch === true, frsqrtefast:payload.frsqrtefast === true, blockmerge:payload.blockmerge === true, fpuguard:payload.fpuguard === true, branchfusion:payload.branchfusion === true, fpuguardwide:payload.fpuguardwide === true, stepcheck:payload.stepcheck === true, readfusion:payload.readfusion === true, fusionredispatch:payload.fusionredispatch === true, counterbatch:payload.counterbatch === true, leandispatch:payload.leandispatch === true, cpformat:payload.cpformat === true, qstatecache:payload.qstatecache === true, qstatefull:payload.qstatefull === true, bswaprotate:payload.bswaprotate === true, chainfusion:payload.chainfusion === true, callfusion:payload.callfusion === true, animstatefast:payload.animstatefast === true, animcallbackfast:payload.animcallbackfast === true, animfusion:payload.animfusion === true, hotfusion:payload.hotfusion === true, matrixfast:payload.matrixfast === true, displaylistfast:payload.displaylistfast === true, gxmatrixfast:payload.gxmatrixfast === true, constantaddr:payload.constantaddr === true};
++      } else if (payload.action === "suppress") {
++        if (typeof payload.value !== "boolean" || !api.browserRollbackSuppressOutput?.(payload.value ? 1 : 0))
++          throw new Error("Output suppression requires paused detached OGL core");
++        return {state: api.getCoreStateName(), output: JSON.parse(api.browserRollbackOutputStats())};
++      } else if (payload.action === "outputStats") {
++        if (!api.browserRollbackOutputStats) throw new Error("Replay output counters unavailable");
++        return {output: JSON.parse(api.browserRollbackOutputStats())};
++      } else if (payload.action === "frameInput") {
++        if(typeof payload.enabled!=="boolean" || !api.browserFrameBenchmarkInput?.(payload.enabled?1:0))throw Error("Frame-based QA input requires paused USA 1.02 VS with two human ports");
++        return {enabled:payload.enabled};
++      } else if (payload.action === "frameInputStop") {
++        if(!Number.isInteger(payload.frames) || !api.browserFrameBenchmarkStopAfterFrames?.(payload.frames))throw Error("Frame input stop requires fresh paused QA input and 120–3600 frames");
++        return {frames:payload.frames};
++      } else if (payload.action === "gpuStartDelay") {
++        if(payload.cycles!==undefined&&![1000,2000,4000,8000].includes(payload.cycles))throw Error("Unsupported GPU start delay");
++        if(!api.browserGpuStartDelay)throw Error("GPU scheduling diagnostics unavailable");
++        const stats=JSON.parse(api.browserGpuStartDelay(payload.cycles===undefined?-1:payload.cycles));
++        if(stats.error)throw Error(stats.error);
++        if(payload.cycles!==undefined&&stats.cycles!==payload.cycles)throw Error("GPU start delay did not apply");
++        return stats;
++      } else if (payload.action === "dispatchProfile") {
++        if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Dispatch profiling mode must be boolean");
++        if(!api.browserDispatchProfile)throw Error("Dispatch profiling unavailable");
++        const stats=JSON.parse(api.browserDispatchProfile(payload.enabled===undefined?-1:payload.enabled?1:0));
++        if(stats.error)throw Error(stats.error);
++        return stats;
++      } else if (payload.action === "rushPresentation") {
++        if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Rush presentation mode must be boolean");
++        if(!api.browserRushPresentation)throw Error("Rush presentation diagnostics unavailable");
++        const stats=JSON.parse(api.browserRushPresentation(payload.enabled===undefined?-1:payload.enabled?1:0));
++        if(stats.error)throw Error(stats.error);
++        if(payload.enabled!==undefined&&stats.enabled!==payload.enabled)throw Error("Rush presentation mode did not apply");
++        return stats;
++      } else if (payload.action === "timingDrift") {
++        if(payload.enabled!==undefined&&typeof payload.enabled!=="boolean")throw Error("Timing drift mode must be boolean");
++        if(!api.browserTimingDrift)throw Error("Timing drift diagnostics unavailable");
++        const stats=JSON.parse(api.browserTimingDrift(payload.enabled===undefined?-1:payload.enabled?1:0));
++        if(stats.error)throw Error(stats.error);
++        if(payload.enabled!==undefined&&stats.enabled!==payload.enabled)throw Error("Timing drift mode did not apply");
++        return stats;
++      } else if (payload.action === "cpFormatStats") {
++        if(!api.browserCPFormatStats)throw Error("CP format statistics unavailable");
++        const stats=JSON.parse(api.browserCPFormatStats());if(stats.error)throw Error(stats.error);return stats;
++      } else if (payload.action === "unthrottled") {
++        if(typeof payload.enabled!=="boolean")throw Error("Unthrottled mode must be boolean");
++        if(!api.browserRollbackSetUnthrottled?.(payload.enabled?1:0))throw Error("Unthrottled mode requires a paused machine");
++        return {enabled:payload.enabled};
++      } else if (payload.action === "frameInputTiming") {
++        if(!api.browserFrameBenchmarkTiming)throw Error("Native frame timing unavailable");
++        return JSON.parse(api.browserFrameBenchmarkTiming());
++      } else if (payload.action === "frameInputStats") {
++        if(!api.browserFrameBenchmarkStats)throw Error("Frame input counters unavailable");
++        return JSON.parse(api.browserFrameBenchmarkStats());
++      } else if (payload.action === "releaseLivePads") {
++        if (!api.browserLiveReleasePads?.()) throw new Error("Live controller release unavailable");
++      } else if (payload.action === "pads" || payload.action === "livePads") {
++        const live = payload.action === "livePads";
++        const setPads = live ? api.browserLiveSetPads : api.browserRollbackSetPads;
++        const fields = ["mask", "stickX", "stickY", "cStickX", "cStickY", "triggerLeft", "triggerRight", "analogA", "analogB"];
++        if (!setPads || !Array.isArray(payload.pads) || payload.pads.length !== 2 ||
++            !Number.isInteger(payload.frame) || payload.frame < 0 || payload.frame > 0xffffffff)
++          throw new Error("Two complete pads and a frame number are required");
++        const packed = payload.pads.flatMap(pad => fields.map((field, i) => {
++          const value = pad?.[field];
++          if (!Number.isInteger(value) || value < 0 || value > (i === 0 ? 0xfffff : 511))
++            throw new Error("Invalid rollback pad field: " + field);
++          return value;
++        }));
++        const pointer = moduleInstance._malloc(72);
++        if (!pointer) throw new Error("Could not allocate controller input buffer");
++        try {
++          new Uint32Array(moduleInstance.HEAPU8.buffer, pointer, 18).set(packed);
++          if (!setPads(pointer, 18, payload.frame))
++            throw new Error(live ? "Live pads require a running or paused machine" : "Authoritative pads require a paused machine");
++        } finally { moduleInstance._free(pointer); }
++      } else if (payload.action === "capture") {
++        if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6)
++          throw new Error("Invalid checkpoint slot");
++        const capture = payload.gpuResident ? api.browserRollbackCaptureGpu : api.browserRollbackCapture;
++        if (!capture) throw new Error("GPU checkpoint API unavailable");
++        const bytes = capture(payload.slot);
++        if (!bytes) throw new Error("Capture failed: state=" + api.getCoreStateName() + ", requiredBytes=" + api.browserRollbackRequiredSize?.() + ", limitBytes=134217728, totalBudgetBytes=671088640");
++        return {bytes, milliseconds: performance.now() - started, profile: api.browserRollbackCaptureProfile ? JSON.parse(api.browserRollbackCaptureProfile(payload.slot)) : null};
++      } else if (payload.action === "restore") {
++        if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
++            !api.browserRollbackRestore(payload.slot)) throw new Error("Checkpoint restore failed");
++      } else if (payload.action === "step") {
++        const unthrottled = payload.unthrottled === true;
++        if (unthrottled && !api.browserRollbackSetUnthrottled?.(1))
++          throw new Error("Unthrottled step requires paused machine");
++        try {
++          let signal = null, sequence = 0;
++          if (typeof Atomics.waitAsync === "function" && typeof SharedArrayBuffer === "function" &&
++              moduleInstance.HEAPU8.buffer instanceof SharedArrayBuffer && api.browserRollbackStepSignal) {
++            const pointer = api.browserRollbackStepSignal();
++            if (!Number.isInteger(pointer) || pointer <= 0 || pointer % 4 ||
++                pointer > moduleInstance.HEAPU8.byteLength - 4) throw new Error("Invalid frame completion signal");
++            signal = new Int32Array(moduleInstance.HEAPU8.buffer, pointer, 1);
++            sequence = Atomics.load(signal, 0);
++          }
++          const transitionAt = performance.now();
++          const step = api.browserRollbackGameStep || api.browserRollbackStep;
++          if (!step()) throw new Error("Game step requires paused GALE01 v1.02 on CachedInterpreter");
++          stepTiming = { transitionMilliseconds: performance.now() - transitionAt,
++            waitStrategy: signal ? "atomic-notification" : "timer", waitWakeups: 0 };
++          const waitAt = performance.now();
++          while (api.getCoreStateName() !== "Paused") {
++            if (performance.now() - started > 5000) {
++              api.setCorePaused(1);
++              throw new Error("Frame step did not complete within five seconds");
++            }
++            api.pumpHostJobs?.();
++            if (signal) {
++              // A bounded async wait services the worker event loop without
++              // nested timer clamping. Sequence comparison closes the race
++              // where completion happens between the state read and waiting.
++              const wait = Atomics.waitAsync(signal, 0, sequence, 16);
++              if (wait.async) await wait.value;
++              sequence = Atomics.load(signal, 0);
++            } else await new Promise(resolve => setTimeout(resolve, 1));
++            stepTiming.waitWakeups++;
++          }
++          stepTiming.waitMilliseconds = performance.now() - waitAt;
++        } finally {
++          if (unthrottled) {
++            api.setCorePaused(1);
++            if (!api.browserRollbackSetUnthrottled(0))
++              throw new Error("Could not restore normal speed after step");
++          }
++        }
++      } else if (payload.action === "equal") {
++        if (![payload.a,payload.b].every(v=>Number.isInteger(v)&&v>=0&&v<6))
++          throw new Error("Invalid comparison slots");
++        return {equal: Boolean(api.browserRollbackEqual(payload.a,payload.b)), comparison: api.browserRollbackCompare ? JSON.parse(api.browserRollbackCompare(payload.a,payload.b)) : null};
++      } else if (payload.action === "release") {
++        if (!Number.isInteger(payload.slot) || payload.slot < 0 || payload.slot >= 6 ||
++            !api.browserRollbackRelease?.(payload.slot)) throw new Error("Checkpoint release failed");
++      } else if (payload.action === "clear") {
++        api.browserRollbackClear();
++      } else throw new Error("Unknown browser rollback action");
++      return {state: api.getCoreStateName(), milliseconds: performance.now() - started, ...stepTiming,
++        coreTicks:readCoreTicks(), ppcPc:api.getPpcPc?.() ?? 0};
++    }
+     case "validationSetCorePaused": {
+       // Harness-only checkpoint barrier. The app never sends this message;
+       // normal emulator pause/start behavior and defaults remain unchanged.
+@@ -1064,7 +1265,10 @@ async function handleMessage(type, payload) {
+         lazyFillAddedEntries: dolphinJitLazyFillAddedEntries,
+         lazyFillTerminalReason: dolphinJitLazyFillTerminalReason,
+         lazyFillFailureCount: dolphinJitLazyFillFailureCount,
+-        cacheSize: dolphinJitCacheMap.size,
++        cacheSize: dolphinJitBundleEntryCount + dolphinJitCacheMap.size,
++        bundleEnabled: dolphinJitBundleEnabled,
++        bundleEntries: dolphinJitBundleEntryCount,
++        bundleBytes: dolphinJitBundleBytes,
+         newCompileCount: dolphinJitNewCompileCount,
+         verificationPending: dolphinJitVerificationPending.size,
+         compilePending: dolphinJitCompilePending,
+@@ -1365,6 +1569,11 @@ async function loadCore({
+   cpuOverclock = 1,
+   emulationSpeed = 1,
+   presentationScale = 1,
++  renderHeight = 0,
++  timingProfile = "baseline",
++  rollbackDeterminism = false,
++  browserNoIcache = false,
++  browserMmu = false,
+   presentationQueueSize = DEFAULT_PRESENTATION_QUEUE,
+   presentationPacing = "smooth",
+   legacyTickQueue: requestedLegacyTickQueue = false,
+@@ -1378,6 +1587,8 @@ async function loadCore({
+   coreLog = false,
+   cachedInterpreterDisableMask = 0,
+   noJitCache = false,
++  jitBundle = false,
++  directBitmapPort = false,
+   reportedCoreSelection = null,
+   wgpuReplayDiagnostics = false,
+   wgpuDeepReplayDiagnostics: requestedWgpuDeepReplayDiagnostics = false,
+@@ -1666,9 +1877,9 @@ async function loadCore({
+   let moduleCanvas;
+   if (videoBackend === "OGL") {
+     if (readbackOgl && typeof OffscreenCanvas === "function") {
+-      moduleCanvas = new OffscreenCanvas(320, 240);
++      moduleCanvas = new OffscreenCanvas(renderHeight ? renderHeight * 4 / 3 : 320, renderHeight || 240);
+     } else if (detachedOgl) {
+-      moduleCanvas = new OffscreenCanvas(640, 480);
++      moduleCanvas = new OffscreenCanvas(renderHeight ? renderHeight * 4 / 3 : 640, renderHeight || 480);
+       detachedOglCanvas = moduleCanvas;
+     } else {
+       moduleCanvas = canvas;
+@@ -1781,8 +1992,11 @@ async function loadCore({
+   dolphinJitCachePersistenceEnabled = !noJitCache;
+   dolphinJitBootLoadComplete = false;
+   dolphinJitBootLoadedEntries = 0;
++  dolphinJitBundleEnabled = !noJitCache && Boolean(jitBundle);
+   if (!noJitCache) {
+-    await reconcileJitCacheWithBuild(buildFingerprint);
++    await reconcileJitCacheWithBuild(buildFingerprint, {
++      loadModules: !dolphinJitBundleEnabled,
++    });
+   } else {
+     postStatus("jit-cache: DISABLED via ?nojitcache=1 (no IDB load/persist)");
+   }
+@@ -1790,13 +2004,23 @@ async function loadCore({
+   if (!noJitCache && buildFingerprint) {
+     const _t_prebuilt = performance.now();
+     const seeded = await maybeSeedIdbFromPrebuiltCache(coreUrl, buildFingerprint);
+-    if (seeded > 0) {
++    if (seeded > 0 && !dolphinJitBundleEnabled) {
+       const loaded = await loadDolphinJitCacheFromIdb(dolphinJitIdb);
+       if (loaded >= DOLPHIN_JIT_PREWARM_THRESHOLD) dolphinJitCachePreWarmed = true;
+     }
+     console.log(`[boot-phase] prebuilt-jit-cache seed took ${(performance.now() - _t_prebuilt).toFixed(1)}ms (seeded ${seeded} new IDB entries)`);
+   }
+-  dolphinJitBootLoadedEntries = dolphinJitCacheMap.size;
++  if (dolphinJitBundleEnabled) {
++    const _t_bundle = performance.now();
++    await loadDolphinJitBundleFromIdb(dolphinJitIdb);
++    console.log(
++      `[boot-phase] JIT block bundle took ${(performance.now() - _t_bundle).toFixed(1)}ms ` +
++      `(${dolphinJitBundleEntryCount} entries, ${(dolphinJitBundleBytes / 1048576).toFixed(2)}MiB)`
++    );
++  }
++  dolphinJitBootLoadedEntries = dolphinJitBundleEnabled
++    ? dolphinJitBundleEntryCount
++    : dolphinJitCacheMap.size;
+   dolphinJitBootLoadComplete = true;
+ 
+   // Day-15 (wasm-dolphin) WebGPU video backend: when the user selects
+@@ -1823,6 +2047,11 @@ async function loadCore({
+     // GP fifo stays empty and the visible canvas stays black.
+     dolphinOglWorkerWebGl: videoBackend === "OGL",
+     dolphinOglReadbackPresent: readbackOgl,
++    // A transferred DOM-backed OffscreenCanvas is already the final output.
++    // Tell the GPU pthread not to consume it with transferToImageBitmap();
++    // doing so clears the browser-managed back buffer before it can mirror to
++    // the visible element and also recreates the detached bitmap bridge.
++    dolphinOglAttachedCanvas: videoBackend === "OGL" && Boolean(canvas) && !readbackOgl,
+     dolphinOglTestClear: Boolean(oglTestClear),
+     dolphinFastSoftwareRaster: Math.min(3, Math.max(0, Number(fastSoftwareRaster) || 0)),
+     dolphinXfbFastPaths: (Number(xfbFastPaths) || 0) & 3,
+@@ -1830,6 +2059,11 @@ async function loadCore({
+     // false, so the shipping page load is unchanged.
+     dolphinCorrectTimeDrift: Boolean(correctTimeDrift),
+     dolphinCoreLog: Boolean(coreLog),
++    dolphinRenderHeight: renderHeight,
++    dolphinTimingProfile: timingProfile,
++    dolphinRollbackDeterminism: Boolean(rollbackDeterminism),
++    dolphinBrowserNoIcache: Boolean(browserNoIcache),
++    dolphinBrowserMmu: Boolean(browserMmu),
+     preinitializedWebGPUDevice,
+     locateFile: (path) => new URL(path, coreUrl).href,
+     print: (message) => postStatus(message),
+@@ -1931,7 +2165,9 @@ async function loadCore({
+   // Renderer transport is required even when persistent JIT caching is not.
+   // ?nojitcache=1 gates only the optional cache channel below.
+   await installDolphinPthreadChannels(moduleInstance, {
+-    jitCacheEnabled: !noJitCache
++    jitCacheEnabled: !noJitCache,
++    jitBundleEnabled: dolphinJitBundleEnabled,
++    directBitmapPortEnabled: Boolean(directBitmapPort)
+   });
+   if (wgpuOwnershipTraceActive) {
+     const heap = moduleInstance?.HEAPU8;
+@@ -2224,6 +2460,9 @@ function bindApi(module) {
+     getCoreState: optionalCwrap("GetCoreState", "number", []),
+     getCoreStateName: optionalCwrap("GetCoreStateName", "string", []),
+     getCoreStatus: optionalCwrap("GetCoreStatus", "string", []),
++    getBrowserLog: optionalCwrap("GetBrowserLog", "string", []),
++    getBrowserProfile: optionalCwrap("GetBrowserProfile", "string", []),
++    browserRenderScalePercent: optionalCwrap("BrowserRenderScalePercent", "number", ["number"]),
+     getCoreTitle: optionalCwrap("GetCoreTitle", "string", []),
+     getCoreTicksLow: optionalCwrap("GetCoreTicksLow", "number", []),
+     getCoreTicksHigh: optionalCwrap("GetCoreTicksHigh", "number", []),
+@@ -2274,6 +2513,35 @@ function bindApi(module) {
+     loadState: cwrap("LoadState", "number", ["number"]),
+     loadStateFile: optionalCwrap("LoadStateFile", "number", ["string"]),
+     saveStateFile: optionalCwrap("SaveStateFile", "number", ["string"]),
++    browserRollbackCaptureProfile: optionalCwrap("BrowserRollbackCaptureProfile", "string", ["number"]),
++    browserRollbackCaptureGpu: optionalCwrap("BrowserRollbackCaptureGpu", "number", ["number"]),
++    browserRollbackCapture: optionalCwrap("BrowserRollbackCapture", "number", ["number"]),
++    browserRollbackRequiredSize: optionalCwrap("BrowserRollbackRequiredSize", "number", []),
++    browserRollbackRestore: optionalCwrap("BrowserRollbackRestore", "number", ["number"]),
++    browserRollbackGameStep: optionalCwrap("BrowserRollbackGameStep", "number", []),
++    browserRollbackSetPads: optionalCwrap("BrowserRollbackSetPads", "number", ["number", "number", "number"]),
++    browserLiveSetPads: optionalCwrap("BrowserLiveSetPads", "number", ["number", "number", "number"]),
++    browserLiveReleasePads: optionalCwrap("BrowserLiveReleasePads", "number", []),
++    browserFrameBenchmarkInput: optionalCwrap("BrowserFrameBenchmarkInput", "number", ["number"]),
++    browserFrameBenchmarkStopAfterFrames: optionalCwrap("BrowserFrameBenchmarkStopAfterFrames", "number", ["number"]),
++    browserCPFormatStats: optionalCwrap("BrowserCPFormatStats", "string", []),
++    browserGpuStartDelay: optionalCwrap("BrowserGpuStartDelay", "string", ["number"]),
++    browserTimingDrift: optionalCwrap("BrowserTimingDrift", "string", ["number"]),
++    browserRushPresentation: optionalCwrap("BrowserRushPresentation", "string", ["number"]),
++    browserDispatchProfile: optionalCwrap("BrowserDispatchProfile", "string", ["number"]),
++    browserFrameBenchmarkTiming: optionalCwrap("BrowserFrameBenchmarkTiming", "string", []),
++    browserFrameBenchmarkStats: optionalCwrap("BrowserFrameBenchmarkStats", "string", []),
++    browserRollbackSuppressOutput: optionalCwrap("BrowserRollbackSuppressOutput", "number", ["number"]),
++    browserRollbackOutputStats: optionalCwrap("BrowserRollbackOutputStats", "string", []),
++    browserInvalidateGuestCode: optionalCwrap("BrowserInvalidateGuestCode", "number", ["number", "number"]),
++    browserRollbackConfigureCodegen: optionalCwrap("BrowserRollbackConfigureCodegen", "number", ["number", "number"]),
++    browserRollbackSetUnthrottled: optionalCwrap("BrowserRollbackSetUnthrottled", "number", ["number"]),
++    browserRollbackStep: optionalCwrap("BrowserRollbackStep", "number", []),
++    browserRollbackEqual: optionalCwrap("BrowserRollbackEqual", "number", ["number", "number"]),
++    browserRollbackCompare: optionalCwrap("BrowserRollbackCompare", "string", ["number", "number"]),
++    browserRollbackClear: optionalCwrap("BrowserRollbackClear", null, []),
++    browserRollbackStepSignal: optionalCwrap("BrowserRollbackStepSignal", "number", []),
++    browserRollbackRelease: optionalCwrap("BrowserRollbackRelease", "number", ["number"]),
+     getFrame: cwrap("GetFrame", "number", []),
+     getFrameSignalPtr: optionalCwrap("GetFrameSignalPtr", "number", []),
+     getGameId: cwrap("GetGameId", "string", []),
+@@ -2849,7 +3117,7 @@ function framePayload({ forceCausalTelemetry = false } = {}) {
+       // WebGPU executor draw/miss/skip counters (render-health: is
+       // geometry flowing into the EFB, are pipes/bind-groups missing,
+       // are draws being poison-guard-skipped).
+-      ` jitc:${dolphinJitCacheMap.size}/${dolphinJitNewCompileCount}` +
++      ` jitc:${dolphinJitBundleEntryCount + dolphinJitCacheMap.size}/${dolphinJitNewCompileCount}` +
+       ` wgx:d${webGpuExecStats.drawIdx}/mp${webGpuExecStats.missPipe}` +
+       `/mb${webGpuExecStats.missBg}/sk${webGpuExecStats.skipDraw}`
+     ),
+@@ -3335,8 +3603,11 @@ function runPresentationLoop() {
+         // OGL bypasses XFB, so api.getFrame() doesn't increment per visible frame.
+         // Use the OGL swap count (incremented in DolphinWeb_OnOglSwap) as the
+         // present-deduplication key so each new GL swap registers as a new frame.
+-        const oglSwap = parseOglSwapStats(api.getVideoStats?.()).swap >>> 0;
+-        const oglFrameKey = oglSwap > 0 ? oglSwap : coreFrame;
++        // Readback signals a completed pixel frame before Swap increments
++        // its separate counter. Using that lagging counter drops fresh
++        // pixels whenever this worker wakes between the two operations.
++        const oglSwap = oglSabEnabledForLoad ? 0 : parseOglSwapStats(api.getVideoStats?.()).swap >>> 0;
++        const oglFrameKey = oglSabEnabledForLoad ? coreFrame : (oglSwap > 0 ? oglSwap : coreFrame);
+         // Detached OGL bitmap capture now happens C++-side from the GPU
+         // pthread (Emscripten.cpp Swap() does transferToImageBitmap +
+         // self.postMessage), and the discio worker forwards via
+@@ -3816,7 +4087,7 @@ function presentFrame(width, height, pointer, length, coreFrame = api?.getFrame?
+   // canvas. The drawFrame* path above is a no-op in SAB mode (no presenter
+   // was set up), so this IS the visible-paint pipeline for OGL+SAB.
+   if (displayFrameView && oglPixelSabView && oglMetaSabView) {
+-    const published = publishOglSabFrame(width, height, displayFrameView);
++    const published = publishOglSabFrame(width, height, markerApplied ? displayFrameView : sourceFrameView);
+     if (markerApplied && published) markerOutputIssued = true;
+   }
+   finishProfileSample("draw", drawStartedAt);
+@@ -3838,42 +4109,27 @@ function presentFrame(width, height, pointer, length, coreFrame = api?.getFrame?
+   finishProfileSample("present", presentStartedAt);
+ }
+ 
+-let oglSabLastPublishMs = 0;
+-// Throttle on SAB writes. Each OGL swap fires the frame signal twice
+-// (OnGlBackbuffer + OnOglSwap, ~1 ms apart) and ogl_swap_count's relaxed
+-// memory ordering means the worker reads it racily — sometimes both wakes
+-// see the same count, sometimes adjacent counts. 14 ms catches the paired
+-// wakes reliably but caps SAB write-rate around 20 Hz. Lower values lift
+-// the write rate but trade gameSpeed (Day-10 measured 91% at 4 ms vs 100%
+-// at 14 ms — main-thread paint contention with worker's SAB reads).
+-const OGL_SAB_MIN_INTERVAL_MS = 14;
+-
+ let oglSabWriteCount = 0;       // successful SAB writes (memcpy + gen bump)
+-let oglSabThrottleSkipCount = 0; // calls returned early by 14ms throttle
++let oglSabThrottleSkipCount = 0; // consumer owns pixels; producer drops instead of blocking
+ let oglSabLastReportMs = 0;
+ const OGL_SAB_REPORT_INTERVAL_MS = 5000;
+ function publishOglSabFrame(width, height, frameView) {
+-  // Throttle to ~60 Hz: without this cap, the worker drives glReadPixels
+-  // at 150-200 Hz (no presenter pacing in SAB mode), eating GPU pthread
+-  // time that the CPU emulation pthread could otherwise use. Empirically
+-  // dropped gameSpeed from 98 % to 67 %. Capping the publish rate keeps the
+-  // readback at human-visible cadence without saturating the pipeline.
+   const now = performance.now();
+-  if (now - oglSabLastPublishMs < OGL_SAB_MIN_INTERVAL_MS) {
+-    oglSabThrottleSkipCount += 1;
+-    maybeReportOglSabRates(now);
+-    return false;
+-  }
+-  oglSabLastPublishMs = now;
+ 
+   // SAB allocation in core-host.js is sized to match this readback output
+   // exactly (presentationScale × 320 × 240). On the rare path where sizes
+   // diverge (e.g. presentation-scale change mid-run, currently not
+   // supported), clip to the smaller buffer so we don't OOB.
++  // Producer and consumer never copy the same shared pixels concurrently.
++  // Contention drops an image instead of blocking either emulation or UI.
++  if (Atomics.compareExchange(oglMetaSabView, 1, 0, 1) !== 0) {
++    oglSabThrottleSkipCount += 1;
++    return false;
++  }
+   const sabBytes = oglPixelSabView.length;
+   const fbBytes = frameView.length;
+   const copyBytes = fbBytes < sabBytes ? fbBytes : sabBytes;
+-  if (copyBytes === 0) return false;
++  if (copyBytes === 0) { Atomics.store(oglMetaSabView, 1, 0); return false; }
+   if (copyBytes === sabBytes && copyBytes === fbBytes) {
+     // Common path: same-size memcpy via TypedArray.set, which compiles to
+     // a SIMD memmove on Chrome.
+@@ -3886,7 +4142,11 @@ function publishOglSabFrame(width, height, frameView) {
+   }
+   // Bump the generation; main thread polls this with Atomics.load on RAF.
+   Atomics.add(oglMetaSabView, 0, 1);
++  Atomics.store(oglMetaSabView, 1, 0);
+   oglSabWriteCount += 1;
++  // Paint on delivery; RAF remains a fallback. Waiting for an unrelated
++  // animation tick discarded images whenever emulation crossed its phase.
++  self.postMessage({type: "sharedFrameReady"});
+   maybeReportOglSabRates(now);
+   return true;
+ }
+@@ -5617,7 +5877,7 @@ async function maybeSeedIdbFromPrebuiltCache(coreUrlValue, currentFingerprint) {
+   return seeded;
+ }
+ 
+-async function reconcileJitCacheWithBuild(fingerprint) {
++async function reconcileJitCacheWithBuild(fingerprint, { loadModules = true } = {}) {
+   await dolphinJitIdbReady;
+   if (!dolphinJitIdb) return 0;
+   const [storedFingerprint, storedEntryKeySchema] = await Promise.all([
+@@ -5649,7 +5909,7 @@ async function reconcileJitCacheWithBuild(fingerprint) {
+   } else {
+     return 0;
+   }
+-  const loaded = await loadDolphinJitCacheFromIdb(dolphinJitIdb);
++  const loaded = loadModules ? await loadDolphinJitCacheFromIdb(dolphinJitIdb) : 0;
+   if (loaded > 0) {
+     postStatus(`jit-cache: loaded ${loaded} compiled modules from IndexedDB`);
+   }
+@@ -5663,7 +5923,60 @@ async function reconcileJitCacheWithBuild(fingerprint) {
+ }
+ let dolphinJitNewCompileCount = 0;
+ let dolphinJitCompilePending = 0;
++let dolphinJitBundleEnabled = false;
++let dolphinJitBundle = null;
++let dolphinJitBundleEntryCount = 0;
++let dolphinJitBundleBytes = 0;
+ const dolphinJitVerificationPending = new Set();
++
++async function loadDolphinJitBundleFromIdb(db) {
++  dolphinJitBundle = null;
++  dolphinJitBundleEntryCount = 0;
++  dolphinJitBundleBytes = 0;
++  if (!db) return 0;
++  const entries = await new Promise((resolve) => {
++    const out = [];
++    try {
++      const tx = db.transaction(DOLPHIN_JIT_IDB_STORE, "readonly");
++      const request = tx.objectStore(DOLPHIN_JIT_IDB_STORE).openCursor();
++      request.onsuccess = (event) => {
++        const cursor = event.target.result;
++        if (!cursor || out.length >= DOLPHIN_JIT_CACHE_MAX) {
++          resolve(out);
++          return;
++        }
++        const value = cursor.value;
++        if (value instanceof Uint8Array || value instanceof ArrayBuffer) {
++          out.push({ hash: String(cursor.key), bytes: value });
++        }
++        cursor.continue();
++      };
++      request.onerror = () => resolve(out);
++      tx.onerror = () => resolve(out);
++    } catch {
++      resolve(out);
++    }
++  });
++  if (!entries.length) return 0;
++  const verified = await verifyDolphinJitEntries(entries);
++  if (!verified) {
++    postStatus("jit-bundle: IDB identity verification failed; bundle disabled");
++    return 0;
++  }
++  const built = buildJitBlockBundle(verified);
++  const startedAt = performance.now();
++  const module = await WebAssembly.compile(built.bytes);
++  const compileMs = performance.now() - startedAt;
++  dolphinJitBundle = { module, indexByHash: built.indexByHash };
++  dolphinJitBundleEntryCount = built.entryCount;
++  dolphinJitBundleBytes = built.bytes.byteLength;
++  if (built.entryCount >= DOLPHIN_JIT_PREWARM_THRESHOLD) dolphinJitCachePreWarmed = true;
++  postStatus(
++    `jit-bundle: compiled ${built.entryCount} functions in ${compileMs.toFixed(1)}ms ` +
++    `from ${(built.bytes.byteLength / 1048576).toFixed(2)}MiB`
++  );
++  return built.entryCount;
++}
+ async function handleDolphinJitNewCompile(event) {
+   const data = event.data;
+   if (!data || data.type !== "dolphin-jit-new-compile") return;
+@@ -5671,8 +5984,9 @@ async function handleDolphinJitNewCompile(event) {
+   const key = String(data.hash);
+   const bytes = data.bytes instanceof ArrayBuffer ? new Uint8Array(data.bytes) : data.bytes;
+   if (!(bytes instanceof Uint8Array)) return;
+-  if (dolphinJitCacheMap.has(key) || dolphinJitVerificationPending.has(key)) return;
+-  if (dolphinJitCacheMap.size >= DOLPHIN_JIT_CACHE_MAX) return;
++  if (dolphinJitBundle?.indexByHash?.has(key) || dolphinJitCacheMap.has(key) ||
++      dolphinJitVerificationPending.has(key)) return;
++  if (dolphinJitBundleEntryCount + dolphinJitCacheMap.size >= DOLPHIN_JIT_CACHE_MAX) return;
+   dolphinJitVerificationPending.add(key);
+   let valid = false;
+   try {
+@@ -5813,7 +6127,7 @@ async function waitForDolphinJitPthreadBarrier(timeoutMs = 30_000) {
+ 
+ export async function installDolphinPthreadChannels(
+   moduleInstance,
+-  { jitCacheEnabled = true } = {}
++  { jitCacheEnabled = true, jitBundleEnabled = false, directBitmapPortEnabled = false } = {}
+ ) {
+   const pthread = moduleInstance?.PThread;
+   dolphinJitPthreadRuntime = pthread || null;
+@@ -5848,6 +6162,18 @@ export async function installDolphinPthreadChannels(
+         }
+       }
+     }
++    if (directBitmapPortEnabled && typeof MessageChannel === "function") {
++      try {
++        const channel = new MessageChannel();
++        worker.postMessage({ type: "dolphin-frame-port", port: channel.port1 }, [channel.port1]);
++        self.postMessage({ type: "directBitmapPort", port: channel.port2 }, [channel.port2]);
++      } catch (err) {
++        if (!self._dolphinDirectFramePortErrLogged) {
++          self._dolphinDirectFramePortErrLogged = true;
++          postStatus(`pthread-transport: direct frame port failed: ${err?.message || err}`);
++        }
++      }
++    }
+   }
+ 
+   if (!jitCacheEnabled) return;
+@@ -5855,6 +6181,16 @@ export async function installDolphinPthreadChannels(
+   // reconcileJitCacheWithBuild before reaching this call site), so we
+   // can push immediately.
+   dolphinJitPthreadWorkers = workers;
++  if (jitBundleEnabled) {
++    dolphinJitLazyFillStarted = true;
++    dolphinJitLazyFillActive = false;
++    dolphinJitLazyFillCompleted = true;
++    dolphinJitLazyFillSourceEntries = 0;
++    dolphinJitLazyFillProcessedEntries = 0;
++    dolphinJitLazyFillAddedEntries = 0;
++    dolphinJitLazyFillTerminalReason = "complete";
++    dolphinJitLazyFillFailureCount = 0;
++  }
+   dolphinJitPthreadInstallPostFailures = 0;
+   if (!workers.length) {
+     postStatus("jit-cache: no pthread workers visible at boot (PTHREAD_POOL_SIZE may be 0)");
+@@ -5870,6 +6206,9 @@ export async function installDolphinPthreadChannels(
+     try {
+       ensureDolphinJitPthreadListeners(w);
+       w.postMessage({ type: "dolphin-jit-cache", cache: dolphinJitCacheMap });
++      if (jitBundleEnabled && dolphinJitBundle) {
++        w.postMessage({ type: "dolphin-jit-bundle", bundle: dolphinJitBundle });
++      }
+       sent += 1;
+     } catch (err) {
+       dolphinJitPthreadInstallPostFailures += 1;
+@@ -5885,7 +6224,7 @@ export async function installDolphinPthreadChannels(
+   // the game runs. Cost: small CPU on discio worker + N postMessages,
+   // each well under the 16ms frame budget. Gain: bigger effective cache
+   // covering menu-nav transitions that the bounded boot-load missed.
+-  dolphinJitLazyFillPromise = startLazyJitCacheFill().catch((error) => {
++  dolphinJitLazyFillPromise = (jitBundleEnabled ? Promise.resolve() : startLazyJitCacheFill()).catch((error) => {
+     dolphinJitLazyFillActive = false;
+     dolphinJitLazyFillCompleted = false;
+     dolphinJitLazyFillTerminalReason = "error";
+@@ -11727,7 +12066,7 @@ function handleDetachedOglFrame(event) {
+   }
+   try {
+     self.postMessage(
+-      { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height },
++      { type: "detachedOglFrame", bitmap: data.bitmap, width: data.width, height: data.height, credit: data.credit },
+       [data.bitmap]
+     );
+   } catch (err) {
+@@ -11736,6 +12075,7 @@ function handleDetachedOglFrame(event) {
+       postStatus(`ogl-detached: forward to main failed: ${err?.message || err}`);
+     }
+     try { data.bitmap.close(); } catch {}
++      if (data.credit) Atomics.sub(data.credit, 0, 1);
+   }
+ }
+ 
+@@ -11748,6 +12088,13 @@ function handleDetachedOglFrame(event) {
+ // `head` is monotonic so we can detect overflow (newEntries > capacity).
+ let frameRingDrainTimer = null;
+ let frameRingLastDrainHead = 0;
++const frameRingLogStats={batches:0,rows:0,drainMs:0,maxDrainMs:0};
++function controlFrameRingLogging(enabled){
++  if(enabled!==undefined&&typeof enabled!=="boolean")throw Error("Frame logging mode must be boolean");
++  if(enabled===false&&frameRingDrainTimer!==null){clearInterval(frameRingDrainTimer);frameRingDrainTimer=null;}
++  if(enabled===true)startFrameRingDrainLoop();
++  return{enabled:frameRingDrainTimer!==null,...frameRingLogStats};
++}
+ function startFrameRingDrainLoop() {
+   if (frameRingDrainTimer || !api?.getFrameRingHead || !api?.getFrameRingEntryPtr) {
+     return;
+@@ -11772,6 +12119,8 @@ function startFrameRingDrainLoop() {
+     if (!heap || !api?.getFrameRingHead) return;
+     const head = api.getFrameRingHead() >>> 0;
+     if (head === frameRingLastDrainHead) return;
++    const logStarted=performance.now();
++    frameRingLogStats.batches++;
+     const total = (head - frameRingLastDrainHead) >>> 0;
+     const overflowed = total > capacity;
+     const startIndex = overflowed ? head - capacity : frameRingLastDrainHead;
+@@ -11791,6 +12140,7 @@ function startFrameRingDrainLoop() {
+       const glerr = heap[off + 5] >>> 0;
+       const commit = heap[off + 6] | 0; // signed
+       const debugBits = heap[off + 7] >>> 0;
++      frameRingLogStats.rows++;
+       console.log(
+         `[frame-ring] f=${frame} prim=${prim} draw=${draw} verts=${verts} ` +
+           `xfb=0x${xfbHash.toString(16)} glerr=${glerr} commit=${commit} ` +
+@@ -11798,6 +12148,8 @@ function startFrameRingDrainLoop() {
+       );
+     }
+     frameRingLastDrainHead = head;
++    const logElapsed=performance.now()-logStarted;
++    frameRingLogStats.drainMs+=logElapsed;frameRingLogStats.maxDrainMs=Math.max(frameRingLogStats.maxDrainMs,logElapsed);
+   }, 1000);
+ }
+ 
+diff --git a/src/upstream-worker-adapter.js b/src/upstream-worker-adapter.js
+index 4a11c29..63a3a47 100644
+--- a/src/upstream-worker-adapter.js
++++ b/src/upstream-worker-adapter.js
+@@ -35,6 +35,7 @@ export class UpstreamWorkerAdapter {
+     expectedCoreSha256 = DEFAULT_UPSTREAM_CORE_SHA256,
+     workerUrl = DEFAULT_WORKER_URL,
+     onStatus = () => {},
++    onSharedFrame = () => {},
+     canvas = null,
+     transferCanvas = null,
+     visibleCanvas = null,
+@@ -49,6 +50,8 @@ export class UpstreamWorkerAdapter {
+     cpuOverclock = 1,
+     emulationSpeed = 1,
+     presentationScale = 1,
++    renderHeight = 0,
++    timingProfile = "baseline",
+     presentationQueueSize = 2,
+     presenterBackend = "webgl",
+     presentationPacing = "smooth",
+@@ -123,11 +126,26 @@ export class UpstreamWorkerAdapter {
+     this.workerCanvas = Boolean(canvas) || Boolean(this.transferCanvasFn);
+     this.visibleCanvas = visibleCanvas;
+     this.detachedOglContext = null;
++    this.presentationQueue = null;
++    this.bitmapPresentationPacing = "immediate";
++    this.bitmapBlit = new URLSearchParams(globalThis.location?.search || "").get("blit") === "bitmap";
++    const bitmapPace = new URLSearchParams(globalThis.location?.search || "").get("pace");
++    if (bitmapPace === "raf" || bitmapPace === "latest") {
++      import("/play/browser-frame-queue.js").then(({BrowserFrameQueue}) => {
++        this.presentationQueue = new BrowserFrameQueue(bitmap =>
++          this.drawDetachedOglBitmap(bitmap, bitmap.width, bitmap.height), bitmapPace === "latest"
++            ? {capacity: 1, rateLimited: false}
++            : undefined);
++        this.bitmapPresentationPacing = bitmapPace === "latest" ? "raf-latest" : "raf-buffered";
++        globalThis.addEventListener("pagehide", () => this.presentationQueue.close(), {once:true});
++      }).catch(error => this.onStatus("Presentation queue unavailable: " + error.message));
++    }
+     this.detachedOglFramesDrawn = 0;
+     this.detachedGpuFramesReceived = 0;
+     this.detachedGpuFramesDropped = 0;
+     this.detachedGpuDrawLastMs = 0;
+     this.detachedGpuDrawMaxMs = 0;
++    this.directBitmapPorts = [];
+     this.videoBackend = videoBackend;
+     this.cpuThread = cpuThread;
+     this.cpuCore = cpuCore;
+@@ -139,6 +157,8 @@ export class UpstreamWorkerAdapter {
+     this.cpuOverclock = cpuOverclock;
+     this.emulationSpeed = emulationSpeed;
+     this.presentationScale = presentationScale;
++    this.renderHeight = renderHeight;
++    this.timingProfile = timingProfile;
+     this.presentationQueueSize = presentationQueueSize;
+     this.presenterBackend = presenterBackend;
+     this.presentationPacing = presentationPacing;
+@@ -203,6 +223,7 @@ export class UpstreamWorkerAdapter {
+       ? { ...inputPhotonMarker }
+       : null;
+     this.oglPixelSab = oglPixelSab;
++    this.onSharedFrame = onSharedFrame;
+     this.oglMetaSab = oglMetaSab;
+     this.oglSabWidth = oglSabWidth | 0;
+     this.oglSabHeight = oglSabHeight | 0;
+@@ -335,6 +356,11 @@ export class UpstreamWorkerAdapter {
+       cpuOverclock: this.cpuOverclock,
+       emulationSpeed: this.emulationSpeed,
+       presentationScale: this.presentationScale,
++      renderHeight: this.renderHeight,
++      timingProfile: this.timingProfile,
++      browserNoIcache: new URLSearchParams(globalThis.location?.search || "").get("icache") === "0",
++      browserMmu: new URLSearchParams(globalThis.location?.search || "").get("mmu") === "1",
++      rollbackDeterminism: new URLSearchParams(globalThis.location?.search || "").get("determinism") === "1",
+       presentationQueueSize: this.presentationQueueSize,
+       presenterBackend: this.presenterBackend,
+       presentationPacing: this.presentationPacing,
+@@ -348,6 +374,8 @@ export class UpstreamWorkerAdapter {
+       coreLog: this.coreLog,
+       cachedInterpreterDisableMask: this.cachedInterpreterDisableMask,
+       noJitCache: this.noJitCache,
++      jitBundle: new URLSearchParams(globalThis.location?.search || "").get("jitbundle") === "1",
++      directBitmapPort: new URLSearchParams(globalThis.location?.search || "").get("directbitmapport") === "1",
+       collectMetrics: this.collectMetrics,
+       legacyOneWayAck: this.legacyOneWayAck,
+       coreSelection: this.coreSelectionTelemetry(window.location.href),
+@@ -795,7 +823,8 @@ export class UpstreamWorkerAdapter {
+     }
+     if (!this.detachedOglContext) {
+       try {
+-        this.detachedOglContext = this.visibleCanvas.getContext("2d", { alpha: false });
++        this.detachedOglContext = this.bitmapBlit ? this.visibleCanvas.getContext("bitmaprenderer") : null;
++        this.detachedOglContext ||= this.visibleCanvas.getContext("2d", { alpha: false });
+       } catch (err) {
+         this.onStatus(`Detached GPU presenter: cannot get 2D context: ${err.message}`);
+         this.detachedGpuFramesDropped += 1;
+@@ -812,7 +841,14 @@ export class UpstreamWorkerAdapter {
+     }
+     const startedAt = this.collectMetrics ? performance.now() : 0;
+     try {
+-      this.detachedOglContext.drawImage(
++      // transferFromImageBitmap consumes the source; record dimensions first.
++      this.presentedWidth = bitmap.width;
++      this.presentedHeight = bitmap.height;
++      if (typeof this.detachedOglContext.transferFromImageBitmap === "function") {
++        if (this.visibleCanvas.width !== bitmap.width) this.visibleCanvas.width = bitmap.width;
++        if (this.visibleCanvas.height !== bitmap.height) this.visibleCanvas.height = bitmap.height;
++        this.detachedOglContext.transferFromImageBitmap(bitmap);
++      } else this.detachedOglContext.drawImage(
+         bitmap,
+         0,
+         0,
+@@ -877,12 +913,30 @@ export class UpstreamWorkerAdapter {
+       return;
+     }
+ 
++    if (message?.type === "directBitmapPort" && message.port) {
++      const port = message.port;
++      port.addEventListener("message", event => this.handleMessage(event.data));
++      port.start?.();
++      this.directBitmapPorts.push(port);
++      return;
++    }
++
+     if ((message?.type === "detachedOglFrame" ||
+          message?.type === "detachedWgpuFrame") && message.bitmap) {
++      if (message.credit) {
++        Atomics.sub(message.credit, 0, 1);
++        this.bitmapTransport = {
++          inFlight: Atomics.load(message.credit, 0),
++          exported: Atomics.load(message.credit, 1),
++          skipped: Atomics.load(message.credit, 2),
++          capacity: 4,
++        };
++      }
+       // Worker has rendered a frame to its standalone OffscreenCanvas and
+       // handed us the result as an ImageBitmap. Draw onto the visible
+       // canvas via 2D context. Lazily create the context on first frame.
+-      this.drawDetachedOglBitmap(message.bitmap, message.width, message.height);
++      if (this.presentationQueue) this.presentationQueue.push(message.bitmap);
++      else this.drawDetachedOglBitmap(message.bitmap, message.width, message.height);
+       return;
+     }
+ 
+@@ -891,6 +945,11 @@ export class UpstreamWorkerAdapter {
+       return;
+     }
+ 
++    if (message?.type === "sharedFrameReady") {
++      this.onSharedFrame();
++      return;
++    }
++
+     if (message?.id === undefined && message?.ok === true) {
+       this.workerTransportStats.unmatchedSuccessRepliesReceived += 1;
+       return;
+@@ -1055,6 +1114,7 @@ export class UpstreamWorkerAdapter {
+       presentation: {
+         detachedBitmapReceivedCount: this.detachedGpuFramesReceived,
+         detachedBitmapDrawnCount: this.detachedOglFramesDrawn,
++        bitmapTransport: this.bitmapTransport || null,
+         detachedBitmapDroppedCount: this.detachedGpuFramesDropped
+       },
+       host: {
+diff --git a/tests/jit-block-bundle.test.mjs b/tests/jit-block-bundle.test.mjs
+new file mode 100644
+index 0000000..fb737d4
+--- /dev/null
++++ b/tests/jit-block-bundle.test.mjs
+@@ -0,0 +1,72 @@
++import assert from "node:assert/strict";
++import test from "node:test";
++
++import { buildJitBlockBundle } from "../src/jit-block-bundle.js";
++
++function u32(value) {
++  const out = [];
++  do {
++    let byte = value & 0x7f;
++    value >>>= 7;
++    if (value) byte |= 0x80;
++    out.push(byte);
++  } while (value);
++  return out;
++}
++
++function section(id, body) {
++  return [id, ...u32(body.length), ...body];
++}
++
++function block(constant) {
++  const type = [
++    2,
++    0x60, 1, 0x7f, 1, 0x7f,
++    0x60, 2, 0x7f, 0x7f, 1, 0x7f,
++  ];
++  const imports = [
++    2,
++    3, 0x65, 0x6e, 0x76, 3, 0x61, 0x64, 0x64, 0, 1,
++    3, 0x65, 0x6e, 0x76, 6, 0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 2, 3, 1, 1,
++  ];
++  // (x) => add(x, constant)
++  const body = [0, 0x20, 0, 0x41, ...u32(constant), 0x10, 0, 0x0b];
++  return Uint8Array.from([
++    0, 0x61, 0x73, 0x6d, 1, 0, 0, 0,
++    ...section(1, type),
++    ...section(2, imports),
++    ...section(3, [1, 0]),
++    ...section(7, [1, 1, 0x66, 0, 1]),
++    ...section(10, [1, ...u32(body.length), ...body]),
++  ]);
++}
++
++test("bundles one-function JIT modules into one instance and exported table", async () => {
++  const bundle = buildJitBlockBundle([
++    { hash: "a", bytes: block(3) },
++    { hash: "b", bytes: block(11) },
++  ]);
++  assert.equal(bundle.entryCount, 2);
++  assert.deepEqual([...bundle.indexByHash], [["a", 0], ["b", 1]]);
++  assert.equal(WebAssembly.validate(bundle.bytes), true);
++  const memory = new WebAssembly.Memory({ initial: 1, maximum: 1, shared: true });
++  const instance = await WebAssembly.instantiate(bundle.bytes, {
++    env: { memory, add: (a, b) => a + b },
++  });
++  assert.equal(instance.instance.exports.t.get(0)(7), 10);
++  assert.equal(instance.instance.exports.t.get(1)(7), 18);
++});
++
++test("rejects ABI mismatches instead of mixing incompatible blocks", () => {
++  const changed = block(4);
++  // Rename the imported helper from add to sub.
++  const addName = [0x61, 0x64, 0x64];
++  const addOffset = changed.findIndex((byte, index) =>
++    byte === addName[0] && changed[index + 1] === addName[1] && changed[index + 2] === addName[2]
++  );
++  changed[addOffset] = 0x73;
++  assert.throws(
++    () => buildJitBlockBundle([{ hash: "a", bytes: block(3) }, { hash: "b", bytes: changed }]),
++    /ABI mismatch/
++  );
++});
+diff --git a/tests/upstream-pthread-channels.test.mjs b/tests/upstream-pthread-channels.test.mjs
+index c25d2ca..d8a6fa4 100644
+--- a/tests/upstream-pthread-channels.test.mjs
++++ b/tests/upstream-pthread-channels.test.mjs
+@@ -93,6 +93,17 @@ test("pthread renderer transport is independent of the optional JIT cache channe
+   );
+   assert.deepEqual(listenerNames(overlappingWorker), rendererListenerNames);
+ 
++  const directPortWorker = fakePthreadWorker();
++  await installDolphinPthreadChannels(
++    { PThread: { runningWorkers: [directPortWorker], unusedWorkers: [] } },
++    { jitCacheEnabled: false, directBitmapPortEnabled: true }
++  );
++  assert.equal(directPortWorker.messages[0].type, "dolphin-frame-port");
++  assert.ok(directPortWorker.messages[0].port instanceof MessagePort);
++  assert.equal(statusMessages.at(-1).type, "directBitmapPort");
++  directPortWorker.messages[0].port.close();
++  statusMessages.at(-1).port.close();
++
+   const cacheEnabled = fakePthreadWorker();
+   await installDolphinPthreadChannels(
+     { PThread: { runningWorkers: [cacheEnabled], unusedWorkers: [] } },
+@@ -124,7 +135,7 @@ test("loadCore awaits pthread cache installation before returning", async () =>
+ 
+   assert.match(
+     source,
+-    /await installDolphinPthreadChannels\(moduleInstance, \{\s*jitCacheEnabled: !noJitCache\s*\}\);/
++    /await installDolphinPthreadChannels\(moduleInstance, \{\s*jitCacheEnabled: !noJitCache,\s*jitBundleEnabled: dolphinJitBundleEnabled,\s*directBitmapPortEnabled: Boolean\(directBitmapPort\)\s*\}\);/
+   );
+   assert.doesNotMatch(
+     source,
+diff --git a/tools/configure-upstream-wasm.mjs b/tools/configure-upstream-wasm.mjs
+index 8c5ccbd..fa7d33c 100644
+--- a/tools/configure-upstream-wasm.mjs
++++ b/tools/configure-upstream-wasm.mjs
+@@ -78,7 +78,7 @@ const toolchain = verifyWasmToolchain();
+ const { emcc, emcmake, cmake, ninja, cargo, rustc } = toolchain.paths;
+ const nagaEnvironment = {
+   ...process.env,
+-  PATH: `${dirname(rustc)};${dirname(emcc)};${process.env.PATH ?? ""}`,
++  PATH: [dirname(rustc), dirname(emcc), process.env.PATH ?? ""].join(process.platform === "win32" ? ";" : ":"),
+   RUSTC: rustc,
+   CARGO: cargo
+ };
+diff --git a/tools/jit-cache-prejs.js b/tools/jit-cache-prejs.js
+index 25c1f93..8ab6859 100644
+--- a/tools/jit-cache-prejs.js
++++ b/tools/jit-cache-prejs.js
+@@ -34,7 +34,15 @@
+     globalThis.addEventListener("message", (event) => {
+       const data = event.data;
+       if (!data) return;
+-      if (data.type === "dolphin-jit-cache") {
++      if (data.type === "dolphin-frame-port" && data.port) {
++        // A dedicated port lets the video pthread hand ImageBitmaps straight
++        // to the page instead of waiting in the parent emulator worker's
++        // event loop. Keep the global fallback for messages that arrive
++        // before Emscripten has initialized Module in this pthread.
++        globalThis._dolphinFramePort = data.port;
++        data.port.start?.();
++        if (typeof Module !== "undefined") Module._dolphinFramePort = data.port;
++      } else if (data.type === "dolphin-jit-cache") {
+         // Bulk-set: discio worker pushes the entire map at boot.
+         // Stash on globalThis first so that even if `Module` isn't ready
+         // yet (pre-js timing), the cache survives until Module is.
+@@ -73,6 +81,14 @@
+             );
+           }
+         }
++      } else if (data.type === "dolphin-jit-bundle") {
++        globalThis._dolphinPendingJitBundle = data.bundle || null;
++        if (typeof Module !== "undefined") {
++          Module._dolphinJitBundle = globalThis._dolphinPendingJitBundle;
++        }
++        const size = Number(data.bundle?.indexByHash?.size) || 0;
++        // eslint-disable-next-line no-console
++        console.log("[jit-bundle:pthread] received bundle (size=" + size + ")");
+       } else if (data.type === "dolphin-jit-cache-barrier") {
+         // Worker messages are processed in FIFO order. Acknowledging this
+         // marker proves that the initial cache and every preceding lazy add
+diff --git a/tools/wasm-toolchain.mjs b/tools/wasm-toolchain.mjs
+index 0c240e4..6aa4afc 100644
+--- a/tools/wasm-toolchain.mjs
++++ b/tools/wasm-toolchain.mjs
+@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
+ import { fileURLToPath } from "node:url";
+ 
+ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+-const lockPath = resolve(root, "provenance/wasm-toolchain.lock.json");
++const lockPath = resolve(process.env.DOLPHIN_TOOLCHAIN_LOCK || resolve(root, "provenance/wasm-toolchain.lock.json"));
+ 
+ function invariant(condition, message) {
+   if (!condition) throw new Error(message);
+@@ -36,7 +36,7 @@ function expandCandidate(candidate) {
+ }
+ 
+ function pathCandidate(command) {
+-  const where = spawnSync("where.exe", [command], { encoding: "utf8", windowsHide: true });
++  const where = spawnSync(process.platform === "win32" ? "where.exe" : "which", [command], { encoding: "utf8", windowsHide: true });
+   if (where.status !== 0) return null;
+   return where.stdout.split(/\r?\n/).map((line) => line.trim()).find(Boolean) ?? null;
+ }
+@@ -111,7 +111,7 @@ export function verifyWasmToolchain() {
+   const emsdkRoot = resolve(dirname(emcc), "../..");
+   const emsdkHead = runVersion("git", ["-C", emsdkRoot, "rev-parse", "HEAD"]);
+   invariant(emsdkHead === lock.emscripten.emsdkCommit, `emsdk commit mismatch: expected ${lock.emscripten.emsdkCommit}, got ${emsdkHead}`);
+-  const clangxx = resolve(emsdkRoot, "upstream/bin/clang++.exe");
++  const clangxx = resolve(emsdkRoot, `upstream/bin/clang++${process.platform === "win32" ? ".exe" : ""}`);
+   invariant(existsSync(clangxx), `Emscripten clang++ is missing at ${clangxx}`);
+   invariant(sha256File(clangxx) === lock.emscripten.clangxxSha256, "Emscripten clang++ hash mismatch");
+ 

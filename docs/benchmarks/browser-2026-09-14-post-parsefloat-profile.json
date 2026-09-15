@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-14",
+  "kind": "sampled-direct-block-profile",
+  "diagnosticOnly": true,
+  "coreSha256": "259de0c87fb9b700927661cd8fa41303f321e5c71660488ce50e4d229089008d",
+  "scene": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "input": "two scripted human controller tracks on native logic frames"
+  },
+  "benchmark": {
+    "durationSeconds": 30,
+    "simulationFps": 58.9363,
+    "visibleFps": 58.4696,
+    "warmBundle": true,
+    "profilerActive": true
+  },
+  "profile": {
+    "samples": 625069,
+    "sampledUs": 240777,
+    "uniqueSampledBlocks": 11075
+  },
+  "topFunctions": [
+    {"name": "HSD_FObjInterpretAnim", "samples": 74334, "sampledUs": 25091.844, "blocks": 41},
+    {"name": "SetupEnvelopeModelMtx", "samples": 13009, "sampledUs": 4685.568, "blocks": 17},
+    {"name": "sinf", "samples": 9334, "sampledUs": 3533.568, "blocks": 9},
+    {"name": "cosf", "samples": 8344, "sampledUs": 3354.112, "blocks": 8},
+    {"name": "HSD_TExpSetReg", "samples": 6955, "sampledUs": 2960.384, "blocks": 9},
+    {"name": "FObjUpdateAnim", "samples": 5742, "sampledUs": 2517.248, "blocks": 7},
+    {"name": "HSD_StateInvalidate", "samples": 5853, "sampledUs": 2238.464, "blocks": 3},
+    {"name": "lbArq_80014BD0", "samples": 6623, "sampledUs": 2057.988, "blocks": 2},
+    {"name": "mpLineIntersection", "samples": 4284, "sampledUs": 1831.424, "blocks": 5},
+    {"name": "_HSD_TObjGetCurrentByType", "samples": 4967, "sampledUs": 1790.72, "blocks": 6},
+    {"name": "HSD_PObjAnimAll", "samples": 5005, "sampledUs": 1734.656, "blocks": 6},
+    {"name": "memcpy", "samples": 4299, "sampledUs": 1734.398, "blocks": 2},
+    {"name": "HSD_TObjAnimAll", "samples": 4970, "sampledUs": 1619.968, "blocks": 6},
+    {"name": "HSD_DObjAnimAll", "samples": 4612, "sampledUs": 1613.824, "blocks": 6},
+    {"name": "mpRemap2d", "samples": 4014, "sampledUs": 1565.952, "blocks": 5},
+    {"name": "HSD_AObjInterpretAnim", "samples": 4078, "sampledUs": 1477.888, "blocks": 2},
+    {"name": "HSD_JObjCheckDepend", "samples": 2747, "sampledUs": 1471.488, "blocks": 4},
+    {"name": "HSD_SetupTevStage", "samples": 3412, "sampledUs": 1376.256, "blocks": 6},
+    {"name": "__fill_mem", "samples": 3215, "sampledUs": 1250.048, "blocks": 4},
+    {"name": "HSD_PObjDisp", "samples": 2804, "sampledUs": 1188.864, "blocks": 5}
+  ],
+  "observations": {
+    "parseFloatPresentInTopFunctions": false,
+    "largestFunctionSampledShare": 0.10421,
+    "interpretation": "The revision-locked parseFloat specialization removed parseFloat from the sampled hot list. HSD_FObjInterpretAnim is now the only function above two percent of sampled guest time. Sampling is diagnostic and does not establish acceptance performance."
+  }
+}

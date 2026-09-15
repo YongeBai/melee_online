@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "animcallbackfast",
+  "coreSha256": "faf3bba5287977ddc94ff010cbb73cf0a29f7903a09d5d76f3d46b5b5ea583f9",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "secondsPerInterval": 30,
+    "order": ["off", "on", "on", "off"],
+    "queueCapacity": 2,
+    "input": "two scripted human controller tracks sampled on native logic frames",
+    "retained": ["leandispatch", "animstatefast", "displaylistfast", "gxmatrixfast", "blockmerge", "integerfifo", "singleprefix", "regcache"],
+    "reverb": false,
+    "background": "black",
+    "scenery": false,
+    "reflection": false,
+    "models": "low"
+  },
+  "measuredRuns": [
+    {"enabled": false, "simulationFps": 54.69814026323102, "visibleFps": 53.731506462113586, "p95GapMs": 33.50500000012107},
+    {"enabled": true, "simulationFps": 56.16881980475901, "visibleFps": 55.13544685879608, "p95GapMs": 33.324999999953434},
+    {"enabled": true, "simulationFps": 58.50608463280203, "visibleFps": 57.539317422345476, "p95GapMs": 18.449999999953434},
+    {"enabled": false, "simulationFps": 53.17197500217083, "visibleFps": 52.63858841907696, "p95GapMs": 33.449999999953434}
+  ],
+  "symmetricMeans": {
+    "control": {"simulationFps": 53.93505763270093, "visibleFps": 53.18504744059527},
+    "candidate": {"simulationFps": 57.33745221878052, "visibleFps": 56.33738214057078},
+    "delta": {"simulationFps": 3.402394586079591, "simulationPercent": 6.308317740424682, "visibleFps": 3.1523346999755075, "visiblePercent": 5.927105656321064}
+  },
+  "inputConsistency": {"passed": true, "checked": 104},
+  "strictReplayRepeat": {
+    "passed": true,
+    "frames": 120,
+    "bytesPerState": 109580237,
+    "sections": 29,
+    "differentBytes": 0,
+    "referenceAnimationCallbacks": 63170,
+    "candidateAnimationCallbacks": 30923,
+    "inputAndGameplayFingerprintsEqual": true
+  },
+  "decision": "Retain the candidate. It has a material repeatable gain and a strict full-machine replay pass. Measure with the independently retained FPU guard before promotion."
+}

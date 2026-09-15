@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-14",
+  "workload": {
+    "resolution": [960, 720],
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "input": "two deterministic ordinary controller tracks on native logic frames",
+    "secondsPerMeasuredLeg": 30,
+    "order": ["control", "candidate", "candidate", "control"]
+  },
+  "candidate": {
+    "coreId": "88ed67ab9d1826e26ed2472b2904ab0f6ff7692ee8f1a8e1fc8bc7a0a8dd74d9",
+    "description": "One unconditional successor with ordinary RAM reads, confined to HSD_FObjInterpretAnim",
+    "emittedCompileSites": 22
+  },
+  "correctness": {
+    "normalRunningReplayFrames": 600,
+    "passed": true,
+    "bytesCompared": 109881709,
+    "sectionsCompared": 29,
+    "inputsExact": true,
+    "fighterStateExact": true,
+    "fingerprintsExact": true,
+    "timingExact": true,
+    "sceneFrameExact": true
+  },
+  "measuredRuns": [
+    {"enabled": false, "simulationFps": 47.14341710479793, "visibleFps": 47.07678329970282},
+    {"enabled": true, "simulationFps": 49.570516643459435, "visibleFps": 49.37050110891958},
+    {"enabled": true, "simulationFps": 49.86863647780841, "visibleFps": 49.5352899772883},
+    {"enabled": false, "simulationFps": 51.40496057869508, "visibleFps": 50.871575773728075}
+  ],
+  "symmetricMeans": {
+    "control": {"simulationFps": 49.2741888417465, "visibleFps": 48.97417953671545},
+    "candidate": {"simulationFps": 49.71957656063392, "visibleFps": 49.45289554310394},
+    "simulationDeltaPercent": 0.903884163079993,
+    "visibleDeltaPercent": 0.977481403608631
+  },
+  "interpretation": "Promising but not decisive because the measured legs drifted upward by more than four FPS. The candidate did complete every frame-stepping transition; the earlier conditional-branch version did not. Continue with a larger unconditional-only chain and require an exact replay before measuring it."
+}

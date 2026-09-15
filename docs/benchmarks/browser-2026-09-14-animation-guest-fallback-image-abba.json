@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "animcallbackfast",
+  "coreSha256": "faf3bba5287977ddc94ff010cbb73cf0a29f7903a09d5d76f3d46b5b5ea583f9",
+  "fixture": {
+    "stage": "Yoshi's Story",
+    "fighters": ["Ice Climbers", "Ice Climbers"],
+    "sourceResolution": [960, 720],
+    "secondsPerInterval": 30,
+    "order": ["off", "on", "on", "off"],
+    "queueCapacity": 3,
+    "input": "two scripted human controller tracks sampled on native logic frames",
+    "retained": ["animstatefast", "displaylistfast", "gxmatrixfast", "blockmerge", "integerfifo", "singleprefix", "regcache"],
+    "leandispatch": false,
+    "reverb": false,
+    "background": "black",
+    "scenery": false,
+    "reflection": false,
+    "models": "low"
+  },
+  "measuredRuns": [
+    {"enabled": false, "simulationFps": 52.314918493123805, "visibleFps": 51.11610432014324, "p95GapMs": 33.63000000012107},
+    {"enabled": true, "simulationFps": 54.90800741774842, "visibleFps": 54.27458170983268, "p95GapMs": 33.46000000019558},
+    {"enabled": true, "simulationFps": 55.268094425772496, "visibleFps": 54.50140795303862, "p95GapMs": 33.23999999999069},
+    {"enabled": false, "simulationFps": 54.23927253367562, "visibleFps": 53.9059026963451, "p95GapMs": 33.43499999982305}
+  ],
+  "symmetricMeans": {
+    "control": {"simulationFps": 53.27709551339971, "visibleFps": 52.51100350824417},
+    "candidate": {"simulationFps": 55.088050921760454, "visibleFps": 54.38799483143565},
+    "delta": {"simulationFps": 1.8109554083607444, "simulationPercent": 3.399127845188823, "visibleFps": 1.876991323191481, "visiblePercent": 3.574465741400009}
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 104,
+    "note": "All shared native-frame input and gameplay fingerprints and polling gaps matched."
+  },
+  "correctness": {
+    "guestState": "Exact RAM, CPU registers, CPU caches, timing, fighters, inputs, and gameplay sections in the 120-frame replay.",
+    "fullMachineBytesEqual": false,
+    "difference": "Three bytes in one GPU TextureCache Texture config descriptor; unchanged-codegen control was fully exact."
+  },
+  "repeatStrictReplay": {
+    "passed": true,
+    "frames": 120,
+    "bytesPerState": 109580237,
+    "sections": 29,
+    "differentBytes": 0,
+    "referenceAnimationCallbacks": 63170,
+    "candidateAnimationCallbacks": 30923
+  },
+  "decision": "Retain the candidate. A fresh strict replay was byte-exact, and the retained lean-dispatch/two-image-queue comparison also produced a material gain."
+}

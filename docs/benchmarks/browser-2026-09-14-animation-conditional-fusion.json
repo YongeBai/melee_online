@@ -1,0 +1,2930 @@
+{
+  "kind": "same-checkpoint-codegen-abba",
+  "feature": "animfusion",
+  "passed": false,
+  "runs": [
+    {
+      "validGameplay": true,
+      "seconds": 29.99791000000015,
+      "simulationFps": 55.037167589341784,
+      "gameRenderFps": 55.037167589341784,
+      "visibleFps": 54.803817999320344,
+      "p95GapMs": 33.144999999552965,
+      "maxGapMs": 66.71000000089407,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1649,
+        "presented": 1644,
+        "dropped": 5,
+        "underruns": 155,
+        "meanAgeMs": 15.562579075425155,
+        "p50AgeUpperMs": 16,
+        "p95AgeUpperMs": 22,
+        "p99AgeUpperMs": 32,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 2,
+        "readyClockSkips": 2
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441724694.6501,
+      "wallEndMs": 1789441754692.56,
+      "canvasSubmissionFps": 54.803817999320344,
+      "sampleCallbackFps": 60.00418029122665,
+      "asyncImageProbe": {
+        "samples": 1801,
+        "maxPending": 2,
+        "enqueueMs": {
+          "count": 1801,
+          "min": 0.010000001639127731,
+          "mean": 0.08088839536678585,
+          "p50": 0.07499999925494194,
+          "p95": 0.14000000059604645,
+          "max": 0.7249999977648258
+        },
+        "harvestMs": {
+          "count": 1801,
+          "min": 0.07000000029802322,
+          "mean": 0.6647890060726369,
+          "p50": 0.5450000017881393,
+          "p95": 1.449999999254942,
+          "max": 5.175000000745058
+        },
+        "completionDelayMs": {
+          "count": 1801,
+          "min": 5.589999999850988,
+          "mean": 16.816976679653457,
+          "p50": 16.58499999716878,
+          "p95": 17.699999999254942,
+          "max": 45.20499999821186
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 517570,
+          "instanceUs": 97661,
+          "uniqueInstances": 19234,
+          "reusedInstances": 11114
+        },
+        "after": {
+          "moduleUs": 875000,
+          "instanceUs": 155687,
+          "uniqueInstances": 27288,
+          "reusedInstances": 16703
+        },
+        "delta": {
+          "moduleUs": 357430,
+          "instanceUs": 58026,
+          "uniqueInstances": 8054,
+          "reusedInstances": 5589
+        },
+        "synchronousCompileAndLinkMs": 415.456,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 0.27000000327825546,
+        "restore": 22.53999999910593,
+        "settle 120 frames": 2467.434999998659,
+        "enable controller input": 2.780000001192093,
+        "resume": 0.29999999701976776
+      },
+      "controllerStress": {
+        "id": 3164,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 3111140138,
+        "stateHash": 1985863363,
+        "startFrame": 552,
+        "lastFrame": 2205,
+        "frames": 1654,
+        "skipped": 0,
+        "inputChanges": [
+          176,
+          172
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": false,
+        "emittedBlocks": 44,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": false,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": false,
+      "warmup": true
+    },
+    {
+      "validGameplay": true,
+      "seconds": 29.998145000003277,
+      "simulationFps": 56.57016458850421,
+      "gameRenderFps": 56.603499983076105,
+      "visibleFps": 56.270146037357165,
+      "p95GapMs": 32.82500000298023,
+      "maxGapMs": 69.62999999895692,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1696,
+        "presented": 1689,
+        "dropped": 7,
+        "underruns": 108,
+        "meanAgeMs": 15.73992007100252,
+        "p50AgeUpperMs": 16,
+        "p95AgeUpperMs": 20,
+        "p99AgeUpperMs": 28,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 2,
+        "readyClockSkips": 2
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441757026.0852,
+      "wallEndMs": 1789441787024.2302,
+      "canvasSubmissionFps": 56.30348143192906,
+      "sampleCallbackFps": 59.93703944026551,
+      "asyncImageProbe": {
+        "samples": 1799,
+        "maxPending": 2,
+        "enqueueMs": {
+          "count": 1799,
+          "min": 0.02500000223517418,
+          "mean": 0.08286548084090192,
+          "p50": 0.07499999925494194,
+          "p95": 0.14499999955296516,
+          "max": 0.7850000001490116
+        },
+        "harvestMs": {
+          "count": 1799,
+          "min": 0.08999999985098839,
+          "mean": 0.7269038354285298,
+          "p50": 0.5899999998509884,
+          "p95": 1.6099999994039536,
+          "max": 4.53999999910593
+        },
+        "completionDelayMs": {
+          "count": 1799,
+          "min": 4.449999999254942,
+          "mean": 16.851331295162904,
+          "p50": 16.570000000298023,
+          "p95": 17.894999999552965,
+          "max": 53.41999999806285
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 875000,
+          "instanceUs": 155687,
+          "uniqueInstances": 27288,
+          "reusedInstances": 16703
+        },
+        "after": {
+          "moduleUs": 876233,
+          "instanceUs": 155974,
+          "uniqueInstances": 27297,
+          "reusedInstances": 16703
+        },
+        "delta": {
+          "moduleUs": 1233,
+          "instanceUs": 287,
+          "uniqueInstances": 9,
+          "reusedInstances": 0
+        },
+        "synchronousCompileAndLinkMs": 1.52,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 0.07000000029802322,
+        "restore": 26.53999999910593,
+        "settle 120 frames": 2231.905000001192,
+        "enable controller input": 3.6150000020861626,
+        "resume": 0.23999999836087227
+      },
+      "controllerStress": {
+        "id": 5154,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 1751807811,
+        "stateHash": 2478909524,
+        "startFrame": 552,
+        "lastFrame": 2252,
+        "frames": 1701,
+        "skipped": 0,
+        "inputChanges": [
+          181,
+          177
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            191,
+            195,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          },
+          {
+            "frame": 1680,
+            "input": 3137827392,
+            "state": 3966001446
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": false,
+        "emittedBlocks": 44,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": false,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": false,
+      "warmup": false
+    },
+    {
+      "validGameplay": true,
+      "seconds": 29.998449999999256,
+      "simulationFps": 57.469635931191206,
+      "gameRenderFps": 57.469635931191206,
+      "visibleFps": 57.10295031910124,
+      "p95GapMs": 32.32000000029802,
+      "maxGapMs": 65.74500000104308,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1722,
+        "presented": 1713,
+        "dropped": 9,
+        "underruns": 86,
+        "meanAgeMs": 15.878251605359996,
+        "p50AgeUpperMs": 16,
+        "p95AgeUpperMs": 18,
+        "p99AgeUpperMs": 32,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441789458.01,
+      "wallEndMs": 1789441819456.4602,
+      "canvasSubmissionFps": 57.10295031910124,
+      "sampleCallbackFps": 59.96976510453189,
+      "asyncImageProbe": {
+        "samples": 1800,
+        "maxPending": 3,
+        "enqueueMs": {
+          "count": 1800,
+          "min": 0.015000000596046448,
+          "mean": 0.08317500002682209,
+          "p50": 0.07499999925494194,
+          "p95": 0.14500000327825546,
+          "max": 0.7249999977648258
+        },
+        "harvestMs": {
+          "count": 1800,
+          "min": 0.06499999761581421,
+          "mean": 0.6885777778261237,
+          "p50": 0.5400000028312206,
+          "p95": 1.6149999983608723,
+          "max": 14.375
+        },
+        "completionDelayMs": {
+          "count": 1800,
+          "min": 6.53999999910593,
+          "mean": 16.842708333327124,
+          "p50": 16.570000000298023,
+          "p95": 17.739999998360872,
+          "max": 49.66000000014901
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 876387,
+          "instanceUs": 156014,
+          "uniqueInstances": 27298,
+          "reusedInstances": 24729
+        },
+        "after": {
+          "moduleUs": 877260,
+          "instanceUs": 156207,
+          "uniqueInstances": 27303,
+          "reusedInstances": 38381
+        },
+        "delta": {
+          "moduleUs": 873,
+          "instanceUs": 193,
+          "uniqueInstances": 5,
+          "reusedInstances": 13652
+        },
+        "synchronousCompileAndLinkMs": 1.066,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 0.20500000193715096,
+        "restore": 25.96499999985099,
+        "settle 120 frames": 2308.545000001788,
+        "enable controller input": 7.6099999994039536,
+        "resume": 0.25
+      },
+      "controllerStress": {
+        "id": 7150,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 949959388,
+        "stateHash": 3818332421,
+        "startFrame": 552,
+        "lastFrame": 2277,
+        "frames": 1726,
+        "skipped": 0,
+        "inputChanges": [
+          184,
+          180
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            191,
+            195,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          },
+          {
+            "frame": 1680,
+            "input": 3137827392,
+            "state": 3966001446
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": true,
+        "emittedBlocks": 91,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": true,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": true,
+      "warmup": true
+    },
+    {
+      "validGameplay": true,
+      "seconds": 29.998804999999702,
+      "simulationFps": 59.00235026028595,
+      "gameRenderFps": 59.035684921449956,
+      "visibleFps": 58.56899966515391,
+      "p95GapMs": 18.900000002235174,
+      "maxGapMs": 49.73999999836087,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1768,
+        "presented": 1758,
+        "dropped": 11,
+        "underruns": 42,
+        "meanAgeMs": 15.979382821330134,
+        "p50AgeUpperMs": 17,
+        "p95AgeUpperMs": 18,
+        "p99AgeUpperMs": 32,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441821773.155,
+      "wallEndMs": 1789441851771.9602,
+      "canvasSubmissionFps": 58.602334326317916,
+      "sampleCallbackFps": 60.00239009520605,
+      "asyncImageProbe": {
+        "samples": 1801,
+        "maxPending": 2,
+        "enqueueMs": {
+          "count": 1801,
+          "min": 0.010000001639127731,
+          "mean": 0.08256524149483604,
+          "p50": 0.07500000298023224,
+          "p95": 0.14000000059604645,
+          "max": 0.6600000001490116
+        },
+        "harvestMs": {
+          "count": 1801,
+          "min": 0.06499999761581421,
+          "mean": 0.6463881176562855,
+          "p50": 0.5099999979138374,
+          "p95": 1.3649999983608723,
+          "max": 16.859999999403954
+        },
+        "completionDelayMs": {
+          "count": 1801,
+          "min": 5.75,
+          "mean": 16.96502498615076,
+          "p50": 16.565000001341105,
+          "p95": 18.679999999701977,
+          "max": 43.32000000029802
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 877260,
+          "instanceUs": 156207,
+          "uniqueInstances": 27303,
+          "reusedInstances": 38381
+        },
+        "after": {
+          "moduleUs": 877744,
+          "instanceUs": 156375,
+          "uniqueInstances": 27308,
+          "reusedInstances": 38382
+        },
+        "delta": {
+          "moduleUs": 484,
+          "instanceUs": 168,
+          "uniqueInstances": 5,
+          "reusedInstances": 1
+        },
+        "synchronousCompileAndLinkMs": 0.652,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 0.2199999988079071,
+        "restore": 52.01000000163913,
+        "settle 120 frames": 2197.580000001937,
+        "enable controller input": 5.384999997913837,
+        "resume": 0.2850000001490116
+      },
+      "controllerStress": {
+        "id": 9140,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 3558393188,
+        "stateHash": 2856319631,
+        "startFrame": 552,
+        "lastFrame": 2325,
+        "frames": 1774,
+        "skipped": 0,
+        "inputChanges": [
+          189,
+          184
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            191,
+            195,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          },
+          {
+            "frame": 1680,
+            "input": 3137827392,
+            "state": 3966001446
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": true,
+        "emittedBlocks": 91,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": true,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": true,
+      "warmup": false
+    },
+    {
+      "validGameplay": true,
+      "seconds": 29.986949999999254,
+      "simulationFps": 58.65884993305567,
+      "gameRenderFps": 58.65884993305567,
+      "visibleFps": 58.25867585733272,
+      "p95GapMs": 19.33000000193715,
+      "maxGapMs": 74.4699999988079,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1758,
+        "presented": 1748,
+        "dropped": 10,
+        "underruns": 47,
+        "meanAgeMs": 15.827611556104054,
+        "p50AgeUpperMs": 17,
+        "p95AgeUpperMs": 18,
+        "p99AgeUpperMs": 27,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441854021.915,
+      "wallEndMs": 1789441884008.865,
+      "canvasSubmissionFps": 58.2920236969763,
+      "sampleCallbackFps": 59.85937216022452,
+      "asyncImageProbe": {
+        "samples": 1796,
+        "maxPending": 3,
+        "enqueueMs": {
+          "count": 1796,
+          "min": 0.019999999552965164,
+          "mean": 0.08437360805731042,
+          "p50": 0.07500000298023224,
+          "p95": 0.14499999955296516,
+          "max": 0.75
+        },
+        "harvestMs": {
+          "count": 1796,
+          "min": 0.05000000074505806,
+          "mean": 0.8163307349037852,
+          "p50": 0.5599999986588955,
+          "p95": 1.905000001192093,
+          "max": 15.544999998062849
+        },
+        "completionDelayMs": {
+          "count": 1796,
+          "min": 7.099999997764826,
+          "mean": 17.178134743858518,
+          "p50": 16.58999999985099,
+          "p95": 19.29500000178814,
+          "max": 58.17999999970198
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 877744,
+          "instanceUs": 156375,
+          "uniqueInstances": 27308,
+          "reusedInstances": 38382
+        },
+        "after": {
+          "moduleUs": 877744,
+          "instanceUs": 156375,
+          "uniqueInstances": 27308,
+          "reusedInstances": 38382
+        },
+        "delta": {
+          "moduleUs": 0,
+          "instanceUs": 0,
+          "uniqueInstances": 0,
+          "reusedInstances": 0
+        },
+        "synchronousCompileAndLinkMs": 0,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 0.07499999925494194,
+        "restore": 31.66499999910593,
+        "settle 120 frames": 2141.974999997765,
+        "enable controller input": 4.449999999254942,
+        "resume": 0.2149999998509884
+      },
+      "controllerStress": {
+        "id": 11126,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 1830443542,
+        "stateHash": 1056621419,
+        "startFrame": 552,
+        "lastFrame": 2314,
+        "frames": 1763,
+        "skipped": 0,
+        "inputChanges": [
+          188,
+          184
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            191,
+            195,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          },
+          {
+            "frame": 1680,
+            "input": 3137827392,
+            "state": 3966001446
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": true,
+        "emittedBlocks": 91,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": true,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": true,
+      "warmup": true
+    },
+    {
+      "validGameplay": true,
+      "seconds": 29.998039999999104,
+      "simulationFps": 59.20386798604352,
+      "gameRenderFps": 59.237203497296925,
+      "visibleFps": 58.9371838960163,
+      "p95GapMs": 18.279999997466803,
+      "maxGapMs": 57.15500000119209,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1774,
+        "presented": 1769,
+        "dropped": 6,
+        "underruns": 30,
+        "meanAgeMs": 15.808827020952329,
+        "p50AgeUpperMs": 17,
+        "p95AgeUpperMs": 18,
+        "p99AgeUpperMs": 27,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 1,
+        "readyClockSkips": 1
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441886238,
+      "wallEndMs": 1789441916236.04,
+      "canvasSubmissionFps": 58.970519407269705,
+      "sampleCallbackFps": 59.970584744871786,
+      "asyncImageProbe": {
+        "samples": 1800,
+        "maxPending": 2,
+        "enqueueMs": {
+          "count": 1800,
+          "min": 0.02500000223517418,
+          "mean": 0.08677500006018414,
+          "p50": 0.08000000193715096,
+          "p95": 0.14499999955296516,
+          "max": 0.8349999971687794
+        },
+        "harvestMs": {
+          "count": 1800,
+          "min": 0.07999999821186066,
+          "mean": 0.7325083333564302,
+          "p50": 0.5350000001490116,
+          "p95": 1.675000000745058,
+          "max": 14.230000000447035
+        },
+        "completionDelayMs": {
+          "count": 1800,
+          "min": 4.990000002086163,
+          "mean": 16.92992777771627,
+          "p50": 16.574999999254942,
+          "p95": 18.12000000104308,
+          "max": 48.55499999970198
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 877744,
+          "instanceUs": 156375,
+          "uniqueInstances": 27308,
+          "reusedInstances": 38382
+        },
+        "after": {
+          "moduleUs": 878394,
+          "instanceUs": 156538,
+          "uniqueInstances": 27311,
+          "reusedInstances": 38383
+        },
+        "delta": {
+          "moduleUs": 650,
+          "instanceUs": 163,
+          "uniqueInstances": 3,
+          "reusedInstances": 1
+        },
+        "synchronousCompileAndLinkMs": 0.813,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 0.11999999731779099,
+        "restore": 25.614999998360872,
+        "settle 120 frames": 2130.309999998659,
+        "enable controller input": 2.1700000017881393,
+        "resume": 2.5299999974668026
+      },
+      "controllerStress": {
+        "id": 13107,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 3594138712,
+        "stateHash": 4289025528,
+        "startFrame": 552,
+        "lastFrame": 2331,
+        "frames": 1780,
+        "skipped": 0,
+        "inputChanges": [
+          190,
+          184
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            191,
+            195,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          },
+          {
+            "frame": 1680,
+            "input": 3137827392,
+            "state": 3966001446
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": true,
+        "emittedBlocks": 91,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": true,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": true,
+      "warmup": false
+    },
+    {
+      "validGameplay": true,
+      "seconds": 29.997800000000744,
+      "simulationFps": 59.13767009580556,
+      "gameRenderFps": 59.13767009580556,
+      "visibleFps": 58.80431231623506,
+      "p95GapMs": 18.24500000104308,
+      "maxGapMs": 64.76999999955297,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1772,
+        "presented": 1764,
+        "dropped": 8,
+        "underruns": 34,
+        "meanAgeMs": 16.165484693855927,
+        "p50AgeUpperMs": 17,
+        "p95AgeUpperMs": 18,
+        "p99AgeUpperMs": 31,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 2,
+        "readyClockSkips": 2
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441918552.76,
+      "wallEndMs": 1789441948550.56,
+      "canvasSubmissionFps": 58.80431231623506,
+      "sampleCallbackFps": 59.971064544731796,
+      "asyncImageProbe": {
+        "samples": 1800,
+        "maxPending": 2,
+        "enqueueMs": {
+          "count": 1800,
+          "min": 0.009999997913837433,
+          "mean": 0.08242777777214845,
+          "p50": 0.07499999925494194,
+          "p95": 0.14499999955296516,
+          "max": 0.6799999997019768
+        },
+        "harvestMs": {
+          "count": 1800,
+          "min": 0.07499999925494194,
+          "mean": 0.6454305555133356,
+          "p50": 0.5,
+          "p95": 1.4749999977648258,
+          "max": 16.37000000104308
+        },
+        "completionDelayMs": {
+          "count": 1800,
+          "min": 5.41499999910593,
+          "mean": 16.885236111169473,
+          "p50": 16.565000001341105,
+          "p95": 17.95499999821186,
+          "max": 49.01000000163913
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 878394,
+          "instanceUs": 156538,
+          "uniqueInstances": 27311,
+          "reusedInstances": 46412
+        },
+        "after": {
+          "moduleUs": 878569,
+          "instanceUs": 156577,
+          "uniqueInstances": 27312,
+          "reusedInstances": 60073
+        },
+        "delta": {
+          "moduleUs": 175,
+          "instanceUs": 39,
+          "uniqueInstances": 1,
+          "reusedInstances": 13661
+        },
+        "synchronousCompileAndLinkMs": 0.214,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 2.5850000008940697,
+        "restore": 43.375,
+        "settle 120 frames": 2174.495000001043,
+        "enable controller input": 2.3150000013411045,
+        "resume": 0.5899999998509884
+      },
+      "controllerStress": {
+        "id": 15099,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 20652390,
+        "stateHash": 22081227,
+        "startFrame": 552,
+        "lastFrame": 2328,
+        "frames": 1777,
+        "skipped": 0,
+        "inputChanges": [
+          189,
+          184
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            191,
+            195,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          },
+          {
+            "frame": 1680,
+            "input": 3137827392,
+            "state": 3966001446
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": false,
+        "emittedBlocks": 91,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": false,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": false,
+      "warmup": true
+    },
+    {
+      "validGameplay": true,
+      "seconds": 29.9985700000003,
+      "simulationFps": 58.50278863292425,
+      "gameRenderFps": 58.53612355522222,
+      "visibleFps": 58.1027695653487,
+      "p95GapMs": 18.91500000283122,
+      "maxGapMs": 59.310000002384186,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "passed": false,
+      "queue": {
+        "capacity": 2,
+        "rateLimited": true,
+        "received": 1754,
+        "presented": 1744,
+        "dropped": 10,
+        "underruns": 55,
+        "meanAgeMs": 16.135163417485447,
+        "p50AgeUpperMs": 17,
+        "p95AgeUpperMs": 18,
+        "p99AgeUpperMs": 27,
+        "ageOverflow256Ms": 0,
+        "clockSkips": 0,
+        "readyClockSkips": 0
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      },
+      "imageProbe": [
+        32,
+        24
+      ],
+      "imageProbeMethod": "webgl2-pbo-fence",
+      "imageContextReuse": false,
+      "imageHarvest": "raf",
+      "wallStartMs": 1789441950768.2551,
+      "wallEndMs": 1789441980766.8252,
+      "canvasSubmissionFps": 58.13610448764666,
+      "sampleCallbackFps": 59.936190291736644,
+      "asyncImageProbe": {
+        "samples": 1799,
+        "maxPending": 3,
+        "enqueueMs": {
+          "count": 1799,
+          "min": 0.015000000596046448,
+          "mean": 0.08549749865307948,
+          "p50": 0.07999999821186066,
+          "p95": 0.14499999955296516,
+          "max": 0.6600000001490116
+        },
+        "harvestMs": {
+          "count": 1799,
+          "min": 0.0950000025331974,
+          "mean": 0.8275486380959333,
+          "p50": 0.6149999983608723,
+          "p95": 1.7699999995529652,
+          "max": 15.489999998360872
+        },
+        "completionDelayMs": {
+          "count": 1799,
+          "min": 5.685000002384186,
+          "mean": 16.954405225115543,
+          "p50": 16.564999997615814,
+          "p95": 18.07999999821186,
+          "max": 47.51000000163913
+        }
+      },
+      "jitWork": {
+        "before": {
+          "moduleUs": 900275,
+          "instanceUs": 156688,
+          "uniqueInstances": 27322,
+          "reusedInstances": 60074
+        },
+        "after": {
+          "moduleUs": 900275,
+          "instanceUs": 156688,
+          "uniqueInstances": 27322,
+          "reusedInstances": 60074
+        },
+        "delta": {
+          "moduleUs": 0,
+          "instanceUs": 0,
+          "uniqueInstances": 0,
+          "reusedInstances": 0
+        },
+        "synchronousCompileAndLinkMs": 0,
+        "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+      },
+      "setupTimingMs": {
+        "pause": 15.065000001341105,
+        "restore": 19.155000001192093,
+        "settle 120 frames": 2083.039999999106,
+        "enable controller input": 7.989999998360872,
+        "resume": 0.25
+      },
+      "controllerStress": {
+        "id": 17081,
+        "ok": true,
+        "active": false,
+        "valid": true,
+        "completed": false,
+        "stopAfterFrames": 0,
+        "stoppedFrame": 0,
+        "inputHash": 3353209375,
+        "stateHash": 2578249188,
+        "startFrame": 552,
+        "lastFrame": 2311,
+        "frames": 1760,
+        "skipped": 0,
+        "inputChanges": [
+          187,
+          183
+        ],
+        "observedActions": [
+          [
+            14,
+            15,
+            16,
+            18,
+            20,
+            24,
+            25,
+            27,
+            29,
+            38,
+            42,
+            43,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            78,
+            84,
+            86,
+            88,
+            89,
+            90,
+            178,
+            179,
+            180,
+            182,
+            183,
+            187,
+            191,
+            195,
+            236,
+            252,
+            253,
+            262,
+            263
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            24,
+            25,
+            26,
+            27,
+            29,
+            32,
+            38,
+            42,
+            44,
+            50,
+            53,
+            60,
+            65,
+            66,
+            70,
+            71,
+            80,
+            86,
+            88,
+            178,
+            179,
+            180,
+            182,
+            341,
+            342
+          ]
+        ],
+        "digests": [
+          {
+            "frame": 120,
+            "input": 2875629857,
+            "state": 3395415632
+          },
+          {
+            "frame": 240,
+            "input": 2615620849,
+            "state": 1333866540
+          },
+          {
+            "frame": 360,
+            "input": 2577705211,
+            "state": 3031457746
+          },
+          {
+            "frame": 480,
+            "input": 1505780583,
+            "state": 1983215301
+          },
+          {
+            "frame": 600,
+            "input": 1106265795,
+            "state": 75402731
+          },
+          {
+            "frame": 720,
+            "input": 1027869383,
+            "state": 1265385235
+          },
+          {
+            "frame": 840,
+            "input": 1501810007,
+            "state": 1176961236
+          },
+          {
+            "frame": 960,
+            "input": 1038233868,
+            "state": 1443541006
+          },
+          {
+            "frame": 1080,
+            "input": 1951783795,
+            "state": 2999255677
+          },
+          {
+            "frame": 1200,
+            "input": 3561414784,
+            "state": 2667090082
+          },
+          {
+            "frame": 1320,
+            "input": 3214931301,
+            "state": 2512685735
+          },
+          {
+            "frame": 1440,
+            "input": 658725575,
+            "state": 1046727058
+          },
+          {
+            "frame": 1560,
+            "input": 3323710946,
+            "state": 3980056186
+          },
+          {
+            "frame": 1680,
+            "input": 3137827392,
+            "state": 3966001446
+          }
+        ],
+        "gaps": [],
+        "kind": "two ordinary controller tracks sampled on native logic frames",
+        "notHumanPlay": true,
+        "exercisedBothPlayers": true
+      },
+      "animFusionCoverage": {
+        "enabled": false,
+        "emittedBlocks": 91,
+        "scope": "Cumulative HSD_FObjInterpretAnim compilation coverage, not runtime share."
+      },
+      "gxmatrixfast": true,
+      "displaylistfast": true,
+      "animstatefast": true,
+      "animcallbackfast": true,
+      "animfusion": false,
+      "hotfusion": true,
+      "matrixfast": false,
+      "constantaddr": false,
+      "callfusion": false,
+      "chainfusion": false,
+      "bswaprotate": false,
+      "qstatefull": false,
+      "qstatecache": false,
+      "cpformat": false,
+      "leandispatch": true,
+      "counterbatch": false,
+      "fusionredispatch": false,
+      "readfusion": false,
+      "stepcheck": false,
+      "fpuguardwide": false,
+      "branchfusion": false,
+      "fpuguard": true,
+      "blockmerge": true,
+      "regcache": true,
+      "fastmem": false,
+      "integerfifo": true,
+      "singleprefix": true,
+      "fprcache": false,
+      "compactgpr": false,
+      "pssimd": false,
+      "psmemsimd": false,
+      "vectorfpr": false,
+      "psqhoist": false,
+      "widemap": false,
+      "stateconst": false,
+      "msrcache": false,
+      "fifocopy": false,
+      "fifobatch": false,
+      "frsqrtefast": false,
+      "enabled": false,
+      "warmup": false
+    }
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 111,
+    "mismatches": [],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "verifiedSelection": {
+    "stage": 28,
+    "characters": [
+      14,
+      14
+    ],
+    "slotTypes": [
+      0,
+      0
+    ],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "stage": "Dream Land 64",
+  "workload": "two scripted human controller tracks at native logic frames; partner AI retained (not human play)",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "engine": {
+    "coreSha256": "6e8ae219b799cc9aa9d6c72efe24f3d27904188f96e71cbad40bafad34b7f7d6",
+    "backend": "OGL",
+    "proxy": "worker",
+    "presentationPacing": "raf-buffered",
+    "bitmapPresenter": true,
+    "pixelPresenter": null,
+    "presentationQueue": {
+      "received": 16258,
+      "presented": 16161,
+      "dropped": 97,
+      "underruns": 896,
+      "ageTotalMs": 261597.74000009894,
+      "ageMaxMs": 1733.7599999979138,
+      "ageHistogram": [
+        500,
+        43,
+        16,
+        17,
+        19,
+        17,
+        25,
+        25,
+        33,
+        49,
+        62,
+        114,
+        266,
+        332,
+        1227,
+        4815,
+        4761,
+        2626,
+        156,
+        85,
+        78,
+        67,
+        45,
+        33,
+        61,
+        116,
+        160,
+        77,
+        46,
+        49,
+        27,
+        61,
+        52,
+        11,
+        3,
+        6,
+        6,
+        9,
+        5,
+        6,
+        2,
+        4,
+        6,
+        12,
+        7,
+        7,
+        1,
+        1,
+        4,
+        1,
+        0,
+        2,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "maxDepth": 2,
+      "clockSkips": 12,
+      "readyClockSkips": 11
+    },
+    "timing": "baseline",
+    "correctTimeDrift": false,
+    "jitRequested": true,
+    "jitTier": "mixed",
+    "interpreterDisableMask": 1061486592,
+    "compactGprLocals": false,
+    "pairedSimd": false,
+    "pairedMemorySimd": false,
+    "vectorFprCache": false,
+    "pairedMemoryHoist": false,
+    "qStateCache": false,
+    "qStateFull": false,
+    "wideBlockMap": false,
+    "constantStateBase": false,
+    "blockMsrCache": false,
+    "fifoCopy": false,
+    "fifoBatch": false,
+    "frsqrteFast": false,
+    "profiler": false,
+    "metrics": false,
+    "emulationSpeed": 1,
+    "cpuOverclock": 1,
+    "cpuThread": true,
+    "initialInternalResolution": [
+      960,
+      792
+    ],
+    "capabilities": {
+      "crossOriginIsolated": true,
+      "sharedMemory": true,
+      "webgl2": true,
+      "webglRenderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+      "webgpu": false
+    }
+  }
+}

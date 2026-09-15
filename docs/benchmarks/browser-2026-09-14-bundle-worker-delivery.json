@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-14",
+  "workload": "Yoshi's Story, Ice Climbers mirror, two native-frame scripted controller tracks, 960x720",
+  "acceptedCore": "faf3bba5287977ddc94ff010cbb73cf0a29f7903a09d5d76f3d46b5b5ea583f9",
+  "runs": [
+    {"name":"bundle-16-workers","simulationFps":59.47019523158333,"visibleFps":58.503471205957815,"p95GapMs":17.445,"jitCompileAndLinkMs":23.186,"received":1783,"presented":1756,"dropped":27,"underruns":43},
+    {"name":"bundle-16-workers-direct-bitmap-port","simulationFps":59.23640375359489,"visibleFps":58.63637265198279,"p95GapMs":17.395,"jitCompileAndLinkMs":17.326,"received":1776,"presented":1760,"dropped":17,"underruns":39},
+    {"name":"cold-8-workers","simulationFps":54.89538878734183,"visibleFps":54.69540558593075,"p95GapMs":33.235,"jitCompileAndLinkMs":423.015},
+    {"name":"cold-16-workers-control","simulationFps":54.23303505164048,"visibleFps":54.033036151634434,"p95GapMs":33.2,"jitCompileAndLinkMs":369.028},
+    {"name":"bundle-8-workers-direct-bitmap-port","simulationFps":58.53350893386166,"visibleFps":58.23350803385895,"p95GapMs":17.67,"jitCompileAndLinkMs":9.928,"received":1756,"presented":1748,"dropped":7,"underruns":51},
+    {"name":"delivery-only-16-workers-bundle-direct-port","simulationFps":56.920744362039024,"deliveryFps":56.42085492092041,"rafFps":60.020058896974405,"jitCompileAndLinkMs":9.194}
+  ],
+  "conclusions": {
+    "persistentJitBundle": "Retain for startup and variance reduction; remaining compile work is too small to explain the FPS deficit.",
+    "directBitmapPort": "Safe presentation simplification; no material throughput gain established.",
+    "eightWorkerPool": "Rejected and restored to 16 workers.",
+    "pixelVerifier": "Delivery-only evidence rejects it as the whole bottleneck.",
+    "targetReached": false
+  }
+}
