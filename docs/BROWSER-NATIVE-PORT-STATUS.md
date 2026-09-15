@@ -5,6 +5,21 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Shared fighter parameter import now covers 17 of PlCo's 23 root sections: the
+complete common-parameter block, throw/scale modifiers, bone and part-group maps,
+shake tables, packed player colors and crowd constants. C checks all 536 field
+offsets, then browser verification checks 1,072 field reads, 1,904 original bone
+lookups, 81,226 original remaps, 4,760 part-group queries and 21 landing-knockback
+cases. All 34 bone-map variants are covered, including non-playable templates.
+The 50 targeted tests pass and all 81 sampled 960×720 images are unchanged.
+
+Six PlCo sections remain: the two color-script tables, accessory model/animation,
+spawn-platform model, another shared model and CPU tables. The importer exposes
+only its converted subgraph; it does not expose ftLoadCommonData or run full
+Fighter_LoadCommonData. This remains initialization work, not a match or an FPS
+result. The source fixture is automatically hosted in development browser checks;
+no player file input is introduced. [Shared-parameter checkpoint](benchmarks/browser-2026-09-15-native-port-shared-parameters.json).
+
 Original fighter motion loading now runs in browser WASM. Typed imports cover
 8,767 motion rows and 57,434 action-script commands across all 27 playable
 components. The native loader passes 26,301 loads and 17,534 repeat/cache checks,

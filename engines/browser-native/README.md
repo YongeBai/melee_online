@@ -97,6 +97,14 @@ assembly fallback or gameplay mismatch.
   original timer/loop/call/goto/animation-wait routines pass nested control checks.
   Raw script assets must still be type-converted before using this representation.
   The probes do not run fighter action handlers or claim gameplay parity.
+- `shared-assets.mjs` imports the common parameter block and 16 other typed
+  PlCo sections. Generated field probes statically check all 536 C offsets and
+  preserve byte colors separately from numeric words. Original bone lookup,
+  remapping, part-group selection and landing-knockback routines read these data
+  in browser checks. Global bindings are scoped to each check and restored before
+  releasing the archive. Six script/model/CPU sections still need import; the
+  full ftLoadCommonData entry point is not exposed. The fixture preparation tool
+  hosts PlCo automatically through shared-fixtures.json.
 - `motion-assets.mjs` imports the 24-byte motion rows and action command graphs,
   keeping shared subroutines, pointer identity, numeric flags and valid null jumps.
   Only the imported graph is exposed; unrelated archive externs remain opaque.

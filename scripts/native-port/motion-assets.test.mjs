@@ -67,3 +67,12 @@ test('motion conversion rejects malformed sizes, prebound buffers, and absent ta
     const {bytes,v,spec}=fighterFixture();mutate(v);assert.throws(()=>convertFighterMotions(bytes,'PlMr.dat',spec));
   }
 });
+
+test('Node Buffer motion imports neither modify input nor use its backing-buffer offset',async()=>{
+  const {convertFighterMotions}=await import('../../engines/browser-native/motion-assets.mjs');
+  const fixture=fighterFixture(),padded=Buffer.alloc(fixture.bytes.length+23,0xa5);
+  padded.set(fixture.bytes,11);const input=padded.subarray(11,11+fixture.bytes.length),before=padded.slice();
+  const original=Uint8Array.from(before),native=convertFighterMotions(input,'PlMr.dat',fixture.spec);
+  assert.deepEqual(Uint8Array.from(padded),original);
+  assert.equal(new DataView(native.image.buffer).getUint32(32+112,true),0xc0000000);
+});

@@ -1,0 +1,95 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 189743,
+    "wasmSha256": "da42edae4dbc2c8e0d2032592f6c79d047ee7a3c9d7d00d9c2e90f3ec8d7ad44",
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-Wl,--fatal-warnings",
+      "-fno-builtin-sinf",
+      "-fno-builtin-cosf",
+      "-fno-builtin-tanf",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ]
+  },
+  "sharedSpecSha256": "0835ef58c4bd4333406a3ad0f6b957b19437e857cf45ee53dcf504f6360c2c89",
+  "shared": {
+    "passed": true,
+    "fieldReads": 1072,
+    "fields": 536,
+    "partLookups": 1904,
+    "remaps": 81226,
+    "groupChecks": 4760,
+    "landings": 21,
+    "sections": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      17,
+      18,
+      19,
+      21
+    ],
+    "pendingSections": [
+      6,
+      7,
+      8,
+      16,
+      20,
+      22
+    ],
+    "parts": 34,
+    "metrics": {
+      "numericWords": 945,
+      "packedBytes": 4373,
+      "relocations": 132
+    },
+    "fullCommonDataLoaded": false,
+    "playable": false
+  },
+  "motions": {
+    "passed": true,
+    "rows": 8767,
+    "loads": 26301,
+    "cacheHits": 17534,
+    "sceneClips": 39
+  },
+  "gpu": {
+    "resolution": [
+      960,
+      720
+    ],
+    "softwareGpu": true,
+    "unchangedImages": 81,
+    "maxVertexError": 0.000003814697265625
+  },
+  "targetedTests": 50,
+  "limitations": [
+    "Six shared sections still require import: color scripts, accessory/model data and CPU tables",
+    "Full ftLoadCommonData entry point is not exposed; original full fighter initialization remains incomplete",
+    "Native match, complete rendering, gameplay parity and sustained performance remain unverified"
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "inputLatencyMeasured": false
+}

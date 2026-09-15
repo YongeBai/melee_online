@@ -45,3 +45,15 @@ test('animation graph validation rejects incorrect track range and missing node 
   const g=tree();g.bytes[53]=0;
   assert.throws(()=>readFigaTree(g.bytes));
 });
+
+test('motion bundle conversion preserves offsets and does not mutate Node Buffer input',async()=>{
+  const {convertMotionAnimations}=await import('../../engines/browser-native/motion-animations.mjs');
+  const {bytes}=tree(),offset=Math.ceil(bytes.length/32)*32,padded=Buffer.alloc(offset+bytes.length+17);
+  padded.set(bytes,9);padded.set(bytes,9+offset);
+  const input=padded.subarray(9,9+offset+bytes.length),before=Uint8Array.from(padded);
+  const motions=[0,offset].map(animationOffset=>({animationOffset,animationSize:bytes.length,name:'x_figatree'}));
+  const converted=convertMotionAnimations(input,motions),v=new DataView(converted.image.buffer);
+  assert.deepEqual(Uint8Array.from(padded),before);assert.equal(converted.clips.size,2);
+  for(const at of [0,offset]){assert.equal(v.getUint32(at,true),bytes.length);assert.equal(v.getInt16(at+58,true),-1);}
+  assert.throws(()=>convertMotionAnimations(input,[{...motions[0],animationSize:bytes.length+1}]),/expected animation/);
+});

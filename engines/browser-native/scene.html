@@ -5,6 +5,7 @@
 <p>Native object loading, animation and lifetime checks. This is not a playable match or a performance test.</p>
 <pre id="result">Loading hosted assets…</pre>
 <script type="module">
+import {verifyShared} from './verify-shared.mjs';
 import {verifyMotions} from './verify-motions.mjs';
 import create from './melee-scene.mjs';
 import {verifyResidentFiles,verifyResidentLifecycle} from './verify-resident-files.mjs';
@@ -21,6 +22,7 @@ try {
   }
   const [models,animations,fighters]=await Promise.all([load('model-fixtures.json'),load('animation-fixtures.json'),load('fighter-fixtures.json')]);
   const report=verifyScene(module,models);report.residentFiles=verifyResidentFiles(module,models);report.residentFiles.lifecycle=verifyResidentLifecycle(module);report.animations=verifySceneAnimations(module,models,animations);
+  const [shared]=await load('shared-fixtures.json');report.shared=verifyShared(module,shared.bytes);
   report.motions=verifyMotions(module,fighters,animations,models);
   document.querySelector('#result').textContent=JSON.stringify(report,null,2);document.documentElement.dataset.result='passed';
 } catch(error) {document.querySelector('#result').textContent=String(error.stack||error);document.documentElement.dataset.result='failed';}

@@ -61,7 +61,7 @@ export function readMotionScripts(archive,starts,lengths) {
 
 export function convertFighterMotions(input,name,spec) {
   const model=readFighterMotions(input,name,spec),{archive}=model;
-  const data=archive.bytes.slice(32,32+archive.dataSize),out=new DataView(data.buffer),pointers=new Set(model.scripts.pointers);
+  const data=Uint8Array.from(archive.bytes.subarray(32,32+archive.dataSize)),out=new DataView(data.buffer),pointers=new Set(model.scripts.pointers);
   for(const motion of model.motions)for(let i=0;i<24;i+=4) {
     out.setUint32(motion.offset+i,archive.data.getUint32(motion.offset+i),true);
     if((i===0&&motion.nameAt!==null)||(i===12&&motion.script!==null))pointers.add(motion.offset+i);

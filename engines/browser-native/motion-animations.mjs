@@ -1,7 +1,7 @@
 import {animationArchives} from './animation-assets.mjs';
 import {convertSceneAnimation} from './scene-assets.mjs';
 export function convertMotionAnimations(bytes,motions) {
-  const image=bytes.slice(),clips=new Map();
+  const image=Uint8Array.from(bytes),clips=new Map();
   for(const {offset,tree} of animationArchives(bytes,true)) {
     const size=new DataView(bytes.buffer,bytes.byteOffset+offset,4).getUint32(0);
     const converted=convertSceneAnimation(bytes.subarray(offset,offset+size),tree);
