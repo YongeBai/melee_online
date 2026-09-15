@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-15",
+  "stage": "Battlefield",
+  "fighters": "Ice Climbers mirror",
+  "coreId": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "kind": "render-dispatch-cost-abba",
+  "scope": "mesh",
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 80,
+    "mismatches": [],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "runs": [
+    {
+      "normalMeshes": true,
+      "nativeWorkFps": 56.26683638785132,
+      "nativeFrameMs": 17.77245824,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0,
+      "diagnosticOnly": true
+    },
+    {
+      "normalMeshes": false,
+      "nativeWorkFps": 70.93238306083545,
+      "nativeFrameMs": 14.097933226666669,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0,
+      "diagnosticOnly": true
+    },
+    {
+      "normalMeshes": false,
+      "nativeWorkFps": 74.59571509481493,
+      "nativeFrameMs": 13.405595733333334,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0,
+      "diagnosticOnly": true
+    },
+    {
+      "normalMeshes": true,
+      "nativeWorkFps": 60.96702797775938,
+      "nativeFrameMs": 16.402308480000002,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0,
+      "diagnosticOnly": true
+    }
+  ],
+  "pairedSavingsMs": [
+    3.67452501333333,
+    2.9967127466666685
+  ],
+  "limits": "Uncapped native-work diagnostic with complete HSD_PObjDisp mesh submission omitted in bypassed legs. These images lack fighter/stage meshes and cannot pass 720p image acceptance. Paired savings include guest drawing and downstream rendering, are not additive with other bounds, and do not establish an exact cache implementation."
+}

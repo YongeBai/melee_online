@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-15",
+  "stage": "Frozen neutral Pokémon Stadium",
+  "fighters": "Ice Climbers mirror",
+  "coreId": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "kind": "render-dispatch-cost-abba",
+  "scope": "mesh",
+  "passed": false,
+  "inputConsistency": {
+    "passed": true,
+    "checked": 80,
+    "mismatches": [],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "runs": [
+    {
+      "normalMeshes": true,
+      "nativeWorkFps": 48.044768068763496,
+      "nativeFrameMs": 20.813920853333332,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0,
+      "diagnosticOnly": true
+    },
+    {
+      "normalMeshes": false,
+      "nativeWorkFps": 60.78690112112832,
+      "nativeFrameMs": 16.45091264,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0.064,
+      "diagnosticOnly": true
+    },
+    {
+      "normalMeshes": false,
+      "nativeWorkFps": 62.61948298309038,
+      "nativeFrameMs": 15.969470719999999,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0,
+      "diagnosticOnly": true
+    },
+    {
+      "normalMeshes": true,
+      "nativeWorkFps": 51.004664584675304,
+      "nativeFrameMs": 19.60604992,
+      "frames": 1200,
+      "controllerFrames": 1201,
+      "synchronousJitCompileMs": 0,
+      "diagnosticOnly": true
+    }
+  ],
+  "pairedSavingsMs": [
+    4.363008213333334,
+    3.6365792000000017
+  ],
+  "limits": "Uncapped native-work diagnostic with complete HSD_PObjDisp mesh submission omitted in bypassed legs. These images lack fighter/stage meshes and cannot pass 720p image acceptance. Paired savings include guest drawing and downstream rendering, are not additive with other bounds, and do not establish an exact cache implementation."
+}

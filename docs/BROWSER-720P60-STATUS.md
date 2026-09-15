@@ -118,6 +118,25 @@ controller frames, with the restored native control falling to 33.80 FPS.
 The page stayed visible/focused, but the cause of that slowdown is unknown.
 Do not promote the FD visual option or infer an all-stage gain from this run.
 [Invalid FD opaque control](benchmarks/browser-2026-09-15-fd-opaque-abba-invalid.json).
+The revision-locked, blank-output `HSD_PObjDisp` mesh-submission diagnostic
+now admits all six legal stages for matched-work controls. On Battlefield,
+normal/bypassed/bypassed/normal 1,200-frame **uncapped native-work** rates
+were **56.27/70.93/74.60/60.97 FPS**; the paired cost bounds are **3.68 and
+3.00 ms/native frame**. On frozen neutral Pokémon Stadium the corresponding
+rates were **48.04/60.79/62.62/51.00 FPS**, bounds **4.36 and 3.64 ms/frame**.
+Both controls had 80 matching native-frame controller/gameplay fingerprints,
+zero new synchronous JIT compile time in measured legs, and restored the
+original guest instructions. The bypassed images omit fighters/stage meshes,
+so they are visually invalid and cannot pass the delivered-720p-image gate.
+The results show a **shared** geometry/primitive path with enough gross cost
+to be relevant to Battlefield and Stadium's missing frame time, but almost
+all that work would have to be reused or accelerated with exact images and
+depth preserved. The full path cost is an upper bound, not an achievable
+cache speedup. A real guarded command/geometry reuse implementation must
+prove textures, vertex-memory inputs, per-frame camera matrices and native
+FIFO order before any target claim.
+[Battlefield mesh bound](benchmarks/browser-2026-09-15-battlefield-shared-mesh-bound.json),
+[Stadium mesh bound](benchmarks/browser-2026-09-15-stadium-shared-mesh-bound.json).
 
 September 14 camera/depth correction: an isolated native Dolphin reference and
 the browser Dream Land 64 Ice Climbers mirror both reported camera interest
