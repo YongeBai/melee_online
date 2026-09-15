@@ -388,6 +388,20 @@ returned no samples because it lacked `wasmdispatch=1`; only the explicit
 direct-dispatch rerun is reported. An untracked local USA1.02 function-name
 map was used only to label the aggregate and is excluded from source.
 [Corrected Yoshi compiled-block diagnostic](benchmarks/browser-2026-09-15-corrected-yoshi-direct-block-summary.json).
+The corrected Yoshi stage GX link3 saved-checkpoint diagnostic gives a
+second substantial scene opportunity. Its1200-frame
+normal/bypassed/bypassed/normal native-work rates were **50.12 / 58.38 /
+62.56 / 52.91 FPS**. The opposing matched pairs bound stage drawing and
+downstream graphics at **2.82 and2.91ms per native frame**; all80
+input/gameplay fingerprints agree, and no measured leg compiled a new
+synchronous guest block. This is a single-stage diagnostic with the
+stage geometry absent in bypassed frames, never a playable60FPS pass.
+The separate fighter GX link5 bound is3.10–3.64ms in its own checkpoint;
+do not add these figures into a predicted image rate. Both bounds direct
+future work toward rendering full stage surfaces and all character meshes
+with less repeated native guest draw work, preserving the game's original
+camera, gameplay processes, Randall and moving Fountain platforms.
+[Corrected stage draw bound](benchmarks/browser-2026-09-15-corrected-yoshi-stage-draw-bound.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation
