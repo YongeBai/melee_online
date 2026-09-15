@@ -332,7 +332,7 @@ measured legs compiled no synchronous new guest blocks. Since bypassing
 fighter drawing removes the characters, this is a diagnostic opportunity,
 not a playable optimization. The amount overlaps with the mesh bound in a
 separate checkpoint and cannot be added or subtracted from it. Prioritize
-full-image tests of guarded shared fighter geometry/display-list paths.
+full-image tests of guarded shared fighter geometry and material paths.
 [Corrected fighter draw bound](benchmarks/browser-2026-09-15-corrected-yoshi-fighter-draw-bound.json).
 Two corrected Yoshi guarded-display-list A/B/B/A sessions initially looked
 faster with the candidate but their final baseline legs developed long image
@@ -347,6 +347,18 @@ matched input/gameplay and the saved execution-ordered event schedule, but
 failed raw byte equality in **17–18 CoreTiming bytes**. Leave the fast path
 opt-in. QA now supports both codegen comparison orders to catch this drift.
 [Display-list order and replay](benchmarks/browser-2026-09-15-corrected-yoshi-displaylist-order-and-replay.json).
+The corrected Yoshi Ice Climbers texture-setup ablation keeps the same low
+models, black background, native-frame input and corrected OGL core. Its
+1200-frame normal/bypassed/bypassed/normal measurements reached **51.59 /
+57.33 / 57.66 / 56.33 uncapped native-work FPS**, corresponding to **1.94 and
+0.41ms per frame** in opposing matched pairs. All80 input/gameplay/polling
+fingerprints agree and measured legs show zero new synchronous guest-JIT
+compilation. The first normal run was appreciably slower than the last, so
+the wide pair disagreement limits causal attribution; texture setup alone
+does not offer an established route to the all-stage 720p60 requirement.
+Bypassing it omits textures and the image gate is disabled. Retain normal
+texture rendering and treat this strictly as a narrowing diagnostic.
+[Corrected texture cost](benchmarks/browser-2026-09-15-corrected-yoshi-texture-native-abba.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

@@ -1,0 +1,1767 @@
+{
+  "status": "Diagnostic run; acceptance is disabled. See image cadence and timing results.",
+  "result": {
+    "kind": "render-dispatch-cost-abba",
+    "scope": "texture",
+    "frames": 1200,
+    "runs": [
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 40.58123092400783,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 29570.320384
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 401380,
+            "instanceUs": 242736,
+            "uniqueInstances": 23154,
+            "reusedInstances": 7304
+          },
+          "after": {
+            "moduleUs": 575501,
+            "instanceUs": 333420,
+            "uniqueInstances": 29462,
+            "reusedInstances": 7426
+          },
+          "delta": {
+            "moduleUs": 174121,
+            "instanceUs": 90684,
+            "uniqueInstances": 6308,
+            "reusedInstances": 122
+          },
+          "synchronousCompileAndLinkMs": 264.805,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": true,
+        "warmup": true
+      },
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 51.59272095222497,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 23259.09504
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 575501,
+            "instanceUs": 333420,
+            "uniqueInstances": 29462,
+            "reusedInstances": 7426
+          },
+          "after": {
+            "moduleUs": 575501,
+            "instanceUs": 333420,
+            "uniqueInstances": 29462,
+            "reusedInstances": 7426
+          },
+          "delta": {
+            "moduleUs": 0,
+            "instanceUs": 0,
+            "uniqueInstances": 0,
+            "reusedInstances": 0
+          },
+          "synchronousCompileAndLinkMs": 0,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": true,
+        "warmup": false
+      },
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 57.420691215029905,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 20898.390016
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 575501,
+            "instanceUs": 333420,
+            "uniqueInstances": 29462,
+            "reusedInstances": 7426
+          },
+          "after": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 7427
+          },
+          "delta": {
+            "moduleUs": 1277,
+            "instanceUs": 808,
+            "uniqueInstances": 14,
+            "reusedInstances": 1
+          },
+          "synchronousCompileAndLinkMs": 2.085,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": false,
+        "warmup": true
+      },
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 57.334312947914,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 20929.874944
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 7427
+          },
+          "after": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 27256
+          },
+          "delta": {
+            "moduleUs": 0,
+            "instanceUs": 0,
+            "uniqueInstances": 0,
+            "reusedInstances": 19829
+          },
+          "synchronousCompileAndLinkMs": 0,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": false,
+        "warmup": false
+      },
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 56.9919506210311,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 21055.604992
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 27256
+          },
+          "after": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 47085
+          },
+          "delta": {
+            "moduleUs": 0,
+            "instanceUs": 0,
+            "uniqueInstances": 0,
+            "reusedInstances": 19829
+          },
+          "synchronousCompileAndLinkMs": 0,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": false,
+        "warmup": true
+      },
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 57.65630035701273,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 20812.989952
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 47085
+          },
+          "after": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 66914
+          },
+          "delta": {
+            "moduleUs": 0,
+            "instanceUs": 0,
+            "uniqueInstances": 0,
+            "reusedInstances": 19829
+          },
+          "synchronousCompileAndLinkMs": 0,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": false,
+        "warmup": false
+      },
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 52.34864382169244,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 22923.229952
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 66914
+          },
+          "after": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 86858
+          },
+          "delta": {
+            "moduleUs": 0,
+            "instanceUs": 0,
+            "uniqueInstances": 0,
+            "reusedInstances": 19944
+          },
+          "synchronousCompileAndLinkMs": 0,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": true,
+        "warmup": true
+      },
+      {
+        "kind": "uncapped-native-work-headroom",
+        "diagnosticOnly": true,
+        "passed": false,
+        "frames": 1200,
+        "nativeWorkFps": 56.33027966136219,
+        "timing": {
+          "valid": true,
+          "frames": 1200,
+          "startFrame": 427,
+          "stopFrame": 1627,
+          "elapsedMs": 21302.92992
+        },
+        "controllerStress": {
+          "active": true,
+          "valid": true,
+          "completed": true,
+          "stopAfterFrames": 1200,
+          "stoppedFrame": 1627,
+          "inputHash": 1094044713,
+          "stateHash": 1796570258,
+          "startFrame": 427,
+          "lastFrame": 1627,
+          "frames": 1201,
+          "skipped": 0,
+          "inputChanges": [
+            125,
+            127
+          ],
+          "observedActions": [
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              67,
+              72,
+              76,
+              78,
+              79,
+              84,
+              85,
+              86,
+              178,
+              179,
+              180,
+              182,
+              236
+            ],
+            [
+              14,
+              15,
+              16,
+              17,
+              18,
+              20,
+              24,
+              25,
+              27,
+              29,
+              35,
+              42,
+              43,
+              44,
+              53,
+              60,
+              65,
+              66,
+              71,
+              77,
+              79,
+              80,
+              84,
+              86,
+              87,
+              88,
+              90,
+              178,
+              179,
+              180,
+              182,
+              236
+            ]
+          ],
+          "digests": [
+            {
+              "frame": 120,
+              "input": 1240787637,
+              "state": 3801682720
+            },
+            {
+              "frame": 240,
+              "input": 2459939265,
+              "state": 1023327814
+            },
+            {
+              "frame": 360,
+              "input": 2771784140,
+              "state": 47304744
+            },
+            {
+              "frame": 480,
+              "input": 1535577246,
+              "state": 4165894835
+            },
+            {
+              "frame": 600,
+              "input": 412550250,
+              "state": 1420912854
+            },
+            {
+              "frame": 720,
+              "input": 3517935259,
+              "state": 840964674
+            },
+            {
+              "frame": 840,
+              "input": 3614470787,
+              "state": 3875654427
+            },
+            {
+              "frame": 960,
+              "input": 3275243830,
+              "state": 2971132013
+            },
+            {
+              "frame": 1080,
+              "input": 913828063,
+              "state": 723462660
+            },
+            {
+              "frame": 1200,
+              "input": 1094044713,
+              "state": 1796570258
+            }
+          ],
+          "gaps": []
+        },
+        "limits": "Uncapped host pacing and no image verifier. Real rendered-image FPS, normal pacing, and physical input latency require separate tests.",
+        "jitWork": {
+          "before": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 86858
+          },
+          "after": {
+            "moduleUs": 576778,
+            "instanceUs": 334228,
+            "uniqueInstances": 29476,
+            "reusedInstances": 86858
+          },
+          "delta": {
+            "moduleUs": 0,
+            "instanceUs": 0,
+            "uniqueInstances": 0,
+            "reusedInstances": 0
+          },
+          "synchronousCompileAndLinkMs": 0,
+          "scope": "Diagnostics bracket image measurement and include small boundary overhead. No per-frame profiling. Excludes browser background optimization/tiering."
+        },
+        "renderDispatch": true,
+        "warmup": false
+      }
+    ],
+    "diagnosticOnly": true,
+    "passed": false,
+    "inputConsistency": {
+      "passed": true,
+      "checked": 80,
+      "mismatches": [],
+      "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+    },
+    "limits": "Uncapped host pacing; blank/incomplete images when dispatch is bypassed. Combined guest render callbacks and downstream graphics opportunity, not GPU-only or additive CPU time. Divergent gameplay fingerprints invalidate a matched-work interpretation. No image acceptance or physical latency claim.",
+    "verifiedSelection": {
+      "stage": 8,
+      "characters": [
+        14,
+        14
+      ],
+      "slotTypes": [
+        0,
+        0
+      ],
+      "timeLimit": 480,
+      "items": -1,
+      "teams": 0
+    },
+    "stage": "Yoshi's Story",
+    "workload": "two scripted human controller tracks at native logic frames; partner AI retained (not human play)",
+    "fighters": [
+      "Ice Climbers",
+      "Ice Climbers"
+    ],
+    "engine": {
+      "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+      "backend": "OGL",
+      "proxy": "worker",
+      "presentationPacing": "raf-buffered-native-clock",
+      "bitmapPresenter": true,
+      "pixelPresenter": null,
+      "presentationQueue": {
+        "received": 10611,
+        "presented": 10347,
+        "dropped": 264,
+        "underruns": 1925,
+        "ageTotalMs": 132407.50000029802,
+        "ageMaxMs": 1915.9649999961257,
+        "ageHistogram": [
+          301,
+          323,
+          425,
+          422,
+          436,
+          441,
+          478,
+          564,
+          533,
+          505,
+          468,
+          489,
+          536,
+          537,
+          472,
+          393,
+          344,
+          234,
+          302,
+          243,
+          225,
+          218,
+          197,
+          219,
+          199,
+          184,
+          187,
+          179,
+          85,
+          69,
+          56,
+          21,
+          15,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          1,
+          2,
+          4,
+          2,
+          0,
+          3,
+          1,
+          0,
+          4,
+          0,
+          2,
+          1,
+          2,
+          2,
+          1,
+          1,
+          3,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "maxDepth": 2,
+        "clockSkips": 0,
+        "readyClockSkips": 0
+      },
+      "timing": "baseline",
+      "correctTimeDrift": false,
+      "jitRequested": true,
+      "jitTier": "mixed",
+      "interpreterDisableMask": 390070272,
+      "compactGprLocals": false,
+      "pairedSimd": false,
+      "pairedMemorySimd": false,
+      "vectorFprCache": false,
+      "pairedMemoryHoist": false,
+      "qStateCache": false,
+      "qStateFull": false,
+      "wideBlockMap": false,
+      "constantStateBase": false,
+      "blockMsrCache": false,
+      "fifoCopy": false,
+      "fifoBatch": false,
+      "frsqrteFast": false,
+      "profiler": false,
+      "metrics": false,
+      "emulationSpeed": 1,
+      "cpuOverclock": 1,
+      "cpuThread": true,
+      "initialInternalResolution": [
+        1280,
+        1056
+      ],
+      "capabilities": {
+        "crossOriginIsolated": true,
+        "sharedMemory": true,
+        "webgl2": true,
+        "webglRenderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+        "webgpu": false
+      }
+    }
+  }
+}
