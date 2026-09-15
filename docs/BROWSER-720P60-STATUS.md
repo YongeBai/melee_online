@@ -37,18 +37,19 @@ a credible larger CPU option. In a disposable source checkout, Emscripten
 parsed 952/1032 Melee C files after one `ssize_t` portability guard; most of
 the 80 failures came from stage callback type mismatches. Suppressing that
 diagnostic for a second syntax-only sweep yielded 1009/1032 parsed files;
-23 still fail on platform headers, generated includes or genuine type conflicts.
-Fighter, collision,
-HSD polygon display and scene code passed; sampled 32-bit object layouts
+23 still fail on platform headers, generated includes or genuine type
+conflicts. Fighter, collision, HSD polygon display and scene code passed;
+sampled 32-bit object layouts
 passed offset assertions. A 1.1 KiB WASM harness linked and executed the
 actual decompiled `mpCollInterpolateECB` routine, yielding the six expected
 ECB/previous-ECB values. A web-target build with probe-only report/assert
 shims also loaded and passed in headless Chrome from a local static page.
-This is a real in-browser source-function execution proof,
-not a linked game or an FPS result. A full client-side port still needs
+This is a real in-browser source-function execution proof, not a linked game
+or an FPS result. A full client-side port still needs
 browser platform services and exact gameplay/rendering parity. Keep the
 automatic hosted startup and emulator play path while validating a native
-vertical slice. [Feasibility spike](BROWSER-NATIVE-MELEE-FEASIBILITY.md).
+vertical slice. [Feasibility spike](BROWSER-NATIVE-MELEE-FEASIBILITY.md),
+[Chrome proof](benchmarks/browser-2026-09-15-native-decomp-browser-proof.json).
 
 An isolated recompilation of only `__GXWriteMatrix` proved real runtime
 coverage (~97,000 guarded helper calls in a 120-frame Dream Land IC/IC replay)

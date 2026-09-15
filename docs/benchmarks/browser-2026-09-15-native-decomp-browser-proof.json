@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-15",
+  "kind": "browser-native-decompiled-melee-source-feasibility",
+  "source": "https://github.com/doldecomp/melee",
+  "sourceCommit": "a75407433c85ac15fab45f92ff79c1481f1fa82f",
+  "compiler": "Emscripten 5.0.7",
+  "sourceSyntaxSweep": {
+    "sourceFiles": 1032,
+    "passedWithOneTemporarySsizeTypedefGuard": 952,
+    "passedWithGuardAndCallbackDiagnosticSuppression": 1009,
+    "remainingFailures": 23
+  },
+  "function": "mpCollInterpolateECB",
+  "browserWasmBytes": 1050,
+  "browser": "headless Google Chrome, private local static page",
+  "expectedECBAndPreviousECBValues": [4, -6, -5, 7, 2, -4],
+  "observedECBAndPreviousECBValues": [4, -6, -5, 7, 2, -4],
+  "passed": true,
+  "probeOnlyShims": ["OSReport", "__assert"],
+  "playableBuild": false,
+  "automaticHostedGame": false,
+  "gameplayMeasured": false,
+  "framesPerSecondMeasured": false,
+  "limits": "One real decompiled collision function executed in browser WASM against synthetic ECB data. This does not link or run the whole game, use hosted game assets, validate gameplay parity, or measure 720p60. Callback-warning suppression was used for a syntax exploration sweep only."
+}
