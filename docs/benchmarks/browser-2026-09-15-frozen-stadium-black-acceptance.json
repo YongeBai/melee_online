@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-15",
+  "kind": "single-acceptance-leg-frozen-stadium",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Pokémon Stadium",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "depth-corrected WebGL 960x720, black stage backdrop, native low-detail fighters",
+  "codegen": ["blockmerge", "animfusion"],
+  "stageControls": ["checked neutral-map transformation controller stopped", "stadium screen off", "stage-only decoration off"],
+  "measurementSeconds": 30,
+  "simulationFps": 45.8686,
+  "distinctVisibleFps": 45.5688,
+  "sourceResolution": [960, 720],
+  "pageVisibleFocused": true,
+  "nativeFrameControllerTracksActive": true,
+  "camera": {"fov": 30, "pitchOffset": 0, "yawOffset": 0},
+  "visualFinding": "Private inspected frame retained the neutral main floor, two raised platforms, fighters and HUD; the decorative video board and stadium backdrop were black.",
+  "passed720p60": false,
+  "decision": "Frozen Stadium remains experimental, and a same-checkpoint stadium-freeze A/B plus long-run neutral-map/camera validation is needed before tournament promotion. This independent leg fails the performance target.",
+  "limits": "A fresh session, not a paired comparison against the native 48.10 visible-FPS Stadium survey leg; never infer a negative causal freeze delta from these numbers. Long transformations/extended neutral-map play, exhaustive characters and physical input latency untested. Raw report: /tmp/melee-frozen-stadium-3286-sep15.json; image fixture ignored."
+}

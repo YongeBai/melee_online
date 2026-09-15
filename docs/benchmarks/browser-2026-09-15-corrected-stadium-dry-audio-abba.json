@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-tournament-reverb-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Pokémon Stadium",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "corrected black-backdrop 960x720 WebGL, native low-detail fighters",
+  "fixedCodegen": ["blockmerge", "animfusion"],
+  "changedSound": "AUX A standard wet reverb callback and buffers only; dry voices, music, gameplay cues and AUX B delay preserved",
+  "measurementSecondsPerLeg": 30,
+  "warmupBeforeEveryLeg": true,
+  "nativeFrameInputFingerprints": {"passed": true, "checked": 95},
+  "measuredRuns": [
+    {"wetReverb": true, "simulationFps": 48.3683, "distinctVisibleFps": 48.2350, "passed720p60": false},
+    {"wetReverb": false, "simulationFps": 51.2976, "distinctVisibleFps": 51.0643, "passed720p60": false},
+    {"wetReverb": false, "simulationFps": 49.0720, "distinctVisibleFps": 48.8053, "passed720p60": false},
+    {"wetReverb": true, "simulationFps": 52.2695, "distinctVisibleFps": 52.0362, "passed720p60": false}
+  ],
+  "dryMinusWetVisiblePairDeltasFps": [2.8294, -3.2309],
+  "decision": "No repeatable corrected-stage benefit. Keep wet reverb native by default; the block-profile's 8.84% reverb share was only sampled compiled guest time and did not predict end-to-end FPS.",
+  "limits": "Paired full warmups and changing browser throughput; one match fixture, not exhaustive audio or human-controller latency coverage. Same-input rolling fingerprints are not whole-machine equivalence. Raw report: /tmp/melee-corrected-stadium-reverb-abba-3286-sep15.json."
+}

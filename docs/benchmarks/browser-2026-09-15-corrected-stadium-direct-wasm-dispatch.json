@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-15",
+  "kind": "single-acceptance-leg-direct-wasm-dispatch",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Pokémon Stadium",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "corrected black-backdrop WebGL, native low-detail fighters, true 960x720",
+  "codegen": ["blockmerge", "animfusion"],
+  "feature": "wasmdispatch=1 explicitly enables the direct Wasm per-block dispatcher present in the same pinned core; ordinary release defaults do not set this URL feature",
+  "measurementSeconds": 30,
+  "simulationFps": 40.6137,
+  "distinctVisibleFps": 40.5138,
+  "sourceResolution": [960, 720],
+  "nativeFrameControllerTracksActive": true,
+  "pageVisibleFocused": true,
+  "passed720p60": false,
+  "executionCoverage": "The diagnostic rerun with the same explicit flag recorded 474,418 direct-dispatch complete-block samples, so this is an exercised dispatcher rather than a compile-only flag.",
+  "decision": "Do not promote direct dispatch: the heavy legal-stage acceptance leg fails 60. A same-checkpoint comparison is needed for any causal claim against ordinary dispatch; the diagnostic profiler's 41.17 FPS is not an unprofiled control.",
+  "limits": "Separate fresh-browser run versus the ordinary-dispatch native-Stadium 48.10 survey leg, so numerical difference cannot be assigned to dispatch alone. No exhaustive roster, long session, or physical input-to-photon latency. Raw report: /tmp/melee-corrected-stadium-direct-dispatch-3286-sep15.json."
+}

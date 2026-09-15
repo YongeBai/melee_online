@@ -208,6 +208,65 @@ warmup/measured runs had fewer than 1,200 common native frames. The within-
 session recovery is too large to attribute any change to fusion; keep it
 disabled, and defer exact-state replay until a valid workload result exists.
 [Invalid hot-fusion control](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-hotfusion-invalid.json).
+An optional 1,800-native-frame match prewarm ran and restored the full captured
+machine state ahead of an ordinary30-second Yoshi acceptance leg. It reached
+**51.24 simulation / 50.90 distinct visible FPS** with active controller
+tracks at960×720; the button-to-result time was86.87seconds including
+match startup and measurement. No paired improvement was established, so
+prewarm stays out of defaults. QA now records its own elapsed time when used.
+[Exact-state prewarm result](benchmarks/browser-2026-09-15-yoshi-exact-match-prewarm.json).
+An ordered corrected black-backdrop four-stage Ice Climbers survey, each with
+30 seconds of active native-frame inputs, measured distinct visible FPS of
+**49.90 Battlefield / 56.24 Final Destination / 48.10 Pokémon Stadium /
+52.80 Dream Land**. All four valid960×720 legs failed; the first stage may
+be colder, and the survey is not a causal stage-cost A/B. Private native-camera
+frames retained fighters, HUD and playable platforms. All inspected camera
+settings had FOV30, zero pitch offset and zero yaw offset. Stadium's neutral
+video-board scenery stayed visible under the black-backdrop option, making
+Frozen Stadium a stage-specific performance follow-up. The all-stage target
+and broader roster/latency coverage remain unmet.
+[Corrected legal-stage survey](benchmarks/browser-2026-09-15-corrected-black-stage-coverage.json).
+An independent corrected Frozen Stadium 30-second leg with its stage-only
+screen, decoration and idle transformation controller suppressed measured
+**45.87 simulation / 45.57 distinct visible FPS**. A native-camera screenshot
+showed the neutral main floor and both raised platforms against black;
+FOV30 and zero pitch/yaw offsets remain. It does not clear the target or prove
+a causal difference from the fresh-session native-Stadium survey. Frozen
+Stadium needs a same-checkpoint A/B and longer neutral-map validation before
+promotion.
+[Frozen Stadium acceptance](benchmarks/browser-2026-09-15-frozen-stadium-black-acceptance.json).
+An explicit direct-WASM-dispatch compiled-block diagnostic on corrected
+native Stadium recorded474,418 periodic complete-block samples. Among the
+78,957microseconds of sampled guest-block duration, animation interpretation
+accounted for18.72%, reverb8.84% and envelope matrix setup3.93%. The
+instrumented41.17 visible FPS is not an acceptance result; sampling excludes
+dispatcher bookkeeping and hardware callbacks, so these percentages cannot
+be treated as complete frame costs. Dry-audio timing is the next controlled
+shared-cost test.
+[Stadium compiled-block profile](benchmarks/browser-2026-09-15-corrected-stadium-direct-block-profile.json).
+The corrected native/dry/dry/native Stadium audio control measured **48.23 /
+51.06 / 48.81 / 52.04 distinct visible FPS** with 95 common controller
+fingerprints. Dry audio gained2.83FPS in the first adjacent pair and lost
+3.23FPS in the reverse pair; no leg met60. The profiler's reverb share did
+not convert to a repeatable image-rate win. Keep wet audio native.
+[Corrected dry-audio reversal](benchmarks/browser-2026-09-15-corrected-stadium-dry-audio-abba.json).
+The corrected native-Stadium direct-dispatch acceptance leg explicitly set
+`wasmdispatch=1` on the same pinned core. It measured **40.61 simulation /
+40.51 distinct visible FPS** at960×720 with active controller tracks and
+page focus. The earlier identical binary rebuild established that the direct
+dispatcher was compiled; the release defaults do not enable its runtime URL
+flag. A separate profile exercised474,418 direct complete-block samples,
+confirming the flag's path. The single direct-dispatch acceptance still
+fails60 and is not a causal A/B against the independent ordinary run.
+[Direct-dispatch acceptance](benchmarks/browser-2026-09-15-corrected-stadium-direct-wasm-dispatch.json).
+The Ryzen laptop was observed on battery in the OS balanced profile with a
+`powersave` CPU governor. A manually paused unchanged-Stadium-checkpoint
+balanced/performance/performance/balanced diagnostic verified each governor
+and measured **42.70 / 48.77 / 48.16 / 49.23 visible FPS**. The first pair
+favors performance by6.06FPS; the reverse loses1.07FPS. All gates fail and
+46 native-input fingerprints match. The OS profile was restored to balanced;
+system power mode is neither an established fix nor a player requirement.
+[Host power diagnostic](benchmarks/browser-2026-09-15-host-power-stadium-abba.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-15",
+  "kind": "diagnostic-sampled-direct-compiled-block-profile",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Pokémon Stadium",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "corrected black-backdrop 960x720 WebGL and native low-detail fighter models",
+  "codegen": ["blockmerge", "animfusion", "direct WASM dispatch for profiler"],
+  "measurementSeconds": 30,
+  "completeCompiledBlockSamples": 474418,
+  "sampledDurationUs": 78956.808,
+  "sampledCompiledBlockTop": [
+    {"function": "HSD_FObjInterpretAnim", "samples": 35188, "sampledDurationUs": 14781.956, "sampledDurationSharePercent": 18.72},
+    {"function": "HandleReverb", "samples": 17349, "sampledDurationUs": 6978.816, "sampledDurationSharePercent": 8.84},
+    {"function": "SetupEnvelopeModelMtx", "samples": 7335, "sampledDurationUs": 3102.976, "sampledDurationSharePercent": 3.93},
+    {"function": "parseFloat", "samples": 6857, "sampledDurationUs": 2367.488, "sampledDurationSharePercent": 3.00},
+    {"function": "sinf", "samples": 5452, "sampledDurationUs": 2046.720, "sampledDurationSharePercent": 2.59},
+    {"function": "cosf", "samples": 4838, "sampledDurationUs": 1923.584, "sampledDurationSharePercent": 2.44}
+  ],
+  "diagnosticSimulationFps": 41.2675,
+  "diagnosticDistinctVisibleFps": 41.1675,
+  "interpretation": "The sampled compiled guest blocks concentrate in animation and audio reverb. Test the existing dry-audio switch with a matched saved-state comparison, and pursue function-local animation work if its own evidence repeats.",
+  "limits": "The first attempt with direct dispatch not selected correctly returned no compiled-block samples; the rerun selected wasmdispatch=1 explicitly. Periodic one-in-1024 wall samples include clock/import overhead and host preemption, exclude dispatcher bookkeeping, partial blocks and native callbacks, and may be biased. Shares are not whole-frame CPU costs. Profiling lowers FPS and cannot establish 720p60 acceptance. Optional 19,827-function symbol map was an ignored local QA fixture and is not committed as a game asset. Raw profile: /tmp/melee-stadium-dispatch-profile-3286-sep15.json."
+}

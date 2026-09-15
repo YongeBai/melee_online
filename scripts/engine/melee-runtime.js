@@ -1456,9 +1456,10 @@ if (params.has("qa")) {
           isLoadedMeleeMatch(s) && s.match?.timeRemaining >= 474 && s.match.timeRemaining <= 480,
       );
       const matchPrewarmFrames = Number(params.get("matchprewarm") || 0);
+      let matchPrewarmResult;
       if (!nativeEngine && matchPrewarmFrames > 0) {
         const { prewarmBrowserMatch } = await import("./browser-match-prewarm.js");
-        await prewarmBrowserMatch(host, matchPrewarmFrames, {
+        matchPrewarmResult = await prewarmBrowserMatch(host, matchPrewarmFrames, {
           onProgress: (text) => { progress.textContent = text; },
         });
       }
@@ -1584,6 +1585,7 @@ if (params.has("qa")) {
           : frameStress
           ? await measureBrowserNativeInput(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure})
           : await measure(host, duration, () => host.adapter.request("meleeInspect", {}));
+        if(matchPrewarmResult)result.matchPrewarm=matchPrewarmResult;
         if(result.dispatchProfile){
           const response=await fetch('./qa-function-symbols.json');
           if(response.ok){

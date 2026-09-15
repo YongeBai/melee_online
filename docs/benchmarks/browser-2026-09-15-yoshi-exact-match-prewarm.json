@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-15",
+  "kind": "exact-state-match-prewarm-acceptance-trial",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "depth-corrected 960x720 WebGL, black sky and native low-detail fighter models",
+  "codegen": ["blockmerge", "animfusion"],
+  "prewarmFrames": 1800,
+  "prewarmMethod": "Run unthrottled native-frame match, then restore exact captured full machine state; generated PPC/Wasm code survives restore",
+  "buttonToResultSeconds": 86.867,
+  "measurementSeconds": 30,
+  "simulationFps": 51.2356,
+  "distinctVisibleFps": 50.9023,
+  "sourceResolution": [960, 720],
+  "controllerTracksActive": true,
+  "pageVisibleFocused": true,
+  "passed720p60": false,
+  "decision": "Do not enable prewarm by default. This single acceptance leg failed and total startup plus measurement time was substantial; no paired throughput improvement was established. Future QA records the precise prewarm elapsed time separately.",
+  "limits": "The 86.867 seconds includes match startup and the 30-second image measurement, not only prewarm. One independent fresh-browser trial cannot isolate causal FPS delta from earlier controls. The tested static package verifies 180 automatic hosted-game files. Raw report: /tmp/melee-yoshi-match-prewarm-3285-sep15.json."
+}

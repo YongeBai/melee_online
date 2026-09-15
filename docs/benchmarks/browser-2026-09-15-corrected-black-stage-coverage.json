@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-15",
+  "kind": "ordered-four-stage-corrected-browser-acceptance-survey",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "engine": "pure browser WebAssembly/worker WebGL, complete automatically hosted USA 1.02 game",
+  "rendering": "corrected WebGL depth and 960x720 bitmap presenter, black decorative stage background, native low-detail fighter models",
+  "codegen": ["blockmerge", "animfusion"],
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "workload": "two scripted human controller tracks indexed by native logic frames; native partner AI retained",
+  "measurementSecondsPerStage": 30,
+  "order": [
+    {"stage": "Battlefield", "id": 31, "simulationFps": 50.6342, "distinctVisibleFps": 49.9009, "p95ImageGapMs": 33.3650, "passed720p60": false},
+    {"stage": "Final Destination", "id": 32, "simulationFps": 57.3031, "distinctVisibleFps": 56.2370, "p95ImageGapMs": 31.0950, "passed720p60": false},
+    {"stage": "Pokémon Stadium", "id": 3, "simulationFps": 48.3319, "distinctVisibleFps": 48.0986, "p95ImageGapMs": 32.9100, "passed720p60": false},
+    {"stage": "Dream Land 64", "id": 28, "simulationFps": 53.5968, "distinctVisibleFps": 52.7969, "p95ImageGapMs": 32.0500, "passed720p60": false}
+  ],
+  "commonChecks": {"sourceResolution": [960, 720], "pageVisibleFocused": true, "controllerTracksActive": true,
+    "fixedEightMinuteNoItemRules": true, "cameraFov": 30, "cameraPitchOffset": 0, "cameraYawOffset": 0},
+  "visualChecks": "Private inspected native-camera frames kept fighters, HUD and playable geometry. Battlefield retained its three platforms and Final Destination its single platform. Stadium still displayed neutral-map video-board scenery, and Dream Land kept its tree and moving platforms. Black backdrop changed cosmetic sky, not camera settings.",
+  "decision": "Four legal stages outside the Fountain Ice Climbers exception all fail. Prior one-stage best measurements must not be treated as all-stage certification. Prioritize shared CPU work and a controlled Frozen Stadium follow-up.",
+  "limits": "Ordered single legs in one browser session, not symmetric stage-by-stage comparisons; first stage may be colder and different stages have different native CPU/GPU load. Still a valid per-leg rejection of the strict 60 target. No exhaustive roster/costume coverage, rollback headroom or physical input-to-photon latency. Raw private report: /tmp/melee-corrected-stage-coverage-3286-sep15.json; four ignored screenshot fixtures are not committed."
+}
