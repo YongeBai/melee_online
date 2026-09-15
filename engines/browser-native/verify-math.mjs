@@ -1,4 +1,5 @@
 import {referenceFma as fma} from './math-reference.mjs';
+import {estimateVectors} from './estimate-vectors.mjs';
 const f=Math.fround;
 const equal=(a,b,label)=>{if(a.length!==b.length||a.some((x,i)=>!Object.is(x,b[i])))
   throw Error(label+': '+JSON.stringify({actual:a,expected:b}));};
@@ -9,8 +10,15 @@ export function verifyMath(module) {
   let seed=17;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return f(((seed%20001)-10000)/997);};
   try {
+    for(const [input,expected] of estimateVectors) {
+      const view=new DataView(module.HEAPU8.buffer);
+      view.setBigUint64(a,BigInt(input),true);
+      module._portEstimateBits(a,b);
+      if(view.getBigUint64(b,true)!==BigInt(expected))throw Error('Hardware reciprocal-root golden mismatch: '+input);
+    }
     module._PSMTXIdentity(out);equal(get(out,12),[1,0,0,0,0,1,0,0,0,0,1,0],'matrix identity');
     module._PSMTXScale(out,2,3,4);equal(get(out,12),[2,0,0,0,0,3,0,0,0,0,4,0],'matrix scale');
+    module._PSMTXTrans(out,2,3,4);equal(get(out,12),[1,0,0,2,0,1,0,3,0,0,1,4],'matrix translation');
     for(let iteration=0;iteration<128;iteration++) {
       const ma=Array.from({length:12},random),mb=Array.from({length:12},random),v=Array.from({length:3},random),w=Array.from({length:3},random);
       const product=ma.map((_,i)=> {
@@ -38,7 +46,46 @@ export function verifyMath(module) {
       put(src,v);module._PSVECAdd(src,dst,out);equal(get(out,3),v.map((x,i)=>f(x+w[i])),'vector add');
       module._PSVECSubtract(src,dst,out);equal(get(out,3),v.map((x,i)=>f(x-w[i])),'vector subtract');
       module._PSVECScale(src,src,0.5);equal(get(src,3),v.map(x=>f(x*0.5)),'vector scale alias');
+      put(src,v);
+      const sum=f(fma(v[2],v[2],f(v[0]*v[0]))+f(v[1]*v[1])),estimate=module._portFrsqrte(sum);
+      const view=new DataView(new ArrayBuffer(8));view.setFloat64(0,estimate);
+      const bits=view.getBigUint64(0);
+      view.setBigUint64(0,(bits&0xfffffffff8000000n)+(bits&0x8000000n));
+      const rounded=view.getFloat64(0);
+      equal([module._portRound25(estimate)],[rounded],'25-bit multiplication operand rounding');
+      const factor=f(-fma(f(estimate*rounded),sum,-3)*f(estimate*0.5));
+      equal([module._PSVECMag(src)],[f(sum*factor)],'vector magnitude');
+      module._PSVECNormalize(src,src);equal(get(src,3),v.map(x=>f(x*factor)),'vector normalization alias');
+      if(Math.abs(module._portFres(sum)*sum-1)>0.0005)throw Error('Reciprocal estimate accuracy');
+      const stable=ma.map((x,i)=>f(x+([0,5,10].includes(i)?40:0)));
+      for(const destination of [out,a]) {
+        put(a,stable);
+        if(module._PSMTXInverse(a,destination)!==1)throw Error('Invertible matrix rejected');
+        const inverse=get(destination,12);
+        for(let r=0;r<3;r++)for(let c=0;c<4;c++) {
+          let value=c===3?stable[r*4+3]:0;
+          for(let k=0;k<3;k++)value+=stable[r*4+k]*inverse[k*4+c];
+          if(Math.abs(value-(r===c?1:0))>0.00002)throw Error('Matrix inverse residual: '+value);
+        }
+      }
+      const q=[...v,random()],norm=q.reduce((n,x)=>n+x*x,0),[qx,qy,qz,qw]=q,k=2/norm;
+      put(src,q);module._PSMTXQuat(a,src);
+      const expectedQuat=[1-k*(qy*qy+qz*qz),k*(qx*qy-qz*qw),k*(qx*qz+qy*qw),0,
+        k*(qx*qy+qz*qw),1-k*(qx*qx+qz*qz),k*(qy*qz-qx*qw),0,
+        k*(qx*qz-qy*qw),k*(qy*qz+qx*qw),1-k*(qx*qx+qy*qy),0];
+      if(get(a,12).some((v,i)=>Math.abs(v-expectedQuat[i])>0.000002))throw Error('Quaternion geometry mismatch');
+      const angle=f(0.7),sin=module._sinf(angle),cos=module._cosf(angle),one=1-cos;
+      const length=Math.hypot(...v),[nx,ny,nz]=v.map(x=>x/length);
+      const expectedAxis=[cos+one*nx*nx,one*nx*ny-sin*nz,one*nx*nz+sin*ny,0,
+        one*ny*nx+sin*nz,cos+one*ny*ny,one*ny*nz-sin*nx,0,
+        one*nz*nx-sin*ny,one*nz*ny+sin*nx,cos+one*nz*nz,0];
+      put(src,v);module._PSMTXRotAxisRad(a,src,angle);
+      if(get(a,12).some((v,i)=>Math.abs(v-expectedAxis[i])>0.000002))throw Error('Axis rotation geometry mismatch');
     }
+    put(a,Array(12).fill(0));put(out,Array(12).fill(17));
+    equal([module._PSMTXInverse(a,out)],[0],'Singular matrix rejection');
+    equal(get(out,12),Array(12).fill(17),'Singular inverse preserves destination');
+    put(src,[0,0,0]);equal([module._PSVECMag(src)],[0],'zero-vector magnitude');
     // This cancellation distinguishes fused multiplication from two rounded operations.
     put(src,[1+2**-23,1,0]);put(dst,[1-2**-23,-1,0]);
     equal([module._PSVECDotProduct(src,dst)],[-(2**-46)],'fused cancellation');
@@ -80,7 +127,39 @@ export function verifyMath(module) {
       reduced=f(reduced+f(f(coefficient)*quarter));
     equal([module._cosf(quarter)],[-reduced],'MSL near-quadrant shortcut');
     if(maxTrigError>0.0001)throw Error('MSL trig initialization/accuracy failed');
-    return {passed:true,cases:128,fusedCancellation:true,inPlaceAliases:true,srtCases:256,maxSrtError,maxTrigError,
+    // GX projects the near plane to -1 and the far plane to 0. The future
+    // WebGL boundary must remap depth without changing x/y or the camera.
+    const close=(actual,expected,label)=>{
+      if(!Number.isFinite(actual)||Math.abs(actual-expected)>0.000002*Math.max(1,Math.abs(expected)))
+        throw Error(label+': '+actual+' != '+expected);
+    };
+    for(const fov of [30,45,60])for(const near of [0.1,1]) {
+      const far=1000,aspect=f(4/3),n=f(near),angle=f(f(fov*0.5)*f(0.017453293));
+      module._MTXPerspective(a,fov,aspect,n,far);
+      const m=get(a,16),cot=1/(module._sinf(angle)/module._cosf(angle));
+      close(m[0],cot/aspect,'Perspective 4:3 aspect');close(m[5],cot,'Perspective FOV');
+      close((m[10]*(-n)+m[11])/n,-1,'Perspective near depth');
+      close((m[10]*(-far)+m[11])/far,0,'Perspective far depth');
+      module._MTXFrustum(a,n,-n,-n*aspect,n*aspect,n,far);
+      const frustum=get(a,16);close(frustum[0],1/aspect,'Frustum aspect');close(frustum[5],1,'Frustum FOV');
+      close((frustum[10]*(-n)+frustum[11])/n,-1,'Frustum near depth');
+      close((frustum[10]*(-far)+frustum[11])/far,0,'Frustum far depth');
+      module._MTXOrtho(a,3,-3,-4,4,n,far);
+      const ortho=get(a,16);close(ortho[0]*4,1,'Ortho right edge');close(ortho[5]*3,1,'Ortho top edge');
+      close(ortho[10]*(-n)+ortho[11],-1,'Ortho near depth');close(ortho[10]*(-far)+ortho[11],0,'Ortho far depth');
+    }
+    // Camera at +Z looking at the origin: no arbitrary pitch or yaw offset.
+    put(src,[0,0,10]);put(dst,[0,1,0]);put(b,[0,0,0]);
+    module._C_MTXLookAt(a,src,dst,b);
+    get(a,12).forEach((value,i)=>close(value,[1,0,0,0,0,1,0,0,0,0,1,-10][i],'Look-at basis'));
+    for(const axis of ['x','y','z','X','Y','Z']) {
+      module._MTXRotRad(a,axis.charCodeAt(0),0);
+      get(a,12).forEach((value,i)=>close(value,[1,0,0,0,0,1,0,0,0,0,1,0][i],'Axis rotation identity'));
+    }
+    return {passed:true,cases:128,estimateGoldenCases:estimateVectors.length,normalizationCases:128,
+      projectionCases:18,lookAtCases:1,
+      quaternionCases:128,inverseCases:256,axisRotationCases:128,
+      fusedCancellation:true,inPlaceAliases:true,srtCases:256,maxSrtError,maxTrigError,
       oracle:'Exact BigInt binary32 arithmetic applied in SDK instruction order',
       limitations:'Finite normal input corpus; not Dolphin gameplay parity or FPSCR/denormal validation'};
   } finally {module._free(storage);}

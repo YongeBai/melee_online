@@ -1,0 +1,559 @@
+{
+  "date": "2026-09-15",
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "source": {
+      "repository": "https://github.com/doldecomp/melee.git",
+      "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+    },
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+    "units": [
+      "src/melee/mp/mpcoll.c",
+      "src/melee/mp/mplib.c",
+      "src/melee/gr/ground.c",
+      "src/melee/ft/ftcommon.c",
+      "libs/dolphin/src/dolphin/mtx/mtx44.c",
+      "src/MSL/trigf.c",
+      "src/MSL/math_data.c",
+      "src/MSL/float.c",
+      "src/sysdolphin/baselib/mtx.c",
+      "src/sysdolphin/baselib/random.c",
+      "src/sysdolphin/baselib/archive.c",
+      "src/sysdolphin/baselib/memory.c",
+      "src/sysdolphin/baselib/initialize.c",
+      "src/sysdolphin/baselib/objalloc.c",
+      "libs/dolphin/src/dolphin/os/OSAlloc.c",
+      "src/sysdolphin/baselib/fobj.c",
+      "src/sysdolphin/baselib/spline.c",
+      "src/sysdolphin/baselib/aobj.c",
+      "src/sysdolphin/baselib/gobj.c",
+      "src/sysdolphin/baselib/gobjproc.c",
+      "src/sysdolphin/baselib/gobjplink.c",
+      "src/sysdolphin/baselib/gobjgxlink.c",
+      "src/sysdolphin/baselib/gobjobject.c",
+      "src/sysdolphin/baselib/gobjuserdata.c"
+    ],
+    "selectedSdkFunctions": [
+      "MTXRotRad",
+      "C_MTXLookAt"
+    ],
+    "arithmeticReference": {
+      "repository": "https://github.com/dolphin-emu/dolphin",
+      "commit": "e22551eae1c84a7e4d0b6a5c519ef4ed4ef69df1",
+      "license": "GPL-2.0-or-later",
+      "purpose": "Gekko reciprocal and reciprocal-square-root arithmetic helpers",
+      "files": [
+        {
+          "file": "Common/FloatUtils.cpp",
+          "sha256": "e7bcd6a48701a361a84a9c0dfbf2ddb0c5c5219a1370838c05f99a5e8dff9dbb"
+        },
+        {
+          "file": "Common/FloatUtils.h",
+          "sha256": "8aad8c06eac7e14ac2876ddd56edc0562d28cd8c906ca6bfd9c72808810dbbe5"
+        },
+        {
+          "file": "Common/CommonTypes.h",
+          "sha256": "b714ae37337b4f9cd6e1863073bdd92fda8648e606c91657b104fdc856199b94"
+        }
+      ]
+    },
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-fno-builtin-sinf",
+      "-fno-builtin-cosf",
+      "-fno-builtin-tanf",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ],
+    "wasmBytes": 47715,
+    "wasmSha256": "0e438bbad470c680bbb7da0cb5615dfe8df0785102d1e67bde0b14641dfa17a5",
+    "imports": [
+      {
+        "module": "env",
+        "name": "_abort_js",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_close",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_write",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_seek",
+        "kind": "function"
+      },
+      {
+        "module": "env",
+        "name": "emscripten_resize_heap",
+        "kind": "function"
+      }
+    ],
+    "playable": false,
+    "gameplayParity": false,
+    "performanceCertified": false
+  },
+  "math": {
+    "passed": true,
+    "cases": 128,
+    "estimateGoldenCases": 57,
+    "normalizationCases": 128,
+    "projectionCases": 18,
+    "lookAtCases": 1,
+    "quaternionCases": 128,
+    "inverseCases": 256,
+    "axisRotationCases": 128,
+    "fusedCancellation": true,
+    "inPlaceAliases": true,
+    "srtCases": 256,
+    "maxSrtError": 3.54283210768358e-7,
+    "maxTrigError": 1.3156060907348888e-7,
+    "oracle": "Exact BigInt binary32 arithmetic applied in SDK instruction order",
+    "limitations": "Finite normal input corpus; not Dolphin gameplay parity or FPSCR/denormal validation"
+  },
+  "meshes": {
+    "passed": true,
+    "models": [
+      {
+        "name": "PlMrNr.dat",
+        "joints": 61,
+        "meshes": 68,
+        "vertices": 6982,
+        "triangles": 6328,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlFxNr.dat",
+        "joints": 73,
+        "meshes": 91,
+        "vertices": 7602,
+        "triangles": 6658,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          128,
+          152
+        ]
+      },
+      {
+        "name": "PlCaNr.dat",
+        "joints": 63,
+        "meshes": 98,
+        "vertices": 7895,
+        "triangles": 6965,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlDkNr.dat",
+        "joints": 75,
+        "meshes": 61,
+        "vertices": 7827,
+        "triangles": 6597,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          128,
+          152
+        ]
+      },
+      {
+        "name": "PlKbNr.dat",
+        "joints": 46,
+        "meshes": 111,
+        "vertices": 8860,
+        "triangles": 7828,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlKpNr.dat",
+        "joints": 76,
+        "meshes": 130,
+        "vertices": 11143,
+        "triangles": 9157,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlLkNr.dat",
+        "joints": 75,
+        "meshes": 99,
+        "vertices": 8418,
+        "triangles": 7310,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlSkNr.dat",
+        "joints": 58,
+        "meshes": 71,
+        "vertices": 7560,
+        "triangles": 6838,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlNsNr.dat",
+        "joints": 63,
+        "meshes": 77,
+        "vertices": 7058,
+        "triangles": 6538,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlPeNr.dat",
+        "joints": 114,
+        "meshes": 105,
+        "vertices": 9080,
+        "triangles": 8176,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlPpNr.dat",
+        "joints": 49,
+        "meshes": 45,
+        "vertices": 4169,
+        "triangles": 3683,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlNnNr.dat",
+        "joints": 49,
+        "meshes": 45,
+        "vertices": 4170,
+        "triangles": 3682,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlPkNr.dat",
+        "joints": 53,
+        "meshes": 52,
+        "vertices": 5479,
+        "triangles": 4989,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          128,
+          144
+        ]
+      },
+      {
+        "name": "PlPrNr.dat",
+        "joints": 50,
+        "meshes": 24,
+        "vertices": 5229,
+        "triangles": 4815,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          128,
+          152
+        ]
+      },
+      {
+        "name": "PlSsNr.dat",
+        "joints": 60,
+        "meshes": 106,
+        "vertices": 11619,
+        "triangles": 10211,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlYsNr.dat",
+        "joints": 70,
+        "meshes": 76,
+        "vertices": 9887,
+        "triangles": 9073,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlZdNr.dat",
+        "joints": 118,
+        "meshes": 79,
+        "vertices": 7366,
+        "triangles": 6418,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlLgNr.dat",
+        "joints": 61,
+        "meshes": 65,
+        "vertices": 7055,
+        "triangles": 6383,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlMtNr.dat",
+        "joints": 68,
+        "meshes": 46,
+        "vertices": 7106,
+        "triangles": 6656,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          128,
+          144
+        ]
+      },
+      {
+        "name": "PlMsNr.dat",
+        "joints": 90,
+        "meshes": 105,
+        "vertices": 8425,
+        "triangles": 7031,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          128,
+          152,
+          144
+        ]
+      },
+      {
+        "name": "PlGwNr.dat",
+        "joints": 53,
+        "meshes": 129,
+        "vertices": 14070,
+        "triangles": 13450,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlDrNr.dat",
+        "joints": 86,
+        "meshes": 72,
+        "vertices": 6999,
+        "triangles": 6273,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlClNr.dat",
+        "joints": 79,
+        "meshes": 85,
+        "vertices": 8323,
+        "triangles": 7381,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlPcNr.dat",
+        "joints": 46,
+        "meshes": 39,
+        "vertices": 4360,
+        "triangles": 4034,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlFeNr.dat",
+        "joints": 92,
+        "meshes": 121,
+        "vertices": 8371,
+        "triangles": 7093,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          128,
+          144
+        ]
+      },
+      {
+        "name": "PlGnNr.dat",
+        "joints": 84,
+        "meshes": 101,
+        "vertices": 8075,
+        "triangles": 7103,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlFcNr.dat",
+        "joints": 67,
+        "meshes": 78,
+        "vertices": 6337,
+        "triangles": 5585,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          128,
+          152,
+          144
+        ]
+      }
+    ],
+    "limitations": "Static geometry decoding; no skinning, materials, textures or rendered-image comparison"
+  },
+  "poses": {
+    "models": 27,
+    "clips": 38,
+    "parentScaleCases": 2
+  },
+  "animationRegression": {
+    "clips": 5508,
+    "allAnimations": true
+  },
+  "integrationDependencies": [
+    {
+      "entry": "HSD_JObjLoadJoint",
+      "linked": false,
+      "missingCount": 49
+    },
+    {
+      "entry": "Fighter_Create",
+      "linked": false,
+      "missingCount": 223
+    }
+  ],
+  "testsPassed": 23,
+  "hostedStages": 6,
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false
+}

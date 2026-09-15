@@ -17,8 +17,37 @@ const needle = 'typedef signed int ssize_t;';
 if (original.split(needle).length !== 2) throw Error('Platform typedef patch no longer matches.');
 fs.writeFileSync(path.join(output, 'include/Runtime/platform.h'), original.replace(needle,
   '#if !defined(__EMSCRIPTEN__)\n' + needle + '\n#endif'));
+const placeholder=fs.readFileSync(path.join(upstream,'src/placeholder.h'),'utf8');
+const estimatePlaceholder='#define __frsqrte(x) sqrt(x)';
+if(placeholder.split(estimatePlaceholder).length!==2)throw Error('Reciprocal-square-root override no longer matches');
+fs.writeFileSync(path.join(output,'include/placeholder.h'),placeholder.replace(estimatePlaceholder,
+  'double portFrsqrte(double);\n#define __frsqrte(x) portFrsqrte(x)'));
+const vendor=path.join(root,'engines/browser-native/vendor/dolphin');
+const provenance=JSON.parse(fs.readFileSync(path.join(vendor,'source.json')));
+for(const {file,sha256} of provenance.files)if(createHash('sha256').update(fs.readFileSync(path.join(vendor,file))).digest('hex')!==sha256)
+  throw Error('Arithmetic reference source hash mismatch: '+file);
+const estimateObjects=[];
+for(const [name,file] of [['float-utils',path.join(vendor,'Common/FloatUtils.cpp')],
+  ['estimates',path.join(root,'engines/browser-native/estimates.cpp')]]) {
+  const object=path.join(output,name+'.o');estimateObjects.push(object);
+  execFileSync(compiler,['-std=c++20','-O2','-fno-fast-math','-ffp-contract=off','-fno-exceptions',
+    '-I'+vendor,'-c',file,'-o',object],{stdio:'inherit'});
+}
+// This SDK file mixes portable C with inline PPC assembly. Select two complete
+// unchanged C definitions from the pinned source rather than compile asm stubs.
+const sdkMatrix=fs.readFileSync(path.join(upstream,'libs/dolphin/src/dolphin/mtx/mtx.c'),'utf8');
+const selectedSdkFunctions=['MTXRotRad','C_MTXLookAt'];
+const selectedText=[['void MTXRotRad(', '\nvoid PSMTXRotTrig('],
+  ['void C_MTXLookAt(', '\nvoid MTXLightFrustum(']].map(([start,end])=>{
+    if(sdkMatrix.split(start).length!==2||sdkMatrix.split(end).length!==2)throw Error('SDK function selection changed');
+    const from=sdkMatrix.indexOf(start),to=sdkMatrix.indexOf(end,from);
+    if(to<from)throw Error('Invalid SDK selection');return sdkMatrix.slice(from,to);
+  });
+const selectedSdk=path.join(output,'sdk-camera.c');
+fs.writeFileSync(selectedSdk,'#include <dolphin.h>\n#include <math.h>\n'+selectedText.join('\n'));
 const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/ground.c', 'src/melee/ft/ftcommon.c',
-  'src/MSL/trigf.c', 'src/MSL/math_data.c', 'src/sysdolphin/baselib/mtx.c',
+  'libs/dolphin/src/dolphin/mtx/mtx44.c',
+  'src/MSL/trigf.c', 'src/MSL/math_data.c', 'src/MSL/float.c', 'src/sysdolphin/baselib/mtx.c',
   'src/sysdolphin/baselib/random.c', 'src/sysdolphin/baselib/archive.c',
   'src/sysdolphin/baselib/memory.c', 'src/sysdolphin/baselib/initialize.c',
   'src/sysdolphin/baselib/objalloc.c', 'libs/dolphin/src/dolphin/os/OSAlloc.c',
@@ -33,16 +62,19 @@ const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'portAnimationTimeline', 'PSMTXIdentity','PSMTXCopy','PSMTXScale','PSMTXTranspose','PSMTXConcat',
   'PSMTXMultVec','PSMTXMultVecSR','PSVECAdd','PSVECSubtract','PSVECScale','PSVECDotProduct',
   'PSVECSquareMag','PSVECCrossProduct','HSD_MtxSRT','HSD_MkRotationMtx','sinf','cosf',
-  'portPoseCreate','portPoseNode','portPoseTrack','portPoseRewind','portPoseStep','portPoseDestroy'];
+  'portPoseCreate','portPoseNode','portPoseTrack','portPoseRewind','portPoseStep','portPoseDestroy',
+  'portFrsqrte','portFres','portRound25','portEstimateBits','PSVECNormalize','PSVECMag','PSMTXTrans',
+  'MTXFrustum','MTXPerspective','MTXOrtho','MTXRotRad','C_MTXLookAt','PSMTXQuat','PSMTXInverse','PSMTXRotAxisRad'];
 const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
   '-fno-builtin-sinf', '-fno-builtin-cosf', '-fno-builtin-tanf',
   '-ffunction-sections', '-fdata-sections', '-I' + path.join(output, 'include'),
   '-Isrc', '-Ilibs/dolphin/include'];
-execFileSync(compiler, [...flags, ...units, path.join(root, 'engines/browser-native/platform.c'),
+execFileSync(compiler, [...flags, ...units, selectedSdk,...estimateObjects, path.join(root, 'engines/browser-native/platform.c'),
   path.join(root, 'engines/browser-native/runtime.c'),
   path.join(root, 'engines/browser-native/fighter.c'),
   path.join(root, 'engines/browser-native/animation.c'),
   path.join(root, 'engines/browser-native/math.c'),
+  path.join(root, 'engines/browser-native/matrix-special.c'),
   path.join(root, 'engines/browser-native/pose.c'),
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
@@ -50,12 +82,12 @@ execFileSync(compiler, [...flags, ...units, path.join(root, 'engines/browser-nat
   '-sASSERTIONS=1', '-o', path.join(output, 'melee-native.mjs')], {cwd:upstream, stdio:'inherit'});
 for (const name of ['archive.mjs', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
-  'joint-assets.mjs','verify-poses.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
+  'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
 const wasm = fs.readFileSync(path.join(output, 'melee-native.wasm'));
 const module = new WebAssembly.Module(wasm);
 const report = {source, compiler:execFileSync(compiler, ['--version'], {encoding:'utf8'}).split('\n')[0],
-  units, flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
+  units,selectedSdkFunctions,arithmeticReference:provenance,flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
   wasmSha256:createHash('sha256').update(wasm).digest('hex'), imports:WebAssembly.Module.imports(module),
   playable:false, gameplayParity:false, performanceCertified:false};
 fs.writeFileSync(path.join(output, 'build.json'), JSON.stringify(report, null, 2) + '\n');

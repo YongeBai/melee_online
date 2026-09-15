@@ -1,0 +1,20 @@
+{
+  "repository": "https://github.com/dolphin-emu/dolphin",
+  "commit": "e22551eae1c84a7e4d0b6a5c519ef4ed4ef69df1",
+  "license": "GPL-2.0-or-later",
+  "purpose": "Gekko reciprocal and reciprocal-square-root arithmetic helpers",
+  "files": [
+    {
+      "file": "Common/FloatUtils.cpp",
+      "sha256": "e7bcd6a48701a361a84a9c0dfbf2ddb0c5c5219a1370838c05f99a5e8dff9dbb"
+    },
+    {
+      "file": "Common/FloatUtils.h",
+      "sha256": "8aad8c06eac7e14ac2876ddd56edc0562d28cd8c906ca6bfd9c72808810dbbe5"
+    },
+    {
+      "file": "Common/CommonTypes.h",
+      "sha256": "b714ae37337b4f9cd6e1863073bdd92fda8648e606c91657b104fdc856199b94"
+    }
+  ]
+}

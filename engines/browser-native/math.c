@@ -13,6 +13,8 @@ _Static_assert(sizeof(Mtx)==48,"Matrix layout");
 /* MSL's math_1.c also defines a big-endian frexp. Link only this portable
  * wrapper instead of overriding libc with that unrelated implementation. */
 float fabsf__Ff(float value) { return fabsf(value); }
+extern double portFrsqrte(double);
+extern double portRound25(double);
 
 void PSMTXIdentity(Mtx m)
 {
@@ -22,6 +24,19 @@ void PSMTXCopy(Mtx src,Mtx dst) { memmove(dst,src,sizeof(Mtx)); }
 void PSMTXScale(Mtx m,float x,float y,float z)
 {
     memset(m,0,sizeof(Mtx));m[0][0]=x;m[1][1]=y;m[2][2]=z;
+}
+void PSMTXTrans(Mtx m,float x,float y,float z)
+{
+    PSMTXIdentity(m);m[0][3]=x;m[1][3]=y;m[2][3]=z;
+}
+void PSMTXRotTrig(Mtx m,char axis,float sine,float cosine)
+{
+    axis|=0x20;
+    if(axis!='x'&&axis!='y'&&axis!='z')return;
+    PSMTXIdentity(m);
+    if(axis=='x') {m[1][1]=cosine;m[1][2]=-sine;m[2][1]=sine;m[2][2]=cosine;}
+    if(axis=='y') {m[0][0]=cosine;m[0][2]=sine;m[2][0]=-sine;m[2][2]=cosine;}
+    if(axis=='z') {m[0][0]=cosine;m[0][1]=-sine;m[1][0]=sine;m[1][1]=cosine;}
 }
 void PSMTXTranspose(Mtx src,Mtx dst)
 {
@@ -82,6 +97,26 @@ float PSVECSquareMag(Vec* a)
 {
     float x=a->x*a->x,y=a->y*a->y;
     return fmaf(a->z,a->z,x)+y;
+}
+static float reciprocal_length(float sum)
+{
+    /* frsqrte produces a double estimate; fmuls then rounds each result to
+     * binary32. Converting the estimate to float first loses hardware bits. */
+    double estimate=portFrsqrte(sum);
+    float square=(float)(estimate*portRound25(estimate)),half=(float)(estimate*0.5);
+    float correction=-fmaf(square,sum,-3.0f);
+    return correction*half;
+}
+void PSVECNormalize(Vec* source,Vec* out)
+{
+    float factor=reciprocal_length(PSVECSquareMag(source));
+    PSVECScale(source,out,factor);
+}
+float PSVECMag(Vec* source)
+{
+    float sum=PSVECSquareMag(source),factor=reciprocal_length(sum);
+    /* fsel uses the third operand for NaN, including the zero-vector path. */
+    return sum*(factor>=0?factor:sum);
 }
 void PSVECCrossProduct(Vec* a,Vec* b,Vec* out)
 {

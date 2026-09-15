@@ -31,6 +31,33 @@ These numbers establish subsystem coverage only, not combat correctness or FPS.
 Fighter creation, the complete action-state loop, full joint/constraint ownership,
 remaining SDK math, GX, audio and Dolphin parity remain.
 
+Further math bring-up replaces the upstream non-GameCube `__frsqrte(x) -> sqrt(x)`
+placeholder with Dolphin's table-based reciprocal-square-root utility. This is
+standalone arithmetic with no CPU dispatcher or emulator state. The vendored
+utility is pinned and licensed, and all 57 upstream golden vectors pass through
+WASM memory, including NaN payloads and denormals. Vector normalization retains
+the SDK's 25-bit multiplication-operand rounding. Inverse, quaternion and axis
+rotation builders now run natively; original C look-at and projection routines
+are linked. The projection checks preserve GX's near=-1/far=0 depth convention.
+These checks do not validate the gameplay camera or complete PPC floating-point
+status/denormal behavior.
+
+A fresh link probe includes the implemented arithmetic, SDK heap and panic
+boundaries. Original `HSD_JObjLoadJoint` is now missing 49 GX functions; original
+`Fighter_Create` is missing 223 symbols across graphics, platform services and
+uncompiled game modules. The latter includes unrelated modes/stages retained
+through common tables. These are engineering dependency counts, not measured
+runtime bottlenecks. The next integration target is the GX graphics boundary and
+typed model/material/texture assets, followed by actual fighter creation.
+
+The typed GX geometry decoder now reads all 27 default model archives: 2,179 mesh
+sections, 209,465 vertex records and 186,255 triangles, including packed colors,
+fixed-point position/normal/UV arrays and triangle-strip winding. Mesh binding,
+material and texture pointers are retained for their next typed importers. No
+skinning or draw calls run yet. Chrome passes this decode alongside the complete
+5,508-clip animation regression and 38-clip pose integration; 23 targeted tests
+pass. [SDK/math/geometry checkpoint](benchmarks/browser-2026-09-15-native-port-sdk-geometry.json).
+
 The first module loads collision data for Battlefield, Final Destination, Dream
 Land, Yoshi's Story, Fountain of Dreams and Pokémon Stadium. Original HSD archive
 code relocates the converted pointers; typed C reads match the source asset

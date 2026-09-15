@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync, spawn} from 'node:child_process';
+import {createHash} from 'node:crypto';
 const root=path.resolve(import.meta.dirname,'../..');
 const source=path.join(root,'engines/melee-decomp'), out=path.join(root,'dist/native-port/audit');
 const emcc=process.env.EMCC||path.join(root,'.browser-tools/emsdk/upstream/emscripten/emcc');
@@ -53,6 +54,8 @@ const missing=[...references].filter(([symbol])=>!definitions.has(symbol))
   .map(([symbol,files])=>({symbol,files:[...files].sort()})).sort((a,b)=>b.files.length-a.files.length||a.symbol.localeCompare(b.symbol));
 const failed=results.filter(r=>r.code!==0).map(({file,diagnostic})=>({file,diagnostic})).sort((a,b)=>a.file.localeCompare(b.file));
 const report={sourceCommit:pin.commit,total:files.length,compiled:passed.length,failed:failed.length,
+  overrides:['Runtime/platform.h','placeholder.h'].map(file=>({file,
+    sha256:createHash('sha256').update(fs.readFileSync(path.join(include,file))).digest('hex')})),
   callbackDiagnosticSuppressed:false,linkedGame:false,missingSymbols:missing.length,missing,failures:failed};
 fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({total:report.total,compiled:report.compiled,failed:report.failed,

@@ -4,6 +4,7 @@ import {verifyFighters} from './verify-fighters.mjs';
 import {verifyAnimations} from './verify-animations.mjs';
 import {verifyMath} from './verify-math.mjs';
 import {verifyPoses} from './verify-poses.mjs';
+import {verifyMeshes} from './verify-meshes.mjs';
 const equal=(a,b,message)=>{if(a.length!==b.length || a.some((x,i)=>!Object.is(x,b[i])))
   throw Error(message+': '+JSON.stringify({actual:a,expected:b}));};
 const stageKinds={'GrNBa.dat':36,'GrNLa.dat':37,'GrOp.dat':28,'GrSt.dat':10,'GrIz.dat':12,'GrPs.usd':16};
@@ -84,6 +85,7 @@ export async function verifyNative(module, stageFiles=[], fighterFiles=[], anima
   const animations=verifyAnimations(module,animationFiles,!!options.allAnimations);
   const math=verifyMath(module);
   const poses=verifyPoses(module,options.models||[],animationFiles);
-  return {passed:true,rngValues:4096,ecbVectors:vectors,stages,runtime,fighters,animations,math,poses,emulator:false,
+  const meshes=verifyMeshes(options.models||[]);
+  return {passed:true,rngValues:4096,ecbVectors:vectors,stages,runtime,fighters,animations,math,poses,meshes,emulator:false,
     playable:false,gameplayParity:false,performanceMeasured:false};
 }

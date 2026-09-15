@@ -86,6 +86,27 @@ assembly fallback or gameplay mismatch.
   It is a limited integration owner, not the complete HSD class implementation.
   38 clips spanning all 27 components and every type-zero clip pass finite-matrix
   and rewind checks in Chrome; constraints and unsupported modes fail explicitly.
+- Additional native SDK operations now include normalization, magnitude,
+  translation, axis rotation, quaternion matrices and inverse matrices.
+  `matrix-special.c` expresses the original paired arithmetic directly in C.
+  Original look-at and projection C is retained, including GX's [-1,0] depth.
+- `estimates.cpp` calls the pinned Dolphin arithmetic utility for reciprocal and
+  reciprocal square root. It replaces the decompilation's incorrect host-only
+  `__frsqrte` placeholder and retains 25-bit operand rounding for normalization.
+  This utility has no emulated CPU/state or graphics dependencies. Vendored
+  source hashes, attribution and GPL-2.0-or-later license are under
+  `vendor/dolphin`; retain them when distributing the port. The 57 upstream
+  reciprocal-root golden vectors run through WASM memory without JS NaN changes.
+- `mesh-assets.mjs` decodes static GX display lists and typed vertex arrays for all
+  27 default fighter models. It preserves strip winding, matrix indices, packed
+  colors and fixed-point coordinates. The browser verifies 2,179 mesh sections.
+  Skinning, materials, textures and actual browser GPU draw calls remain.
+
+`node scripts/native-port/audit-link.mjs` probes original joint loading and fighter
+creation with the implemented native math/heap/error boundaries. It requires a
+fresh compile audit after platform-header changes and never emits a runnable
+module with unresolved imports. Its missing symbols are integration work, not
+proof that every referenced mode belongs in a tournament browser build.
 
 These tests establish subsystem behavior and selected layout compatibility.
 Expected values come from documented/source arithmetic and original asset bytes,
