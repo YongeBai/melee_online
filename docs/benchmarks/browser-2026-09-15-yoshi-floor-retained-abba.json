@@ -1,0 +1,108 @@
+{
+  "date": "2026-09-15",
+  "kind": "floor-retained-yoshi-visual-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": {
+    "stage": "Yoshis Story",
+    "fighters": "Ice Climbers mirror",
+    "secondsPerLeg": 30,
+    "outputPixels": "960x720",
+    "background": "black",
+    "fighterModels": "low",
+    "autoHostedGame": true
+  },
+  "selection": {
+    "decorativeDrawsHidden": 60,
+    "raisedPlatformDrawsRetained": 4,
+    "mainFloorDrawsRetained": 20,
+    "dynamicWaterDrawsRetained": 18,
+    "randallPreserved": true,
+    "originalCamera": true
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 107,
+    "mismatches": [],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "measurements": [
+    {
+      "nativeArt": true,
+      "simulationFps": 50.73762066227325,
+      "gameRenderFps": 50.6709483617972,
+      "distinctVisibleFps": 50.43759531013103,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 33.10999999940395,
+      "passed": false,
+      "queue": {
+        "received": 1520,
+        "presented": 1514,
+        "dropped": 7,
+        "underruns": 277,
+        "meanAgeMs": 9.879537648625938
+      }
+    },
+    {
+      "nativeArt": false,
+      "simulationFps": 57.37089298910433,
+      "gameRenderFps": 57.33755720003454,
+      "distinctVisibleFps": 55.87078248096389,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 30.78999999165535,
+      "passed": false,
+      "queue": {
+        "received": 1719,
+        "presented": 1677,
+        "dropped": 44,
+        "underruns": 110,
+        "meanAgeMs": 15.526601073140535
+      }
+    },
+    {
+      "nativeArt": false,
+      "simulationFps": 58.070973597225766,
+      "gameRenderFps": 58.03763779148683,
+      "distinctVisibleFps": 56.27084008732325,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 30.189999997615814,
+      "passed": false,
+      "queue": {
+        "received": 1740,
+        "presented": 1689,
+        "dropped": 53,
+        "underruns": 101,
+        "meanAgeMs": 15.651666666432341
+      }
+    },
+    {
+      "nativeArt": true,
+      "simulationFps": 57.5041115439674,
+      "gameRenderFps": 57.5041115439674,
+      "distinctVisibleFps": 56.13734715364701,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 30.195000007748604,
+      "passed": false,
+      "queue": {
+        "received": 1724,
+        "presented": 1685,
+        "dropped": 40,
+        "underruns": 105,
+        "meanAgeMs": 15.162489614421252
+      }
+    }
+  ],
+  "decision": "Retain opt-in. Full 720p scene visibly preserves main floor and platforms, but both candidate legs fail 60. Adjacent visible gains are +5.43 and +0.13 FPS amid a large control drift.",
+  "limits": "Mechanical replay for the revised 60-draw selection and wider camera range still require separate confirmation. The earlier 80-draw replay did pass observable mechanics but its image omitted the main floor; do not use its FPS as playable evidence."
+}

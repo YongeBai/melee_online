@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-15",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "randallMoved": true,
+  "observedItemKinds": [
+    210
+  ],
+  "passed": true,
+  "kind": "yoshi-gameplay-observable-comparison",
+  "feature": "yoshiminimal",
+  "fullMachineEquivalence": false,
+  "framesCompared": 600,
+  "initialActorCount": 4,
+  "checked": [
+    "all fighter actors including partners: action, facing, damage and motion state",
+    "player slots: positions, actions, stocks, damage",
+    "match settings and timers",
+    "RNG seed",
+    "Randall and main-stage/Shy Guy transforms, timers, item actors and projectiles",
+    "native camera transform and settings"
+  ]
+}

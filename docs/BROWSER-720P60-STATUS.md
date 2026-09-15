@@ -9,6 +9,116 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 15 Yoshi static-stage cache opportunity control: a read-only native
+matrix inventory found 84/102 map-3 drawable objects with the same 12-float
+world transforms and object identities across 156 active native frames. The
+map-0 collision object has no drawable meshes; map-2 Randall and the 18
+changing foreground-water draws were excluded. This is a pose observation,
+not a valid graphics cache: GX commands, material and texture contents,
+vertex memory, camera-dependent matrices, and later animation are not yet
+tracked. A guarded **visual-incomplete** same-checkpoint native-work cost
+control omitted just those 84 draws, then restored all original flags. Warmed
+normal/omitted/omitted/normal runs took 20.33/16.12/15.58/17.25 ms per
+native frame, or 49.19/62.04/64.17/57.96 uncapped native-work FPS.
+Both adjacent pairs favor omission by **4.21 and 1.67 ms/frame**, while the
+normal control warmed by 8.77 FPS across the session. All 80 sampled native
+input/gameplay fingerprints matched and measured JIT compilation was zero.
+The 62–64 figures do **not** pass the 720p60 image gate because the stage is
+missing. A complete, guarded stage draw cache or a simpler legible native
+stage renderer could have high return, but neither exists yet; baseline
+playable images and native camera remain unchanged.
+[Yoshi pose inventory](benchmarks/browser-2026-09-15-yoshi-mesh-inventory.json),
+[static-draw cost bound](benchmarks/browser-2026-09-15-yoshi-stable-draw-cost-bound.json).
+The follow-up read-only object-byte probe found no changes in the first
+64 bytes of all 84 identified native material and mesh objects over 51 active
+Yoshi frames (1883→1934). This narrows an invalidation question but still
+cannot license a whole-draw FIFO replay because linked material animation,
+textures, vertex streams and camera-dependent commands remain unchecked.
+[Object-byte hashes](benchmarks/browser-2026-09-15-yoshi-draw-object-hashes.json).
+An opt-in native low-detail Yoshi experiment then hid 80 checked stage
+mesh displays while keeping four raised-platform displays, all 18
+changing foreground-water draws, Randall, and the native camera. The initial
+cropped preview retained fighters and raised platforms against black, but a
+later full 960×720 view revealed that the **main floor artwork was absent**.
+This 80-draw mode is visually invalid for tournament play even though its
+600-frame same-input observable gameplay replay preserved all fighter and
+partner actors, Randall, items, RNG, stage state, rules and camera. The
+30-second same-checkpoint original/minimal/minimal/original visible rates
+were **54.04/57.77/55.66/56.20 FPS**; simulation rates were
+54.57/59.20/57.03/57.73. The first visible pair favors minimal by 3.73 FPS,
+the reversed pair opposes it by 0.54 FPS. All 108 native-input fingerprints
+matched, and all four image gates failed. In the fastest minimal leg the
+presentation queue received 1,774 images but dropped 41 in 30 seconds;
+mean image age was 18.78 ms. This selection was replaced by a narrower
+60-draw cosmetic experiment that retains the 20-draw main-floor group; it
+must pass a full-scene picture and performance control before promotion.
+[Minimal Yoshi stage comparison](benchmarks/browser-2026-09-15-yoshi-minimal-stage-abba.json).
+The revised **60-draw** Yoshi preview retains the 20-draw green main-floor
+group. The full 960×720 gameplay view visibly preserved the floor/ledge,
+both raised platforms, fighters, HUD, foreground waves and Randall under the
+native camera. Its normal/reduced/reduced/normal 30-second corrected visible
+rates were **50.44/55.87/56.27/56.14 FPS**; simulation was
+50.74/57.37/58.07/57.50. Both paired image differences favor reduction
+(+5.43 and +0.13 FPS), but the native control warmed 5.70 FPS and no image
+gate passed. All 107 sampled native-input fingerprints matched. The fastest
+reduced leg received 1,740 images, dropped 53, and showed 15.65-ms average
+main-queue age. Keep this visually viable Yoshi mode opt-in; test wider native
+zoom and broader workload coverage before promotion.
+[Floor-retained comparison](benchmarks/browser-2026-09-15-yoshi-floor-retained-abba.json).
+Its 600-frame same-input observable gameplay replay subsequently matched all
+four fighter/partner actors, player slots, match state, RNG, Randall, stage
+transforms, item/projectile actors and the native camera while Randall moved.
+This is not full-machine equivalence, and its fastest delivered 720p image
+rate remains below 60. Native wider-zoom pictures and broader roster/stage
+coverage are still required before promotion.
+[Floor-retained gameplay replay](benchmarks/browser-2026-09-15-yoshi-floor-retained-gameplay-replay.json).
+Holding the 60-draw floor-retained Yoshi scene, immediate/RAF/RAF/immediate
+same-checkpoint visible rates were **52.90/55.97/56.90/54.30 FPS**.
+Both adjacent pairs favor buffered RAF by 3.07 and 2.60 FPS with 109 matching
+native-input fingerprints. Every 960×720 image gate fails. Immediate mode
+removes the main queue but loses more distinct painted images; RAF had
+15.51–16.37 ms average image age. Keep RAF for cadence in this tested scene;
+the one-image latest-frame RAF latch is the next lower-latency control.
+[Floor-retained direct-vs-RAF](benchmarks/browser-2026-09-15-yoshi-floor-retained-direct-vs-raf.json).
+The one-image RAF latest/buffered/buffered/latest control had measured visible
+54.23/41.53/58.23/56.20 FPS. It is **invalid for causal FPS comparison**:
+the first buffered leg stalled to 41.53 and had fewer than 1,200 common
+native frames, so the controller-input consistency check failed. All legs
+missed 60. Capacity-one latest RAF lowered main-queue image age to
+7.32–8.13 ms versus 16.45–17.56 ms for two-image RAF in this session;
+that is a JS queue timestamp, not input-to-photon latency. Repeat a valid
+matched-work control before changing the default.
+[Invalid latest-frame control](benchmarks/browser-2026-09-15-yoshi-floor-retained-latest-invalid.json).
+The first **all-six-legal-stage native mesh inventory** on the same corrected
+auto-hosted browser core found: Battlefield's visible map-6 stage object has
+54 DObjs; Final Destination's category-0 playable map-2 has two, while a
+separate category-1 map-3 has 26; Frozen Stadium's neutral map-5 has 14,
+versus category-1 map-1/map-2 with 62/60; Dream Land's category-0 map-4/map-6
+have 26/6, versus category-1 map-7/map-5 with 11/25; Yoshi's map-3 has 102
+and map-2 Randall has two; Fountain's main category-1 maps1/3 have 75/108,
+with moving-platform objects preserved separately. The already-black
+category-2 backgrounds were also counted but do not give a new savings
+claim. **These are structure counts, not timed costs or permission to hide
+objects.** A whole-map Final Destination map-3 draw skip proved invalid in a
+full 960×720 view: it removed the dark playable stage top despite retaining
+the separate map-2 low grid. Hiding all 18 joint-4 meshes also removed that
+top. An isolated seven-draw translucent-group preview identified the dark
+floor there; an eleven-draw opaque-group preview retained the floor and ledges
+while simplifying the moving underside. Only that opaque underside group is
+now the opt-in timed candidate; native collision, processes, camera and other
+stage meshes remain live. Visual identification alone cannot establish a
+frame-rate gain or mechanic equivalence.
+[Six-stage structure inventory](benchmarks/browser-2026-09-15-legal-stage-mesh-inventory.json).
+The 30-second same-checkpoint FD opaque-underside normal/reduced/reduced/normal
+image rates were **57.14/58.74/54.50/33.80 FPS** at 960×720; simulation was
+58.70/59.97/55.40/33.80. The first normal/reduced pair favors the reduction
+by only 1.60 visible FPS, and both fail 60. The complete A/B/B/A attribution
+is **invalid**: the final two legs had fewer than 1,200 common tracked
+controller frames, with the restored native control falling to 33.80 FPS.
+The page stayed visible/focused, but the cause of that slowdown is unknown.
+Do not promote the FD visual option or infer an all-stage gain from this run.
+[Invalid FD opaque control](benchmarks/browser-2026-09-15-fd-opaque-abba-invalid.json).
+
 September 14 camera/depth correction: an isolated native Dolphin reference and
 the browser Dream Land 64 Ice Climbers mirror both reported camera interest
 `[-22.703764,23.204119,0]`, position `[-14.457623,42.405716,125.036156]`,

@@ -1,0 +1,89 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-latest-vs-buffered-presentation-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": {
+    "stage": "Yoshis Story",
+    "fighters": "Ice Climbers mirror",
+    "visualMode": "floor retained, 60 cosmetic draws hidden",
+    "finalHiddenStageDraws": 60,
+    "outputPixels": "960x720",
+    "secondsPerLeg": 30,
+    "autoHostedGame": true
+  },
+  "inputConsistency": {
+    "passed": false,
+    "checked": 98,
+    "mismatches": [
+      {
+        "run": 2,
+        "reason": "fewer than 1200 common tracked frames"
+      }
+    ],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "measurements": [
+    {
+      "bufferedRaf": false,
+      "simulationFps": 56.53097787592184,
+      "distinctVisibleFps": 54.23107370526228,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "queue": {
+        "presented": 1629,
+        "dropped": 67,
+        "meanAgeMs": 8.128563536016614
+      }
+    },
+    {
+      "bufferedRaf": true,
+      "simulationFps": 41.96644284564316,
+      "distinctVisibleFps": 41.53311182340856,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "queue": {
+        "presented": 1248,
+        "dropped": 11,
+        "meanAgeMs": 16.4515184294313
+      }
+    },
+    {
+      "bufferedRaf": true,
+      "simulationFps": 59.665582741909965,
+      "distinctVisibleFps": 58.232275446992574,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "queue": {
+        "presented": 1749,
+        "dropped": 40,
+        "meanAgeMs": 17.561232132646545
+      }
+    },
+    {
+      "bufferedRaf": false,
+      "simulationFps": 59.802043236459426,
+      "distinctVisibleFps": 56.201920232257855,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "queue": {
+        "presented": 1688,
+        "dropped": 105,
+        "meanAgeMs": 7.319333530918328
+      }
+    }
+  ],
+  "decision": "Invalid causal FPS comparison: one buffered leg slowed to about 42 native/visible FPS and had fewer than 1200 common tracked native frames. No queue-mode promotion. All image gates fail.",
+  "limits": "Queue receipt-to-canvas age is not physical input-to-photon latency. Capacity-one latest mode had 7.3-8.1 ms mean age vs 16.5-17.6 ms for capacity-two RAF in this invalid session, but throughput evidence must be repeated with matched native work."
+}

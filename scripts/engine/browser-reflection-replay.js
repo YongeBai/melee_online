@@ -3,11 +3,11 @@ import {benchmarkPad} from './browser-benchmark-input.js';
 // state intentionally differs; do not label this full-machine equivalence.
 export async function verifyFountainReflectionState(host,{frames=600,feature="reflection",onProgress=()=>{}}={}){
  if(!Number.isInteger(frames)||frames<120||frames>3600)throw Error('Expected 120–3600 replay frames');
- const staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground',yoshiWaves=feature==='yoshioffscreen',yoshi=feature==='yoshianimation'||stageBackground||yoshiWaves,stadium=feature==='stadiumscreen'||feature==='stadiumdecoration',stageName=staticBackground?'Battlefield':yoshi?'Yoshi':stadium?'Stadium':'Fountain';
+ const staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground',yoshiWaves=feature==='yoshioffscreen',yoshiMinimal=feature==='yoshiminimal',yoshi=feature==='yoshianimation'||stageBackground||yoshiWaves||yoshiMinimal,stadium=feature==='stadiumscreen'||feature==='stadiumdecoration',stageName=staticBackground?'Battlefield':yoshi?'Yoshi':stadium?'Stadium':'Fountain';
  const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
  const inspect=()=>host.adapter.request('meleeControl',{action:staticBackground?'tournamentGameplayState':yoshi?'yoshiGameplayState':stadium?'stadiumGameplayState':'fountainReflectionState'});
- if(!['staticbackground','stagebackground','yoshioffscreen','reflection','scenery','modeldetail','animation','decorations','particles','stadiumscreen','stadiumdecoration','yoshianimation'].includes(feature))throw Error('Unknown cosmetic feature');
- const reflection=enabled=>host.adapter.request('meleeControl',{action:staticBackground?'staticBackgroundAnimation':stageBackground?'stageBackground':yoshiWaves?'yoshiOffscreenDecor':yoshi?'yoshiBackgroundAnimation':feature==='stadiumdecoration'?'stadiumDecoration':stadium?'stadiumScreen':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
+ if(!['staticbackground','stagebackground','yoshioffscreen','yoshiminimal','reflection','scenery','modeldetail','animation','decorations','particles','stadiumscreen','stadiumdecoration','yoshianimation'].includes(feature))throw Error('Unknown cosmetic feature');
+ const reflection=enabled=>host.adapter.request('meleeControl',{action:staticBackground?'staticBackgroundAnimation':stageBackground?'stageBackground':yoshiWaves?'yoshiOffscreenDecor':yoshiMinimal?'yoshiMinimalStage':yoshi?'yoshiBackgroundAnimation':feature==='stadiumdecoration'?'stadiumDecoration':stadium?'stadiumScreen':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
  const neutral=benchmarkPad(null),reference=[],inputs=[];let captured=false;
  const itemKinds=new Set();let randallMoved=false,initialRandall;
  try{
@@ -29,6 +29,13 @@ export async function verifyFountainReflectionState(host,{frames=600,feature="re
    if(visible.objects?.length!==1||visible.objects[0].mapId!==3||
       visible.objects[0].groups!==7||visible.objects[0].draws?.length!==14||visible.writes?.length)
     throw Error('Yoshi wave replay must retain the checked Shy Guy stage object');
+  }else if(yoshiMinimal){
+   if(visible.objects?.length!==1||visible.objects[0].mapId!==3||
+      visible.objects[0].hiddenDraws?.length!==60||
+      JSON.stringify(visible.objects[0].retainedMainDisplays)!=='[0,1,2,3]'||
+      visible.objects[0].retainedFloorDraws?.length!==20||
+      !visible.objects[0].randallPreserved||visible.writes?.length)
+    throw Error('Yoshi minimal replay must retain platform displays and Randall');
   }else if(visible.objects.length!==1)throw Error('Cosmetic object was not identified');
   await command('capture',{slot:5});captured=true;
   for(const enabled of[true,false]){

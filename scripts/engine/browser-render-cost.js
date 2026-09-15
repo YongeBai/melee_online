@@ -9,9 +9,11 @@ export async function measureBrowserRenderCost(host,inspect,{
 }={}){
   if(!Number.isInteger(frames)||frames<1200||frames>3600)throw Error('Render cost requires 1200–3600 native frames');
   const links=scope.startsWith('link-'),group=links?scope.slice(5):'';
-  if(!['scene','mesh','drawable','texture','tev','link-stage','link-fighters','link-effects','link-hud','link-shadows','link-environment'].includes(scope))throw Error('Unknown render-cost scope');
+  if(!['scene','mesh','drawable','texture','tev','link-stage','link-fighters','link-effects','link-hud','link-shadows','link-environment','yoshi-static'].includes(scope))throw Error('Unknown render-cost scope');
   const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
-  const render=enabled=>host.adapter.request('meleeControl',links?{action:'renderLinkDiagnostic',enabled,group}:{action:'renderCostDiagnostic',enabled,scope});
+  const render=enabled=>host.adapter.request('meleeControl',scope==='yoshi-static'
+    ?{action:'yoshiStableDrawCostDiagnostic',enabled}
+    :links?{action:'renderLinkDiagnostic',enabled,group}:{action:'renderCostDiagnostic',enabled,scope});
   const runs=[];let captured=false,failed,result;
   try{
     await command('pause');await command('step');await render(true);

@@ -1,0 +1,191 @@
+{
+  "date": "2026-09-15",
+  "coreId": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Final Destination",
+  "fighters": "Ice Climbers mirror",
+  "feature": "11 opaque lower DObjs hidden; 7 translucent floor DObjs retained",
+  "kind": "same-checkpoint-final destination-fdbottom-abba",
+  "passed": false,
+  "inputConsistency": {
+    "passed": false,
+    "checked": 98,
+    "mismatches": [
+      {
+        "run": 6,
+        "reason": "fewer than 1200 common tracked frames"
+      },
+      {
+        "run": 7,
+        "reason": "fewer than 1200 common tracked frames"
+      }
+    ],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "runs": [
+    {
+      "original": true,
+      "simulationFps": 58.70310148051539,
+      "visibleFps": 57.13635203725348,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "validGameplay": true,
+      "passed": false,
+      "queue": {
+        "received": 1759,
+        "presented": 1715,
+        "dropped": 44,
+        "underruns": 73,
+        "meanAgeMs": 18.099518950487713
+      },
+      "controllerFrames": 1762,
+      "coverage": {
+        "mapId": 3,
+        "hiddenVisualDraws": 11,
+        "retainedTranslucentFloorDraws": 7,
+        "retainedJointTwoDraws": 5,
+        "floorMapId": 2,
+        "floorDraws": 2,
+        "gameObjectsPreserved": true,
+        "original": true,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "original": false,
+      "simulationFps": 59.96949522784157,
+      "visibleFps": 58.736103719542434,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "validGameplay": true,
+      "passed": false,
+      "queue": {
+        "received": 1797,
+        "presented": 1763,
+        "dropped": 35,
+        "underruns": 25,
+        "meanAgeMs": 17.392226318785973
+      },
+      "controllerFrames": 1800,
+      "coverage": {
+        "mapId": 3,
+        "hiddenVisualDraws": 11,
+        "retainedTranslucentFloorDraws": 7,
+        "retainedJointTwoDraws": 5,
+        "floorMapId": 2,
+        "floorDraws": 2,
+        "gameObjectsPreserved": true,
+        "original": false,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "original": false,
+      "simulationFps": 55.40402602590442,
+      "visibleFps": 54.503960621151464,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "validGameplay": true,
+      "passed": false,
+      "queue": {
+        "received": 1661,
+        "presented": 1636,
+        "dropped": 27,
+        "underruns": 150,
+        "meanAgeMs": 16.923661369147247
+      },
+      "controllerFrames": 1663,
+      "coverage": {
+        "mapId": 3,
+        "hiddenVisualDraws": 11,
+        "retainedTranslucentFloorDraws": 7,
+        "retainedJointTwoDraws": 5,
+        "floorMapId": 2,
+        "floorDraws": 2,
+        "gameObjectsPreserved": true,
+        "original": false,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    },
+    {
+      "original": true,
+      "simulationFps": 33.7995549725309,
+      "visibleFps": 33.7995549725309,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "validGameplay": true,
+      "passed": false,
+      "queue": {
+        "received": 1014,
+        "presented": 1014,
+        "dropped": 0,
+        "underruns": 774,
+        "meanAgeMs": 8.512302761408822
+      },
+      "controllerFrames": 1015,
+      "coverage": {
+        "mapId": 3,
+        "hiddenVisualDraws": 11,
+        "retainedTranslucentFloorDraws": 7,
+        "retainedJointTwoDraws": 5,
+        "floorMapId": 2,
+        "floorDraws": 2,
+        "gameObjectsPreserved": true,
+        "original": true,
+        "stableAtEnd": true
+      },
+      "pageLifecycle": {
+        "start": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "end": {
+          "visibility": "visible",
+          "focused": true
+        },
+        "events": []
+      }
+    }
+  ],
+  "limits": "The full A/B/B/A is invalid for causal FPS because the last two runs have fewer than 1200 common tracked input frames. The first pair favors hiding by 1.60 visible FPS but both legs fail 60. Frame rates are distinct delivered 960x720 images, not physical input-to-photon latency. Visual preview passed; broader gameplay equivalence remains unproven."
+}

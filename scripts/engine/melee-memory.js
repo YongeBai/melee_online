@@ -11,7 +11,7 @@ import {planFountainParticles,inspectParticleBanks,PARTICLE_DRAW_CAVE,PARTICLE_D
 import {planShadowDiagnostic,SHADOW_DIAGNOSTIC_PROC} from './melee-shadow-diagnostic.js';
 import {planFountainAnimation,FOUNTAIN_ANIMATION_CAVE,FOUNTAIN_ANIMATION_BYTES} from './melee-fountain-animation.js';
 import {planFighterModelDetail} from './melee-model-detail.js';
-import {planFountainScenery,inspectFountainGeometry,inspectYoshiGeometry,planYoshiOffscreenDecor,planFountainGeometryView,planFountainDecorations} from './melee-scenery.js';
+import {planFountainScenery,inspectFountainGeometry,inspectYoshiGeometry,inspectTournamentStageGeometry,planFinalDestinationBottomVisual,inspectYoshiStaticDrawObjectBytes,planYoshiOffscreenDecor,planYoshiStableDrawCostDiagnostic,planYoshiMinimalStage,planFountainGeometryView,planFountainDecorations} from './melee-scenery.js';
 const fountainGeometryBaseline=new WeakMap();
 import {planFountainReflection} from './melee-reflection.js';
 import { planStageBackground } from './melee-background.js';
@@ -406,7 +406,7 @@ export function controlMelee(module, api, action, options = {}) {
       return plan;
     }finally{if(!wasPaused)api.setCorePaused(0);}
   }
-  if(action==='yoshiGeometryInspect'||action==='yoshiOffscreenDecor'){
+  if(action==='yoshiGeometryInspect'||action==='yoshiDrawDependencyProbe'||action==='yoshiOffscreenDecor'||action==='yoshiStableDrawCostDiagnostic'||action==='yoshiMinimalStage'){
     const wasPaused=api.getCoreStateName?.()==='Paused';
     if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for checked Yoshi mesh control');
     try{
@@ -414,9 +414,37 @@ export function controlMelee(module, api, action, options = {}) {
       if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==8)
         throw Error('Yoshi mesh inventory requires a live Yoshi match');
       const geometry=inspectYoshiGeometry(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)));
-      if(action==='yoshiGeometryInspect')return geometry;
-      const plan=planYoshiOffscreenDecor(geometry,options.enabled);
+      if(action==='yoshiGeometryInspect')return {...geometry,sceneFrame:current.sceneFrame};
+      if(action==='yoshiDrawDependencyProbe')return {...inspectYoshiStaticDrawObjectBytes(geometry,a=>v.getUint8(at(a))),sceneFrame:current.sceneFrame,renderFrame:current.renderFrame};
+      const plan=action==='yoshiStableDrawCostDiagnostic'
+        ? planYoshiStableDrawCostDiagnostic(geometry,options.enabled)
+        : action==='yoshiMinimalStage'?planYoshiMinimalStage(geometry,options.enabled)
+        : planYoshiOffscreenDecor(geometry,options.enabled);
       for(const [address,value] of plan.writes)w(address,value);
+      return plan;
+    }finally{if(!wasPaused)api.setCorePaused(0);}
+  }
+  if(action==='tournamentStageGeometryInspect'){
+    const wasPaused=api.getCoreStateName?.()==='Paused';
+    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for tournament stage geometry inventory');
+    try{
+      const current=inspectMelee(module);
+      if(current.major!==2||current.minor!==2||current.sceneKind!==2||![2,3,8,28,31,32].includes(current.match?.stage))
+        throw Error('Tournament geometry inventory requires a live legal-stage match');
+      return {...inspectTournamentStageGeometry(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a))),
+        stage:current.match.stage,sceneFrame:current.sceneFrame};
+    }finally{if(!wasPaused)api.setCorePaused(0);}
+  }
+  if(action==='finalDestinationBottomVisual'){
+    const wasPaused=api.getCoreStateName?.()==='Paused';
+    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for Final Destination visual control');
+    try{
+      const current=inspectMelee(module);
+      if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==32)
+        throw Error('Final Destination visual control requires a live Final Destination match');
+      const geometry=inspectTournamentStageGeometry(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)));
+      const plan=planFinalDestinationBottomVisual(u32,geometry,options.enabled,options.selection);
+      for(const[address,value]of plan.writes)w(address,value);
       return plan;
     }finally{if(!wasPaused)api.setCorePaused(0);}
   }

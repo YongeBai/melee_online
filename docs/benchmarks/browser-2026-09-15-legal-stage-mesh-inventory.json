@@ -1,0 +1,470 @@
+{
+  "date": "2026-09-15",
+  "kind": "legal-stage-native-mesh-structure-inventory",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stages": [
+    {
+      "name": "Battlefield",
+      "stage": 31,
+      "objects": [
+        {
+          "mapId": 0,
+          "category": 0,
+          "joints": 23,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 3,
+          "category": 2,
+          "joints": 3,
+          "draws": 2,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 1,
+          "category": 2,
+          "joints": 6,
+          "draws": 1,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 6,
+          "category": 0,
+          "joints": 17,
+          "draws": 54,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 13,
+              "draws": 22,
+              "firstDraw": 11,
+              "lastDraw": 32
+            },
+            {
+              "joint": 14,
+              "draws": 7,
+              "firstDraw": 33,
+              "lastDraw": 39
+            },
+            {
+              "joint": 15,
+              "draws": 7,
+              "firstDraw": 40,
+              "lastDraw": 46
+            },
+            {
+              "joint": 16,
+              "draws": 7,
+              "firstDraw": 47,
+              "lastDraw": 53
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Final Destination",
+      "stage": 32,
+      "objects": [
+        {
+          "mapId": 0,
+          "category": 0,
+          "joints": 23,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 1,
+          "category": 1,
+          "joints": 2,
+          "draws": 2,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 2,
+          "category": 0,
+          "joints": 2,
+          "draws": 2,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 3,
+          "category": 1,
+          "joints": 6,
+          "draws": 26,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 2,
+              "draws": 5,
+              "firstDraw": 0,
+              "lastDraw": 4
+            },
+            {
+              "joint": 4,
+              "draws": 18,
+              "firstDraw": 6,
+              "lastDraw": 23
+            }
+          ]
+        },
+        {
+          "mapId": 4,
+          "category": 2,
+          "joints": 18,
+          "draws": 22,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 9,
+              "draws": 11,
+              "firstDraw": 4,
+              "lastDraw": 14
+            }
+          ]
+        },
+        {
+          "mapId": 5,
+          "category": 2,
+          "joints": 10,
+          "draws": 23,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 5,
+              "draws": 8,
+              "firstDraw": 0,
+              "lastDraw": 7
+            },
+            {
+              "joint": 6,
+              "draws": 8,
+              "firstDraw": 8,
+              "lastDraw": 15
+            }
+          ]
+        },
+        {
+          "mapId": 6,
+          "category": 2,
+          "joints": 6,
+          "draws": 5,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 7,
+          "category": 2,
+          "joints": 7,
+          "draws": 2,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 8,
+          "category": 2,
+          "joints": 6,
+          "draws": 4,
+          "groupsAtLeastFiveDraws": []
+        }
+      ]
+    },
+    {
+      "name": "Pokemon Stadium",
+      "stage": 3,
+      "objects": [
+        {
+          "mapId": 0,
+          "category": 0,
+          "joints": 25,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 1,
+          "category": 1,
+          "joints": 13,
+          "draws": 62,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 2,
+              "draws": 5,
+              "firstDraw": 0,
+              "lastDraw": 4
+            },
+            {
+              "joint": 11,
+              "draws": 35,
+              "firstDraw": 19,
+              "lastDraw": 53
+            },
+            {
+              "joint": 12,
+              "draws": 8,
+              "firstDraw": 54,
+              "lastDraw": 61
+            }
+          ]
+        },
+        {
+          "mapId": 2,
+          "category": 1,
+          "joints": 4,
+          "draws": 60,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 2,
+              "draws": 28,
+              "firstDraw": 0,
+              "lastDraw": 27
+            },
+            {
+              "joint": 3,
+              "draws": 32,
+              "firstDraw": 28,
+              "lastDraw": 59
+            }
+          ]
+        },
+        {
+          "mapId": 5,
+          "category": 0,
+          "joints": 3,
+          "draws": 14,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 1,
+              "draws": 6,
+              "firstDraw": 0,
+              "lastDraw": 5
+            },
+            {
+              "joint": 2,
+              "draws": 8,
+              "firstDraw": 6,
+              "lastDraw": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dream Land",
+      "stage": 28,
+      "objects": [
+        {
+          "mapId": 0,
+          "category": 0,
+          "joints": 31,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 3,
+          "category": 2,
+          "joints": 3,
+          "draws": 1,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 7,
+          "category": 1,
+          "joints": 17,
+          "draws": 11,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 5,
+          "category": 1,
+          "joints": 21,
+          "draws": 25,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 14,
+              "draws": 5,
+              "firstDraw": 14,
+              "lastDraw": 18
+            }
+          ]
+        },
+        {
+          "mapId": 4,
+          "category": 0,
+          "joints": 14,
+          "draws": 26,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 6,
+          "category": 0,
+          "joints": 11,
+          "draws": 6,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 1,
+          "category": 0,
+          "joints": 6,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 8,
+          "category": 0,
+          "joints": 2,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        }
+      ]
+    },
+    {
+      "name": "Yoshis Story",
+      "stage": 8,
+      "objects": [
+        {
+          "mapId": 0,
+          "category": 0,
+          "joints": 23,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 1,
+          "category": 2,
+          "joints": 26,
+          "draws": 92,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 3,
+          "category": 0,
+          "joints": 22,
+          "draws": 102,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 4,
+              "draws": 26,
+              "firstDraw": 4,
+              "lastDraw": 29
+            },
+            {
+              "joint": 5,
+              "draws": 20,
+              "firstDraw": 30,
+              "lastDraw": 49
+            },
+            {
+              "joint": 17,
+              "draws": 17,
+              "firstDraw": 62,
+              "lastDraw": 78
+            },
+            {
+              "joint": 19,
+              "draws": 17,
+              "firstDraw": 81,
+              "lastDraw": 97
+            }
+          ]
+        },
+        {
+          "mapId": 2,
+          "category": 0,
+          "joints": 5,
+          "draws": 2,
+          "groupsAtLeastFiveDraws": []
+        }
+      ]
+    },
+    {
+      "name": "Fountain of Dreams",
+      "stage": 2,
+      "objects": [
+        {
+          "mapId": 0,
+          "category": 0,
+          "joints": 20,
+          "draws": 0,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 1,
+          "category": 1,
+          "joints": 51,
+          "draws": 75,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 3,
+          "category": 1,
+          "joints": 56,
+          "draws": 108,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 8,
+              "draws": 20,
+              "firstDraw": 9,
+              "lastDraw": 28
+            },
+            {
+              "joint": 11,
+              "draws": 7,
+              "firstDraw": 31,
+              "lastDraw": 37
+            },
+            {
+              "joint": 12,
+              "draws": 7,
+              "firstDraw": 38,
+              "lastDraw": 44
+            },
+            {
+              "joint": 13,
+              "draws": 6,
+              "firstDraw": 45,
+              "lastDraw": 50
+            },
+            {
+              "joint": 37,
+              "draws": 18,
+              "firstDraw": 74,
+              "lastDraw": 91
+            }
+          ]
+        },
+        {
+          "mapId": 4294967295,
+          "category": 2,
+          "joints": 2,
+          "draws": 1,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 2,
+          "category": 0,
+          "joints": 7,
+          "draws": 13,
+          "groupsAtLeastFiveDraws": [
+            {
+              "joint": 6,
+              "draws": 6,
+              "firstDraw": 7,
+              "lastDraw": 12
+            }
+          ]
+        },
+        {
+          "mapId": 4,
+          "category": 0,
+          "joints": 5,
+          "draws": 1,
+          "groupsAtLeastFiveDraws": []
+        },
+        {
+          "mapId": 4,
+          "category": 0,
+          "joints": 5,
+          "draws": 1,
+          "groupsAtLeastFiveDraws": []
+        }
+      ]
+    }
+  ],
+  "diagnosticOnly": true,
+  "limits": "Read-only counts from one active frame after 30-second browser gameplay on each legal stage. Map category and draw count do not prove artwork is cosmetic, on-screen, expensive, or safe to cache. No player ISO was requested. No extracted asset bytes, vertex positions or textures are stored here."
+}

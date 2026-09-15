@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshis Story",
+  "fighters": "Ice Climbers mirror",
+  "firstSceneFrame": 1883,
+  "secondSceneFrame": 1934,
+  "firstRenderFrame": 1881,
+  "secondRenderFrame": 1932,
+  "checkedDrawObjects": 84,
+  "changedMaterial": [],
+  "changedMesh": [],
+  "cacheSafe": false,
+  "limits": "Only the first 64 bytes at each native material and mesh object pointer are hashed. No GX FIFO, texture, linked-object or vertex-memory equivalence is implied."
+}

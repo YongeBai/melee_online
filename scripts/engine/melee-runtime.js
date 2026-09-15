@@ -492,6 +492,10 @@ async function tick() {
         await applyRuntimeSettingOnce("stage-background", "stageBackground", false);
       if (params.get("yoshioffscreen") === "off" && stage === 8)
         await applyRuntimeSettingOnce("yoshi-offscreen", "yoshiOffscreenDecor", false);
+      if (params.get("yoshiminimal") === "1" && stage === 8 && params.get('benchmarkyoshiminimalcompare')!=='1')
+        await applyRuntimeSettingOnce("yoshi-minimal", "yoshiMinimalStage", false);
+      if (params.get('fdbottom') === 'off' && stage === 32 && params.get('benchmarkfdbottomcompare')!=='1')
+        await applyRuntimeSettingOnce('fd-bottom', 'finalDestinationBottomVisual', false);
       if (params.get("backgroundanimation") === "off" && [31, 32].includes(stage))
         await applyRuntimeSettingOnce("background-animation", "staticBackgroundAnimation", false);
       if (params.get("reflection") === "off" && stage === 2)
@@ -1363,6 +1367,19 @@ if (params.has("qa")) {
       output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: Yoshi wave mode preserved gameplay, Randall and native camera.':'FAILED: Yoshi wave mode changed gameplay.';
     }catch(error){progress.textContent='FAILED: '+error.message;}finally{host.setInputState(neutral());yoshiWaveReplay.disabled=false;}
   };panel.append(yoshiWaveReplay);
+  const yoshiMinimalReplay=document.createElement('button');yoshiMinimalReplay.textContent='Verify minimal Yoshi gameplay';
+  yoshiMinimalReplay.onclick=async()=>{
+    yoshiMinimalReplay.disabled=true;progress.textContent='Preparing minimal Yoshi gameplay replay…';
+    try{
+      const state=await waitForGame(s=>s.major===2);if(state.minor===2)await quitMatch();await waitForCss();stageSelector.value='8';
+      await host.adapter.request('meleeControl',{action:'select',player:Number(selectors[0].value),cpu:Number(selectors[1].value)});
+      await delay(800);await waitForCss();await startTestMatch({online:false});await waitForGame(s=>s.minor===2&&s.sceneKind===2&&s.sceneFrame>360);
+      await host.adapter.request('meleeControl',{action:'yoshiMinimalStage',enabled:true});
+      const {verifyFountainReflectionState}=await import('./browser-reflection-replay.js');
+      const result=await verifyFountainReflectionState(host,{feature:'yoshiminimal',frames:Number(params.get('cosmeticframes')||600),onProgress:text=>{progress.textContent=text;}});
+      output.textContent=JSON.stringify(result,null,2);progress.textContent=result.passed?'PASS: Yoshi gameplay, Randall, items, RNG and native camera matched.':'FAILED: minimal Yoshi stage changed gameplay.';
+    }catch(error){progress.textContent='FAILED: '+error.message;}finally{host.setInputState(neutral());yoshiMinimalReplay.disabled=false;}
+  };panel.append(yoshiMinimalReplay);
   const yoshiAnimationReplay=document.createElement('button');yoshiAnimationReplay.textContent='Verify Yoshi background animation';
   yoshiAnimationReplay.onclick=async()=>{
     yoshiAnimationReplay.disabled=true;progress.textContent='Preparing Yoshi background replay…';
@@ -1383,6 +1400,17 @@ if (params.has("qa")) {
   animationInventoryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'stageAnimationInventory'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(animationInventoryButton);
   const yoshiMeshInventoryButton=document.createElement('button');yoshiMeshInventoryButton.textContent='Inspect Yoshi meshes';
   yoshiMeshInventoryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'yoshiGeometryInspect'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(yoshiMeshInventoryButton);
+  const legalGeometryButton=document.createElement('button');legalGeometryButton.textContent='Inspect legal stage meshes';
+  legalGeometryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'tournamentStageGeometryInspect'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(legalGeometryButton);
+  const fdDrawSelection=document.createElement('select');fdDrawSelection.setAttribute('aria-label','FD draw selection');
+  for(const [value,label] of [['opaque','Opaque underside (visual pass)'],['translucent','Translucent floor (invalid preview)'],['all','All lower meshes (invalid preview)']]){const option=document.createElement('option');option.value=value;option.textContent=label;fdDrawSelection.append(option);}
+  panel.append(fdDrawSelection);
+  const fdBottomButton=document.createElement('button');fdBottomButton.textContent='Preview FD lower visual';
+  fdBottomButton.onclick=async()=>{try{const enabled=params.get('fdbottom')==='off';params.set('fdbottom',enabled?'on':'off');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'finalDestinationBottomVisual',enabled,selection:fdDrawSelection.value}),null,2);}catch(error){output.textContent=error.message;}};panel.append(fdBottomButton);
+  const yoshiDependencyButton=document.createElement('button');yoshiDependencyButton.textContent='Inspect Yoshi draw objects';
+  yoshiDependencyButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'yoshiDrawDependencyProbe'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(yoshiDependencyButton);
+  const yoshiMinimalButton=document.createElement('button');yoshiMinimalButton.textContent='Preview minimal Yoshi stage';
+  yoshiMinimalButton.onclick=async()=>{try{const enabled=params.get('yoshiminimal')==='1';params.set('yoshiminimal',enabled?'0':'1');output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'yoshiMinimalStage',enabled}),null,2);}catch(error){output.textContent=error.message;}};panel.append(yoshiMinimalButton);
   const particleBankInventoryButton=document.createElement('button');particleBankInventoryButton.textContent='Inspect live particle banks';
   particleBankInventoryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'particleBankInspect'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(particleBankInventoryButton);
   const renderLinkInventoryButton=document.createElement('button');renderLinkInventoryButton.textContent='Inspect render links';
@@ -1401,7 +1429,7 @@ if (params.has("qa")) {
   const renderCostCheck=document.createElement('input');renderCostCheck.type='checkbox';renderCostCheck.setAttribute('aria-label','Measure render dispatch cost');
   const renderCostLabel=document.createElement('label');renderCostLabel.append(renderCostCheck,' Compare scene draws bypassed (blank-output diagnostic)');panel.append(renderCostLabel);
   const renderCostScope=document.createElement('select');renderCostScope.setAttribute('aria-label','Render diagnostic scope');
-  for(const[value,label]of[['scene','Scene draw callbacks'],['link-stage','Stage GX link 3'],['link-fighters','Fighter GX link 5'],['link-effects','Effects GX links 7–8'],['link-hud','HUD GX link 11'],['link-shadows','Shadow GX link 4'],['link-environment','Fog/light GX links 0,10'],['drawable','Materials and meshes'],['mesh','Mesh skinning and submission'],['texture','Texture setup and loading'],['tev','Material combiner setup']])renderCostScope.add(new Option(label,value));
+  for(const[value,label]of[['scene','Scene draw callbacks'],['link-stage','Stage GX link 3'],['link-fighters','Fighter GX link 5'],['link-effects','Effects GX links 7–8'],['link-hud','HUD GX link 11'],['link-shadows','Shadow GX link 4'],['link-environment','Fog/light GX links 0,10'],['yoshi-static','Yoshi matrix-stable visual meshes'],['drawable','Materials and meshes'],['mesh','Mesh skinning and submission'],['texture','Texture setup and loading'],['tev','Material combiner setup']])renderCostScope.add(new Option(label,value));
   renderCostScope.value=[...renderCostScope.options].some(o=>o.value===params.get('rendercostscope'))?params.get('rendercostscope'):'scene';panel.append(renderCostScope);
   const timingDriftCompare=document.createElement('input');timingDriftCompare.type='checkbox';timingDriftCompare.setAttribute('aria-label','Compare time-drift correction');
   const timingDriftLabel=document.createElement('label');timingDriftLabel.append(timingDriftCompare,' Compare time-drift correction');panel.append(timingDriftLabel);
@@ -1492,7 +1520,8 @@ if (params.has("qa")) {
         const codegenAB = cpuCompare.checked && (params.get("benchmarkgxmatrixfastcompare") === "1" || params.get("benchmarkdisplaylistfastcompare") === "1" || params.get("benchmarkanimstatefastcompare") === "1" || params.get("benchmarkanimcallbackfastcompare") === "1" || params.get("benchmarkanimfusioncompare") === "1" || params.get("benchmarkhotfusioncompare") === "1" || params.get("benchmarkmatrixfastcompare") === "1" || params.get("benchmarkconstantaddrcompare") === "1" || params.get("benchmarkcallfusioncompare") === "1" || params.get("benchmarkchainfusioncompare") === "1" || params.get("benchmarkbswaprotatecompare") === "1" || params.get("benchmarkqstatefullcompare") === "1" || params.get("benchmarkqstatecachecompare") === "1" || params.get("benchmarkcpformatcompare") === "1" || params.get("benchmarkleandispatchcompare") === "1" || params.get("benchmarkcounterbatchcompare") === "1" || params.get("benchmarkfusionredispatchcompare") === "1" || params.get("benchmarkreadbranchfastcompare") === "1" || params.get("benchmarkreadbranchcompare") === "1" || params.get("benchmarkreadfusioncompare") === "1" || params.get("benchmarkstepcheckcompare") === "1" || params.get("benchmarkfpuguardwidecompare") === "1" || params.get("benchmarkidlecheckscompare") === "1" || params.get("benchmarkbranchfusioncompare") === "1" || params.get("benchmarkfpuguardcompare") === "1" || params.get("benchmarkblockmergecompare") === "1" || params.get("benchmarkfrsqrtefastcompare") === "1" || params.get("benchmarkfifobatchcompare") === "1" || params.get("benchmarkfifocopycompare") === "1" || params.get("benchmarkmsrcachecompare") === "1" || params.get("benchmarkstateconstcompare") === "1" || params.get("benchmarkwidemapcompare") === "1" || params.get("benchmarkpsqhoistcompare") === "1" || params.get("benchmarkvectorfpronlycompare") === "1" || params.get("benchmarkvectorfprarithcompare") === "1" || params.get("benchmarkvectorfprcompare") === "1" || params.get("benchmarkfifocompare") === "1" || params.get("benchmarkprefixcompare") === "1" || params.get("benchmarkfprcompare") === "1" || params.get("benchmarkregcachecompare") === "1" || params.get("benchmarkcompactgprcompare") === "1" || params.get("benchmarkpssimdcompare") === "1" || params.get("benchmarkpsmemsimdcompare") === "1");
         const scaleAB = params.get("benchmarkscalecompare") === "1";
         const probeAB = params.get("benchmarkworkerprobecompare") === "1" || params.get("benchmarkharvestcompare") === "1" || params.get("benchmarkprobecompare") === "1" || params.get("benchmarkasynccompare") === "1" || params.get("benchmarkasynccontrol") === "1" || params.get("benchmarkprobecontext") === "1";
-        const pacingAB=params.get("benchmarkpacingcompare")==="1";
+        const latestPacingAB=params.get('benchmarklatestpacecompare')==='1';
+        const pacingAB=params.get("benchmarkpacingcompare")==="1"||latestPacingAB;
         const fixedWorkAB=params.get("benchmarkfixedwork")==="1";
         if(fixedWorkAB&&!frameStress)throw Error("Fixed work requires native-frame inputs");
         const queueCapacityAB=params.get("benchmarkqueuecapacitycompare")==="1";
@@ -1509,15 +1538,21 @@ if (params.has("qa")) {
         const shadowAB=params.get("benchmarkshadowcompare")==="1";
         const yoshiAnimationAB=params.get('benchmarkyoshianimationcompare')==='1';
         const yoshiOffscreenAB=params.get('benchmarkyoshioffscreencompare')==='1';
+        const yoshiMinimalAB=params.get('benchmarkyoshiminimalcompare')==='1';
+        const fdBottomAB=params.get('benchmarkfdbottomcompare')==='1';
         const staticBackgroundAB=params.get('benchmarkstaticbackgroundcompare')==='1';
         const stageBackgroundAB=params.get('benchmarkstagebackgroundcompare')==='1';
         const reverbAB=params.get('benchmarkreverbcompare')==='1';
         if(yoshiAnimationAB&&params.get('background')!=='black')throw Error('Yoshi animation comparison requires a black background');
         if(yoshiOffscreenAB&&(params.get('background')!=='black'||params.get('yoshioffscreen')==='off'))
           throw Error('Yoshi below-stage mesh comparison requires black background and original mesh visibility');
+        if(yoshiMinimalAB&&(params.get('background')!=='black'||params.get('yoshiminimal')==='1'))
+          throw Error('Yoshi minimal visuals comparison requires black background and original stage visibility');
+        if(fdBottomAB&&(params.get('background')!=='black'||params.get('fdbottom')==='off'))
+          throw Error('Final Destination lower visual comparison requires black background and original stage visibility');
         if(staticBackgroundAB&&params.get('background')!=='black')throw Error('Static background comparison requires a black background');
         if(stageBackgroundAB&&params.get('background')==='black')throw Error('Stage background comparison must start with a visible background');
-        const reflectionAB=stageBackgroundAB||reverbAB||staticBackgroundAB||yoshiAnimationAB||yoshiOffscreenAB||stadiumAB||params.get("benchmarkreflectioncompare")==="1"||sceneryAB||modelAB||animationAB||shadowAB||decorationsAB||particlesAB;
+        const reflectionAB=stageBackgroundAB||reverbAB||staticBackgroundAB||yoshiAnimationAB||yoshiOffscreenAB||yoshiMinimalAB||fdBottomAB||stadiumAB||params.get("benchmarkreflectioncompare")==="1"||sceneryAB||modelAB||animationAB||shadowAB||decorationsAB||particlesAB;
         if(retainedConfigAB&&(!frameStress||headroomCheck.checked||checkpointControl.checked||dispatchProfileCheck.checked||queueCapacityAB||queueClockAB||codegenAB||reflectionAB||scaleAB||probeAB||pacingAB||fixedWorkAB||repeats>1))
           throw Error('Retained CPU group comparison requires only native-frame inputs and one codegen comparison');
         if(frameStress&&repeats>1)throw Error("Native-frame input supports single runs and matched comparisons");
@@ -1563,9 +1598,9 @@ if (params.has("qa")) {
           : retainedConfigAB
           ? await (await import('./browser-retained-config.js')).compareRetainedBrowserConfig(host,duration,()=>host.adapter.request('meleeInspect',{}),{measure,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : reflectionAB
-          ? await compareFountainReflection(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,frameInput:frameStress,feature:stageBackgroundAB?'stagebackground':reverbAB?'reverb':staticBackgroundAB?'staticbackground':yoshiAnimationAB?'yoshianimation':yoshiOffscreenAB?'yoshioffscreen':stadiumAB?"stadiumscreen":particlesAB?"particles":decorationsAB?"decorations":shadowAB?"shadowdiag":animationAB?"animation":modelAB?"modeldetail":sceneryAB?"scenery":"reflection",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          ? await compareFountainReflection(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,frameInput:frameStress,feature:stageBackgroundAB?'stagebackground':reverbAB?'reverb':staticBackgroundAB?'staticbackground':yoshiAnimationAB?'yoshianimation':yoshiOffscreenAB?'yoshioffscreen':yoshiMinimalAB?'yoshiminimal':fdBottomAB?'fdbottom':stadiumAB?"stadiumscreen":particlesAB?"particles":decorationsAB?"decorations":shadowAB?"shadowdiag":animationAB?"animation":modelAB?"modeldetail":sceneryAB?"scenery":"reflection",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : pacingAB
-          ? await compareBrowserPacing(host,duration,()=>host.adapter.request("meleeInspect",{}),{frameInput:frameStress,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          ? await compareBrowserPacing(host,duration,()=>host.adapter.request("meleeInspect",{}),{frameInput:frameStress,latest:latestPacingAB,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : probeAB
           ? await compareBrowserProbe(host,duration,()=>host.adapter.request("meleeInspect",{}),{frameInput:frameStress,mode:params.get("benchmarkworkerprobecompare")==="1"?"worker":params.get("benchmarkharvestcompare")==="1"?"harvest":params.get("benchmarkprobecontext")==="1"?"context":params.get("benchmarkasynccontrol")==="1"?"async-overhead":params.get("benchmarkasynccompare")==="1"?"async":"overhead",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : scaleAB

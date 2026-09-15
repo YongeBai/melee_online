@@ -63,3 +63,28 @@ test('Yoshi stage-background replay refuses to hide Randall',async()=>{
  await assert.rejects(verifyFountainReflectionState(host,{feature:'stagebackground',frames:120}),/preserve Randall/);
  assert.equal(actions.some(d=>d.action==='capture'),false);
 });
+
+test('minimal Yoshi replay preserves Randall, platform and camera probes and rejects changed camera',async()=>{
+ for(const cameraMismatch of[false,true]){
+  let frame=400,original=true;const actions=[];
+  const host={adapter:{request:async(type,data)=>{
+   actions.push(data);
+   if(data.action==='restore')frame=400;
+   if(data.action==='step')frame++;
+   if(data.action==='yoshiMinimalStage'){
+    original=data.enabled;
+    return {objects:[{mapId:3,hiddenDraws:Array(60).fill(0),retainedMainDisplays:[0,1,2,3],retainedFloorDraws:Array(20).fill(0),randallPreserved:true}],writes:[]};
+   }
+   if(data.action==='yoshiGameplayState')return {sceneFrame:frame,match:{stage:8},randomSeed:123,
+    camera:{fov:original||!cameraMismatch?30:31},fighters:[{character:14},{character:14}],
+    allActors:[{character:14},{character:14},{partner:1},{partner:2}],items:[],
+    platforms:[{mapId:0},{mapId:2,x:frame},{mapId:3}]};
+   return {};
+  }}};
+  const result=await verifyFountainReflectionState(host,{feature:'yoshiminimal',frames:120});
+  assert.equal(result.passed,!cameraMismatch);
+  if(!cameraMismatch)assert.equal(result.randallMoved,true);
+  else assert.equal(result.mismatch.frame,0);
+  assert.equal(actions.at(-3).enabled,true);
+ }
+});

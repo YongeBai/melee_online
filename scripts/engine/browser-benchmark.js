@@ -522,7 +522,7 @@ export async function measureBrowserGameplayAsync(host,seconds,inspect,{sampleWi
 
 // Compare immediate delivery with a two-image-bounded RAF queue. The queue
 // preserves whole frames and adds presentation delay, never simulation steps.
-export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>{},onResult=()=>{},measure=measureBrowserGameplayAsync,QueueClass,frameInput=false}={}){
+export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>{},onResult=()=>{},measure=measureBrowserGameplayAsync,QueueClass,frameInput=false,latest=false}={}){
   const {BrowserFrameQueue}=QueueClass?{BrowserFrameQueue:QueueClass}:await import('./browser-frame-queue.js');
   const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
   const runs=[];let captured=false;const originalPacing=host.adapter.bitmapPresentationPacing;
@@ -532,12 +532,13 @@ export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>
     if(originalQueue){originalQueue.clear();host.adapter.presentationQueue=null;}
     await command('pause');await command('step');await command('capture',{slot:5});captured=true;
     for(const [index,paced]of [false,true,true,false].entries())for(const warmup of [true,false]){
-      onProgress('Presentation '+(paced?'RAF':'immediate')+' '+(warmup?'warmup':'measurement')+' '+(index+1)+'/4…');
+      onProgress('Presentation '+(paced?'buffered RAF':latest?'latest-frame RAF':'immediate')+' '+(warmup?'warmup':'measurement')+' '+(index+1)+'/4…');
       await command('pause');clearQueue();await command('restore',{slot:5});
       for(let frame=0;frame<120;frame++)await command('step');
       if(frameInput)await command('frameInput',{enabled:true});
-      if(paced)host.adapter.presentationQueue=new BrowserFrameQueue(bitmap=>host.adapter.drawDetachedOglBitmap(bitmap,bitmap.width,bitmap.height));
-      host.adapter.bitmapPresentationPacing=paced?'raf-buffered':'immediate';
+      if(paced||latest)host.adapter.presentationQueue=new BrowserFrameQueue(bitmap=>host.adapter.drawDetachedOglBitmap(bitmap,bitmap.width,bitmap.height),
+        paced?(latest?{capacity:2,rateLimited:false}:undefined):{capacity:1,rateLimited:false});
+      host.adapter.bitmapPresentationPacing=paced?'raf-buffered':latest?'raf-latest':'immediate';
       await host.adapter.request('start',{});
       const result=await measure(host,seconds,inspect);
       if(frameInput){
@@ -548,10 +549,12 @@ export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>
       }
       const stats=host.adapter.presentationQueue?.stats;
       runs.push({...result,paced,warmup,queue:stats?{...stats,meanAgeMs:stats.presented?stats.ageTotalMs/stats.presented:0,capacity:host.adapter.presentationQueue.capacity}:null});
-      onResult({kind:'same-checkpoint-presentation-abba',passed:false,runs});
+      onResult({kind:latest?'same-checkpoint-latest-vs-buffered-presentation-abba':'same-checkpoint-presentation-abba',passed:false,runs});
     }
     const inputConsistency=frameInput?compareFrameInputDigests(runs):undefined;
-    return {kind:'same-checkpoint-presentation-abba',passed:runs.filter(r=>r.paced&&!r.warmup).every(r=>r.passed)&&(!frameInput||inputConsistency.passed),runs,...(frameInput?{inputConsistency}:{})};
+    return {kind:latest?'same-checkpoint-latest-vs-buffered-presentation-abba':'same-checkpoint-presentation-abba',latestMode:latest,
+      passed:runs.filter(r=>!r.warmup&&(latest?!r.paced:r.paced)).every(r=>r.passed)&&(!frameInput||inputConsistency.passed),
+      runs,...(frameInput?{inputConsistency}:{})};
   }finally{
     if(frameInput)await command('frameInput',{enabled:false});
     await command('pause');clearQueue();host.adapter.bitmapPresentationPacing=originalPacing;
@@ -564,10 +567,10 @@ export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>
 // restores all machine/graphics state before changing only that pass.
 export async function compareFountainReflection(host,seconds,inspect,{measure=measureBrowserGameplayAsync,feature="reflection",frameInput=false,onProgress=()=>{},onResult=()=>{}}={}){
  const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
- if(!['reverb','reflection','scenery','modeldetail','animation','shadowdiag','decorations','particles','stadiumscreen','yoshianimation','yoshioffscreen','staticbackground','stagebackground'].includes(feature))throw Error('Unknown cosmetic feature');
- const reverb=feature==='reverb',yoshiAnimation=feature==='yoshianimation',yoshiOffscreen=feature==='yoshioffscreen',yoshi=yoshiAnimation||yoshiOffscreen,stadium=feature==='stadiumscreen',staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground';
- let stageName=reverb?'Tournament match':yoshi?'Yoshi':stadium?'Stadium':staticBackground?'Tournament stage':'Fountain';
- const reflection=enabled=>host.adapter.request('meleeControl',{action:stageBackground?'stageBackground':reverb?'auxReverb':yoshiAnimation?'yoshiBackgroundAnimation':yoshiOffscreen?'yoshiOffscreenDecor':stadium?'stadiumScreen':staticBackground?'staticBackgroundAnimation':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='shadowdiag'?'shadowDiagnostic':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
+ if(!['reverb','reflection','scenery','modeldetail','animation','shadowdiag','decorations','particles','stadiumscreen','yoshianimation','yoshioffscreen','yoshiminimal','fdbottom','staticbackground','stagebackground'].includes(feature))throw Error('Unknown cosmetic feature');
+ const reverb=feature==='reverb',yoshiAnimation=feature==='yoshianimation',yoshiOffscreen=feature==='yoshioffscreen',yoshiMinimal=feature==='yoshiminimal',yoshi=yoshiAnimation||yoshiOffscreen||yoshiMinimal,fdBottom=feature==='fdbottom',stadium=feature==='stadiumscreen',staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground';
+ let stageName=reverb?'Tournament match':fdBottom?'Final Destination':yoshi?'Yoshi':stadium?'Stadium':staticBackground?'Tournament stage':'Fountain';
+ const reflection=enabled=>host.adapter.request('meleeControl',{action:stageBackground?'stageBackground':reverb?'auxReverb':fdBottom?'finalDestinationBottomVisual':yoshiAnimation?'yoshiBackgroundAnimation':yoshiOffscreen?'yoshiOffscreenDecor':yoshiMinimal?'yoshiMinimalStage':stadium?'stadiumScreen':staticBackground?'staticBackgroundAnimation':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='shadowdiag'?'shadowDiagnostic':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
  const codegen=browserCodegenConfig(host);
  const runs=[];let captured=false;
  try{
@@ -580,7 +583,7 @@ export async function compareFountainReflection(host,seconds,inspect,{measure=me
   }
   else if(stageBackground){const stages={2:'Fountain',3:'Stadium',8:'Yoshi',28:'Dream Land',31:'Battlefield',32:'Final Destination'};stageName=stages[inspectedStage];if(!stageName)throw Error('Stage background comparison requires a neutral tournament stage');}
   else if(staticBackground){if(![31,32].includes(inspectedStage))throw Error('Static background comparison requires Battlefield or Final Destination');stageName=inspectedStage===31?'Battlefield':'Final Destination';}
-  else if(inspectedStage!==(yoshi?8:stadium?3:2))throw Error('Cosmetic comparison requires '+stageName);
+  else if(inspectedStage!==(yoshi?8:fdBottom?32:stadium?3:2))throw Error('Cosmetic comparison requires '+stageName);
   const initial=await reflection(true);if(initial.objects.length<1)throw Error('Cosmetic render callback was not identified');
   await command('capture',{slot:5});captured=true;
   for(const[index,enabled]of[true,false,false,true].entries())for(const warmup of[true,false]){
@@ -609,6 +612,27 @@ export async function compareFountainReflection(host,seconds,inspect,{measure=me
        verified.objects[0].draws.length!==14||verified.writes.length)
       throw Error('Yoshi below-stage meshes changed during measurement');
     result.cosmeticCoverage={mapId:3,groups:7,draws:14,visible:enabled,stableAtEnd:true};
+   }
+   if(yoshiMinimal){
+    await command('pause');const verified=await reflection(enabled);
+    if(verified.objects.length!==1||verified.objects[0].mapId!==3||
+       verified.objects[0].hiddenDraws.length!==60||verified.objects[0].retainedMainDisplays.length!==4||
+       verified.objects[0].retainedFloorDraws.length!==20||
+       !verified.objects[0].randallPreserved||verified.writes.length)
+     throw Error('Yoshi minimal visual selection changed during measurement');
+    result.cosmeticCoverage={mapId:3,decorativeDraws:60,raisedPlatformDisplays:4,floorDraws:20,
+      dynamicDraws:18,randallPreserved:true,original:enabled,stableAtEnd:true};
+   }
+   if(fdBottom){
+    await command('pause');const verified=await reflection(enabled);
+    if(verified.objects.length!==1||verified.selection!=='opaque'||verified.objects[0].mapId!==3||verified.objects[0].selectedDraws.length!==11||
+       verified.objects[0].retainedTopDraws.length!==5||
+       verified.objects[0].retainedFloorDraws.length!==7||
+       verified.objects[0].floorMapId!==2||verified.objects[0].floorDraws!==2||
+       !verified.objects[0].gameObjectsPreserved||verified.writes.length)
+     throw Error('Final Destination lower visual selection changed during measurement');
+    result.cosmeticCoverage={mapId:3,hiddenVisualDraws:11,retainedTranslucentFloorDraws:7,retainedJointTwoDraws:5,floorMapId:2,floorDraws:2,
+      gameObjectsPreserved:true,original:enabled,stableAtEnd:true};
    }
    if(stadium){
     await command('pause');const verified=await reflection(enabled);

@@ -180,6 +180,18 @@ test('pacing control restores the existing RAF queue and verifies matching nativ
  assert.ok(original.clearCount>=2);
 });
 
+test('latest-frame pacing compares one-image RAF to buffered RAF and restores the original mode',async()=>{
+ const {compareBrowserPacing}=await import('./browser-benchmark.js');const seen=[];
+ const host={adapter:{presentationQueue:null,bitmapPresentationPacing:'raf-buffered',request:async()=>({})}};
+ class Queue{constructor(_present,options){this.capacity=options?.capacity||2;this.stats={presented:0,ageTotalMs:0};}close(){}}
+ const result=await compareBrowserPacing(host,30,()=>({}),{QueueClass:Queue,latest:true,
+  measure:async()=>{seen.push([host.adapter.bitmapPresentationPacing,host.adapter.presentationQueue?.capacity]);return{passed:true}}});
+ assert.equal(result.kind,'same-checkpoint-latest-vs-buffered-presentation-abba');
+ assert.equal(result.passed,true);
+ assert.deepEqual(seen.filter((_,i)=>i%2===1),[['raf-latest',1],['raf-buffered',2],['raf-buffered',2],['raf-latest',1]]);
+ assert.equal(host.adapter.presentationQueue,null);assert.equal(host.adapter.bitmapPresentationPacing,'raf-buffered');
+});
+
 test('Fountain comparison holds one checkpoint and restores reflection even after failure',async()=>{
  const {compareFountainReflection}=await import('./browser-benchmark.js');const calls=[];
  const host={adapter:{request:async(t,d)=>{calls.push([t,d]);return t==='meleeControl'?{objects:[{}]}:{};}}};
@@ -369,6 +381,41 @@ test('cosmetic comparisons use matched native polling and release ownership on f
   assert.equal(calls.filter(([,d])=>d.action==='frameInput').at(-1)[1].enabled,false);
   assert.equal(calls.filter(([type])=>type==='meleeControl').at(-1)[1].enabled,true);
  }
+});
+
+test('Yoshi minimal-visual comparison checks retained gameplay displays and restores native art',async()=>{
+ const {compareFountainReflection}=await import('./browser-benchmark.js');const calls=[];
+ const host={adapter:{request:async(type,data)=>{
+  calls.push([type,data]);
+  if(data.action==='yoshiMinimalStage')return {objects:[{mapId:3,hiddenDraws:Array(60).fill(0),
+   retainedMainDisplays:[0,1,2,3],retainedFloorDraws:Array(20).fill(0),randallPreserved:true}],writes:[]};
+  return {};
+ }}};
+ const result=await compareFountainReflection(host,30,async()=>({match:{stage:8}}),
+  {feature:'yoshiminimal',measure:async()=>({passed:true})});
+ assert.equal(result.passed,true);
+ assert.deepEqual(result.runs.filter(r=>!r.warmup).map(r=>r.yoshiminimal),[true,false,false,true]);
+ assert.equal(result.runs.filter(r=>!r.warmup).every(r=>r.cosmeticCoverage.randallPreserved),true);
+ assert.equal(calls.filter(([,data])=>data.action==='yoshiMinimalStage').at(-1)[1].enabled,true);
+ await assert.rejects(compareFountainReflection(host,30,async()=>({match:{stage:8}}),
+  {feature:'yoshiminimal',measure:async()=>{throw Error('image collection failed')}}),/image collection failed/);
+ assert.equal(calls.filter(([,data])=>data.action==='yoshiMinimalStage').at(-1)[1].enabled,true);
+});
+
+test('Final Destination visual comparison retains the native floor and restores the draw callback',async()=>{
+ const {compareFountainReflection}=await import('./browser-benchmark.js');const calls=[];
+ const host={adapter:{request:async(type,data)=>{
+  calls.push([type,data]);
+  if(data.action==='finalDestinationBottomVisual')return {selection:'opaque',objects:[{mapId:3,selectedDraws:Array(11).fill(0),retainedTopDraws:[0,1,2,3,4],retainedFloorDraws:[7,8,9,10,11,12,23],
+   floorMapId:2,floorDraws:2,gameObjectsPreserved:true}],writes:[]};
+  return {};
+ }}};
+ const result=await compareFountainReflection(host,30,async()=>({match:{stage:32}}),
+  {feature:'fdbottom',measure:async()=>({passed:true})});
+ assert.equal(result.passed,true);
+ assert.deepEqual(result.runs.filter(r=>!r.warmup).map(r=>r.fdbottom),[true,false,false,true]);
+ assert.equal(result.runs.filter(r=>!r.warmup).every(r=>r.cosmeticCoverage.floorDraws===2),true);
+ assert.equal(calls.filter(([,data])=>data.action==='finalDestinationBottomVisual').at(-1)[1].enabled,true);
 });
 
 test('single native-input measurement admits while paused and releases on inactive workload or error',async()=>{

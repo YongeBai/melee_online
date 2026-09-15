@@ -1,0 +1,113 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-yoshi-yoshiminimal-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": {
+    "stage": "Yoshis Story",
+    "fighters": "Ice Climbers mirror",
+    "input": "two active native-frame controller tracks",
+    "outputPixels": "960x720",
+    "secondsPerMeasuredLeg": 30,
+    "background": "black",
+    "fighterModels": "low",
+    "normalCamera": true,
+    "autoHostedGame": true
+  },
+  "selection": {
+    "decorativeNativeDrawsOmitted": 80,
+    "mainPlatformDrawsRetained": 4,
+    "foregroundDynamicDrawsRetained": 18,
+    "randallPreserved": true,
+    "gameProcessesPreserved": true
+  },
+  "inputConsistency": {
+    "passed": true,
+    "checked": 108,
+    "mismatches": [],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "measurements": [
+    {
+      "normalArt": true,
+      "simulationFps": 54.57106873288104,
+      "gameRenderFps": 54.50439668800275,
+      "distinctVisibleFps": 54.03769237385471,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 31.945000007748604,
+      "queue": {
+        "received": 1635,
+        "presented": 1622,
+        "dropped": 14,
+        "underruns": 168,
+        "meanImageAgeMs": 11.042077682039594
+      },
+      "jitCompileAndLinkMs": 37.245
+    },
+    {
+      "normalArt": false,
+      "simulationFps": 59.20302922165478,
+      "gameRenderFps": 59.13635914370247,
+      "distinctVisibleFps": 57.76962254568003,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 19.34000000357628,
+      "queue": {
+        "received": 1774,
+        "presented": 1734,
+        "dropped": 41,
+        "underruns": 52,
+        "meanImageAgeMs": 18.777301037815135
+      },
+      "jitCompileAndLinkMs": 0
+    },
+    {
+      "normalArt": false,
+      "simulationFps": 57.03109011044206,
+      "gameRenderFps": 56.96442606589449,
+      "distinctVisibleFps": 55.66447719721697,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 30.510000005364418,
+      "queue": {
+        "received": 1709,
+        "presented": 1671,
+        "dropped": 39,
+        "underruns": 115,
+        "meanImageAgeMs": 17.151274685987023
+      },
+      "jitCompileAndLinkMs": 0
+    },
+    {
+      "normalArt": true,
+      "simulationFps": 57.73487292996774,
+      "gameRenderFps": 57.7015387077218,
+      "distinctVisibleFps": 56.20149870665451,
+      "passed": false,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "p95VisibleGapMs": 29.945000007748604,
+      "queue": {
+        "received": 1731,
+        "presented": 1687,
+        "dropped": 43,
+        "underruns": 101,
+        "meanImageAgeMs": 14.979665086070815
+      },
+      "jitCompileAndLinkMs": 0
+    }
+  ],
+  "decision": "Keep opt-in only: visual mode has complete playable platforms and preserved native mechanics, but both 30-second candidate legs fail 60 and paired gains oppose each other.",
+  "limits": "Same-checkpoint A/B/B/A with source-resolution and changing-image gate. Mechanical replay and wider native-camera views still required before playable default. Native-frame fingerprints are observables, not full machine proof. Presentation queue loses roughly 1.3 distinct images/s in the fastest candidate leg."
+}
