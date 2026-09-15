@@ -10,6 +10,7 @@
 #include <string.h>
 
 static void* arena;
+extern void __sinit_trigf_c(void);
 static unsigned frames;
 static u64 paused_links;
 static unsigned trace[256];
@@ -39,6 +40,8 @@ int portRuntimeInit(void)
     void* start;
     int heap;
     if (arena) return 0;
+    /* The original .ctors pointer is not an Emscripten constructor. */
+    __sinit_trigf_c();
     arena = aligned_alloc(32, 32 * 1024 * 1024);
     if (!arena) return -1;
     start = OSInitAlloc(arena, (char*)arena + 32 * 1024 * 1024, 1);

@@ -18,6 +18,7 @@ if (original.split(needle).length !== 2) throw Error('Platform typedef patch no 
 fs.writeFileSync(path.join(output, 'include/Runtime/platform.h'), original.replace(needle,
   '#if !defined(__EMSCRIPTEN__)\n' + needle + '\n#endif'));
 const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/ground.c', 'src/melee/ft/ftcommon.c',
+  'src/MSL/trigf.c', 'src/MSL/math_data.c', 'src/sysdolphin/baselib/mtx.c',
   'src/sysdolphin/baselib/random.c', 'src/sysdolphin/baselib/archive.c',
   'src/sysdolphin/baselib/memory.c', 'src/sysdolphin/baselib/initialize.c',
   'src/sysdolphin/baselib/objalloc.c', 'libs/dolphin/src/dolphin/os/OSAlloc.c',
@@ -29,25 +30,32 @@ const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'portRuntimeProbePause', 'portRuntimeProbeRead', 'portRuntimeProbeReset',
   'portRuntimeProbeClear', 'portRuntimeHeapFree', 'portRuntimeObjectsUsed', 'portRuntimeProcsUsed',
   'portFighterAttribute', 'portFighterPhysicsProbe', 'portAnimationCreate', 'portAnimationRun', 'portAnimationDestroy',
-  'portAnimationTimeline'];
+  'portAnimationTimeline', 'PSMTXIdentity','PSMTXCopy','PSMTXScale','PSMTXTranspose','PSMTXConcat',
+  'PSMTXMultVec','PSMTXMultVecSR','PSVECAdd','PSVECSubtract','PSVECScale','PSVECDotProduct',
+  'PSVECSquareMag','PSVECCrossProduct','HSD_MtxSRT','HSD_MkRotationMtx','sinf','cosf',
+  'portPoseCreate','portPoseNode','portPoseTrack','portPoseRewind','portPoseStep','portPoseDestroy'];
 const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
+  '-fno-builtin-sinf', '-fno-builtin-cosf', '-fno-builtin-tanf',
   '-ffunction-sections', '-fdata-sections', '-I' + path.join(output, 'include'),
   '-Isrc', '-Ilibs/dolphin/include'];
 execFileSync(compiler, [...flags, ...units, path.join(root, 'engines/browser-native/platform.c'),
   path.join(root, 'engines/browser-native/runtime.c'),
   path.join(root, 'engines/browser-native/fighter.c'),
   path.join(root, 'engines/browser-native/animation.c'),
+  path.join(root, 'engines/browser-native/math.c'),
+  path.join(root, 'engines/browser-native/pose.c'),
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, 'melee-native.mjs')], {cwd:upstream, stdio:'inherit'});
 for (const name of ['archive.mjs', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
-  'animation-assets.mjs', 'verify-animations.mjs', 'verify.mjs', 'verify-runtime.mjs', 'index.html'])
+  'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
+  'joint-assets.mjs','verify-poses.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
 const wasm = fs.readFileSync(path.join(output, 'melee-native.wasm'));
 const module = new WebAssembly.Module(wasm);
 const report = {source, compiler:execFileSync(compiler, ['--version'], {encoding:'utf8'}).split('\n')[0],
-  units, flags:flags.slice(0,6), wasmBytes:wasm.length,
+  units, flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
   wasmSha256:createHash('sha256').update(wasm).digest('hex'), imports:WebAssembly.Module.imports(module),
   playable:false, gameplayParity:false, performanceCertified:false};
 fs.writeFileSync(path.join(output, 'build.json'), JSON.stringify(report, null, 2) + '\n');

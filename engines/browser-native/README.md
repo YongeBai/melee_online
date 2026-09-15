@@ -8,7 +8,8 @@ The next milestone also runs the original OS/HSD allocator and object scheduler,
 loads all 27 playable fighter components' common attributes, and executes original
 gravity/friction and FObj/AObj animation code. Chrome has decoded and replayed all
 5,508 clips in the 27 fighter animation archives. These are subsystem checks;
-the full fighter action-state machine, bone transforms and renderer are pending.
+selected SDK math and a limited animated bone hierarchy also run natively. The
+full fighter action-state machine, HSD scene ownership and renderer are pending.
 
 ## Reproduce
 
@@ -25,7 +26,7 @@ node scripts/native-port/serve.mjs
 Setup creates a clean, pinned, ignored `engines/melee-decomp` checkout. Build
 produces ignored `dist/native-port` output. `EMCC` can select another compiler;
 the tested compiler is Emscripten 5.0.7. Verification without prepared fixtures
-checks RNG and ECB interpolation only; the report lists stage coverage explicitly.
+checks arithmetic and scheduler behavior; the report lists asset coverage explicitly.
 
 To include real stage data, run this **development build tool** before verification:
 
@@ -74,8 +75,17 @@ assembly fallback or gameplay mismatch.
   validates byte-coded streams. Payload bytes already use little-endian encoding.
   The original FObj decoder and AObj timeline execute them, including Hermite
   interpolation, rewind, loop and end behavior. Both classical-scale tree types
-  are retained; 11 retail clips use type zero. Pose application and bone mapping
-  remain to be connected and checked against Dolphin.
+  are retained; 11 retail clips use type zero.
+- `math.c` replaces 13 SDK paired-single routines with explicit instruction-order
+  arithmetic. An independent BigInt binary32 oracle checks fused cancellation and
+  aliasing. Original MSL sin/cos and HSD SRT builders are retained, with explicit
+  MSL initialization. This does not establish FPSCR or full PPC float parity.
+- `joint-assets.mjs` imports typed joint trees without touching mesh/texture bytes.
+  `pose.c` connects original animation decoding and SRT builders for ordinary
+  joint hierarchies, including scale compensation and visibility channels.
+  It is a limited integration owner, not the complete HSD class implementation.
+  38 clips spanning all 27 components and every type-zero clip pass finite-matrix
+  and rewind checks in Chrome; constraints and unsupported modes fail explicitly.
 
 These tests establish subsystem behavior and selected layout compatibility.
 Expected values come from documented/source arithmetic and original asset bytes,

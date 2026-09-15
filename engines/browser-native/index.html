@@ -19,9 +19,9 @@ try {
     return {name,bytes:new Uint8Array(await response.arrayBuffer())};
   }));
   }
-  const [stages,fighters,animations]=await Promise.all([loadFixtures('stage-fixtures.json'),loadFixtures('fighter-fixtures.json'),loadFixtures('animation-fixtures.json')]);
+  const [stages,fighters,animations,models]=await Promise.all([loadFixtures('stage-fixtures.json'),loadFixtures('fighter-fixtures.json'),loadFixtures('animation-fixtures.json'),loadFixtures('model-fixtures.json')]);
   const report=await verifyNative(module,stages,fighters,animations,
-    {allAnimations:new URL(location.href).searchParams.get('allanimations')==='1'});
+    {models,allAnimations:new URL(location.href).searchParams.get('allanimations')==='1'});
   document.getElementById('result').textContent=JSON.stringify(report,null,2);
   document.documentElement.dataset.result='passed';
 } catch(error) {

@@ -14,9 +14,22 @@ with 33,756,699 emitted updates per pass and identical results after rewind.
 Synthetic timeline vectors verify loop/end behavior. Eleven clips use the valid
 non-classical scaling flag, which the importer now retains.
 
-These numbers establish asset/decoder coverage only, not combat correctness or
-FPS. Fighter creation, the complete action-state loop, pose/bone application,
-matrix/vector platform routines, GX, audio and Dolphin parity remain.
+Selected SDK matrix/vector routines now run natively with explicit fused operations;
+128 finite-input cases use an independent exact binary32 oracle. Original MSL
+trigonometry and HSD SRT builders run with explicit constructor initialization.
+The original cosine near-quadrant shortcut is retained rather than substituted
+with standard browser cosine. 256 SRT geometry checks pass in Chrome.
+
+Typed default model joint trees now connect to original FObj/AObj animation and
+the SRT builders through a limited native pose owner. Chrome passes 38 clips over
+3,275 frames, covering all 27 fighter components and all 11 type-zero clips, with
+finite matrices and exact rewind replay. Constraints, custom joint classes and
+unsupported animation channels fail explicitly. This owner is not full HSD JObj
+or fighter initialization. [Recorded validation](benchmarks/browser-2026-09-15-native-port-math-pose.json).
+
+These numbers establish subsystem coverage only, not combat correctness or FPS.
+Fighter creation, the complete action-state loop, full joint/constraint ownership,
+remaining SDK math, GX, audio and Dolphin parity remain.
 
 The first module loads collision data for Battlefield, Final Destination, Dream
 Land, Yoshi's Story, Fountain of Dreams and Pokémon Stadium. Original HSD archive

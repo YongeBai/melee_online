@@ -1,0 +1,410 @@
+{
+  "date": "2026-09-15",
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "source": {
+      "repository": "https://github.com/doldecomp/melee.git",
+      "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+    },
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+    "units": [
+      "src/melee/mp/mpcoll.c",
+      "src/melee/mp/mplib.c",
+      "src/melee/gr/ground.c",
+      "src/melee/ft/ftcommon.c",
+      "src/MSL/trigf.c",
+      "src/MSL/math_data.c",
+      "src/sysdolphin/baselib/mtx.c",
+      "src/sysdolphin/baselib/random.c",
+      "src/sysdolphin/baselib/archive.c",
+      "src/sysdolphin/baselib/memory.c",
+      "src/sysdolphin/baselib/initialize.c",
+      "src/sysdolphin/baselib/objalloc.c",
+      "libs/dolphin/src/dolphin/os/OSAlloc.c",
+      "src/sysdolphin/baselib/fobj.c",
+      "src/sysdolphin/baselib/spline.c",
+      "src/sysdolphin/baselib/aobj.c",
+      "src/sysdolphin/baselib/gobj.c",
+      "src/sysdolphin/baselib/gobjproc.c",
+      "src/sysdolphin/baselib/gobjplink.c",
+      "src/sysdolphin/baselib/gobjgxlink.c",
+      "src/sysdolphin/baselib/gobjobject.c",
+      "src/sysdolphin/baselib/gobjuserdata.c"
+    ],
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-fno-builtin-sinf",
+      "-fno-builtin-cosf",
+      "-fno-builtin-tanf",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ],
+    "wasmBytes": 43966,
+    "wasmSha256": "0e5d331b0861bb89c0c8762e727c8b6c31c9307a7733eebb3220652d8adee28b",
+    "imports": [
+      {
+        "module": "env",
+        "name": "_abort_js",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_close",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_write",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_seek",
+        "kind": "function"
+      },
+      {
+        "module": "env",
+        "name": "emscripten_resize_heap",
+        "kind": "function"
+      }
+    ],
+    "playable": false,
+    "gameplayParity": false,
+    "performanceCertified": false
+  },
+  "math": {
+    "passed": true,
+    "cases": 128,
+    "fusedCancellation": true,
+    "inPlaceAliases": true,
+    "srtCases": 256,
+    "maxSrtError": 2.934317596909575e-7,
+    "maxTrigError": 0.00002298434746139357,
+    "oracle": "Exact BigInt binary32 arithmetic applied in SDK instruction order",
+    "limitations": "Finite normal input corpus; not Dolphin gameplay parity or FPSCR/denormal validation"
+  },
+  "poses": {
+    "passed": true,
+    "parentScaleCases": 2,
+    "models": 27,
+    "clips": [
+      {
+        "name": "PlMrNr.dat",
+        "animation": "PlyMario5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 61,
+        "frames": 52,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMrNr.dat",
+        "animation": "PlyMario5K_Share_ACTION_Appeal_figatree",
+        "classical": false,
+        "nodes": 61,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFxNr.dat",
+        "animation": "PlyFox5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 73,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlCaNr.dat",
+        "animation": "PlyCaptain5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 63,
+        "frames": 62,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDkNr.dat",
+        "animation": "PlyDonkey5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 75,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKbNr.dat",
+        "animation": "PlyKirby5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 46,
+        "frames": 112,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKpNr.dat",
+        "animation": "PlyKoopa5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 76,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLkNr.dat",
+        "animation": "PlyLink5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 75,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSkNr.dat",
+        "animation": "PlySeak5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 58,
+        "frames": 76,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNsNr.dat",
+        "animation": "PlyNess5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 63,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPeNr.dat",
+        "animation": "PlyPeach5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 114,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPpNr.dat",
+        "animation": "PlyPopo5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 49,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNnNr.dat",
+        "animation": "PlyNana5K_Share_ACTION_SpecialAirS2_figatree",
+        "classical": true,
+        "nodes": 49,
+        "frames": 72,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPkNr.dat",
+        "animation": "PlyPikachu5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 53,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPrNr.dat",
+        "animation": "PlyPurin5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 50,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSsNr.dat",
+        "animation": "PlySamus5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 60,
+        "frames": 83,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 70,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirB_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 42,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirF_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 52,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirHi_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 42,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirLw_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 62,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirN_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 50,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirB_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 32,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirF_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 32,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirHi_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 32,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirLw_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 32,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirN_figatree",
+        "classical": false,
+        "nodes": 70,
+        "frames": 32,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlZdNr.dat",
+        "animation": "PlyZelda5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 118,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLgNr.dat",
+        "animation": "PlyLuigi5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 61,
+        "frames": 62,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMtNr.dat",
+        "animation": "PlyMewtwo5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 68,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMsNr.dat",
+        "animation": "PlyMars5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 90,
+        "frames": 92,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGwNr.dat",
+        "animation": "PlyGamewatch5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 53,
+        "frames": 62,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDrNr.dat",
+        "animation": "PlyDrmario5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 86,
+        "frames": 62,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlClNr.dat",
+        "animation": "PlyClink5K_Share_ACTION_Wait_figatree",
+        "classical": true,
+        "nodes": 79,
+        "frames": 92,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPcNr.dat",
+        "animation": "PlyPichu5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 46,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFeNr.dat",
+        "animation": "PlyEmblem5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 92,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGnNr.dat",
+        "animation": "PlyGanon5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 84,
+        "frames": 120,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFcNr.dat",
+        "animation": "PlyFalco5K_Share_ACTION_Wait1_figatree",
+        "classical": true,
+        "nodes": 67,
+        "frames": 120,
+        "rewindPassed": true
+      }
+    ],
+    "limitations": "Limited SRT/visibility integration; no constraints, combat, rendering or Dolphin pose parity"
+  },
+  "animationRegression": {
+    "clips": 5508,
+    "allAnimations": true
+  },
+  "hostedModels": 27,
+  "hostedStages": 6,
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false
+}

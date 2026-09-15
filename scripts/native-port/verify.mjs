@@ -11,7 +11,9 @@ const fighterNames=fs.existsSync(fighterManifest)?JSON.parse(fs.readFileSync(fig
 const load=names=>names.map(name=>({name,bytes:new Uint8Array(fs.readFileSync(path.join(output,'fixtures',name)))}));
 const animationManifest=path.join(output,'animation-fixtures.json');
 const animationNames=fs.existsSync(animationManifest)?JSON.parse(fs.readFileSync(animationManifest)):[];
+const modelManifest=path.join(output,'model-fixtures.json');
+const modelNames=fs.existsSync(modelManifest)?JSON.parse(fs.readFileSync(modelManifest)):[];
 const report=await verifyNative(await create(),load(names),load(fighterNames),load(animationNames),
-  {allAnimations:process.argv.includes('--all-animations')});
+  {allAnimations:process.argv.includes('--all-animations'),models:load(modelNames)});
 fs.writeFileSync(path.join(output,'verification.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));

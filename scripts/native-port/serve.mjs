@@ -5,9 +5,10 @@ import {pathToFileURL} from 'node:url';
 const output=path.resolve(import.meta.dirname,'../../dist/native-port');
 const port=Number(process.env.MELEE_NATIVE_PORT||3324);
 const files=new Set(['index.html','melee-native.mjs','melee-native.wasm','archive.mjs',
-  'stage-collision.mjs','fighter-assets.mjs','verify-fighters.mjs','animation-assets.mjs','verify-animations.mjs','verify.mjs','verify-runtime.mjs',
+  'stage-collision.mjs','fighter-assets.mjs','verify-fighters.mjs','animation-assets.mjs','verify-animations.mjs','math-reference.mjs','verify-math.mjs','verify.mjs','verify-runtime.mjs',
+  'joint-assets.mjs','verify-poses.mjs','model-fixtures.json',
   'stage-fixtures.json','fighter-fixtures.json','animation-fixtures.json','build.json']);
-for(const manifestName of ['stage-fixtures.json','fighter-fixtures.json','animation-fixtures.json']) {
+for(const manifestName of ['stage-fixtures.json','fighter-fixtures.json','animation-fixtures.json','model-fixtures.json']) {
 const manifest=path.join(output,manifestName);
 if(fs.existsSync(manifest))for(const name of JSON.parse(fs.readFileSync(manifest))) {
   if(!/^(Gr|Pl)[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid fixture filename');

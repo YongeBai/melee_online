@@ -18,7 +18,7 @@ try {
   if(!match||!stdout.includes('data-result="passed"'))throw Error('Browser verification failed: '+(match?.[1]||stdout));
   const entities={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"'};
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
-  if(!verification.passed||verification.stages.length!==6||verification.fighters.length!==27||
+  if(!verification.passed||verification.stages.length!==6||verification.fighters.length!==27||verification.poses.models!==27||
     (allAnimations?!verification.animations.allAnimations:verification.animations.clips.length!==27))
     throw Error('Six hosted stages and 27 playable fighter components required');
   const report={browser:(await run(chrome,['--version'])).stdout.trim(),
