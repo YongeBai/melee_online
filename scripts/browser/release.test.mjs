@@ -6,7 +6,8 @@ import os from 'node:os';
 import {createServer} from 'node:http';
 import {createHash} from 'node:crypto';
 import {createReleaseHandler} from './release-server.mjs';
-import {packageBrowserRelease} from './package-release.mjs';
+import {packageBrowserRelease,prepareHostedGame} from './package-release.mjs';
+import {gzipSync} from 'node:zlib';
 
 test('production static server serves only packaged files, including hosted game chunks',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'melee-release-'));
@@ -30,4 +31,19 @@ test('packager rejects an unpinned core and modified candidate before creating o
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'melee-package-')),coreId='a'.repeat(64),dir=path.join(root,'engines/wasm-dolphin/build/core-candidates',coreId),out=path.join(root,'out');
  try{fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(path.join(dir,'manifest.json'),JSON.stringify({coreId:'sha256:'+coreId,files:[{name:'core.js',sha256:createHash('sha256').update('original').digest('hex')}]}));fs.writeFileSync(path.join(dir,'core.js'),'modified');assert.throws(()=>packageBrowserRelease({coreId,output:out,projectRoot:root}),/artifact hash mismatch/);assert.equal(fs.existsSync(out),false);}
  finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('hosted release provision validates the full disc and refuses missing or tampered chunks',()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'melee-hosted-'));
+ try{
+  const image=Buffer.alloc(32);image.write('GALE01');image[7]=2;
+  const packed=gzipSync(image),sha256=createHash('sha256').update(packed).digest('hex');
+  const rawSha256=createHash('sha256').update(image).digest('hex');
+  const part={name:`${sha256}.gz`,bytes:packed.length,rawBytes:image.length,sha256,rawSha256};
+  fs.writeFileSync(path.join(dir,part.name),packed);
+  fs.writeFileSync(path.join(dir,'manifest.json'),JSON.stringify({schemaVersion:1,name:'Melee.iso',size:image.length,sha256:rawSha256,parts:[part],omittedFiles:[]}));
+  assert.equal(prepareHostedGame(dir).manifest.sha256,rawSha256);
+  assert.throws(()=>prepareHostedGame(),/hosted game directory is required/);
+  fs.writeFileSync(path.join(dir,part.name),Buffer.from('tampered'));
+  assert.throws(()=>prepareHostedGame(dir),/checksum mismatch/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

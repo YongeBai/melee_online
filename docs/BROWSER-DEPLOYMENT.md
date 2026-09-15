@@ -1,14 +1,51 @@
 # Browser-only preview deployment
 
-Current requirement (September 13): every playable browser build must load the
+Current requirement (September 14): every playable browser build must load the
 hosted game automatically. A player-supplied ISO or file picker is prohibited;
 the local disc is only a development fixture. See [AGENTS.md](../AGENTS.md).
-The private 720p60 lab preserves automatic startup. Its hosted loader and
-performance changes still need to be reconciled into the reproducible release
-packaging before deployment.
+The reproducible static packager now requires a complete, locally ignored hosted
+game fixture (`--hosted-game`), validates the assembled game SHA-256, and emits
+only compressed, same-origin chunks. Its bootstrap loads `/game/manifest.json`
+without a player file picker. The September 14 local package reached native
+gameplay, but it has not been published or certified at 720p60. Neither game
+bytes nor exported JIT binaries belong in Git.
+
+The local September 14 package used experimental core `78948685...` and a
+private complete USA 1.02 game fixture (207,418,784 decoded bytes, 152.8 MB
+static package). An initial release had a stale engine-side `melee-memory.js`
+that rejected the runtime's cosmetic controls repeatedly, plus an audio module
+without the CSS startup gate. Packaging now copies the tested Melee controls
+and checks parity; the isolated package reached an ordinary Dream Land match.
+With two older emulator tabs still running, consecutive 30-second Dream Land
+Ice Climbers measurements fell to roughly 45 simulation/visible FPS. After
+closing those tabs, a 30-second, native-frame-input run reached **58.27
+simulation / 57.90 distinct visible FPS** at 960×720, with 1,039 new JIT
+instances and 61 presentation underruns. This still fails sustained 60 FPS;
+An isolated warm control reached 58.96 simulation / 58.30 distinct visible
+FPS with 294 new JIT instances. A diagnostic delivery-only run without image
+verification reached 58.58 simulation / 57.91 delivered FPS while the browser's
+animation callback ran at 60.01 FPS. Its native match setup first timed out
+after a quit action and had to be retried; this is a harness reliability issue,
+not a completed performance measurement. These results point to sustained
+emulation and presentation work rather than cold JIT compilation or the pixel
+verifier alone.
+The three-image queue trial reached 57.90 simulation / 57.70 distinct visible
+FPS and increased mean image age from 16.43 to 19.69 ms versus the warm
+two-image control; the two-image setting was restored. A current-core named
+profile could not be completed from this static package because the private
+`qa-function-symbols.json` fixture is excluded; do not infer a new hotspot from
+that failed diagnostic. A Dream Land screenshot shows noticeable stage
+perspective during a widely separated, native-frame-input match. The read-only
+native camera has zero pitch/yaw offsets and FOV 30, but equivalent-scene native
+Dolphin image comparison is still required to determine whether projection is
+correct.
+the binary and its prebuilt JIT cache are ignored local experiments whose
+candidate source metadata must be reconciled with the retained engine patch
+before a reproducible release can claim that core.
 
 The September 11 deployment and packaging commands below are historical. They
 predate the no-ISO requirement and must not be used to republish that player flow.
+The existing public URL still serves that older player-file flow.
 
 ## Live Vercel deployment
 
@@ -57,7 +94,7 @@ have been built by `node scripts/browser/build-candidate.mjs`. Packaging verifie
 all candidate hashes before writing and refuses to overwrite an existing release.
 
 ```
-npm run build:browser -- --core b041332554a42918a67b72e58c171ffbacb3c4fff2acd1c0186f95e1b9e20b52 --out dist/browser/local-preview --wasm-dispatch
+node scripts/browser/package-release.mjs --core <verified-core-sha256> --hosted-game <ignored-complete-hosted-fixture> --out dist/browser/local-preview
 npm run verify:browser-release -- dist/browser/local-preview
 PORT=8080 node dist/browser/local-preview/server.mjs
 ```
@@ -68,7 +105,8 @@ The package has no server-side application dependency or native executable.
 `files.json` records file sizes and SHA-256 hashes. Release metadata explicitly
 records that online multiplayer and a certified 60 FPS target are unavailable.
 The server serves an inventory of packaged files only, returns proper WASM MIME,
-blocks upload methods, and never exposes the checkout, ISO, saves, or `.env`.
+blocks upload methods, and never exposes the checkout, uncompressed ISO, saves,
+or `.env`. The packaged compressed game chunks are served under `/game/`.
 
 The generated Dockerfile provides an alternative CPU-only static server:
 

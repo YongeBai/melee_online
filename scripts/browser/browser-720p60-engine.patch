@@ -1018,6 +1018,84 @@ index 941cf54..bcca175 100644
 +if (new URLSearchParams(location.search).get('probe') === '1') {
 +  await import('./melee-probe-controls.js');
 +}
+diff --git a/src/audio.js b/src/audio.js
+index 473b437..4aea8a3 100644
+--- a/src/audio.js
++++ b/src/audio.js
+@@ -4,11 +4,12 @@ import {
+ } from "./audio-pcm-ring.js";
+ 
+ export class AudioController {
+-  constructor() {
++  constructor({ outputEnabled = true } = {}) {
+     this.context = null;
+     this.gain = null;
+     this.source = null;
+     this.muted = true;
++    this.outputEnabled = outputEnabled;
+     // 0..1, driven by the volume dial. Mute is kept separate so the dial
+     // position survives a mute/unmute round trip.
+     this.volume = 1;
+@@ -126,7 +127,7 @@ export class AudioController {
+       this.context = new AudioContext();
+     }
+     this.gain = this.context.createGain();
+-    this.gain.gain.value = this.muted ? 0 : this.volume;
++    this.gain.gain.value = this.muted || !this.outputEnabled ? 0 : this.volume;
+     this.gain.connect(this.context.destination);
+     if (this.requestedTransport === "worklet") {
+       await this.tryEnableWorkletTransport();
+@@ -204,7 +205,14 @@ export class AudioController {
+     }
+ 
+     const now = this.context.currentTime;
+-    this.gain.gain.setTargetAtTime(this.muted ? 0 : this.volume, now, 0.01);
++    this.gain.gain.setTargetAtTime(this.muted || !this.outputEnabled ? 0 : this.volume, now, 0.01);
++  }
++
++  setOutputEnabled(enabled) {
++    // Keep consuming emulator audio while boot is hidden. User mute/volume
++    // and autoplay activation remain independent of this presentation gate.
++    this.outputEnabled = Boolean(enabled);
++    this.update();
+   }
+ 
+   startPump() {
+@@ -275,13 +283,14 @@ export class AudioController {
+         // profiler can attribute slow chunks to a busy worker vs. main-thread
+         // starvation (which shows up as pump-gap, recorded above).
+         const mixT0 = performance.now();
++        const silent = !this.outputEnabled;
+         const chunk = await this.source(this.chunkFrames);
+         const mixMs = performance.now() - mixT0;
+         const p = this.profile;
+         p.sumMixMs += mixMs;
+         p.mixSamples += 1;
+         if (mixMs > p.maxMixMs) p.maxMixMs = mixMs;
+-        if (!this.scheduleChunk(chunk)) {
++        if (!this.scheduleChunk(chunk, silent)) {
+           break;
+         }
+         scheduled += 1;
+@@ -294,7 +303,7 @@ export class AudioController {
+     }
+   }
+ 
+-  scheduleChunk(chunk) {
++  scheduleChunk(chunk, silent = !this.outputEnabled) {
+     if (!chunk?.available || !chunk.samples || !this.context || !this.gain) {
+       this.available = false;
+       this.stats = chunk?.stats || "audio:unavailable";
+@@ -316,7 +325,8 @@ export class AudioController {
+     for (let channel = 0; channel < channels; channel += 1) {
+       const output = buffer.getChannelData(channel);
+       for (let frame = 0; frame < usableFrames; frame += 1) {
+-        output[frame] = samples[frame * channels + channel] / 32768;
++        // Queued boot chunks must stay silent even after the gate opens.
++        output[frame] = silent ? 0 : samples[frame * channels + channel] / 32768;
+       }
+     }
+ 
 diff --git a/src/core-host.js b/src/core-host.js
 index cc93295..3c1cb34 100644
 --- a/src/core-host.js
@@ -1348,6 +1426,50 @@ index 0000000..a9a1f0a
 +    entryCount: count,
 +  };
 +}
+diff --git a/src/melee-background.js b/src/melee-background.js
+new file mode 100644
+index 0000000..83637f2
+--- /dev/null
++++ b/src/melee-background.js
+@@ -0,0 +1,38 @@
++// USA 1.02 draw-only experiment: category 2 is a rendering pass, not a proof
++// that an object is cosmetic. Explicitly preserve Randall on Yoshi's Story.
++// Redirect only grDisplay callbacks to an existing, verified empty callback.
++// Animation, RNG, collision, stage processes and fighter effects keep running.
++export const BACKGROUND_RENDER = 0x801c5db0;
++export const EMPTY_RENDER = 0x8021a60c; // grBattle_BG_Callback3: blr
++export function planStageBackground(read32, read8, enabled, stage) {
++  if (typeof enabled !== 'boolean') throw Error('Background mode must be boolean');
++  if (!Number.isInteger(stage) || stage < 0) throw Error('Background planning requires the current stage');
++  if (read32(EMPTY_RENDER) !== 0x4e800020 || read32(BACKGROUND_RENDER) !== 0x7c0802a6)
++    throw Error('Background experiment requires unmodified USA 1.02 callbacks');
++  const valid = (p, bytes) => Number.isInteger(p) && !(p & 3) && p >= 0x80003100 && p + bytes <= 0x81800000;
++  const entities = read32(0x804d782c);
++  if (!valid(entities, 24)) throw Error('Invalid game-object list');
++  let gobj = read32(entities + 5 * 4);
++  const seen = new Set(), writes = [], objects = [];
++  while (gobj) {
++    if (!valid(gobj, 0x38) || seen.has(gobj) || seen.size >= 128) throw Error('Invalid stage-object chain');
++    seen.add(gobj);
++    const ground = read32(gobj + 0x2c), callback = read32(gobj + 0x1c);
++    if (read8(gobj) === 0 && read8(gobj + 1) === 3 && valid(ground, 0x20) &&
++        read32(ground + 4) === gobj &&
++        [BACKGROUND_RENDER, EMPTY_RENDER].includes(callback)) {
++      const mapId = read32(ground + 0x14);
++      // Follow actual callback code, not the mislabeled decompilation table:
++      // map 2 uses grStory_801E3370 / 801E33E0 (moving collision and puffs).
++      // Map 1 uses grStory_801E31C0 and is the decorative background.
++      const gameplayVisible = stage === 8 && mapId === 2;
++      const category = read8(ground + 0x11) >>> 5;
++      if (category !== 2 && !gameplayVisible) { gobj = read32(gobj + 8); continue; }
++      const target = enabled || gameplayVisible ? BACKGROUND_RENDER : EMPTY_RENDER;
++      objects.push({gobj, mapId, category, ...(gameplayVisible ? {preservedGameplay: 'Randall'} : {})});
++      if (callback !== target) writes.push([gobj + 0x1c, target]);
++    }
++    gobj = read32(gobj + 8);
++  }
++  return {writes, objects};
++}
 diff --git a/src/melee-css-layout.js b/src/melee-css-layout.js
 new file mode 100644
 index 0000000..6197273
@@ -1552,12 +1674,155 @@ index 0000000..c9cc852
 +  w(objects[1] + 28, noop);
 +  return true;
 +}
+diff --git a/src/melee-fountain-animation.js b/src/melee-fountain-animation.js
+new file mode 100644
+index 0000000..7a5e0da
+--- /dev/null
++++ b/src/melee-fountain-animation.js
+@@ -0,0 +1,54 @@
++// The guarded code area follows the seven tap-jump stubs and precedes their flags.
++// Private USA 1.02 experiment: stop joint animation only on already-hidden
++// Fountain map objects 0/1. Retain material processing, the collision update
++// counter, callbacks, the main stage, moving platforms, fighters and camera.
++import {BACKGROUND_RENDER,EMPTY_RENDER} from './melee-background.js';
++export const FOUNTAIN_ANIMATION_PROC=0x801c1cd0;
++export const FOUNTAIN_ANIMATION_CAVE=0x80002c00;
++export const FOUNTAIN_ANIMATION_BYTES=0x68;
++export function cloneFountainAnimationProcedure(read32){
++ const words=Array.from({length:FOUNTAIN_ANIMATION_BYTES/4},(_,i)=>read32(FOUNTAIN_ANIMATION_PROC+i*4)>>>0);
++ let hash=2166136261;for(const word of words)hash=Math.imul(hash^word,16777619)>>>0;
++ if(hash!==0x1fbe4a71)throw Error('Unexpected USA 1.02 ground animation procedure');
++ // Omit HSD_JObjAnimAll. Relocate the retained external grMaterial call.
++ // All other instructions and internal branches retain their original offsets.
++ words[8]=0x60000000;
++ const from=FOUNTAIN_ANIMATION_CAVE+10*4,to=0x801c9698;
++ words[10]=(0x48000001|((to-from)&0x03fffffc))>>>0;
++ return words;
++}
++export function planFountainAnimation(read32,read8,enabled){
++ if(typeof enabled!=='boolean')throw Error('Animation mode must be boolean');
++ const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++ const lists=read32(0x804d782c);if(!valid(lists,24))throw Error('Invalid stage-object list');
++ const seen=new Set(),objects=[],writes=[],codeWrites=[];let g=read32(lists+20);
++ while(g){
++  if(!valid(g,0x38)||seen.has(g)||seen.size>=128)throw Error('Invalid stage-object chain');seen.add(g);
++  const ground=read32(g+0x2c),render=read32(g+0x1c);
++  if(read8(g)===0&&read8(g+1)===3&&valid(ground,0x20)&&read32(ground+4)===g&&[0,1].includes(read32(ground+0x14))&&(read8(ground+0x11)>>>5)!==2){
++   if(![BACKGROUND_RENDER,EMPTY_RENDER].includes(render)||(!enabled&&render!==EMPTY_RENDER))throw Error('Only already-hidden scenery animation may be disabled');
++   const procs=new Set();let p=read32(g+0x18),found=0;
++   while(p){
++    if(!valid(p,0x18)||procs.has(p)||procs.size>=16||read32(p+0x10)!==g)throw Error('Invalid scenery process ownership');procs.add(p);
++    const callback=read32(p+0x14);
++    if([FOUNTAIN_ANIMATION_PROC,FOUNTAIN_ANIMATION_CAVE].includes(callback)){
++     if(++found!==1)throw Error('Duplicate scenery animation process');
++     const target=enabled?FOUNTAIN_ANIMATION_PROC:FOUNTAIN_ANIMATION_CAVE;
++     if(callback!==target)writes.push([p+0x14,target]);
++     objects.push({gobj:g,mapId:read32(ground+0x14),process:p,enabled});
++    }
++    p=read32(p);
++   }
++   if(found!==1)throw Error('Scenery animation process not identified');
++  }
++  g=read32(g+8);
++ }
++ if(objects.length!==2)throw Error('Both Fountain scenery objects are required');
++ const code=cloneFountainAnimationProcedure(read32);
++ for(let i=0;i<code.length;i++){
++  const address=FOUNTAIN_ANIMATION_CAVE+i*4,current=read32(address);
++  if(current!==0&&current!==code[i])throw Error('Animation code-handler area already in use at '+address.toString(16)+' value '+current.toString(16)+'; zero areas '+[0x80002c00,0x80002d00,0x80002e00].filter(start=>Array.from({length:26},(_,j)=>read32(start+j*4)).every(word=>word===0)).map(a=>a.toString(16)).join(','));
++  if(!enabled&&current!==code[i])codeWrites.push([address,code[i]]);
++ }
++ return {objects,writes,codeWrites};
++}
+diff --git a/src/melee-fountain-particles.js b/src/melee-fountain-particles.js
+new file mode 100644
+index 0000000..ba1e277
+--- /dev/null
++++ b/src/melee-fountain-particles.js
+@@ -0,0 +1,60 @@
++// USA 1.02 experiment. Ground loads stage particles into bank 30; Fountain's
++// main object spawns its ambient generators there. Skip only their draw body.
++// Particle generation, updates, sorting, RNG and all other banks stay native.
++export const PARTICLE_DRAW_HOOK=0x803a02c4;
++export const PARTICLE_DRAW_ORIGINAL=0x800107a0;
++export const PARTICLE_DRAW_CAVE=0x80002d00;
++const branch=(from,to)=>(0x48000000|((to-from)&0x03fffffc))>>>0;
++export function fountainParticleDrawCode(){
++ const code=[],normalBranches=[];
++ const emit=word=>code.push(word>>>0);
++ const normal=()=>{normalBranches.push(code.length);emit(0);};
++ // Preserve r12, the stack pointer and the entire CR. r0 is overwritten by the
++ // displaced instruction on the native path. No floating-point instruction,
++ // LR, CTR or XER change is introduced. The original size compare still runs.
++ [0x9421fff0,0x91810008,0x7d800026,0x9181000c,
++  0x881e0008,0x2c00001e].forEach(emit);normal();
++ [0x3d808048,0x880c9d30,0x2c000002].forEach(emit);normal();
++ [0x880c9d33,0x2c000002].forEach(emit);normal();
++ [0x3d808047,0xa00cdb76,0x2c000002].forEach(emit);normal();
++ const restore=()=>[0x8181000c,0x7d8ff120,0x81810008,0x38210010].forEach(emit);
++ restore();
++ // Advance directly to the next particle. Keep prev_kind describing the last
++ // rendered particle, so the next fighter effect gets the correct GX state.
++ emit(branch(PARTICLE_DRAW_CAVE+code.length*4,0x803a388c));
++ const normalIndex=code.length;restore();emit(PARTICLE_DRAW_ORIGINAL);
++ emit(branch(PARTICLE_DRAW_CAVE+code.length*4,PARTICLE_DRAW_HOOK+4));
++ for(const index of normalBranches)code[index]=(0x40820000|((normalIndex-index)*4))>>>0;
++ return code;
++}
++export function planFountainParticles(read32,enabled){
++ if(typeof enabled!=='boolean')throw Error('Particle visibility must be boolean');
++ const hooked=branch(PARTICLE_DRAW_HOOK,PARTICLE_DRAW_CAVE),current=read32(PARTICLE_DRAW_HOOK);
++ if(![PARTICLE_DRAW_ORIGINAL,hooked].includes(current))throw Error('Unexpected particle draw hook');
++ for(const[address,word]of [[0x803a02b4,0xc03e004c],[0x803a02bc,0xfc010040],[0x803a02c0,0x418035c8],[0x803a02c8,0x2c000000],[0x803a3888,0x827e0004],[0x803a388c,0x83de0000],[0x803a3890,0x281e0000]])
++  if(read32(address)!==word)throw Error('Unexpected USA 1.02 particle draw procedure');
++ const code=fountainParticleDrawCode(),codeWrites=[];
++ for(const[index,word]of code.entries()){
++  const address=PARTICLE_DRAW_CAVE+index*4,value=read32(address);
++  if(value!==0&&value!==word)throw Error('Particle code-handler area already occupied');
++  if(current===hooked&&value!==word)throw Error('Incomplete installed particle hook');
++  if(!enabled&&value!==word)codeWrites.push([address,word]);
++ }
++ const target=enabled?PARTICLE_DRAW_ORIGINAL:hooked;
++ return {objects:[{bank:30,scope:'Fountain match only',enabled}],enabled,
++  codeWrites,writes:current===target?[]:[[PARTICLE_DRAW_HOOK,target]],codeBytes:code.length*4};
++}
++export function inspectParticleBanks(read32,read8,readFloat){
++ const seen=new Set(),banks=new Map();
++ for(let link=0;link<16;link++){
++  let particle=read32(0x804d0908+link*4);
++  while(particle){
++   if((particle&3)||particle<0x80003100||particle+0x98>0x81800000||seen.has(particle)||seen.size>=10000)throw Error('Invalid particle list');
++   seen.add(particle);const bank=read8(particle+8),size=readFloat(particle+0x4c);
++   const row=banks.get(bank)||{bank,particles:0,aboveDrawThreshold:0,links:[]};
++   row.particles++;if(!(size<1.19209290e-7))row.aboveDrawThreshold++;if(!row.links.includes(link))row.links.push(link);
++   banks.set(bank,row);particle=read32(particle);
++  }
++ }
++ return {total:seen.size,banks:[...banks.values()].sort((a,b)=>a.bank-b.bank),limits:'Live particle count, not CPU time or executed draw count.'};
++}
 diff --git a/src/melee-memory.js b/src/melee-memory.js
 new file mode 100644
-index 0000000..aea5cab
+index 0000000..6c1349a
 --- /dev/null
 +++ b/src/melee-memory.js
-@@ -0,0 +1,279 @@
+@@ -0,0 +1,613 @@
++import {planRenderCostDiagnostic,RENDER_COST_SCOPES} from './melee-render-cost.js';
++import {inspectRenderLinks,planRenderLinkDiagnostic,RENDER_LINK_CAVE,RENDER_LINK_CODE_BYTES,RENDER_LINK_HOOK} from './melee-render-groups.js';
++import {planAuxReverb} from './melee-reverb.js';
++import {planYoshiBackgroundAnimation,inspectYoshiGameplay} from './melee-yoshi-animation.js';
++import {inspectStageAnimation} from './melee-stage-animation.js';
++import {planStadiumScreen,inspectStadiumPlatforms} from './melee-stadium-screen.js';
++import {planStadiumTransformations,STADIUM_TRANSFORMATION_CONTROLLER} from './melee-stadium-freeze.js';
++import {planFrozenStadiumDecoration} from './melee-stadium-decoration.js';
++import {planStaticBackgroundAnimation} from './melee-static-background.js';
++import {planFountainParticles,inspectParticleBanks,PARTICLE_DRAW_CAVE,PARTICLE_DRAW_HOOK} from './melee-fountain-particles.js';
++import {planShadowDiagnostic,SHADOW_DIAGNOSTIC_PROC} from './melee-shadow-diagnostic.js';
++import {planFountainAnimation,FOUNTAIN_ANIMATION_CAVE,FOUNTAIN_ANIMATION_BYTES} from './melee-fountain-animation.js';
++import {planFighterModelDetail} from './melee-model-detail.js';
++import {planFountainScenery,inspectFountainGeometry,planFountainGeometryView,planFountainDecorations} from './melee-scenery.js';
++const fountainGeometryBaseline=new WeakMap();
++import {planFountainReflection} from './melee-reflection.js';
++import { planStageBackground } from './melee-background.js';
 +import { installTapJumpHooks, TAP_JUMP_FLAG } from "./melee-tap-jump.js";
 +import { applyCssLayout } from "./melee-css-layout.js";
 +import { applyCssForeground } from "./melee-foreground.js";
@@ -1608,8 +1873,23 @@ index 0000000..aea5cab
 +        }
 +      : undefined;
 +  });
-+  let match;
++  let match, camera;
 +  if (major === 2 && minor === 2 && sceneKind === 2) {
++    // Original USA 1.02 game_camera (cm/types.h). Read-only diagnostics:
++    // distinguish native camera movement from renderer/projection faults.
++    const cam = 0x80452c68;
++    const float = (a) => view.getFloat32(mem1 + a - 0x80000000);
++    const vec = (a) => [float(a), float(a + 4), float(a + 8)];
++    camera = {
++      mode: u32(cam + 4),
++      interest: vec(cam + 0x14),
++      targetInterest: vec(cam + 0x20),
++      position: vec(cam + 0x2c),
++      targetPosition: vec(cam + 0x38),
++      fov: float(cam + 0x44),
++      pitchOffset: float(cam + 0x2c8),
++      yawOffset: float(cam + 0x2cc),
++    };
 +    const rules = 0x8046b6a0 + 0x24c8;
 +    match = {
 +      pauser: view.getInt8(mem1 + 0x46b6a1),
@@ -1634,6 +1914,7 @@ index 0000000..aea5cab
 +          character: u32(slot + 4),
 +          slotType: u32(slot + 8),
 +          stocks: read(slot + 0x8e, 1)[0],
++          damage: view.getFloat32(mem1 + fp + 0x1830 - 0x80000000),
 +          action: u32(fp + 0x10),
 +          x: view.getFloat32(mem1 + fp + 0xb0 - 0x80000000),
 +          y: view.getFloat32(mem1 + fp + 0xb4 - 0x80000000),
@@ -1666,6 +1947,7 @@ index 0000000..aea5cab
 +    ].map((a) => u32(a).toString(16)),
 +    fighters,
 +    match,
++    camera,
 +    master: read(0x804c1fac, 68),
 +    copy: read(0x804c20bc, 68),
 +    game: read(0x804c21cc, 68),
@@ -1694,7 +1976,307 @@ index 0000000..aea5cab
 +  const main = u32(0x804d3ee0);
 +  const rules = main + 0x1850,
 +    vs = main + 0x590;
++  if(action==='renderCostDiagnostic'){
++    if(!api.browserInvalidateGuestCode)throw Error('Render diagnostic requires code invalidation');
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause render diagnostic');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==8)throw Error('Render-cost fixture requires a live Yoshi match');
++      const scope=options.scope||'scene';
++      if(options.enabled===false){
++        for(const other of Object.keys(RENDER_COST_SCOPES))if(other!==scope&&planRenderCostDiagnostic(u32,true,other).writes.length)throw Error('Another render diagnostic hook is active');
++      }
++      const plan=planRenderCostDiagnostic(u32,options.enabled,scope);
++      for(const[address,value]of plan.writes)w(address,value);
++      for(const[address]of plan.writes)if(!api.browserInvalidateGuestCode(address,4))throw Error('Render diagnostic invalidation failed');
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='renderLinkDiagnostic'){
++    if(!api.browserInvalidateGuestCode)throw Error('Render-link diagnostic requires code invalidation');
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause render-link diagnostic');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2)throw Error('Render-link diagnostic requires a live match');
++      const plan=planRenderLinkDiagnostic(u32,a=>v.getUint8(at(a)),options.enabled,options.group);
++      for(const[address,value]of plan.codeWrites)w(address,value);
++      if(plan.codeWrites.length){
++        if(!api.browserInvalidateGuestCode(RENDER_LINK_HOOK,4))throw Error('Render-link hook invalidation failed');
++        if(!api.browserInvalidateGuestCode(RENDER_LINK_CAVE,RENDER_LINK_CODE_BYTES))throw Error('Render-link cave invalidation failed');
++      }
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='renderLinkInventory'){
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for render-link inventory');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2)throw Error('Render-link inventory requires a live match');
++      return {...inspectRenderLinks(u32,a=>v.getUint8(at(a))),stage:current.match.stage,sceneFrame:current.sceneFrame};
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
 +  if (action === "inspect") return state;
++  if(action==='auxReverb'){
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for reverb change');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2)return {objects:[],writes:[],enabled:options.enabled};
++      const plan=planAuxReverb(u32,options.enabled);
++      for(const[address,value]of plan.writes)w(address,value);
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='stageAnimationInventory'){
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for animation inventory');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2)throw Error('Animation inventory requires a live match');
++      return {...inspectStageAnimation(u32,a=>v.getUint8(at(a))),stage:current.match.stage,sceneFrame:current.sceneFrame};
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if (action === "fountainReflectionState" || action === "stadiumGameplayState" || action === "yoshiGameplayState" || action === 'tournamentGameplayState') {
++    const tournament=action==='tournamentGameplayState',stadium=action==='stadiumGameplayState',yoshi=action==='yoshiGameplayState';
++    if(tournament?!Number.isInteger(state.match?.stage):state.match?.stage!==(yoshi?8:stadium?3:2))throw Error('Cosmetic state inspection requires a live native stage');
++    const valid=(p,bytes)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+bytes<=0x81800000;
++    const lists=u32(0x804d782c),seed=u32(0x804d5f94);if(!valid(lists,0x24)||!valid(seed,4))throw Error('Invalid stage/RNG pointers');
++    const platforms=[],seen=new Set();let g=u32(lists+20);
++    while(g){
++      if(!valid(g,0x38)||seen.has(g)||seen.size>=128)throw Error('Invalid stage-object list');seen.add(g);
++      const ground=u32(g+0x2c),jobj=u32(g+0x28);
++      if(v.getUint16(at(g))===3&&valid(ground,0xe0)&&u32(ground+4)===g&&u32(ground+0x14)===4){
++        if(!valid(jobj,0x44))throw Error('Invalid platform root');
++        platforms.push({positionBits:[0x38,0x3c,0x40].map(o=>u32(jobj+o)),modeTimers:[0xc4,0xc8].map(o=>u32(ground+o)),heightState:[0xd0,0xd4,0xd8,0xdc].map(o=>u32(ground+o))});
++      }
++      g=u32(g+8);
++    }
++    const allActors=[];seen.clear();g=u32(lists+0x20);
++    while(g){
++      if(!valid(g,0x38)||seen.has(g)||seen.size>=16)throw Error('Invalid fighter-object chain');seen.add(g);
++      const fp=u32(g+0x2c);
++      if(v.getUint16(at(g))!==4||!valid(fp,0x1834)||u32(fp)!==g)throw Error('Invalid fighter object');
++      allActors.push({playerId:v.getUint8(at(fp+0xc)),kind:u32(fp+4),action:u32(fp+0x10),facingBits:u32(fp+0x2c),damageBits:u32(fp+0x1830),motionWords:Array.from({length:34},(_,i)=>u32(fp+0x80+i*4))});
++      g=u32(g+8);
++    }
++    allActors.sort((a,b)=>a.playerId-b.playerId||a.kind-b.kind);
++    return {...state,...(yoshi?inspectYoshiGameplay(u32,a=>v.getUint8(at(a))):{}),...(!yoshi?{platforms:tournament?[]:stadium?inspectStadiumPlatforms(u32,a=>v.getUint8(at(a))):platforms}:{}),allActors,randomSeed:u32(seed)};
++  }
++  if(action==='stadiumScreen'){
++    if(!api.browserInvalidateGuestCode)throw Error('Stadium screen experiment requires guest code invalidation');
++    const eligible=s=>s.major===2&&s.minor===2&&s.sceneKind===2&&s.match?.stage===3;
++    if(!eligible(state))return {objects:[],writes:[],codeWrites:[]};
++    let plan=planStadiumScreen(u32,a=>v.getUint8(at(a)),options.enabled);
++    if(!plan.codeWrites.length&&!plan.writes.length)return plan;
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for Stadium screen change');
++    try{
++      if(!eligible(inspectMelee(module)))return {objects:[],writes:[],codeWrites:[]};
++      plan=planStadiumScreen(u32,a=>v.getUint8(at(a)),options.enabled);
++      for(const[address,value]of plan.codeWrites){w(address,value);if(!api.browserInvalidateGuestCode(address,4))throw Error('Stadium copy-site invalidation failed');}
++      for(const[address,value]of plan.writes)w(address,value);
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='stadiumTransformations'){
++    if(!api.browserInvalidateGuestCode)throw Error('Stadium freeze experiment requires guest code invalidation');
++    const eligible=s=>s.major===2&&s.minor===2&&s.sceneKind===2&&s.match?.stage===3;
++    if(!eligible(state))return {objects:[],writes:[],codeWrites:[]};
++    let plan=planStadiumTransformations(u32,a=>v.getUint8(at(a)),options.enabled);
++    if(!plan.codeWrites.length)return plan;
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for Stadium freeze change');
++    try{
++      if(!eligible(inspectMelee(module)))return {objects:[],writes:[],codeWrites:[]};
++      plan=planStadiumTransformations(u32,a=>v.getUint8(at(a)),options.enabled);
++      for(const[address,value]of plan.codeWrites)w(address,value);
++      if(plan.codeWrites.length&&!api.browserInvalidateGuestCode(STADIUM_TRANSFORMATION_CONTROLLER,4))
++        throw Error('Stadium transformation-controller invalidation failed');
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='stadiumDecoration'){
++    const eligible=s=>s.major===2&&s.minor===2&&s.sceneKind===2&&s.match?.stage===3;
++    if(!eligible(state))return {objects:[],writes:[]};
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for Stadium decoration change');
++    try{
++      if(!eligible(inspectMelee(module)))return {objects:[],writes:[]};
++      const plan=planFrozenStadiumDecoration(u32,a=>v.getUint8(at(a)),options.enabled);
++      for(const[address,value]of plan.writes)w(address,value);
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='staticBackgroundAnimation'){
++    const eligible=s=>s.major===2&&s.minor===2&&s.sceneKind===2&&[31,32].includes(s.match?.stage);
++    if(!eligible(state))return {objects:[],writes:[],codeWrites:[]};
++    let plan=planStaticBackgroundAnimation(u32,a=>v.getUint8(at(a)),options.enabled,state.match.stage);
++    if(!plan.codeWrites.length&&!plan.writes.length)return plan;
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for static background change');
++    try{
++      const current=inspectMelee(module);if(!eligible(current))return {objects:[],writes:[],codeWrites:[]};
++      plan=planStaticBackgroundAnimation(u32,a=>v.getUint8(at(a)),options.enabled,current.match.stage);
++      for(const[address,value]of plan.codeWrites)w(address,value);
++      if(plan.codeWrites.length&&!api.browserInvalidateGuestCode(FOUNTAIN_ANIMATION_CAVE,FOUNTAIN_ANIMATION_BYTES))
++        throw Error('Static animation code invalidation failed');
++      for(const[address,value]of plan.writes)w(address,value);
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='fountainParticles'){
++    if(!api.browserInvalidateGuestCode)throw Error('Particle experiment requires guest code invalidation');
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for particle visibility');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==2)return {objects:[],writes:[],codeWrites:[]};
++      const plan=planFountainParticles(u32,options.enabled);
++      const particles=inspectParticleBanks(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)));
++      for(const[address,value]of plan.codeWrites)w(address,value);
++      if(plan.codeWrites.length&&!api.browserInvalidateGuestCode(PARTICLE_DRAW_CAVE,plan.codeBytes))throw Error('Particle cave invalidation failed; hook unchanged');
++      for(const[address,value]of plan.writes)w(address,value);
++      if(plan.writes.length&&!api.browserInvalidateGuestCode(PARTICLE_DRAW_HOOK,4))throw Error('Particle hook invalidation failed');
++      return {...plan,particles};
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if (action === "fountainAnimation" || action === 'yoshiBackgroundAnimation') {
++    const animationStage=action==='yoshiBackgroundAnimation'?8:2;
++    const animationPlan=(read32,read8,enabled)=>animationStage===8?planYoshiBackgroundAnimation(read32,read8,enabled,animationStage):planFountainAnimation(read32,read8,enabled);
++    if(state.major!==2||state.minor!==2||state.sceneKind!==2||state.match?.stage!==animationStage)return {objects:[],writes:[],codeWrites:[]};
++    let plan=animationPlan(u32,a=>v.getUint8(at(a)),options.enabled);
++    if(plan.writes.length||plan.codeWrites.length){
++      if(!api.browserInvalidateGuestCode)throw Error('This core cannot safely install guest code');
++      const wasPaused=api.getCoreStateName?.()==='Paused';
++      if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for scenery animation change');
++      try{
++        const current=inspectMelee(module);
++        if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==animationStage)return {objects:[],writes:[],codeWrites:[]};
++        plan=animationPlan(u32,a=>v.getUint8(at(a)),options.enabled);
++        for(const[address,value]of plan.codeWrites)w(address,value);
++        if(plan.codeWrites.length&&!api.browserInvalidateGuestCode(FOUNTAIN_ANIMATION_CAVE,FOUNTAIN_ANIMATION_BYTES))throw Error('Guest code invalidation failed; process callbacks unchanged');
++        for(const[address,value]of plan.writes)w(address,value);
++      }finally{if(!wasPaused)api.setCorePaused(0);}
++    }
++    return plan;
++  }
++  if (action === "shadowDiagnostic") {
++    if(state.major!==2||state.minor!==2||state.sceneKind!==2)return {objects:[],writes:[],diagnosticOnly:true};
++    if(!api.browserInvalidateGuestCode)throw Error('Shadow diagnostic requires safe code invalidation');
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause the shadow diagnostic');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2)return {objects:[],writes:[],diagnosticOnly:true};
++      const plan=planShadowDiagnostic(u32,options.enabled);
++      for(const[address,value]of plan.writes)w(address,value);
++      if(plan.writes.length&&!api.browserInvalidateGuestCode(SHADOW_DIAGNOSTIC_PROC,4))throw Error('Shadow code invalidation failed');
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if (action === "modelDetail") {
++    if(state.major!==2||state.minor!==2||state.sceneKind!==2)return {objects:[],writes:[],byteWrites:[]};
++    let plan=planFighterModelDetail(u32,a=>v.getUint8(at(a)),options.enabled);
++    if(plan.writes.length||plan.byteWrites.length){
++      const wasPaused=api.getCoreStateName?.()==='Paused';
++      if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for model detail change');
++      try{
++        const current=inspectMelee(module);
++        if(current.major!==2||current.minor!==2||current.sceneKind!==2)return {objects:[],writes:[],byteWrites:[]};
++        plan=planFighterModelDetail(u32,a=>v.getUint8(at(a)),options.enabled);
++        for(const[address,value]of plan.writes)w(address,value);
++        for(const[address,value]of plan.byteWrites)b(address,value);
++      }finally{if(!wasPaused)api.setCorePaused(0);}
++    }
++    return plan;
++  }
++  if(action==='fountainDecorations'){
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for decoration visibility');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==2)return {objects:[],writes:[]};
++      const plan=planFountainDecorations(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)),options.enabled);
++      for(const[address,value]of plan.writes)w(address,value);
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if(action==='fountainGeometryInspect'||action==='fountainGeometryView'){
++    const wasPaused=api.getCoreStateName?.()==='Paused';
++    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for geometry diagnostic');
++    try{
++      const current=inspectMelee(module);
++      if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==2)throw Error('Geometry diagnostic requires Fountain');
++      const geometry=inspectFountainGeometry(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)));
++      if(action==='fountainGeometryInspect'){
++        const original=fountainGeometryBaseline.get(module);
++        if(!original||original.objects[0].root!==geometry.objects[0].root)fountainGeometryBaseline.set(module,geometry);
++        return geometry;
++      }
++      const original=fountainGeometryBaseline.get(module);if(!original)throw Error('Inspect geometry before changing visibility');
++      const plan=planFountainGeometryView(geometry,original,options.selection);
++      for(const[address,value]of plan.writes)w(address,value);
++      return plan;
++    }finally{if(!wasPaused)api.setCorePaused(0);}
++  }
++  if (action === "fountainScenery") {
++    if (state.major !== 2 || state.minor !== 2 || state.sceneKind !== 2 || state.match?.stage !== 2) return {objects:[],writes:[],clear:[]};
++    let plan=planFountainScenery(u32,a=>v.getUint8(at(a)),options.enabled);
++    if(plan.writes.length){
++      const wasPaused=api.getCoreStateName?.()==='Paused';
++      if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for scenery change');
++      try{
++        const current=inspectMelee(module);
++        if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==2)return {objects:[],writes:[],clear:[]};
++        plan=planFountainScenery(u32,a=>v.getUint8(at(a)),options.enabled);
++
++        for(const [address,value]of plan.writes)w(address,value);
++      }finally{if(!wasPaused)api.setCorePaused(0);}
++    }
++    return plan;
++  }
++  if (action === "fountainReflection") {
++    if (state.major !== 2 || state.minor !== 2 || state.sceneKind !== 2 || state.match?.stage !== 2) return {objects:[],writes:[],clear:[]};
++    let plan=planFountainReflection(u32,a=>v.getUint8(at(a)),options.enabled);
++    if(plan.writes.length){
++      const wasPaused=api.getCoreStateName?.()==='Paused';
++      if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for reflection change');
++      try{
++        const current=inspectMelee(module);
++        if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==2)return {objects:[],writes:[],clear:[]};
++        plan=planFountainReflection(u32,a=>v.getUint8(at(a)),options.enabled);
++        for(const [address,bytes]of plan.clear)heap.fill(0,at(address),at(address)+bytes);
++        for(const [address,value]of plan.writes)w(address,value);
++      }finally{if(!wasPaused)api.setCorePaused(0);}
++    }
++    return plan;
++  }
++  if (action === "stageBackground") {
++    if (state.major !== 2 || state.minor !== 2 || state.sceneKind !== 2) return {objects: [], writes: []};
++    // A previously skipped background must animate before becoming visible.
++    if(options.enabled && state.match.stage===8){
++      const repair=planYoshiBackgroundAnimation(u32,a=>v.getUint8(at(a)),true,8);
++      if(repair.writes.length)controlMelee(module,api,'yoshiBackgroundAnimation',{enabled:true});
++    }
++    let plan = planStageBackground(u32, (a) => v.getUint8(at(a)), options.enabled, state.match.stage);
++    if (plan.writes.length) {
++      const wasPaused = api.getCoreStateName?.() === 'Paused';
++      if (!wasPaused && !api.setCorePaused(1)) throw Error('Could not pause for background change');
++      try {
++        const paused = inspectMelee(module);
++        if (paused.major !== 2 || paused.minor !== 2 || paused.sceneKind !== 2)
++          return {objects: [], writes: []};
++        // Objects may have been replaced between the first read and the pause.
++        plan = planStageBackground(u32, (a) => v.getUint8(at(a)), options.enabled, paused.match.stage);
++        for (const [address, value] of plan.writes) w(address, value);
++      }
++      finally { if (!wasPaused) api.setCorePaused(0); }
++    }
++    return plan;
++  }
 +  if (action === "roomLayout") {
 +    if (state.major === 2 && state.minor === 0 && state.sceneKind === 8) {
 +      applyCssLayout(heap);
@@ -1837,6 +2419,70 @@ index 0000000..aea5cab
 +  }
 +  return inspectMelee(module);
 +}
+diff --git a/src/melee-model-detail.js b/src/melee-model-detail.js
+new file mode 100644
+index 0000000..ce3bb8c
+--- /dev/null
++++ b/src/melee-model-detail.js
+@@ -0,0 +1,58 @@
++// USA 1.02 private cosmetic experiment. Select the game's existing low-detail
++// mesh visibility table for the normal render group. Keep the normal render
++// callback, skeleton, animation processes and all gameplay/camera fields.
++export function planFighterModelDetail(read32, read8, highDetail) {
++  if (typeof highDetail !== 'boolean') throw Error('Model detail must be boolean');
++  const valid=(p,n,align=4)=>Number.isInteger(p)&&p%align===0&&p>=0x80003100&&p+n<=0x81800000;
++  const check=(p,n,label,align=4)=>{if(!valid(p,n,align))throw Error('Invalid '+label);return p;};
++  const lists=check(read32(0x804d782c),0x24,'fighter list');
++  const seen=new Set(),objects=[],writes=[],byteWrites=[];let g=read32(lists+0x20);
++  while(g){
++    check(g,0x38,'fighter object');if(seen.has(g)||seen.size>=16)throw Error('Invalid fighter chain');seen.add(g);
++    const fp=check(read32(g+0x2c),0x620,'fighter data');
++    if(read8(g)!==0||read8(g+1)!==4||read8(g+2)!==8||read32(fp)!==g)throw Error('Unrecognized fighter ownership');
++    const data=check(read32(fp+0x10c),12,'fighter definition');
++    const desc=check(read32(data+8),8,'model descriptor');
++    const count=read32(fp+0x5ac),costume=read8(fp+0x619);
++    if(count!==read32(desc)||count>11||costume>7)throw Error('Unrecognized model or costume count');
++    if(count===0){g=read32(g+8);continue;}
++    const table=check(read32(desc+4),(costume+1)*16,'costume visibility table');
++    const high=read32(table+costume*16)||read32(table);
++    const low=read32(table+costume*16+4)||read32(table+4);
++    if(!high||!low){g=read32(g+8);continue;}
++    const current=read32(fp+0x5b8),currentLow=read32(fp+0x5bc);
++    if(![high,low].includes(current)||currentLow!==low)throw Error('Unrecognized live model tables');
++    const dobjCount=read32(fp+0x5ec),dobjTable=read32(fp+0x5f0);
++    if(!dobjCount||dobjCount>256)throw Error('Invalid mesh count');check(dobjTable,dobjCount*4,'mesh pointer table');
++    const collect=lookup=>{
++      check(lookup,count*8,'model visibility groups');const meshes=new Set();
++      for(let model=0;model<count;model++){
++        const variants=read32(lookup+model*8),entries=read32(lookup+model*8+4);
++        if(variants>256)throw Error('Invalid model variant count');
++        if(variants)check(entries,variants*8,'model variants');
++        for(let variant=0;variant<variants;variant++){
++          const n=read32(entries+variant*8),indices=read32(entries+variant*8+4);
++          if(n>256)throw Error('Invalid variant mesh count');if(n)check(indices,n,'mesh indices',1);
++          for(let i=0;i<n;i++){
++            const index=read8(indices+i);if(index>=dobjCount)throw Error('Out-of-range mesh index');
++            meshes.add(check(read32(dobjTable+index*4),0x18,'mesh'));
++          }
++        }
++      }
++      return meshes;
++    };
++    const highMeshes=collect(high),lowMeshes=collect(low),target=highDetail?high:low;
++    if(!highMeshes.size||!lowMeshes.size)throw Error('Model table has no drawable meshes');
++    objects.push({gobj:g,fighter:fp,kind:read32(fp+4),costume,highMeshes:highMeshes.size,lowMeshes:lowMeshes.size,high,low,selected:target});
++    if(current!==target){
++      // Hide both groups once; normal Melee rendering selects the live part
++      // variants on its next draw. This does not rewrite the archive tables.
++      for(const mesh of new Set([...highMeshes,...lowMeshes])){
++        const flags=read32(mesh+0x14);if(!(flags&1))writes.push([mesh+0x14,(flags|1)>>>0]);
++      }
++      writes.push([fp+0x5b8,target]);byteWrites.push([fp+0x5b0,0]);
++    }
++    g=read32(g+8);
++  }
++  return {objects,writes,byteWrites};
++}
 diff --git a/src/melee-probe-controls.js b/src/melee-probe-controls.js
 new file mode 100644
 index 0000000..72b05d1
@@ -1880,6 +2526,613 @@ index 0000000..72b05d1
 +const report=document.createElement('pre');report.style.cssText='max-width:90vw;max-height:160px;overflow:auto;font-size:10px;white-space:pre-wrap';
 +inspectButton.onclick=async()=>{try{report.textContent=JSON.stringify(await window.__host.adapter.request('meleeInspect',{}));}catch(e){report.textContent=e.message;}};
 +panel.append(inspectButton,report);
+diff --git a/src/melee-reflection.js b/src/melee-reflection.js
+new file mode 100644
+index 0000000..c4bbc86
+--- /dev/null
++++ b/src/melee-reflection.js
+@@ -0,0 +1,29 @@
++// USA 1.02 Fountain-only cosmetic experiment. grIzumi_801CCEA0 draws an
++// additional camera pass into an 80x60 RGB565 reflection texture. Replace
++// that render callback only; retain the stage/platform processes and camera.
++export const REFLECTION_RENDER=0x801ccea0;
++export const REFLECTION_EMPTY=0x8021a60c;
++export function planFountainReflection(read32,read8,enabled) {
++ if(typeof enabled!=='boolean')throw Error('Reflection mode must be boolean');
++ if(read32(REFLECTION_RENDER)!==0x7c0802a6||read32(REFLECTION_EMPTY)!==0x4e800020)throw Error('Reflection experiment requires unmodified USA 1.02 callbacks');
++ const valid=(p,bytes)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+bytes<=0x81800000;
++ const lists=read32(0x804d782c);if(!valid(lists,0x4c))throw Error('Invalid camera-object list');
++ let gobj=read32(lists+0x48);const seen=new Set(),writes=[],clear=[],objects=[];
++ while(gobj){
++  if(!valid(gobj,0x38)||seen.has(gobj)||seen.size>=128)throw Error('Invalid reflection-object chain');seen.add(gobj);
++  const cb=read32(gobj+0x1c);
++  if(read8(gobj)===0&&read8(gobj+1)===0x11&&read8(gobj+2)===0x12&&read8(gobj+6)===read8(0x804d784b)&&read8(gobj+7)===3&&[REFLECTION_RENDER,REFLECTION_EMPTY].includes(cb)){
++   const camera=read32(gobj+0x28),reflection=read32(gobj+0x2c);
++   if(!valid(camera,0x40)||!valid(reflection,0x34))throw Error('Invalid Fountain reflection data');
++   const image=read32(reflection+0x30);
++   if(!valid(image,0x18)||read32(image+4)!==((80<<16)|60)||read32(image+8)!==4||read32(image+12)!==0)throw Error('Unexpected Fountain reflection image');
++   const pixels=read32(image),bytes=80*60*2;if(!valid(pixels,bytes))throw Error('Invalid reflection pixel allocation');
++   objects.push({gobj,camera,image,pixels,bytes});
++   const target=enabled?REFLECTION_RENDER:REFLECTION_EMPTY;
++   if(cb!==target){writes.push([gobj+0x1c,target]);if(!enabled)clear.push([pixels,bytes]);}
++  }
++  gobj=read32(gobj+8);
++ }
++ if(objects.length>1)throw Error('Unexpected duplicate Fountain reflection cameras');
++ return {writes,clear,objects};
++}
+diff --git a/src/melee-render-cost.js b/src/melee-render-cost.js
+new file mode 100644
+index 0000000..af77268
+--- /dev/null
++++ b/src/melee-render-cost.js
+@@ -0,0 +1,24 @@
++// Diagnostic only: bypass scene-object draw dispatch inside the original
++// camera passes. Native camera setup and frame/VI loop remain in place.
++// Blank/incomplete output is expected; never use this as a playable setting.
++export const RENDER_DISPATCH=0x80390ed0;
++export const RENDER_COST_SCOPES={
++  scene:{address:RENDER_DISPATCH,bytes:0xf0,hash:0xde45893f},
++  mesh:{address:0x8036e8ac,bytes:0x144,hash:0x05e03a65},
++  drawable:{address:0x8035e388,bytes:0xb8,hash:0x68cc1f2f},
++  texture:{address:0x80360950,bytes:0x2e8,hash:0xe1eb5d2e},
++  tev:{address:0x80385448,bytes:0x6c,hash:0xf543a920},
++};
++export function planRenderCostDiagnostic(read32,enabled,scope='scene'){
++  if(typeof enabled!=='boolean')throw Error('Render-cost mode must be boolean');
++  if(!Object.hasOwn(RENDER_COST_SCOPES,scope))throw Error('Unknown render diagnostic scope');
++  const {address,bytes,hash:expectedHash}=RENDER_COST_SCOPES[scope];
++  const original=0x7c0802a6,ret=0x4e800020,current=read32(address);
++  if(![original,ret].includes(current))throw Error('Unexpected render-dispatch hook');
++  let hash=2166136261;
++  for(let i=0;i<bytes;i+=4)hash=Math.imul(hash^(i===0?original:read32(address+i)),16777619)>>>0;
++  if(hash!==expectedHash)throw Error('Render diagnostic requires original USA 1.02 dispatch');
++  const target=enabled?original:ret;
++  return{diagnosticOnly:true,passed:false,enabled,scope,writes:current===target?[]:[[address,target]],
++    limits:'Blank/incomplete rendering. Scene bypass removes object draw callbacks; drawable removes material setup and meshes; mesh removes skinning and primitive submission; texture removes texture resource/matrix/object setup and loading; tev removes compiled material combiner setup and constant updates. Each includes downstream graphics work. Not a gameplay optimization or GPU-only timing.'};
++}
+diff --git a/src/melee-render-groups.js b/src/melee-render-groups.js
+new file mode 100644
+index 0000000..a24b813
+--- /dev/null
++++ b/src/melee-render-groups.js
+@@ -0,0 +1,73 @@
++// Diagnostic-only GX-link filter for GALE01 1.02. The camera, game-object
++// processes, collision, animation and input all continue to run. Only the
++// selected render-object lists are skipped by HSD_GObj_80390ED0.
++export const RENDER_LINK_HOOK=0x80390f28;
++export const RENDER_LINK_CAVE=0x80002e00;
++export const RENDER_LINK_MASK=0x80002efc;
++export const RENDER_LINK_GROUPS={
++  stage:(1<<3)>>>0,
++  fighters:(1<<5)>>>0,
++  effects:((1<<7)|(1<<8))>>>0,
++  hud:(1<<11)>>>0,
++  shadows:(1<<4)>>>0,
++  environment:((1<<0)|(1<<10))>>>0,
++};
++const ORIGINAL=0x806dc184; // lwz r3,HSD_GObjGXLinkHead@sda21(r13)
++const branch=(from,to)=>(0x48000000|((to-from)&0x03fffffc))>>>0;
++const HOOK_BRANCH=branch(RENDER_LINK_HOOK,RENDER_LINK_CAVE);
++const CAVE_WORDS=[
++  0x57ecf0be, // srwi r12,r31,2: byte offset -> GX-link number
++  0x3c008000, // lis r0,0x8000
++  0x80002efc, // lwz r0,RENDER_LINK_MASK(r0)
++  0x7c006430, // srw r0,r0,r12
++  0x70000001, // andi. r0,r0,1
++  0x41820008, // beq render
++  branch(RENDER_LINK_CAVE+0x18,0x80390f6c), // skip this GX link
++  ORIGINAL,
++  branch(RENDER_LINK_CAVE+0x20,0x80390f2c), // resume original loop
++];
++export const RENDER_LINK_CODE_BYTES=CAVE_WORDS.length*4;
++
++const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++export function inspectRenderLinks(read32,read8){
++  const heads=read32(0x804d7824),max=read8(0x804ce381);
++  if(!valid(heads,(max+2)*4)||max>63)throw Error('Invalid GX-link table');
++  const links=[];
++  for(let link=0;link<=max+1;link++){
++    const objects=[],seen=new Set();let g=read32(heads+link*4);
++    while(g){
++      if(!valid(g,0x38)||seen.has(g)||seen.size>=512)throw Error('Invalid GX-link object chain');
++      seen.add(g);if(read8(g+3)!==link)throw Error('GX-link identity mismatch');
++      const userData=read32(g+0x2c),ground=valid(userData,0x20)&&read32(userData+4)===g;
++      objects.push({gobj:g,classifier:read8(g),pLink:read8(g+2),renderPriority:read8(g+5),
++        objectKind:read8(g+6),callback:read32(g+0x1c),hsdObject:read32(g+0x28),userData,
++        ...(ground?{groundMapId:read32(userData+0x14),groundCategory:read8(userData+0x11)>>>5}: {})});
++      g=read32(g+0x10);
++    }
++    if(objects.length)links.push({link,objects});
++  }
++  return{heads,max,links};
++}
++
++export function planRenderLinkDiagnostic(read32,read8,enabled,group='stage'){
++  if(typeof enabled!=='boolean')throw Error('Render-link mode must be boolean');
++  if(!Object.hasOwn(RENDER_LINK_GROUPS,group))throw Error('Unknown render-link group');
++  const hook=read32(RENDER_LINK_HOOK),mask=read32(RENDER_LINK_MASK);
++  const cave=CAVE_WORDS.map((_,i)=>read32(RENDER_LINK_CAVE+i*4));
++  const inactive=hook===ORIGINAL&&mask===0&&cave.every(word=>word===0);
++  const active=hook===HOOK_BRANCH&&mask===RENDER_LINK_GROUPS[group]&&cave.every((word,i)=>word===CAVE_WORDS[i]);
++  if(!inactive&&!active)throw Error('Unexpected render-link diagnostic hook '+JSON.stringify({hook:hook.toString(16),mask:mask.toString(16),cave:cave.map(x=>x.toString(16))}));
++  const inventory=inspectRenderLinks(read32,read8);
++  const selected=inventory.links.filter(({link})=>RENDER_LINK_GROUPS[group]&(1<<link));
++  if(!selected.length)throw Error('Selected render-link group has no live objects');
++  const codeWrites=[];
++  if(!enabled&&inactive){
++    CAVE_WORDS.forEach((word,i)=>codeWrites.push([RENDER_LINK_CAVE+i*4,word]));
++    codeWrites.push([RENDER_LINK_MASK,RENDER_LINK_GROUPS[group]],[RENDER_LINK_HOOK,HOOK_BRANCH]);
++  }else if(enabled&&active){
++    codeWrites.push([RENDER_LINK_HOOK,ORIGINAL],[RENDER_LINK_MASK,0]);
++    CAVE_WORDS.forEach((_,i)=>codeWrites.push([RENDER_LINK_CAVE+i*4,0]));
++  }
++  return{diagnosticOnly:true,passed:false,enabled,group,mask:RENDER_LINK_GROUPS[group],selected,inventory,codeWrites,
++    limits:'Selected GX-link draw callbacks are skipped. Output is incomplete and cannot pass gameplay image acceptance.'};
++}
+diff --git a/src/melee-reverb.js b/src/melee-reverb.js
+new file mode 100644
+index 0000000..4aaecab
+--- /dev/null
++++ b/src/melee-reverb.js
+@@ -0,0 +1,33 @@
++// GALE01 USA 1.02 audio-only optimization. AUX A is Melee's standard room
++// reverb return. A null callback also makes AX stop sending DSP input to that
++// buffer; clearing its three rotating buffers removes only the wet return.
++// Dry voices, music, gameplay cues and AUX B's delay remain native.
++export const AX_AUX_A_CALLBACK=0x804d74f8;
++export const AX_AUX_A_CONTEXT=0x804d7500;
++export const AX_AUX_A_BUFFER=0x804a8e80;
++export const AX_AUX_A_BUFFER_BYTES=0x1680;
++export const AX_REVERB_STD_CALLBACK=0x8035ce78;
++export const AX_REVERB_STD_WORK=0x804c5e00;
++export const AX_DRIVER_STATE=0x804d603c;
++
++export function planAuxReverb(read32,enabled){
++  if(typeof enabled!=='boolean')throw Error('Reverb mode must be boolean');
++  const expected=[[AX_REVERB_STD_CALLBACK,0x7c0802a6],[AX_REVERB_STD_CALLBACK+0x0c,0x8804013c],
++    [AX_REVERB_STD_CALLBACK+0x14,0x4082000c],[AX_REVERB_STD_CALLBACK+0x1c,0x4bfffa7d],
++    [AX_REVERB_STD_CALLBACK+0x2c,0x4e800020]];
++  for(const[address,word]of expected)if(read32(address)!==word)
++    throw Error('Reverb control requires the unmodified USA 1.02 callback');
++  const type=read32(AX_DRIVER_STATE)>>>8&15;
++  if(type!==2)throw Error('Expected Melee standard reverb on AUX A');
++  const callback=read32(AX_AUX_A_CALLBACK),context=read32(AX_AUX_A_CONTEXT);
++  if(![0,AX_REVERB_STD_CALLBACK].includes(callback))throw Error('Unexpected AUX A callback');
++  if(![0,AX_REVERB_STD_WORK].includes(context))throw Error('Unexpected AUX A context');
++  if((callback===0)!==(context===0))throw Error('Inconsistent AUX A callback state');
++  const writes=[],targetCallback=enabled?AX_REVERB_STD_CALLBACK:0,targetContext=enabled?AX_REVERB_STD_WORK:0;
++  if(callback!==targetCallback)writes.push([AX_AUX_A_CALLBACK,targetCallback]);
++  if(context!==targetContext)writes.push([AX_AUX_A_CONTEXT,targetContext]);
++  if(!enabled)for(let offset=0;offset<AX_AUX_A_BUFFER_BYTES;offset+=4)
++    if(read32(AX_AUX_A_BUFFER+offset)!==0)writes.push([AX_AUX_A_BUFFER+offset,0]);
++  return {objects:[{channel:0,type:'standard',enabled}],writes,enabled,
++    effect:'wet standard reverb only',dryMixPreserved:true,bufferBytes:AX_AUX_A_BUFFER_BYTES};
++}
+diff --git a/src/melee-scenery.js b/src/melee-scenery.js
+new file mode 100644
+index 0000000..dc5bba2
+--- /dev/null
++++ b/src/melee-scenery.js
+@@ -0,0 +1,98 @@
++// USA 1.02 Fountain map objects 0 and 1 have animation initialization and
++// empty gameplay processes. Object 3 owns collision/platform setup; keep it.
++// Category-2 objects already belong to the independent background toggle.
++import {BACKGROUND_RENDER,EMPTY_RENDER} from './melee-background.js';
++export function planFountainScenery(read32,read8,enabled){
++ if(typeof enabled!=='boolean')throw Error('Scenery mode must be boolean');
++ if(read32(BACKGROUND_RENDER)!==0x7c0802a6||read32(EMPTY_RENDER)!==0x4e800020)throw Error('Scenery requires original USA 1.02 callbacks');
++ const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++ const lists=read32(0x804d782c);if(!valid(lists,24))throw Error('Invalid stage-object list');
++ let g=read32(lists+20);const seen=new Set(),objects=[],writes=[];
++ while(g){
++  if(!valid(g,0x38)||seen.has(g)||seen.size>=128)throw Error('Invalid scenery-object chain');seen.add(g);
++  const ground=read32(g+0x2c),cb=read32(g+0x1c);
++  if(read8(g)===0&&read8(g+1)===3&&valid(ground,0x20)&&read32(ground+4)===g&&[0,1].includes(read32(ground+0x14))&&(read8(ground+0x11)>>>5)!==2&&[BACKGROUND_RENDER,EMPTY_RENDER].includes(cb)){
++   objects.push({gobj:g,mapId:read32(ground+0x14)});const target=enabled?BACKGROUND_RENDER:EMPTY_RENDER;if(cb!==target)writes.push([g+0x1c,target]);
++  }
++  g=read32(g+8);
++ }
++ return {objects,writes};
++}
++
++
++// Private render-only diagnostic for the Fountain main map object. This does
++// not remove joints, processes, materials, animation, collision or cameras.
++// HSD_JObjDispSub tests DOBJ_HIDDEN before calling the material/mesh renderer.
++export function inspectFountainGeometry(read32,read8,readFloat) {
++ const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++ const requirePtr=(p,n)=>{if(!valid(p,n))throw Error('Invalid Fountain geometry pointer');};
++ const lists=read32(0x804d782c);requirePtr(lists,24);
++ const objects=[],seenG=new Set();let g=read32(lists+20);
++ while(g){
++  requirePtr(g,0x38);if(seenG.has(g)||seenG.size>=128)throw Error('Invalid Fountain object chain');seenG.add(g);
++  const ground=read32(g+0x2c);
++  if(read8(g)===0&&read8(g+1)===3&&valid(ground,0x20)&&read32(ground+4)===g&&read32(ground+0x14)===3){
++   if(read32(g+0x1c)!==0x801cd220||read32(0x801cd220)!==0x7c0802a6)throw Error('Unexpected Fountain main renderer');
++   const root=read32(g+0x28),joints=[],draws=[],seenJ=new Set(),seenD=new Set();requirePtr(root,0x88);
++   const visit=(j,parent,depth)=>{
++    if(depth>64)throw Error('Fountain joint tree too deep');
++    while(j){
++     requirePtr(j,0x88);if(seenJ.has(j)||seenJ.size>=2048)throw Error('Invalid Fountain joint chain');seenJ.add(j);
++     if(read32(j+12)!==parent)throw Error('Fountain joint parent mismatch');
++     const flags=read32(j+20),index=joints.length;
++     const entry={index,address:j,parent,flags,local:[0,4,8].map(k=>readFloat(j+0x38+k)),world:[0x50,0x60,0x70].map(k=>readFloat(j+k)),draws:[]};joints.push(entry);
++     if(!(flags&0x4020)){
++      let d=read32(j+24);
++      while(d){requirePtr(d,24);if(seenD.has(d)||seenD.size>=2048)throw Error('Invalid Fountain display-object chain');seenD.add(d);
++       const draw={index:draws.length,joint:index,address:d,flags:read32(d+20),material:read32(d+8),mesh:read32(d+12)};
++       entry.draws.push(draw.index);draws.push(draw);d=read32(d+4);
++      }
++     }
++     if(flags&0x1000)throw Error('Instanced Fountain geometry needs separate validation');
++     if(read32(j+16))visit(read32(j+16),j,depth+1);
++     j=read32(j+8);
++    }
++   };
++   visit(root,0,0);objects.push({gobj:g,root,joints,draws});
++  }
++  g=read32(g+8);
++ }
++ if(objects.length!==1)throw Error('Expected one Fountain main map object');
++ return {objects,diagnosticOnly:true};
++}
++
++export function planFountainGeometryView(current,original,selection) {
++ if(!Number.isInteger(selection)||selection < -2)throw Error('Invalid geometry selection');
++ const a=current.objects[0],b=original.objects[0];
++ if(a.root!==b.root||a.draws.length!==b.draws.length||a.draws.some((d,i)=>d.address!==b.draws[i].address||d.joint!==b.draws[i].joint))throw Error('Fountain geometry changed; inspect again');
++ if(selection>=a.joints.length)throw Error('Joint selection is out of range');
++ const writes=[];
++ for(const [i,d]of a.draws.entries()){
++  const hidden=selection===-1 ? (b.draws[i].flags&1) : selection===d.joint ? (b.draws[i].flags&1) : 1;
++  const target=((d.flags&~1)|hidden)>>>0;if(target!==d.flags)writes.push([d.address+20,target]);
++ }
++ return {objects:[{root:a.root,joints:a.joints.length,draws:a.draws.length}],selection,writes,diagnosticOnly:true};
++}
++
++
++// USA 1.02 Fountain main-object decorations, identified by isolated live draws.
++// Keep all floor/ledge/platform meshes and every original joint/process. The
++// selected display flags have no animation writer in the observed fixture.
++// Validate the entire structure before returning any data writes.
++export function planFountainDecorations(read32,read8,readFloat,enabled) {
++ if(typeof enabled!=='boolean')throw Error('Decoration visibility must be boolean');
++ const geometry=inspectFountainGeometry(read32,read8,readFloat),o=geometry.objects[0];
++ if(o.joints.length!==56||o.draws.length!==108)throw Error('Unexpected Fountain mesh layout');
++ const targets=[[11,31,7,0],[12,38,7,0],[13,45,6,0],[37,74,18,-27]],writes=[],objects=[];
++ for(const[joint,first,count,z]of targets){
++  const j=o.joints[joint];
++  if(j.parent!==o.joints[1].address||j.local[0]!==0||j.local[2]!==z||j.draws.length!==count||j.draws.some((n,i)=>n!==first+i))throw Error('Fountain decoration identity mismatch');
++  for(const index of j.draws){
++   const d=o.draws[index],base=index===89?4:2;
++   if(d.joint!==joint||(d.flags&~1)!==base||!d.material||!d.mesh)throw Error('Unexpected Fountain decoration display flags');
++   const value=base|(enabled?0:1);if(d.flags!==value)writes.push([d.address+20,value]);
++  }
++  objects.push({joint,draws:count});
++ }
++ return {objects,writes,enabled,drawCount:38,limits:'Cosmetic visibility only; gameplay equivalence and sustained performance require separate validation.'};
++}
+diff --git a/src/melee-shadow-diagnostic.js b/src/melee-shadow-diagnostic.js
+new file mode 100644
+index 0000000..98a2011
+--- /dev/null
++++ b/src/melee-shadow-diagnostic.js
+@@ -0,0 +1,12 @@
++// Private diagnostic only. Removing dynamic shadows changes competitive visual
++// cues, so its timings must never count as a playable 720p60 acceptance result.
++export const SHADOW_DIAGNOSTIC_PROC=0x8000f38c;
++export function planShadowDiagnostic(read32,enabled){
++ if(typeof enabled!=='boolean')throw Error('Shadow diagnostic mode must be boolean');
++ const first=read32(SHADOW_DIAGNOSTIC_PROC);
++ if(![0x7c0802a6,0x4e800020].includes(first))throw Error('Unrecognized shadow entry');
++ let hash=2166136261;for(let i=4;i<0x66c;i+=4)hash=Math.imul(hash^read32(SHADOW_DIAGNOSTIC_PROC+i),16777619)>>>0;
++ if(hash!==0x202007de)throw Error('Shadow diagnostic requires the original USA 1.02 routine');
++ const target=enabled?0x7c0802a6:0x4e800020;
++ return {objects:[{procedure:SHADOW_DIAGNOSTIC_PROC,enabled}],writes:first===target?[]:[[SHADOW_DIAGNOSTIC_PROC,target]],diagnosticOnly:true};
++}
+diff --git a/src/melee-stadium-decoration.js b/src/melee-stadium-decoration.js
+new file mode 100644
+index 0000000..8312f65
+--- /dev/null
++++ b/src/melee-stadium-decoration.js
+@@ -0,0 +1,39 @@
++import {BACKGROUND_RENDER,EMPTY_RENDER} from './melee-background.js';
++import {STADIUM_TRANSFORMATION_CONTROLLER} from './melee-stadium-freeze.js';
++
++const RETURN=0x4e800020;
++const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++
++// Frozen Stadium keeps map 5 as the neutral playable stage. Map 2 owns the
++// transformation controller and a separate generic draw root. Once that
++// controller is frozen at its checked idle state, its draw root is decorative:
++// map 0 and map 5 continue to render and all collision/state objects remain.
++export function planFrozenStadiumDecoration(read32,read8,enabled){
++  if(typeof enabled!=='boolean')throw Error('Frozen Stadium decoration mode must be boolean');
++  if(read32(BACKGROUND_RENDER)!==0x7c0802a6||read32(EMPTY_RENDER)!==RETURN)
++    throw Error('Frozen Stadium decoration requires original USA 1.02 callbacks');
++  const lists=read32(0x804d782c);if(!valid(lists,24))throw Error('Invalid Stadium object list');
++  const seen=new Set(),objects=[],preserved=[];let gobj=read32(lists+20);
++  while(gobj){
++    if(!valid(gobj,0x38)||seen.has(gobj)||seen.size>=128)throw Error('Invalid Stadium object chain');
++    seen.add(gobj);const ground=read32(gobj+0x2c),mapId=valid(ground,0xec)?read32(ground+0x14):-1;
++    if(read8(gobj)===0&&read8(gobj+1)===3&&valid(ground,0xec)&&read32(ground+4)===gobj){
++      if(mapId===0||mapId===5)preserved.push({gobj,mapId,callback:read32(gobj+0x1c)});
++      if(mapId===2){
++        const callback=read32(gobj+0x1c),mode=(read8(ground+0xdc)<<8)|read8(ground+0xdd),
++          activeMap=(read8(ground+0xde)<<8)|read8(ground+0xdf),incomingObject=read32(ground+0xe8);
++        if((read8(ground+0x11)>>>5)!==1||![BACKGROUND_RENDER,EMPTY_RENDER].includes(callback)||
++            mode!==0||activeMap!==5||incomingObject!==0)
++          throw Error('Stadium transformation draw root is not idle on the neutral map');
++        objects.push({gobj,ground,mapId,callback,mode,activeMap});
++      }
++    }
++    gobj=read32(gobj+8);
++  }
++  if(objects.length!==1||!preserved.some(o=>o.mapId===0)||!preserved.some(o=>o.mapId===5))
++    throw Error('Expected Stadium transformation, main and neutral objects');
++  if(!enabled&&read32(STADIUM_TRANSFORMATION_CONTROLLER)!==RETURN)
++    throw Error('Decoration may be hidden only after Stadium transformations are frozen');
++  const target=enabled?BACKGROUND_RENDER:EMPTY_RENDER;
++  return {enabled,objects,preserved,writes:objects[0].callback===target?[]:[[objects[0].gobj+0x1c,target]]};
++}
+diff --git a/src/melee-stadium-freeze.js b/src/melee-stadium-freeze.js
+new file mode 100644
+index 0000000..182284e
+--- /dev/null
++++ b/src/melee-stadium-freeze.js
+@@ -0,0 +1,49 @@
++// USA 1.02, Pokémon Stadium only. Frozen Stadium keeps the initial neutral
++// stage and disables its transformation controller. Apply only while the
++// controller is idle on the initial map; never freeze a transition halfway.
++export const STADIUM_TRANSFORMATION_CONTROLLER = 0x801d4548;
++const ORIGINAL = 0x7c0802a6;
++const RETURN = 0x4e800020;
++const FOLLOWING_WORDS = [
++  0x90010004, 0x9421ff50, 0xdbe100a8, 0xdbc100a0,
++  0xdba10098, 0xbf610084, 0x3b830000,
++];
++const valid = (p, bytes) => Number.isInteger(p) && !(p & 3) &&
++  p >= 0x80003100 && p + bytes <= 0x81800000;
++
++export function planStadiumTransformations(read32, read8, enabled) {
++  if (typeof enabled !== 'boolean') throw Error('Stadium transformations mode must be boolean');
++  const current = read32(STADIUM_TRANSFORMATION_CONTROLLER);
++  if (![ORIGINAL, RETURN].includes(current) ||
++      FOLLOWING_WORDS.some((word, i) => read32(STADIUM_TRANSFORMATION_CONTROLLER + 4 + i * 4) !== word))
++    throw Error('Unexpected USA 1.02 Stadium transformation controller');
++
++  const lists = read32(0x804d782c);
++  if (!valid(lists, 24)) throw Error('Invalid Stadium object lists');
++  const seen = new Set(), objects = [];
++  const read16 = address => (read8(address) << 8) | read8(address + 1);
++  let gobj = read32(lists + 20);
++  while (gobj) {
++    if (!valid(gobj, 0x38) || seen.has(gobj) || seen.size >= 128)
++      throw Error('Invalid Stadium object chain');
++    seen.add(gobj);
++    const ground = read32(gobj + 0x2c);
++    if (read8(gobj) === 0 && read8(gobj + 1) === 3 && valid(ground, 0xec) &&
++        read32(ground + 4) === gobj && read32(ground + 0x14) === 2) {
++      const mode = read16(ground + 0xdc);
++      const activeMap = read16(ground + 0xde);
++      const activeObject = read32(ground + 0xe4), incomingObject = read32(ground + 0xe8);
++      if (mode > 6 || !valid(activeObject, 0x38)) throw Error('Invalid Stadium transformation state');
++      objects.push({gobj, ground, mode, activeMap, activeObject, incomingObject,
++        timer: read32(ground + 0xd8) | 0});
++    }
++    gobj = read32(gobj + 8);
++  }
++  if (objects.length !== 1) throw Error('Expected one Stadium transformation controller');
++  const state = objects[0];
++  if (!enabled && (state.mode !== 0 || state.activeMap !== 5 || state.incomingObject !== 0))
++    throw Error('Frozen Stadium must start on the idle neutral map');
++  const target = enabled ? ORIGINAL : RETURN;
++  return {enabled, frozen: !enabled, objects,
++    codeWrites: current === target ? [] : [[STADIUM_TRANSFORMATION_CONTROLLER, target]], writes: []};
++}
+diff --git a/src/melee-stadium-screen.js b/src/melee-stadium-screen.js
+new file mode 100644
+index 0000000..eb832e9
+--- /dev/null
++++ b/src/melee-stadium-screen.js
+@@ -0,0 +1,68 @@
++// USA 1.02, Pokémon Stadium only. Keep the video-board state machine, RNG,
++// completion flags, stage transformations and gameplay camera. Suppress only
++// its three texture-copy call sites and the board's draw call. Keep the
++// custom render wrapper's state updates (grStadium_801D1EF8) running.
++export const STADIUM_SCREEN_CALLS = [
++  [0x801d2f60,0x4be3f369,0x38c00001,0x38600001,0x800122c8],
++  [0x801d300c,0x4be3f2bd,0x38c00000,0x881f0018,0x800122c8],
++  [0x801d30c0,0x4be3f209,0xa0a3001c,0x881f0018,0x800122c8],
++  [0x801d509c,0x4bff0d15,0x389f0000,0x8001001c,0x801c5db0],
++];
++const DRAW=0x801d5074,NOP=0x60000000;
++const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++export function planStadiumScreen(read32,read8,enabled) {
++ if(typeof enabled!=='boolean')throw Error('Stadium screen visibility must be boolean');
++ if(read32(DRAW)!==0x7c0802a6||read32(0x801d5090)!==0x4bffce69)throw Error('Unexpected Stadium draw procedures');
++ const codeWrites=[],writes=[],objects=[];
++ for(const[address,original,before,after]of STADIUM_SCREEN_CALLS){
++  const current=read32(address);
++  if(![original,NOP].includes(current)||read32(address-4)!==before||read32(address+4)!==after)throw Error('Unexpected USA 1.02 Stadium texture-copy site');
++  const target=enabled?original:NOP;if(current!==target)codeWrites.push([address,target]);
++ }
++ const lists=read32(0x804d782c);if(!valid(lists,24))throw Error('Invalid Stadium object lists');
++ let g=read32(lists+20);const seen=new Set();
++ while(g){
++  if(!valid(g,0x38)||seen.has(g)||seen.size>=128)throw Error('Invalid Stadium object chain');seen.add(g);
++  const ground=read32(g+0x2c);
++  if(read8(g)===0&&read8(g+1)===3&&valid(ground,0xfc)&&read32(ground+4)===g&&read32(ground+0x14)===1){
++   const current=read32(g+0x1c),root=read32(g+0x28);
++   if(current!==DRAW||!valid(root,0x88))throw Error('Unexpected Stadium video board');
++   // These wrappers are created by grStadium_801D2278 and remain active.
++   for(const offset of[0xd4,0xd8,0xdc])if(!valid(read32(ground+offset),0x38))throw Error('Stadium video wrappers not ready');
++   objects.push({gobj:g,ground,root,mapId:1});
++  }
++  g=read32(g+8);
++ }
++ if(objects.length!==1)throw Error('Expected one Stadium video board');
++ return {enabled,objects,codeWrites,writes,copySites:STADIUM_SCREEN_CALLS.slice(0,3).map(([address])=>address),drawSite:0x801d509c};
++}
++
++// Replay probes for the gameplay stage objects, excluding the video board.
++// Keep exact float bits; this is observable-state validation, not whole-machine
++// equivalence (the screen textures and graphics command stream intentionally differ).
++export function inspectStadiumPlatforms(read32,read8) {
++ const lists=read32(0x804d782c);if(!valid(lists,24))throw Error('Invalid Stadium object lists');
++ const objects=[],seen=new Set();let g=read32(lists+20);
++ while(g){
++  if(!valid(g,0x38)||seen.has(g)||seen.size>=128)throw Error('Invalid Stadium object chain');seen.add(g);
++  const ground=read32(g+0x2c),mapId=valid(ground,0xf4)?read32(ground+0x14):-1;
++  if(read8(g)===0&&read8(g+1)===3&&valid(ground,0xf4)&&read32(ground+4)===g&&mapId>=2&&mapId<=9){
++   const joints=[],seenJ=new Set();
++   const visit=(j,depth=0)=>{
++    if(depth>64)throw Error('Stadium joint depth exceeded');
++    while(j){
++     if(!valid(j,0x88)||seenJ.has(j)||seenJ.size>=2048)throw Error('Invalid Stadium joint tree');seenJ.add(j);
++     joints.push({local:Array.from({length:10},(_,i)=>read32(j+0x1c+i*4)),matrix:Array.from({length:12},(_,i)=>read32(j+0x44+i*4))});
++     if(!(read32(j+20)&0x1000))visit(read32(j+16),depth+1);
++     j=read32(j+8);
++    }
++   };
++   const root=read32(g+0x28);if(!valid(root,0x88))throw Error('Invalid Stadium gameplay root');
++   visit(root);
++   objects.push({mapId,modeWords:Array.from({length:13},(_,i)=>read32(ground+0xc4+i*4)),joints});
++  }
++  g=read32(g+8);
++ }
++ if(!objects.some(o=>o.mapId===2))throw Error('Stadium transformation controller absent');
++ return objects;
++}
+diff --git a/src/melee-stage-animation.js b/src/melee-stage-animation.js
+new file mode 100644
+index 0000000..a3708a2
+--- /dev/null
++++ b/src/melee-stage-animation.js
+@@ -0,0 +1,56 @@
++// Read-only workload inventory. Counts are structural opportunities, not CPU
++// time or proof that an animation can be skipped. Inspect only while paused.
++export function inspectStageAnimation(read32, read8) {
++  const valid = (p, bytes) => Number.isInteger(p) && !(p & 3) && p >= 0x80003100 && p + bytes <= 0x81800000;
++  const requirePointer = (p, bytes) => { if (!valid(p, bytes)) throw Error('Invalid animation inventory pointer'); };
++  const lists = read32(0x804d782c); requirePointer(lists, 24);
++  const objects = [], seenObjects = new Set(); let g = read32(lists + 20);
++  while (g) {
++    requirePointer(g, 0x38);
++    if (seenObjects.has(g) || seenObjects.size >= 128) throw Error('Invalid animation object chain');
++    seenObjects.add(g);
++    const ground = read32(g + 0x2c);
++    if (read8(g) === 0 && read8(g + 1) === 3 && valid(ground, 0x20) && read32(ground + 4) === g) {
++      const row = {gobj: g, mapId: read32(ground + 0x14), category: read8(ground + 0x11) >>> 5,
++        render: read32(g + 0x1c), joints: 0, jointAnimations: 0, jointChannels: 0,
++        activeJointAnimations: 0, animationTypes: {}, processes: []};
++      const seenJoints = new Set(), seenAnimations = new Set(), seenChannels = new Set();
++      const visit = (j, depth = 0) => {
++        if (depth > 64) throw Error('Animation joint depth exceeded');
++        while (j) {
++          requirePointer(j, 0x88);
++          if (seenJoints.has(j) || seenJoints.size >= 2048) throw Error('Invalid animation joint tree');
++          seenJoints.add(j); row.joints++;
++          const a = read32(j + 0x7c);
++          if (a) {
++            requirePointer(a, 0x1c);
++            if (seenAnimations.has(a)) throw Error('Shared joint animation owner');
++            seenAnimations.add(a); row.jointAnimations++;
++            if (!(read32(a) & 0x40000000)) row.activeJointAnimations++;
++            let f = read32(a + 0x14);
++            while (f) {
++              requirePointer(f, 0x30);
++              if (seenChannels.has(f) || seenChannels.size >= 16384) throw Error('Invalid animation channel chain');
++              seenChannels.add(f); row.jointChannels++;
++              const type = read8(f + 0x13); row.animationTypes[type] = (row.animationTypes[type] || 0) + 1;
++              f = read32(f);
++            }
++          }
++          if (!(read32(j + 0x14) & 0x1000)) visit(read32(j + 0x10), depth + 1);
++          j = read32(j + 8);
++        }
++      };
++      const root = read32(g + 0x28); requirePointer(root, 0x88); visit(root);
++      const seenProcesses = new Set(); let p = read32(g + 0x18);
++      while (p) {
++        requirePointer(p, 0x18);
++        if (seenProcesses.has(p) || seenProcesses.size >= 16 || read32(p + 0x10) !== g)
++          throw Error('Invalid animation process ownership');
++        seenProcesses.add(p); row.processes.push(read32(p + 0x14)); p = read32(p);
++      }
++      objects.push(row);
++    }
++    g = read32(g + 8);
++  }
++  return {objects, limits: 'Joint animation inventory only; excludes material/texture/shape animation and does not measure CPU time.'};
++}
+diff --git a/src/melee-static-background.js b/src/melee-static-background.js
+new file mode 100644
+index 0000000..376c8f4
+--- /dev/null
++++ b/src/melee-static-background.js
+@@ -0,0 +1,60 @@
++import {BACKGROUND_RENDER,EMPTY_RENDER} from './melee-background.js';
++import {cloneFountainAnimationProcedure,FOUNTAIN_ANIMATION_PROC as PROC,
++  FOUNTAIN_ANIMATION_CAVE as CAVE} from './melee-fountain-animation.js';
++
++const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++// These are decorative stage objects in USA 1.02. Battlefield map 1 must
++// already be hidden by black-background mode. Map 3 is deliberately excluded:
++// it is the background transition controller, consumes the global game RNG and
++// waits on its joint animation. Freezing it changes competitive simulation.
++// Final Destination maps 1/2
++// are the visible animated underside; maps 4-8 are its hidden backdrop layers.
++// The main/collision objects (Battlefield 0/6, Final Destination 0/3) are absent.
++const STAGES={
++  31:new Map([[1,0x8021a26c]]),
++  32:new Map([[1,0x8021a968],[2,0x8021a9a4],[4,0x8021ab80],[5,0x8021abd4],
++    [6,0x8021ac28],[7,0x8021add0],[8,0x8021b28c]]),
++};
++
++export function planStaticBackgroundAnimation(read32,read8,enabled,stage){
++  if(typeof enabled!=='boolean'||!STAGES[stage])throw Error('Static background requires Battlefield or Final Destination');
++  const wanted=STAGES[stage],seen=new Set(),objects=[],writes=[],codeWrites=[];
++  const lists=read32(0x804d782c);if(!valid(lists,24))throw Error('Invalid stage object list');
++  let gobj=read32(lists+20);
++  while(gobj){
++    if(!valid(gobj,0x38)||seen.has(gobj)||seen.size>=128)throw Error('Invalid stage object chain');seen.add(gobj);
++    const ground=read32(gobj+0x2c),mapId=valid(ground,0x20)?read32(ground+0x14):-1;
++    if(read8(gobj)===0&&read8(gobj+1)===3&&valid(ground,0x20)&&read32(ground+4)===gobj&&wanted.has(mapId)){
++      const render=read32(gobj+0x1c),category=read8(ground+0x11)>>>5;
++      if(![BACKGROUND_RENDER,EMPTY_RENDER].includes(render))throw Error('Unexpected decorative render callback');
++      if((stage===31||category===2)&&!enabled&&render!==EMPTY_RENDER)
++        throw Error('Hidden decorative animation requires black-background mode');
++      const processes=new Set();let process=read32(gobj+0x18),joint=0,stageProcess=0,material=0;
++      while(process){
++        if(!valid(process,0x18)||processes.has(process)||processes.size>=16||read32(process+0x10)!==gobj)
++          throw Error('Invalid decorative process ownership');
++        processes.add(process);const callback=read32(process+0x14);
++        if(callback===wanted.get(mapId))stageProcess++;
++        if(callback===0x801c1d38)material++;
++        if([PROC,CAVE].includes(callback)){
++          if(++joint!==1)throw Error('Duplicate decorative joint-animation procedure');
++          const target=enabled?PROC:CAVE;if(callback!==target)writes.push([process+0x14,target]);
++          objects.push({gobj,mapId,category,render,process,enabled});
++        }
++        process=read32(process);
++      }
++      if(joint!==1||stageProcess!==1||material!==1)throw Error('Decorative procedures not identified');
++    }
++    gobj=read32(gobj+8);
++  }
++  if(objects.length!==wanted.size||![...wanted.keys()].every(id=>objects.some(object=>object.mapId===id)))
++    throw Error('Decorative stage objects missing');
++  const code=cloneFountainAnimationProcedure(read32);
++  for(let i=0;i<code.length;i++){
++    const address=CAVE+i*4,current=read32(address);
++    if(current!==0&&current!==code[i])throw Error('Animation code area already in use');
++    if(!enabled&&current!==code[i])codeWrites.push([address,code[i]]);
++  }
++  return {enabled,stage,objects,writes,codeWrites,
++    preserved:stage===31?['main Battlefield','three platforms','map 3 background RNG/transition controller']:['main Final Destination collision object']};
++}
 diff --git a/src/melee-tap-jump.js b/src/melee-tap-jump.js
 new file mode 100644
 index 0000000..281919c
@@ -1954,8 +3207,96 @@ index 0000000..281919c
 +    write(h.at, branch(h.at, cave));
 +  }
 +}
+diff --git a/src/melee-yoshi-animation.js b/src/melee-yoshi-animation.js
+new file mode 100644
+index 0000000..00ede47
+--- /dev/null
++++ b/src/melee-yoshi-animation.js
+@@ -0,0 +1,82 @@
++import {BACKGROUND_RENDER, EMPTY_RENDER} from './melee-background.js';
++import {cloneFountainAnimationProcedure, FOUNTAIN_ANIMATION_PROC as PROC,
++  FOUNTAIN_ANIMATION_CAVE as CAVE} from './melee-fountain-animation.js';
++const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
++
++// USA 1.02 Yoshi map 1 is the hidden decorative pass. Map 2 is Randall;
++// map 3 owns Shy Guy logic. Neither is eligible. Keep material processing,
++// collision-update counter and callbacks in the existing checked procedure.
++export function planYoshiBackgroundAnimation(read32,read8,enabled,stage){
++  if(typeof enabled!=='boolean'||stage!==8)throw Error('Yoshi animation requires a boolean mode and current stage 8');
++  if(read32(0x801e322c)!==0x4e800020)throw Error('Unexpected Yoshi background callback');
++  const lists=read32(0x804d782c);if(!valid(lists,24))throw Error('Invalid stage object list');
++  const seen=new Set(),objects=[],writes=[],codeWrites=[];let g=read32(lists+20);
++  while(g){
++    if(!valid(g,0x38)||seen.has(g)||seen.size>=128)throw Error('Invalid Yoshi object chain');seen.add(g);
++    const ground=read32(g+0x2c);
++    if(read8(g)===0&&read8(g+1)===3&&valid(ground,0x20)&&read32(ground+4)===g&&read32(ground+0x14)===1){
++      const render=read32(g+0x1c);
++      if((read8(ground+0x11)>>>5)!==2||![BACKGROUND_RENDER,EMPTY_RENDER].includes(render)||(!enabled&&render!==EMPTY_RENDER))
++        throw Error('Only the already-hidden Yoshi background may stop animation');
++      const procs=new Set();let p=read32(g+0x18),found=0,stageCallback=0;
++      while(p){
++        if(!valid(p,0x18)||procs.has(p)||procs.size>=16||read32(p+0x10)!==g)throw Error('Invalid Yoshi process ownership');procs.add(p);
++        const callback=read32(p+0x14);
++        if(callback===0x801e322c)stageCallback++;
++        if([PROC,CAVE].includes(callback)){
++          if(++found!==1)throw Error('Duplicate Yoshi animation procedure');
++          const target=enabled?PROC:CAVE;if(callback!==target)writes.push([p+0x14,target]);
++          objects.push({gobj:g,mapId:1,process:p,enabled});
++        }
++        p=read32(p);
++      }
++      if(found!==1||stageCallback!==1)throw Error('Yoshi background procedures not identified');
++    }
++    g=read32(g+8);
++  }
++  if(objects.length!==1)throw Error('Expected exactly one Yoshi background');
++  const code=cloneFountainAnimationProcedure(read32);
++  for(let i=0;i<code.length;i++){
++    const address=CAVE+i*4,current=read32(address);
++    if(current!==0&&current!==code[i])throw Error('Animation code area already in use');
++    if(!enabled&&current!==code[i])codeWrites.push([address,code[i]]);
++  }
++  return {objects,writes,codeWrites};
++}
++
++// Exact transform bits for every gameplay map; the cosmetic map is excluded.
++// Include spawned item/projectile actors, including Shy Guys and their drops.
++export function inspectYoshiGameplay(read32,read8){
++  const lists=read32(0x804d782c);if(!valid(lists,40))throw Error('Invalid Yoshi lists');
++  const objects=[],seen=new Set();let g=read32(lists+20);
++  while(g){
++    if(!valid(g,0x38)||seen.has(g)||seen.size>=128)throw Error('Invalid Yoshi stage chain');seen.add(g);
++    const ground=read32(g+0x2c),mapId=valid(ground,0xcc)?read32(ground+0x14):-1;
++    if(read8(g)===0&&read8(g+1)===3&&valid(ground,0xcc)&&read32(ground+4)===g&&[0,2,3].includes(mapId)){
++      const joints=[],seenJ=new Set();
++      const visit=(j,depth=0)=>{
++        if(depth>64)throw Error('Yoshi joint depth exceeded');
++        while(j){
++          if(!valid(j,0x88)||seenJ.has(j)||seenJ.size>=2048)throw Error('Invalid Yoshi joint tree');seenJ.add(j);
++          joints.push({local:Array.from({length:10},(_,i)=>read32(j+0x1c+i*4)),matrix:Array.from({length:12},(_,i)=>read32(j+0x44+i*4))});
++          if(!(read32(j+0x14)&0x1000))visit(read32(j+0x10),depth+1);j=read32(j+8);
++        }
++      };
++      const root=read32(g+0x28);if(!valid(root,0x88))throw Error('Invalid Yoshi gameplay root');visit(root);
++      objects.push({mapId,modeWords:[read32(ground+0xc4),read32(ground+0xc8)],joints});
++    }
++    g=read32(g+8);
++  }
++  if(objects.length!==3||![0,2,3].every(id=>objects.some(o=>o.mapId===id)))throw Error('Yoshi gameplay maps missing');
++  const items=[];seen.clear();g=read32(lists+0x24);
++  while(g){
++    if(!valid(g,0x38)||seen.has(g)||seen.size>=256)throw Error('Invalid Yoshi item chain');seen.add(g);
++    const item=read32(g+0x2c);
++    if(!valid(item,0xcc0)||read32(item+4)!==g)throw Error('Invalid Yoshi item owner');
++    items.push({kind:read32(item+0x10),state:read32(item+0x24),animation:read32(item+0x28),
++      facingBits:read32(item+0x2c),motionWords:Array.from({length:15},(_,i)=>read32(item+0x40+i*4)),
++      damageWords:[read32(item+0xc9c),read32(item+0xca0)]});
++    g=read32(g+8);
++  }
++  return {platforms:objects,items};
++}
 diff --git a/src/upstream-discio-worker.js b/src/upstream-discio-worker.js
-index 5ff41f5..4f89dca 100644
+index 5ff41f5..fc5a688 100644
 --- a/src/upstream-discio-worker.js
 +++ b/src/upstream-discio-worker.js
 @@ -1,3 +1,4 @@
@@ -2493,7 +3834,54 @@ index 5ff41f5..4f89dca 100644
    maybeReportOglSabRates(now);
    return true;
  }
-@@ -5617,7 +5877,7 @@ async function maybeSeedIdbFromPrebuiltCache(coreUrlValue, currentFingerprint) {
+@@ -5537,20 +5797,25 @@ async function maybeSeedIdbFromPrebuiltCache(coreUrlValue, currentFingerprint) {
+         req.onerror = () => resolve(0);
+       } catch { resolve(0); }
+     });
+-    if (existingCount >= DOLPHIN_JIT_PREWARM_THRESHOLD) {
+-      // User's IDB already pre-warmed enough — no need to seed from prebuilt.
++    if ((!dolphinJitBundleEnabled && existingCount >= DOLPHIN_JIT_PREWARM_THRESHOLD) ||
++        (dolphinJitBundleEnabled && existingCount >= DOLPHIN_JIT_CACHE_MAX)) {
++      // When the complete bundle is already in IDB, avoid another network fetch.
+       return 0;
+     }
+   }
+-  const prebuiltUrl = new URL("prebuilt-jit-cache.bin", coreUrlValue).href;
++  const prebuiltUrl = new URL("prebuilt-jit-cache.bin.gz", coreUrlValue).href;
+   let buffer;
+   try {
+     const resp = await fetch(prebuiltUrl);
+     if (!resp.ok) {
+-      // 404 is normal — the build just didn't ship a prebuilt cache.
+-      return 0;
++      // Older candidates use an uncompressed asset.
++      const legacy = await fetch(new URL("prebuilt-jit-cache.bin", coreUrlValue).href);
++      if (!legacy.ok) return 0;
++      buffer = await legacy.arrayBuffer();
++    } else {
++      const stream = resp.body.pipeThrough(new DecompressionStream("gzip"));
++      buffer = await new Response(stream).arrayBuffer();
+     }
+-    buffer = await resp.arrayBuffer();
+   } catch {
+     return 0;
+   }
+@@ -5576,6 +5841,14 @@ async function maybeSeedIdbFromPrebuiltCache(coreUrlValue, currentFingerprint) {
+     postStatus("jit-cache: prebuilt block identity mismatch; entire file ignored");
+     return 0;
+   }
++  // A bundled cache compiles all verified functions into one WebAssembly
++  // module, so it does not have the per-pthread Module multiplication that
++  // requires the 8,192-entry IDB boot cap. Keep the complete prebuilt set in
++  // memory long enough for loadDolphinJitBundleFromIdb() to consume it. This
++  // also avoids selecting an arbitrary hash-sorted IDB subset on first load.
++  if (dolphinJitBundleEnabled) {
++    dolphinJitPrebuiltBundleEntries = verifiedEntries.slice(0, DOLPHIN_JIT_CACHE_MAX);
++  }
+   // §28ch: only seed the FIRST DOLPHIN_JIT_IDB_BOOT_LOAD_MAX entries into
+   // IDB synchronously — past testing showed a 16k-entry IDB tx blocks the
+   // main thread ~3s and re-inflates the startup freeze the prebuilt cache
+@@ -5617,7 +5890,7 @@ async function maybeSeedIdbFromPrebuiltCache(coreUrlValue, currentFingerprint) {
    return seeded;
  }
  
@@ -2502,7 +3890,7 @@ index 5ff41f5..4f89dca 100644
    await dolphinJitIdbReady;
    if (!dolphinJitIdb) return 0;
    const [storedFingerprint, storedEntryKeySchema] = await Promise.all([
-@@ -5649,7 +5909,7 @@ async function reconcileJitCacheWithBuild(fingerprint) {
+@@ -5649,7 +5922,7 @@ async function reconcileJitCacheWithBuild(fingerprint) {
    } else {
      return 0;
    }
@@ -2511,7 +3899,7 @@ index 5ff41f5..4f89dca 100644
    if (loaded > 0) {
      postStatus(`jit-cache: loaded ${loaded} compiled modules from IndexedDB`);
    }
-@@ -5663,7 +5923,60 @@ async function reconcileJitCacheWithBuild(fingerprint) {
+@@ -5663,7 +5936,63 @@ async function reconcileJitCacheWithBuild(fingerprint) {
  }
  let dolphinJitNewCompileCount = 0;
  let dolphinJitCompilePending = 0;
@@ -2519,14 +3907,17 @@ index 5ff41f5..4f89dca 100644
 +let dolphinJitBundle = null;
 +let dolphinJitBundleEntryCount = 0;
 +let dolphinJitBundleBytes = 0;
++let dolphinJitPrebuiltBundleEntries = null;
  const dolphinJitVerificationPending = new Set();
 +
 +async function loadDolphinJitBundleFromIdb(db) {
 +  dolphinJitBundle = null;
 +  dolphinJitBundleEntryCount = 0;
 +  dolphinJitBundleBytes = 0;
-+  if (!db) return 0;
-+  const entries = await new Promise((resolve) => {
++  if (!db && !dolphinJitPrebuiltBundleEntries?.length) return 0;
++  const prebuiltEntries = dolphinJitPrebuiltBundleEntries;
++  dolphinJitPrebuiltBundleEntries = null;
++  const entries = prebuiltEntries?.length ? prebuiltEntries : await new Promise((resolve) => {
 +    const out = [];
 +    try {
 +      const tx = db.transaction(DOLPHIN_JIT_IDB_STORE, "readonly");
@@ -2572,7 +3963,7 @@ index 5ff41f5..4f89dca 100644
  async function handleDolphinJitNewCompile(event) {
    const data = event.data;
    if (!data || data.type !== "dolphin-jit-new-compile") return;
-@@ -5671,8 +5984,9 @@ async function handleDolphinJitNewCompile(event) {
+@@ -5671,8 +6000,9 @@ async function handleDolphinJitNewCompile(event) {
    const key = String(data.hash);
    const bytes = data.bytes instanceof ArrayBuffer ? new Uint8Array(data.bytes) : data.bytes;
    if (!(bytes instanceof Uint8Array)) return;
@@ -2584,7 +3975,7 @@ index 5ff41f5..4f89dca 100644
    dolphinJitVerificationPending.add(key);
    let valid = false;
    try {
-@@ -5813,7 +6127,7 @@ async function waitForDolphinJitPthreadBarrier(timeoutMs = 30_000) {
+@@ -5813,7 +6143,7 @@ async function waitForDolphinJitPthreadBarrier(timeoutMs = 30_000) {
  
  export async function installDolphinPthreadChannels(
    moduleInstance,
@@ -2593,7 +3984,7 @@ index 5ff41f5..4f89dca 100644
  ) {
    const pthread = moduleInstance?.PThread;
    dolphinJitPthreadRuntime = pthread || null;
-@@ -5848,6 +6162,18 @@ export async function installDolphinPthreadChannels(
+@@ -5848,6 +6178,18 @@ export async function installDolphinPthreadChannels(
          }
        }
      }
@@ -2612,7 +4003,7 @@ index 5ff41f5..4f89dca 100644
    }
  
    if (!jitCacheEnabled) return;
-@@ -5855,6 +6181,16 @@ export async function installDolphinPthreadChannels(
+@@ -5855,6 +6197,16 @@ export async function installDolphinPthreadChannels(
    // reconcileJitCacheWithBuild before reaching this call site), so we
    // can push immediately.
    dolphinJitPthreadWorkers = workers;
@@ -2629,7 +4020,7 @@ index 5ff41f5..4f89dca 100644
    dolphinJitPthreadInstallPostFailures = 0;
    if (!workers.length) {
      postStatus("jit-cache: no pthread workers visible at boot (PTHREAD_POOL_SIZE may be 0)");
-@@ -5870,6 +6206,9 @@ export async function installDolphinPthreadChannels(
+@@ -5870,6 +6222,9 @@ export async function installDolphinPthreadChannels(
      try {
        ensureDolphinJitPthreadListeners(w);
        w.postMessage({ type: "dolphin-jit-cache", cache: dolphinJitCacheMap });
@@ -2639,7 +4030,7 @@ index 5ff41f5..4f89dca 100644
        sent += 1;
      } catch (err) {
        dolphinJitPthreadInstallPostFailures += 1;
-@@ -5885,7 +6224,7 @@ export async function installDolphinPthreadChannels(
+@@ -5885,7 +6240,7 @@ export async function installDolphinPthreadChannels(
    // the game runs. Cost: small CPU on discio worker + N postMessages,
    // each well under the 16ms frame budget. Gain: bigger effective cache
    // covering menu-nav transitions that the bounded boot-load missed.
@@ -2648,7 +4039,7 @@ index 5ff41f5..4f89dca 100644
      dolphinJitLazyFillActive = false;
      dolphinJitLazyFillCompleted = false;
      dolphinJitLazyFillTerminalReason = "error";
-@@ -11727,7 +12066,7 @@ function handleDetachedOglFrame(event) {
+@@ -11727,7 +12082,7 @@ function handleDetachedOglFrame(event) {
    }
    try {
      self.postMessage(
@@ -2657,7 +4048,7 @@ index 5ff41f5..4f89dca 100644
        [data.bitmap]
      );
    } catch (err) {
-@@ -11736,6 +12075,7 @@ function handleDetachedOglFrame(event) {
+@@ -11736,6 +12091,7 @@ function handleDetachedOglFrame(event) {
        postStatus(`ogl-detached: forward to main failed: ${err?.message || err}`);
      }
      try { data.bitmap.close(); } catch {}
@@ -2665,7 +4056,7 @@ index 5ff41f5..4f89dca 100644
    }
  }
  
-@@ -11748,6 +12088,13 @@ function handleDetachedOglFrame(event) {
+@@ -11748,6 +12104,13 @@ function handleDetachedOglFrame(event) {
  // `head` is monotonic so we can detect overflow (newEntries > capacity).
  let frameRingDrainTimer = null;
  let frameRingLastDrainHead = 0;
@@ -2679,7 +4070,7 @@ index 5ff41f5..4f89dca 100644
  function startFrameRingDrainLoop() {
    if (frameRingDrainTimer || !api?.getFrameRingHead || !api?.getFrameRingEntryPtr) {
      return;
-@@ -11772,6 +12119,8 @@ function startFrameRingDrainLoop() {
+@@ -11772,6 +12135,8 @@ function startFrameRingDrainLoop() {
      if (!heap || !api?.getFrameRingHead) return;
      const head = api.getFrameRingHead() >>> 0;
      if (head === frameRingLastDrainHead) return;
@@ -2688,7 +4079,7 @@ index 5ff41f5..4f89dca 100644
      const total = (head - frameRingLastDrainHead) >>> 0;
      const overflowed = total > capacity;
      const startIndex = overflowed ? head - capacity : frameRingLastDrainHead;
-@@ -11791,6 +12140,7 @@ function startFrameRingDrainLoop() {
+@@ -11791,6 +12156,7 @@ function startFrameRingDrainLoop() {
        const glerr = heap[off + 5] >>> 0;
        const commit = heap[off + 6] | 0; // signed
        const debugBits = heap[off + 7] >>> 0;
@@ -2696,7 +4087,7 @@ index 5ff41f5..4f89dca 100644
        console.log(
          `[frame-ring] f=${frame} prim=${prim} draw=${draw} verts=${verts} ` +
            `xfb=0x${xfbHash.toString(16)} glerr=${glerr} commit=${commit} ` +
-@@ -11798,6 +12148,8 @@ function startFrameRingDrainLoop() {
+@@ -11798,6 +12164,8 @@ function startFrameRingDrainLoop() {
        );
      }
      frameRingLastDrainHead = head;
@@ -2947,6 +4338,19 @@ index 0000000..fb737d4
 +    /ABI mismatch/
 +  );
 +});
+diff --git a/tests/jit-cache-identity.test.mjs b/tests/jit-cache-identity.test.mjs
+index 7f5c86f..e27daa9 100644
+--- a/tests/jit-cache-identity.test.mjs
++++ b/tests/jit-cache-identity.test.mjs
+@@ -104,7 +104,7 @@ test("worker source locks v3 migration and reconcile-before-seed ordering", asyn
+   assert.match(source, /DOLPHIN_JIT_IDB_VERSION\s*=\s*3/);
+   assert.match(source, /DOLPHIN_JIT_ENTRY_KEY_SCHEMA_KEY\s*=\s*"entryKeySchema"/);
+   assert.match(source, /event\.oldVersion\s*<\s*3[\s\S]{0,400}deleteObjectStore\(DOLPHIN_JIT_IDB_STORE\)/);
+-  const reconcile = source.indexOf("await reconcileJitCacheWithBuild(buildFingerprint)");
++  const reconcile = source.indexOf("await reconcileJitCacheWithBuild(buildFingerprint, {");
+   const seed = source.indexOf("await maybeSeedIdbFromPrebuiltCache(coreUrl, buildFingerprint)");
+   assert.ok(reconcile >= 0 && seed > reconcile, "reconcile must fail closed before prebuilt seed");
+   assert.match(source, /verifyCanonicalWasmBlockKey\(String\(key\), buf\)/);
 diff --git a/tests/upstream-pthread-channels.test.mjs b/tests/upstream-pthread-channels.test.mjs
 index c25d2ca..d8a6fa4 100644
 --- a/tests/upstream-pthread-channels.test.mjs

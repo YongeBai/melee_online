@@ -444,6 +444,8 @@ async function tick() {
     }
     const state = await host.adapter.request("meleeInspect", {});
     gameState = state;
+    if (params.has("qa")) document.documentElement.dataset.qaStartupScene =
+      `${state.major}:${state.minor}:${state.sceneKind}:${state.sceneFrame}:${state.renderFrame}:${ready ? 1 : 0}`;
     const scene = `${state.major}:${state.minor}`;
     if (scene === "2:0" && state.sceneFrame < previousSceneFrame) lastScene = "";
     previousSceneFrame = state.sceneFrame;
