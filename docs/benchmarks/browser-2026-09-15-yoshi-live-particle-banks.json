@@ -1,0 +1,11 @@
+{
+  "date": "2026-09-15",
+  "kind": "read-only-live-particle-bank-inventory",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "fixture": "Corrected 960x720 depth, black stage sky, native low-detail fighters, block merge and animation fusion",
+  "observed": {"total": 1, "banks": [{"bank": 0, "particles": 1, "aboveDrawThreshold": 1, "links": [0]}]},
+  "decision": "The live Yoshi snapshot contains no ambient stage-particle bank; avoid porting Fountain's bank-30 draw suppression as a Yoshi optimization. Preserve combat particle effects.",
+  "limits": "A single paused inventory after a 120-frame native Yoshi replay; counts are not CPU self-time, draw call totals, or exhaustive active-attack particle coverage. The hosted-game static package verified 180 files. Raw report: /tmp/melee-yoshi-particle-inventory-3282-sep15.json."
+}

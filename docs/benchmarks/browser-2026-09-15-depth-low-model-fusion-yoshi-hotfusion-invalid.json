@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-15",
+  "kind": "invalid-same-checkpoint-codegen-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "corrected WebGL depth 960x720, black sky, native low-detail models",
+  "fixedCodegen": ["blockmerge", "animfusion"],
+  "changedCodegen": "revision-locked hotfusion across 14 Melee function ranges",
+  "measurementSecondsPerLeg": 30,
+  "warmupBeforeEveryLeg": true,
+  "measuredRuns": [
+    {"hotfusion": false, "simulationFps": 27.4343, "distinctVisibleFps": 27.4676, "commonNativeFrameGate": false},
+    {"hotfusion": true, "simulationFps": 28.8676, "distinctVisibleFps": 28.8676, "commonNativeFrameGate": false, "cumulativeCompiledBlocks": 16},
+    {"hotfusion": true, "simulationFps": 29.6357, "distinctVisibleFps": 29.6357, "commonNativeFrameGate": false, "cumulativeCompiledBlocks": 16},
+    {"hotfusion": false, "simulationFps": 53.5382, "distinctVisibleFps": 52.9381, "commonNativeFrameGate": false}
+  ],
+  "inputConsistency": {"passed": false, "checked": 66, "reason": "Six runs, including warmups, had fewer than 1200 common native tracked frames"},
+  "pageVisibility": "visible and focused in all measured legs",
+  "decision": "Keep disabled. Throughput recovered massively after the first three legs; neither a symmetric FPS change nor target eligibility can be inferred from this invalid control. Defer state replay until valid evidence of a gain.",
+  "limits": "The cause of the within-session recovery is unproven; JIT diagnostics show no synchronous module compilation during the image windows, but do not exclude background browser tiering. No physical input-to-photon latency or production performance conclusion. Raw report: /tmp/melee-yoshi-hotfusion-3285-sep15.json."
+}

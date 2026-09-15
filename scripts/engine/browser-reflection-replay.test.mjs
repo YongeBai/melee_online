@@ -24,3 +24,42 @@ test('Battlefield replay preserves gameplay and RNG while changing only map-1 an
   const r=await verifyFountainReflectionState(host,{feature:'staticbackground',frames:120});assert.equal(r.passed,!mismatch);assert.equal(r.fullMachineEquivalence,false);assert.equal(r.kind,'battlefield-gameplay-observable-comparison');assert.equal(actions.at(-3).enabled,true);
  }
 });
+
+test('Yoshi stage-background replay keeps Randall and native camera while skipping only decorative drawing',async()=>{
+ for(const cameraMismatch of[false,true]){
+  let frame=400,draw=true;const actions=[];
+  const host={adapter:{request:async(t,d)=>{
+   actions.push(d);
+   if(d.action==='restore')frame=400;
+   if(d.action==='step')frame++;
+   if(d.action==='stageBackground'){
+    draw=d.enabled;
+    return{objects:[{mapId:1},{mapId:2,preservedGameplay:'Randall'}],writes:[],codeWrites:[]};
+   }
+   if(d.action==='yoshiGameplayState')return{
+    sceneFrame:frame,match:{stage:8},randomSeed:123,
+    camera:{fov:draw||!cameraMismatch?30:31},
+    fighters:[{character:14},{character:14}],allActors:[{character:14},{character:14},{partner:1},{partner:2}],
+    items:[],platforms:[{mapId:0},{mapId:2,x:frame},{mapId:3}],
+   };
+   return{};
+  }}};
+  const result=await verifyFountainReflectionState(host,{feature:'stagebackground',frames:120});
+  assert.equal(result.passed,!cameraMismatch);
+  if(!cameraMismatch){assert.equal(result.randallMoved,true);assert.equal(result.framesCompared,120);assert.equal(result.fullMachineEquivalence,false);}
+  else assert.equal(result.mismatch.frame,0);
+  assert.equal(actions.at(-3).enabled,true);
+ }
+});
+
+test('Yoshi stage-background replay refuses to hide Randall',async()=>{
+ let frame=400;const actions=[];
+ const host={adapter:{request:async(t,d)=>{
+  actions.push(d);if(d.action==='step')frame++;
+  if(d.action==='stageBackground')return{objects:[{mapId:1},{mapId:2}],writes:[],codeWrites:[]};
+  if(d.action==='yoshiGameplayState')return{sceneFrame:frame,match:{stage:8},fighters:[{character:2},{character:20}],allActors:[{},{}],items:[],platforms:[{mapId:0},{mapId:2},{mapId:3}],camera:{fov:30}};
+  return{};
+ }}};
+ await assert.rejects(verifyFountainReflectionState(host,{feature:'stagebackground',frames:120}),/preserve Randall/);
+ assert.equal(actions.some(d=>d.action==='capture'),false);
+});

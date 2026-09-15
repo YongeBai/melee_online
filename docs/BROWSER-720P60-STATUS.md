@@ -118,6 +118,96 @@ distinct visible **56.00 / 57.54 / 56.87 / 58.17 FPS**. The first pair gains
 110 input fingerprints pass, but no leg hits 60. Restore the original native
 background; the older raw-depth apparent benefit also failed its reversal.
 [Corrected Dream Land background comparison](benchmarks/browser-2026-09-15-depth-low-model-dreamland-background-abba.json).
+The corrected low-model/fusion 30-second guest-PC diagnostic sampled 1,493
+locations (one unmapped). `HSD_FObjInterpretAnim` still led named functions at
+51 samples (3.4%); particles, reverb, texture-resource assignment and envelope
+matrix setup followed at 19–22 samples each (1.3–1.5%). These are last-PC
+residency observations including waits, not self-time or predicted FPS savings.
+The profiler reduced visible delivery to 49.93 FPS, so it cannot certify
+performance. Its optional text symbol map lived only in an ignored private
+lab package with 181 hashed files and automatic hosted-game startup.
+[Corrected CPU residency](benchmarks/browser-2026-09-15-depth-low-model-fusion-cpu-profile.json).
+The first corrected Yoshi's Story acceptance leg with an Ice Climbers mirror,
+native low-detail models and the exact-replay animation fusion measured only
+**40.70 simulation / 40.60 distinct visible FPS** for 30 seconds at 960×720.
+Both native-frame controller tracks were active; the page stayed focused and
+the two-image queue dropped only two of 1,220 received frames. The stage is
+outside the permitted Fountain IC exception and needs a much larger gain than
+incremental dispatcher work. The subsequent checked Yoshi background control
+below preserves Randall, terrain, gameplay feedback and original camera.
+[Corrected Yoshi baseline](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-baseline.json).
+Yoshi's corresponding 1,492 guest-PC samples put animation interpretation at
+48 (3.2%) and texture setup at 24 (1.6%), with matrices, joint updates,
+trigonometry, reverb and particles distributed below that. Counts include
+last-PC host waits and are not exact function time. The stage-background A/B
+control below tests the decorative draw cost directly.
+[Corrected Yoshi CPU residency](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-cpu-profile.json).
+Corrected Yoshi decorative map-1 background normal/black/black/normal ABBA
+measured **49.34 / 55.07 / 55.57 / 52.97 distinct visible FPS**. Both 30-second
+pairs favor black (mean +4.16 FPS); 102 controller fingerprints match. The
+callback continues to preserve map-2 Randall. A separate same-input 600-frame
+replay matched fighters and partners, rules/timers, RNG, items, moving Randall,
+stage transforms and original camera. The black-scene screenshot preserved
+4:3 framing, platforms, fighters, trees and HUD; the game reported FOV 20,
+zero camera pitch/yaw offsets. Graphics commands intentionally differ, and
+55.57 remains under 60. Retain this stage-only cosmetic option; no default
+promotion or all-stage certification follows.
+[Yoshi background timing](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-background-abba.json).
+[Randall and camera replay](benchmarks/browser-2026-09-15-yoshi-background-gameplay-replay.json).
+Freezing map-1 decorative Yoshi animation while the sky draw was already off
+gave normal/frozen/frozen/normal visible **55.37 / 55.53 / 55.46 / 57.07 FPS**.
+The first pair gains only 0.17 FPS and the reversed pair loses 1.61;
+109 input fingerprints match and all gates fail. Keep native animation
+enabled. The larger map-1 draw skip remains stage-only and optional.
+[Yoshi animation control](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-animation-abba.json).
+Live read-only Yoshi geometry contains zero map-0 collision display objects
+and 102 map-3 display objects across 22 joints; map-2 Randall is excluded
+from mesh editing. Seven two-material joints near world Y≈−210 turned out
+to be visible foreground water artwork, not invisible offscreen work.
+Guardedly hiding their 14 DOBJ flags on the black-background, low-model/fusion
+Yoshi scene gave native/reduced/reduced/native visible **52.50 / 54.74 / 56.44 /
+55.84 FPS**. Both pairs favor removal (+2.23 / +0.60), 107 fingerprints match,
+but every gate fails. The corrected screenshot shows missing foreground waves;
+native waves remain default. An independent same-input 600-frame replay
+matched fighters, Randall, items, RNG and native camera, so the opt-in is
+mechanically viable for this fixture. Stage/playable geometry must remain legible.
+[Yoshi mesh inventory](benchmarks/browser-2026-09-15-yoshi-mesh-inventory.json).
+[Wave timing](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-waves-abba.json).
+[Wave gameplay replay](benchmarks/browser-2026-09-15-yoshi-waves-gameplay-replay.json).
+The two checked 17-draw Yoshi side groups looked visually unchanged at a
+comparable idle frame with native waves retained. Their normal/hidden/hidden/
+normal same-checkpoint visible rates were **53.04 / 55.20 / 54.94 / 56.00 FPS**:
+first pair +2.16, reverse −1.06. All 106 fingerprints match, but the FPS
+effect is not repeatable and every gate fails. Restore native side displays;
+the screenshot cannot rule out differences at wider native camera zoom.
+[Side scenery timing](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-side-scenery-abba.json).
+With the corrected black Yoshi sky and low-detail fighters, changing only
+the revision-locked animation callback continuation after a native warmup
+gave off/on/on/off visible **51.27 / 52.14 / 48.50 / 48.17 FPS**. Both same-
+checkpoint pairs favor it (+0.87 / +0.33) with 98 matching native-input
+fingerprints, but the session drifts more than 3 FPS and no leg reaches 60.
+Keep the callback specialization opt-in pending exact-configuration replay;
+the earlier ~1.9 FPS gain in another setup does not transfer here.
+[Corrected callback timing](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-animcallback-abba.json).
+The read-only live Yoshi particle inventory, after a checked120-frame native
+match replay, found just one bank-0 particle and **no ambient stage bank**.
+Fountain's bank-30 draw suppression therefore has no identified equivalent
+Yoshi payoff in this scene. It is a snapshot, not a particle self-time profile.
+[Yoshi particle inventory](benchmarks/browser-2026-09-15-yoshi-live-particle-banks.json).
+The checked26-draw Yoshi group-4 tree preview left the red platform and native
+camera visible in a black-background screenshot. A30-second same-checkpoint
+normal/removed/removed/normal trial gave **51.94 / 54.22 / 54.14 / 54.80**
+visible FPS: first pair +2.29, reverse −0.66. The 102 native-input
+fingerprints matched, but none passed and the gain did not repeat. Reject the
+tree preview and leave the visually uncertain group 5 native.
+[Yoshi tree comparison](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-tree-abba.json).
+Revision-locked hot-function fusion compiled16 Yoshi blocks but yielded an
+**invalid** native-input FPS control: off/on/on/off distinct visible **27.47 /
+28.87 / 29.64 / 52.94 FPS**. All measured legs failed the 60 gate and six
+warmup/measured runs had fewer than 1,200 common native frames. The within-
+session recovery is too large to attribute any change to fusion; keep it
+disabled, and defer exact-state replay until a valid workload result exists.
+[Invalid hot-fusion control](benchmarks/browser-2026-09-15-depth-low-model-fusion-yoshi-hotfusion-invalid.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

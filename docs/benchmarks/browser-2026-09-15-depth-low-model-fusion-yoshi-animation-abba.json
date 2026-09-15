@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-yoshi-yoshianimation-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Yoshi's Story","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","models":"native low detail","backgroundDraw":"decorative map-1 already skipped","codegen":"block merge and animation fusion on"},
+  "decorativeAnimationValues": [true,false,false,true],
+  "simulationFps": [55.93304,56.90161,56.99685,58.50400],
+  "distinctVisibleFps": [55.36637,55.53491,55.46360,57.07057],
+  "offPairedGainFps": [0.16854,-1.60697],
+  "inputConsistency": {"passed":true,"checked":109,"mismatches":[]},
+  "stageCoverage": {"mapId":1,"callbackStableAtEndOfEveryLeg":true},
+  "decision": "Reject freezing this decorative joint animation after the sky draw is suppressed: opposing paired results and no 60-FPS leg. Restore normal animation, Randall and native background behavior except for the optional render-only map-1 draw skip.",
+  "limits": "One matchup. Matching native-frame inputs are not full machine-state equivalence. The reversible renderer-only background skip has a separate 600-frame gameplay/Randall/camera replay."
+}

@@ -23,7 +23,7 @@ export function planFountainScenery(read32,read8,enabled){
 // Private render-only diagnostic for the Fountain main map object. This does
 // not remove joints, processes, materials, animation, collision or cameras.
 // HSD_JObjDispSub tests DOBJ_HIDDEN before calling the material/mesh renderer.
-export function inspectFountainGeometry(read32,read8,readFloat) {
+export function inspectFountainGeometry(read32,read8,readFloat,{mapIds=[3],stageName='Fountain',renderCallback=0x801cd220}={}) {
  const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
  const requirePtr=(p,n)=>{if(!valid(p,n))throw Error('Invalid Fountain geometry pointer');};
  const lists=read32(0x804d782c);requirePtr(lists,24);
@@ -31,8 +31,9 @@ export function inspectFountainGeometry(read32,read8,readFloat) {
  while(g){
   requirePtr(g,0x38);if(seenG.has(g)||seenG.size>=128)throw Error('Invalid Fountain object chain');seenG.add(g);
   const ground=read32(g+0x2c);
-  if(read8(g)===0&&read8(g+1)===3&&valid(ground,0x20)&&read32(ground+4)===g&&read32(ground+0x14)===3){
-   if(read32(g+0x1c)!==0x801cd220||read32(0x801cd220)!==0x7c0802a6)throw Error('Unexpected Fountain main renderer');
+  if(read8(g)===0&&read8(g+1)===3&&valid(ground,0x20)&&read32(ground+4)===g&&mapIds.includes(read32(ground+0x14))){
+   const mapId=read32(ground+0x14);
+   if(read32(g+0x1c)!==renderCallback||read32(renderCallback)!==0x7c0802a6)throw Error('Unexpected '+stageName+' stage renderer');
    const root=read32(g+0x28),joints=[],draws=[],seenJ=new Set(),seenD=new Set();requirePtr(root,0x88);
    const visit=(j,parent,depth)=>{
     if(depth>64)throw Error('Fountain joint tree too deep');
@@ -53,12 +54,51 @@ export function inspectFountainGeometry(read32,read8,readFloat) {
      j=read32(j+8);
     }
    };
-   visit(root,0,0);objects.push({gobj:g,root,joints,draws});
+   visit(root,0,0);objects.push({gobj:g,mapId,root,joints,draws});
   }
   g=read32(g+8);
  }
- if(objects.length!==1)throw Error('Expected one Fountain main map object');
+ if(objects.length!==mapIds.length||new Set(objects.map(object=>object.mapId)).size!==mapIds.length)
+  throw Error('Expected checked '+stageName+' stage mesh objects');
  return {objects,diagnosticOnly:true};
+}
+
+// Read-only inventory for the Yoshi main stage and the Shy Guy stage object.
+// Map 2 is Randall and is intentionally never in a mesh-edit candidate.
+export function inspectYoshiGeometry(read32,read8,readFloat){
+ return inspectFountainGeometry(read32,read8,readFloat,{mapIds:[0,3],stageName:'Yoshi',renderCallback:BACKGROUND_RENDER});
+}
+
+// Seven two-material meshes with low joint origins draw Yoshi's foreground
+// water waves. Change only DOBJ_HIDDEN; the Shy Guy map object, its processes,
+// joints, collision, animations and all native camera state remain present.
+export function planYoshiOffscreenDecor(geometry,enabled){
+ if(typeof enabled!=='boolean')throw Error('Yoshi offscreen visibility requires a boolean mode');
+ const collision=geometry.objects?.find(object=>object.mapId===0);
+ const display=geometry.objects?.find(object=>object.mapId===3);
+ if(geometry.objects?.length!==2||collision?.joints.length!==23||collision.draws.length!==0||
+    display?.joints.length!==22||display.draws.length!==102)
+  throw Error('Unexpected Yoshi stage geometry; offscreen visibility rejected');
+ const groups=[[13,-20,54],[14,-50,56],[15,-70,58],[16,-90,60],
+               [18,-225,79],[20,-320,98],[21,-370,100]];
+ const writes=[],draws=[];
+ for(const [joint,z,first] of groups){
+  const j=display.joints[joint];
+  if(j.parent!==display.joints[1].address||j.local[0]!==0||j.local[1]>-280||
+     j.local[2]!==z||j.world[1]>-180||j.draws.length!==2||
+     j.draws[0]!==first||j.draws[1]!==first+1)
+   throw Error('Yoshi offscreen joint identity changed');
+  for(const [index,base] of [[first,8],[first+1,2]]){
+   const draw=display.draws[index];
+   if(draw.joint!==joint||(draw.flags&~1)!==base||!draw.material||!draw.mesh)
+    throw Error('Yoshi offscreen material identity changed');
+   const target=base|(enabled?0:1);
+   if(draw.flags!==target)writes.push([draw.address+20,target]);
+   draws.push(index);
+  }
+ }
+ return {objects:[{mapId:3,root:display.root,groups:groups.length,draws,enabled}],writes,
+  limits:'Render-only foreground water-wave reduction; native water stays default. The camera and gameplay probes match in the tested Yoshi Ice Climbers fixture.'};
 }
 
 export function planFountainGeometryView(current,original,selection) {

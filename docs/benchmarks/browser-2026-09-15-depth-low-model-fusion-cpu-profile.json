@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-15",
+  "kind": "guest-function-wall-residency-diagnostic",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","models":"native low detail","codegen":"block merge and animation fusion on"},
+  "seconds": 30,
+  "guestPcSamples": 1493,
+  "unmapped": 1,
+  "topNamedFunctions": [
+    {"name":"HSD_FObjInterpretAnim","samples":51,"fraction":0.03416},
+    {"name":"psDispParticles","samples":22,"fraction":0.01474},
+    {"name":"HandleReverb","samples":21,"fraction":0.01407},
+    {"name":"HSD_TObjAssignResources","samples":21,"fraction":0.01407},
+    {"name":"SetupEnvelopeModelMtx","samples":19,"fraction":0.01273},
+    {"name":"HSD_TObjSetup","samples":15,"fraction":0.01005},
+    {"name":"HSD_TExpSetReg","samples":14,"fraction":0.00938}
+  ],
+  "diagnosticSimulationFps": 50.16571,
+  "diagnosticVisibleFps": 49.93238,
+  "interpretation": "Animation interpretation remains the highest named guest-PC residency after low-detail fighter tables and targeted fusion. Rendering, material and effects work is spread across functions rather than one removable general-emulator feature.",
+  "limits": "PC is the last committed guest instruction and samples include host waits; counts do not give exact self-time or a guaranteed FPS gain. Profiling itself reduces FPS and is not an acceptance run. Symbol map was added only to a new ignored private lab release on port 3276; the ordinary static release does not need it."
+}

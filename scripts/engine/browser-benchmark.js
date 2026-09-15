@@ -553,10 +553,10 @@ export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>
 // restores all machine/graphics state before changing only that pass.
 export async function compareFountainReflection(host,seconds,inspect,{measure=measureBrowserGameplayAsync,feature="reflection",frameInput=false,onProgress=()=>{},onResult=()=>{}}={}){
  const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
- if(!['reverb','reflection','scenery','modeldetail','animation','shadowdiag','decorations','particles','stadiumscreen','yoshianimation','staticbackground','stagebackground'].includes(feature))throw Error('Unknown cosmetic feature');
- const reverb=feature==='reverb',yoshi=feature==='yoshianimation',stadium=feature==='stadiumscreen',staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground';
+ if(!['reverb','reflection','scenery','modeldetail','animation','shadowdiag','decorations','particles','stadiumscreen','yoshianimation','yoshioffscreen','staticbackground','stagebackground'].includes(feature))throw Error('Unknown cosmetic feature');
+ const reverb=feature==='reverb',yoshiAnimation=feature==='yoshianimation',yoshiOffscreen=feature==='yoshioffscreen',yoshi=yoshiAnimation||yoshiOffscreen,stadium=feature==='stadiumscreen',staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground';
  let stageName=reverb?'Tournament match':yoshi?'Yoshi':stadium?'Stadium':staticBackground?'Tournament stage':'Fountain';
- const reflection=enabled=>host.adapter.request('meleeControl',{action:stageBackground?'stageBackground':reverb?'auxReverb':yoshi?'yoshiBackgroundAnimation':stadium?'stadiumScreen':staticBackground?'staticBackgroundAnimation':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='shadowdiag'?'shadowDiagnostic':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
+ const reflection=enabled=>host.adapter.request('meleeControl',{action:stageBackground?'stageBackground':reverb?'auxReverb':yoshiAnimation?'yoshiBackgroundAnimation':yoshiOffscreen?'yoshiOffscreenDecor':stadium?'stadiumScreen':staticBackground?'staticBackgroundAnimation':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='shadowdiag'?'shadowDiagnostic':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
  const codegen=browserCodegenConfig(host);
  const runs=[];let captured=false;
  try{
@@ -587,10 +587,17 @@ export async function compareFountainReflection(host,seconds,inspect,{measure=me
     result.controllerStress={...stats,kind:'two ordinary controller tracks sampled on native logic frames',notHumanPlay:true,exercisedBothPlayers:!!exercised};
     if(!exercised){result.passed=false;result.invalidWorkload='Frame-based controller workload was invalid or inactive';}
    }
-   if(yoshi){
+   if(yoshiAnimation){
     await command('pause');const verified=await reflection(enabled);
     if(verified.objects.length!==1||verified.objects[0].mapId!==1||verified.writes.length||verified.codeWrites.length)throw Error('Yoshi animation hook changed during measurement');
-    result.cosmeticCoverage={mapId:1,animation:enabled,stableAtEnd:true};
+     result.cosmeticCoverage={mapId:1,animation:enabled,stableAtEnd:true};
+   }
+   if(yoshiOffscreen){
+    await command('pause');const verified=await reflection(enabled);
+    if(verified.objects.length!==1||verified.objects[0].mapId!==3||verified.objects[0].groups!==7||
+       verified.objects[0].draws.length!==14||verified.writes.length)
+      throw Error('Yoshi below-stage meshes changed during measurement');
+    result.cosmeticCoverage={mapId:3,groups:7,draws:14,visible:enabled,stableAtEnd:true};
    }
    if(stadium){
     await command('pause');const verified=await reflection(enabled);

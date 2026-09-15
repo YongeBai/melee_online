@@ -11,7 +11,7 @@ import {planFountainParticles,inspectParticleBanks,PARTICLE_DRAW_CAVE,PARTICLE_D
 import {planShadowDiagnostic,SHADOW_DIAGNOSTIC_PROC} from './melee-shadow-diagnostic.js';
 import {planFountainAnimation,FOUNTAIN_ANIMATION_CAVE,FOUNTAIN_ANIMATION_BYTES} from './melee-fountain-animation.js';
 import {planFighterModelDetail} from './melee-model-detail.js';
-import {planFountainScenery,inspectFountainGeometry,planFountainGeometryView,planFountainDecorations} from './melee-scenery.js';
+import {planFountainScenery,inspectFountainGeometry,inspectYoshiGeometry,planYoshiOffscreenDecor,planFountainGeometryView,planFountainDecorations} from './melee-scenery.js';
 const fountainGeometryBaseline=new WeakMap();
 import {planFountainReflection} from './melee-reflection.js';
 import { planStageBackground } from './melee-background.js';
@@ -319,6 +319,16 @@ export function controlMelee(module, api, action, options = {}) {
       return plan;
     }finally{if(!wasPaused)api.setCorePaused(0);}
   }
+  if(action==='particleBankInspect'){
+    const wasPaused=api.getCoreStateName?.()==='Paused';
+    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for particle-bank inventory');
+    try{
+      const current=inspectMelee(module);
+      if(current.major!==2||current.minor!==2||current.sceneKind!==2)
+        throw Error('Particle-bank inventory requires a live match');
+      return inspectParticleBanks(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)));
+    }finally{if(!wasPaused)api.setCorePaused(0);}
+  }
   if(action==='fountainParticles'){
     if(!api.browserInvalidateGuestCode)throw Error('Particle experiment requires guest code invalidation');
     const wasPaused=api.getCoreStateName?.()==='Paused';
@@ -393,6 +403,20 @@ export function controlMelee(module, api, action, options = {}) {
       if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==2)return {objects:[],writes:[]};
       const plan=planFountainDecorations(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)),options.enabled);
       for(const[address,value]of plan.writes)w(address,value);
+      return plan;
+    }finally{if(!wasPaused)api.setCorePaused(0);}
+  }
+  if(action==='yoshiGeometryInspect'||action==='yoshiOffscreenDecor'){
+    const wasPaused=api.getCoreStateName?.()==='Paused';
+    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for checked Yoshi mesh control');
+    try{
+      const current=inspectMelee(module);
+      if(current.major!==2||current.minor!==2||current.sceneKind!==2||current.match?.stage!==8)
+        throw Error('Yoshi mesh inventory requires a live Yoshi match');
+      const geometry=inspectYoshiGeometry(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)));
+      if(action==='yoshiGeometryInspect')return geometry;
+      const plan=planYoshiOffscreenDecor(geometry,options.enabled);
+      for(const [address,value] of plan.writes)w(address,value);
       return plan;
     }finally{if(!wasPaused)api.setCorePaused(0);}
   }

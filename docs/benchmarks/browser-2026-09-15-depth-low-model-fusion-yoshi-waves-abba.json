@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-yoshi-yoshioffscreen-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Yoshi's Story","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","models":"native low detail","skyDraw":"decorative map-1 suppressed","codegen":"block merge and animation fusion on"},
+  "foregroundWaterValues": ["native","reduced","reduced","native"],
+  "simulationFps": [53.13737,55.53682,57.77011,56.57128],
+  "distinctVisibleFps": [52.50399,54.73677,56.43670,55.83788],
+  "reducedWaterPairedGainFps": [2.23278,0.59882],
+  "inputConsistency": {"passed":true,"checked":107,"mismatches":[]},
+  "coverage": {"stageMapId":3,"checkedDrawFlags":14,"callbackStableAtEndOfEveryLeg":true},
+  "visualCheck": "The foreground water-wave artwork is missing in the reduced scene. Fighters, playable platforms, trees, terrain and HUD remain framed normally. This is a visible cosmetic reduction, not invisible offscreen culling.",
+  "decision": "Keep native water by default; both pairs gain FPS, but the smaller gain is 0.60, the visual loss is visible, and every 30-second gate still fails. The optional mode passed its separate gameplay/Randall/camera replay.",
+  "limits": "One heavy Yoshi matchup, not all characters or physical input-to-photon latency. Graphics bytes intentionally differ."
+}

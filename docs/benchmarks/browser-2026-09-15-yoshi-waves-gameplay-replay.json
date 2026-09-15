@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-15",
+  "kind": "yoshi-gameplay-observable-comparison",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "fixture": {"stage":"Yoshi's Story","fighters":["Ice Climbers","Ice Climbers"],"models":"native low detail","renderer":"depth-corrected 960x720 WebGL","frames":600,"skyDraw":"off in both"},
+  "comparison": "Identical checkpoint and controller inputs, native 14-flag foreground water artwork versus hidden wave display objects; no collision, processes, animation or game camera changed.",
+  "passed":true,
+  "framesCompared":600,
+  "randallMoved":true,
+  "checked": ["all fighter and partner actor actions/positions/damage","tournament settings/timer, RNG","Randall, main-stage and Shy Guy transforms","items and projectiles","native camera transform and settings"],
+  "fullMachineEquivalence":false,
+  "decision": "Gameplay probes match in this fixture, but the cosmetic mode remains opt-in because it removes visible water and still fails 720p60.",
+  "limits": "Graphic bytes differ by design, and 600 frames do not cover every tournament move or character. Matching probes are not full serialized-emulator equivalence."
+}

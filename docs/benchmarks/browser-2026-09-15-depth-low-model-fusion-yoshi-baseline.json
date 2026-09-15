@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-15",
+  "kind": "single-native-input-browser-acceptance",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers","Ice Climbers"],
+  "rules": {"timeLimitSeconds":480,"items":-1,"teams":0,"stocks":4},
+  "renderer": "depth-corrected WebGL at 960x720",
+  "models": "native low detail",
+  "codegen": {"blockmerge":true,"animfusion":true},
+  "seconds":29.99913,
+  "simulationFps":40.70117,
+  "distinctVisibleFps":40.60117,
+  "p95VisibleGapMs":33.915,
+  "nativeFrameControllerTracksActive":true,
+  "pageVisibleFocusedAndNoLifecycleEvents":true,
+  "queue": {"presented":1218,"dropped":2,"underruns":572,"meanAgeMs":8.4236},
+  "passed":false,
+  "decision": "Yoshi's Story Ice Climbers remains an all-stage 720p60 blocker outside the accepted Fountain-only matchup exception. Profile and isolate stage render work while preserving Randall and native camera.",
+  "limits": "This is one 30-second neutral-stage matchup with scripted normal pad inputs, not the entire character/move/stage matrix or measured physical input-to-photon latency."
+}

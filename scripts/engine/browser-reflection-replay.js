@@ -3,11 +3,11 @@ import {benchmarkPad} from './browser-benchmark-input.js';
 // state intentionally differs; do not label this full-machine equivalence.
 export async function verifyFountainReflectionState(host,{frames=600,feature="reflection",onProgress=()=>{}}={}){
  if(!Number.isInteger(frames)||frames<120||frames>3600)throw Error('Expected 120–3600 replay frames');
- const staticBackground=feature==='staticbackground',yoshi=feature==='yoshianimation',stadium=feature==='stadiumscreen'||feature==='stadiumdecoration',stageName=staticBackground?'Battlefield':yoshi?'Yoshi':stadium?'Stadium':'Fountain';
+ const staticBackground=feature==='staticbackground',stageBackground=feature==='stagebackground',yoshiWaves=feature==='yoshioffscreen',yoshi=feature==='yoshianimation'||stageBackground||yoshiWaves,stadium=feature==='stadiumscreen'||feature==='stadiumdecoration',stageName=staticBackground?'Battlefield':yoshi?'Yoshi':stadium?'Stadium':'Fountain';
  const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
  const inspect=()=>host.adapter.request('meleeControl',{action:staticBackground?'tournamentGameplayState':yoshi?'yoshiGameplayState':stadium?'stadiumGameplayState':'fountainReflectionState'});
- if(!['staticbackground','reflection','scenery','modeldetail','animation','decorations','particles','stadiumscreen','stadiumdecoration','yoshianimation'].includes(feature))throw Error('Unknown cosmetic feature');
- const reflection=enabled=>host.adapter.request('meleeControl',{action:staticBackground?'staticBackgroundAnimation':yoshi?'yoshiBackgroundAnimation':feature==='stadiumdecoration'?'stadiumDecoration':stadium?'stadiumScreen':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
+ if(!['staticbackground','stagebackground','yoshioffscreen','reflection','scenery','modeldetail','animation','decorations','particles','stadiumscreen','stadiumdecoration','yoshianimation'].includes(feature))throw Error('Unknown cosmetic feature');
+ const reflection=enabled=>host.adapter.request('meleeControl',{action:staticBackground?'staticBackgroundAnimation':stageBackground?'stageBackground':yoshiWaves?'yoshiOffscreenDecor':yoshi?'yoshiBackgroundAnimation':feature==='stadiumdecoration'?'stadiumDecoration':stadium?'stadiumScreen':feature==='particles'?'fountainParticles':feature==='decorations'?'fountainDecorations':feature==='animation'?'fountainAnimation':feature==='modeldetail'?'modelDetail':feature==='scenery'?'fountainScenery':'fountainReflection',enabled});
  const neutral=benchmarkPad(null),reference=[],inputs=[];let captured=false;
  const itemKinds=new Set();let randallMoved=false,initialRandall;
  try{
@@ -19,7 +19,17 @@ export async function verifyFountainReflectionState(host,{frames=600,feature="re
    if(!Array.isArray(start.items)||![0,2,3].every(id=>start.platforms.some(p=>p.mapId===id)))throw Error('Yoshi stage and item probes are incomplete');
    initialRandall=JSON.stringify(start.platforms.find(p=>p.mapId===2));
   }
-  if((await reflection(true)).objects.length!==1)throw Error('Cosmetic object was not identified');
+  const visible=await reflection(true);
+  if(stageBackground){
+   if(visible.objects?.length!==2||JSON.stringify(visible.objects.map(object=>object.mapId))!==JSON.stringify([1,2])||
+      visible.objects.find(object=>object.mapId===2)?.preservedGameplay!=='Randall'||
+      visible.writes?.length||visible.codeWrites?.length)
+    throw Error('Yoshi stage background must preserve Randall and use only the decorative draw callback');
+  }else if(yoshiWaves){
+   if(visible.objects?.length!==1||visible.objects[0].mapId!==3||
+      visible.objects[0].groups!==7||visible.objects[0].draws?.length!==14||visible.writes?.length)
+    throw Error('Yoshi wave replay must retain the checked Shy Guy stage object');
+  }else if(visible.objects.length!==1)throw Error('Cosmetic object was not identified');
   await command('capture',{slot:5});captured=true;
   for(const enabled of[true,false]){
    await command('restore',{slot:5});await reflection(enabled);let previous=await inspect();

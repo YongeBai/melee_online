@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-yoshi-yoshisidetrees-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Yoshi's Story","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","models":"native low detail","sky":"black","water":"native","codegen":"block merge and animation fusion on"},
+  "sideDrawValues": ["native","hidden","hidden","native"],
+  "simulationFps": [53.56947,56.09950,55.83876,56.83215],
+  "distinctVisibleFps": [53.03611,55.19950,54.93867,55.99883],
+  "hiddenPairedGainFps": [2.16339,-1.06016],
+  "inputConsistency": {"passed":true,"checked":106,"mismatches":[]},
+  "coverage": {"stageMapId":3,"guardedSideDrawFlags":34,"groups":2,"callbackStableAtEndOfEveryLeg":true},
+  "visualCheck": "Comparable idle-match black-background frames showed the three playable platforms, center terrain, side trees, native water, fighters and HUD in both modes. A static scene does not establish visibility across every camera zoom.",
+  "decision": "Reject side scenery default promotion: opposing paired visible-FPS gains, no 60-FPS leg, and no separate long-running gameplay/zoom replay for this low-benefit candidate. Restore native side displays.",
+  "limits": "Draw count is structural coverage, not exact CPU self-time. The fixed idle camera preview is not exhaustive visual verification of dynamic camera framing."
+}

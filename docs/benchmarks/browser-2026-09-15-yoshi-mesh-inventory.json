@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-15",
+  "kind": "checked-live-read-only-stage-mesh-inventory",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "geometry": [
+    {"mapId":0,"role":"collision/main-stage state","joints":23,"displayObjects":0},
+    {"mapId":3,"role":"rendering and Shy Guy stage processes","joints":22,"displayObjects":102,"hiddenDisplayObjects":0}
+  ],
+  "map2RandallInspectedButNotEligibleForMeshEditing":true,
+  "renderGroups": [
+    {"joint":4,"draws":26,"local":[0,0,0]},
+    {"joint":5,"draws":20,"local":[0,0,0]},
+    {"joint":17,"draws":17,"local":[-200,0,-155]},
+    {"joint":19,"draws":17,"local":[190,-118.5,-287]},
+    {"joints":[13,14,15,16,18,20,21],"draws":14,"worldYApprox":-210,"visualFinding":"Despite low joint positions, hiding these meshes visibly removes the Yoshi foreground water-wave artwork."}
+  ],
+  "decision": "Do not infer offscreen status from a joint transform alone. Check same-scene pictures and gameplay replay for each selected draw group, then pair image FPS against the native rendering mode.",
+  "limits": "Structural inventory counts draw opportunities, not guest CPU self-time or guaranteed FPS. Pointer addresses and private screenshots are ignored diagnostic fixtures; no extracted game asset was committed."
+}

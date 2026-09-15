@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "kind": "yoshi-gameplay-observable-comparison",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "fixture": {"stage":"Yoshi's Story","fighters":["Ice Climbers","Ice Climbers"],"models":"native low detail","renderer":"depth-corrected 960x720 WebGL","frames":600},
+  "comparison": "Same checkpoint and identical normal controller inputs, normal decorative map-1 draw versus suppressed map-1 draw; map-2 Randall retained in both.",
+  "passed":true,
+  "framesCompared":600,
+  "randallMoved":true,
+  "checked": ["all four fighter actors including Ice Climbers partners","positions, actions, stocks, facing, damage and motion","tournament rules, timers and RNG","Randall/main-stage/Shy Guy transforms and items/projectiles","native camera transform and settings"],
+  "visualCheck": "The ignored 1280x960 viewport screenshot of a 960x720 black-background Yoshi scene shows original playable platforms, trees, fighters and HUD against black sky. The game's camera reported FOV 20, pitchOffset 0, yawOffset 0, 4:3 framing; the replay compared its full camera probe on every frame. Randall moved in the replay although he was outside the screenshot at frame 400.",
+  "fullMachineEquivalence":false,
+  "decision": "Gameplay, stage objects and native camera match for this heavy Yoshi fixture; retain cosmetic skip as opt-in while rate remains under 60.",
+  "limits": "The intended draw-command and graphics-state bytes differ; this is not byte-for-byte full-emulator equivalence. A screenshot and 600 replay frames cannot exhaust every character, item or full-length tournament match."
+}

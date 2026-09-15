@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-yoshi-stagebackground-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Yoshi's Story","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","models":"native low detail","codegen":"block merge and animation fusion on"},
+  "backgroundDrawValues": [true,false,false,true],
+  "simulationFps": [49.60207,55.76775,56.83195,53.47167],
+  "distinctVisibleFps": [49.33539,55.06774,55.56531,52.97162],
+  "blackBackgroundPairedGainFps": [5.73235,2.59370],
+  "meanBlackBackgroundGainFps":4.16303,
+  "inputConsistency": {"passed":true,"checked":102,"mismatches":[]},
+  "stageCoverage": {"objects":2,"mapIds":[1,2],"decorativeDrawSkipped":1,"RandallMapId":2,"RandallPreservedGameplay":true,"callbackStableAtEndOfEveryLeg":true},
+  "validity": "All four 30-second measured legs used the same match checkpoint, native-frame inputs from both pads, changing 960x720 images, and visible/focused pages with no lifecycle events. Planned warmups excluded. The ordinary-background single-run 40.60 FPS and the warmed normal legs here are separate measurements and must not be subtracted as a causal estimate.",
+  "decision": "Retain Yoshi decorative-background skip as an experimental opt-in: it gains both pairs and the 600-frame Randall/camera/gameplay replay passed. It does not hit 720p60; no all-stage default or certification.",
+  "limits": "This renderer shortcut removes a cosmetic draw callback while retaining stage gameplay objects. Native-frame fingerprints are weaker than the separate 600-frame gameplay/Randall/camera replay; graphics bytes intentionally differ. Input-to-photon latency and full character coverage were not measured."
+}

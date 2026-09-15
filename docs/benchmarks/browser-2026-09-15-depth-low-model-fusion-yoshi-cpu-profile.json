@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-15",
+  "kind": "guest-function-wall-residency-diagnostic",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Yoshi's Story","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","models":"native low detail","codegen":"block merge and animation fusion on"},
+  "seconds":30,
+  "guestPcSamples":1492,
+  "unmapped":0,
+  "topNamedFunctions": [
+    {"name":"HSD_FObjInterpretAnim","samples":48,"fraction":0.03217},
+    {"name":"HSD_TObjSetup","samples":24,"fraction":0.01609},
+    {"name":"SetupEnvelopeModelMtx","samples":18,"fraction":0.01206},
+    {"name":"HSD_JObjMakeMatrix","samples":17,"fraction":0.01139},
+    {"name":"JObjUpdateFunc","samples":17,"fraction":0.01139},
+    {"name":"sinf","samples":16,"fraction":0.01072},
+    {"name":"HandleReverb","samples":15,"fraction":0.01005},
+    {"name":"psDispParticles","samples":14,"fraction":0.00938}
+  ],
+  "diagnosticSimulationFps":42.40267,
+  "diagnosticVisibleFps":42.30267,
+  "interpretation": "Yoshi's corrected low-model/fusion CPU pressure spans animation, texture setup, matrices, trigonometry and decorative effects; no single named function explains the 40.6-FPS acceptance baseline.",
+  "limits": "Last-PC residency includes host waits and does not measure exact self-time or predict benefit from removing a scene component. Profiling FPS is a diagnostic only. The optional QA text symbol map is in a new ignored local static package, not a player requirement."
+}

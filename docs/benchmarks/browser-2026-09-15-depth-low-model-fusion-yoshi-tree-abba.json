@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-yoshi-display-group-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "corrected WebGL depth at 960x720, black sky, low-detail native models, block merge and animation fusion",
+  "changedRenderer": "only group-4 map-3 26 display-object flags; screenshot showed right decorative tree removed while the red platform and native camera remained",
+  "measurementSecondsPerLeg": 30,
+  "warmupBeforeEveryLeg": true,
+  "nativeFrameInputFingerprints": {"passed": true, "checked": 102},
+  "measuredRuns": [
+    {"nativeTree": true, "simulationFps": 52.2692, "distinctVisibleFps": 51.9359, "passed720p60": false},
+    {"nativeTree": false, "simulationFps": 55.3904, "distinctVisibleFps": 54.2239, "passed720p60": false},
+    {"nativeTree": false, "simulationFps": 55.0378, "distinctVisibleFps": 54.1377, "passed720p60": false},
+    {"nativeTree": true, "simulationFps": 55.7999, "distinctVisibleFps": 54.7999, "passed720p60": false}
+  ],
+  "pairedRemovedTreeVisibleDeltaFps": [2.2880, -0.6622],
+  "decision": "Reject and remove tracked preview: the reverse pair loses, the effect is not repeatable and no target gate passes. Group 5's visual role was unresolved and it remains native.",
+  "limits": "The screenshots are private ignored fixtures, not a systematic wide-camera visual audit; rolling native-input fingerprints are not whole-machine equivalence. Raw report: /tmp/melee-yoshi-tree-abba-3284-sep15.json."
+}

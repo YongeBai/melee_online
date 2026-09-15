@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-codegen-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "corrected WebGL depth, 960x720, black stage sky, native low-detail fighter meshes",
+  "fixedCodegen": ["blockmerge", "animfusion"],
+  "changedCodegen": "animcallbackfast alone",
+  "measurementSecondsPerLeg": 30,
+  "warmupBeforeEveryLeg": true,
+  "nativeFrameInputFingerprints": {"passed": true, "checked": 98},
+  "measuredRuns": [
+    {"animcallbackfast": false, "simulationFps": 51.6000, "distinctVisibleFps": 51.2667, "passed720p60": false},
+    {"animcallbackfast": true, "simulationFps": 52.5376, "distinctVisibleFps": 52.1376, "passed720p60": false},
+    {"animcallbackfast": true, "simulationFps": 48.8025, "distinctVisibleFps": 48.5025, "passed720p60": false},
+    {"animcallbackfast": false, "simulationFps": 48.5034, "distinctVisibleFps": 48.1700, "passed720p60": false}
+  ],
+  "pairedVisibleDeltaFps": [0.8709, 0.3325],
+  "pairedMeanVisibleDeltaFps": 0.6017,
+  "decision": "Keep opt-in; both pairs favor the callback but session throughput drifts by more than 3 FPS and none meets 60. The older configuration's ~1.9 FPS improvement cannot be extrapolated.",
+  "limits": "Automated ordinary inputs on two native-frame controller tracks, not full human competitive coverage or input-to-photon latency. Same-checkpoint fingerprints are not full-machine equivalence. Full replay for this exact stage/render/codegen combination remains outstanding. Raw private report: /tmp/melee-depth-yoshi-animcallback-3281-sep15.json."
+}
