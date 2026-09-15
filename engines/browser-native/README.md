@@ -87,6 +87,15 @@ assembly fallback or gameplay mismatch.
   to original GObj owners. Immediate release and deletion during a scheduler
   callback are checked. Unregistered graphics classes still abort; full fighter
   initialization remains pending.
+- The portable source adapter preserves numeric command-word bit positions across
+  PPC and WASM, including signed fields, partial word views, the byte-15 hitbox
+  overlay and color commands. Raw fighter/item/stage byte accesses use native
+  word accessors. It keeps CommandInfo at 0x24 bytes with five return-stack words
+  and removes the loop handler's invalid one-entry array access. Generated C
+  probes check 252 actual fields against independent bit extraction/insertion;
+  original timer/loop/call/goto/animation-wait routines pass nested control checks.
+  Raw script assets must still be type-converted before using this representation.
+  The probes do not run fighter action handlers or claim gameplay parity.
 - `fighter-assets.mjs` converts scalar common attributes and preserves packed
   throw flags. Twenty named fields per component are read through C structs;
   original falling and friction routines are checked against explicit arithmetic.

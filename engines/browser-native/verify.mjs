@@ -1,3 +1,4 @@
+import {verifyCommandFields,verifyCommandControl} from './verify-commands.mjs';
 import {convertStageCollision, loadStageCollision} from './stage-collision.mjs';
 import {verifyRuntime} from './verify-runtime.mjs';
 import {verifyFighters} from './verify-fighters.mjs';
@@ -80,12 +81,13 @@ export async function verifyNative(module, stageFiles=[], fighterFiles=[], anima
       stages.at(-1).degenerateLineCasePassed=true;
     } finally {mutation.dispose();}
   }
+  const commandFields=verifyCommandFields(module),commandControl=verifyCommandControl(module);
   const runtime=verifyRuntime(module);
   const fighters=verifyFighters(module,fighterFiles);
   const animations=verifyAnimations(module,animationFiles,!!options.allAnimations);
   const math=verifyMath(module);
   const poses=verifyPoses(module,options.models||[],animationFiles);
   const meshes=verifyMeshes(module,options.models||[],animationFiles);
-  return {passed:true,rngValues:4096,ecbVectors:vectors,stages,runtime,fighters,animations,math,poses,meshes,emulator:false,
+  return {passed:true,rngValues:4096,ecbVectors:vectors,commandFields,commandControl,stages,runtime,fighters,animations,math,poses,meshes,emulator:false,
     playable:false,gameplayParity:false,performanceMeasured:false};
 }

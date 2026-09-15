@@ -3,6 +3,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {preparePortableSource} from './portable-source.mjs';
+import {commandProbeSource} from './command-probes.mjs';
 import {sceneLinkInputs} from './scene-link.mjs';
 const root = path.resolve(import.meta.dirname, '../..');
 const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
@@ -77,7 +78,9 @@ let exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'portPoseCreate','portPoseNode','portPoseTrack','portPoseRewind','portPoseStep','portPoseDestroy',
   'portFrsqrte','portFres','portRound25','portEstimateBits','PSVECNormalize','PSVECMag','PSMTXTrans',
   'MTXFrustum','MTXPerspective','MTXOrtho','MTXRotRad','C_MTXLookAt','PSMTXQuat','PSMTXInverse','PSMTXRotAxisRad',
-  'portSkinMatrices','portSkinVertices','portTextureMatrix','portPoseFlags'];
+  'portSkinMatrices','portSkinVertices','portTextureMatrix','portPoseFlags',
+  'portCommandReadUnit','portCommandFieldRead','portCommandFieldWrite','portCommandFieldCount','portCommandControlCreate','portCommandControlDestroy',
+  'portCommandControlFrame','portCommandControlStep','portCommandControlRead'];
 const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
   '-Wl,--fatal-warnings',
   '-fno-builtin-sinf', '-fno-builtin-cosf', '-fno-builtin-tanf',
@@ -85,6 +88,9 @@ const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasi
   '-I'+path.join(output,'portable/src'),'-I'+path.join(output,'portable/libs/dolphin/include'),
   '-Isrc', '-Ilibs/dolphin/include'];
 const portable=preparePortableSource(upstream,output);
+const commandProbe=path.join(output,'command-layout-probe.c');
+fs.writeFileSync(commandProbe,commandProbeSource(portable.commandFields));
+fs.writeFileSync(path.join(output,'command-fields.mjs'),'export const commandFields='+JSON.stringify(portable.commandFields)+';\n');
 const sceneInputs=scene?sceneLinkInputs(root,upstream,output):null;
 if(scene) {
   exports=exports.filter(name=>!['portInterpolate','portSeed','portRandom','portStagePrune','portStageMetric','portArchiveOpen','portArchiveSymbol','portArchiveClose','portFighterAttribute','portFighterPhysicsProbe'].includes(name));
@@ -93,9 +99,10 @@ if(scene) {
     'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects');
 }
 const selectedUnits=scene?units.filter(file=>!file.startsWith('src/melee/')):units;
+selectedUnits.push('src/melee/lb/lbcommand.c');
 if(scene)selectedUnits.push('src/melee/lb/lbanim.c','src/melee/lb/lbarchive.c');
 execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.directory,file)), selectedSdk,textureSource,...estimateObjects,
-  path.join(root, 'engines/browser-native/errors.c'),
+  path.join(root, 'engines/browser-native/errors.c'),commandProbe,path.join(root,'engines/browser-native/commands.c'),
   ...(scene?[]:[path.join(root, 'engines/browser-native/platform.c'),path.join(root, 'engines/browser-native/fighter.c')]),
   path.join(root, 'engines/browser-native/runtime.c'),
   path.join(root, 'engines/browser-native/animation.c'),
@@ -108,7 +115,7 @@ execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, moduleName+'.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+for (const name of ['verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));

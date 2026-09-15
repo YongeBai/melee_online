@@ -20,3 +20,12 @@ test('rejects unexpected callback expressions and incomplete stage descriptors',
   assert.throws(()=>adaptStageCallbacks(descriptor('(void*)demo')),/expression changed/);
   assert.throws(()=>adaptStageCallbacks('StageData stage = { Kind, callbacks };'),/shape changed/);
 });
+
+test('command word fields preserve MSB positions and signed partial views',async()=>{
+  const {reverseCommandBits}=await import('./portable-source.mjs');
+  const result=reverseCommandBits('u16 opcode : 6; // top six bits\ns16 angle : 8;');
+  assert.deepEqual(result.fields,[{field:'opcode',width:6,signed:false,shift:26},{field:'angle',width:8,signed:true,shift:18}]);
+  assert.equal(result.text,'\n    u32 : 18;\n    s32 angle : 8;\n    u32 opcode : 6;\n');
+  assert.throws(()=>reverseCommandBits('u32 a : 17; u32 b : 16;'),/exceed/);
+  assert.throws(()=>reverseCommandBits('u32 a;'),/Unexpected/);
+});

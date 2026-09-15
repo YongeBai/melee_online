@@ -23,7 +23,7 @@ export function preparePortableSource(source,output) {
   const destination=path.join(output,'portable');
   const files=execFileSync('rg',['--files','src','libs/dolphin/include','libs/dolphin/src','-g','*.c','-g','*.h'],
     {cwd:source,encoding:'utf8'}).trim().split('\n').sort();
-  const patches=[];
+  const patches=[],extraCommandFields=[];let commandLayout;
   const booleanCallbacks=new Set();
   for(const file of files.filter(f=>f.startsWith('src/melee/gr/')&&f.endsWith('.c')))
     for(const match of fs.readFileSync(path.join(source,file),'utf8').matchAll(/\bvoid\s+(\w+)\s*\(\s*bool\s+\w+\s*\)\s*\{/g))booleanCallbacks.add(match[1]);
@@ -34,6 +34,37 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/ft/types.h') {
+      const match=/struct gmScriptEventDefault \{([^{}]*)\};/.exec(text);
+      if(!match)throw Error('Missing fighter command dispatch view');
+      const converted=reverseCommandBits(match[1]);
+      text=text.replace(match[0],'struct gmScriptEventDefault {'+converted.text+'};');
+      extraCommandFields.push(...converted.fields.map(f=>({...f,view:'dispatch',member:null,path:f.field,word:0})));
+    }
+    if(file==='src/melee/ft/ftaction.c'||file==='src/melee/it/itanimlist.c') {
+      let count=0;
+      text=text.replace(/\(\((u8|u16|s16)\*\) cmd->u\)\[([01-3])\]/g,(_,type,index)=>{
+        count++;return 'portCommand'+type.toUpperCase()+'(cmd->u,'+index+')';
+      });
+      if(count!==(file.includes('ftaction')?1:18))throw Error('Command raw access count changed: '+file+' '+count);
+      text='#include <port-command-word.h>\n'+text;
+    }
+    if(file==='src/melee/gr/grmaterial.c') {
+      replace('*(u16*) cmd->ptr[0]','portCommandU16(cmd->ptr[0],0)');
+      text='#include <port-command-word.h>\n'+text;
+    }
+    if(file==='src/melee/ft/kinds/ftCommon/ftCo_ItemThrow.c') {
+      replace('((ftCo_ItemThrowCmd*) fp->cmd_vars)->angle','portCommandSigned12(fp->cmd_vars)');
+      text='#include <port-command-word.h>\n'+text;
+    }
+    if(file==='src/melee/lb/lbcommand.c') {
+      replace('    u32* ptr = (u32*) info;\n    ptr[info->loop_count + 3] -= 1;',
+        '    info->event_return[info->loop_count - 1] = (CmdUnion*)\n        ((uintptr_t) info->event_return[info->loop_count - 1] - 1);');
+      replace('info->ptr[0] = &info->ptr[info->loop_count][0];','info->u = info->event_return[info->loop_count - 2];');
+    }
+    if(file==='src/melee/lb/types.h') {
+      commandLayout=adaptCommandLayouts(text);text=commandLayout.text;
+    }
     // Match the implemented function signatures, retaining their original bodies.
     if(file==='src/melee/gr/grkraid.h')replace('void grKraid_OnDemoInit(bool);','void grKraid_OnDemoInit(int);');
     if(file==='src/melee/gr/grtzelda.c')replace('void grTZelda_OnDemoInit(bool);','void grTZelda_OnDemoInit(int);');
@@ -75,8 +106,92 @@ export function preparePortableSource(source,output) {
   // Expose this one MSL declaration without putting all MSL headers ahead of
   // the host standard library (which would select incompatible FILE layouts).
   fs.writeFileSync(path.join(output,'include/printf.h'),'#include <MSL/printf.h>\n');
+  commandLayout.fields.push(...extraCommandFields);
+  fs.writeFileSync(path.join(output,'include/port-command-word.h'),`#ifndef PORT_COMMAND_WORD_H
+#define PORT_COMMAND_WORD_H
+#include <Runtime/platform.h>
+static inline u8 portCommandU8(const void* words,unsigned index) {
+    return ((const u32*)words)[index/4] >> (24-8*(index%4));
+}
+static inline u16 portCommandU16(const void* words,unsigned index) {
+    return ((const u32*)words)[index/2] >> (16-16*(index%2));
+}
+static inline s16 portCommandS16(const void* words,unsigned index) {
+    unsigned value=portCommandU16(words,index);return value<32768?(int)value:(int)value-65536;
+}
+static inline int portCommandSigned12(const void* words) {
+    unsigned value=*(const u32*)words&4095;return value<2048?(int)value:(int)value-4096;
+}
+#endif
+`);
   const manifest={recipeSha256:digest(fs.readFileSync(new URL(import.meta.url))),files:files.length,patches,
-    callbackDiagnosticSuppressed:false,functionPointerCasts:false};
+    callbackDiagnosticSuppressed:false,functionPointerCasts:false,
+    commandLayouts:{records:commandLayout.records.length+1,fields:commandLayout.fields.length,
+      sha256:digest(JSON.stringify(commandLayout.fields)),representation:'native numeric u32 with original MSB field positions'}};
   fs.writeFileSync(path.join(destination,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
-  return {directory:destination,manifest};
+  return {directory:destination,manifest,commandFields:commandLayout.fields};
+}
+
+// These asset words are converted to native u32 values before C sees them.
+// Keep their PPC (MSB-first) field positions, including partial-byte/halfword
+// views. Promoting those views to u32 is intentional: they are CmdUnion views,
+// never standalone arrays. Runtime Fighter flag structs are NOT changed here.
+export function reverseCommandBits(body) {
+  const clean=body.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/[^\n]*/g,'');
+  const declarations=clean.split(';').map(s=>s.trim()).filter(Boolean);
+  const fields=[];let used=0;
+  for(const declaration of declarations) {
+    const match=/^([us](?:8|16|32))\s+(\w+)\s*:\s*(\d+)$/.exec(declaration);
+    if(!match)throw Error('Unexpected command bitfield declaration: '+declaration);
+    const width=Number(match[3]);used+=width;
+    if(width<1||used>32)throw Error('Command fields exceed one word');
+    fields.push({field:match[2],width,signed:match[1][0]==='s',shift:32-used});
+  }
+  if(!fields.length)throw Error('Empty command bitfield record');
+  const lines=fields.toReversed().map(f=>`    ${f.signed?'s32':'u32'} ${f.field} : ${f.width};`);
+  if(used<32)lines.unshift(`    u32 : ${32-used};`);
+  return {text:'\n'+lines.join('\n')+'\n',fields};
+}
+export function adaptCommandLayouts(text) {
+  const union=/union CmdUnion \{([\s\S]*?)\n\};/.exec(text);
+  if(!union)throw Error('Missing command word union');
+  const fields=[],records=[];
+  for(const [,type,member] of union[1].matchAll(/struct (\w+) (\w+);/g)) {
+    const re=new RegExp('struct '+type+' \\{([^{}]*)\\};','g'),matches=[...text.matchAll(re)];
+    if(matches.length!==1)throw Error('Ambiguous command word definition: '+type);
+    if(!matches[0][1].includes(':'))continue; // Native pointers/raw u32 words.
+    const converted=reverseCommandBits(matches[0][1]);records.push(type);
+    fields.push(...converted.fields.map(f=>({...f,view:'command',member,path:member+'.'+f.field,word:0})));
+    text=text.replace(matches[0][0],'struct '+type+' {'+converted.text+'};');
+  }
+  const color=/union ColorOverlay_x8_t \{([\s\S]*?)\n\};/.exec(text);
+  if(!color)throw Error('Missing color command union');
+  let colorBody=color[1],count=0;
+  colorBody=colorBody.replace(/struct \{([^{}]*)\} (light_rot1|light_rot2|unk);/g,(_,body,member)=>{
+    const converted=reverseCommandBits(body);count++;
+    fields.push(...converted.fields.map(f=>({...f,view:'color',member,path:member+'.'+f.field,word:0})));
+    return 'struct {'+converted.text+'} '+member+';';
+  });
+  if(count!==3||colorBody.split('GXColor light_color;').length!==2)throw Error('Color command shape changed');
+  colorBody=colorBody.replace('GXColor light_color;','struct { u32 a : 8; u32 b : 8; u32 g : 8; u32 r : 8; } light_color;');
+  fields.push(...['r','g','b','a'].map((field,i)=>({field,width:8,signed:false,shift:24-i*8,view:'color',member:'light_color',path:'light_color.'+field,word:0})));
+  text=text.replace(color[0],'union ColorOverlay_x8_t {'+colorBody+'\n};');
+  const skip=/struct spawn_hitbox_skip \{([^{}]*)\};/.exec(text);
+  if(!skip||!skip[1].includes('u8 _0[0xF];')||[...skip[1].matchAll(/u32 xF_b[0-4] : 1;/g)].length!==5)
+    throw Error('Hitbox byte-15 overlay shape changed');
+  text=text.replace(skip[0],`struct spawn_hitbox_skip {
+    u32 _words[3];
+    u32 : 3;
+    u32 xF_b4 : 1; u32 xF_b3 : 1; u32 xF_b2 : 1; u32 xF_b1 : 1; u32 xF_b0 : 1;
+    u32 : 24;
+};`);
+  fields.push(...Array.from({length:5},(_,i)=>({field:'xF_b'+i,width:1,signed:false,shift:7-i,view:'skip',member:null,path:'xF_b'+i,word:3})));
+  const stack='    union CmdUnion*\n        event_return[3]; // 0x10 - Array Size is purely made-up for now\n    u32 loop_count_dup;  // 0x14\n    u32 unk_x18;         // 0x18';
+  if(text.split(stack).length!==2)throw Error('Command return stack shape changed');
+  text=text.replace(stack,'    CmdUnion* event_return[5]; // Five existing words at offsets 0x10..0x20.');
+  const at=text.lastIndexOf('#endif');if(at<0)throw Error('Command header guard missing');
+  text=text.slice(0,at)+'_Static_assert(sizeof(CmdUnion)==4,"Native command word ABI");\n'+
+    '_Static_assert(sizeof(struct spawn_hitbox_skip)==16,"Native hitbox overlay ABI");\n'+
+    '_Static_assert(sizeof(CommandInfo)==0x24,"Native command state ABI");\n'+text.slice(at);
+  return {text,fields,records};
 }

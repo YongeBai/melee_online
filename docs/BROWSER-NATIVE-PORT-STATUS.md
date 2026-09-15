@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Command decoding now preserves the PowerPC bit positions when commands are
+represented as native numeric words. The unmodified-header probe failed at least
+one read/write check for all 252 field views. The corrected build passes 64,512
+field reads, 794 masked writes and 10,496 byte/halfword/signed-angle reads. This
+covers fighter/item parameters, the fighter opcode view and color-command words;
+it does not change ordinary runtime Fighter flag structs or packed image bytes.
+Read-only checks of the development executable confirm timer, opcode and byte-15
+hitbox extraction. The command stack now names all five existing words, retaining
+its 0x24-byte ABI; loop handling avoids the decompilation's out-of-bounds one-entry
+pointer-array access. Original control routines pass 36 steps, including two
+nested loops with a subroutine at stack depth five and animation-wait timing.
+
+The 41 targeted tests, all 5,508 animation clips and 81 unchanged 960×720 diagnostic
+images pass. The wider audit still compiles 1,047 modules and has 83 failures;
+the last Fighter_Create link probe still has 149 missing platform dependencies
+and no signature mismatches. These are port correctness checks, not a combat or
+performance result. Typed motion/script graphs and shared fighter data are the
+next initialization dependencies. [Command-layout checkpoint](benchmarks/browser-2026-09-15-native-port-command-layout.json).
+
 Original Melee archive loading now reads browser-prefetched native-layout images.
 It retains `lbArchive_LoadSymbols`, C varargs lookup, HSD relocation and archive
 release, with no DVD interrupt wait in this path. Chrome verifies 162 loads across

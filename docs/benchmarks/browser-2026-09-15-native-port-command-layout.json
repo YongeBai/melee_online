@@ -1,0 +1,138 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 63557,
+    "wasmSha256": "7c179841202c75d2d8d493e0d9e59f37519ee42e238941ea7dfbb5a7b4b4e43d",
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-Wl,--fatal-warnings",
+      "-fno-builtin-sinf",
+      "-fno-builtin-cosf",
+      "-fno-builtin-tanf",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ]
+  },
+  "portableSource": {
+    "recipeSha256": "21a5c0760a4a42d0f14a7001babdee793c451032b26b740648b0e8d072bd2cd4",
+    "patchedFiles": 74,
+    "commandLayouts": {
+      "records": 72,
+      "fields": 252,
+      "sha256": "c4245ba51f0ff20fcbbcd8bebad27d806997f0c0e5d5e6988731629929d3448f",
+      "representation": "native numeric u32 with original MSB field positions"
+    }
+  },
+  "baseline": {
+    "scope": "Probe compiled against unmodified pinned upstream headers",
+    "fields": 252,
+    "reads": 64512,
+    "writes": 794,
+    "failingFields": 252
+  },
+  "corrected": {
+    "fields": {
+      "passed": true,
+      "fields": 252,
+      "reads": 64512,
+      "writes": 794,
+      "unitReads": 10496,
+      "failingFields": [],
+      "representation": "native numeric command words retaining PPC MSB-first fields",
+      "gameplayParity": false
+    },
+    "control": {
+      "passed": true,
+      "steps": 14,
+      "nested": {
+        "passed": true,
+        "steps": 22,
+        "maxDepth": 5
+      },
+      "originalFunctions": [
+        "Command_00",
+        "Command_01",
+        "Command_02",
+        "Command_03",
+        "Command_04",
+        "Command_05",
+        "Command_06",
+        "Command_07",
+        "Command_08"
+      ],
+      "limitation": "Timer/loop/subroutine/goto primitives, not the fighter action-state loop"
+    }
+  },
+  "executableEvidence": {
+    "functions": [
+      {
+        "address": "0x8007121c",
+        "bytes": 976,
+        "sha256": "8c0a8c46d9305ead9bc9511073cafbfdf616b7feec89ffdc081f093d3e25520b"
+      },
+      {
+        "address": "0x8000594c",
+        "bytes": 72,
+        "sha256": "0c3da173069bcfe62c6e009f630bcfcdf55fcacf153af97bb77c9232581169aa"
+      },
+      {
+        "address": "0x80005a30",
+        "bytes": 88,
+        "sha256": "2968f5a4e24bb17cd3f479c4e2b7bdb6c81f96cfcf316c586963cf0ef015b746"
+      },
+      {
+        "address": "0x80073240",
+        "bytes": 276,
+        "sha256": "bf0faf8f72c1ad88c63c015885a5f1e222f2c6f443e73b996cf9970970173d31"
+      }
+    ],
+    "findings": [
+      "0x80005964 retains the low 26 command bits for the timer value",
+      "0x80071248 reads byte 15; 0x8007124c tests bit 3 for the hitbox skip condition",
+      "0x800732f4 and 0x800732f8 decode the upper six command bits from the first byte",
+      "Command_04 decrements the word at state+0x0c+4*depth and reloads the return word at state+0x08+4*depth"
+    ],
+    "note": "Read-only development DOL inspection. No executable bytes or disassembly are committed."
+  },
+  "regression": {
+    "targetedTests": 41,
+    "animationClips": 5508,
+    "compiled": 1047,
+    "compileFailures": 83,
+    "link": [
+      {
+        "entry": "HSD_JObjLoadJoint",
+        "missingCount": 49,
+        "abiMismatches": [],
+        "otherErrors": []
+      },
+      {
+        "entry": "Fighter_Create",
+        "missingCount": 149,
+        "abiMismatches": [],
+        "otherErrors": []
+      }
+    ],
+    "sceneModels": 27,
+    "identical720pImages": 81,
+    "softwareGpu": true
+  },
+  "limitations": [
+    "Motion archive/script graph conversion remains",
+    "Fighter_Create and combat are not running",
+    "Full material rendering, native gameplay-camera parity, input and audio remain",
+    "No measured gameplay FPS or latency"
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "inputLatencyMeasured": false
+}
