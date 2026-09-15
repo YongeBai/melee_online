@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-15",
+  "kind": "VISUAL-INVALID-raw-depth-diagnostic-negative-control",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "rendering": "same 960x720 WebGL core, black decorative stage backdrop and low-detail fighters; generated uncorrected depth function, clear depth and utility clear shader; only pthread self-loader URL repaired so the ignored lab package could boot",
+  "codegen": ["blockmerge", "animfusion"],
+  "automaticallyHostedGame": true,
+  "diagnosticPackageFilesIntegrityVerified": 180,
+  "diagnosticOnly": true,
+  "measurementSeconds": 30,
+  "simulationFps": 49.0085,
+  "distinctVisibleFps": 48.4422,
+  "sourceResolution": [960, 720],
+  "camera": {"fov": 30, "pitchOffset": 0, "yawOffset": 0},
+  "visualFailure": "The tree face drew in front of the fighter model and foreground ordering was wrong. This is not a playable Melee release, whatever its FPS.",
+  "comparisonReference": "Independent corrected black-backdrop Dream Land legal-stage survey: 52.7969 distinct visible FPS on the same pinned WASM core and named settings.",
+  "decision": "No evidence that removing the depth correction is a high-ROI FPS fix; the visually invalid control itself also fails 60. Preserve corrected depth as a gameplay invariant.",
+  "limits": "Different fresh browser sessions and uncontrolled warmup; the raw-minus-corrected numerical delta is not a causal A/B. First launch attempt reused an immutable cached generated loader and got HTTP 404 for its old pthread sibling; a new port and browser profile made the repaired self-loader URL take effect. File verifier checks hosted game/hash integrity, not visual correctness. The visual-invalid package and screenshots are ignored local diagnostics. Raw report: /tmp/melee-raw-depth-control-dreamland-3288-sep15.json."
+}

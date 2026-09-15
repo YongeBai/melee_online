@@ -267,6 +267,16 @@ favors performance by6.06FPS; the reverse loses1.07FPS. All gates fail and
 46 native-input fingerprints match. The OS profile was restored to balanced;
 system power mode is neither an established fix nor a player requirement.
 [Host power diagnostic](benchmarks/browser-2026-09-15-host-power-stadium-abba.json).
+An ignored visual-invalid depth control kept the **same pinned WASM core**,
+black Dream Land backdrop, low-detail fighters and fusion, but restored the
+old generated GL depth bindings. It booted with automatic hosted-game loading
+after repairing only its pthread self-loader URL on a fresh cache origin.
+The30-second diagnostic reached **49.01 simulation / 48.44 distinct visible
+FPS**; an inspected tree covered fighters. The independent corrected survey
+was52.80 visible FPS, but the separate cold sessions cannot establish a
+causal depth cost. There is no target gain to justify wrong occlusion, so
+the corrected renderer remains mandatory.
+[Visual-invalid depth control](benchmarks/browser-2026-09-15-raw-depth-same-core-negative-control.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation
