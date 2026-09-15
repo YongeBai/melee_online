@@ -34,12 +34,18 @@ To include real stage data, run this **development build tool** before verificat
 node scripts/native-port/prepare-fixtures.mjs /path/to/development-fixture.iso
 node scripts/native-port/verify-browser.mjs
 node scripts/native-port/verify-browser.mjs --all-animations
+node scripts/native-port/verify-gpu.mjs
 ```
 
 The browser automatically fetches the prepared hosted assets. There is no player
 file picker. Game data stays in ignored output, never Git. The private verification
 server uses port 3324 by default (`MELEE_NATIVE_PORT` overrides it). It serves static
 files only and needs no GPU server. The subsystem page is not a playable release.
+`/gpu-preview.html` displays an animated native model using browser GPU resources;
+`?model=PlFxNr.dat` selects another hosted model. It is a development asset view,
+with a diagnostic front camera and unlit first-UV textures. It does not run combat
+or substitute for the original gameplay camera. The separate GPU check uses
+SwiftShader for correctness and cannot establish hardware FPS or input latency.
 
 `node scripts/native-port/audit.mjs` compiles the game, HSD, and SDK C files to
 objects and writes `dist/native-port/audit/report.json`. It reports actual compile
@@ -100,14 +106,25 @@ assembly fallback or gameplay mismatch.
 - `mesh-assets.mjs` decodes static GX display lists and typed vertex arrays for all
   27 default fighter models. It preserves strip winding, matrix indices, packed
   colors and fixed-point coordinates. The browser verifies 2,179 mesh sections.
-  Materials, textures and actual browser GPU draw calls remain.
+  Material/texture descriptors now have their own typed importer.
 - `skin-assets.mjs` imports inverse-bind matrices and envelope palettes with
   original influence ordering and weights. `skin.c` prepares rigid/shared and
   blended matrices using native SDK/HSD math, then transforms reference vertices.
   Identical palettes share one calculation per frame. Browser checks cover 32
   animated frames of all 27 default models and replay; five independent examples
-  distinguish HSD's single-influence and blended coordinate spaces. GPU draws,
-  normal matrices and material/texture combining are still pending.
+  distinguish HSD's single-influence and blended coordinate spaces. The GPU path
+  disables CPU reference vertex transformation and updates matrix palettes only.
+- `material-assets.mjs` and `texture.mjs` decode the default models' 1,753 materials
+  and 1,730 texture descriptors, including indexed palettes, GX-specific CMPR
+  interpolation and RGB-preserving transparent CMPR entries. Original HSD
+  `MakeTextureMtx` is selected unchanged from the pinned source; six hand-calculated
+  transform cases and all 1,730 imported transforms run in browser verification.
+- `gpu-mesh.mjs` uploads static mesh buffers and uses float matrix palettes for
+  vertex transforms. `gpu-preview.mjs` verifies GPU positions against native CPU
+  reference vertices and renders a 960×720 diagnostic image. It displays only the
+  first supported UV image; native lighting, normal matrices, TEV, LOD, material
+  animation and fighter part selection are not implemented. Do not promote this
+  shader or its diagnostic camera to the player flow as a faithful renderer.
 
 `node scripts/native-port/audit-link.mjs` probes original joint loading and fighter
 creation with the implemented native math/heap/error boundaries. It requires a

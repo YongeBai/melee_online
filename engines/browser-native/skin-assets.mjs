@@ -59,7 +59,7 @@ export function readSkinBindings(input,model) {
   return {inverse,hasInverse,groups,influences,meshPalettes};
 }
 
-export function loadSkin(module,model,bindings) {
+export function loadSkin(module,model,bindings,{referenceVertices=true}={}) {
   const owned=[];
   const alloc=bytes=>{const p=module._malloc(bytes);if(!p)throw Error('Skin allocation failed');owned.push(p);return p;};
   const upload=typed=>{const p=alloc(typed.byteLength);module.HEAPU8.set(new Uint8Array(typed.buffer,typed.byteOffset,typed.byteLength),p);return p;};
@@ -77,11 +77,12 @@ export function loadSkin(module,model,bindings) {
       positions.set([v[9][0],v[9][1],v[9][2]??0],vertex*3);
       indices[vertex++]=bindings.meshPalettes[i][(v[0]?.[0]??0)/3];
     }));
-    const positionPtr=upload(positions),indexPtr=upload(indices),transformed=alloc(positions.byteLength);
+    const positionPtr=referenceVertices?upload(positions):0,indexPtr=referenceVertices?upload(indices):0,
+      transformed=referenceVertices?alloc(positions.byteLength):0;
     return {world,matrices,transformed,positions,indices,groupCount:bindings.groups.length,
       step(){const result=module._portSkinMatrices(n,world,inverse,has,flags,parents,bindings.groups.length,groups,influences,matrices);
         if(result!==0)throw Error('Native skin matrices failed: '+result);
-        module._portSkinVertices(model.totalVertices,positionPtr,indexPtr,matrices,transformed);},
+        if(referenceVertices)module._portSkinVertices(model.totalVertices,positionPtr,indexPtr,matrices,transformed);},
       dispose(){for(const p of owned)module._free(p);}};
   } catch(error){for(const p of owned)module._free(p);throw error;}
 }

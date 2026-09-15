@@ -45,6 +45,15 @@ const selectedText=[['void MTXRotRad(', '\nvoid PSMTXRotTrig('],
   });
 const selectedSdk=path.join(output,'sdk-camera.c');
 fs.writeFileSync(selectedSdk,'#include <dolphin.h>\n#include <math.h>\n'+selectedText.join('\n'));
+const tobj=fs.readFileSync(path.join(upstream,'src/sysdolphin/baselib/tobj.c'),'utf8');
+const textureStart='static void MakeTextureMtx(HSD_TObj* tobj)\n{',textureEnd='\nstatic void TObjSetupMtx(';
+if(tobj.split(textureStart).length!==2||tobj.split(textureEnd).length!==2)throw Error('Texture matrix selection changed');
+const textureSource=path.join(output,'texture-matrix.c');
+fs.writeFileSync(textureSource,
+  '#include <sysdolphin/baselib/tobj.h>\n#include <sysdolphin/baselib/mtx.h>\n#include <sysdolphin/baselib/debug.h>\n#include <math.h>\n'+
+  '#include <placeholder.h>\n#define FLT_EPSILON 1.00000001335e-10F\n'+
+  tobj.slice(tobj.indexOf(textureStart),tobj.indexOf(textureEnd,tobj.indexOf(textureStart)))+'\n'+
+  fs.readFileSync(path.join(root,'engines/browser-native/texture-matrix.c'),'utf8'));
 const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/ground.c', 'src/melee/ft/ftcommon.c',
   'libs/dolphin/src/dolphin/mtx/mtx44.c',
   'src/MSL/trigf.c', 'src/MSL/math_data.c', 'src/MSL/float.c', 'src/sysdolphin/baselib/mtx.c',
@@ -65,12 +74,12 @@ const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'portPoseCreate','portPoseNode','portPoseTrack','portPoseRewind','portPoseStep','portPoseDestroy',
   'portFrsqrte','portFres','portRound25','portEstimateBits','PSVECNormalize','PSVECMag','PSMTXTrans',
   'MTXFrustum','MTXPerspective','MTXOrtho','MTXRotRad','C_MTXLookAt','PSMTXQuat','PSMTXInverse','PSMTXRotAxisRad',
-  'portSkinMatrices','portSkinVertices'];
+  'portSkinMatrices','portSkinVertices','portTextureMatrix','portPoseFlags'];
 const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
   '-fno-builtin-sinf', '-fno-builtin-cosf', '-fno-builtin-tanf',
   '-ffunction-sections', '-fdata-sections', '-I' + path.join(output, 'include'),
   '-Isrc', '-Ilibs/dolphin/include'];
-execFileSync(compiler, [...flags, ...units, selectedSdk,...estimateObjects, path.join(root, 'engines/browser-native/platform.c'),
+execFileSync(compiler, [...flags, ...units, selectedSdk,textureSource,...estimateObjects, path.join(root, 'engines/browser-native/platform.c'),
   path.join(root, 'engines/browser-native/runtime.c'),
   path.join(root, 'engines/browser-native/fighter.c'),
   path.join(root, 'engines/browser-native/animation.c'),
@@ -84,12 +93,12 @@ execFileSync(compiler, [...flags, ...units, selectedSdk,...estimateObjects, path
   '-sASSERTIONS=1', '-o', path.join(output, 'melee-native.mjs')], {cwd:upstream, stdio:'inherit'});
 for (const name of ['archive.mjs', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
-  'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
+  'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
 const wasm = fs.readFileSync(path.join(output, 'melee-native.wasm'));
 const module = new WebAssembly.Module(wasm);
 const report = {source, compiler:execFileSync(compiler, ['--version'], {encoding:'utf8'}).split('\n')[0],
-  units,selectedSdkFunctions,arithmeticReference:provenance,flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
+  units,selectedSdkFunctions,selectedHsdFunctions:['MakeTextureMtx'],arithmeticReference:provenance,flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
   wasmSha256:createHash('sha256').update(wasm).digest('hex'), imports:WebAssembly.Module.imports(module),
   playable:false, gameplayParity:false, performanceCertified:false};
 fs.writeFileSync(path.join(output, 'build.json'), JSON.stringify(report, null, 2) + '\n');

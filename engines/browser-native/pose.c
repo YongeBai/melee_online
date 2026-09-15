@@ -112,6 +112,10 @@ void portPoseStep(Pose* pose,float* matrices)
         for(int r=0;r<3;r++)for(int c=0;c<4;c++)matrices[i*12+r*4+c]=j->mtx[r][c];
     }
 }
+void portPoseFlags(Pose* pose,unsigned* flags)
+{
+    for(unsigned i=0;i<pose->count;i++)flags[i]=pose->nodes[i].joint.flags;
+}
 void portPoseDestroy(Pose* pose)
 {
     if(!pose)return;

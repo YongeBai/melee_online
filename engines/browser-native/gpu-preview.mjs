@@ -1,0 +1,86 @@
+import createMeleeNative from './melee-native.mjs';
+import {readModelMeshes} from './mesh-assets.mjs';
+import {readModelMaterials} from './material-assets.mjs';
+import {textureMatrices} from './texture-matrix.mjs';
+import {readSkinBindings,loadSkin} from './skin-assets.mjs';
+import {loadPose} from './verify-poses.mjs';
+import {animationArchives} from './animation-assets.mjs';
+import {createMeshPipeline,uploadMesh} from './gpu-mesh.mjs';
+import {verifyGpuConventions} from './verify-gpu-conventions.mjs';
+const canvas=document.querySelector('canvas'),status=document.querySelector('#status'),result=document.querySelector('#result');
+const parameters=new URL(location.href).searchParams;
+const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});
+async function fetchAsset(name) {
+  if(!/^Pl[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid hosted model name');
+  const response=await fetch('./fixtures/'+name);if(!response.ok)throw Error('Hosted asset unavailable: '+name);
+  return new Uint8Array(await response.arrayBuffer());
+}
+function columnMajor(rows) {return Float32Array.from({length:16},(_,i)=>rows[i%4*4+(i>>2)]);}
+try {
+  if(!gl)throw Error('WebGL2 unavailable');
+  const module=await createMeleeNative();if(module._portRuntimeInit()<0)throw Error('Native runtime initialization failed');
+  const pipeline=createMeshPipeline(gl),scratch=module._malloc(144);
+  const conventions=verifyGpuConventions(gl,pipeline);
+  // Diagnostic front view only. The actual gameplay camera must come from the
+  // native match; no pitch/yaw/projection adjustment is applied to /play/.
+  module.HEAPF32.set([0,12,75,0,1,0,0,12,0],scratch/4);
+  module._C_MTXLookAt(scratch+36,scratch,scratch+12,scratch+24);
+  const view=columnMajor([...module.HEAPF32.slice((scratch+36)/4,(scratch+84)/4),0,0,0,1]);
+  module._MTXPerspective(scratch,45,4/3,1,500);
+  const projection=columnMajor(module.HEAPF32.slice(scratch/4,scratch/4+16));module._free(scratch);
+  const manifest=await (await fetch('./model-fixtures.json')).json(),rows=[];
+  const selected=parameters.get('model')||'PlMrNr.dat';if(!manifest.includes(selected))throw Error('Model not in hosted manifest');
+  const names=parameters.get('verify')==='1'?manifest:[selected];
+  async function load(name,referenceVertices) {
+    const [bytes,motion]=await Promise.all([fetchAsset(name),fetchAsset(name.replace('Nr','AJ'))]);
+    const model=readModelMeshes(bytes),assets=readModelMaterials(bytes,model),transforms=textureMatrices(module,assets.textures);
+    const pose=loadPose(module,model.tree,animationArchives(motion).next().value.tree);
+    let skin,gpu,flags;
+    try {
+      skin=loadSkin(module,model,readSkinBindings(bytes,model),{referenceVertices});
+      gpu=uploadMesh(gl,pipeline,model,skin,assets,transforms);flags=module._malloc(model.tree.nodes.length*4);
+      return {model,pose,skin,gpu,
+        step(){module._portPoseStep(pose.pointer,skin.world);skin.step();module._portPoseFlags(pose.pointer,flags);
+          gpu.updatePalette(module.HEAPF32.subarray(skin.matrices/4,skin.matrices/4+skin.groupCount*12));},
+        draw(){gl.viewport(0,0,960,720);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+          const draws=gpu.draw(view,projection,new Uint32Array(module.HEAPU8.buffer,flags,model.tree.nodes.length));
+          const error=gl.getError();if(error!==gl.NO_ERROR)throw Error('GPU error: '+error);return draws;},
+        dispose(){gpu.dispose();skin.dispose();pose.dispose();module._free(flags);}};
+    } catch(error){gpu?.dispose();skin?.dispose();pose.dispose();if(flags)module._free(flags);throw error;}
+  }
+  for(const name of names) {
+    status.textContent='Verifying native GPU resources: '+name;
+    const actor=await load(name,true),snapshots=[];let maxError=0,maxScaledError=0;
+    try {
+      for(let frame=0;frame<=32;frame++) {
+        actor.step();if(frame%16!==0)continue;
+        const positions=actor.gpu.readPositions(),expected=module.HEAPF32.subarray(actor.skin.transformed/4,actor.skin.transformed/4+positions.length);
+        positions.forEach((v,i)=>{const error=Math.abs(v-expected[i]),scaled=error/(1+Math.abs(expected[i]));
+          maxError=Math.max(maxError,error);maxScaledError=Math.max(maxScaledError,scaled);
+          if(!Number.isFinite(v)||scaled>0.00002)throw Error('GPU/native vertex mismatch: '+name+' '+i+' '+v+' '+expected[i]);});
+        const draws=actor.draw(),pixels=new Uint8Array(960*720*4);gl.readPixels(0,0,960,720,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+        let coloredPixels=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]||pixels[i+1]||pixels[i+2])coloredPixels++;
+        if(coloredPixels<100)throw Error('No visible model pixels: '+name);
+        const sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels))].map(x=>x.toString(16).padStart(2,'0')).join('');
+        snapshots.push({frame,draws,coloredPixels,sha256});
+      }
+      rows.push({name,vertices:actor.model.totalVertices,paletteMatrices:actor.skin.groupCount,maxError,maxScaledError,
+        snapshots,distinctImages:snapshots.some(s=>s.sha256!==snapshots[0].sha256)});
+    } finally {actor.dispose();}
+  }
+  const report={passed:true,resolution:[960,720],conventions,models:rows,emulator:false,playable:false,gameplayParity:false,
+    performanceMeasured:false,renderer:gl.getParameter(gl.RENDERER),
+    limitations:'Diagnostic unlit first-UV image; no native lighting, TEV, material animation, part selection, gameplay camera or match simulation'};
+  const actor=await load(selected,false);actor.step();actor.draw();
+  result.textContent=JSON.stringify(report,null,2);document.documentElement.dataset.result='passed';
+  status.textContent='Native animation + GPU mesh diagnostic: '+selected+' · 960 × 720 · not gameplay';
+  if(parameters.get('verify')!=='1') {
+    let last=performance.now(),debt=0;
+    function animate(now) {
+      debt=Math.min(100,debt+now-last);last=now;
+      while(debt>=1000/60){actor.step();debt-=1000/60;}
+      actor.draw();requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  }
+} catch(error) {result.textContent=String(error.stack||error);status.textContent='Native GPU verification failed';document.documentElement.dataset.result='failed';}

@@ -5,6 +5,23 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Latest milestone: all 27 default fighter components render through a native
+animation/skin-matrix pipeline and browser WebGL2 at 960×720. Static geometry is
+uploaded once; the draw path updates matrix palettes without CPU vertex skinning.
+The diagnostic shader displays the first UV image, not complete native materials.
+Native lighting/TEV, normal matrices, fighter part selection, combat, gameplay
+camera, audio and input are still missing. The original `/play/` path is unchanged.
+
+Chrome/SwiftShader checks compare every GPU-transformed vertex with the native
+CPU reference at animation frames 0, 16 and 32 for all 27 models. Maximum absolute
+error is 0.0000038147 world units. All models produce visible, differing images
+over that sequence; Game & Watch holds the same visible pose at frames 0 and 16,
+then changes by 32. Five synthetic raster cases verify clockwise GX front faces,
+front-face culling, both GX clip boundaries and hidden joints. Visual inspection
+found and fixed reversed culling before this check passed. These are correctness
+checks on a software GPU, not hardware performance or gameplay-camera parity.
+[Texture/GPU checkpoint](benchmarks/browser-2026-09-15-native-port-texture-gpu.json).
+
 Continued implementation: original OS/HSD allocation and GObj scheduling now run
 in WASM, with Melee's 25 callback-priority levels and checks for ordering, pause
 masks, deletion during callbacks and bounded object reuse. All 27 playable fighter
@@ -53,8 +70,8 @@ typed model/material/texture assets, followed by actual fighter creation.
 The typed GX geometry decoder now reads all 27 default model archives: 2,179 mesh
 sections, 209,465 vertex records and 186,255 triangles, including packed colors,
 fixed-point position/normal/UV arrays and triangle-strip winding. Mesh binding,
-material and texture pointers are retained for their next typed importers. No
-skinning or draw calls run yet. Chrome passes this decode alongside the complete
+material and texture pointers are retained for their typed importers. At that
+checkpoint no skinning or draw calls ran. Chrome passed this decode alongside the complete
 5,508-clip animation regression and 38-clip pose integration; 23 targeted tests
 pass. [SDK/math/geometry checkpoint](benchmarks/browser-2026-09-15-native-port-sdk-geometry.json).
 
@@ -66,15 +83,21 @@ default fighter models pass 32 animated frames and exact rewind checks in Chrome
 Identical palettes are shared across mesh sections, reducing total palette
 calculations from 8,552 to 3,011; SHA-256 comparisons of every transformed vertex
 over the 32-frame sequence remained identical for all 27 models. This is work
-reduction in a subsystem, not a measured match FPS improvement. Native GPU draws,
-normal matrices, materials/texture combining and full match integration remain.
+reduction in a subsystem, not a measured match FPS improvement. The later GPU
+diagnostic uses these palettes; normal matrices, complete materials/texture
+combining and full match integration remain.
 
-Next texture work must not blindly reuse `scripts/engine/gx-decoder.js`: inspection
-found missing indexed palette formats and PC-style CMPR interpolation/transparent
+The native texture decoder replaces assumptions in `scripts/engine/gx-decoder.js`:
+inspection found missing indexed palette formats and PC-style CMPR interpolation/transparent
 colors. Dolphin's `TextureDecoder_Generic.cpp` and `TextureDecoder_Util.h` show
 GX uses 3/8–5/8 interpolation and retains averaged RGB in transparent entries.
 The 27 default archives reference 1,730 texture descriptors: CMPR 1,635, C8 73,
 C4 1, I4 18, I8 1 and RGB5A3 2. These are descriptor counts, not unique images.
+All now decode in Chrome: 1,753 material descriptors and 17,744,214 decoded texels.
+The unchanged original HSD `MakeTextureMtx` runs for all 1,730 descriptors, with
+six hand-calculated transform/validation cases. Indexed palettes, GX interpolation,
+partial tiles, malformed pointers, cycles and truncation have focused tests.
+The full 5,508-clip browser regression and 33 targeted tests pass.
 
 The first module loads collision data for Battlefield, Final Destination, Dream
 Land, Yoshi's Story, Fountain of Dreams and Pokémon Stadium. Original HSD archive

@@ -156,7 +156,19 @@ export function verifyMath(module) {
       module._MTXRotRad(a,axis.charCodeAt(0),0);
       get(a,12).forEach((value,i)=>close(value,[1,0,0,0,0,1,0,0,0,0,1,0][i],'Axis rotation identity'));
     }
-    return {passed:true,cases:128,estimateGoldenCases:estimateVectors.length,normalizationCases:128,
+    // Texture coordinates have inverse scaling and a mirror-specific T offset.
+    for(const wrap of [0,1,2]) {
+      put(a,[0,0,0,2,4,1,0.25,0.5,0]);
+      if(module._portTextureMatrix(a,4,2,wrap,out)!==0)throw Error('Texture matrix rejected');
+      get(out,12).forEach((v,i)=>close(v,[2,0,0,-0.5,0,0.5,0,wrap===2?-1.25:-0.25,0,0,1,0][i],'Texture scale/wrap'));
+    }
+    const angle=f(0.7),tc=module._cosf(angle),ts=module._sinf(angle);
+    put(a,[0,0,angle,1,1,1,0,0,0]);module._portTextureMatrix(a,1,1,0,out);
+    get(out,12).forEach((v,i)=>close(v,[tc,ts,0,0,-ts,tc,0,0,0,0,1,0][i],'Texture rotation sign'));
+    put(a,[0,0,0,0,0,1,0,0,0]);module._portTextureMatrix(a,1,1,2,out);
+    get(out,12).forEach((v,i)=>close(v,[0,0,0,0,0,0,0,0,0,0,1,0][i],'Zero texture scale'));
+    if(module._portTextureMatrix(a,0,1,0,out)!==-1)throw Error('Zero texture repeat accepted');
+    return {passed:true,cases:128,estimateGoldenCases:estimateVectors.length,normalizationCases:128,textureMatrixCases:6,
       projectionCases:18,lookAtCases:1,
       quaternionCases:128,inverseCases:256,axisRotationCases:128,
       fusedCancellation:true,inPlaceAliases:true,srtCases:256,maxSrtError,maxTrigError,
