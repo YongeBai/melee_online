@@ -9,7 +9,11 @@ loads all 27 playable fighter components' common attributes, and executes origin
 gravity/friction and FObj/AObj animation code. Chrome has decoded and replayed all
 5,508 clips in the 27 fighter animation archives. These are subsystem checks;
 selected SDK math and a limited animated bone hierarchy also run natively. The
-full fighter action-state machine, HSD scene ownership and renderer are pending.
+full fighter action-state machine and renderer are pending.
+The separate scene bring-up target now uses original HSD class ownership,
+reference resolution, matrix updates, destruction and Melee's `lbAnim` attachment.
+It drives the diagnostic GPU view, but the original GX material/draw boundary and
+fighter creation are still incomplete.
 
 ## Reproduce
 
@@ -124,7 +128,44 @@ assembly fallback or gameplay mismatch.
   reference vertices and renders a 960×720 diagnostic image. It displays only the
   first supported UV image; native lighting, normal matrices, TEV, LOD, material
   animation and fighter part selection are not implemented. Do not promote this
-  shader or its diagnostic camera to the player flow as a faithful renderer.
+shader or its diagnostic camera to the player flow as a faithful renderer.
+
+## Original HSD scene bring-up
+
+After the regular build and fixture preparation:
+
+```sh
+node scripts/native-port/audit.mjs
+node scripts/native-port/audit-link.mjs
+node scripts/native-port/build.mjs --scene
+node scripts/native-port/verify-browser.mjs --scene
+node scripts/native-port/verify-gpu.mjs --scene
+```
+
+This produces `melee-scene.mjs/.wasm` and a separate `scene-build.json`. The scene
+library currently uses the audit's `-O0` objects; it is not a performance build.
+The 49 unresolved GX entry points retained by HSD class tables abort by name.
+They do not silently skip work. `/scene.html` checks loading and animation;
+`/gpu-preview.html?scene=1` connects original HSD matrices to the diagnostic GPU
+resource path. Neither is a playable release.
+
+All 27 default model archives pass three load/destroy cycles with resolved
+envelopes, source-descriptor metrics, zero remaining joint/display/polygon/material/
+texture/animation objects or ID/vector/matrix allocations, and stable heap use on
+repeated cycles. Original HSD/lbAnim runs 38 clips over 2,180 frames with exact
+matrix agreement against the earlier native pose owner and exact rewind replay.
+The browser GPU's 81 sampled images also match the previous diagnostic path.
+This verifies native object integration, not Dolphin gameplay parity.
+
+`portable-source.mjs` generates a pinned source mirror under ignored output.
+Explicit typed wrappers adapt boolean stage callbacks and predicate return values;
+no callback casts or suppressed diagnostics are used. It also makes two original
+PowerPC register dependencies explicit: `ftLib_800876B4` returns the animation
+predicate, and the multi-man menu passes `mn_802295AC()` to `gm_801677E8`.
+The supplied USA 1.02 executable confirmed both register flows. Menu declarations
+and memory-card result declarations now match their implemented signatures.
+Link signature warnings are fatal. Source hashes and the transformation recipe
+are recorded in build/audit metadata; the upstream checkout remains unchanged.
 
 `node scripts/native-port/audit-link.mjs` probes original joint loading and fighter
 creation with the implemented native math/heap/error boundaries. It requires a
@@ -138,9 +179,10 @@ not a frame-by-frame Dolphin oracle. Native gameplay parity is still unproven.
 
 ## Next milestones
 
-1. Bring up the native object allocator and fixed simulation update loop, then
-   load fighter attributes, motion tables and animation data using typed converters.
-   Audit big-endian bitfields and pointer/function references explicitly.
+1. Connect `Fighter_Create` to the native HSD owner, remaining fighter archive
+   structures, motion tables and platform services. Audit big-endian bitfields
+   and pointer/function references explicitly; common attributes and animation
+   decoding alone do not initialize a fighter.
 2. Run one two-fighter legal-stage match with scripted per-frame input. Compare
    action state, position, velocity, damage, RNG, collisions, camera and rules
    against the equivalent Dolphin scene. Preserve floating-point behavior; no

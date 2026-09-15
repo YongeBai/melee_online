@@ -5,6 +5,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const chrome=process.env.CHROME||'google-chrome',output=path.resolve(import.meta.dirname,'../../dist/native-port');
+const scene=process.argv.includes('--scene'),prefix=scene?'scene-gpu':'gpu';
 const profile=fs.mkdtempSync(path.join(os.tmpdir(),'melee-native-port-gpu-')),server=createNativePortServer();
 let browser,socket,stderr='',sequence=0;const pending=new Map();
 function command(method,params={}) {
@@ -29,7 +30,7 @@ try {
   socket.addEventListener('message',event=>{const message=JSON.parse(event.data),waiter=pending.get(message.id);
     if(waiter){pending.delete(message.id);if(message.error)waiter.reject(Error(JSON.stringify(message.error)));else waiter.resolve(message.result);}});
   await command('Page.enable');
-  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/gpu-preview.html?verify=1'});
+  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/gpu-preview.html?verify=1'+(scene?'&scene=1':'')});
   // Wait for the new document before installing a completion promise in it.
   let ready=false;
   for(let i=0;i<100;i++) {
@@ -44,20 +45,21 @@ try {
   if(evaluated.exceptionDetails)throw Error('GPU page execution failed: '+JSON.stringify(evaluated.exceptionDetails));
   const page=evaluated.result.value;
   const screenshot=await command('Page.captureScreenshot',{format:'png'});
-  fs.writeFileSync(path.join(output,'gpu-diagnostic.png'),Buffer.from(screenshot.data,'base64'));
+  fs.writeFileSync(path.join(output,prefix+'-diagnostic.png'),Buffer.from(screenshot.data,'base64'));
   if(page.status!=='passed')throw Error('GPU verification failed: '+page.text);
   const verification=JSON.parse(page.text);
-  fs.writeFileSync(path.join(output,'gpu-check-output.json'),JSON.stringify(verification,null,2)+'\n');
+  fs.writeFileSync(path.join(output,prefix+'-check-output.json'),JSON.stringify(verification,null,2)+'\n');
   if(!verification.passed||verification.models.length!==27||verification.resolution.join(',')!=='960,720')throw Error('Incomplete GPU coverage');
   if(verification.models.some(m=>!m.distinctImages))throw Error('Animated output did not change: '+verification.models.filter(m=>!m.distinctImages).map(m=>m.name).join(', '));
+  if(verification.originalHsdObjects!==scene)throw Error('Wrong native object path tested');
   const report={browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),
-    build:JSON.parse(fs.readFileSync(path.join(output,'build.json'))),softwareGpu:true,verification};
-  fs.writeFileSync(path.join(output,'gpu-verification.json'),JSON.stringify(report,null,2)+'\n');
+    build:JSON.parse(fs.readFileSync(path.join(output,scene?'scene-build.json':'build.json'))),softwareGpu:true,verification};
+  fs.writeFileSync(path.join(output,prefix+'-verification.json'),JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify({passed:true,models:verification.models.length,resolution:verification.resolution,
     maxVertexError:Math.max(...verification.models.map(m=>m.maxError)),softwareGpu:true,playable:false,performanceMeasured:false}));
 } finally {
   for(const waiter of pending.values())waiter.reject(Error('Chrome test closed'));pending.clear();socket?.close();
   if(browser&&browser.exitCode===null){const exited=new Promise(resolve=>browser.once('exit',resolve));browser.kill('SIGKILL');await exited;}
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
-  fs.writeFileSync(path.join(output,'gpu-chrome.log'),stderr);fs.rmSync(profile,{recursive:true,force:true});
+  fs.writeFileSync(path.join(output,prefix+'-chrome.log'),stderr);fs.rmSync(profile,{recursive:true,force:true});
 }

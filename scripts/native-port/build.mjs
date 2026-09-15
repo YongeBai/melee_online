@@ -2,10 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {preparePortableSource} from './portable-source.mjs';
+import {sceneLinkInputs} from './scene-link.mjs';
 const root = path.resolve(import.meta.dirname, '../..');
 const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
 const upstream = path.join(root, 'engines/melee-decomp');
 const output = path.join(root, 'dist/native-port');
+const scene=process.argv.includes('--scene'),moduleName=scene?'melee-scene':'melee-native';
 const compiler = process.env.EMCC || path.join(root, '.browser-tools/emsdk/upstream/emscripten/emcc');
 const git = args => execFileSync('git', args, {cwd:upstream, encoding:'utf8'}).trim();
 if (git(['rev-parse', 'HEAD']) !== source.commit || git(['status', '--porcelain', '--untracked-files=no']))
@@ -62,7 +65,7 @@ const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/gr
   'src/sysdolphin/baselib/objalloc.c', 'libs/dolphin/src/dolphin/os/OSAlloc.c',
   'src/sysdolphin/baselib/fobj.c', 'src/sysdolphin/baselib/spline.c', 'src/sysdolphin/baselib/aobj.c',
   ...['gobj','gobjproc','gobjplink','gobjgxlink','gobjobject','gobjuserdata'].map(n=>'src/sysdolphin/baselib/'+n+'.c')];
-const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
+let exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'portStagePrune', 'portStageMetric', 'portArchiveOpen', 'portArchiveSymbol',
   'portArchiveClose', 'portRuntimeInit', 'portRuntimeStep', 'portRuntimeProbeCreate',
   'portRuntimeProbePause', 'portRuntimeProbeRead', 'portRuntimeProbeReset',
@@ -76,30 +79,43 @@ const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'MTXFrustum','MTXPerspective','MTXOrtho','MTXRotRad','C_MTXLookAt','PSMTXQuat','PSMTXInverse','PSMTXRotAxisRad',
   'portSkinMatrices','portSkinVertices','portTextureMatrix','portPoseFlags'];
 const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
+  '-Wl,--fatal-warnings',
   '-fno-builtin-sinf', '-fno-builtin-cosf', '-fno-builtin-tanf',
   '-ffunction-sections', '-fdata-sections', '-I' + path.join(output, 'include'),
+  '-I'+path.join(output,'portable/src'),'-I'+path.join(output,'portable/libs/dolphin/include'),
   '-Isrc', '-Ilibs/dolphin/include'];
-execFileSync(compiler, [...flags, ...units, selectedSdk,textureSource,...estimateObjects, path.join(root, 'engines/browser-native/platform.c'),
+const portable=preparePortableSource(upstream,output);
+const sceneInputs=scene?sceneLinkInputs(root,upstream,output):null;
+if(scene) {
+  exports=exports.filter(name=>!['portInterpolate','portSeed','portRandom','portStagePrune','portStageMetric','portArchiveOpen','portArchiveSymbol','portArchiveClose','portFighterAttribute','portFighterPhysicsProbe'].includes(name));
+  exports.push('portSceneLoad','portSceneDestroy','portSceneCollect','portSceneMatrices','portSceneMetric','portSceneLiveJoints',
+    'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects');
+}
+const selectedUnits=scene?units.filter(file=>!file.startsWith('src/melee/')):units;
+if(scene)selectedUnits.push('src/melee/lb/lbanim.c');
+execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.directory,file)), selectedSdk,textureSource,...estimateObjects,
+  path.join(root, 'engines/browser-native/errors.c'),
+  ...(scene?[]:[path.join(root, 'engines/browser-native/platform.c'),path.join(root, 'engines/browser-native/fighter.c')]),
   path.join(root, 'engines/browser-native/runtime.c'),
-  path.join(root, 'engines/browser-native/fighter.c'),
   path.join(root, 'engines/browser-native/animation.c'),
   path.join(root, 'engines/browser-native/math.c'),
   path.join(root, 'engines/browser-native/matrix-special.c'),
   path.join(root, 'engines/browser-native/pose.c'),
   path.join(root, 'engines/browser-native/skin.c'),
+  ...(sceneInputs?.files||[]),
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
-  '-sASSERTIONS=1', '-o', path.join(output, 'melee-native.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['archive.mjs', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+  '-sASSERTIONS=1', '-o', path.join(output, moduleName+'.mjs')], {cwd:upstream, stdio:'inherit'});
+for (const name of ['archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
-const wasm = fs.readFileSync(path.join(output, 'melee-native.wasm'));
+const wasm = fs.readFileSync(path.join(output, moduleName+'.wasm'));
 const module = new WebAssembly.Module(wasm);
 const report = {source, compiler:execFileSync(compiler, ['--version'], {encoding:'utf8'}).split('\n')[0],
-  units,selectedSdkFunctions,selectedHsdFunctions:['MakeTextureMtx'],arithmeticReference:provenance,flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
+  units:selectedUnits,portableSource:portable.manifest,selectedSdkFunctions,selectedHsdFunctions:['MakeTextureMtx'],arithmeticReference:provenance,flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
   wasmSha256:createHash('sha256').update(wasm).digest('hex'), imports:WebAssembly.Module.imports(module),
-  playable:false, gameplayParity:false, performanceCertified:false};
-fs.writeFileSync(path.join(output, 'build.json'), JSON.stringify(report, null, 2) + '\n');
+  ...(scene?{sceneBringup:sceneInputs}:{}),playable:false, gameplayParity:false, performanceCertified:false};
+fs.writeFileSync(path.join(output, scene?'scene-build.json':'build.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify(report, null, 2));

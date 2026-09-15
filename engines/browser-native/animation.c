@@ -3,6 +3,10 @@
 #include <stdlib.h>
 
 static int initialized;
+void portAnimationInit(void)
+{
+    if (!initialized) { HSD_FObjInitAllocData(); initialized=1; }
+}
 typedef struct TrackOutput { float value; unsigned updates; } TrackOutput;
 static void output_value(void* object, int type, HSD_ObjData* value)
 {
@@ -15,7 +19,7 @@ HSD_FObj* portAnimationCreate(unsigned char* data, unsigned length,
     int start, unsigned type, unsigned frac_value, unsigned frac_slope)
 {
     HSD_FObjDesc desc = {0};
-    if (!initialized) { HSD_FObjInitAllocData(); initialized=1; }
+    portAnimationInit();
     desc.length=length;desc.startframe=start;desc.type=type;
     desc.frac_value=frac_value;desc.frac_slope=frac_slope;desc.ad=data;
     return HSD_FObjLoadDesc(&desc);

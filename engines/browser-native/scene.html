@@ -1,0 +1,24 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Melee native port — original HSD scene verification</title>
+<h1>Original HSD scene verification</h1>
+<p>Native object loading, animation and lifetime checks. This is not a playable match or a performance test.</p>
+<pre id="result">Loading hosted assets…</pre>
+<script type="module">
+import create from './melee-scene.mjs';
+import {verifyScene,verifySceneAnimations} from './verify-scene.mjs';
+try {
+  const module=await create();module._portRuntimeInit();
+  async function load(manifest) {
+    const response=await fetch('./'+manifest);if(!response.ok)throw Error('Hosted manifest unavailable');
+    return await Promise.all((await response.json()).map(async name=>{
+      if(!/^Pl[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid hosted asset');
+      const response=await fetch('./fixtures/'+name);if(!response.ok)throw Error('Hosted asset unavailable');
+      return {name,bytes:new Uint8Array(await response.arrayBuffer())};
+    }));
+  }
+  const [models,animations]=await Promise.all([load('model-fixtures.json'),load('animation-fixtures.json')]);
+  const report=verifyScene(module,models);report.animations=verifySceneAnimations(module,models,animations);
+  document.querySelector('#result').textContent=JSON.stringify(report,null,2);document.documentElement.dataset.result='passed';
+} catch(error) {document.querySelector('#result').textContent=String(error.stack||error);document.documentElement.dataset.result='failed';}
+</script>

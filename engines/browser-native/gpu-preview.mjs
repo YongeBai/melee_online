@@ -1,4 +1,4 @@
-import createMeleeNative from './melee-native.mjs';
+import {loadSceneAsset,loadSceneAnimation} from './scene-assets.mjs';
 import {readModelMeshes} from './mesh-assets.mjs';
 import {readModelMaterials} from './material-assets.mjs';
 import {textureMatrices} from './texture-matrix.mjs';
@@ -9,6 +9,7 @@ import {createMeshPipeline,uploadMesh} from './gpu-mesh.mjs';
 import {verifyGpuConventions} from './verify-gpu-conventions.mjs';
 const canvas=document.querySelector('canvas'),status=document.querySelector('#status'),result=document.querySelector('#result');
 const parameters=new URL(location.href).searchParams;
+const fullScene=parameters.get('scene')==='1';
 const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});
 async function fetchAsset(name) {
   if(!/^Pl[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid hosted model name');
@@ -18,6 +19,7 @@ async function fetchAsset(name) {
 function columnMajor(rows) {return Float32Array.from({length:16},(_,i)=>rows[i%4*4+(i>>2)]);}
 try {
   if(!gl)throw Error('WebGL2 unavailable');
+  const {default:createMeleeNative}=await import(fullScene?'./melee-scene.mjs':'./melee-native.mjs');
   const module=await createMeleeNative();if(module._portRuntimeInit()<0)throw Error('Native runtime initialization failed');
   const pipeline=createMeshPipeline(gl),scratch=module._malloc(144);
   const conventions=verifyGpuConventions(gl,pipeline);
@@ -34,13 +36,26 @@ try {
   async function load(name,referenceVertices) {
     const [bytes,motion]=await Promise.all([fetchAsset(name),fetchAsset(name.replace('Nr','AJ'))]);
     const model=readModelMeshes(bytes),assets=readModelMaterials(bytes,model),transforms=textureMatrices(module,assets.textures);
-    const pose=loadPose(module,model.tree,animationArchives(motion).next().value.tree);
+    let pose;
+    if(fullScene) {
+      const asset=loadSceneAsset(module,bytes),n=model.tree.nodes.length,nodes=module._malloc(n*4);
+      const length=new DataView(motion.buffer,motion.byteOffset,4).getUint32(0),clip=loadSceneAnimation(module,motion.subarray(0,length));
+      const root=module._portSceneLoad(asset.root);
+      if(!root||module._portSceneCollect(root,nodes,n)!==n||module._portSceneAnimation(n,nodes,clip.tree)!==0)
+        throw Error('Native HSD animation attachment failed');
+      module._portSceneRequest(root);
+      pose={step(world,flags){module._portSceneAnimate(root);module._portSceneMatrices(n,nodes,world);module._portSceneFlags(n,nodes,flags);},
+        dispose(){module._portSceneDestroy(root);clip.dispose();asset.dispose();module._free(nodes);}};
+    } else {
+      const limited=loadPose(module,model.tree,animationArchives(motion).next().value.tree);
+      pose={step(world,flags){module._portPoseStep(limited.pointer,world);module._portPoseFlags(limited.pointer,flags);},dispose:limited.dispose};
+    }
     let skin,gpu,flags;
     try {
       skin=loadSkin(module,model,readSkinBindings(bytes,model),{referenceVertices});
       gpu=uploadMesh(gl,pipeline,model,skin,assets,transforms);flags=module._malloc(model.tree.nodes.length*4);
       return {model,pose,skin,gpu,
-        step(){module._portPoseStep(pose.pointer,skin.world);skin.step();module._portPoseFlags(pose.pointer,flags);
+        step(){pose.step(skin.world,flags);skin.step();
           gpu.updatePalette(module.HEAPF32.subarray(skin.matrices/4,skin.matrices/4+skin.groupCount*12));},
         draw(){gl.viewport(0,0,960,720);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
           const draws=gpu.draw(view,projection,new Uint32Array(module.HEAPU8.buffer,flags,model.tree.nodes.length));
@@ -68,7 +83,7 @@ try {
         snapshots,distinctImages:snapshots.some(s=>s.sha256!==snapshots[0].sha256)});
     } finally {actor.dispose();}
   }
-  const report={passed:true,resolution:[960,720],conventions,models:rows,emulator:false,playable:false,gameplayParity:false,
+  const report={passed:true,originalHsdObjects:fullScene,resolution:[960,720],conventions,models:rows,emulator:false,playable:false,gameplayParity:false,
     performanceMeasured:false,renderer:gl.getParameter(gl.RENDERER),
     limitations:'Diagnostic unlit first-UV image; no native lighting, TEV, material animation, part selection, gameplay camera or match simulation'};
   const actor=await load(selected,false);actor.step();actor.draw();

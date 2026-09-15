@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync, spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {preparePortableSource} from './portable-source.mjs';
 const root=path.resolve(import.meta.dirname,'../..');
 const source=path.join(root,'engines/melee-decomp'), out=path.join(root,'dist/native-port/audit');
 const emcc=process.env.EMCC||path.join(root,'.browser-tools/emsdk/upstream/emscripten/emcc');
@@ -14,6 +15,7 @@ if(execFileSync('git',['rev-parse','HEAD'],{cwd:source,encoding:'utf8'}).trim()!
   throw Error('Audit requires the clean pinned source.');
 const include=path.join(root,'dist/native-port/include');
 if(!fs.existsSync(path.join(include,'Runtime/platform.h')))throw Error('Build the native bootstrap first.');
+const portable=preparePortableSource(source,path.dirname(include));
 const files=execFileSync('rg',['--files','src/melee','src/sysdolphin','libs/dolphin/src','-g','*.c'],
   {cwd:source,encoding:'utf8'}).trim().split('\n').sort();
 fs.mkdirSync(out,{recursive:true});
@@ -22,7 +24,8 @@ async function compile(file) {
   const object=path.join(out,file.replaceAll('/','_')+'.o');
   return await new Promise((resolve,reject)=> {
     const child=spawn(emcc,['-O0','-fno-fast-math','-ffp-contract=off','-fno-strict-aliasing',
-      '-I'+include,'-Isrc','-Ilibs/dolphin/include','-c',file,'-o',object],{cwd:source});
+      '-I'+include,'-I'+path.join(portable.directory,'src'),'-I'+path.join(portable.directory,'libs/dolphin/include'),
+      '-Isrc','-Ilibs/dolphin/include','-c',path.join(portable.directory,file),'-o',object],{cwd:source});
     let diagnostic='';
     child.stderr.on('data',b=>{if(diagnostic.length<20000)diagnostic+=b;});
     child.stdout.resume();child.on('error',reject);
@@ -54,7 +57,8 @@ const missing=[...references].filter(([symbol])=>!definitions.has(symbol))
   .map(([symbol,files])=>({symbol,files:[...files].sort()})).sort((a,b)=>b.files.length-a.files.length||a.symbol.localeCompare(b.symbol));
 const failed=results.filter(r=>r.code!==0).map(({file,diagnostic})=>({file,diagnostic})).sort((a,b)=>a.file.localeCompare(b.file));
 const report={sourceCommit:pin.commit,total:files.length,compiled:passed.length,failed:failed.length,
-  overrides:['Runtime/platform.h','placeholder.h'].map(file=>({file,
+  portableSource:portable.manifest,
+  overrides:['Runtime/platform.h','placeholder.h','printf.h'].map(file=>({file,
     sha256:createHash('sha256').update(fs.readFileSync(path.join(include,file))).digest('hex')})),
   callbackDiagnosticSuppressed:false,linkedGame:false,missingSymbols:missing.length,missing,failures:failed};
 fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n');

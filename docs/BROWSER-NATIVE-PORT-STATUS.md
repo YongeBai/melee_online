@@ -5,7 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
-Latest milestone: all 27 default fighter components render through a native
+The original HSD scene path now loads and destroys all 27 model archives with
+resolved joint/envelope references. Three cycles per model leave no tracked scene
+objects or ID/vector/matrix allocations and show stable repeated heap use. Original
+Melee `lbAnim` attachment and HSD joint animation run 38 clips over 2,180 frames,
+matching the prior native pose matrices exactly and passing exact rewind checks.
+This path also drives the browser GPU: all 81 sampled 960×720 images match the
+earlier diagnostic path. The scene target uses audit objects at `-O0`, and all
+49 unimplemented GX calls abort explicitly; the diagnostic shader still lacks
+native material effects. It is not gameplay or an FPS result.
+
+Portable source adapters now let 1,047 of 1,130 modules compile (83 failures).
+Original `Fighter_Create` has 149 remaining external dependencies, down from 223,
+with no linker signature mismatches. The adapters preserve boolean conversions
+instead of casting incompatible callbacks. Two additional C fixes make values
+carried in the original PowerPC `r3` register explicit as a return value and a
+function argument; the development executable verified those flows. The upstream
+checkout remains pinned and clean. All 38 targeted tests and the complete
+5,508-clip browser regression pass. [Scene/ABI checkpoint](benchmarks/browser-2026-09-15-native-port-hsd-scene.json).
+
+The earlier GPU milestone renders all 27 default fighter components through a native
 animation/skin-matrix pipeline and browser WebGL2 at 960×720. Static geometry is
 uploaded once; the draw path updates matrix palettes without CPU vertex skinning.
 The diagnostic shader displays the first UV image, not complete native materials.
@@ -45,7 +64,7 @@ unsupported animation channels fail explicitly. This owner is not full HSD JObj
 or fighter initialization. [Recorded validation](benchmarks/browser-2026-09-15-native-port-math-pose.json).
 
 These numbers establish subsystem coverage only, not combat correctness or FPS.
-Fighter creation, the complete action-state loop, full joint/constraint ownership,
+Fighter creation, the complete action-state loop, constraint descriptor imports,
 remaining SDK math, GX, audio and Dolphin parity remain.
 
 Further math bring-up replaces the upstream non-GameCube `__frsqrte(x) -> sqrt(x)`
@@ -59,7 +78,7 @@ are linked. The projection checks preserve GX's near=-1/far=0 depth convention.
 These checks do not validate the gameplay camera or complete PPC floating-point
 status/denormal behavior.
 
-A fresh link probe includes the implemented arithmetic, SDK heap and panic
+The earlier SDK/geometry link probe included implemented arithmetic, SDK heap and panic
 boundaries. Original `HSD_JObjLoadJoint` is now missing 49 GX functions; original
 `Fighter_Create` is missing 223 symbols across graphics, platform services and
 uncompiled game modules. The latter includes unrelated modes/stages retained

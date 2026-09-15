@@ -1,0 +1,2533 @@
+{
+  "date": "2026-09-15",
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "source": {
+      "repository": "https://github.com/doldecomp/melee.git",
+      "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+    },
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+    "units": [
+      "libs/dolphin/src/dolphin/mtx/mtx44.c",
+      "src/MSL/trigf.c",
+      "src/MSL/math_data.c",
+      "src/MSL/float.c",
+      "src/sysdolphin/baselib/mtx.c",
+      "src/sysdolphin/baselib/random.c",
+      "src/sysdolphin/baselib/archive.c",
+      "src/sysdolphin/baselib/memory.c",
+      "src/sysdolphin/baselib/initialize.c",
+      "src/sysdolphin/baselib/objalloc.c",
+      "libs/dolphin/src/dolphin/os/OSAlloc.c",
+      "src/sysdolphin/baselib/fobj.c",
+      "src/sysdolphin/baselib/spline.c",
+      "src/sysdolphin/baselib/aobj.c",
+      "src/sysdolphin/baselib/gobj.c",
+      "src/sysdolphin/baselib/gobjproc.c",
+      "src/sysdolphin/baselib/gobjplink.c",
+      "src/sysdolphin/baselib/gobjgxlink.c",
+      "src/sysdolphin/baselib/gobjobject.c",
+      "src/sysdolphin/baselib/gobjuserdata.c",
+      "src/melee/lb/lbanim.c"
+    ],
+    "portableSource": {
+      "recipeSha256": "f9e0b99eb541590120896da8a347460b839b7ca79a0c4576239249e640a6364a",
+      "files": 2433,
+      "patches": [
+        {
+          "file": "src/melee/ft/ftlib.c",
+          "originalSha256": "5251ea8552762285d99599dda9bf60c59520ef65d8fb162da3cc0afe8cdde2c8",
+          "portableSha256": "861f188fdeaf303f27524f4946a93c997142bdeb1790dc94dfe747a77b6d2d05",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/ft/ftlib.h",
+          "originalSha256": "5b05ee78313ebd6c9e01cbfdfaf64d88acf627d1f968ec5d2ce51db33aa1a884",
+          "portableSha256": "d9bc639e02bfef0810bab7a064185826731cfc131d7a0a6569f939c001e37302",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/gm/gm_1798.c",
+          "originalSha256": "9c2318b49e19a17b9e60aa4ecc006fc7769a2b110763d72e88772bea9931b217",
+          "portableSha256": "47fb9b4a75c4f881abdaf9f5c571ff8804298fe76117e6c19a3577033dc68880",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/gr/grbigblue.c",
+          "originalSha256": "1fdbe230095afaaeca3c2fe7a01a0fd7ffb176f70853d7ea56403bcd5933822d",
+          "portableSha256": "cdeed645e2bf6c3c5cfc85030beee1078bd6ee806aed3f6f567ddd16ad216b32",
+          "adapters": [
+            {
+              "function": "grBigBlue_801E57BC",
+              "adapter": "port_demo_grBigBlue_801E57BC",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grbigblueroute.c",
+          "originalSha256": "705ac331f44216e4a8c7be46a782ff975c50ba26d5ae3d35526bd8bf11caeef4",
+          "portableSha256": "36d90980e0b48d8da2749215b46f1889b9f642728f2c5ee666c7471c285b3f7d",
+          "adapters": [
+            {
+              "function": "grBigBlueRoute_8020B864",
+              "adapter": "port_demo_grBigBlueRoute_8020B864",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grcastle.c",
+          "originalSha256": "05b0b6735cdb173c82027a6f81ffbbc5a54153ff7077ba2ad0b05c2cb3a16796",
+          "portableSha256": "1227afffe7054407f692717e79dc167d23a95efdb8c8d8c7d5e71592dfad810e",
+          "adapters": [
+            {
+              "function": "grCastle_801CD338",
+              "adapter": "port_demo_grCastle_801CD338",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grfigure2.c",
+          "originalSha256": "109ca029120fc06de89d7a6fa99590f3fc5e47eb64e45a01cbb1be8a49d482d1",
+          "portableSha256": "29aed5b25e875232b69cb5afc6bdf4065eea4267d2b0aacb69f65b9e3a120f2a",
+          "adapters": [
+            {
+              "function": "grFigure1_8020E270",
+              "adapter": "port_demo_grFigure1_8020E270",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grfigure3.c",
+          "originalSha256": "8f4c5781f143e22ff876659c0fd024b14994ab8b0bd352776a32a222b9fad36c",
+          "portableSha256": "e5df4a881d1170f01f4df324dff78358266b1831da34bcd7d960e44b108ac35f",
+          "adapters": [
+            {
+              "function": "grFigure3_8020E504",
+              "adapter": "port_demo_grFigure3_8020E504",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grflatzone.c",
+          "originalSha256": "19bcd7aca8f34e737b11fea9c28a936d394589086d637f8eb0052a4d6d19a229",
+          "portableSha256": "fb2f2f103222cd085d403b9af23bd98683d489ab2268db40f734e4052007d09e",
+          "adapters": [
+            {
+              "function": "grFlatzone_80216E74",
+              "adapter": "port_demo_grFlatzone_80216E74",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grfourside.c",
+          "originalSha256": "ec40f8a7a208f05f9eac5ad6b31a976051fb1eced61ef7719a4db248779cc3b0",
+          "portableSha256": "b6c1b8d50e87e84bd0bb329a34e26ff15ad59b2c53a623afff3f57fe84d1f0d2",
+          "adapters": [
+            {
+              "function": "grFourside_801F2D0C",
+              "adapter": "port_demo_grFourside_801F2D0C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grgarden.c",
+          "originalSha256": "36bc38871fb3c20bf7e179ada3528fc921d43e2059de905e3aaefafb08970db1",
+          "portableSha256": "4830506ffe2a917eea66d47c206901239a70e73575b9d35485ca26cfa2eab46e",
+          "adapters": [
+            {
+              "function": "grGarden_80202B6C",
+              "adapter": "port_demo_grGarden_80202B6C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grgreatbay.c",
+          "originalSha256": "8941084ab0ab8670483ed5155879cbb896f08f2015c5ffe8e0057e7e7a7144e5",
+          "portableSha256": "65d4bce4fb43527b556728504eb7409b632dd49d53c4e81b51a0346ad5735d1d",
+          "adapters": [
+            {
+              "function": "grGreatBay_801F423C",
+              "adapter": "port_demo_grGreatBay_801F423C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grgreens.c",
+          "originalSha256": "befff48dd005633080d1d21cfaf8c011d69dcd3a439dce5a86021d9d404dc5d6",
+          "portableSha256": "f688a1b2114824a8c957b22156d261649f37ff6fe8ad0224953689af4e510443",
+          "adapters": [
+            {
+              "function": "grGreens_80213458",
+              "adapter": "port_demo_grGreens_80213458",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grheal.c",
+          "originalSha256": "194391365e32ca0ae40033eeec22e51c7a600ea33c08452a04d87d9ed9712c21",
+          "portableSha256": "b325147adf59702d2a8d821ad411e3f1d8b276b52571cb76222b37b455d2a3e9",
+          "adapters": [
+            {
+              "function": "grHeal_8021EF38",
+              "adapter": "port_demo_grHeal_8021EF38",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grhomerun.c",
+          "originalSha256": "fe1b789fea9ee95a4fd3cb683c2e8197afeea3726d00e308c7f42e333c2a4e0f",
+          "portableSha256": "b638bd0e6e3f9f501622adb613f1750437951a2b4aaaefed0d3e42fa85e2af08",
+          "adapters": [
+            {
+              "function": "grHomeRun_8021C750",
+              "adapter": "port_demo_grHomeRun_8021C750",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/gricemt.c",
+          "originalSha256": "745403896a8b9e00801f238d781039f18256b4d136952d785756a3eac60607e6",
+          "portableSha256": "ab5d1396695d36ad17d97a43b01463ab07ec7c107609cb6291f9becde0b44e38",
+          "adapters": [
+            {
+              "function": "grIceMt_801F6868",
+              "adapter": "port_demo_grIceMt_801F6868",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            },
+            {
+              "function": "fn_801FA4CC",
+              "adapter": "port_route_fn_801FA4CC",
+              "from": "int(int)",
+              "to": "bool(int)",
+              "conversion": "result != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grinishie1.c",
+          "originalSha256": "f5f94ea174a77dbf586ae8a8d29494e8bee9ae6d6128da977350053dadca03a1",
+          "portableSha256": "54985951b666aef31849d47c2908ff48d77d179dc41885b39edf3d95c08df408",
+          "adapters": [
+            {
+              "function": "grInishie1_801FA908",
+              "adapter": "port_demo_grInishie1_801FA908",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grinishie2.c",
+          "originalSha256": "6b31e46633b2d03d370f009663b9c25af27fa3a131778983d6d6d2a0fa6a43b1",
+          "portableSha256": "f0cbcc6620a3cc9ca8cceb9a68b888120ddc18165e8debf9aba5d0e1087baa2f",
+          "adapters": [
+            {
+              "function": "grInishie2_801FCBC0",
+              "adapter": "port_demo_grInishie2_801FCBC0",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grizumi.c",
+          "originalSha256": "8a2fff58356d64f6aa210ffa2573db5d201169d7986ad23753abdf5d6b3383d0",
+          "portableSha256": "a4fa875220d8ed85c7ae07b4c63db237c5670bd0de8de62c10055fdc1d8f3d0a",
+          "adapters": [
+            {
+              "function": "grIzumi_801CBB84",
+              "adapter": "port_demo_grIzumi_801CBB84",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grkinokoroute.c",
+          "originalSha256": "5efb7f0e73e41c365d54bafdbd260814f0043e07b0217f67080b7db4a48b4387",
+          "portableSha256": "3a5c857c8dc2e24c762c9fcdf39df1ec97d2d6c4a73af43eb035e364e19ce02c",
+          "adapters": [
+            {
+              "function": "grKinokoRoute_8020741C",
+              "adapter": "port_demo_grKinokoRoute_8020741C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grkinokoroute.h",
+          "originalSha256": "f0822480c67087dd6fae33a56482e1aeb06b2bb66d73a3745b96117c50a886fe",
+          "portableSha256": "634edfbd9a80201e8bf3be2d61feba0dc99fb38c1404e0252465e8669e67ec06",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/gr/grkongo.c",
+          "originalSha256": "1946eb651be09a8b4bbe464d375f854dc23452e2042cb4873538df416cf430e4",
+          "portableSha256": "3047a6677a8a70b2eebf4a0cf9562af027debe44077a6222f5ba078fa354b081",
+          "adapters": [
+            {
+              "function": "grKongo_801D5238",
+              "adapter": "port_demo_grKongo_801D5238",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grkraid.h",
+          "originalSha256": "e997f34fd060fc84e862913eaff34664383768dc8bdbb7f11ae83beca629fff5",
+          "portableSha256": "c556ad3508f0fc45ae67d3e2eebbc0f5ffa1e536e4d1a8363c1fc9b58f1ce553",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/gr/grmutecity.c",
+          "originalSha256": "21a7e048d646888f523d7302e5b06e5b3baba67e50f495903deccbc89f3bb231",
+          "portableSha256": "ba215ab4c6294cc612c496d106dee5b72adfad187513e324d614ae4c5483f7df",
+          "adapters": [
+            {
+              "function": "grMuteCity_801EFC68",
+              "adapter": "port_demo_grMuteCity_801EFC68",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/groldkongo.c",
+          "originalSha256": "5e925426598de0d6b1d4e04607b994beb7025e4d58001fdb8d9639a2de741120",
+          "portableSha256": "2c9f5410a36c9c741a8549a3d0b59591b23206077a5ff6049057a0d20bf8183f",
+          "adapters": [
+            {
+              "function": "grOldKongo_8020F468",
+              "adapter": "port_demo_grOldKongo_8020F468",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/groldpupupu.c",
+          "originalSha256": "cb57b8d6eb7bcde7a7ad8c5367cddcae52a7b7958210bfd831e97004f4787db0",
+          "portableSha256": "759a6de889b76838b8c91d9c301ae49eddca07a83ba9b90b03d50a32835e01a6",
+          "adapters": [
+            {
+              "function": "grOldPupupu_802107DC",
+              "adapter": "port_demo_grOldPupupu_802107DC",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/groldyoshi.c",
+          "originalSha256": "cbef0a7238a267dea6275510520bed0dbcca61b7b344a3150cd09f8887318aa5",
+          "portableSha256": "0a31cae86a777b9d7cdc0b5b7a49b65d1322dd4507d5e6abf09e5c1e79df6c83",
+          "adapters": [
+            {
+              "function": "grOldYoshi_8020E798",
+              "adapter": "port_demo_grOldYoshi_8020E798",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/gronett.c",
+          "originalSha256": "4ce024bfda6d278f1f5cffffd282d60a8fba6f2e1a0498bf96fb3c43d39f7c5e",
+          "portableSha256": "bb9ab5e2b15f66b15de1de516f11fef6d281495b22110f9e58f87768bee247c6",
+          "adapters": [
+            {
+              "function": "grOnett_801E3734",
+              "adapter": "port_demo_grOnett_801E3734",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grpura.c",
+          "originalSha256": "df0116a2bcda97e62716dc67aca4494e65754d487fbc00395e1d89384dd5b3f5",
+          "portableSha256": "b8eb904517223457bf0d8462c14e183b557427816d52ce877b0d0e2785948adc",
+          "adapters": [
+            {
+              "function": "grPura_80211CFC",
+              "adapter": "port_demo_grPura_80211CFC",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grpushon.c",
+          "originalSha256": "202b2f176bebc1c3c9deb757ef02c2b1e5f90c9fa7c56f901d083be3e1b052ed",
+          "portableSha256": "ce21f2891929bda9aa54af251a4fe54a7b92a809a823c3ca2d511e82e9b9e03e",
+          "adapters": [
+            {
+              "function": "grPushOn_802182C4",
+              "adapter": "port_demo_grPushOn_802182C4",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grrcruise.c",
+          "originalSha256": "b77315a1b8b7ccb57cdf22c8a38d111debe45286aba714b1e943ea1dbb9faf82",
+          "portableSha256": "b61cdbde2bb2695ef574447132f5dd3780e02515c0c61ff07add9efda9966678",
+          "adapters": [
+            {
+              "function": "grRCruise_801FF164",
+              "adapter": "port_demo_grRCruise_801FF164",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grshrine.c",
+          "originalSha256": "49e0a27781b9780012e3193dc32265949da5c71e985e3dbb3245ab940445e613",
+          "portableSha256": "be5a26d8e009897390a8ac4d9171da20882636fb816d374adca4d6f772735c74",
+          "adapters": [
+            {
+              "function": "grShrine_80201C60",
+              "adapter": "port_demo_grShrine_80201C60",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grshrineroute.c",
+          "originalSha256": "fdd56a74ec4d13e46df994291794ac10f1b8bb0235f958992bdf47523a9de065",
+          "portableSha256": "d716c27fbde286a2ed9a48244679557fc8531634d083dc7e14b2dc36cd706fa1",
+          "adapters": [
+            {
+              "function": "grShrineRoute_OnDemoInit",
+              "adapter": "port_demo_grShrineRoute_OnDemoInit",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grstory.c",
+          "originalSha256": "9a2ccbf40514f42eab31f89880c9bda7e69f2aa9043e57b9280d228d80372b5d",
+          "portableSha256": "9a91217f54f7a99b1fcf2dc99bac9b4d4eeac0160a990a66d0d0506267596133",
+          "adapters": [
+            {
+              "function": "grStory_801E302C",
+              "adapter": "port_demo_grStory_801E302C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtclink.c",
+          "originalSha256": "97fa4409d646432880d1ac43c37f626c25e4de9d27bc42b4256b20faf4f67b33",
+          "portableSha256": "be3e8c6b78fadbad5342e39cb19434be10069607dc12f1fa99ee3f4b34b17c9c",
+          "adapters": [
+            {
+              "function": "grTCLink_8021FF44",
+              "adapter": "port_demo_grTCLink_8021FF44",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtdonkey.c",
+          "originalSha256": "8dacb470e853b358def805e6300b53604f75371269d8540a16b7046b0d39052f",
+          "portableSha256": "7c6a8597f26666393c693d897eb027bec7fadf012e56d540c8c8434841f76ee3",
+          "adapters": [
+            {
+              "function": "grTDonkey_80220228",
+              "adapter": "port_demo_grTDonkey_80220228",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtdrmario.c",
+          "originalSha256": "d1a289a1b33bc52d9836d783587b80a18d17675a3df024a82b5e82c1ddcfc35e",
+          "portableSha256": "6bc6de9dbe2765e6a7dbb9dd7d7e14281b52ec0d059bebd4931ef8d317d32b9c",
+          "adapters": [
+            {
+              "function": "grtDrMario_8022050C",
+              "adapter": "port_demo_grtDrMario_8022050C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtemblem.c",
+          "originalSha256": "428977d0784baa77335b18bd364ce98a9f5c9e8680130f43627df5a8d8417afa",
+          "portableSha256": "f6df2c4b3510654b08ac5ccef0a36077e3c456aa9c02b344ef47f5a2a4b15503",
+          "adapters": [
+            {
+              "function": "grTRoy_802243F4",
+              "adapter": "port_demo_grTRoy_802243F4",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtest.c",
+          "originalSha256": "9f7a586922f347751655d7bc34e71fe215c2b993f5f3479f034a0bec139b94d0",
+          "portableSha256": "e4124300e508d985e6fe8e2c1425f4752845366bde4388296936a37aa4981ffa",
+          "adapters": [
+            {
+              "function": "grTest_80206E2C",
+              "adapter": "port_demo_grTest_80206E2C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtfalco.c",
+          "originalSha256": "b99a7d6bbf5cddf3b82e547ee2b86226c928f626ae39193bcf7dfa4b83318392",
+          "portableSha256": "c33d4926621272dfa5b57b23205a57cc340f008aa5407cacba87d01e613bbfd8",
+          "adapters": [
+            {
+              "function": "grTFalco_802207F0",
+              "adapter": "port_demo_grTFalco_802207F0",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtfox.c",
+          "originalSha256": "dfc8a68d49f6da2a7b8471d15208d3651e14d78450aec4c37adfcb63f17cf026",
+          "portableSha256": "056c0479f43e10fa9566e666c2747609bb4add53e343a9ec122bd335e6eab7bb",
+          "adapters": [
+            {
+              "function": "grTFox_80220B80",
+              "adapter": "port_demo_grTFox_80220B80",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtgamewatch.c",
+          "originalSha256": "93ed14af81f631bbdc34aa829ca4d14edf13e64c4fb584fd0fb0f15b609134ac",
+          "portableSha256": "93d2db9d1d9a32773fa3b4bd25d3ee0af28284b5781f889e149bda11fad4687b",
+          "adapters": [
+            {
+              "function": "grTGameWatch_80224110",
+              "adapter": "port_demo_grTGameWatch_80224110",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtganon.c",
+          "originalSha256": "c2127ab77006b4ee33bba116154d0bc00a28ef4b7adeb9fc86f526a5ff76c0c5",
+          "portableSha256": "f0c2d8dd898aab6fb4c3f50c4a0e2b209606b0f165cde3ffb4ba2ade66cdd927",
+          "adapters": [
+            {
+              "function": "grTGanon_802246D8",
+              "adapter": "port_demo_grTGanon_802246D8",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grticeclimber.c",
+          "originalSha256": "513f958314599ec64be86c972d714ea1f2905f64387768ee74248a827c295976",
+          "portableSha256": "5f3263f31d60e818301461bfce9ae3a837dbd8d0a297d8f73fe219a6d18a7585",
+          "adapters": [
+            {
+              "function": "grTIceClimber_80220F10",
+              "adapter": "port_demo_grTIceClimber_80220F10",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtkirby.c",
+          "originalSha256": "b4b9cf98d629c45a34d712b6b60de072597393bf56067752e7b079f8e703258b",
+          "portableSha256": "d6755b9dba5b3dbb6dbc69c4e9223800296e46f3e2856473f6b2e40d2dddd29a",
+          "adapters": [
+            {
+              "function": "grTKirby_80221364",
+              "adapter": "port_demo_grTKirby_80221364",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtkoopa.c",
+          "originalSha256": "a25e7c582814568d82ebc1b276e4c9b31a169c9663faf4d5c497a0c4c4d114f9",
+          "portableSha256": "3093303fd98daaa4c82e27811f0e1e35c40e3c84514504e0b2ce2b0464b9dd6e",
+          "adapters": [
+            {
+              "function": "grTKoopa_80221648",
+              "adapter": "port_demo_grTKoopa_80221648",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtlink.c",
+          "originalSha256": "c1e0bdd8fc86a88a19b9fb8280d039cdc8846a53fd87f71e4edf680c38604fc7",
+          "portableSha256": "1f4ba8899adf94a9b9569d514bc05419126816bc4b6c939914b1ff3c48fc2a53",
+          "adapters": [
+            {
+              "function": "grTLink_8022192C",
+              "adapter": "port_demo_grTLink_8022192C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtluigi.c",
+          "originalSha256": "8ccd4e01524c96f342e97ad52c391adc58694b6e385bab209d68dc6fcae79e45",
+          "portableSha256": "2466931114b97e12bbd82e4124e9ddf61362b5eff22702de9b4caa846091edd7",
+          "adapters": [
+            {
+              "function": "grTLuigi_80221C10",
+              "adapter": "port_demo_grTLuigi_80221C10",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtmario.c",
+          "originalSha256": "fd875751c3065e02898ae2dd7220e7e4419dbdbb52f2fe9ce31b7b00c6ffbdbe",
+          "portableSha256": "3fec81ed1da952438370919ee97c8fc73e1d27c76e511cf90b1f7f2b2b56e069",
+          "adapters": [
+            {
+              "function": "grTMario_8021F840",
+              "adapter": "port_demo_grTMario_8021F840",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtmars.c",
+          "originalSha256": "296816e0c8a1ae0dc5891508393457397d58a4dd9dcd8604d1241677a97fe609",
+          "portableSha256": "b7380e7391c910b51f03536aedd280cc8a63bfdbf5759d2fa023f14b407d4a1d",
+          "adapters": [
+            {
+              "function": "grTMars_80221EF4",
+              "adapter": "port_demo_grTMars_80221EF4",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtmewtwo.c",
+          "originalSha256": "d39907a77ee5cc1f643ae7864ba6dd4bd55ca762ee7d1ea77bbb886e6a6b3ee2",
+          "portableSha256": "db68a6c16e223c54f8f8a09cc8c87a40020b5fdb8e8bb816cb375b386f793a7b",
+          "adapters": [
+            {
+              "function": "grTMewtwo_802221D8",
+              "adapter": "port_demo_grTMewtwo_802221D8",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtness.c",
+          "originalSha256": "9b0ef0af2bcf926d573ded33e1cea38068df4d8738feaa7f3280b344b6cf45aa",
+          "portableSha256": "138e54f37dbf57d594757e6bc77af4b6b48da53ce9ffbb3621f16d063e495765",
+          "adapters": [
+            {
+              "function": "grTNess_802225D0",
+              "adapter": "port_demo_grTNess_802225D0",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtpeach.c",
+          "originalSha256": "93ab9f5967d838cdcf2c42580a421cfd5e65d69df39d2726894b999b573a328d",
+          "portableSha256": "feed25d16748aada4d2e52de0eecc5d7a36707fa1cadebc6f8b5b11ef7ef293c",
+          "adapters": [
+            {
+              "function": "grTPeach_802228B4",
+              "adapter": "port_demo_grTPeach_802228B4",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtpichu.c",
+          "originalSha256": "85321f1dce0f34d0f9cfe3b13a96715c369b2754bb0204c3106b78009a47910e",
+          "portableSha256": "86af0ce19b452f405c3f58470dc7e531526b50367bf0b419d7b87fb0cb049967",
+          "adapters": [
+            {
+              "function": "grTPichu_80222B98",
+              "adapter": "port_demo_grTPichu_80222B98",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtpikachu.c",
+          "originalSha256": "5c0804ec79e31ec8cfcc92f625d0052627a658d3dd00ea744250a75a888b2de8",
+          "portableSha256": "7e5a058cadbbb22b20951e8f8ae531fc8760c024a8688f3bd456179d3e2abf16",
+          "adapters": [
+            {
+              "function": "grTPikachu_80222E7C",
+              "adapter": "port_demo_grTPikachu_80222E7C",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtpurin.c",
+          "originalSha256": "f8e3da38df49fcfb211eeafaa6ac925a46016bbaf2db8d96986d0890e86f9e63",
+          "portableSha256": "2ba262eb29d812cd73964c2b596bba5d79ee89575454c062df104ddbf5917ee8",
+          "adapters": [
+            {
+              "function": "grTPurin_80223160",
+              "adapter": "port_demo_grTPurin_80223160",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtseak.c",
+          "originalSha256": "eed1dad8eab730a999bd4e236bf1c323a1f52ffe9305520de5add20cd4a6c9ff",
+          "portableSha256": "826f1342c7e9df9b7a4fb383ae642fef4626df5219d4376a52e87e6a433ef940",
+          "adapters": [
+            {
+              "function": "grTSeak_OnDemoInit",
+              "adapter": "port_demo_grTSeak_OnDemoInit",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtyoshi.c",
+          "originalSha256": "98ae795bb18d54085d1a0cd68a14597f0e5e229891a98ea6eaa093fa7a9f3b72",
+          "portableSha256": "5d79f7b9030f565301e8566d146b507937f1e811c57013f5bfb99ad3f3239347",
+          "adapters": [
+            {
+              "function": "grTYoshi_OnDemoInit",
+              "adapter": "port_demo_grTYoshi_OnDemoInit",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grtzelda.c",
+          "originalSha256": "0c69429c18928e80fb7fdf0a7f66c5204a61e6711c2a8f25a30dcf7d3f65df34",
+          "portableSha256": "c40a90d2bdb411744da590e0a6b7de1dacbe920d6fc4b5e882cf84d31dfb8073",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/gr/grvenom.c",
+          "originalSha256": "790b75c4ecd40a2fa60bda77aa80a5332aa18c6629ae15d15bb770ed87823cef",
+          "portableSha256": "b64079994163eca10a901a8af1adae6882fc41d628701efdf3a8f06a136fb493",
+          "adapters": [
+            {
+              "function": "grVenom_80203B14",
+              "adapter": "port_demo_grVenom_80203B14",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/gryorster.c",
+          "originalSha256": "49ae4a1b5571f11476f833097b889c41e8657d6697b20633f384f22dd4355784",
+          "portableSha256": "26a15362d4784fae03b3835973c5f9c4270fbd305f10d044f0af217e594b6693",
+          "adapters": [
+            {
+              "function": "grYorster_80201FA0",
+              "adapter": "port_demo_grYorster_80201FA0",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grzebes.c",
+          "originalSha256": "862934374962ac36b29d442d9f1906624c0acc2d923ad4ed1aadd75b45a81081",
+          "portableSha256": "18084982b49f70eccefd4d1cbda825cf6afc431373d42da6976a87cadd6ea7b7",
+          "adapters": [
+            {
+              "function": "grZebes_801D84A0",
+              "adapter": "port_demo_grZebes_801D84A0",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/gr/grzebesroute.c",
+          "originalSha256": "177d5e9705f1930cc1fdd2efa235c1473b18fb730d00522f8f11a4039a641163",
+          "portableSha256": "d061b1edd75a5a83c72d1a2424b8e55a3c249d6704e1269c0c22acd3bc313841",
+          "adapters": [
+            {
+              "function": "grZebesRoute_8020B160",
+              "adapter": "port_demo_grZebesRoute_8020B160",
+              "from": "void(bool)",
+              "to": "void(int)",
+              "conversion": "argument != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/it/kinds/itmewtwodisable.c",
+          "originalSha256": "4159f84f99a29589531df3ee66363b2c4563cb11595d086d36172758687fb6e3",
+          "portableSha256": "7dfc307836b56278c8ed67118c54085ce83d8af4ce6898803cca219a7b860169",
+          "adapters": [
+            {
+              "function": "itMewtwodisable_UnkMotion0_Coll",
+              "adapter": "port_disable_collision",
+              "from": "int(Item_GObj*)",
+              "to": "bool(Item_GObj*)",
+              "conversion": "result != 0"
+            }
+          ]
+        },
+        {
+          "file": "src/melee/lb/lbcardnew.h",
+          "originalSha256": "ba314c8f60d6b654bea0bb93ec0519ed2c94277ccf41d17f60cf922b949b7cce",
+          "portableSha256": "c5c48ba2f6b9beacd3154b004fb11e3221b69380f1659acea63f3f4edaec24bb",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/mn/mnhyaku.c",
+          "originalSha256": "19c086604016a2f8fa47125f8b9aeb942f9e8529764fcbea2b352d241e4b7a1a",
+          "portableSha256": "92ad2d15106dab7e40733a39118ffa13da268ccc7ef063556aac88e4e76a4c01",
+          "adapters": []
+        },
+        {
+          "file": "src/melee/mn/mnmainrule.c",
+          "originalSha256": "50b4989e7031bf236d445991750d1fd5f62f4f495bf58b83309cdd337d8c8c5e",
+          "portableSha256": "669d3ea6a162f26b6eb3749514321f635d78b128c8a48f127d3bfb446ce4c642",
+          "adapters": []
+        }
+      ],
+      "callbackDiagnosticSuppressed": false,
+      "functionPointerCasts": false
+    },
+    "selectedSdkFunctions": [
+      "MTXRotRad",
+      "C_MTXLookAt"
+    ],
+    "selectedHsdFunctions": [
+      "MakeTextureMtx"
+    ],
+    "arithmeticReference": {
+      "repository": "https://github.com/dolphin-emu/dolphin",
+      "commit": "e22551eae1c84a7e4d0b6a5c519ef4ed4ef69df1",
+      "license": "GPL-2.0-or-later",
+      "purpose": "Gekko reciprocal and reciprocal-square-root arithmetic helpers",
+      "files": [
+        {
+          "file": "Common/FloatUtils.cpp",
+          "sha256": "e7bcd6a48701a361a84a9c0dfbf2ddb0c5c5219a1370838c05f99a5e8dff9dbb"
+        },
+        {
+          "file": "Common/FloatUtils.h",
+          "sha256": "8aad8c06eac7e14ac2876ddd56edc0562d28cd8c906ca6bfd9c72808810dbbe5"
+        },
+        {
+          "file": "Common/CommonTypes.h",
+          "sha256": "b714ae37337b4f9cd6e1863073bdd92fda8648e606c91657b104fdc856199b94"
+        }
+      ]
+    },
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-Wl,--fatal-warnings",
+      "-fno-builtin-sinf",
+      "-fno-builtin-cosf",
+      "-fno-builtin-tanf",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ],
+    "wasmBytes": 162170,
+    "wasmSha256": "56baae9f1e454f489e8ab574bed283c999ab32133e9722fbffee3f84ffe83f88",
+    "imports": [
+      {
+        "module": "env",
+        "name": "_abort_js",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_close",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_write",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_seek",
+        "kind": "function"
+      },
+      {
+        "module": "env",
+        "name": "emscripten_resize_heap",
+        "kind": "function"
+      }
+    ],
+    "sceneBringup": {
+      "files": [
+        "/home/yongeb/melee_online-720p60/engines/browser-native/scene.c",
+        "/home/yongeb/melee_online-720p60/dist/native-port/scene-gx-guards.c",
+        "/home/yongeb/melee_online-720p60/dist/native-port/audit/scene-hsd.a"
+      ],
+      "unavailableGX": [
+        "GXBegin",
+        "GXCallDisplayList",
+        "GXClearVtxDesc",
+        "GXInitLightAttn",
+        "GXInitLightColor",
+        "GXInitLightDir",
+        "GXInitTexObj",
+        "GXInitTexObjCI",
+        "GXInitTexObjLOD",
+        "GXInitTlutObj",
+        "GXLoadLightObjImm",
+        "GXLoadNrmMtxImm",
+        "GXLoadPosMtxImm",
+        "GXLoadTexMtxImm",
+        "GXLoadTexObj",
+        "GXLoadTlut",
+        "GXPixModeSync",
+        "GXSetAlphaCompare",
+        "GXSetAlphaUpdate",
+        "GXSetArray",
+        "GXSetBlendMode",
+        "GXSetChanAmbColor",
+        "GXSetChanCtrl",
+        "GXSetChanMatColor",
+        "GXSetColorUpdate",
+        "GXSetCullMode",
+        "GXSetCurrentMtx",
+        "GXSetDither",
+        "GXSetDstAlpha",
+        "GXSetNumChans",
+        "GXSetNumTevStages",
+        "GXSetNumTexGens",
+        "GXSetTevAlphaIn",
+        "GXSetTevAlphaOp",
+        "GXSetTevColor",
+        "GXSetTevColorIn",
+        "GXSetTevColorOp",
+        "GXSetTevColorS10",
+        "GXSetTevKAlphaSel",
+        "GXSetTevKColor",
+        "GXSetTevKColorSel",
+        "GXSetTevOp",
+        "GXSetTevOrder",
+        "GXSetTevSwapMode",
+        "GXSetTexCoordGen2",
+        "GXSetVtxAttrFmt",
+        "GXSetVtxDesc",
+        "GXSetZCompLoc",
+        "GXSetZMode"
+      ],
+      "auditOptimization": "-O0",
+      "renderingReady": false
+    },
+    "playable": false,
+    "gameplayParity": false,
+    "performanceCertified": false
+  },
+  "compile": {
+    "total": 1130,
+    "compiled": 1047,
+    "failed": 83,
+    "patchedFiles": 67,
+    "typedAdapters": 59,
+    "callbackDiagnosticSuppressed": false
+  },
+  "link": [
+    {
+      "entry": "HSD_JObjLoadJoint",
+      "linked": false,
+      "missingCount": 49,
+      "missing": [
+        "GXBegin",
+        "GXCallDisplayList",
+        "GXClearVtxDesc",
+        "GXInitLightAttn",
+        "GXInitLightColor",
+        "GXInitLightDir",
+        "GXInitTexObj",
+        "GXInitTexObjCI",
+        "GXInitTexObjLOD",
+        "GXInitTlutObj",
+        "GXLoadLightObjImm",
+        "GXLoadNrmMtxImm",
+        "GXLoadPosMtxImm",
+        "GXLoadTexMtxImm",
+        "GXLoadTexObj",
+        "GXLoadTlut",
+        "GXPixModeSync",
+        "GXSetAlphaCompare",
+        "GXSetAlphaUpdate",
+        "GXSetArray",
+        "GXSetBlendMode",
+        "GXSetChanAmbColor",
+        "GXSetChanCtrl",
+        "GXSetChanMatColor",
+        "GXSetColorUpdate",
+        "GXSetCullMode",
+        "GXSetCurrentMtx",
+        "GXSetDither",
+        "GXSetDstAlpha",
+        "GXSetNumChans",
+        "GXSetNumTevStages",
+        "GXSetNumTexGens",
+        "GXSetTevAlphaIn",
+        "GXSetTevAlphaOp",
+        "GXSetTevColor",
+        "GXSetTevColorIn",
+        "GXSetTevColorOp",
+        "GXSetTevColorS10",
+        "GXSetTevKAlphaSel",
+        "GXSetTevKColor",
+        "GXSetTevKColorSel",
+        "GXSetTevOp",
+        "GXSetTevOrder",
+        "GXSetTevSwapMode",
+        "GXSetTexCoordGen2",
+        "GXSetVtxAttrFmt",
+        "GXSetVtxDesc",
+        "GXSetZCompLoc",
+        "GXSetZMode"
+      ],
+      "abiMismatches": [],
+      "otherErrors": []
+    },
+    {
+      "entry": "Fighter_Create",
+      "linked": false,
+      "missingCount": 149,
+      "missing": [
+        "AISetStreamVolLeft",
+        "AISetStreamVolRight",
+        "ARQPostRequest",
+        "AXAcquireVoice",
+        "AXFreeVoice",
+        "AXSetVoiceAddr",
+        "AXSetVoiceAdpcm",
+        "AXSetVoiceCurrentAddr",
+        "AXSetVoiceEndAddr",
+        "AXSetVoiceItdOn",
+        "AXSetVoiceItdTarget",
+        "AXSetVoiceLoopAddr",
+        "AXSetVoiceMix",
+        "AXSetVoicePriority",
+        "AXSetVoiceSrc",
+        "AXSetVoiceSrcRatio",
+        "AXSetVoiceState",
+        "AXSetVoiceVe",
+        "CARDCheckAsync",
+        "CARDClose",
+        "CARDCreateAsync",
+        "CARDDeleteAsync",
+        "CARDFastOpen",
+        "CARDFormatAsync",
+        "CARDFreeBlocks",
+        "CARDGetStatus",
+        "CARDGetXferredBytes",
+        "CARDMountAsync",
+        "CARDOpen",
+        "CARDProbeEx",
+        "CARDRead",
+        "CARDReadAsync",
+        "CARDRenameAsync",
+        "CARDSetStatusAsync",
+        "CARDUnmount",
+        "CARDWrite",
+        "CARDWriteAsync",
+        "DCFlushRange",
+        "DCInvalidateRange",
+        "DCStoreRange",
+        "DVDClose",
+        "DVDConvertPathToEntrynum",
+        "DVDFastOpen",
+        "DVDGetCurrentDiskID",
+        "DVDGetDriveStatus",
+        "DVDReadAsyncPrio",
+        "GXBegin",
+        "GXCallDisplayList",
+        "GXClearVtxDesc",
+        "GXCopyDisp",
+        "GXCopyTex",
+        "GXGetProjectionv",
+        "GXGetTexBufferSize",
+        "GXGetViewportv",
+        "GXInitFogAdjTable",
+        "GXInitLightAttn",
+        "GXInitLightColor",
+        "GXInitLightDir",
+        "GXInitLightDistAttn",
+        "GXInitLightPos",
+        "GXInitLightSpot",
+        "GXInitTexObj",
+        "GXInitTexObjCI",
+        "GXInitTexObjLOD",
+        "GXInitTlutObj",
+        "GXInvalidateTexAll",
+        "GXInvalidateVtxCache",
+        "GXLoadLightObjImm",
+        "GXLoadNrmMtxImm",
+        "GXLoadPosMtxImm",
+        "GXLoadTexMtxImm",
+        "GXLoadTexObj",
+        "GXLoadTlut",
+        "GXPixModeSync",
+        "GXProject",
+        "GXSetAlphaCompare",
+        "GXSetAlphaUpdate",
+        "GXSetArray",
+        "GXSetBlendMode",
+        "GXSetChanAmbColor",
+        "GXSetChanCtrl",
+        "GXSetChanMatColor",
+        "GXSetColorUpdate",
+        "GXSetCopyClamp",
+        "GXSetCopyClear",
+        "GXSetCopyFilter",
+        "GXSetCullMode",
+        "GXSetCurrentMtx",
+        "GXSetDispCopyDst",
+        "GXSetDispCopyGamma",
+        "GXSetDispCopySrc",
+        "GXSetDispCopyYScale",
+        "GXSetDither",
+        "GXSetDrawDone",
+        "GXSetDstAlpha",
+        "GXSetFieldMode",
+        "GXSetFog",
+        "GXSetFogRangeAdj",
+        "GXSetIndTexCoordScale",
+        "GXSetIndTexMtx",
+        "GXSetIndTexOrder",
+        "GXSetLineWidth",
+        "GXSetNumChans",
+        "GXSetNumIndStages",
+        "GXSetNumTevStages",
+        "GXSetNumTexGens",
+        "GXSetPixelFmt",
+        "GXSetPointSize",
+        "GXSetProjection",
+        "GXSetScissor",
+        "GXSetTevAlphaIn",
+        "GXSetTevAlphaOp",
+        "GXSetTevClampMode",
+        "GXSetTevColor",
+        "GXSetTevColorIn",
+        "GXSetTevColorOp",
+        "GXSetTevColorS10",
+        "GXSetTevDirect",
+        "GXSetTevIndirect",
+        "GXSetTevKAlphaSel",
+        "GXSetTevKColor",
+        "GXSetTevKColorSel",
+        "GXSetTevOp",
+        "GXSetTevOrder",
+        "GXSetTevSwapMode",
+        "GXSetTexCoordGen2",
+        "GXSetTexCopyDst",
+        "GXSetTexCopySrc",
+        "GXSetViewport",
+        "GXSetViewportJitter",
+        "GXSetVtxAttrFmt",
+        "GXSetVtxDesc",
+        "GXSetZCompLoc",
+        "GXSetZMode",
+        "GXSetZTexture",
+        "GXWaitDrawDone",
+        "HSD_SisLib_FontAtlas",
+        "MTXLightPerspective",
+        "OSDisableInterrupts",
+        "OSGetTime",
+        "OSResetSystem",
+        "OSRestoreInterrupts",
+        "OSTicksToCalendarTime",
+        "VIFlush",
+        "VIGetNextField",
+        "VISetBlack",
+        "VISetPostRetraceCallback",
+        "VISetPreRetraceCallback",
+        "VIWaitForRetrace"
+      ],
+      "abiMismatches": [],
+      "otherErrors": []
+    }
+  ],
+  "scene": {
+    "passed": true,
+    "models": [
+      {
+        "name": "PlMrNr.dat",
+        "passes": [
+          {
+            "nodes": 61,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33463008
+          },
+          {
+            "nodes": 61,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33461952
+          },
+          {
+            "nodes": 61,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33461952
+          }
+        ],
+        "metrics": [
+          1301.1817443219575,
+          -1536.6561237301103,
+          0,
+          59,
+          5959,
+          19742,
+          68,
+          257.0000007264316
+        ]
+      },
+      {
+        "name": "PlFxNr.dat",
+        "passes": [
+          {
+            "nodes": 73,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33430528
+          },
+          {
+            "nodes": 73,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33429472
+          },
+          {
+            "nodes": 73,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33429472
+          }
+        ],
+        "metrics": [
+          1532.6940004247099,
+          -2515.592638283153,
+          0,
+          77,
+          8201.054443359375,
+          27338,
+          91,
+          388.0000005438924
+        ]
+      },
+      {
+        "name": "PlCaNr.dat",
+        "passes": [
+          {
+            "nodes": 63,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33423136
+          },
+          {
+            "nodes": 63,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33423136
+          },
+          {
+            "nodes": 63,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33423136
+          }
+        ],
+        "metrics": [
+          1466.436625456279,
+          -3035.738566733082,
+          0,
+          79,
+          8218.40000000596,
+          38400,
+          98,
+          357.00000015832484
+        ]
+      },
+      {
+        "name": "PlDkNr.dat",
+        "passes": [
+          {
+            "nodes": 75,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33422720
+          },
+          {
+            "nodes": 75,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33422720
+          },
+          {
+            "nodes": 75,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33422720
+          }
+        ],
+        "metrics": [
+          2434.7793848606057,
+          -3337.95645378888,
+          0,
+          37,
+          3737,
+          22056,
+          61,
+          342.00000346824527
+        ]
+      },
+      {
+        "name": "PlKbNr.dat",
+        "passes": [
+          {
+            "nodes": 46,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33353632
+          },
+          {
+            "nodes": 46,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33352576
+          },
+          {
+            "nodes": 46,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33352576
+          }
+        ],
+        "metrics": [
+          913.3066755278658,
+          -626.559807059064,
+          0,
+          42,
+          4295.636184692383,
+          13518,
+          111,
+          791.0000075763091
+        ]
+      },
+      {
+        "name": "PlKpNr.dat",
+        "passes": [
+          {
+            "nodes": 76,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 76,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 76,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          }
+        ],
+        "metrics": [
+          2339.747347494264,
+          -5055.018030559946,
+          0,
+          115,
+          15455,
+          44892,
+          130,
+          337.00000047683716
+        ]
+      },
+      {
+        "name": "PlLkNr.dat",
+        "passes": [
+          {
+            "nodes": 75,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 75,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 75,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          }
+        ],
+        "metrics": [
+          1459.2118576055937,
+          -2304.719952290018,
+          0,
+          95,
+          9495,
+          26096,
+          99,
+          243.00000036507845
+        ]
+      },
+      {
+        "name": "PlSkNr.dat",
+        "passes": [
+          {
+            "nodes": 58,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 58,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 58,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          }
+        ],
+        "metrics": [
+          1171.6183951500038,
+          -1554.3552166083246,
+          0,
+          63,
+          6363,
+          18738,
+          71,
+          217.0000002682209
+        ]
+      },
+      {
+        "name": "PlNsNr.dat",
+        "passes": [
+          {
+            "nodes": 63,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 63,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          },
+          {
+            "nodes": 63,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33313344
+          }
+        ],
+        "metrics": [
+          1238.4459474329287,
+          -1264.064540334679,
+          0,
+          70,
+          7070,
+          29642,
+          77,
+          209.0000002346933
+        ]
+      },
+      {
+        "name": "PlPeNr.dat",
+        "passes": [
+          {
+            "nodes": 114,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 114,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 114,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          }
+        ],
+        "metrics": [
+          2792.3006693552247,
+          153.5922175377416,
+          0,
+          85,
+          8123.899999976158,
+          20603,
+          105,
+          312.00000101327896
+        ]
+      },
+      {
+        "name": "PlPpNr.dat",
+        "passes": [
+          {
+            "nodes": 49,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 49,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 49,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          }
+        ],
+        "metrics": [
+          908.5595462688142,
+          -842.8602796679661,
+          0,
+          43,
+          3863,
+          17054,
+          45,
+          161.99999995157123
+        ]
+      },
+      {
+        "name": "PlNnNr.dat",
+        "passes": [
+          {
+            "nodes": 49,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 49,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 49,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          }
+        ],
+        "metrics": [
+          908.2896171328251,
+          -842.382264066007,
+          0,
+          43,
+          3863,
+          17054,
+          45,
+          161.99999995157123
+        ]
+      },
+      {
+        "name": "PlPkNr.dat",
+        "passes": [
+          {
+            "nodes": 53,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 53,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 53,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          }
+        ],
+        "metrics": [
+          1198.1449006271778,
+          -750.8640174136963,
+          0,
+          26,
+          2626,
+          4700,
+          52,
+          330.00000075250864
+        ]
+      },
+      {
+        "name": "PlPrNr.dat",
+        "passes": [
+          {
+            "nodes": 50,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 50,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          },
+          {
+            "nodes": 50,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33308032
+          }
+        ],
+        "metrics": [
+          1143.4802457115875,
+          -972.2259069664779,
+          0,
+          14,
+          1414,
+          2902,
+          24,
+          151.00000012665987
+        ]
+      },
+      {
+        "name": "PlSsNr.dat",
+        "passes": [
+          {
+            "nodes": 60,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33305920
+          },
+          {
+            "nodes": 60,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33305920
+          },
+          {
+            "nodes": 60,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33305920
+          }
+        ],
+        "metrics": [
+          1341.1815533150848,
+          -4059.667237684649,
+          0,
+          95,
+          15053.445740103722,
+          28632,
+          106,
+          239.00000029802322
+        ]
+      },
+      {
+        "name": "PlYsNr.dat",
+        "passes": [
+          {
+            "nodes": 70,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33305920
+          },
+          {
+            "nodes": 70,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33305920
+          },
+          {
+            "nodes": 70,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33305920
+          }
+        ],
+        "metrics": [
+          1992.4585642664952,
+          -1266.4145385848824,
+          0,
+          40,
+          4020,
+          18076,
+          76,
+          501.0000019799918
+        ]
+      },
+      {
+        "name": "PlZdNr.dat",
+        "passes": [
+          {
+            "nodes": 118,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 118,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 118,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          2813.7929975002203,
+          -9.093739267697401,
+          0,
+          55,
+          6035,
+          14688,
+          79,
+          394.00000028684735
+        ]
+      },
+      {
+        "name": "PlLgNr.dat",
+        "passes": [
+          {
+            "nodes": 61,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 61,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 61,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          1301.170407982344,
+          -1527.8117203322763,
+          0,
+          53,
+          5353,
+          18779,
+          65,
+          261.0000004507601
+        ]
+      },
+      {
+        "name": "PlMtNr.dat",
+        "passes": [
+          {
+            "nodes": 68,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 68,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 68,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          1431.7559690438861,
+          -1261.3824791732013,
+          0,
+          42,
+          10242,
+          14308,
+          46,
+          155.0000000372529
+        ]
+      },
+      {
+        "name": "PlMsNr.dat",
+        "passes": [
+          {
+            "nodes": 90,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 90,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 90,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          1502.3486568439332,
+          -4136.303163110784,
+          0,
+          85,
+          10685,
+          27535,
+          105,
+          387.00000020861626
+        ]
+      },
+      {
+        "name": "PlGwNr.dat",
+        "passes": [
+          {
+            "nodes": 53,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 53,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 53,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          1096.0876986097846,
+          -790.9531414931157,
+          0,
+          116,
+          11716,
+          0,
+          129,
+          269.00000093877316
+        ]
+      },
+      {
+        "name": "PlDrNr.dat",
+        "passes": [
+          {
+            "nodes": 86,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 86,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 86,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          1865.3440621992295,
+          -1351.9028730893624,
+          0,
+          58,
+          5958,
+          18136,
+          72,
+          266.000000461936
+        ]
+      },
+      {
+        "name": "PlClNr.dat",
+        "passes": [
+          {
+            "nodes": 79,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 79,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 79,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          1540.1678091761291,
+          -2355.490510144696,
+          0,
+          83,
+          8383,
+          23600,
+          85,
+          218.000000461936
+        ]
+      },
+      {
+        "name": "PlPcNr.dat",
+        "passes": [
+          {
+            "nodes": 46,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 46,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          },
+          {
+            "nodes": 46,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33304512
+          }
+        ],
+        "metrics": [
+          1308.0981565901584,
+          -905.767629331036,
+          0,
+          37,
+          3737,
+          8882,
+          39,
+          98.00000017508864
+        ]
+      },
+      {
+        "name": "PlFeNr.dat",
+        "passes": [
+          {
+            "nodes": 92,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          },
+          {
+            "nodes": 92,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          },
+          {
+            "nodes": 92,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          }
+        ],
+        "metrics": [
+          1555.3057489288308,
+          -4439.854302641466,
+          0,
+          95,
+          9635,
+          37655,
+          121,
+          423.0000000447035
+        ]
+      },
+      {
+        "name": "PlGnNr.dat",
+        "passes": [
+          {
+            "nodes": 84,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          },
+          {
+            "nodes": 84,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          },
+          {
+            "nodes": 84,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          }
+        ],
+        "metrics": [
+          1455.9651781526745,
+          -3554.503255197813,
+          0,
+          90,
+          6720.281930565834,
+          28125,
+          101,
+          329.00000005215406
+        ]
+      },
+      {
+        "name": "PlFcNr.dat",
+        "passes": [
+          {
+            "nodes": 67,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          },
+          {
+            "nodes": 67,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          },
+          {
+            "nodes": 67,
+            "maxMatrixError": 0,
+            "liveAfterDestroy": 0,
+            "heapFree": 33303456
+          }
+        ],
+        "metrics": [
+          1416.9872071359432,
+          -1612.1316397234941,
+          0,
+          56,
+          5656,
+          16694,
+          78,
+          359.00000051409006
+        ]
+      }
+    ],
+    "playable": false,
+    "gameplayParity": false,
+    "performanceMeasured": false,
+    "limitations": "Real HSD class loading, bind matrices, envelope reference resolution and destruction; no combat or HSD GPU execution",
+    "animations": {
+      "passed": true,
+      "clips": [
+        {
+          "name": "PlMrNr.dat",
+          "animation": "PlyMario5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 52,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlMrNr.dat",
+          "animation": "PlyMario5K_Share_ACTION_Appeal_figatree",
+          "type": 0,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlFxNr.dat",
+          "animation": "PlyFox5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlCaNr.dat",
+          "animation": "PlyCaptain5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 62,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlDkNr.dat",
+          "animation": "PlyDonkey5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlKbNr.dat",
+          "animation": "PlyKirby5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlKpNr.dat",
+          "animation": "PlyKoopa5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlLkNr.dat",
+          "animation": "PlyLink5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlSkNr.dat",
+          "animation": "PlySeak5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlNsNr.dat",
+          "animation": "PlyNess5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlPeNr.dat",
+          "animation": "PlyPeach5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlPpNr.dat",
+          "animation": "PlyPopo5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlNnNr.dat",
+          "animation": "PlyNana5K_Share_ACTION_SpecialAirS2_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlPkNr.dat",
+          "animation": "PlyPikachu5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlPrNr.dat",
+          "animation": "PlyPurin5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlSsNr.dat",
+          "animation": "PlySamus5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_AttackAirB_figatree",
+          "type": 0,
+          "frames": 42,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_AttackAirF_figatree",
+          "type": 0,
+          "frames": 52,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_AttackAirHi_figatree",
+          "type": 0,
+          "frames": 42,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_AttackAirLw_figatree",
+          "type": 0,
+          "frames": 62,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_AttackAirN_figatree",
+          "type": 0,
+          "frames": 50,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_LandingAirB_figatree",
+          "type": 0,
+          "frames": 32,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_LandingAirF_figatree",
+          "type": 0,
+          "frames": 32,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_LandingAirHi_figatree",
+          "type": 0,
+          "frames": 32,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_LandingAirLw_figatree",
+          "type": 0,
+          "frames": 32,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlYsNr.dat",
+          "animation": "PlyYoshi5K_Share_ACTION_LandingAirN_figatree",
+          "type": 0,
+          "frames": 32,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlZdNr.dat",
+          "animation": "PlyZelda5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlLgNr.dat",
+          "animation": "PlyLuigi5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 62,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlMtNr.dat",
+          "animation": "PlyMewtwo5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlMsNr.dat",
+          "animation": "PlyMars5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlGwNr.dat",
+          "animation": "PlyGamewatch5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 62,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlDrNr.dat",
+          "animation": "PlyDrmario5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 62,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlClNr.dat",
+          "animation": "PlyClink5K_Share_ACTION_Wait_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlPcNr.dat",
+          "animation": "PlyPichu5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlFeNr.dat",
+          "animation": "PlyEmblem5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlGnNr.dat",
+          "animation": "PlyGanon5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        },
+        {
+          "name": "PlFcNr.dat",
+          "animation": "PlyFalco5K_Share_ACTION_Wait1_figatree",
+          "type": 1,
+          "frames": 64,
+          "maxMatrixError": 0,
+          "rewindPassed": true
+        }
+      ],
+      "limitations": "Original lbAnim attachment and HSD joint animation; comparison is against native arithmetic/pose checks, not Dolphin gameplay"
+    }
+  },
+  "gpu": {
+    "softwareGpu": true,
+    "originalHsdObjects": true,
+    "models": 27,
+    "resolution": [
+      960,
+      720
+    ],
+    "conventions": {
+      "passed": true,
+      "cases": [
+        "clockwise front",
+        "cull front",
+        "GX far clip",
+        "GX near clip",
+        "hidden joint"
+      ]
+    },
+    "identicalImages": 81,
+    "maxVertexError": 0.000003814697265625,
+    "visualReview": "Mario diagnostic reviewed; native gameplay camera remains unverified"
+  },
+  "registerFlowEvidence": [
+    {
+      "address": "0x800876b4",
+      "finding": "Animation predicate result remains in r3 through the wrapper return",
+      "fixture": "USA 1.02 development executable",
+      "sha256": "762adbdd8c995f2f589c77c77bfa38fdd98f9909d69cd8f8a4d756c6147577a6"
+    },
+    {
+      "address": "0x801677e8",
+      "finding": "Stores the low byte of the incoming r3 argument",
+      "fixture": "USA 1.02 development executable",
+      "sha256": "1fcbe7d41dd55c75c7dfe63279860cf50af6852dfe6d94770a305de041c36869"
+    },
+    {
+      "address": "0x8024c68c",
+      "finding": "Calls mn_802295AC then gm_801677E8 with no intervening r3 write",
+      "fixture": "USA 1.02 development executable",
+      "sha256": "7fff29aaabbc4afe959b9f19a58d61eb6315a43e42f71ab2b62689edf8cf8e93"
+    }
+  ],
+  "regression": {
+    "targetedTests": 38,
+    "animationClips": 5508,
+    "coreWasmSha256": "e57267cc9c06f22b78302d4da1685bb2ccf88914f937762929f70d9cdbb170f0"
+  },
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "inputLatencyMeasured": false
+}
