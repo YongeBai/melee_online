@@ -1,11 +1,12 @@
+import {convertSceneAsset} from './scene-assets.mjs';
+import {readJointAnimation} from './joint-animation-assets.mjs';
 import {readCpuTables} from './cpu-assets.mjs';
 import {readColorTables} from './color-assets.mjs';
-import {inspectArchive,nativeSubgraphImage} from './archive.mjs';
-export const sharedSections=[0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,17,18,19,21,22];
-export const pendingSharedSections=[8,16,20];
+import {inspectArchive,nativeSubgraphImage,archiveRootView} from './archive.mjs';
+export const sharedSections=Array.from({length:23},(_,i)=>i);
+export const pendingSharedSections=[];
 // Import the typed parameter/bone-map graph needed by fighter initialization.
-// The full ftLoadCommonData entry point is deliberately not exposed until its
-// accessory models and joint animation are also imported.
+// All root sections are typed before the original ftLoadCommonData is exposed.
 export function convertSharedParameters(input,spec) {
   const archive=inspectArchive(input),d=archive.data,root=archive.publics.get('ftLoadCommonData');
   if(root===undefined||archive.externs.size)throw Error('Invalid shared fighter archive');
@@ -62,9 +63,27 @@ export function convertSharedParameters(input,spec) {
   for(const at of cpu.raw)raw(at,1);
   for(const at of cpu.words)word(at);
   for(const at of cpu.pointers)pointers.add(at);
-  // A separate root prevents callers from treating unconverted data as a full
-  // native ftLoadCommonData table. Every exposed pointer has an imported type.
+  const scenes=[];
+  for(const section of [8,16,20]) {
+    const at=section===8?pointer(roots[8]):roots[section];if(at===null)throw Error('Missing shared model');
+    const view=archiveRootView(archive,'shared_Share_joint',at),scene=convertSceneAsset(view);
+    for(const [slot,width] of scene.writes) {
+      bounds(slot,width);for(let i=0;i<width;i++)if(packed.has(slot+i))throw Error('Shared scene overlaps packed data');
+      if(width===4)word(slot);else out.setUint16(slot,d.getUint16(slot),true);
+    }
+    for(const slot of scene.pointerSlots)pointer(slot);
+    scenes.push({section,...scene});
+  }
+  const animationRoot=pointer(roots[8]+4);if(animationRoot===null)throw Error('Missing shared accessory animation');
+  const animation=readJointAnimation(archive,animationRoot);
+  for(const at of animation.words)word(at);
+  for(const at of animation.pointers)pointers.add(at);
+  for(let i=0;i<23;i++)pointer(root+i*4);
+  const missing=[...archive.relocations].filter(slot=>!pointers.has(slot));
+  if(missing.length)throw Error('Unclassified shared relocations: '+missing.map(x=>x.toString(16)).join(','));
+  // The original root is exposed only after every source relocation belongs to
+  // an imported descriptor. The secondary root supports independent verification.
   sharedSections.forEach((section,i)=>{const at=bytes.length+i*4;out.setUint32(at,roots[section],true);pointers.add(at);});
-  return {image:nativeSubgraphImage(data,pointers,new Map([['native_shared_parameters',bytes.length]])),archive,roots,
-    parts,groups,colors,cpu,common,sections:sharedSections,pending:pendingSharedSections,metrics:{numericWords:scalars.size,packedBytes:packed.size,relocations:pointers.size}};
+  return {image:nativeSubgraphImage(data,pointers,new Map([['native_shared_parameters',bytes.length],['ftLoadCommonData',root]])),archive,roots,
+    parts,groups,colors,cpu,scenes,animation,common,sections:sharedSections,pending:pendingSharedSections,metrics:{numericWords:scalars.size,packedBytes:packed.size,relocations:pointers.size}};
 }

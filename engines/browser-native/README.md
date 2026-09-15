@@ -97,14 +97,16 @@ assembly fallback or gameplay mismatch.
   original timer/loop/call/goto/animation-wait routines pass nested control checks.
   Raw script assets must still be type-converted before using this representation.
   The probes do not run fighter action handlers or claim gameplay parity.
-- `shared-assets.mjs` imports the common parameter block and 19 other typed
-  PlCo sections. Generated field probes statically check all 536 C offsets and
-  preserve byte colors separately from numeric words. Original bone lookup,
-  remapping, part-group selection and landing-knockback routines read these data
-  in browser checks. Global bindings are scoped to each check and restored before
-  releasing the archive. Three model/animation sections still need import; the
-  full ftLoadCommonData entry point is not exposed. The fixture preparation tool
-  hosts PlCo automatically through shared-fixtures.json.
+- `shared-assets.mjs` imports all 23 PlCo sections, including three shared
+  models and HSD joint animation. Generated probes check all 536 common-parameter
+  field offsets. Original bone lookup, remapping, part groups and landing
+  knockback read these data in browser checks. Original Fighter_LoadCommonData
+  binds all 23 globals and retains its archive after the prefetched cache clears.
+  The wrapper initializes once; full startup must not call it independently of a
+  later Fighter_FirstInitialize that already invokes the same loader.
+  Accessory animation passes 153 frames and exact rewind. These are initialization
+  checks, not full fighter creation. PlCo is hosted automatically through
+  shared-fixtures.json.
 - `color-assets.mjs` imports shared color/light scripts as numeric words, while
   `cpu-assets.mjs` preserves CPU input scripts as bytes and imports numeric attack
   lists. Original color interpretation is compared with a separate BE reference
@@ -227,7 +229,7 @@ not a frame-by-frame Dolphin oracle. Native gameplay parity is still unproven.
 ## Next milestones
 
 1. Connect `Fighter_Create` to the native HSD owner, remaining fighter archive
-   structures, shared PlCo data and platform services; replace the limited motion
+   structures and platform services; replace the limited motion
    fixture with full fighter ownership. Audit big-endian bitfields
    and pointer/function references explicitly; common attributes and animation
    decoding alone do not initialize a fighter.

@@ -16,43 +16,47 @@ export function convertSceneAsset(input) {
   const image=nativeArchiveImage(archive,publics);
   {
     const out=new DataView(image.buffer,32,archive.dataSize);
-    const word=at=>out.setUint32(at,d.getUint32(at),true),half=at=>out.setUint16(at,d.getUint16(at),true);
+    const writes=new Map(),pointerSlots=new Set();
+    const claim=(at,size)=>{for(let i=0;i<size;i+=4)if(archive.relocations.has(at+i))pointerSlots.add(at+i);};
+    const word=at=>{writes.set(at,4);out.setUint32(at,d.getUint32(at),true);};
+    const half=at=>{writes.set(at,2);out.setUint16(at,d.getUint16(at),true);};
     const ptr=at=>archive.relocations.has(at)?d.getUint32(at):null;
     for(const node of model.tree.nodes) {
-      word(node.offset+4);for(let i=0;i<9;i++)word(node.offset+20+i*4);
+      claim(node.offset,64);word(node.offset+4);for(let i=0;i<9;i++)word(node.offset+20+i*4);
       if(node.inverseBind!==null)for(let i=0;i<12;i++)word(node.inverseBind+i*4);
     }
     const dobjs=new Set();let weightSum=0;
     for(const mesh of model.meshes) {
-      dobjs.add(mesh.dobj);
+      dobjs.add(mesh.dobj);claim(mesh.dobj,16);claim(mesh.pobj,24);
       if(ptr(mesh.dobj)!==null||ptr(mesh.pobj)!==null)throw Error('Custom display/polygon class requires integration');
       half(mesh.pobj+12);half(mesh.pobj+14);
       let at=ptr(mesh.pobj+8);
       for(;;at+=24) {
-        word(at);if(d.getUint32(at)===255)break;
+        word(at);if(d.getUint32(at)===255)break;claim(at,24);
         for(const field of [4,8,12])word(at+field);half(at+18);
       }
       if((mesh.flags&0x3000)===0x2000) {
-        for(let slot=mesh.binding;ptr(slot)!==null;slot+=4)
-          for(let entry=ptr(slot);ptr(entry)!==null;entry+=8){word(entry+4);weightSum+=d.getFloat32(entry+4);}
+        for(let slot=mesh.binding;ptr(slot)!==null;slot+=4) {
+          claim(slot,4);for(let entry=ptr(slot);ptr(entry)!==null;entry+=8){claim(entry,8);word(entry+4);weightSum+=d.getFloat32(entry+4);}
+        }
       }
     }
     for(const material of assets.materials.values()) {
-      word(material.offset+4);const mat=ptr(material.offset+12);word(mat+12);word(mat+16);
+      claim(material.offset,24);word(material.offset+4);const mat=ptr(material.offset+12);word(mat+12);word(mat+16);
       if(material.renderDescriptor!==null)throw Error('Render descriptors require a typed importer');
     }
     for(const texture of assets.textures.values()) {
-      const at=texture.offset;
+      const at=texture.offset;claim(at,92);
       for(const field of [8,12,16,20,24,28,32,36,40,44,48,52,56,64,68,72])word(at+field);
       const lod=ptr(at+84),tev=ptr(at+88);
       if(lod!==null)for(const field of [0,4,12])word(lod+field);
       if(tev!==null)word(tev+28);
     }
     for(const image of assets.images.values()) {
-      half(image.offset+4);half(image.offset+6);for(const field of [8,12,16,20])word(image.offset+field);
+      claim(image.offset,24);half(image.offset+4);half(image.offset+6);for(const field of [8,12,16,20])word(image.offset+field);
     }
     for(const palette of assets.palettes.values()) {
-      word(palette.offset+4);word(palette.offset+8);half(palette.offset+12);
+      claim(palette.offset,16);word(palette.offset+4);word(palette.offset+8);half(palette.offset+12);
     }
     let inverseSum=0,materialSum=0,textureSum=0;
     for(const node of model.tree.nodes)if(node.inverseBind!==null)
@@ -63,7 +67,7 @@ export function convertSceneAsset(input) {
     }
     const metrics=[model.tree.nodes.reduce((n,node)=>n+[...node.rotation,...node.scale,...node.translation].reduce((n,v,i)=>n+(i+1)*v,0),0),
       inverseSum,0,dobjs.size,materialSum,textureSum,model.meshes.length,weightSum];
-    return {image,rootOffset:model.tree.nodes[0].offset,model,metrics,archive};
+    return {image,rootOffset:model.tree.nodes[0].offset,model,metrics,archive,writes,pointerSlots};
   }
 }
 

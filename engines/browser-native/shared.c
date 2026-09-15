@@ -1,5 +1,5 @@
-/* Typed shared-data integration. Full Fighter_LoadCommonData still requires
- * accessory scenes and joint animation; do not call it on this image. */
+/* Typed shared-data integration. The complete PlCo image is retained by the
+ * original Fighter_LoadCommonData for the lifetime of the runtime. */
 #include <melee/ft/fighter.h>
 #include <melee/ft/ftparts.h>
 #include <melee/ft/ftcommon.h>
@@ -30,4 +30,42 @@ void portSharedLanding(ftCommonData* common,float velocity,float normal_x,float 
     ftCommon_SetGroundedKnockbackIfLanded(&fp);
     output[0]=fp.xF0_ground_kb_vel;output[1]=fp.x8c_kb_vel.x;output[2]=fp.x8c_kb_vel.y;
     p_ftCommonData=previous;
+}
+
+#include <melee/sfx/crowdsfx.h>
+/* Like the game, common data live for the lifetime of this native runtime. */
+static int common_initialized;
+int portSharedInitialize(void)
+{
+    if(common_initialized)return 1;
+    Fighter_LoadCommonData();common_initialized=1;return 0;
+}
+uintptr_t portSharedGlobal(unsigned index)
+{
+    switch(index) {
+    case 0:return (uintptr_t)p_ftCommonData;
+    case 1:return (uintptr_t)Fighter_804D6550;
+    case 2:return (uintptr_t)Fighter_804D654C;
+    case 3:return (uintptr_t)Fighter_804D6548;
+    case 4:return (uintptr_t)ftPartsTable;
+    case 5:return (uintptr_t)Fighter_804D6540;
+    case 6:return (uintptr_t)Fighter_804D653C;
+    case 7:return (uintptr_t)Fighter_804D6538;
+    case 8:return (uintptr_t)Fighter_804D6534;
+    case 9:return (uintptr_t)Fighter_804D6530;
+    case 10:return (uintptr_t)Fighter_GrabMashShake;
+    case 11:return (uintptr_t)Fighter_SmashChargeShakeTable;
+    case 12:return (uintptr_t)Fighter_804D6524;
+    case 13:return (uintptr_t)Fighter_804D6520;
+    case 14:return (uintptr_t)Fighter_804D651C;
+    case 15:return (uintptr_t)Fighter_804D6518;
+    case 16:return (uintptr_t)Fighter_804D6514;
+    case 17:return (uintptr_t)Fighter_804D6510;
+    case 18:return (uintptr_t)Fighter_804D650C;
+    case 19:return (uintptr_t)Fighter_804D6508;
+    case 20:return (uintptr_t)Fighter_804D6504;
+    case 21:return (uintptr_t)gCrowdConfig;
+    case 22:return (uintptr_t)Fighter_804D64FC;
+    default:abort();
+    }
 }

@@ -10,6 +10,7 @@
 #include <sysdolphin/baselib/mtx.h>
 #include <sysdolphin/baselib/list.h>
 #include <sysdolphin/baselib/aobj.h>
+#include <sysdolphin/baselib/fobj.h>
 #include <melee/lb/lbanim.h>
 #include <melee/ft/forward.h>
 #include <sysdolphin/baselib/gobjproc.h>
@@ -29,6 +30,9 @@ _Static_assert(sizeof(HSD_TObjTevDesc)==32,"Texture TEV descriptor ABI");
 _Static_assert(sizeof(HSD_EnvelopeDesc)==8,"Envelope descriptor ABI");
 _Static_assert(sizeof(FigaTree)==20,"FigaTree ABI");
 _Static_assert(sizeof(FigaTrack)==12,"FigaTrack ABI");
+_Static_assert(sizeof(HSD_AnimJoint)==20,"Animation joint descriptor ABI");
+_Static_assert(sizeof(HSD_AObjDesc)==16,"Animation object descriptor ABI");
+_Static_assert(sizeof(HSD_FObjDesc)==20,"Function object descriptor ABI");
 static int initialized;
 extern int portRuntimeInit(void);
 extern void portAnimationInit(void);
@@ -141,4 +145,10 @@ void portSceneObjectDeleteNextStep(HSD_GObj* object)
 {
     if(!object||object->obj_kind!=HSD_GObj_JObjKind)abort();
     if(!HSD_GObj_SetupProc(object,portSceneObjectFree,0))abort();
+}
+
+/* Shared accessory animation uses native HSD descriptors, not FigaTree. */
+void portSceneJointAnimation(HSD_JObj* root,HSD_AnimJoint* animation)
+{
+    HSD_JObjAddAnimAll(root,animation,NULL,NULL);
 }

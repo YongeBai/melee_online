@@ -5,36 +5,21 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
-Shared import now covers 20 of PlCo's 23 sections. Both color tables retain all
-129 entries and 1,211 commands. The original color interpreter matches an
-independent BE-data reference over 23,177 updates and 900,334 state reads,
-including fades, signed lighting angles, nested control flow, priority rejection
-and lifetimes. External GFX/SFX/rumble words are observed through Melee's existing
-skip handlers in this check; effects are not emitted or declared implemented.
+All 23 sections of PlCo now import, and the original Fighter_LoadCommonData runs
+in browser WASM. Its 23 global bindings and all 805 source relocations remain
+valid after the prefetched file cache is released. The original loader retains
+one archive (two heap allocations) for the runtime lifetime. Three shared models
+load through original HSD objects; the accessory's 153-frame animation and exact
+rewind match the pose reference with zero matrix error.
 
-The CPU section retains byte scripts separately from numeric attack entries.
-All 61 non-null scripts copy exactly through the original C routine. The 189
-attack lists contain 947 entries, including two contextual lists with negative
-weights that are preserved. Original projectile selection matches 8,192 seeded
-choices. This does not run the complete CPU decision loop. Three shared sections
-remain: accessory model/animation and two other models. Their model graphs already
-parse through the existing HSD importer; merging them and importing joint animation
-are next. [Color/CPU checkpoint](benchmarks/browser-2026-09-15-native-port-shared-scripts.json).
-
-Shared fighter parameter import now covers 17 of PlCo's 23 root sections: the
-complete common-parameter block, throw/scale modifiers, bone and part-group maps,
-shake tables, packed player colors and crowd constants. C checks all 536 field
-offsets, then browser verification checks 1,072 field reads, 1,904 original bone
-lookups, 81,226 original remaps, 4,760 part-group queries and 21 landing-knockback
-cases. All 34 bone-map variants are covered, including non-playable templates.
-The 50 targeted tests pass and all 81 sampled 960×720 images are unchanged.
-
-Six PlCo sections remain: the two color-script tables, accessory model/animation,
-spawn-platform model, another shared model and CPU tables. The importer exposes
-only its converted subgraph; it does not expose ftLoadCommonData or run full
-Fighter_LoadCommonData. This remains initialization work, not a match or an FPS
-result. The source fixture is automatically hosted in development browser checks;
-no player file input is introduced. [Shared-parameter checkpoint](benchmarks/browser-2026-09-15-native-port-shared-parameters.json).
+The existing shared-parameter, color, CPU and motion checks still pass. Color
+import also classifies eight unreachable commands in two retained tails; these
+are converted metadata, not additional executed coverage. The 1,211 reachable
+commands still produce 23,177 checked updates. All 81 sampled 960×720 images are
+unchanged, and 57 targeted tests pass. This is common initialization only:
+Fighter_Create, complete character metadata, combat, native rendering and audio
+remain. There is no match FPS or input-latency result.
+[Common-initialization checkpoint](benchmarks/browser-2026-09-15-native-port-common-initialization.json).
 
 Original fighter motion loading now runs in browser WASM. Typed imports cover
 8,767 motion rows and 57,434 action-script commands across all 27 playable
@@ -54,7 +39,7 @@ context, not full Fighter_Create, action execution or a playable match. The
 The platform adapter replaces the GameCube ARAM/RAM address split with a checked
 copy from prefetched native animation bundles; original cache, copy, relocation,
 primary/secondary buffer and partner-selection routines remain. Two motion flag
-views retain their original word bits. Full shared PlCo data, remaining character
+views retain their original word bits. Remaining character
 metadata and native rendering/platform integration still precede a match loop.
 
 Command decoding now preserves the PowerPC bit positions when commands are

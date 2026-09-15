@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {inspectArchive} from '../../engines/browser-native/archive.mjs';
+import {inspectArchive,archiveRootView} from '../../engines/browser-native/archive.mjs';
 import {convertStageCollision} from '../../engines/browser-native/stage-collision.mjs';
 
 function fixture() {
@@ -22,6 +22,17 @@ test('reads big-endian symbols and accepts a public root at offset zero',()=> {
   const a=inspectArchive(fixture().bytes);
   assert.equal(a.publics.get('coll_data'),0);
   assert.deepEqual([...a.relocations],[0,8,36]);
+});
+test('nested archive view preserves source data and relocation identity',()=> {
+  const {bytes}=fixture(),before=bytes.slice(),source=inspectArchive(bytes);
+  const nested=inspectArchive(archiveRootView(source,'nested',48));
+  assert.deepEqual([...nested.publics],[['nested',48]]);
+  assert.deepEqual([...nested.relocations],[...source.relocations]);
+  assert.deepEqual(nested.bytes.subarray(32,32+nested.dataSize),bytes.subarray(32,32+source.dataSize));
+  assert.deepEqual(bytes,before);
+  for(const at of [-1,120,1.5,NaN])assert.throws(()=>archiveRootView(source,'nested',at),/Invalid nested/);
+  assert.throws(()=>archiveRootView(source,'bad\0symbol',0),/Invalid nested/);
+  assert.throws(()=>archiveRootView({...source,externs:new Map([['external',0]])},'nested',0),/Invalid nested/);
 });
 test('converts mixed float, signed-short, flags and pointers without changing the source',()=> {
   const {bytes}=fixture(), original=bytes.slice(), converted=convertStageCollision(bytes);

@@ -5,12 +5,14 @@ function fixture() {
   const body=new Uint8Array(8192),d=new DataView(body.buffer),relocs=new Set();let cursor=92;
   const alloc=size=>{const at=cursor;cursor+=Math.ceil(size/4)*4;return at;};
   const ptr=(at,target)=>{d.setUint32(at,target);relocs.add(at);};
-  const roots=[];for(let i=0;i<23;i++){roots[i]=alloc(i===22?40:i===6?984:i===7?48:i===0?2072:i===4||i===5?136:i===1?312:i===2?120:i===3?36:i===12?156:i===13?60:i===14?36:i===9?24:i===21?68:[17,18,19].includes(i)?20:8);ptr(i*4,roots[i]);}
+  const roots=[];for(let i=0;i<23;i++){roots[i]=alloc(i===16||i===20?64:i===22?40:i===6?984:i===7?48:i===0?2072:i===4||i===5?136:i===1?312:i===2?120:i===3?36:i===12?156:i===13?60:i===14?36:i===9?24:i===21?68:[17,18,19].includes(i)?20:8);ptr(i*4,roots[i]);}
   d.setFloat32(roots[0],0.28);body.set([0x12,0x34,0x56,0x78],roots[0]+4);
   const descriptor=alloc(12),joints=alloc(4),parts=alloc(56);ptr(descriptor,joints);ptr(descriptor+4,parts);d.setUint32(descriptor+8,1);
   body.fill(255,parts,parts+56);body[parts]=0;
   for(let i=0;i<34;i++)ptr(roots[4]+i*4,descriptor);
   for(const [section,count] of [[9,3],[10,1],[11,1]])for(let i=0;i<count;i++){const values=alloc(8);ptr(roots[section]+i*8,values);d.setUint32(roots[section]+i*8+4,1);}
+  const accessory=alloc(64),animation=alloc(20);ptr(roots[8],accessory);ptr(roots[8]+4,animation);d.setUint32(animation+16,1);
+  for(const at of [accessory,roots[16],roots[20]])for(const delta of [32,36,40])d.setFloat32(at+delta,1);
   const scriptTable=alloc(62*4),cpuScript=alloc(4),terminator=alloc(4);
   ptr(roots[22],scriptTable);ptr(scriptTable+4,cpuScript);body.set([128,128,127],cpuScript);
   for(let table=1;table<8;table++){
@@ -30,7 +32,7 @@ test('shared importer preserves packed bytes and exposes only converted sections
   assert.deepEqual([...a.cpu.scripts[1].bytes],[128,128,127]);
   assert.deepEqual([...a.image.subarray(32+f.cpuScript,32+f.cpuScript+3)],[128,128,127]);
   assert.equal(a.parts.length,34);assert.deepEqual(a.sections,sharedSections);assert.deepEqual(a.pending,pendingSharedSections);
-  assert.equal(v.getUint32(12,true),1);assert.equal(new TextDecoder().decode(a.image.subarray(a.image.length-25)),'native_shared_parameters\0');
+  assert.equal(v.getUint32(12,true),2);assert.ok(new TextDecoder().decode(a.image).endsWith('native_shared_parameters\0ftLoadCommonData\0'));
 });
 test('shared importer rejects unsafe bone maps and nonfinite physics constants',()=>{
   for(const mutate of [

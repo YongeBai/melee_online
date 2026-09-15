@@ -18,6 +18,16 @@ export function readColorTables(archive) {
     }
     tables.push({section,offset:at,entries});
   }
-  const scripts=readMotionScripts(archive,starts,colorCommandWords,{terminalOpcodes:[0,6,7,10]});
-  return {tables,scripts};
+  const options={terminalOpcodes:[0,6,7,10]},reachable=readMotionScripts(archive,starts,colorCommandWords,options);
+  // Retail PlCo retains two self-looping tails after terminating commands.
+  // They have relocation entries although no table entry reaches them. Validate
+  // their branch records before importing them; never guess ordinary data words.
+  const first=Math.min(...starts),end=Math.min(...tables.map(t=>t.offset)),orphanRoots=new Set();
+  for(const slot of archive.relocations)if(slot>=first&&slot<end&&!reachable.pointers.has(slot)) {
+    const opcode=d.getUint32(slot-4)>>>26,target=d.getUint32(slot);
+    if(![5,7].includes(opcode)||target<first||target>=end)throw Error('Unclassified color-region pointer');
+    orphanRoots.add(target);
+  }
+  const scripts=orphanRoots.size?readMotionScripts(archive,[...starts,...orphanRoots],colorCommandWords,options):reachable;
+  return {tables,scripts,reachableCommands:reachable.commands.size,orphanRoots:[...orphanRoots]};
 }

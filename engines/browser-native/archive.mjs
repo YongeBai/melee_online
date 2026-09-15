@@ -88,3 +88,14 @@ export function nativeSubgraphImage(data,relocations,publics) {
   }
   return image;
 }
+
+// A private BE view lets an existing typed importer visit an explicitly known
+// nested root. Body offsets and relocation metadata retain their identities.
+export function archiveRootView(archive,name,offset) {
+  if(archive.externs.size||!name||name.includes('\0')||!Number.isInteger(offset)||offset<0||offset>=archive.dataSize)
+    throw Error('Invalid nested archive root');
+  const text=new TextEncoder().encode(name+'\0'),start=32+archive.dataSize+archive.relocations.size*4;
+  const bytes=new Uint8Array(start+8+text.length),view=new DataView(bytes.buffer);
+  bytes.set(archive.bytes.subarray(0,start));view.setUint32(0,bytes.length);view.setUint32(12,1);view.setUint32(16,0);
+  view.setUint32(start,offset);bytes.set(text,start+8);return bytes;
+}
