@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"models":"native low-detail fighter tables","renderer":"depth-corrected 960x720 WebGL","frames":600},
+  "onlyCodegenDifference": {"gxmatrixfast":[false,true]},
+  "actualCandidateCoverage": {"gxMatrixFastRuns":563929,"loadPos":371618,"setIndex":192273},
+  "fullMachineBytesEqual": false,
+  "executionStateEqual": false,
+  "serializedBytesPerLeg": 117501335,
+  "differentSections": [{"name":"CoreTiming","differentBytes":25,"fields":["m_idled_cycles","next_event_order","event.order"]}],
+  "fingerprintsEqual": true,
+  "decision": "The original fast FIFO GX helper remains disabled: a GX-only comparison, with integer FIFO and short-prefix both off, still changes scheduler insertion orders. The separate full FIFO-check source candidate must also be repeated GX-only before its repair hypothesis can be evaluated.",
+  "limits": "Matching sampled fighter/controller fingerprints does not authorize ignoring serialized event orders or guarantee deterministic future timing. This replay has no 30-second FPS gain to attribute to the source change."
+}

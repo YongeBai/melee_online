@@ -1483,7 +1483,7 @@ if (params.has("qa")) {
         const reflectionAB=stageBackgroundAB||reverbAB||staticBackgroundAB||yoshiAnimationAB||stadiumAB||params.get("benchmarkreflectioncompare")==="1"||sceneryAB||modelAB||animationAB||shadowAB||decorationsAB||particlesAB;
         if(retainedConfigAB&&(!frameStress||headroomCheck.checked||checkpointControl.checked||dispatchProfileCheck.checked||queueCapacityAB||queueClockAB||codegenAB||reflectionAB||scaleAB||probeAB||pacingAB||fixedWorkAB||repeats>1))
           throw Error('Retained CPU group comparison requires only native-frame inputs and one codegen comparison');
-        if(frameStress&&(scaleAB||pacingAB||repeats>1))throw Error("Native-frame input supports single runs, codegen and cosmetic comparisons");
+        if(frameStress&&(scaleAB||repeats>1))throw Error("Native-frame input supports single runs, codegen, pacing and cosmetic comparisons");
         if(animationAB&&(params.get("scenery")!=="off"||params.get("sceneryanimation")==="off"))throw Error("Animation comparison requires scenery off and animation initially on");
         if(modelAB&&params.get("models")==="low")throw Error("Start model comparison at normal detail");
         if(params.get("benchmarkreflectioncompare")==="1"&&params.get("reflection")==="off")throw Error("Start reflection comparison with reflections enabled");
@@ -1491,7 +1491,7 @@ if (params.has("qa")) {
         if(particlesAB&&params.get("particles")==="off")throw Error("Start particle comparison with particles enabled");
         if(decorationsAB&&params.get("decorations")==="off")throw Error("Start decoration comparison with decorations enabled");
         if(sceneryAB&&params.get("scenery")==="off")throw Error("Start scenery comparison with scenery enabled");
-        if(stress && ((!frameStress && probeAB) || pacingAB))throw Error("Use a standard or codegen benchmark for controller stress");
+        if(stress && ((!frameStress && probeAB) || (pacingAB&&!frameStress)))throw Error("Use native-frame inputs for a presentation control");
         const pcSampling = params.get("pcsample") === "1";
         if(pcSampling && ((gpuScheduleCompare.checked || rushCompare.checked || frameLogCompare.checked || checkpointControl.checked || dispatchProfileCheck.checked) || timingDriftCompare.checked || headroomCheck.checked || codegenAB || retainedConfigAB || scaleAB || probeAB || pacingAB || fixedWorkAB || queueCapacityAB || queueClockAB || reflectionAB || repeats>1))throw Error("PC sampling requires a single diagnostic run");
         const pcSamples = pcSampling ? sampleBrowserCpuLocations(host, duration) : null;
@@ -1528,7 +1528,7 @@ if (params.has("qa")) {
           : reflectionAB
           ? await compareFountainReflection(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,frameInput:frameStress,feature:stageBackgroundAB?'stagebackground':reverbAB?'reverb':staticBackgroundAB?'staticbackground':yoshiAnimationAB?'yoshianimation':stadiumAB?"stadiumscreen":particlesAB?"particles":decorationsAB?"decorations":shadowAB?"shadowdiag":animationAB?"animation":modelAB?"modeldetail":sceneryAB?"scenery":"reflection",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : pacingAB
-          ? await compareBrowserPacing(host,duration,()=>host.adapter.request("meleeInspect",{}),{onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
+          ? await compareBrowserPacing(host,duration,()=>host.adapter.request("meleeInspect",{}),{frameInput:frameStress,onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : probeAB
           ? await compareBrowserProbe(host,duration,()=>host.adapter.request("meleeInspect",{}),{frameInput:frameStress,mode:params.get("benchmarkworkerprobecompare")==="1"?"worker":params.get("benchmarkharvestcompare")==="1"?"harvest":params.get("benchmarkprobecontext")==="1"?"context":params.get("benchmarkasynccontrol")==="1"?"async-overhead":params.get("benchmarkasynccompare")==="1"?"async":"overhead",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : scaleAB

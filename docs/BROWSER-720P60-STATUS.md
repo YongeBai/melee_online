@@ -35,6 +35,89 @@ is 2.59 FPS, with 107 shared native-input fingerprints and intact 960×720
 images. Mean queue age rose 2.28 ms, and the fastest leg still missed 60.
 Low detail remains opt-in pending representative roster/costume visuals.
 [Fighter model control](benchmarks/browser-2026-09-14-dreamland-fighter-model-abba.json).
+The corrected low-detail Dream Land main-presentation control compared direct
+bitmap delivery with the existing two-image RAF queue at one saved gameplay
+checkpoint. Distinct visible FPS were direct 52.33, RAF 53.37, RAF 55.53,
+direct 55.98. Both 30-second pairs oppose one another; all 108 native-input
+fingerprints matched, and none reached 60. Direct delivery removes the main
+queue's measured 13.48–18.08 ms image age in RAF legs, but this is not an
+end-to-end input-latency result. Keep the current RAF queue default.
+[Main pacing control](benchmarks/browser-2026-09-15-depth-low-model-main-pacing-abba.json).
+The higher-return GX matrix helper remains **off**: two warmed normal-running
+replays on the corrected old core changed 17–19 serialized scheduler/idle bytes,
+while its unchanged-codegen control passed exactly. An isolated source-matched
+candidate replaced fast FIFO gather checks with Dolphin's full write/check path
+and visually preserved the native Dream Land camera. Its warmed unchanged
+control differed only in two bytes of unused idle accounting, but the warmed
+GX leg still changed 17 CoreTiming bytes including event insertion orders.
+Those saved replay configurations actually differed in GX, integer FIFO and
+short-prefix flags together: the URL names were ignored at startup but applied
+to the comparison. The scheduler mismatch cannot be assigned to GX. The
+FIFO-wrapper hypothesis is unproved, the active experimental source was
+reverted, and GX-only state replay is being repeated. No FPS claim or default
+promotion follows. [Confounded GX FIFO-check replay](benchmarks/browser-2026-09-15-gx-fifo-check-replay.json).
+
+On the corrected 960×720 Dream Land IC/IC scene with low-detail fighter tables,
+holding block merge enabled while integer FIFO and short-prefix compilation
+were off in all legs, the
+same-checkpoint animation-fusion off/on/on/off comparison measured distinct
+visible **55.54 / 56.73 / 58.20 / 56.50 FPS**. Both 30-second pairs favor the
+revision-locked `HSD_FObjInterpretAnim` fusion (mean +1.45 visible FPS), with
+110 matching native controller fingerprints and 33 emitted fused blocks. Each
+leg retained focus and changing 720p images. The fastest leg still fails 60;
+the optimization remains opt-in while wider matchup coverage is checked. Its
+corrected 600-native-frame replay changed only the fusion flag and matched all
+117,142,854 serialized bytes across 29 sections and controller fingerprints.
+Lean dispatch was held on in both replay legs for telemetry but off in both
+timing configurations. An earlier run without block merge was invalid because
+the compiler emitted no eligible fusion blocks.
+The `integerfifo=1` and `singleprefix=1` URL names were ignored by the startup
+mask; those features require the verified numeric `disable` bits and a separate
+controlled trial. The A/B fusion isolation remains intact.
+[Corrected fusion comparison](benchmarks/browser-2026-09-15-depth-low-model-anim-fusion-abba.json).
+[Isolated fusion replay](benchmarks/browser-2026-09-15-depth-low-model-anim-fusion-replay.json).
+The corrected follow-up isolated `singleprefix` with animation fusion, block
+merge, integer FIFO and low-detail models fixed. Prefix off/on/on/off distinct
+visible FPS were **55.03 / 55.38 / 54.00 / 57.95**. The second paired loss is
+3.95 FPS, 106 input fingerprints match, every page stayed focused, and no leg
+passes 60. Keep short-prefix compilation off for this configuration rather
+than crediting its first 0.35-FPS win.
+[Prefix comparison](benchmarks/browser-2026-09-15-depth-low-model-prefix-abba.json).
+Holding fusion, block merge, normal JIT prefix and low-detail models fixed,
+integer FIFO off/on/on/off gave corrected distinct visible **55.54 / 54.17 /
+56.23 / 57.77 FPS**. Both 30-second pairs lose 1.37–1.54 FPS with the FIFO
+shortcut, 108 native-controller fingerprints match, and every gate fails.
+Leave integer FIFO off for this measured combination.
+[Integer FIFO comparison](benchmarks/browser-2026-09-15-depth-low-model-integer-fifo-abba.json).
+The corrected GX-only old-core replay exercised 563,929 `FastMeleeGxMatrix`
+calls in 600 native Dream Land IC/IC frames with low-detail models. The only
+codegen difference was `gxmatrixfast`; FIFO and prefix flags were off in both
+legs. Of 117,501,335 bytes, 25 CoreTiming bytes changed, including serialized
+event insertion orders. Gameplay/input fingerprints match, but execution-state
+equality fails; original GX remains disabled. The full FIFO-check source
+candidate is being retested with the same GX-only isolation.
+[Isolated GX replay](benchmarks/browser-2026-09-15-gx-matrix-isolated-replay.json).
+The isolated rebuilt core with Dolphin's ordinary FIFO write/check path also
+fails. With only GX changed and 563,826 helper calls, 19 CoreTiming, 12 RAM and
+two hardware GPU FIFO bytes differ in 117,238,239 serialized bytes. The source
+patch stays only as an opt-in negative reproduction; it is not in the active
+vendor checkout or release default. The roughly 5% raw GX gain is unusable
+until a state-exact helper can be demonstrated.
+[Full-check GX-only replay](benchmarks/browser-2026-09-15-gx-fullcheck-isolated-replay.json).
+The corrected low-model/fusion Dream Land display-list specialization reached
+2,160,421 guarded calls (zero fallbacks), but visible off/on/on/off rates were
+**56.00 / 57.50 / 56.47 / 58.67 FPS**. The candidate gains 1.50 FPS in the
+first pair and loses 2.20 in the second; 111 native-input fingerprints match,
+all pages remain focused, and no acceptance gate passes. Keep it opt-in rather
+than extrapolating an older Yoshi's Story gain to all stages.
+[Display-list comparison](benchmarks/browser-2026-09-15-depth-low-model-display-list-abba.json).
+With corrected depth, native low-detail fighters and fusion, the Dream Land
+decorative-background draw callback normal/black/black/normal control measured
+distinct visible **56.00 / 57.54 / 56.87 / 58.17 FPS**. The first pair gains
+1.54 FPS; the reversed pair loses 1.30. The stage gameplay-object guard and
+110 input fingerprints pass, but no leg hits 60. Restore the original native
+background; the older raw-depth apparent benefit also failed its reversal.
+[Corrected Dream Land background comparison](benchmarks/browser-2026-09-15-depth-low-model-dreamland-background-abba.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

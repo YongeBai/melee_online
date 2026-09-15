@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-15",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "coreSha256": "103af6577c5973a8eaa7b9cf3fe6c7106c31de5230313385e11793186d5fe166",
+  "sourcePatch": "scripts/browser/browser-gx-fullcheck.patch",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"models":"native low-detail fighter tables","renderer":"depth-corrected 960x720 WebGL","frames":600},
+  "onlyCodegenDifference": {"gxmatrixfast":[false,true]},
+  "gxMatrixFastRuns": 563826,
+  "fullMachineBytesEqual": false,
+  "executionStateEqual": false,
+  "serializedBytesPerLeg": 117238239,
+  "differentSections": [
+    {"name":"CoreTiming","differentBytes":19,"fields":["m_idled_cycles","next_event_order","event.order"]},
+    {"name":"HW Memory RAM","differentBytes":12},
+    {"name":"HW GPFifo","differentBytes":2}
+  ],
+  "fingerprintsEqual": true,
+  "decision": "Reject the full FIFO-check GX source experiment; its isolated candidate changes serialized RAM, FIFO and event-order state. Do not ship this patched core. The source was already reversed in the private active vendor checkout; retain the text patch for reproducibility only.",
+  "limits": "Matching sampled fighter/controller fingerprints does not prove scene or machine-state equivalence. Different compiled-core source means its byte count cannot be compared directly to the older core's saved-state size. No candidate FPS uplift was measured."
+}

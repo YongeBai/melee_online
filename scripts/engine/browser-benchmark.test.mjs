@@ -140,6 +140,22 @@ test('pacing comparison restores immediate presentation on failure and keeps the
  await assert.rejects(compareBrowserPacing(host,30,()=>{},{QueueClass:Queue,measure:async()=>{throw Error('capture failed');}}),/capture failed/);assert.equal(host.adapter.presentationQueue,null);assert.equal(calls.at(-2)[1].action,'release');assert.equal(calls.at(-1)[0],'start');
 });
 
+test('pacing control restores the existing RAF queue and verifies matching native-frame inputs',async()=>{
+ const {compareBrowserPacing}=await import('./browser-benchmark.js');
+ const original={clearCount:0,clear(){this.clearCount++;},close(){throw Error('Do not close the active browser queue');}};
+ const host={adapter:{presentationQueue:original,bitmapPresentationPacing:'raf-buffered',request:async(t,d)=>{
+   if(d.action==='frameInputStats')return{valid:true,startFrame:20,inputChanges:[12,12],observedActions:[[1,2,3],[1,2,3]],gaps:[],digests:[{frame:1200,input:1,state:2}]};
+   return{};
+ }}};
+ class Queue{constructor(){this.stats={presented:0,ageTotalMs:0};this.capacity=2;}close(){}}
+ const result=await compareBrowserPacing(host,30,()=>{},{QueueClass:Queue,frameInput:true,measure:async()=>({passed:false})});
+ assert.equal(result.inputConsistency.passed,true);
+ assert.equal(result.passed,false);
+ assert.equal(host.adapter.presentationQueue,original);
+ assert.equal(host.adapter.bitmapPresentationPacing,'raf-buffered');
+ assert.ok(original.clearCount>=2);
+});
+
 test('Fountain comparison holds one checkpoint and restores reflection even after failure',async()=>{
  const {compareFountainReflection}=await import('./browser-benchmark.js');const calls=[];
  const host={adapter:{request:async(t,d)=>{calls.push([t,d]);return t==='meleeControl'?{objects:[{}]}:{};}}};

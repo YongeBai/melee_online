@@ -1,0 +1,46 @@
+diff --git a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+--- a/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
++++ b/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp
+@@ -14032,15 +14032,12 @@ s32 CachedInterpreter::FastMeleeGxMatrix(PowerPC::PowerPCState& ppc_state,
+     const u32 old_lr = LR(ppc_state);
+     WriteRamU32BE(ram, stack_offset + 12, old_lr);
+     WriteRamU32BE(ram, stack_offset, old_sp);
+-    fifo.FastWrite8(0x10);
+-    fifo.FastCheckGatherPipe();
+-    fifo.FastWrite32(((ppc_state.gpr[4] << 2) & 0xfffffffcu) | 0x000b0000u);
+-    fifo.FastCheckGatherPipe();
++    fifo.Write8(0x10);
++    fifo.Write32(((ppc_state.gpr[4] << 2) & 0xfffffffcu) | 0x000b0000u);
+     apply_metric(entry);
+     for (u32 i = 0; i < matrix.size(); i += 2)
+     {
+-      fifo.FastWrite64((u64{matrix[i]} << 32) | matrix[i + 1]);
+-      fifo.FastCheckGatherPipe();
++      fifo.Write64((u64{matrix[i]} << 32) | matrix[i + 1]);
+       ppc_state.ps[i / 2].SetBoth(
+           std::bit_cast<double>(ConvertToDouble(matrix[i])),
+           std::bit_cast<double>(ConvertToDouble(matrix[i + 1])));
+@@ -14078,17 +14075,11 @@ s32 CachedInterpreter::FastMeleeGxMatrix(PowerPC::PowerPCState& ppc_state,
+     const bool high = static_cast<s32>(original_index) >= 5;
+     const u32 matrix_index = ReadRamU32BE(ram, gx_offset + (high ? 0x84 : 0x80));
+     apply_metric(entry);
+-    fifo.FastWrite8(0x08);
+-    fifo.FastCheckGatherPipe();
+-    fifo.FastWrite8(high ? 0x40 : 0x30);
+-    fifo.FastCheckGatherPipe();
+-    fifo.FastWrite32(matrix_index);
+-    fifo.FastCheckGatherPipe();
+-    fifo.FastWrite8(0x10);
+-    fifo.FastCheckGatherPipe();
+-    fifo.FastWrite32(high ? 0x00001019 : 0x00001018);
+-    fifo.FastCheckGatherPipe();
+-    fifo.FastWrite32(matrix_index);
+-    fifo.FastCheckGatherPipe();
++    fifo.Write8(0x08);
++    fifo.Write8(high ? 0x40 : 0x30);
++    fifo.Write32(matrix_index);
++    fifo.Write8(0x10);
++    fifo.Write32(high ? 0x00001019 : 0x00001018);
++    fifo.Write32(matrix_index);
+     if (!high)
+       apply_metric(middle);

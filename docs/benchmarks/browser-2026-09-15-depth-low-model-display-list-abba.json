@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-codegen-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","modelDetail":"native low detail"},
+  "heldCodegen": {"animfusion":true,"blockmerge":true,"integerfifo":false,"singleprefix":false,"regcache":true},
+  "displaylistfastValues": [false,true,true,false],
+  "simulationFps": [57.03364,58.87156,58.03881,59.90644],
+  "distinctVisibleFps": [56.00030,57.50478,56.47199,58.67297],
+  "visiblePairedGainFps": [1.50448,-2.20098],
+  "runtimeCoverage": {"compiledBlocks":2,"successfulCallsAfterSecondOnLeg":2160421,"fallbacks":0},
+  "inputConsistency": {"passed":true,"checked":111,"mismatches":[]},
+  "validity": "All four measured 30-second legs had native-frame controller activity for both players, changing 960x720 images and visible/focused pages without lifecycle events. Warmups excluded.",
+  "decision": "Reject default promotion of display-list specialization on this corrected Dream Land fixture: the two visible-FPS pairs oppose and every 720p60 image gate fails. The previously measured Yoshi's Story benefit does not establish a shared-stage gain.",
+  "limits": "Successful call counts prove execution coverage, not time saved. No isolated full-machine replay of display-list fast plus fusion/low models was run because this FPS comparison did not establish a repeatable gain."
+}

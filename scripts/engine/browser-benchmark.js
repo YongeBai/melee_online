@@ -511,29 +511,40 @@ export async function measureBrowserGameplayAsync(host,seconds,inspect,{sampleWi
 
 // Compare immediate delivery with a two-image-bounded RAF queue. The queue
 // preserves whole frames and adds presentation delay, never simulation steps.
-export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>{},onResult=()=>{},measure=measureBrowserGameplayAsync,QueueClass}={}){
-  if(host.adapter.presentationQueue)throw Error('Start pacing comparison with immediate presentation');
+export async function compareBrowserPacing(host,seconds,inspect,{onProgress=()=>{},onResult=()=>{},measure=measureBrowserGameplayAsync,QueueClass,frameInput=false}={}){
   const {BrowserFrameQueue}=QueueClass?{BrowserFrameQueue:QueueClass}:await import('./browser-frame-queue.js');
   const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
   const runs=[];let captured=false;const originalPacing=host.adapter.bitmapPresentationPacing;
+  const originalQueue=host.adapter.presentationQueue;
   const clearQueue=()=>{host.adapter.presentationQueue?.close();host.adapter.presentationQueue=null;};
   try{
+    if(originalQueue){originalQueue.clear();host.adapter.presentationQueue=null;}
     await command('pause');await command('step');await command('capture',{slot:5});captured=true;
     for(const [index,paced]of [false,true,true,false].entries())for(const warmup of [true,false]){
       onProgress('Presentation '+(paced?'RAF':'immediate')+' '+(warmup?'warmup':'measurement')+' '+(index+1)+'/4…');
       await command('pause');clearQueue();await command('restore',{slot:5});
       for(let frame=0;frame<120;frame++)await command('step');
+      if(frameInput)await command('frameInput',{enabled:true});
       if(paced)host.adapter.presentationQueue=new BrowserFrameQueue(bitmap=>host.adapter.drawDetachedOglBitmap(bitmap,bitmap.width,bitmap.height));
       host.adapter.bitmapPresentationPacing=paced?'raf-buffered':'immediate';
       await host.adapter.request('start',{});
       const result=await measure(host,seconds,inspect);
+      if(frameInput){
+        await command('frameInput',{enabled:false});const stats=await command('frameInputStats');
+        const exercised=stats.valid&&stats.inputChanges?.every(n=>n>=8)&&stats.observedActions?.every(a=>a.length>=3);
+        result.controllerStress={...stats,exercisedBothPlayers:!!exercised};
+        if(!exercised){result.passed=false;result.invalidWorkload='Native-frame controller input was inactive';}
+      }
       const stats=host.adapter.presentationQueue?.stats;
       runs.push({...result,paced,warmup,queue:stats?{...stats,meanAgeMs:stats.presented?stats.ageTotalMs/stats.presented:0,capacity:host.adapter.presentationQueue.capacity}:null});
       onResult({kind:'same-checkpoint-presentation-abba',passed:false,runs});
     }
-    return {kind:'same-checkpoint-presentation-abba',passed:runs.filter(r=>r.paced&&!r.warmup).every(r=>r.passed),runs};
+    const inputConsistency=frameInput?compareFrameInputDigests(runs):undefined;
+    return {kind:'same-checkpoint-presentation-abba',passed:runs.filter(r=>r.paced&&!r.warmup).every(r=>r.passed)&&(!frameInput||inputConsistency.passed),runs,...(frameInput?{inputConsistency}:{})};
   }finally{
+    if(frameInput)await command('frameInput',{enabled:false});
     await command('pause');clearQueue();host.adapter.bitmapPresentationPacing=originalPacing;
+    if(originalQueue){originalQueue.clear();host.adapter.presentationQueue=originalQueue;}
     try{if(captured)await command('release',{slot:5});}finally{await host.adapter.request('start',{});}
   }
 }

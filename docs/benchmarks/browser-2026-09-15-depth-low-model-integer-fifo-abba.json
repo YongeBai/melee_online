@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-codegen-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","modelDetail":"native low detail"},
+  "heldCodegen": {"animfusion":true,"blockmerge":true,"singleprefix":false,"regcache":true},
+  "integerfifoValues": [false,true,true,false],
+  "simulationFps": [56.27152,55.20349,57.56467,59.10367],
+  "distinctVisibleFps": [55.53813,54.17009,56.23138,57.77026],
+  "visiblePairedGainFps": [-1.36804,-1.53887],
+  "inputConsistency": {"passed":true,"checked":108,"mismatches":[]},
+  "validity": "Four 30-second measured legs used the same gameplay checkpoint, changing 960x720 images and both native logic-frame controller tracks; planned warmups excluded.",
+  "decision": "Reject integer FIFO on this corrected configuration; it loses both paired visible-FPS comparisons and no leg reaches strict 60.",
+  "limits": "One heavy matchup; machine-state replay for the FIFO flag exists in earlier work but was not repeated with low-detail models and this corrected renderer. No production default change follows."
+}

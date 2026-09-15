@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-15",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"modelDetail":"native low-detail fighter tables","renderer":"depth-corrected WebGL at 960x720","rules":"4 stocks, 8 minutes, no items"},
+  "frames": 600,
+  "codegenDifference": {"animfusion":[false,true]},
+  "heldCodegen": {"blockmerge":true,"regcache":true,"integerfifo":false,"singleprefix":false,"leandispatch":true},
+  "fullMachineBytesEqual": true,
+  "serializedBytesPerLeg": 117142854,
+  "sectionsEqual": 29,
+  "fingerprintsEqual": true,
+  "executionStateEqual": true,
+  "decision": "Animation fusion is state-exact for this normal-running 600-frame heavy fixture. Retain as experimental opt-in; paired corrected-renderer FPS still fails strict 60 and broader stage/character coverage is pending.",
+  "limits": "Lean dispatch was fixed on in both replay legs to satisfy the replay's specializer-counter telemetry check; it was off in both 30-second A/B timing legs. This is a configuration difference between correctness and timing, but no difference between the replay legs."
+}

@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-15",
+  "kind": "normal-running-browser-codegen-equivalence",
+  "experiment": "GX matrix helper using Dolphin's ordinary FIFO writes and flush exception checks",
+  "patch": "scripts/browser/browser-gx-fullcheck.patch",
+  "coreSha256": "103af6577c5973a8eaa7b9cf3fe6c7106c31de5230313385e11793186d5fe166",
+  "sourcePatchesMatchedBuild": true,
+  "automaticHostedGame": true,
+  "privatePackageVerifiedFiles": 179,
+  "nativeCameraVisualCheck": "Dream Land Ice Climbers spawn retained FOV 30, zero pitch/yaw offsets, camera interest [-22.703764,23.204119,0], position [-14.457623,42.405716,125.036156], correctly visible P1/P2, tree, platform and water at 960x720.",
+  "fixture": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"frames":600,"sourceResolution":[960,720]},
+  "warmUnchangedControl": {
+    "fullMachineBytesEqual":false,
+    "executionStateEqual":true,
+    "differentSections":[{"name":"CoreTiming","differentBytes":2,"fields":["m_idled_cycles"]}],
+    "fingerprintsEqual":true
+  },
+  "warmGxCandidate": {
+    "fullMachineBytesEqual":false,
+    "executionStateEqual":false,
+    "differentSections":[{"name":"CoreTiming","differentBytes":17,"fields":["m_idled_cycles","next_event_order","event.order"]}],
+    "fingerprintsEqual":true
+  },
+  "coldControlAndCandidate": "The first unchanged control itself changed 18 CoreTiming bytes and one RAM byte; the adjacent GX leg changed 7,363 bytes in an unused GPU FIFO suffix and 27 CoreTiming bytes. Neither cold leg establishes GX causality. Warm runs above distinguish only idle accounting from scheduler-order differences.",
+  "decision": "Do not promote the patched helper. This initial control was confounded by three codegen differences. Its corrected GX-only follow-up also fails, including 12 RAM and two HW GPFifo bytes; the active vendor source was reversed and the text patch remains only for reproducibility.",
+  "limits": "No 30-second FPS comparison was run on the patched candidate. The previous raw helper's +5% timing cannot be credited to this source change. Scheduler ordinals are serialized and cannot be ignored solely because sampled fighter/input fingerprints matched. Startup ignored the integerfifo=1 and singleprefix=1 URL names, while codegenComparison applied those flags only in the candidate leg."
+}

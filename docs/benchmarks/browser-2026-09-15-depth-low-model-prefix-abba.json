@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-codegen-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","modelDetail":"native low detail"},
+  "heldCodegen": {"animfusion":true,"blockmerge":true,"integerfifo":true,"regcache":true},
+  "singleprefixValues": [false,true,true,false],
+  "simulationFps": [55.72748,56.51427,55.43585,59.01745],
+  "distinctVisibleFps": [55.02629,55.37931,54.00245,57.95228],
+  "visiblePairedGainFps": [0.35302,-3.94983],
+  "inputConsistency": {"passed":true,"checked":106,"mismatches":[]},
+  "validity": "Each of four 30-second measured legs kept a visible/focused page with no lifecycle events, active native-frame input on both pads and changing 960x720 images. The first on warmup reached only 48.33 visible FPS but was excluded as planned.",
+  "decision": "Reject short-prefix compilation on this corrected configuration; opposing pair outcomes and no 60-FPS passing leg. Do not promote it as a default from this test.",
+  "limits": "A 30-second A/B/B/A comparison isolates this flag for one matchup; it does not show whether its first warmup slowdown is JIT compilation or a host disturbance. The full-machine correctness of the on path was established in earlier source/replay work but not separately repeated here."
+}

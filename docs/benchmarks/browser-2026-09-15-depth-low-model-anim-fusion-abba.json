@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-codegen-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "experiment": "Revision-locked HSD_FObjInterpretAnim conditional fusion, with native low-detail fighter models",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"sourceResolution":[960,720],"renderer":"depth-corrected WebGL","rules":"4 stocks, 8 minutes, no items"},
+  "heldCodegen": {"blockmerge":true,"integerfifo":false,"singleprefix":false,"regcache":true},
+  "inputConsistency": {"passed":true,"checked":110,"mismatches":[],"limits":"Native logic-frame rolling fingerprints of inputs, action, position and stocks; not full machine-state equality."},
+  "measuredRuns": [
+    {"fusion":false,"simulationFps":56.86906,"distinctVisibleFps":55.53567,"emittedFusedBlocks":0,"passed":false},
+    {"fusion":true,"simulationFps":58.10043,"distinctVisibleFps":56.73375,"emittedFusedBlocks":33,"passed":false},
+    {"fusion":true,"simulationFps":59.26934,"distinctVisibleFps":58.20263,"emittedFusedBlocks":33,"passed":false},
+    {"fusion":false,"simulationFps":58.60293,"distinctVisibleFps":56.50283,"emittedFusedBlocks":33,"passed":false}
+  ],
+  "visiblePairedGainFps": [1.19808,1.69980],
+  "meanVisibleGainFps": 1.44894,
+  "simulationPairedGainFps": [1.23137,0.66641],
+  "meanSimulationGainFps": 0.94889,
+  "validity": "All four measured legs had visible/focused pages with no lifecycle events, exercised both native-frame controller tracks, and verified changing 960x720 images for 30 seconds. Warmups are excluded. A prior no-blockmerge trial failed emission coverage and is excluded. Startup ignored the integerfifo=1 and singleprefix=1 URL names; all four recorded codegen settings were false, so this isolates fusion but does not measure the intended FIFO/prefix combination.",
+  "decision": "Retain as an experimental opt-in; both pairs gain visible FPS, but no leg reaches strict 60. A 600-frame normal-running replay with only fusion changed passed all 117142854 serialized bytes and 29 sections.",
+  "limits": "Coverage counts emitted blocks rather than their runtime self-time. This is one heavy Dream Land matchup, not all-stage/all-character certification; lean dispatch was fixed on in both correctness legs to satisfy replay telemetry but off in both FPS configurations."
+}

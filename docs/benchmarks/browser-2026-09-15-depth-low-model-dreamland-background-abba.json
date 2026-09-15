@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-dream-land-stagebackground-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "scene": {"stage":"Dream Land 64","fighters":["Ice Climbers","Ice Climbers"],"renderer":"depth-corrected 960x720 WebGL","modelDetail":"native low detail","codegen":"block merge and state-exact animation fusion on"},
+  "backgroundDrawValues": [true,false,false,true],
+  "simulationFps": [57.06890,58.83768,58.77134,59.60428],
+  "distinctVisibleFps": [56.00219,57.53758,56.87119,58.17085],
+  "blackBackgroundPairedGainFps": [1.53539,-1.29966],
+  "inputConsistency": {"passed":true,"checked":110,"mismatches":[]},
+  "stageCoverage": {"objects":1,"decorativeMapId":3,"preservedGameplay":true,"sameAtEndOfEveryLeg":true},
+  "validity": "Four 30-second measured legs from one native-gameplay checkpoint, with changing 960x720 images and two active native logic-frame controller tracks. Planned warmups excluded.",
+  "decision": "Reject default black-background promotion on corrected Dream Land: opposing paired visible-FPS results, and no 60-FPS passing leg. Restore the normal native background after comparison.",
+  "limits": "Controller fingerprints and stage callback preservation do not replace a full-machine replay or visual camera inspection if this cosmetic mode is later promoted. One matchup and stage cannot establish all-stage benefit."
+}

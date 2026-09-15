@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-presentation-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "renderer": "depth-corrected WebGL, 960x720",
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "modelDetail": "native low-detail fighter tables, same on both configurations",
+  "inputConsistency": {"passed":true,"sharedFingerprints":108,"mismatches":[],"limits":"Native logic-frame rolling input/action/position fingerprints, not whole emulator-state equality."},
+  "runs": [
+    {"mainRafQueue":false,"simulationFps":55.16800,"distinctVisibleFps":52.33460,"mainQueueAgeMs":0,"passed":false},
+    {"mainRafQueue":true,"simulationFps":55.03258,"distinctVisibleFps":53.36594,"mainQueueAgeMs":13.48458,"passed":false},
+    {"mainRafQueue":true,"simulationFps":57.53453,"distinctVisibleFps":55.53449,"mainQueueAgeMs":18.07662,"passed":false},
+    {"mainRafQueue":false,"simulationFps":58.78381,"distinctVisibleFps":55.98300,"mainQueueAgeMs":0,"passed":false}
+  ],
+  "pairedDirectMinusRafVisibleFps": [-1.03134,0.44850],
+  "decision": "Retain the main two-image RAF queue default. Immediate delivery reduces one measured queue component but shows opposing visible-FPS pair results and no strict 60-FPS leg. The original queue is restored after the control.",
+  "limits": "Measured main queued-image age is one component of presentation delay, not physical input-to-photon latency. The emulator worker still has its own queue and CPU pressure. RAF image sampling cannot guarantee physical scanout timing."
+}

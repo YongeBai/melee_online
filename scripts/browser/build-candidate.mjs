@@ -8,6 +8,12 @@ const engine = resolve(root, "engines/wasm-dolphin");
 const local = resolve(root, ".browser-tools");
 const outputDir = resolve(process.env.DOLPHIN_WASM_OUTPUT_DIR || resolve(engine, "build/browser-output"));
 const buildDir = resolve(process.env.DOLPHIN_WASM_BUILD_DIR || resolve(engine, "build/dolphin-wasm"));
+const gxFullCheck = process.argv.includes("--gx-fullcheck");
+const interpreterSource = readFileSync(resolve(engine,
+  "vendor/dolphin/Source/Core/Core/PowerPC/CachedInterpreter/CachedInterpreter.cpp"), "utf8");
+const gxHasFullWrites = interpreterSource.includes("fifo.Write64((u64{matrix[i]} << 32) | matrix[i + 1]);");
+if (gxFullCheck !== gxHasFullWrites)
+  throw Error("Apply or reverse browser-gx-fullcheck.patch in the private vendor checkout before building");
 const lockPath = resolve(local, "linux-toolchain.lock.json");
 const hash = p => createHash("sha256").update(readFileSync(p)).digest("hex");
 Object.assign(process.env, {
@@ -33,7 +39,8 @@ built.info.source.experimental = true;
 // These consolidated patches reproduce the exact ignored engine and Dolphin
 // source trees used by the current candidate. The engine patch applies to a
 // clean wasm-dolphin checkout; the vendor patch applies after patch:upstream.
-const patches = ["browser-720p60-engine.patch", "browser-720p60-vendor.patch"];
+const patches = ["browser-720p60-engine.patch", "browser-720p60-vendor.patch",
+  ...(gxFullCheck ? ["browser-gx-fullcheck.patch"] : [])];
 built.info.source.additionalPatches = patches.map(name => ({ name, sha256: hash(resolve(import.meta.dirname, name)) }));
 built.info.toolchain.lockSha256 = hash(lockPath);
 writeFileSync(built.destination, JSON.stringify(built.info, null, 2) + "\n");
