@@ -5,6 +5,22 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original collision initialization, reset and world-position updates now run for
+all 27 playable fighter components: 318 hurtboxes and the two retail dynamics
+colliders. Across 864 animated frames plus exact rewind, positions agree with
+independent matrix multiplication within 0.00000191 world units. Original cached
+position updates are checked too. Kirby's 13 reserved accessory slots and Link's
+and Young Link's reserved slot remain in the part mapping.
+
+The portable declaration now gives the dynamics-collider array all eleven entries
+instead of a one-entry decompiler placeholder plus padding. C offset/extent checks
+preserve the original Fighter layout, and an independent synthetic fixture fills
+all eleven slots through the original initializer. The 59 targeted tests, complete
+5,508-clip browser regression and 81 unchanged sampled images pass. This uses a
+limited Fighter context; complete parts/material setup, dynamic-bone simulation,
+Fighter_Create and combat remain.
+[Character-collision checkpoint](benchmarks/browser-2026-09-15-native-port-character-collision.json).
+
 All 23 sections of PlCo now import, and the original Fighter_LoadCommonData runs
 in browser WASM. Its 23 global bindings and all 805 source relocations remain
 valid after the prefetched file cache is released. The original loader retains

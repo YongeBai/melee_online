@@ -1,0 +1,347 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 199274,
+    "wasmSha256": "8fb4c7fd8b8d7a369132f8a622c4d4122039a0639d5c41a2ee55fd68ae1af026"
+  },
+  "characterCollision": {
+    "passed": true,
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "partCount": 61,
+        "reservedParts": 0,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFx.dat",
+        "partCount": 73,
+        "reservedParts": 0,
+        "hurtboxes": 13,
+        "dynamicColliders": 1,
+        "frames": 32,
+        "reads": 11812,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlCa.dat",
+        "partCount": 63,
+        "reservedParts": 0,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDk.dat",
+        "partCount": 75,
+        "reservedParts": 0,
+        "hurtboxes": 13,
+        "dynamicColliders": 1,
+        "frames": 32,
+        "reads": 11812,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKb.dat",
+        "partCount": 59,
+        "reservedParts": 13,
+        "hurtboxes": 5,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 4542,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKp.dat",
+        "partCount": 76,
+        "reservedParts": 0,
+        "hurtboxes": 15,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 13622,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLk.dat",
+        "partCount": 76,
+        "reservedParts": 1,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSk.dat",
+        "partCount": 58,
+        "reservedParts": 0,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNs.dat",
+        "partCount": 63,
+        "reservedParts": 0,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPe.dat",
+        "partCount": 114,
+        "reservedParts": 0,
+        "hurtboxes": 14,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 12714,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPp.dat",
+        "partCount": 49,
+        "reservedParts": 0,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNn.dat",
+        "partCount": 49,
+        "reservedParts": 0,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPk.dat",
+        "partCount": 53,
+        "reservedParts": 0,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPr.dat",
+        "partCount": 50,
+        "reservedParts": 0,
+        "hurtboxes": 9,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 8174,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSs.dat",
+        "partCount": 60,
+        "reservedParts": 0,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYs.dat",
+        "partCount": 70,
+        "reservedParts": 0,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlZd.dat",
+        "partCount": 118,
+        "reservedParts": 0,
+        "hurtboxes": 12,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 10898,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLg.dat",
+        "partCount": 61,
+        "reservedParts": 0,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMt.dat",
+        "partCount": 68,
+        "reservedParts": 0,
+        "hurtboxes": 14,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 12714,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMs.dat",
+        "partCount": 90,
+        "reservedParts": 0,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGw.dat",
+        "partCount": 53,
+        "reservedParts": 0,
+        "hurtboxes": 15,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 13622,
+        "maxWorldError": 2.9802322387695312e-8,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDr.dat",
+        "partCount": 86,
+        "reservedParts": 0,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlCl.dat",
+        "partCount": 80,
+        "reservedParts": 1,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPc.dat",
+        "partCount": 46,
+        "reservedParts": 0,
+        "hurtboxes": 14,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 12714,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFe.dat",
+        "partCount": 92,
+        "reservedParts": 0,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGn.dat",
+        "partCount": 84,
+        "reservedParts": 0,
+        "hurtboxes": 12,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 10898,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFc.dat",
+        "partCount": 67,
+        "reservedParts": 0,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      }
+    ],
+    "capacityChecks": 11,
+    "hurtboxes": 318,
+    "frames": 864,
+    "limitation": "Original initialization, reset, world-position and cache routines; limited Fighter context, no combat/dynamic-bone simulation or complete part/material setup"
+  },
+  "regression": {
+    "targetedTests": 59,
+    "commonInitialization": true,
+    "allAnimationClips": 5508,
+    "unchangedImages": 81,
+    "compileAudit": {
+      "total": 1130,
+      "compiled": 1047,
+      "failed": 83
+    }
+  },
+  "gpu": {
+    "resolution": [
+      960,
+      720
+    ],
+    "softwareGpu": true,
+    "maxVertexError": 0.000003814697265625
+  },
+  "limitations": [
+    "Limited Fighter context with original collision initialization/reset/world-position code, not Fighter_Create or combat",
+    "Reserved accessory slots mapped from original shared part groups; full parts/material setup remains",
+    "Animation/dynamics integration still needs original fighter callbacks; dynamic-bone simulation is not run",
+    "Position reference uses native matrices and independent multiply-adds, not Dolphin match parity"
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "inputLatencyMeasured": false
+}

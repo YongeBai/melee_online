@@ -35,6 +35,11 @@ export function preparePortableSource(source,output) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
     if(file==='src/melee/ft/types.h') {
+      // The original loops allow eleven dynamics colliders (0x1670..0x1828).
+      // Replace the decomp's one-entry placeholder plus padding with that real
+      // array so native C indexing stays within its declared object.
+      replace('    /* fp+1670 */ Fighter_x1670_t x1670[1]; ///< @todo figure out proper size\n    /* fp+1674 */ u8 filler_x1674[0x1828 - 0x1670 - 0x28];',
+        '    /* fp+1670 */ Fighter_x1670_t x1670[11];');
       const match=/struct gmScriptEventDefault \{([^{}]*)\};/.exec(text);
       if(!match)throw Error('Missing fighter command dispatch view');
       const converted=reverseCommandBits(match[1]);

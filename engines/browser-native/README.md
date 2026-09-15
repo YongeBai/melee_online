@@ -97,6 +97,13 @@ assembly fallback or gameplay mismatch.
   original timer/loop/call/goto/animation-wait routines pass nested control checks.
   Raw script assets must still be type-converted before using this representation.
   The probes do not run fighter action handlers or claim gameplay parity.
+- `character-collision-assets.mjs` imports the typed hurtbox/dynamics-collider
+  subgraph. Original initialization/reset/world-position routines read it through
+  a limited Fighter fixture with original model bones and shared reserved-part
+  mappings. All 318 hurtboxes across 27 components pass animation, cached update
+  and rewind checks. Eleven synthetic colliders exercise the native array limit;
+  the portable header replaces its one-entry placeholder without changing layout.
+  Full parts/material setup, dynamic-bone simulation and combat remain pending.
 - `shared-assets.mjs` imports all 23 PlCo sections, including three shared
   models and HSD joint animation. Generated probes check all 536 common-parameter
   field offsets. Original bone lookup, remapping, part groups and landing

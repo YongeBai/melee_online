@@ -26,6 +26,7 @@ try {
     if(!verification.shared.colors?.passed||verification.shared.colors.entries!==129)throw Error('Incomplete original color interpreter coverage');
     if(!verification.shared.cpu?.passed||verification.shared.cpu.scripts!==61||verification.shared.cpu.choices!==8192)throw Error('Incomplete original CPU data coverage');
     if(!verification.commonInitialization?.passed||verification.commonInitialization.globals!==23||verification.commonInitialization.models.length!==3)throw Error('Incomplete original common initialization');
+    if(!verification.characterCollision?.passed||verification.characterCollision.rows.length!==27||verification.characterCollision.frames!==864||verification.characterCollision.capacityChecks!==11)throw Error('Incomplete original character collision initialization');
     if(!verification.motions?.passed||verification.motions.components.length!==27||verification.motions.rows!==8767||verification.motions.sceneClips.length!==39||verification.motions.liveOwners!==0)throw Error('Incomplete original motion loader coverage');
   } else if(!verification.passed||verification.stages.length!==6||verification.fighters.length!==27||verification.poses.models!==27||
     (allAnimations?!verification.animations.allAnimations:verification.animations.clips.length!==27))
