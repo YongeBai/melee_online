@@ -21,6 +21,7 @@ try {
   const entities={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"'};
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
   if(scene) {
+    if(!verification.attributes?.passed||verification.attributes.rows.length!==27||verification.attributes.copies!==135)throw Error('Incomplete original character attribute coverage');
     if(!verification.passed||verification.models.length!==27||verification.animations.clips.length!==38||verification.residentFiles?.files.length!==27||!verification.residentFiles.lifecycle?.passed)throw Error('Incomplete native HSD scene coverage');
     if(!verification.shared?.passed||verification.shared.fields!==536||verification.shared.parts!==34||verification.shared.sections.length!==23)throw Error('Incomplete typed shared-data coverage');
     if(!verification.shared.colors?.passed||verification.shared.colors.entries!==129)throw Error('Incomplete original color interpreter coverage');

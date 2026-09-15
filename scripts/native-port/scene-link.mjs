@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-export function sceneLinkInputs(root,upstream,output) {
+export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
   const auditDir=path.join(output,'audit'),report=JSON.parse(fs.readFileSync(path.join(auditDir,'link-report.json')));
   const recipe=createHash('sha256').update(fs.readFileSync(new URL('./portable-source.mjs',import.meta.url))).digest('hex');
   if(report.portableSource?.recipeSha256!==recipe)throw Error('Re-run native compile/link audits before scene bring-up');
@@ -25,12 +25,14 @@ export function sceneLinkInputs(root,upstream,output) {
     .filter(file=>!failed.has(file)).map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
   const library=path.join(auditDir,'scene-hsd.a');fs.rmSync(library,{force:true});
   execFileSync(path.join(root,'.browser-tools/emsdk/upstream/emscripten/emar'),['rcs',library,...objects]);
-  // Only character filename definitions are needed by the animation loader.
-  // Explicit objects allow dead-code elimination without recursively extracting
+  // The animation loader needs character filenames; callers can additionally
+  // retain original per-character initialization routines. Explicit objects
+  // allow dead-code elimination without recursively extracting
   // unrelated game/platform implementations from the full audit library.
   const characterFiles=execFileSync('rg',['-l','char.*Init_AnimDatFilename.*=','src/melee/ft','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort();
   if(characterFiles.length!==33||characterFiles.some(file=>failed.has(file)))throw Error('Character animation filename source set changed');
-  const characterObjects=characterFiles.map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
+  if(additionalFiles.some(file=>failed.has(file)))throw Error('Required character loader failed the compile audit');
+  const characterObjects=[...new Set([...characterFiles,...additionalFiles])].map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
   return {files:[path.join(root,'engines/browser-native/scene.c'),guards,library,...characterObjects],
     unavailableGX:missing,auditOptimization:'-O0',renderingReady:false};
 }

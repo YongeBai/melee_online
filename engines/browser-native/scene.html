@@ -5,6 +5,7 @@
 <p>Native object loading, animation and lifetime checks. This is not a playable match or a performance test.</p>
 <pre id="result">Loading hosted assets…</pre>
 <script type="module">
+import {verifyAttributes} from './verify-attributes.mjs';
 import {verifyCharacterCollision} from './verify-character-collision.mjs';
 import {verifyCommonInitialization} from './verify-common-initialization.mjs';
 import {verifyShared} from './verify-shared.mjs';
@@ -23,7 +24,9 @@ try {
     }));
   }
   const [models,animations,fighters]=await Promise.all([load('model-fixtures.json'),load('animation-fixtures.json'),load('fighter-fixtures.json')]);
+  const attributes=verifyAttributes(module,fighters);
   const report=verifyScene(module,models);report.residentFiles=verifyResidentFiles(module,models);report.residentFiles.lifecycle=verifyResidentLifecycle(module);report.animations=verifySceneAnimations(module,models,animations);
+  report.attributes=attributes;
   const [shared]=await load('shared-fixtures.json');report.shared=verifyShared(module,shared.bytes);
   report.motions=verifyMotions(module,fighters,animations,models);
   report.commonInitialization=verifyCommonInitialization(module,shared.bytes);

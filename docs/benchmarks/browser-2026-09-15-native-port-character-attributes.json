@@ -1,0 +1,329 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 217204,
+    "wasmSha256": "08619e582b46d351fa32c8ffd3ec3f78e706eeab2a353d6dcc6417d102af02ae"
+  },
+  "layouts": {
+    "target": "powerpc-unknown-none-eabi",
+    "matchingRecords": 20,
+    "uniqueFields": 1346,
+    "sourceSha256": "db227c579b525ff357b427e86fad33017ada28e3ebaa4976aa9c97557024739a"
+  },
+  "attributes": {
+    "passed": true,
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "kind": 0,
+        "type": "ftMario_DatAttrs",
+        "bytes": 132,
+        "fields": 33,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlFx.dat",
+        "kind": 1,
+        "type": "ftFox_DatAttrs",
+        "bytes": 212,
+        "fields": 53,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlCa.dat",
+        "kind": 2,
+        "type": "ftCaptain_DatAttrs",
+        "bytes": 140,
+        "fields": 35,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlDk.dat",
+        "kind": 3,
+        "type": "ftDonkeyAttributes",
+        "bytes": 116,
+        "fields": 29,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlKb.dat",
+        "kind": 4,
+        "type": "struct ftKb_DatAttrs",
+        "bytes": 1060,
+        "fields": 265,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlKp.dat",
+        "kind": 5,
+        "type": "ftKoopaAttributes",
+        "bytes": 160,
+        "fields": 40,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlLk.dat",
+        "kind": 6,
+        "type": "ftLk_DatAttrs",
+        "bytes": 220,
+        "fields": 67,
+        "scaledFields": [
+          "specialhi_pos_y_offset"
+        ],
+        "copies": 5
+      },
+      {
+        "name": "PlSk.dat",
+        "kind": 7,
+        "type": "ftSeakAttributes",
+        "bytes": 116,
+        "fields": 29,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlNs.dat",
+        "kind": 8,
+        "type": "ftNessAttributes",
+        "bytes": 220,
+        "fields": 55,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlPe.dat",
+        "kind": 9,
+        "type": "ftPe_DatAttrs",
+        "bytes": 192,
+        "fields": 48,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlPp.dat",
+        "kind": 10,
+        "type": "ftIceClimberAttributes",
+        "bytes": 348,
+        "fields": 165,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlNn.dat",
+        "kind": 11,
+        "type": "ftIceClimberAttributes",
+        "bytes": 348,
+        "fields": 165,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlPk.dat",
+        "kind": 12,
+        "type": "ftPikachuAttributes",
+        "bytes": 248,
+        "fields": 62,
+        "scaledFields": [
+          "height_attributes.top",
+          "height_attributes.bottom",
+          "height_attributes.left.x",
+          "height_attributes.left.y",
+          "height_attributes.right.x",
+          "height_attributes.right.y"
+        ],
+        "copies": 5
+      },
+      {
+        "name": "PlPr.dat",
+        "kind": 15,
+        "type": "ftPurinAttributes",
+        "bytes": 256,
+        "fields": 82,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlSs.dat",
+        "kind": 13,
+        "type": "ftSs_DatAttrs",
+        "bytes": 212,
+        "fields": 53,
+        "scaledFields": [
+          "x8",
+          "x54",
+          "x58",
+          "x74_vec.y",
+          "height_attributes.top",
+          "height_attributes.bottom",
+          "height_attributes.left.x",
+          "height_attributes.left.y",
+          "height_attributes.right.x",
+          "height_attributes.right.y"
+        ],
+        "copies": 5
+      },
+      {
+        "name": "PlYs.dat",
+        "kind": 14,
+        "type": "ftYoshiAttributes",
+        "bytes": 312,
+        "fields": 117,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlZd.dat",
+        "kind": 19,
+        "type": "ftZelda_DatAttrs",
+        "bytes": 168,
+        "fields": 42,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlLg.dat",
+        "kind": 17,
+        "type": "ftLuigiAttributes",
+        "bytes": 152,
+        "fields": 38,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlMt.dat",
+        "kind": 16,
+        "type": "ftMewtwoAttributes",
+        "bytes": 136,
+        "fields": 34,
+        "scaledFields": [
+          "x80_MEWTWO_DISABLE_OFFSET_X",
+          "x84_MEWTWO_DISABLE_OFFSET_Y"
+        ],
+        "copies": 5
+      },
+      {
+        "name": "PlMs.dat",
+        "kind": 18,
+        "type": "MarsAttributes",
+        "bytes": 152,
+        "fields": 47,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlGw.dat",
+        "kind": 24,
+        "type": "ftGameWatchAttributes",
+        "bytes": 148,
+        "fields": 52,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlDr.dat",
+        "kind": 21,
+        "type": "ftMario_DatAttrs",
+        "bytes": 132,
+        "fields": 33,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlCl.dat",
+        "kind": 20,
+        "type": "ftLk_DatAttrs",
+        "bytes": 220,
+        "fields": 67,
+        "scaledFields": [
+          "specialhi_pos_y_offset"
+        ],
+        "copies": 5
+      },
+      {
+        "name": "PlPc.dat",
+        "kind": 23,
+        "type": "ftPikachuAttributes",
+        "bytes": 248,
+        "fields": 62,
+        "scaledFields": [
+          "height_attributes.top",
+          "height_attributes.bottom",
+          "height_attributes.left.x",
+          "height_attributes.left.y",
+          "height_attributes.right.x",
+          "height_attributes.right.y"
+        ],
+        "copies": 5
+      },
+      {
+        "name": "PlFe.dat",
+        "kind": 26,
+        "type": "MarsAttributes",
+        "bytes": 152,
+        "fields": 47,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlGn.dat",
+        "kind": 25,
+        "type": "ftCaptain_DatAttrs",
+        "bytes": 140,
+        "fields": 35,
+        "scaledFields": [],
+        "copies": 5
+      },
+      {
+        "name": "PlFc.dat",
+        "kind": 22,
+        "type": "ftFox_DatAttrs",
+        "bytes": 212,
+        "fields": 53,
+        "scaledFields": [],
+        "copies": 5
+      }
+    ],
+    "fieldReads": 3616,
+    "copies": 135,
+    "scaledFields": 78,
+    "recordTypes": 20,
+    "limitation": "Original per-character parameter copies and scale adjustments; OnLoad item registration and full Fighter_Create are not executed"
+  },
+  "regression": {
+    "targetedTests": 63,
+    "commonInitialization": true,
+    "characterCollision": true,
+    "motionRows": 8767,
+    "sceneClips": 38,
+    "unchangedImages": 81
+  },
+  "gpu": {
+    "resolution": [
+      960,
+      720
+    ],
+    "softwareGpu": true,
+    "maxVertexError": 0.000003814697265625
+  },
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "inputLatencyMeasured": false,
+  "limitations": [
+    "Original LoadSpecialAttrs callbacks only; complete Fighter_Create/OnLoad item registration and combat remain",
+    "PowerPC layout cross-check uses Clang with the same compatibility header, not retail MWCC execution",
+    "Six opaque pointer-typed decomp fields retain unrelocated scalar bits; they are not imported pointer graphs",
+    "Compiler-inserted padding is excluded from struct-assignment equality; declared byte fields remain checked"
+  ]
+}

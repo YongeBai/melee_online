@@ -5,6 +5,20 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+All 27 original LoadSpecialAttrs callbacks now execute in browser WASM, including
+clone delegation and the size adjustments for Link/Young Link, Pikachu/Pichu,
+Samus and Mewtwo. Import covers 20 distinct layouts and 1,346 named scalar fields.
+Compiler-generated offsets and widths match a separate PowerPC-targeted layout
+check. Packed colors, byte arrays, Kirby's halfword and opaque unrelocated words
+retain their original representations.
+
+Browser verification passes 3,616 field reads, 135 original parameter loads and
+78 scaled-field cases. The 63 targeted tests pass, existing initialization,
+collision and motion checks pass, and all 81 sampled 720p images are unchanged.
+This still does not execute complete Fighter_Create, OnLoad item registration or
+combat, and there is no native match FPS or input-latency result.
+[Character-attribute checkpoint](benchmarks/browser-2026-09-15-native-port-character-attributes.json).
+
 Original collision initialization, reset and world-position updates now run for
 all 27 playable fighter components: 318 hurtboxes and the two retail dynamics
 colliders. Across 864 animated frames plus exact rewind, positions agree with

@@ -1,3 +1,4 @@
+import {readAttributeSpec,attributeProbeSource} from './attribute-spec.mjs';
 import {readSharedSpec,sharedProbeSource} from './shared-spec.mjs';
 import {readMotionSpec} from './motion-spec.mjs';
 import fs from 'node:fs';
@@ -97,10 +98,13 @@ const commandProbe=path.join(output,'command-layout-probe.c');
 fs.writeFileSync(commandProbe,commandProbeSource(portable.commandFields));
 fs.writeFileSync(path.join(output,'command-fields.mjs'),'export const commandFields='+JSON.stringify(portable.commandFields)+';\n');
 fs.writeFileSync(path.join(output,'motion-spec.mjs'),'export const motionSpec='+JSON.stringify(readMotionSpec(upstream))+';\n');
-const sceneInputs=scene?sceneLinkInputs(root,upstream,output):null;
+const attributeSpec=readAttributeSpec(upstream,output,compiler),attributeProbe=path.join(output,'attribute-probe.c');
+fs.writeFileSync(attributeProbe,attributeProbeSource(attributeSpec));
+fs.writeFileSync(path.join(output,'attribute-spec.mjs'),'export const attributeSpec='+JSON.stringify(attributeSpec)+';\n');
+const sceneInputs=scene?sceneLinkInputs(root,upstream,output,attributeSpec.characters.map(c=>c.file)):null;
 if(scene) {
   exports=exports.filter(name=>!['portInterpolate','portSeed','portRandom','portStagePrune','portStageMetric','portArchiveOpen','portArchiveSymbol','portArchiveClose','portFighterAttribute','portFighterPhysicsProbe'].includes(name));
-  exports.push('portCollisionAttach','portCollisionReset','portCollisionWorld','portCollisionRead','portSharedInitialize','portSharedGlobal','portSceneJointAnimation','portCpuScript','portCpuChoose','portColorCreate','portColorDestroy','portColorSelect','portColorStep','portColorRead','portSharedField','portSharedPart','portSharedLanding','portMotionCreate','portMotionDestroy','portMotionLoad','portMotionEntry','portMotionLive','portMotionBuffers','portFilePins',
+  exports.push('portAttributeField','portAttributeSize','portAttributesLoad','portCollisionAttach','portCollisionReset','portCollisionWorld','portCollisionRead','portSharedInitialize','portSharedGlobal','portSceneJointAnimation','portCpuScript','portCpuChoose','portColorCreate','portColorDestroy','portColorSelect','portColorStep','portColorRead','portSharedField','portSharedPart','portSharedLanding','portMotionCreate','portMotionDestroy','portMotionLoad','portMotionEntry','portMotionLive','portMotionBuffers','portFilePins',
     'portSceneObjectDeleteNextStep','portSceneObjectCreate','portSceneObjectRoot','portSceneObjectFree','portSceneLoad','portSceneDestroy','portSceneCollect','portSceneMatrices','portSceneMetric','portSceneLiveJoints',
     'portFileInstall','portFileCount','portFileBytes','portFileReads','portFileAllocations','portFileClear','portFileArchive','portFileArchiveClose','portFileArchivePair',
     'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects');
@@ -117,12 +121,12 @@ execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.
   path.join(root, 'engines/browser-native/matrix-special.c'),
   path.join(root, 'engines/browser-native/pose.c'),
   path.join(root, 'engines/browser-native/skin.c'),
-  ...(sceneInputs?[path.join(root,'engines/browser-native/character-collision.c'),sharedProbe,path.join(root,'engines/browser-native/cpu.c'),path.join(root,'engines/browser-native/colors.c'),path.join(root,'engines/browser-native/shared.c'),path.join(root,'engines/browser-native/motions.c'),path.join(root,'engines/browser-native/resident-files.c'),...sceneInputs.files]:[]),
+  ...(sceneInputs?[attributeProbe,path.join(root,'engines/browser-native/attributes.c'),path.join(root,'engines/browser-native/character-collision.c'),sharedProbe,path.join(root,'engines/browser-native/cpu.c'),path.join(root,'engines/browser-native/colors.c'),path.join(root,'engines/browser-native/shared.c'),path.join(root,'engines/browser-native/motions.c'),path.join(root,'engines/browser-native/resident-files.c'),...sceneInputs.files]:[]),
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, moduleName+'.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+for (const name of ['attribute-assets.mjs','verify-attributes.mjs','character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));

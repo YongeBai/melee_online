@@ -97,6 +97,12 @@ assembly fallback or gameplay mismatch.
   original timer/loop/call/goto/animation-wait routines pass nested control checks.
   Raw script assets must still be type-converted before using this representation.
   The probes do not run fighter action handlers or claim gameplay parity.
+- `attribute-assets.mjs` imports special parameters for all 27 components.
+  `attribute-spec.mjs` obtains 20 layouts from the WASM compiler, cross-checks
+  them with a PowerPC-targeted compiler and generates C offset/width probes.
+  Numeric words, halfwords, packed colors and byte arrays remain distinct.
+  Original LoadSpecialAttrs callbacks pass copies, clone delegation and scaling
+  through a limited Fighter/GObj context. This is not full OnLoad or Fighter_Create.
 - `character-collision-assets.mjs` imports the typed hurtbox/dynamics-collider
   subgraph. Original initialization/reset/world-position routines read it through
   a limited Fighter fixture with original model bones and shared reserved-part
