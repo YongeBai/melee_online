@@ -2,6 +2,8 @@
 // depth, while the generated OpenGL comparison and clear bindings do not.
 // Keep this separate from the immutable original loader and WASM artifact.
 export const WEBGL_DEPTH_CORE = 'b041332554a42918a67b72e58c171ffbacb3c4fff2acd1c0186f95e1b9e20b52';
+export const VERIFIED_DEPTH_CORES = new Set([WEBGL_DEPTH_CORE,
+  '78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade']);
 export function correctWebGLDepthLoader(source) {
   const replace = (from, to) => {
     if (source.split(from).length !== 2) throw Error('Unexpected core loader: ' + from);

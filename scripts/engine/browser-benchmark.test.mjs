@@ -152,6 +152,19 @@ test('Fountain comparison holds one checkpoint and restores reflection even afte
  await assert.rejects(compareFountainReflection(host,30,async()=>({match:{stage:31}})),/requires Fountain/);
 });
 
+test('fighter model comparison accepts Dream Land and restores native detail',async()=>{
+ const {compareFountainReflection}=await import('./browser-benchmark.js');const settings=[];
+ const host={adapter:{request:async(t,d)=>{
+   if(t==='meleeControl'){settings.push(d);return{objects:[{}]};}
+   return{};
+ }}};
+ const result=await compareFountainReflection(host,30,async()=>({match:{stage:28}}),
+   {feature:'modeldetail',measure:async()=>({passed:true})});
+ assert.equal(result.kind,'same-checkpoint-dream land-modeldetail-abba');
+ assert.deepEqual(result.runs.filter(r=>!r.warmup).map(r=>r.modeldetail),[true,false,false,true]);
+ assert.equal(settings.at(-1).enabled,true);
+});
+
 test('GPR comparison toggles only GPR caching and restores the original configuration',async()=>{
  const {compareBrowserCodegen}=await import('./browser-benchmark.js');const changes=[];const host={cachedInterpreterDisableMask:(1<<16)|(1<<18),adapter:{request:async(t,d)=>{if(d.action==='codegen')changes.push(d);return {};}}};
  const result=await compareBrowserCodegen(host,30,()=>{},{feature:'regcache',measure:async()=>({passed:true})});

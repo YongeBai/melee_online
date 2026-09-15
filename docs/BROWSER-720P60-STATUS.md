@@ -9,6 +9,33 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 14 camera/depth correction: an isolated native Dolphin reference and
+the browser Dream Land 64 Ice Climbers mirror both reported camera interest
+`[-22.703764,23.204119,0]`, position `[-14.457623,42.405716,125.036156]`,
+FOV 30, and zero pitch/yaw offsets at early idle match frames. The original
+static package copied an uncorrected WebGL loader: its reversed depth placed the
+Dream Land tree over P1 and hid the foreground water. Applying the pinned
+fail-closed depth bridge to the shipped loader restores both fighters, platform,
+tree face, flowers, and foreground water in the visually matched native scene.
+The corrected loader has a versioned URL so previously cached raw loaders
+cannot mask the repair. Prior high FPS measurements of the raw package do not
+validate normal gameplay visuals; corrected-package timing and broader stage
+and roster coverage are required before certification. The hosted no-ISO flow
+and original camera/projection values remain unchanged.
+The first corrected static 30-second Dream Land IC/IC leg measured 52.998
+simulation and 52.031 distinct visible FPS at 960×720 with normal scenery and
+model detail. A separate cold leg with several CPU and cosmetic flags reached
+48.069/47.568 FPS; it was not a same-checkpoint A/B test, so do not attribute
+that difference to any one flag. The full older tuned query timed out before
+gameplay. [Depth release validation](benchmarks/browser-2026-09-14-depth-release-validation.json).
+The corrected same-checkpoint high/low/low/high fighter-model control then
+measured 52.54/55.94/55.24/53.47 distinct visible FPS on Dream Land IC/IC.
+Both pairs favor the game's own low-detail mesh tables; the mean visible gain
+is 2.59 FPS, with 107 shared native-input fingerprints and intact 960×720
+images. Mean queue age rose 2.28 ms, and the fastest leg still missed 60.
+Low detail remains opt-in pending representative roster/costume visuals.
+[Fighter model control](benchmarks/browser-2026-09-14-dreamland-fighter-model-abba.json).
+
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation
 processes while preserving its main object and platforms. Ice Climbers ABBA

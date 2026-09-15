@@ -1489,3 +1489,23 @@ the pinned wasm-dolphin checkout, and `browser-720p60-vendor.patch` applies
 after the locked upstream Dolphin snapshot. Both patches were applied in a
 fresh temporary worktree and every changed or added source file was compared
 byte-for-byte with the benchmarked checkout.
+
+September 14 browser release correction: a private native Dolphin reference
+and an automatic-hosted static browser package ran the same Dream Land 64 Ice
+Climbers spawn. Their camera interest, position, FOV 30, and zero pitch/yaw
+offsets agreed exactly at early idle match frames. The old release packager
+copied the generated WebGL JS loader without the existing reversed-depth
+compatibility bridge: the tree hid the foreground P1 and the water was missing.
+Correcting comparisons, clear depth and the utility clear shader restored the
+fighters, tree face and water in a visually inspected 960×720 native-like image.
+The release selects a `depth-v2` loader URL so a previously immutable cached JS
+cannot serve the wrong renderer. WASM and game logic are unchanged. A clean
+corrected 30-second package leg reached 52.998 simulation / 52.031 distinct
+visible FPS, 960×720, Dream Land IC/IC, four stocks, eight minutes, no items.
+No same-checkpoint raw/corrected speed comparison was claimed: older near-60
+raw-loader timings are not visually valid acceptance runs. An idle Chrome RAF
+probe reached 60.014 Hz, ruling out an immediate browser display-cadence cap.
+The candidate core carries a source patch snapshot whose hash differs from the
+current retained engine patch, although its recorded local source inputs still
+match; do not publish a source reproduction claim for this binary from the
+current patch. See `benchmarks/browser-2026-09-14-depth-release-validation.json`.

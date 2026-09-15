@@ -552,6 +552,10 @@ export async function compareFountainReflection(host,seconds,inspect,{measure=me
   await command('pause');await command('step');
   const inspectedStage=(await inspect()).match?.stage;
   if(reverb){if(!Number.isInteger(inspectedStage))throw Error('Reverb comparison requires a live tournament match');}
+  else if(feature==='modeldetail'){
+   const stages={2:'Fountain',3:'Stadium',8:'Yoshi',28:'Dream Land',31:'Battlefield',32:'Final Destination'};
+   stageName=stages[inspectedStage];if(!stageName)throw Error('Model detail comparison requires a neutral tournament stage');
+  }
   else if(stageBackground){const stages={2:'Fountain',3:'Stadium',8:'Yoshi',28:'Dream Land',31:'Battlefield',32:'Final Destination'};stageName=stages[inspectedStage];if(!stageName)throw Error('Stage background comparison requires a neutral tournament stage');}
   else if(staticBackground){if(![31,32].includes(inspectedStage))throw Error('Static background comparison requires Battlefield or Final Destination');stageName=inspectedStage===31?'Battlefield':'Final Destination';}
   else if(inspectedStage!==(yoshi?8:stadium?3:2))throw Error('Cosmetic comparison requires '+stageName);

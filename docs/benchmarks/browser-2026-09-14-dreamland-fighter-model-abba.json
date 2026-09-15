@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-14",
+  "kind": "same-checkpoint-dream-land-modeldetail-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "renderer": "versioned reversed-depth corrected WebGL loader",
+  "stage": "Dream Land 64",
+  "fighters": ["Ice Climbers", "Ice Climbers"],
+  "nativeInput": {
+    "passed": true,
+    "sharedFingerprints": 107,
+    "mismatches": [],
+    "limits": "Rolling logic-frame input/action/state fingerprints and polling gaps; not byte-for-byte full machine state or measured human input-to-photon latency."
+  },
+  "controlledRuns": [
+    {"highDetail":true,"simulationFps":53.16871,"distinctVisibleFps":52.53536,"sourceResolution":[960,720],"queueUnderruns":216,"meanQueueAgeMs":10.79511,"passed":false},
+    {"highDetail":false,"simulationFps":57.33716,"distinctVisibleFps":55.93706,"sourceResolution":[960,720],"queueUnderruns":111,"meanQueueAgeMs":14.17233,"passed":false},
+    {"highDetail":false,"simulationFps":57.03704,"distinctVisibleFps":55.23692,"sourceResolution":[960,720],"queueUnderruns":126,"meanQueueAgeMs":14.21488,"passed":false},
+    {"highDetail":true,"simulationFps":54.33333,"distinctVisibleFps":53.46667,"sourceResolution":[960,720],"queueUnderruns":182,"meanQueueAgeMs":13.04202,"passed":false}
+  ],
+  "pairedVisibleGainFps": [3.40171,1.77026],
+  "meanVisibleGainFps": 2.58598,
+  "meanSimulationGainFps": 3.43608,
+  "meanQueueAgeIncreaseMs": 2.27504,
+  "decision": "Retain the existing native low-detail fighter visibility-table control as an opt-in browser rendering candidate across tournament stages. No leg achieves sustained 720p60; keep normal high-detail default until representative other fighter costumes and match visual fidelity are verified.",
+  "limits": "A separate low-detail image visually retained the stage tree, water, HUD, fighter identity and original camera framing, while Ice Climbers looked visibly simpler. The two configurations differed in existing native model visibility tables; this A/B/B/A cannot establish complete move/skin visual coverage or physical scanout timing. Startup warmups excluded from matched measurement legs."
+}

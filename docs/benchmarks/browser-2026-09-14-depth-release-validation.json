@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-14",
+  "kind": "static-browser-depth-correction-visual-and-image-gate",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Dream Land 64",
+  "characters": ["Ice Climbers", "Ice Climbers"],
+  "nativeReference": {
+    "sourceResolution": [960, 720],
+    "sceneFrame": 421,
+    "cameraInterest": [-22.703764, 23.204119, 0],
+    "cameraPosition": [-14.457623, 42.405716, 125.036156],
+    "fov": 30,
+    "pitchOffset": 0,
+    "yawOffset": 0
+  },
+  "browserMatch": {
+    "sourceResolution": [960, 720],
+    "sceneFrame": 404,
+    "cameraInterest": [-22.703764, 23.204119, 0],
+    "cameraPosition": [-14.457623, 42.405716, 125.036156],
+    "fov": 30,
+    "pitchOffset": 0,
+    "yawOffset": 0,
+    "fighters": [{"character":14,"x":-5,"y":0.0089,"stocks":4},
+                 {"character":14,"x":-41.6,"y":30.1422,"stocks":4}]
+  },
+  "visualFinding": "The raw generated WebGL loader drew Dream Land's tree in front of P1 and omitted the native foreground water. A fail-closed reversed-depth binding and clear correction restored native foreground/background ordering, both fighters, the tree face, left platform and water in the versioned static release. This is a rendering/presentation correction; game camera values and projection were not modified.",
+  "automaticHostedStartup": true,
+  "packagedFilesVerified": 180,
+  "imageBenchmark": {
+    "durationSeconds": 30,
+    "configuration": "unmodified packaged defaults plus QA probe, no experimental cosmetic cuts",
+    "simulationFps": 52.99788,
+    "visibleDistinctFps": 52.03125,
+    "sourceResolution": [960, 720],
+    "stage": 28,
+    "characters": [14, 14],
+    "slotTypes": [0, 0],
+    "timeLimit": 480,
+    "items": -1,
+    "teams": 0,
+    "queueCapacity": 2,
+    "queueUnderruns": 229,
+    "passed": false
+  },
+  "separateMinimalTunedLeg": {
+    "configuration": "model detail low, black background, integer FIFO, single prefix, guarded block merging, animation/display-list specialization, animation conditional fusion, lean dispatch and register allocation",
+    "simulationFps": 48.06852,
+    "visibleDistinctFps": 47.56850,
+    "sourceResolution": [960, 720],
+    "queueUnderruns": 364,
+    "passed": false,
+    "interpretation": "A separate cold browser leg, not an A/B control; lower absolute FPS does not identify which optional flag changed performance. The larger all-knobs cold run timed out at scene transition and yielded no FPS sample."
+  },
+  "measurementLimit": "Single corrected browser leg; this is no causal FPS comparison against the old loader. Native and browser images are separate idle frames with the same reported camera and fighter spawn state; screenshots and isolated development disc are not in the repository. Raw-loader FPS was invalid as evidence of visually normal gameplay. Other stages, roster combinations, and measured input-to-photon latency remain untested on the corrected static package."
+}

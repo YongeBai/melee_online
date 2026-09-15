@@ -4,6 +4,8 @@ import {createHash} from 'node:crypto';
 import {brotliDecompressSync,gunzipSync,gzipSync} from 'node:zlib';
 import {fileURLToPath} from 'node:url';
 import {browserDefaults} from './release-config.mjs';
+import {correctWebGLDepthLoader,VERIFIED_DEPTH_CORES} from './webgl-depth-loader.mjs';
+import {correctReleaseCoreUrl} from './release-protocol.mjs';
 const root=path.resolve(import.meta.dirname,'../..');
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function prepareHostedGame(gameDir){
@@ -54,6 +56,7 @@ export function packageBrowserRelease({coreId,output,projectRoot=root,wasmDispat
   for(const file of manifest.files){
     if(path.basename(file.name)!==file.name||hash(fs.readFileSync(path.join(candidate,file.name)))!==file.sha256)throw Error('Candidate artifact hash mismatch: '+file.name);
   }
+  if(!VERIFIED_DEPTH_CORES.has(coreId))throw Error('Core depth semantics have not been visually verified: '+coreId);
   if(hash(fs.readFileSync(path.join(candidate,'dolphin-core-upstream.wasm')))!==coreId)throw Error('WASM hash does not match selected core');
   const game=prepareHostedGame(hostedGameDir);
   const destination=path.resolve(output||path.join(projectRoot,'dist/browser',coreId));
@@ -71,13 +74,21 @@ export function packageBrowserRelease({coreId,output,projectRoot=root,wasmDispat
   for(const chunk of game.chunks)write(`game/${chunk.name}`,chunk.data);
   write('game/manifest.json',JSON.stringify(game.manifest,null,2));
   copyTree(path.join(projectRoot,'engines/wasm-dolphin/src'),'engine/src');
+  const protocol=fs.readFileSync(path.join(projectRoot,'engines/wasm-dolphin/src/upstream-worker-protocol.js'),'utf8');
+  write('engine/src/upstream-worker-protocol.js',correctReleaseCoreUrl(protocol));
   // The browser runtime sends cosmetic and diagnostic actions to melee-memory.
   // Keep that module and its helpers identical to the tested runtime source:
   // an older engine copy silently rejects these actions during live matches.
   for(const name of fs.readdirSync(path.join(projectRoot,'scripts/engine')).filter(name=>
     /^melee-.*\.js$/.test(name)&&!/^melee-(runtime|startup|probe-controls)\.js$/.test(name)))
     copy(path.join(projectRoot,'scripts/engine',name),`engine/src/${name}`);
-  const engineFiles=['dolphin-core-upstream.js','dolphin-core-upstream.wasm','dolphin-core-upstream.build.json','dolphin-core-abi-v1.json'];
+  // The OGL core uses reversed clip depth. Correct the generated JS bindings
+  // before delivery, failing closed if this candidate has an unknown loader.
+  // The WASM remains byte-identical; files.json hashes the delivered JS.
+  const loader=fs.readFileSync(path.join(candidate,'dolphin-core-upstream.js'),'utf8');
+  const depthLoader=correctWebGLDepthLoader(loader);
+  write(`play/build/core-candidates/${coreId}/dolphin-core-upstream-depth-v2.js`,depthLoader);
+  const engineFiles=['dolphin-core-upstream.wasm','dolphin-core-upstream.build.json','dolphin-core-abi-v1.json'];
   for(const name of engineFiles)copy(path.join(candidate,name),`play/build/core-candidates/${coreId}/${name}`);
   const prebuilt=manifest.files.find(file=>file.name==='prebuilt-jit-cache.bin.gz');
   if(prebuilt)copy(path.join(candidate,prebuilt.name),`play/build/core-candidates/${coreId}/${prebuilt.name}`);
@@ -114,7 +125,7 @@ export function packageBrowserRelease({coreId,output,projectRoot=root,wasmDispat
     for(const name of ['source-manifest.json','README.txt','core-build.json','linux-toolchain.lock.json'])copy(path.join(sourceDir,name),'source/'+name);
     write('source/index.html','<!doctype html><title>Engine source</title><h1>Engine source</h1><p>Download all parts and join them in order as described in <a href="README.txt">README</a>. Checksums: <a href="source-manifest.json">manifest</a>.</p><ul>'+source.parts.map(p=>'<li><a href="'+p.name+'">'+p.name+'</a></li>').join('')+'</ul>');
   }
-  write('release.json',JSON.stringify({schemaVersion:1,coreId,kind:'browser-only-preview',defaults,networkMultiplayer:false,performanceCertified:false,sourceIncluded:Boolean(sourceDir),discProvision:'hosted-automatic',gameSha256:game.manifest.sha256,createdAt:new Date().toISOString()},null,2));
+  write('release.json',JSON.stringify({schemaVersion:1,coreId,kind:'browser-only-preview',defaults,networkMultiplayer:false,performanceCertified:false,sourceIncluded:Boolean(sourceDir),discProvision:'hosted-automatic',gameSha256:game.manifest.sha256,depthLoader:{version:2,candidateSha256:hash(loader),deliveredSha256:hash(depthLoader)},createdAt:new Date().toISOString()},null,2));
   const files=[];
   const inventory=dir=>{for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())inventory(p);else files.push({path:path.relative(destination,p),bytes:fs.statSync(p).size,sha256:hash(fs.readFileSync(p))});}};
   inventory(destination);write('files.json',JSON.stringify(files,null,2));
