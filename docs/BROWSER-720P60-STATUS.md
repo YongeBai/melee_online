@@ -323,6 +323,17 @@ alternatives are rejected; keep the working detached worker ImageBitmap path.
 The first URL-only proxy trial was overridden by the release bootstrap's
 mandatory worker default and is not a causal proxy comparison.
 [OGL route viability](benchmarks/browser-2026-09-15-corrected-ogl-proxy-negative-controls.json).
+The corrected Yoshi fighter-link saved-checkpoint ablation isolates the
+largest reusable scene group: normal/bypassed/bypassed/normal measured
+**54.03 / 67.26 / 65.49 / 54.44 uncapped native-work FPS**, bounding
+**3.64 and3.10ms per frame** in complete fighter GX link5 drawing and its
+downstream work. All80 sampled gameplay/input fingerprints matched and the
+measured legs compiled no synchronous new guest blocks. Since bypassing
+fighter drawing removes the characters, this is a diagnostic opportunity,
+not a playable optimization. The amount overlaps with the mesh bound in a
+separate checkpoint and cannot be added or subtracted from it. Prioritize
+full-image tests of guarded shared fighter geometry/display-list paths.
+[Corrected fighter draw bound](benchmarks/browser-2026-09-15-corrected-yoshi-fighter-draw-bound.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

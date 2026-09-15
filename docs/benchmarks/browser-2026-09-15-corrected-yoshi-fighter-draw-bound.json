@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-15",
+  "kind": "corrected-renderer-uncapped-fighter-link-opportunity-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": "Yoshi's Story Ice Climbers mirror, four normal animated partner/player fighters, two deterministic human controller tracks on native logic frames, black decorative backdrop, low-detail fighter meshes, blockmerge and animation fusion",
+  "method": "One saved match checkpoint; 1,200 native frames per normal/bypassed/bypassed/normal warmup and measured leg. The guarded diagnostic bypasses only fighter GX link 5 draw callbacks, retaining fighter processes, animation, input, stage/Randall, gameplay and camera. Host presentation pacing is temporarily uncapped, then original code and pacing are restored.",
+  "normalMeasuredNativeWorkFps": [54.0296, 54.4401],
+  "fighterDrawsBypassedNativeWorkFps": [67.2586, 65.4924],
+  "normalElapsedMsPer1200Frames": [22210.030336, 22042.589696],
+  "fighterDrawsBypassedElapsedMsPer1200Frames": [17841.585152, 18322.744576],
+  "pairedNativeMsSavedPerFrame": [3.640371, 3.099871],
+  "measuredLegSynchronousCompileAndLinkMs": [0, 0, 0, 0],
+  "inputConsistency": {"passed": true, "checked": 80, "mismatches": []},
+  "diagnosticOnly": true,
+  "acceptancePassed": false,
+  "interpretation": "Normal fighter drawing and its downstream guest/GX/browser work bound about 3.1–3.6 ms per native frame on this heavy corrected match. Both bypassed legs exceed 60 native-work FPS, but fighters disappear, so this is a target for reducing repeated skinning and display-list submission while keeping readable real meshes and correct camera.",
+  "limits": "Different initial checkpoints and overlapping scopes make this bound nonadditive with the earlier mesh ablation. Native headroom is not visible 720p60 or physical input-to-photon latency. Native-frame input fingerprints are sampled gameplay checks, not byte-exact full-machine equivalence. Full diagnostic report: /tmp/melee-corrected-yoshi-fighters-cost-3289-sep15.json."
+}
