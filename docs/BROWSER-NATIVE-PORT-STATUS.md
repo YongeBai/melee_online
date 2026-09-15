@@ -5,6 +5,22 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Shared import now covers 20 of PlCo's 23 sections. Both color tables retain all
+129 entries and 1,211 commands. The original color interpreter matches an
+independent BE-data reference over 23,177 updates and 900,334 state reads,
+including fades, signed lighting angles, nested control flow, priority rejection
+and lifetimes. External GFX/SFX/rumble words are observed through Melee's existing
+skip handlers in this check; effects are not emitted or declared implemented.
+
+The CPU section retains byte scripts separately from numeric attack entries.
+All 61 non-null scripts copy exactly through the original C routine. The 189
+attack lists contain 947 entries, including two contextual lists with negative
+weights that are preserved. Original projectile selection matches 8,192 seeded
+choices. This does not run the complete CPU decision loop. Three shared sections
+remain: accessory model/animation and two other models. Their model graphs already
+parse through the existing HSD importer; merging them and importing joint animation
+are next. [Color/CPU checkpoint](benchmarks/browser-2026-09-15-native-port-shared-scripts.json).
+
 Shared fighter parameter import now covers 17 of PlCo's 23 root sections: the
 complete common-parameter block, throw/scale modifiers, bone and part-group maps,
 shake tables, packed player colors and crowd constants. C checks all 536 field

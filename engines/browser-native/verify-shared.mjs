@@ -1,3 +1,5 @@
+import {verifyCpu} from './verify-cpu.mjs';
+import {verifyColors} from './verify-colors.mjs';
 import {sharedSpec} from './shared-spec.mjs';
 import {convertSharedParameters,sharedSections,pendingSharedSections} from './shared-assets.mjs';
 import {installResidentFile,openResidentArchive} from './resident-files.mjs';
@@ -40,7 +42,8 @@ export function verifyShared(module,input) {
       const expected=[clamped,Math.fround(ny*clamped),Math.fround(-nx*clamped)];
       for(let i=0;i<3;i++)if(!Object.is(module.HEAPF32[scratch/4+i],expected[i]))throw Error('Original shared landing knockback mismatch');landings++;
     }
-    return {passed:true,fieldReads,fields:sharedSpec.fields.length,partLookups,remaps,groupChecks,landings,
+    const colors=verifyColors(module,converted,pointer),cpu=verifyCpu(module,converted,pointer);
+    return {passed:true,colors,cpu,fieldReads,fields:sharedSpec.fields.length,partLookups,remaps,groupChecks,landings,
       sections:sharedSections,pendingSections:pendingSharedSections,parts:converted.parts.length,metrics:converted.metrics,
       fullCommonDataLoaded:false,playable:false};
   } finally {module._free(scratch);file.dispose();if(module._portFileClear()!==0)throw Error('Shared archive remained pinned');}

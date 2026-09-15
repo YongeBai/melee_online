@@ -97,14 +97,20 @@ assembly fallback or gameplay mismatch.
   original timer/loop/call/goto/animation-wait routines pass nested control checks.
   Raw script assets must still be type-converted before using this representation.
   The probes do not run fighter action handlers or claim gameplay parity.
-- `shared-assets.mjs` imports the common parameter block and 16 other typed
+- `shared-assets.mjs` imports the common parameter block and 19 other typed
   PlCo sections. Generated field probes statically check all 536 C offsets and
   preserve byte colors separately from numeric words. Original bone lookup,
   remapping, part-group selection and landing-knockback routines read these data
   in browser checks. Global bindings are scoped to each check and restored before
-  releasing the archive. Six script/model/CPU sections still need import; the
+  releasing the archive. Three model/animation sections still need import; the
   full ftLoadCommonData entry point is not exposed. The fixture preparation tool
   hosts PlCo automatically through shared-fixtures.json.
+- `color-assets.mjs` imports shared color/light scripts as numeric words, while
+  `cpu-assets.mjs` preserves CPU input scripts as bytes and imports numeric attack
+  lists. Original color interpretation is compared with a separate BE reference
+  over 23,177 updates; existing game skip handlers expose external event words
+  without pretending to implement effects. Original CPU script copying and
+  weighted projectile choice are checked; full AI remains part of the match loop.
 - `motion-assets.mjs` imports the 24-byte motion rows and action command graphs,
   keeping shared subroutines, pointer identity, numeric flags and valid null jumps.
   Only the imported graph is exposed; unrelated archive externs remain opaque.

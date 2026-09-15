@@ -1,9 +1,11 @@
+import {readCpuTables} from './cpu-assets.mjs';
+import {readColorTables} from './color-assets.mjs';
 import {inspectArchive,nativeSubgraphImage} from './archive.mjs';
-export const sharedSections=[0,1,2,3,4,5,9,10,11,12,13,14,15,17,18,19,21];
-export const pendingSharedSections=[6,7,8,16,20,22];
+export const sharedSections=[0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,17,18,19,21,22];
+export const pendingSharedSections=[8,16,20];
 // Import the typed parameter/bone-map graph needed by fighter initialization.
 // The full ftLoadCommonData entry point is deliberately not exposed until its
-// color scripts, accessory models and CPU tables are also imported.
+// accessory models and joint animation are also imported.
 export function convertSharedParameters(input,spec) {
   const archive=inspectArchive(input),d=archive.data,root=archive.publics.get('ftLoadCommonData');
   if(root===undefined||archive.externs.size)throw Error('Invalid shared fighter archive');
@@ -52,9 +54,17 @@ export function convertSharedParameters(input,spec) {
     const at=roots[section]+i*8,values=pointer(at),length=word(at+4);
     if(values===null||length>256)throw Error('Invalid shake table');floats(values,length*2);
   }
+  const colors=readColorTables(archive);
+  for(const table of colors.tables)for(const entry of table.entries){pointer(entry.offset);raw(entry.offset+4,4);}
+  for(const at of colors.scripts.words.keys())word(at);
+  for(const at of colors.scripts.pointers)pointers.add(at);
+  const cpu=readCpuTables(archive);
+  for(const at of cpu.raw)raw(at,1);
+  for(const at of cpu.words)word(at);
+  for(const at of cpu.pointers)pointers.add(at);
   // A separate root prevents callers from treating unconverted data as a full
   // native ftLoadCommonData table. Every exposed pointer has an imported type.
   sharedSections.forEach((section,i)=>{const at=bytes.length+i*4;out.setUint32(at,roots[section],true);pointers.add(at);});
   return {image:nativeSubgraphImage(data,pointers,new Map([['native_shared_parameters',bytes.length]])),archive,roots,
-    parts,groups,common,sections:sharedSections,pending:pendingSharedSections,metrics:{numericWords:scalars.size,packedBytes:packed.size,relocations:pointers.size}};
+    parts,groups,colors,cpu,common,sections:sharedSections,pending:pendingSharedSections,metrics:{numericWords:scalars.size,packedBytes:packed.size,relocations:pointers.size}};
 }

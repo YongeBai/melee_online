@@ -1,5 +1,5 @@
 /* Typed shared-data integration. Full Fighter_LoadCommonData still requires
- * color scripts, accessory scenes and CPU tables; do not call it on this image. */
+ * accessory scenes and joint animation; do not call it on this image. */
 #include <melee/ft/fighter.h>
 #include <melee/ft/ftparts.h>
 #include <melee/ft/ftcommon.h>

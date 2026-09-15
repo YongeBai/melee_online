@@ -30,7 +30,7 @@ export function readFighterMotions(input,name,spec) {
 
 // Visit both call targets and continuations. Loops are kept as command words;
 // there is no execution or unrolling here. Shared tails keep their identity.
-export function readMotionScripts(archive,starts,lengths) {
+export function readMotionScripts(archive,starts,lengths,{terminalOpcodes=[0,6,7]}={}) {
   const d=archive.data,commands=new Map(),owners=new Map(),pointers=new Set(),pending=[...starts];
   const bounds=(at,bytes)=>{if(!Number.isSafeInteger(at)||at<0||at%4||at+bytes>d.byteLength)fail('script out of bounds');};
   while(pending.length) {
@@ -51,7 +51,7 @@ export function readMotionScripts(archive,starts,lengths) {
         if(archive.relocations.has(slot)&&!pointers.has(slot))fail('untyped pointer in script opcode '+opcode+' at '+slot.toString(16));
       }
       commands.set(at,{offset:at,opcode,words,target});
-      if(opcode===0||opcode===6||opcode===7||(opcode===5&&target===null))break;
+      if(terminalOpcodes.includes(opcode)||(opcode===5&&target===null))break;
       at+=words*4;
     }
   }
