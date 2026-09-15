@@ -359,6 +359,17 @@ does not offer an established route to the all-stage 720p60 requirement.
 Bypassing it omits textures and the image gate is disabled. Retain normal
 texture rendering and treat this strictly as a narrowing diagnostic.
 [Corrected texture cost](benchmarks/browser-2026-09-15-corrected-yoshi-texture-native-abba.json).
+The existing revision-locked hot-function fusion was retested in the
+corrected Yoshi scene with two native-frame Ice Climbers tracks. The 35-second
+**on/off/off/on** control measured **49.40 / 50.94 / 53.55 / 53.32 distinct
+visible FPS** at960×720. Both pairs favor the unfused path by1.54 and
+0.23FPS, respectively; within-session warming explains much of the overall
+rise. The measured input/gameplay gate matches115 shared fingerprints,
+fusion reached33 cumulative compiled blocks, and no run passed60. Unlike
+the older invalid30-second trial, its native-frame workload is valid. Keep
+`hotfusion` opt-in/off; these same-function boundaries are not the larger
+CPU gain needed for all legal stages.
+[Corrected hot-function fusion](benchmarks/browser-2026-09-15-corrected-yoshi-hotfusion-reverse.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation
