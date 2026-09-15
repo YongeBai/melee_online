@@ -152,3 +152,9 @@ void portSceneJointAnimation(HSD_JObj* root,HSD_AnimJoint* animation)
 {
     HSD_JObjAddAnimAll(root,animation,NULL,NULL);
 }
+
+/* Keep the C aggregate argument inside C at the JS/WASM boundary. */
+void portLightColor(GXLightObj* light,unsigned r,unsigned g,unsigned b,unsigned a)
+{
+    GXColor color={(u8)r,(u8)g,(u8)b,(u8)a};GXInitLightColor(light,color);
+}

@@ -32,7 +32,7 @@ const flags=['-O2','-fno-fast-math','-ffp-contract=off','-fno-strict-aliasing',
 const platformObjects=[path.join(native,'float-utils.o'),path.join(native,'estimates.o')];
 const portableFiles=['src/MSL/trigf.c','src/MSL/math_data.c','src/MSL/float.c',
   'libs/dolphin/src/dolphin/os/OSAlloc.c','libs/dolphin/src/dolphin/mtx/mtx44.c',
-  path.join(native,'sdk-camera.c'),...['platform.c','errors.c','math.c','matrix-special.c'].map(f=>path.join(root,'engines/browser-native',f))];
+  path.join(native,'sdk-camera.c'),path.join(native,'sdk-light.c'),...['platform.c','errors.c','math.c','matrix-special.c'].map(f=>path.join(root,'engines/browser-native',f))];
 for(let i=0;i<portableFiles.length;i++) {
   const object=path.join(out,'platform-'+i+'.o');
   const result=spawnSync(compiler,[...flags,'-c',portableFiles[i],'-o',object],{cwd:upstream,encoding:'utf8'});

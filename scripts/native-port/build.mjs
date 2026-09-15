@@ -52,6 +52,18 @@ const selectedText=[['void MTXRotRad(', '\nvoid PSMTXRotTrig('],
   });
 const selectedSdk=path.join(output,'sdk-camera.c');
 fs.writeFileSync(selectedSdk,'#include <dolphin.h>\n#include <math.h>\n'+selectedText.join('\n'));
+// Light-object constructors/getters only write CPU-side data. Compile the
+// original complete prefix; hardware register submission starts after it.
+const sdkLightText=fs.readFileSync(path.join(upstream,'libs/dolphin/src/dolphin/gx/GXLight.c'),'utf8');
+const lightBoundary='#if DEBUG\n#define WRITE_SOME_LIGHT_REG1';
+if(sdkLightText.split(lightBoundary).length!==2)throw Error('SDK light object boundary changed');
+const sdkLight=path.join(output,'sdk-light.c');
+let lightSource=sdkLightText.slice(0,sdkLightText.indexOf(lightBoundary));
+const colorShift='obj->Color = (color.r << 24)';
+if(lightSource.split(colorShift).length!==2)throw Error('SDK light color packing changed');
+// Preserve packed high-bit colors without signed left-shift overflow in C.
+lightSource=lightSource.replace(colorShift,'obj->Color = ((u32) color.r << 24)');
+fs.writeFileSync(sdkLight,lightSource.replace('"__gx.h"',JSON.stringify(path.join(upstream,'libs/dolphin/src/dolphin/gx/__gx.h'))));
 const tobj=fs.readFileSync(path.join(upstream,'src/sysdolphin/baselib/tobj.c'),'utf8');
 const textureStart='static void MakeTextureMtx(HSD_TObj* tobj)\n{',textureEnd='\nstatic void TObjSetupMtx(';
 if(tobj.split(textureStart).length!==2||tobj.split(textureEnd).length!==2)throw Error('Texture matrix selection changed');
@@ -104,15 +116,15 @@ fs.writeFileSync(path.join(output,'attribute-spec.mjs'),'export const attributeS
 const sceneInputs=scene?sceneLinkInputs(root,upstream,output,attributeSpec.characters.map(c=>c.file)):null;
 if(scene) {
   exports=exports.filter(name=>!['portInterpolate','portSeed','portRandom','portStagePrune','portStageMetric','portArchiveOpen','portArchiveSymbol','portArchiveClose','portFighterAttribute','portFighterPhysicsProbe'].includes(name));
-  exports.push('portAttributeField','portAttributeSize','portAttributesLoad','portCollisionAttach','portCollisionReset','portCollisionWorld','portCollisionRead','portSharedInitialize','portSharedGlobal','portSceneJointAnimation','portCpuScript','portCpuChoose','portColorCreate','portColorDestroy','portColorSelect','portColorStep','portColorRead','portSharedField','portSharedPart','portSharedLanding','portMotionCreate','portMotionDestroy','portMotionLoad','portMotionEntry','portMotionLive','portMotionBuffers','portFilePins',
+  exports.push('portLightColor','GXInitLightSpot','GXInitLightDistAttn','GXInitLightPos','GXInitLightDir','GXInitLightColor','GXGetLightColor','portCollisionPartRead','portAttributeField','portAttributeSize','portAttributesLoad','portCollisionAttach','portCollisionReset','portCollisionWorld','portCollisionRead','portSharedInitialize','portSharedGlobal','portSceneJointAnimation','portCpuScript','portCpuChoose','portColorCreate','portColorDestroy','portColorSelect','portColorStep','portColorRead','portSharedField','portSharedPart','portSharedLanding','portMotionCreate','portMotionDestroy','portMotionLoad','portMotionEntry','portMotionLive','portMotionBuffers','portFilePins',
     'portSceneObjectDeleteNextStep','portSceneObjectCreate','portSceneObjectRoot','portSceneObjectFree','portSceneLoad','portSceneDestroy','portSceneCollect','portSceneMatrices','portSceneMetric','portSceneLiveJoints',
     'portFileInstall','portFileCount','portFileBytes','portFileReads','portFileAllocations','portFileClear','portFileArchive','portFileArchiveClose','portFileArchivePair',
     'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects');
 }
 const selectedUnits=scene?units.filter(file=>!file.startsWith('src/melee/')):units;
 selectedUnits.push('src/melee/lb/lbcommand.c');
-if(scene)selectedUnits.push('src/melee/ft/ftcoll.c','src/melee/lb/lbcollision.c','src/melee/lb/lb_00B0.c','src/melee/lb/lbanim.c','src/melee/lb/lbarchive.c','src/melee/lb/lb_013B.c','src/melee/lb/lb_0219.c','src/melee/ft/ftaction.c','src/melee/ft/ftcmdscript.c','src/melee/ft/ftcpuattack.c','src/melee/ft/ftdata.c','src/melee/ft/ftparts.c','src/melee/ft/ftcommon.c','src/melee/ft/fighter.c','src/melee/pl/player.c');
-execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.directory,file)), selectedSdk,textureSource,...estimateObjects,
+if(scene)selectedUnits.push('src/melee/ft/ftmaterial.c','src/melee/lb/lbrefract.c','src/melee/ft/ftdevice.c','src/melee/ft/kinds/ftCommon/ftCo_09F4.c','src/melee/ft/ft_0C8C.c','src/melee/ft/ftCo_800C7CA0.c','src/melee/ft/ftcoll.c','src/melee/lb/lbcollision.c','src/melee/lb/lb_00B0.c','src/melee/lb/lbanim.c','src/melee/lb/lbarchive.c','src/melee/lb/lb_013B.c','src/melee/lb/lb_0219.c','src/melee/ft/ftaction.c','src/melee/ft/ftcmdscript.c','src/melee/ft/ftcpuattack.c','src/melee/ft/ftdata.c','src/melee/ft/ftparts.c','src/melee/ft/ftcommon.c','src/melee/ft/fighter.c','src/melee/pl/player.c');
+execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.directory,file)), selectedSdk,sdkLight,textureSource,...estimateObjects,
   path.join(root, 'engines/browser-native/errors.c'),commandProbe,path.join(root,'engines/browser-native/commands.c'),
   ...(scene?[]:[path.join(root, 'engines/browser-native/platform.c'),path.join(root, 'engines/browser-native/fighter.c')]),
   path.join(root, 'engines/browser-native/runtime.c'),
@@ -126,7 +138,7 @@ execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, moduleName+'.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['attribute-assets.mjs','verify-attributes.mjs','character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+for (const name of ['verify-lights.mjs','attribute-assets.mjs','verify-attributes.mjs','character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));

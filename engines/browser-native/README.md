@@ -97,6 +97,10 @@ assembly fallback or gameplay mismatch.
   original timer/loop/call/goto/animation-wait routines pass nested control checks.
   Raw script assets must still be type-converted before using this representation.
   The probes do not run fighter action handlers or claim gameplay parity.
+- Original fighter material classes use a typed setup callback adapter and
+  explicit references to the original templates instead of adjacent-global
+  assumptions. The SDK light-object constructors/getters run natively; hardware
+  submission remains a guarded renderer boundary. This does not certify shading.
 - `attribute-assets.mjs` imports special parameters for all 27 components.
   `attribute-spec.mjs` obtains 20 layouts from the WASM compiler, cross-checks
   them with a PowerPC-targeted compiler and generates C offset/width probes.
@@ -109,7 +113,9 @@ assembly fallback or gameplay mismatch.
   mappings. All 318 hurtboxes across 27 components pass animation, cached update
   and rewind checks. Eleven synthetic colliders exercise the native array limit;
   the portable header replaces its one-entry placeholder without changing layout.
-  Full parts/material setup, dynamic-bone simulation and combat remain pending.
+  Original ftParts_SetupParts now supplies the part mapping and fighter material
+  classes; display indices, depth and flags are checked. Material drawing,
+  dynamic-bone simulation and combat remain pending.
 - `shared-assets.mjs` imports all 23 PlCo sections, including three shared
   models and HSD joint animation. Generated probes check all 536 common-parameter
   field offsets. Original bone lookup, remapping, part groups and landing

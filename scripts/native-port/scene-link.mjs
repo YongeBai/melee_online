@@ -8,7 +8,11 @@ export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
   const auditDir=path.join(output,'audit'),report=JSON.parse(fs.readFileSync(path.join(auditDir,'link-report.json')));
   const recipe=createHash('sha256').update(fs.readFileSync(new URL('./portable-source.mjs',import.meta.url))).digest('hex');
   if(report.portableSource?.recipeSha256!==recipe)throw Error('Re-run native compile/link audits before scene bring-up');
-  const missing=report.results.find(x=>x.entry==='HSD_JObjLoadJoint').missing;
+  const memoryLightFunctions=new Set(['GXInitLightAttn','GXInitLightAttnA','GXGetLightAttnA','GXInitLightAttnK','GXGetLightAttnK',
+    'GXInitLightSpot','GXInitLightDistAttn','GXInitLightPos','GXGetLightPos','GXInitLightDir','GXGetLightDir',
+    'GXInitSpecularDir','GXInitSpecularDirHA','GXInitLightColor','GXGetLightColor']);
+  const materialDrawing=['GXSetNumIndStages','GXSetIndTexOrder','GXSetIndTexCoordScale','GXSetIndTexMtx','GXSetTevIndirect'];
+  const missing=[...new Set([...report.results.find(x=>x.entry==='HSD_JObjLoadJoint').missing,...materialDrawing])].filter(name=>!memoryLightFunctions.has(name));
   if(missing.some(name=>!name.startsWith('GX')))throw Error('Scene loader has unresolved non-GX dependencies');
   const headers=execFileSync('rg',['--files','libs/dolphin/include/dolphin/gx','-g','*.h'],{cwd:upstream,encoding:'utf8'})
     .trim().split('\n').map(file=>fs.readFileSync(path.join(upstream,file),'utf8')).join('\n');

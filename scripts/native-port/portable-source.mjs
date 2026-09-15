@@ -34,6 +34,25 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/ft/ftmaterial.c') {
+      // Retail .data has ftMObj, the TEV template and the constant template in
+      // sequence. C does not guarantee that placement (or retain unused data).
+      // Refer to the original template objects explicitly instead of indexing
+      // beyond the smaller HSD_MObjInfo object through a fabricated aggregate.
+      for(const [from,to,count] of [
+        ['    struct ft_MObjInfo* info = (struct ft_MObjInfo*) &ftMObj;\n','',2],
+        ['info->texp_tmpl','ftMaterial_803C6A44',3],
+        ['info->tevdesc_tmpl','ftMaterial_803C69D0',2],
+      ]) {
+        if(text.split(from).length!==count+1)throw Error('Fighter material template references changed');
+        text=text.replaceAll(from,to);
+      }
+      replace('void ftMaterial_800BF260(void)\n{',
+        'static void port_material_setup(HSD_MObj* mobj,u32 mode)\n{ ftMaterial_800BF2B8(mobj,mode,0); }\n\nvoid ftMaterial_800BF260(void)\n{');
+      replace('ftMObj.setup = (HSD_MObjSetupFunc) (Event) ftMaterial_800BF2B8;',
+        'ftMObj.setup = port_material_setup;');
+      adapters.push({function:'ftMaterial_800BF2B8',adapter:'port_material_setup',from:'void(HSD_MObj*,u32,u32)',to:'void(HSD_MObj*,u32)',conversion:'unused third parameter = 0'});
+    }
     if(file==='src/melee/ft/types.h') {
       // The original loops allow eleven dynamics colliders (0x1670..0x1828).
       // Replace the decomp's one-entry placeholder plus padding with that real

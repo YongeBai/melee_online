@@ -22,12 +22,14 @@ try {
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
   if(scene) {
     if(!verification.attributes?.passed||verification.attributes.rows.length!==27||verification.attributes.copies!==135)throw Error('Incomplete original character attribute coverage');
+    if(!verification.lights?.passed||verification.lights.cases!==22)throw Error('Incomplete original SDK light-object coverage');
     if(!verification.passed||verification.models.length!==27||verification.animations.clips.length!==38||verification.residentFiles?.files.length!==27||!verification.residentFiles.lifecycle?.passed)throw Error('Incomplete native HSD scene coverage');
     if(!verification.shared?.passed||verification.shared.fields!==536||verification.shared.parts!==34||verification.shared.sections.length!==23)throw Error('Incomplete typed shared-data coverage');
     if(!verification.shared.colors?.passed||verification.shared.colors.entries!==129)throw Error('Incomplete original color interpreter coverage');
     if(!verification.shared.cpu?.passed||verification.shared.cpu.scripts!==61||verification.shared.cpu.choices!==8192)throw Error('Incomplete original CPU data coverage');
     if(!verification.commonInitialization?.passed||verification.commonInitialization.globals!==23||verification.commonInitialization.models.length!==3)throw Error('Incomplete original common initialization');
     if(!verification.characterCollision?.passed||verification.characterCollision.rows.length!==27||verification.characterCollision.frames!==864||verification.characterCollision.capacityChecks!==11)throw Error('Incomplete original character collision initialization');
+    if(verification.characterCollision.rows.some(r=>!r.originalParts||!r.fighterMaterials))throw Error('Incomplete original part/material setup');
     if(!verification.motions?.passed||verification.motions.components.length!==27||verification.motions.rows!==8767||verification.motions.sceneClips.length!==39||verification.motions.liveOwners!==0)throw Error('Incomplete original motion loader coverage');
   } else if(!verification.passed||verification.stages.length!==6||verification.fighters.length!==27||verification.poses.models!==27||
     (allAnimations?!verification.animations.allAnimations:verification.animations.clips.length!==27))

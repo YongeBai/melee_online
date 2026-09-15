@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original ftParts_SetupParts now replaces the temporary bone assignment in the
+collision fixture. All 27 components pass: 1,894 part slots and 1,753 fighter
+material objects. Checks cover reserved slots, joint identity, hierarchy depth,
+display-object indices and lighting flags. The 318 animated hurtboxes still pass
+position/cache checks and exact rewind.
+
+Fighter material setup now has a typed callback adapter for its unused third
+argument. Template reads reference their original named objects directly instead
+of relying on separate globals being adjacent. The pinned retail symbol map
+confirms the class object and two templates at 0x803C6980, 0x803C69D0 and 0x803C6A44.
+Original SDK light-object constructors/getters are now compiled as CPU code;
+22 position, direction, color and attenuation cases pass. Hardware draw calls
+remain explicit guards until the renderer implements them.
+
+All 63 targeted tests pass and all 81 sampled 720p images are unchanged. The live
+Fighter_Create link probe has 144 unresolved symbols, down from 150; this is a
+dependency count, not an FPS measurement. Material drawing, complete fighter
+creation and combat remain.
+[Parts/material checkpoint](benchmarks/browser-2026-09-15-native-port-parts-materials.json).
+
 All 27 original LoadSpecialAttrs callbacks now execute in browser WASM, including
 clone delegation and the size adjustments for Link/Young Link, Pikachu/Pichu,
 Samus and Mewtwo. Import covers 20 distinct layouts and 1,346 named scalar fields.
@@ -31,8 +51,8 @@ instead of a one-entry decompiler placeholder plus padding. C offset/extent chec
 preserve the original Fighter layout, and an independent synthetic fixture fills
 all eleven slots through the original initializer. The 59 targeted tests, complete
 5,508-clip browser regression and 81 unchanged sampled images pass. This uses a
-limited Fighter context; complete parts/material setup, dynamic-bone simulation,
-Fighter_Create and combat remain.
+limited Fighter context; dynamic-bone simulation, complete Fighter_Create and
+combat remain. The later parts/material checkpoint replaces its temporary mapping.
 [Character-collision checkpoint](benchmarks/browser-2026-09-15-native-port-character-collision.json).
 
 All 23 sections of PlCo now import, and the original Fighter_LoadCommonData runs

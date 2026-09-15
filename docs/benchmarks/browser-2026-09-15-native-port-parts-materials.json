@@ -1,0 +1,432 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 230124,
+    "wasmSha256": "b295224cfc2bbabbb768d7106a2566269b83570432c1c7dcc8cdae4ae38302ea"
+  },
+  "parts": {
+    "originalFunction": "ftParts_SetupParts",
+    "components": 27,
+    "parts": 1894,
+    "fighterMaterials": 1753,
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "partCount": 61,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 59,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFx.dat",
+        "partCount": 73,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 77,
+        "hurtboxes": 13,
+        "dynamicColliders": 1,
+        "frames": 32,
+        "reads": 11812,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlCa.dat",
+        "partCount": 63,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 79,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDk.dat",
+        "partCount": 75,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 37,
+        "hurtboxes": 13,
+        "dynamicColliders": 1,
+        "frames": 32,
+        "reads": 11812,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKb.dat",
+        "partCount": 59,
+        "reservedParts": 13,
+        "originalParts": true,
+        "fighterMaterials": 42,
+        "hurtboxes": 5,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 4542,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKp.dat",
+        "partCount": 76,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 115,
+        "hurtboxes": 15,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 13622,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLk.dat",
+        "partCount": 76,
+        "reservedParts": 1,
+        "originalParts": true,
+        "fighterMaterials": 95,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSk.dat",
+        "partCount": 58,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 63,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNs.dat",
+        "partCount": 63,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 70,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPe.dat",
+        "partCount": 114,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 85,
+        "hurtboxes": 14,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 12714,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPp.dat",
+        "partCount": 49,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 43,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNn.dat",
+        "partCount": 49,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 43,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPk.dat",
+        "partCount": 53,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 26,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPr.dat",
+        "partCount": 50,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 14,
+        "hurtboxes": 9,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 8174,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSs.dat",
+        "partCount": 60,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 95,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYs.dat",
+        "partCount": 70,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 40,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlZd.dat",
+        "partCount": 118,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 55,
+        "hurtboxes": 12,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 10898,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLg.dat",
+        "partCount": 61,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 53,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMt.dat",
+        "partCount": 68,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 42,
+        "hurtboxes": 14,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 12714,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMs.dat",
+        "partCount": 90,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 85,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGw.dat",
+        "partCount": 53,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 116,
+        "hurtboxes": 15,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 13622,
+        "maxWorldError": 2.9802322387695312e-8,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDr.dat",
+        "partCount": 86,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 58,
+        "hurtboxes": 10,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9082,
+        "maxWorldError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlCl.dat",
+        "partCount": 80,
+        "reservedParts": 1,
+        "originalParts": true,
+        "fighterMaterials": 83,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 4.76837158203125e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPc.dat",
+        "partCount": 46,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 37,
+        "hurtboxes": 14,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 12714,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFe.dat",
+        "partCount": 92,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 95,
+        "hurtboxes": 11,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 9990,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGn.dat",
+        "partCount": 84,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 90,
+        "hurtboxes": 12,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 10898,
+        "maxWorldError": 0.0000019073486328125,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFc.dat",
+        "partCount": 67,
+        "reservedParts": 0,
+        "originalParts": true,
+        "fighterMaterials": 56,
+        "hurtboxes": 13,
+        "dynamicColliders": 0,
+        "frames": 32,
+        "reads": 11806,
+        "maxWorldError": 9.5367431640625e-7,
+        "rewindPassed": true
+      }
+    ]
+  },
+  "lights": {
+    "passed": true,
+    "cases": 22,
+    "originalSdk": true,
+    "limitation": "CPU light-object construction only; no lighting submission or rendered lighting parity"
+  },
+  "materialAdapters": {
+    "typedSetupCallback": true,
+    "explicitTemplateReferences": true,
+    "retailSymbols": {
+      "ftMObj": {
+        "address": "0x803C6980",
+        "size": "0x50"
+      },
+      "tevTemplate": {
+        "address": "0x803C69D0",
+        "size": "0x74"
+      },
+      "constantTemplate": {
+        "address": "0x803C6A44",
+        "size": "0x18"
+      }
+    }
+  },
+  "regression": {
+    "targetedTests": 63,
+    "attributes": true,
+    "commonInitialization": true,
+    "motionRows": 8767,
+    "collisionHurtboxes": 318,
+    "collisionFrames": 864,
+    "unchangedImages": 81
+  },
+  "link": [
+    {
+      "entry": "HSD_JObjLoadJoint",
+      "unresolvedSymbols": 46
+    },
+    {
+      "entry": "Fighter_Create",
+      "unresolvedSymbols": 144
+    }
+  ],
+  "gpu": {
+    "resolution": [
+      960,
+      720
+    ],
+    "softwareGpu": true,
+    "maxVertexError": 0.000003814697265625
+  },
+  "limitations": [
+    "Limited Fighter context, not full Fighter_Create or combat",
+    "Material class assignment verified; material draw/shading callbacks are not executed",
+    "SDK light-object CPU calculations verified; light submission and rendered lighting parity remain",
+    "Unresolved-symbol counts measure integration dependencies, not runtime bottlenecks"
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "inputLatencyMeasured": false
+}
