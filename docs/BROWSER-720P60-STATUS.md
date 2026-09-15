@@ -311,6 +311,18 @@ playable FPS improvement. The corrected heavy match needs both faster native
 work and distinct delivered 720p images. Focus on retaining the actual stage
 and fighter meshes while reducing shared skinning/primitive translation cost.
 [Current-core mesh cost](benchmarks/browser-2026-09-15-corrected-yoshi-mesh-cost-native-abba.json).
+Alternative browser OGL routes were tested with ignored static packages that
+changed only the release bootstrap default, retained all180 automatically
+hosted files and passed integrity checks. Direct `oglproxy=proxy` actually
+selected the alternate backend but displayed a black canvas at **0 visible
+FPS**, with no frames received by the queue despite46.92 simulation FPS.
+The `oglproxy=main` package never finished startup; after45seconds its status
+said "The main-thread engine cannot mount local discs. Use the worker
+renderer." The main route violates the no-ISO startup invariant. Both
+alternatives are rejected; keep the working detached worker ImageBitmap path.
+The first URL-only proxy trial was overridden by the release bootstrap's
+mandatory worker default and is not a causal proxy comparison.
+[OGL route viability](benchmarks/browser-2026-09-15-corrected-ogl-proxy-negative-controls.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

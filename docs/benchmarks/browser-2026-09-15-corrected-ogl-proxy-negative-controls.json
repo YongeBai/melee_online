@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-15",
+  "kind": "corrected-browser-opengl-proxy-negative-controls",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": "Yoshi's Story Ice Climbers mirror, corrected 960x720 target, black decorative background, native low-detail fighters and native-frame controller input",
+  "labPackages": "Two ignored 180-file static packages automatically host the same intact game chunks and pinned core; only their release-bootstrap.js oglproxy default, release.json diagnostic metadata and files.json hashes differ from the working worker release. Static verifier passed but does not verify visuals.",
+  "workingDefault": "The playable release forces oglproxy=worker in its bootstrap. A URL-only oglproxy=proxy request was overridden and the reported worker route stayed below 60; it was not a proxy comparison.",
+  "directProxy": {"requestedAndVerified": "proxy", "simulationFps": 46.9191, "distinctVisibleFps": 0, "observedProbeResolution": [320, 240], "receivedAndPresentedFrames": [0, 0], "visualFailure": "The game continued to simulate with active native-frame inputs, but the inspected gameplay canvas was completely black."},
+  "mainThread": {"requestedAndVerified": "main", "benchmarkRun": false, "after45SecondsLoadingHidden": false, "startupStatus": "The main-thread engine cannot mount local discs. Use the worker renderer.", "noIsoInvariantBroken": true},
+  "decision": "Reject both alternate rendering routes. Retain worker plus detached ImageBitmap presentation; neither alternative yields visible playable 720p Melee and the main route fails automatic hosted-game startup.",
+  "limits": "These are route viability checks, not paired FPS comparisons or physical latency measurements. Both diagnostic packages, game chunks, raw results and screenshots remain ignored local files. Raw proxy result: /tmp/melee-corrected-yoshi-oglproxy-direct-3290-sep15.json; main startup report: /tmp/melee-corrected-oglmain-boot-3291-sep15.json."
+}
