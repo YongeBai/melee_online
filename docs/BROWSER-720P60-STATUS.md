@@ -299,6 +299,18 @@ a repeatable gain or solve the missing9+ FPS. Leave2× as the playable default.
 The benchmark now supports active native-frame controller input for this
 scale comparison and rejects mismatched or inactive runs.
 [Corrected EFB scale with native input](benchmarks/browser-2026-09-15-corrected-stadium-efbscale-native-input-abba.json).
+The corrected Yoshi black-background low-model mesh diagnostic gives a larger
+shared-rendering opportunity. Across the saved checkpoint, the uncapped native
+normal/bypassed/bypassed/normal measurements were **52.07 / 65.03 / 68.65 /
+53.65 native-work FPS**. Skipping complete `HSD_PObjDisp` mesh skinning and
+primitive submission saves **3.83 and4.07ms per native frame** in the two
+pairs. All80 sampled native-input/gameplay fingerprints match; the measured
+legs compiled no new synchronous JIT blocks. Bypassed images omit meshes,
+so this is only a bound for a future exact rendering optimization, not a
+playable FPS improvement. The corrected heavy match needs both faster native
+work and distinct delivered 720p images. Focus on retaining the actual stage
+and fighter meshes while reducing shared skinning/primitive translation cost.
+[Current-core mesh cost](benchmarks/browser-2026-09-15-corrected-yoshi-mesh-cost-native-abba.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

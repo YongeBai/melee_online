@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-15",
+  "kind": "corrected-renderer-uncapped-mesh-opportunity-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": "Yoshi's Story, Ice Climbers mirror, two deterministic native-frame human controller tracks, black decorative background, native low-detail models, blockmerge and animation fusion",
+  "method": "Same saved native match checkpoint; 1,200 native logic frames per warmup and measured normal/bypassed/bypassed/normal interval, host pacing temporarily uncapped. Diagnostic hook skips the revision-locked HSD_PObjDisp mesh skinning and primitive submission, then restores original guest instructions and pacing.",
+  "sourceResolution": [960, 720],
+  "normalMeasuredNativeWorkFps": [52.0727, 53.6514],
+  "bypassedMeasuredNativeWorkFps": [65.0324, 68.6538],
+  "normalElapsedMsPer1200Frames": [23044.705024, 22366.624768],
+  "bypassedElapsedMsPer1200Frames": [18452.340224, 17478.999808],
+  "pairedNativeMsSavedPerFrame": [3.826971, 4.073021],
+  "measuredLegSynchronousCompileAndLinkMs": [0, 0, 0, 0],
+  "inputConsistency": {"passed": true, "checked": 80, "mismatches": []},
+  "diagnosticOnly": true,
+  "acceptancePassed": false,
+  "interpretation": "The full guest mesh/draw path and its downstream GPU work bound about 3.8–4.1 ms per frame on this corrected heavy match. Both bypassed branches exceed 60 uncapped native frames per second, but incomplete fighter/stage images cannot be used for play. Optimize skinning and primitive submission while retaining the real meshes, gameplay state and camera; then measure distinct visible FPS in paired full-render runs.",
+  "limits": "Uncapped native throughput does not establish visible 720p60 or input-to-photon latency. The diagnostic includes guest instructions, Dolphin GX translation and browser rendering; it is not a GPU-only time share and cannot be added to unrelated ablations. The matched inputs are sampled gameplay fingerprints, not byte-exact full-machine replay. First diagnostic capture was incorrectly classified as timed out by a Playwright acceptance-word matcher even though QA had finished; final full report is /tmp/melee-corrected-yoshi-mesh-cost-3289-sep15.json."
+}
