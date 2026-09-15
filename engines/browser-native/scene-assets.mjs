@@ -1,23 +1,23 @@
-import {inspectArchive} from './archive.mjs';
+import {inspectArchive,nativeArchiveImage} from './archive.mjs';
 import {readModelMeshes} from './mesh-assets.mjs';
 import {readModelMaterials} from './material-assets.mjs';
 import {readSkinBindings} from './skin-assets.mjs';
 import {readFigaTree} from './animation-assets.mjs';
 // Convert known HSD descriptors only. GX display lists, texture pixels, packed
 // colors and vertex-array payloads remain byte-for-byte big endian for GX.
-export function loadSceneAsset(module,input) {
+export function convertSceneAsset(input) {
   const archive=inspectArchive(input),d=archive.data,model=readModelMeshes(input),assets=readModelMaterials(input,model);
   readSkinBindings(input,model); // Validate every reference and weight first.
   if(archive.externs.size)throw Error('Scene extern references require explicit linking');
   if(model.tree.nodes.some(n=>n.className!==null||n.constraints!==null||(n.flags&0x5020)))
     throw Error('Custom, constrained, instance, spline or particle joints require a typed importer');
-  const memory=module._malloc(archive.dataSize);if(!memory)throw Error('Scene descriptor allocation failed');
-  try {
-    module.HEAPU8.set(archive.bytes.subarray(32,32+archive.dataSize),memory);
-    const out=new DataView(module.HEAPU8.buffer,memory,archive.dataSize);
+  // Hide public entry points whose payload type has not been imported.
+  const publics=new Map([...archive.publics].filter(([,at])=>at===model.tree.nodes[0].offset));
+  const image=nativeArchiveImage(archive,publics);
+  {
+    const out=new DataView(image.buffer,32,archive.dataSize);
     const word=at=>out.setUint32(at,d.getUint32(at),true),half=at=>out.setUint16(at,d.getUint16(at),true);
     const ptr=at=>archive.relocations.has(at)?d.getUint32(at):null;
-    for(const slot of archive.relocations)out.setUint32(slot,memory+d.getUint32(slot),true);
     for(const node of model.tree.nodes) {
       word(node.offset+4);for(let i=0;i<9;i++)word(node.offset+20+i*4);
       if(node.inverseBind!==null)for(let i=0;i<12;i++)word(node.inverseBind+i*4);
@@ -63,7 +63,20 @@ export function loadSceneAsset(module,input) {
     }
     const metrics=[model.tree.nodes.reduce((n,node)=>n+[...node.rotation,...node.scale,...node.translation].reduce((n,v,i)=>n+(i+1)*v,0),0),
       inverseSum,0,dobjs.size,materialSum,textureSum,model.meshes.length,weightSum];
-    return {memory,root:memory+model.tree.nodes[0].offset,model,metrics,dispose(){module._free(memory);}};
+    return {image,rootOffset:model.tree.nodes[0].offset,model,metrics,archive};
+  }
+}
+
+export function loadSceneAsset(module,input) {
+  const converted=convertSceneAsset(input),{archive}=converted;
+  const memory=module._malloc(archive.dataSize);if(!memory)throw Error('Scene descriptor allocation failed');
+  try {
+    module.HEAPU8.set(converted.image.subarray(32,32+archive.dataSize),memory);
+    const out=new DataView(module.HEAPU8.buffer,memory,archive.dataSize);
+    for(const slot of archive.relocations)out.setUint32(slot,memory+archive.data.getUint32(slot),true);
+    let disposed=false;
+    return {memory,root:memory+converted.rootOffset,model:converted.model,metrics:converted.metrics,
+      dispose(){if(!disposed){module._free(memory);disposed=true;}}};
   } catch(error){module._free(memory);throw error;}
 }
 

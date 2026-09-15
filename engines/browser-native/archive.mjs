@@ -38,3 +38,30 @@ export function inspectArchive(input) {
     dataSize, relocations, publics:symbols(publicStart, publicCount, false),
     externs:symbols(externStart, externCount, true)};
 }
+
+// Prepare the container for the original native HSD parser. Descriptor scalars
+// still require a typed importer; packed payloads and strings are untouched.
+export function nativeArchiveImage(archive,publics) {
+  if(archive.externs.size)throw Error('Native archives require explicit extern linking');
+  if(!(publics instanceof Map)||!publics.size)throw Error('Typed native public symbols required');
+  for(const [name,offset] of publics)if(archive.publics.get(name)!==offset)
+    throw Error('Native public symbol is not in the source archive');
+  const strings=[...publics.keys()].map(name=>new TextEncoder().encode(name+'\0'));
+  const table=32+archive.dataSize,symbolStart=table+archive.relocations.size*4+publics.size*8;
+  const image=new Uint8Array(symbolStart+strings.reduce((n,b)=>n+b.length,0)),out=new DataView(image.buffer);
+  image.set(archive.bytes.subarray(0,32+archive.dataSize));
+  [image.length,archive.dataSize,archive.relocations.size,publics.size,0].forEach((v,i)=>out.setUint32(i*4,v,true));
+  const source=new DataView(archive.bytes.buffer,archive.bytes.byteOffset,archive.bytes.length);
+  for(const at of [24,28])out.setUint32(at,source.getUint32(at),true);
+  let index=0;
+  for(const at of archive.relocations) {
+    out.setUint32(table+index++*4,at,true);out.setUint32(32+at,archive.data.getUint32(at),true);
+  }
+  let textOffset=0;index=0;
+  for(const offset of publics.values()) {
+    const at=table+archive.relocations.size*4+index*8;
+    out.setUint32(at,offset,true);out.setUint32(at+4,textOffset,true);
+    image.set(strings[index],symbolStart+textOffset);textOffset+=strings[index++].length;
+  }
+  return image;
+}

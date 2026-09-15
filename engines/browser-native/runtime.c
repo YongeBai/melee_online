@@ -20,7 +20,7 @@ static HSD_GObj* objects[8];
 static void unsupported_destructor(HSD_Obj* object)
 {
     (void)object;
-    /* Until the real renderer owns these classes, using one is a hard error. */
+    /* A class without an integrated owner must fail instead of leaking it. */
     abort();
 }
 static GObjFunc destructors[4] = {
@@ -132,3 +132,12 @@ void portRuntimeProbeClear(void)
 int portRuntimeHeapFree(void) { return OSCheckHeap(HSD_GetHeap()); }
 int portRuntimeObjectsUsed(void) { return gobj_alloc_data.used; }
 int portRuntimeProcsUsed(void) { return gobjproc_alloc_data.used; }
+
+/* Called by the real HSD scene integration after its class pools are ready. */
+void portRuntimeSetJointDestructor(GObjFunc destructor)
+{
+    if(!arena||!destructor)abort();
+    if(destructors[HSD_GObj_JObjKind]!=unsupported_destructor&&
+       destructors[HSD_GObj_JObjKind]!=destructor)abort();
+    destructors[HSD_GObj_JObjKind]=destructor;
+}

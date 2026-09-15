@@ -63,7 +63,15 @@ assembly fallback or gameplay mismatch.
 - `platform.c` links original `mpCollInterpolateECB`, `mpPruneEmptyLines`, HSD RNG,
   and HSD archive parsing/lookup. `OSReport` logs and assertions abort. Unsupported
   platform calls fail linking rather than silently succeeding.
-- `archive.mjs` validates big-endian HSD metadata and relocation slots.
+- `archive.mjs` validates big-endian HSD metadata and relocation slots. Its native
+  container builder exposes only explicitly selected typed public symbols.
+- `resident-files.c` supplies synchronous reads from browser-prefetched images to
+  original Melee `lbArchive` C code. Immutable resident bytes and separately
+  relocated archive copies have independent lifetimes. Only explicit .dat/.usd
+  names and HSD heap 0 are integrated; other heaps and asynchronous I/O remain
+  unresolved. The JS host installs typed images automatically, without a picker.
+  Scene checks verify 162 loads, C varargs lookup, independent relocation, invalid
+  installs, cache lifetime and archive release across all 27 models.
 - `stage-collision.mjs` converts the known `MapCollData`, `Vec2`, `MapLine`, and
   `MapJoint` layouts to little-endian WASM32, then builds a small native archive.
   Original HSD C code performs pointer relocation and symbol lookup. It deliberately
@@ -75,8 +83,10 @@ assembly fallback or gameplay mismatch.
 - `runtime.c` provides a WASM-owned arena to the original OS heap and HSD object
   allocator. Original GObj callbacks run in Melee's 25 process-priority levels.
   Order, 64-bit pause masks, delayed deletion, and 120 allocation/reuse cycles are
-  checked. This is a simulation bootstrap: graphics destructors abort until their
-  real implementations are registered, and full scene initialization is pending.
+  checked. The scene target registers the real joint destructor and attaches models
+  to original GObj owners. Immediate release and deletion during a scheduler
+  callback are checked. Unregistered graphics classes still abort; full fighter
+  initialization remains pending.
 - `fighter-assets.mjs` converts scalar common attributes and preserves packed
   throw flags. Twenty named fields per component are read through C structs;
   original falling and friction routines are checked against explicit arithmetic.

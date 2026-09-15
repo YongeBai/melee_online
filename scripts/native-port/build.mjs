@@ -88,11 +88,12 @@ const portable=preparePortableSource(upstream,output);
 const sceneInputs=scene?sceneLinkInputs(root,upstream,output):null;
 if(scene) {
   exports=exports.filter(name=>!['portInterpolate','portSeed','portRandom','portStagePrune','portStageMetric','portArchiveOpen','portArchiveSymbol','portArchiveClose','portFighterAttribute','portFighterPhysicsProbe'].includes(name));
-  exports.push('portSceneLoad','portSceneDestroy','portSceneCollect','portSceneMatrices','portSceneMetric','portSceneLiveJoints',
+  exports.push('portSceneObjectDeleteNextStep','portSceneObjectCreate','portSceneObjectRoot','portSceneObjectFree','portSceneLoad','portSceneDestroy','portSceneCollect','portSceneMatrices','portSceneMetric','portSceneLiveJoints',
+    'portFileInstall','portFileCount','portFileBytes','portFileReads','portFileAllocations','portFileClear','portFileArchive','portFileArchiveClose','portFileArchivePair',
     'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects');
 }
 const selectedUnits=scene?units.filter(file=>!file.startsWith('src/melee/')):units;
-if(scene)selectedUnits.push('src/melee/lb/lbanim.c');
+if(scene)selectedUnits.push('src/melee/lb/lbanim.c','src/melee/lb/lbarchive.c');
 execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.directory,file)), selectedSdk,textureSource,...estimateObjects,
   path.join(root, 'engines/browser-native/errors.c'),
   ...(scene?[]:[path.join(root, 'engines/browser-native/platform.c'),path.join(root, 'engines/browser-native/fighter.c')]),
@@ -102,12 +103,12 @@ execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.
   path.join(root, 'engines/browser-native/matrix-special.c'),
   path.join(root, 'engines/browser-native/pose.c'),
   path.join(root, 'engines/browser-native/skin.c'),
-  ...(sceneInputs?.files||[]),
+  ...(sceneInputs?[path.join(root,'engines/browser-native/resident-files.c'),...sceneInputs.files]:[]),
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, moduleName+'.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+for (const name of ['resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));

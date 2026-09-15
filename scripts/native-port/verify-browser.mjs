@@ -21,7 +21,7 @@ try {
   const entities={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"'};
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
   if(scene) {
-    if(!verification.passed||verification.models.length!==27||verification.animations.clips.length!==38)throw Error('Incomplete native HSD scene coverage');
+    if(!verification.passed||verification.models.length!==27||verification.animations.clips.length!==38||verification.residentFiles?.files.length!==27||!verification.residentFiles.lifecycle?.passed)throw Error('Incomplete native HSD scene coverage');
   } else if(!verification.passed||verification.stages.length!==6||verification.fighters.length!==27||verification.poses.models!==27||
     (allAnimations?!verification.animations.allAnimations:verification.animations.clips.length!==27))
     throw Error('Six hosted stages and 27 playable fighter components required');

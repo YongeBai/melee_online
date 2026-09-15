@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original Melee archive loading now reads browser-prefetched native-layout images.
+It retains `lbArchive_LoadSymbols`, C varargs lookup, HSD relocation and archive
+release, with no DVD interrupt wait in this path. Chrome verifies 162 loads across
+all 27 default models, independent simultaneous copies, and stable repeated heap
+use. Invalid/duplicate installs are rejected; releasing the hosted cache leaves
+loaded archives valid. Only imported joint public symbols are exposed.
+
+Scenes now attach to original GObj owners with the real HSD joint destructor.
+The checks cover immediate release and deletion from a running original scheduler
+callback, with no remaining GObj, callback, scene or archive allocations. This is
+model ownership used by fighter creation, not execution of `Fighter_Create`.
+The scene GPU diagnostic also uses this original archive/GObj path. All 81 sampled
+960×720 images are identical to the previous path. The complete 5,508-clip browser
+regression and 40 targeted tests pass. [Archive/ownership checkpoint](benchmarks/browser-2026-09-15-native-port-resident-files.json).
+
+The file adapter currently handles explicit .dat/.usd filenames and the HSD heap
+only. Locale selection, ARAM/other heaps, asynchronous file callbacks, shared
+`PlCo` fighter tables, complete character metadata and motion-script conversion
+remain. No native competitive match or FPS/latency result exists yet.
+
 The original HSD scene path now loads and destroys all 27 model archives with
 resolved joint/envelope references. Three cycles per model leave no tracked scene
 objects or ID/vector/matrix allocations and show stable repeated heap use. Original

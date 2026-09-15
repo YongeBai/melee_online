@@ -11,6 +11,11 @@
 #include <sysdolphin/baselib/list.h>
 #include <sysdolphin/baselib/aobj.h>
 #include <melee/lb/lbanim.h>
+#include <melee/ft/forward.h>
+#include <sysdolphin/baselib/gobjproc.h>
+#include <sysdolphin/baselib/gobj.h>
+#include <sysdolphin/baselib/gobjobject.h>
+#include <sysdolphin/baselib/gobjplink.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,6 +32,11 @@ _Static_assert(sizeof(FigaTrack)==12,"FigaTrack ABI");
 static int initialized;
 extern int portRuntimeInit(void);
 extern void portAnimationInit(void);
+extern void portRuntimeSetJointDestructor(GObjFunc);
+static void destroy_joint_object(HSD_Obj* object)
+{
+    HSD_JObjRemoveAll((HSD_JObj*)object);
+}
 HSD_JObj* portSceneLoad(HSD_Joint* descriptor)
 {
     if(!initialized) {
@@ -34,6 +44,7 @@ HSD_JObj* portSceneLoad(HSD_Joint* descriptor)
         HSD_ListInitAllocData();HSD_IDInitAllocData();HSD_IDSetup();
         HSD_VecInitAllocData();HSD_MtxInitAllocData();HSD_RObjInitAllocData();
         HSD_AObjInitAllocData();portAnimationInit();
+        portRuntimeSetJointDestructor(destroy_joint_object);
         initialized=1;
     }
     return HSD_JObjLoadJoint(descriptor);
@@ -103,4 +114,31 @@ unsigned portSceneLiveObjects(void)
         HSD_CLASS_INFO(&hsdPObj)->head.nb_exist+HSD_CLASS_INFO(&hsdMObj)->head.nb_exist+
         HSD_CLASS_INFO(&hsdTObj)->head.nb_exist+HSD_AObjGetAllocData()->used+
         HSD_IDGetAllocData()->used+HSD_VecGetAllocData()->used+HSD_MtxGetAllocData()->used;
+}
+
+/* Real GObj ownership used by fighters. User data and fighter callbacks are
+ * attached by Fighter_Create later; this verifies the graphics-object lifetime. */
+HSD_GObj* portSceneObjectCreate(HSD_Joint* descriptor)
+{
+    HSD_JObj* root=portSceneLoad(descriptor);if(!root)return NULL;
+    HSD_GObj* object=GObj_Create(HSD_GOBJ_CLASS_FIGHTER,8,0);
+    if(!object){HSD_JObjRemoveAll(root);return NULL;}
+    HSD_GObjObject_80390A70(object,HSD_GObj_JObjKind,root);
+    return object;
+}
+HSD_JObj* portSceneObjectRoot(HSD_GObj* object)
+{
+    if(!object||object->obj_kind!=HSD_GObj_JObjKind)abort();
+    return object->hsd_obj;
+}
+void portSceneObjectFree(HSD_GObj* object)
+{
+    if(!object||object->obj_kind!=HSD_GObj_JObjKind)abort();
+    HSD_GObjFree(object);
+}
+
+void portSceneObjectDeleteNextStep(HSD_GObj* object)
+{
+    if(!object||object->obj_kind!=HSD_GObj_JObjKind)abort();
+    if(!HSD_GObj_SetupProc(object,portSceneObjectFree,0))abort();
 }

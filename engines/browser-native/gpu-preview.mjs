@@ -1,4 +1,5 @@
-import {loadSceneAsset,loadSceneAnimation} from './scene-assets.mjs';
+import {convertSceneAsset,loadSceneAnimation} from './scene-assets.mjs';
+import {installResidentFile,openResidentArchive} from './resident-files.mjs';
 import {readModelMeshes} from './mesh-assets.mjs';
 import {readModelMaterials} from './material-assets.mjs';
 import {textureMatrices} from './texture-matrix.mjs';
@@ -32,20 +33,35 @@ try {
   const projection=columnMajor(module.HEAPF32.slice(scratch/4,scratch/4+16));module._free(scratch);
   const manifest=await (await fetch('./model-fixtures.json')).json(),rows=[];
   const selected=parameters.get('model')||'PlMrNr.dat';if(!manifest.includes(selected))throw Error('Model not in hosted manifest');
-  const names=parameters.get('verify')==='1'?manifest:[selected];
+  const names=parameters.get('verify')==='1'?manifest:[selected],residentModels=new Map();
   async function load(name,referenceVertices) {
     const [bytes,motion]=await Promise.all([fetchAsset(name),fetchAsset(name.replace('Nr','AJ'))]);
     const model=readModelMeshes(bytes),assets=readModelMaterials(bytes,model),transforms=textureMatrices(module,assets.textures);
     let pose;
     if(fullScene) {
-      const asset=loadSceneAsset(module,bytes),n=model.tree.nodes.length,nodes=module._malloc(n*4);
-      const length=new DataView(motion.buffer,motion.byteOffset,4).getUint32(0),clip=loadSceneAnimation(module,motion.subarray(0,length));
-      const root=module._portSceneLoad(asset.root);
-      if(!root||module._portSceneCollect(root,nodes,n)!==n||module._portSceneAnimation(n,nodes,clip.tree)!==0)
-        throw Error('Native HSD animation attachment failed');
-      module._portSceneRequest(root);
-      pose={step(world,flags){module._portSceneAnimate(root);module._portSceneMatrices(n,nodes,world);module._portSceneFlags(n,nodes,flags);},
-        dispose(){module._portSceneDestroy(root);clip.dispose();asset.dispose();module._free(nodes);}};
+      if(!residentModels.has(name)) {
+        const converted=convertSceneAsset(bytes);
+        const symbol=[...converted.archive.publics].find(([,at])=>at===converted.rootOffset)?.[0];
+        if(!symbol)throw Error('Typed native joint symbol missing');
+        installResidentFile(module,name,converted.image);residentModels.set(name,symbol);
+      }
+      const asset=openResidentArchive(module,name,[residentModels.get(name)]),n=model.tree.nodes.length;
+      let nodes,clip,object;
+      const dispose=()=>{
+        if(object){module._portSceneObjectFree(object);object=0;}
+        clip?.dispose();clip=null;asset.dispose();if(nodes){module._free(nodes);nodes=0;}
+      };
+      try {
+        nodes=module._malloc(n*4);if(!nodes)throw Error('Native node allocation failed');
+        const length=new DataView(motion.buffer,motion.byteOffset,4).getUint32(0);
+        clip=loadSceneAnimation(module,motion.subarray(0,length));
+        object=module._portSceneObjectCreate(asset.addresses[0]);
+        const root=object&&module._portSceneObjectRoot(object);
+        if(!root||module._portSceneCollect(root,nodes,n)!==n||module._portSceneAnimation(n,nodes,clip.tree)!==0)
+          throw Error('Native HSD animation attachment failed');
+        module._portSceneRequest(root);
+        pose={step(world,flags){module._portSceneAnimate(root);module._portSceneMatrices(n,nodes,world);module._portSceneFlags(n,nodes,flags);},dispose};
+      } catch(error){dispose();throw error;}
     } else {
       const limited=loadPose(module,model.tree,animationArchives(motion).next().value.tree);
       pose={step(world,flags){module._portPoseStep(limited.pointer,world);module._portPoseFlags(limited.pointer,flags);},dispose:limited.dispose};
@@ -83,7 +99,9 @@ try {
         snapshots,distinctImages:snapshots.some(s=>s.sha256!==snapshots[0].sha256)});
     } finally {actor.dispose();}
   }
-  const report={passed:true,originalHsdObjects:fullScene,resolution:[960,720],conventions,models:rows,emulator:false,playable:false,gameplayParity:false,
+  if(fullScene&&(module._portFileAllocations()||module._portRuntimeObjectsUsed()||module._portSceneLiveObjects()))
+    throw Error('Native scene benchmark leaked archive or object ownership');
+  const report={passed:true,originalGameArchiveLoader:fullScene,originalGObjOwnership:fullScene,originalHsdObjects:fullScene,resolution:[960,720],conventions,models:rows,emulator:false,playable:false,gameplayParity:false,
     performanceMeasured:false,renderer:gl.getParameter(gl.RENDERER),
     limitations:'Diagnostic unlit first-UV image; no native lighting, TEV, material animation, part selection, gameplay camera or match simulation'};
   const actor=await load(selected,false);actor.step();actor.draw();

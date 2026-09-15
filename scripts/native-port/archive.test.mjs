@@ -62,3 +62,27 @@ test('does not infer unregistered pointers from plausible integers',()=> {
   const f=fixture();f.v.setUint32(152,44); // Valid relocation, wrong field.
   assert.throws(()=>convertStageCollision(f.bytes),/unrelocated array pointer/);
 });
+
+test('native container exposes only selected typed symbols and leaves packed data intact', async()=> {
+  const {nativeArchiveImage}=await import('../../engines/browser-native/archive.mjs');
+  const {bytes}=fixture();bytes.set([0x30,0x30,0x31,0x42],20);
+  const a=inspectArchive(bytes),image=nativeArchiveImage(a,new Map([['coll_data',0]])),view=new DataView(image.buffer);
+  assert.equal(view.getUint32(0,true),image.length);assert.equal(view.getUint32(12,true),1);
+  assert.deepEqual(image.subarray(20,24),bytes.subarray(20,24));
+  assert.equal(view.getUint32(32,true),48); // Relative until original parser runs.
+  assert.deepEqual(image.subarray(32+48,32+120),bytes.subarray(32+48,32+120)); // No inferred payload swap.
+  assert.throws(()=>nativeArchiveImage(a,new Map([['untyped',0]])),/not in the source/);
+  assert.throws(()=>nativeArchiveImage(a,new Map()),/Typed native public/);
+});
+
+test('native container removes unconverted public entry points', async()=> {
+  const {nativeArchiveImage}=await import('../../engines/browser-native/archive.mjs');
+  const {bytes}=fixture(),extended=new Uint8Array(bytes.length+16),view=new DataView(extended.buffer);
+  extended.set(bytes.subarray(0,172));
+  view.setUint32(0,extended.length);view.setUint32(12,2);
+  view.setUint32(172,64);view.setUint32(176,10);
+  extended.set(new TextEncoder().encode('coll_data\0opaque\0'),180);
+  const a=inspectArchive(extended),native=nativeArchiveImage(a,new Map([['coll_data',0]])),v=new DataView(native.buffer);
+  assert.equal(a.publics.size,2);assert.equal(v.getUint32(12,true),1);
+  assert.equal(new TextDecoder().decode(native.subarray(172)),'coll_data\0');
+});
