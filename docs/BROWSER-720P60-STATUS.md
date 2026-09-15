@@ -370,6 +370,24 @@ the older invalid30-second trial, its native-frame workload is valid. Keep
 `hotfusion` opt-in/off; these same-function boundaries are not the larger
 CPU gain needed for all legal stages.
 [Corrected hot-function fusion](benchmarks/browser-2026-09-15-corrected-yoshi-hotfusion-reverse.json).
+The corrected Yoshi direct-WASM-dispatch sampler then recorded **579,531**
+complete compiled-block visits over1596 native-frame controller inputs.
+The named groups inside its top256 reported blocks include animation
+interpretation (46,311 visits,15.97ms sampled), audio reverb (22,243,
+9.35ms), cosine and sine, and envelope matrix setup (11,532,4.32ms);
+individual material and drawing routines in the reported sample are smaller
+and distributed. These wall
+samples include preemption, exclude dispatcher/native callback work and
+select just one in1024 blocks; the top256 do not represent the whole
+232.62ms sampled set or a fraction of each real game frame. The measured
+45.46 distinct visible FPS is degraded by profiling and not acceptance.
+This spread argues for reducing repeated rendering work across multiple
+guest functions while retaining complete fighter images, rather than
+specializing one more general emulator dispatcher. The first profiler run
+returned no samples because it lacked `wasmdispatch=1`; only the explicit
+direct-dispatch rerun is reported. An untracked local USA1.02 function-name
+map was used only to label the aggregate and is excluded from source.
+[Corrected Yoshi compiled-block diagnostic](benchmarks/browser-2026-09-15-corrected-yoshi-direct-block-summary.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

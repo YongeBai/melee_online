@@ -1,0 +1,167 @@
+{
+  "core": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "stage": "Yoshi's Story",
+  "fighters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "frames": 1596,
+  "source": [
+    960,
+    720
+  ],
+  "visible": 45.458850811105954,
+  "sim": 45.60171332151169,
+  "profile": {
+    "samples": 579531,
+    "sampledUs": 232622,
+    "reportedBlocks": 256
+  },
+  "mappedTop": [
+    {
+      "name": "HSD_FObjInterpretAnim",
+      "start": 2151067696,
+      "samples": 46311,
+      "sampledUs": 15969.795999999998,
+      "blocks": 29,
+      "shareOfReportedSampledUs": 16.82
+    },
+    {
+      "name": "HandleReverb",
+      "start": 2151008528,
+      "samples": 22243,
+      "sampledUs": 9352.446,
+      "blocks": 9,
+      "shareOfReportedSampledUs": 9.85
+    },
+    {
+      "name": "cosf",
+      "start": 2150785600,
+      "samples": 8214,
+      "sampledUs": 4479.232,
+      "blocks": 9,
+      "shareOfReportedSampledUs": 4.72
+    },
+    {
+      "name": "SetupEnvelopeModelMtx",
+      "start": 2151081156,
+      "samples": 11532,
+      "sampledUs": 4320,
+      "blocks": 16,
+      "shareOfReportedSampledUs": 4.55
+    },
+    {
+      "name": "parseFloat",
+      "start": 2151066640,
+      "samples": 8971,
+      "sampledUs": 3828.478,
+      "blocks": 5,
+      "shareOfReportedSampledUs": 4.03
+    },
+    {
+      "name": "sinf",
+      "start": 2150786004,
+      "samples": 7396,
+      "sampledUs": 2963.968,
+      "blocks": 7,
+      "shareOfReportedSampledUs": 3.12
+    },
+    {
+      "name": "HSD_StateInvalidate",
+      "start": 2151030724,
+      "samples": 5559,
+      "sampledUs": 2193.924,
+      "blocks": 3,
+      "shareOfReportedSampledUs": 2.31
+    },
+    {
+      "name": "FObjUpdateAnim",
+      "start": 2151067248,
+      "samples": 5745,
+      "sampledUs": 2082.5600000000004,
+      "blocks": 7,
+      "shareOfReportedSampledUs": 2.19
+    },
+    {
+      "name": "HSD_TExpSetReg",
+      "start": 2151173928,
+      "samples": 4577,
+      "sampledUs": 1644.8,
+      "blocks": 5,
+      "shareOfReportedSampledUs": 1.73
+    },
+    {
+      "name": "lbArq_80014BD0",
+      "start": 2147568592,
+      "samples": 5713,
+      "sampledUs": 1641.216,
+      "blocks": 2,
+      "shareOfReportedSampledUs": 1.73
+    },
+    {
+      "name": "HSD_AObjInterpretAnim",
+      "start": 2151039376,
+      "samples": 4070,
+      "sampledUs": 1621.248,
+      "blocks": 3,
+      "shareOfReportedSampledUs": 1.71
+    },
+    {
+      "name": "HSD_PObjAnimAll",
+      "start": 2151070528,
+      "samples": 4504,
+      "sampledUs": 1595.392,
+      "blocks": 6,
+      "shareOfReportedSampledUs": 1.68
+    },
+    {
+      "name": "HSD_DObjAnimAll",
+      "start": 2151014476,
+      "samples": 4193,
+      "sampledUs": 1568.2560000000003,
+      "blocks": 6,
+      "shareOfReportedSampledUs": 1.65
+    },
+    {
+      "name": "HSD_SetupChannel",
+      "start": 2151030948,
+      "samples": 3584,
+      "sampledUs": 1553.664,
+      "blocks": 7,
+      "shareOfReportedSampledUs": 1.64
+    },
+    {
+      "name": "mpLineIntersection",
+      "start": 2147805564,
+      "samples": 4226,
+      "sampledUs": 1551.872,
+      "blocks": 5,
+      "shareOfReportedSampledUs": 1.63
+    },
+    {
+      "name": "_HSD_TObjGetCurrentByType",
+      "start": 2151018088,
+      "samples": 4315,
+      "sampledUs": 1532.9279999999999,
+      "blocks": 6,
+      "shareOfReportedSampledUs": 1.61
+    },
+    {
+      "name": "HSD_JObjDispSub",
+      "start": 2151105464,
+      "samples": 3309,
+      "sampledUs": 1333.2479999999998,
+      "blocks": 4,
+      "shareOfReportedSampledUs": 1.4
+    },
+    {
+      "name": "HSD_TObjAnimAll",
+      "start": 2151017376,
+      "samples": 3665,
+      "sampledUs": 1278.976,
+      "blocks": 5,
+      "shareOfReportedSampledUs": 1.35
+    }
+  ],
+  "limits": "Every 1024th complete compiled Wasm block, host wall time including preemption, not whole-frame CPU share; 256 reported blocks are only a subset. Private symbol map stays untracked."
+}
