@@ -1,0 +1,913 @@
+{
+  "date": "2026-09-15",
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "source": {
+      "repository": "https://github.com/doldecomp/melee.git",
+      "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+    },
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+    "units": [
+      "src/melee/mp/mpcoll.c",
+      "src/melee/mp/mplib.c",
+      "src/melee/gr/ground.c",
+      "src/melee/ft/ftcommon.c",
+      "libs/dolphin/src/dolphin/mtx/mtx44.c",
+      "src/MSL/trigf.c",
+      "src/MSL/math_data.c",
+      "src/MSL/float.c",
+      "src/sysdolphin/baselib/mtx.c",
+      "src/sysdolphin/baselib/random.c",
+      "src/sysdolphin/baselib/archive.c",
+      "src/sysdolphin/baselib/memory.c",
+      "src/sysdolphin/baselib/initialize.c",
+      "src/sysdolphin/baselib/objalloc.c",
+      "libs/dolphin/src/dolphin/os/OSAlloc.c",
+      "src/sysdolphin/baselib/fobj.c",
+      "src/sysdolphin/baselib/spline.c",
+      "src/sysdolphin/baselib/aobj.c",
+      "src/sysdolphin/baselib/gobj.c",
+      "src/sysdolphin/baselib/gobjproc.c",
+      "src/sysdolphin/baselib/gobjplink.c",
+      "src/sysdolphin/baselib/gobjgxlink.c",
+      "src/sysdolphin/baselib/gobjobject.c",
+      "src/sysdolphin/baselib/gobjuserdata.c"
+    ],
+    "selectedSdkFunctions": [
+      "MTXRotRad",
+      "C_MTXLookAt"
+    ],
+    "arithmeticReference": {
+      "repository": "https://github.com/dolphin-emu/dolphin",
+      "commit": "e22551eae1c84a7e4d0b6a5c519ef4ed4ef69df1",
+      "license": "GPL-2.0-or-later",
+      "purpose": "Gekko reciprocal and reciprocal-square-root arithmetic helpers",
+      "files": [
+        {
+          "file": "Common/FloatUtils.cpp",
+          "sha256": "e7bcd6a48701a361a84a9c0dfbf2ddb0c5c5219a1370838c05f99a5e8dff9dbb"
+        },
+        {
+          "file": "Common/FloatUtils.h",
+          "sha256": "8aad8c06eac7e14ac2876ddd56edc0562d28cd8c906ca6bfd9c72808810dbbe5"
+        },
+        {
+          "file": "Common/CommonTypes.h",
+          "sha256": "b714ae37337b4f9cd6e1863073bdd92fda8648e606c91657b104fdc856199b94"
+        }
+      ]
+    },
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-fno-builtin-sinf",
+      "-fno-builtin-cosf",
+      "-fno-builtin-tanf",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ],
+    "wasmBytes": 49861,
+    "wasmSha256": "19a1cd49bcf865dc2320b6518d6a67afba40ef42bcd3ddd7c5dd7891a3ab70eb",
+    "imports": [
+      {
+        "module": "env",
+        "name": "_abort_js",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_close",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_write",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_seek",
+        "kind": "function"
+      },
+      {
+        "module": "env",
+        "name": "emscripten_resize_heap",
+        "kind": "function"
+      }
+    ],
+    "playable": false,
+    "gameplayParity": false,
+    "performanceCertified": false
+  },
+  "skin": {
+    "passed": true,
+    "arithmetic": {
+      "passed": true,
+      "cases": 5
+    },
+    "models": [
+      {
+        "name": "PlMrNr.dat",
+        "joints": 61,
+        "meshes": 68,
+        "vertices": 6982,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 112,
+          "influences": 178,
+          "min": -4.742148399353027,
+          "max": 14.016189575195312,
+          "rewindPassed": true
+        },
+        "triangles": 6328,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlFxNr.dat",
+        "joints": 73,
+        "meshes": 91,
+        "vertices": 7602,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 124,
+          "influences": 194,
+          "min": -7.668863296508789,
+          "max": 16.47268295288086,
+          "rewindPassed": true
+        },
+        "triangles": 6658,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          128,
+          152
+        ]
+      },
+      {
+        "name": "PlCaNr.dat",
+        "joints": 63,
+        "meshes": 98,
+        "vertices": 7895,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 100,
+          "influences": 152,
+          "min": -6.8468098640441895,
+          "max": 19.57392120361328,
+          "rewindPassed": true
+        },
+        "triangles": 6965,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlDkNr.dat",
+        "joints": 75,
+        "meshes": 61,
+        "vertices": 7827,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 140,
+          "influences": 227,
+          "min": -9.307635307312012,
+          "max": 18.23077964782715,
+          "rewindPassed": true
+        },
+        "triangles": 6597,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          128,
+          152
+        ]
+      },
+      {
+        "name": "PlKbNr.dat",
+        "joints": 46,
+        "meshes": 111,
+        "vertices": 8860,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 271,
+          "influences": 976,
+          "min": -7.962714195251465,
+          "max": 12.313621520996094,
+          "rewindPassed": true
+        },
+        "triangles": 7828,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlKpNr.dat",
+        "joints": 76,
+        "meshes": 130,
+        "vertices": 11143,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 109,
+          "influences": 157,
+          "min": -20.35675811767578,
+          "max": 31.948932647705078,
+          "rewindPassed": true
+        },
+        "triangles": 9157,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlLkNr.dat",
+        "joints": 75,
+        "meshes": 99,
+        "vertices": 8418,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 110,
+          "influences": 166,
+          "min": -4.364952087402344,
+          "max": 15.799521446228027,
+          "rewindPassed": true
+        },
+        "triangles": 7310,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlSkNr.dat",
+        "joints": 58,
+        "meshes": 71,
+        "vertices": 7560,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 87,
+          "influences": 134,
+          "min": -3.336657762527466,
+          "max": 13.281039237976074,
+          "rewindPassed": true
+        },
+        "triangles": 6838,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlNsNr.dat",
+        "joints": 63,
+        "meshes": 77,
+        "vertices": 7058,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 77,
+          "influences": 108,
+          "min": -5.206921577453613,
+          "max": 13.553861618041992,
+          "rewindPassed": true
+        },
+        "triangles": 6538,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlPeNr.dat",
+        "joints": 114,
+        "meshes": 105,
+        "vertices": 9080,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 133,
+          "influences": 220,
+          "min": -3.8144216537475586,
+          "max": 16.482744216918945,
+          "rewindPassed": true
+        },
+        "triangles": 8176,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlPpNr.dat",
+        "joints": 49,
+        "meshes": 45,
+        "vertices": 4169,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 52,
+          "influences": 70,
+          "min": -5.630359649658203,
+          "max": 11.973125457763672,
+          "rewindPassed": true
+        },
+        "triangles": 3683,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlNnNr.dat",
+        "joints": 49,
+        "meshes": 45,
+        "vertices": 4170,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 52,
+          "influences": 70,
+          "min": -14.673006057739258,
+          "max": 15.06173324584961,
+          "rewindPassed": true
+        },
+        "triangles": 3682,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlPkNr.dat",
+        "joints": 53,
+        "meshes": 52,
+        "vertices": 5479,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 118,
+          "influences": 219,
+          "min": -9.845108032226562,
+          "max": 13.966512680053711,
+          "rewindPassed": true
+        },
+        "triangles": 4989,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          128,
+          144
+        ]
+      },
+      {
+        "name": "PlPrNr.dat",
+        "joints": 50,
+        "meshes": 24,
+        "vertices": 5229,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 68,
+          "influences": 110,
+          "min": -6.606213092803955,
+          "max": 12.646520614624023,
+          "rewindPassed": true
+        },
+        "triangles": 4815,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          128,
+          152
+        ]
+      },
+      {
+        "name": "PlSsNr.dat",
+        "joints": 60,
+        "meshes": 106,
+        "vertices": 11619,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 121,
+          "influences": 186,
+          "min": -6.4375,
+          "max": 20.774097442626953,
+          "rewindPassed": true
+        },
+        "triangles": 10211,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlYsNr.dat",
+        "joints": 70,
+        "meshes": 76,
+        "vertices": 9887,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 180,
+          "influences": 339,
+          "min": -6.08081579208374,
+          "max": 16.188127517700195,
+          "rewindPassed": true
+        },
+        "triangles": 9073,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          144,
+          152,
+          128
+        ]
+      },
+      {
+        "name": "PlZdNr.dat",
+        "joints": 118,
+        "meshes": 79,
+        "vertices": 7366,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 126,
+          "influences": 171,
+          "min": -4.78116512298584,
+          "max": 15.258624076843262,
+          "rewindPassed": true
+        },
+        "triangles": 6418,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlLgNr.dat",
+        "joints": 61,
+        "meshes": 65,
+        "vertices": 7055,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 108,
+          "influences": 170,
+          "min": -4.66315221786499,
+          "max": 13.55539321899414,
+          "rewindPassed": true
+        },
+        "triangles": 6383,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlMtNr.dat",
+        "joints": 68,
+        "meshes": 46,
+        "vertices": 7106,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 72,
+          "influences": 96,
+          "min": -14.075164794921875,
+          "max": 19.665990829467773,
+          "rewindPassed": true
+        },
+        "triangles": 6656,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          128,
+          144
+        ]
+      },
+      {
+        "name": "PlMsNr.dat",
+        "joints": 90,
+        "meshes": 105,
+        "vertices": 8425,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 139,
+          "influences": 201,
+          "min": -8.501026153564453,
+          "max": 16.81702995300293,
+          "rewindPassed": true
+        },
+        "triangles": 7031,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          128,
+          152,
+          144
+        ]
+      },
+      {
+        "name": "PlGwNr.dat",
+        "joints": 53,
+        "meshes": 129,
+        "vertices": 14070,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 107,
+          "influences": 175,
+          "min": -8.386799812316895,
+          "max": 21.9375,
+          "rewindPassed": true
+        },
+        "triangles": 13450,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlDrNr.dat",
+        "joints": 86,
+        "meshes": 72,
+        "vertices": 6999,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 123,
+          "influences": 187,
+          "min": -4.291947841644287,
+          "max": 13.453104019165039,
+          "rewindPassed": true
+        },
+        "triangles": 6273,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlClNr.dat",
+        "joints": 79,
+        "meshes": 85,
+        "vertices": 8323,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 96,
+          "influences": 135,
+          "min": -4.663095474243164,
+          "max": 16.471059799194336,
+          "rewindPassed": true
+        },
+        "triangles": 7381,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlPcNr.dat",
+        "joints": 46,
+        "meshes": 39,
+        "vertices": 4360,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 38,
+          "influences": 54,
+          "min": -15.564867973327637,
+          "max": 25.83224868774414,
+          "rewindPassed": true
+        },
+        "triangles": 4034,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlFeNr.dat",
+        "joints": 92,
+        "meshes": 121,
+        "vertices": 8371,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 119,
+          "influences": 166,
+          "min": -8.545461654663086,
+          "max": 17.8004207611084,
+          "rewindPassed": true
+        },
+        "triangles": 7093,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          128,
+          144
+        ]
+      },
+      {
+        "name": "PlGnNr.dat",
+        "joints": 84,
+        "meshes": 101,
+        "vertices": 8075,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 92,
+          "influences": 121,
+          "min": -18.015363693237305,
+          "max": 22.114795684814453,
+          "rewindPassed": true
+        },
+        "triangles": 7103,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          152,
+          144,
+          128
+        ]
+      },
+      {
+        "name": "PlFcNr.dat",
+        "joints": 67,
+        "meshes": 78,
+        "vertices": 6337,
+        "skin": {
+          "frames": 32,
+          "paletteMatrices": 137,
+          "influences": 221,
+          "min": -5.681186199188232,
+          "max": 18.162378311157227,
+          "rewindPassed": true
+        },
+        "triangles": 5585,
+        "formats": [
+          0
+        ],
+        "primitives": [
+          128,
+          152,
+          144
+        ]
+      }
+    ],
+    "limitations": "Animated geometry decoding/skinning; no materials, textures or rendered-image comparison"
+  },
+  "deduplication": {
+    "framesPerComponent": 32,
+    "models": 27,
+    "before": 8552,
+    "after": 3011,
+    "comparisons": [
+      {
+        "name": "PlMrNr.dat",
+        "before": 257,
+        "after": 112,
+        "sha256": "59fe686a2b341779da0fb3817161317a7e700812a00d8fe579dd8ea4af96ba6d"
+      },
+      {
+        "name": "PlFxNr.dat",
+        "before": 393,
+        "after": 124,
+        "sha256": "61ad36e96884cb7dc1bef945379013b2d5c7f07e512592919078e6ec8fb0b519"
+      },
+      {
+        "name": "PlCaNr.dat",
+        "before": 368,
+        "after": 100,
+        "sha256": "1f24c781944c2f746049b1d47aca3189a93ff392d1b76492e5e31a26baff6fd7"
+      },
+      {
+        "name": "PlDkNr.dat",
+        "before": 344,
+        "after": 140,
+        "sha256": "9f0acd9ccf53e52687e6f89128df7cd66dca69c31189a71292a1e2eb210acd43"
+      },
+      {
+        "name": "PlKbNr.dat",
+        "before": 813,
+        "after": 271,
+        "sha256": "3adf8066c31f78c6cdd24dfb8f3ba8624945e451b0bd320ef566de7dc26ba0e7"
+      },
+      {
+        "name": "PlKpNr.dat",
+        "before": 387,
+        "after": 109,
+        "sha256": "adae688a1b9afd0da5f9e4183d097b7cab4d0aa2d4c475cec0ff9315551608ee"
+      },
+      {
+        "name": "PlLkNr.dat",
+        "before": 267,
+        "after": 110,
+        "sha256": "3af572512851dfbe9d58ecfc789dee318f83060f988104543575a8d9601b867f"
+      },
+      {
+        "name": "PlSkNr.dat",
+        "before": 219,
+        "after": 87,
+        "sha256": "af945b1741c7d5c42842a7e850980303f8a3adf696b856f69c331fb3739a2677"
+      },
+      {
+        "name": "PlNsNr.dat",
+        "before": 209,
+        "after": 77,
+        "sha256": "90e7b6b67ceb4d143366df30f5ee0d4bda5bd7eaf106b37a4d023de3b638867b"
+      },
+      {
+        "name": "PlPeNr.dat",
+        "before": 345,
+        "after": 133,
+        "sha256": "69a8897d22442c279aa8cf69098fe1d25f6bfbcf58a702728b1ec2cb52246dd1"
+      },
+      {
+        "name": "PlPpNr.dat",
+        "before": 168,
+        "after": 52,
+        "sha256": "119a646ac04bf13a46ac2152f47fad535e9d357b00177f930767cd29a1124925"
+      },
+      {
+        "name": "PlNnNr.dat",
+        "before": 168,
+        "after": 52,
+        "sha256": "d9bbd9422a24486958f530f10cc09fdea2f77b4c91f8f785bb1a7cf5eb726a02"
+      },
+      {
+        "name": "PlPkNr.dat",
+        "before": 334,
+        "after": 118,
+        "sha256": "7a9251f116d53ecf2759422045db8a01323cf7f7bcb019dd10d831d19692b36d"
+      },
+      {
+        "name": "PlPrNr.dat",
+        "before": 151,
+        "after": 68,
+        "sha256": "979281cb18f6db92e894bf240feb42c8d3f7120214007b8577ff2c0333bb9783"
+      },
+      {
+        "name": "PlSsNr.dat",
+        "before": 296,
+        "after": 121,
+        "sha256": "0d7c424bc52c742a0a89518bf214c541bb6c2b075b308afde5e6889d77fe76ec"
+      },
+      {
+        "name": "PlYsNr.dat",
+        "before": 507,
+        "after": 180,
+        "sha256": "718fc87c709f91a8ccfbbceb38520a51952e31fcb82da76199f32b65508d9732"
+      },
+      {
+        "name": "PlZdNr.dat",
+        "before": 394,
+        "after": 126,
+        "sha256": "fd2ecefb3c13761948c36f2ca1e67da56e9bc736584382844ecce5cf2e922ee0"
+      },
+      {
+        "name": "PlLgNr.dat",
+        "before": 261,
+        "after": 108,
+        "sha256": "6be59a87b725f05ae2b6b7ba163bfbd32bdc294c61b0dc6ff86eca89df06806e"
+      },
+      {
+        "name": "PlMtNr.dat",
+        "before": 155,
+        "after": 72,
+        "sha256": "ba97adf3fc5f1df234904ebe3a58314574cd54c7da4032013ffd6f319dc23527"
+      },
+      {
+        "name": "PlMsNr.dat",
+        "before": 409,
+        "after": 139,
+        "sha256": "aed586d2d92f62b273ff4d91a16ece0ab4a08c5ad1e23692f6bcd24afbe8a965"
+      },
+      {
+        "name": "PlGwNr.dat",
+        "before": 345,
+        "after": 107,
+        "sha256": "a6b21723dfadc666d2e86284dc78978dc398f3bbda891dd4ea1dfe23b32b548e"
+      },
+      {
+        "name": "PlDrNr.dat",
+        "before": 270,
+        "after": 123,
+        "sha256": "4a2fc61d0e5296946261421f3177ad393002bb9cb6c8d603bb83646188e96da1"
+      },
+      {
+        "name": "PlClNr.dat",
+        "before": 244,
+        "after": 96,
+        "sha256": "eab2084c8301b5cf5d0b7b7b9c71bf04968fe5b2171fb9410e3de03a60475dca"
+      },
+      {
+        "name": "PlPcNr.dat",
+        "before": 98,
+        "after": 38,
+        "sha256": "51b6b9f87170fe814d7aab9ba9ba114cd8f9902f24572856f73701211724a840"
+      },
+      {
+        "name": "PlFeNr.dat",
+        "before": 442,
+        "after": 119,
+        "sha256": "9cce6fc155eb89d4700598c1cead6e717a9c943113682444475dc970406677b4"
+      },
+      {
+        "name": "PlGnNr.dat",
+        "before": 337,
+        "after": 92,
+        "sha256": "676b9abb7921e55d0bcebddf458ab504b6125a7ca5c3b0f1c3ed9e874852b3d5"
+      },
+      {
+        "name": "PlFcNr.dat",
+        "before": 371,
+        "after": 137,
+        "sha256": "3ca5f597e72b472d27d81ea3755139bac3b1ba36a5a5e02b1e314a78b5966af4"
+      }
+    ]
+  },
+  "animationRegression": {
+    "clips": 5508,
+    "allAnimations": true
+  },
+  "testsPassed": 27,
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false
+}

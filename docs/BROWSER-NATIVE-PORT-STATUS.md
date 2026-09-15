@@ -58,6 +58,24 @@ skinning or draw calls run yet. Chrome passes this decode alongside the complete
 5,508-clip animation regression and 38-clip pose integration; 23 targeted tests
 pass. [SDK/math/geometry checkpoint](benchmarks/browser-2026-09-15-native-port-sdk-geometry.json).
 
+Skinning now connects the imported meshes to animated poses. The typed envelope
+importer preserves influence order and raw weights, and native palette preparation
+retains HSD's different coordinate-space rules for rigid, shared, single-influence
+and blended meshes. Five hand-calculated cases cover those distinctions. All 27
+default fighter models pass 32 animated frames and exact rewind checks in Chrome.
+Identical palettes are shared across mesh sections, reducing total palette
+calculations from 8,552 to 3,011; SHA-256 comparisons of every transformed vertex
+over the 32-frame sequence remained identical for all 27 models. This is work
+reduction in a subsystem, not a measured match FPS improvement. Native GPU draws,
+normal matrices, materials/texture combining and full match integration remain.
+
+Next texture work must not blindly reuse `scripts/engine/gx-decoder.js`: inspection
+found missing indexed palette formats and PC-style CMPR interpolation/transparent
+colors. Dolphin's `TextureDecoder_Generic.cpp` and `TextureDecoder_Util.h` show
+GX uses 3/8–5/8 interpolation and retains averaged RGB in transparent entries.
+The 27 default archives reference 1,730 texture descriptors: CMPR 1,635, C8 73,
+C4 1, I4 18, I8 1 and RGB5A3 2. These are descriptor counts, not unique images.
+
 The first module loads collision data for Battlefield, Final Destination, Dream
 Land, Yoshi's Story, Fountain of Dreams and Pokémon Stadium. Original HSD archive
 code relocates the converted pointers; typed C reads match the source asset

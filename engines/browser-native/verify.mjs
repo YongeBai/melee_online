@@ -85,7 +85,7 @@ export async function verifyNative(module, stageFiles=[], fighterFiles=[], anima
   const animations=verifyAnimations(module,animationFiles,!!options.allAnimations);
   const math=verifyMath(module);
   const poses=verifyPoses(module,options.models||[],animationFiles);
-  const meshes=verifyMeshes(options.models||[]);
+  const meshes=verifyMeshes(module,options.models||[],animationFiles);
   return {passed:true,rngValues:4096,ecbVectors:vectors,stages,runtime,fighters,animations,math,poses,meshes,emulator:false,
     playable:false,gameplayParity:false,performanceMeasured:false};
 }

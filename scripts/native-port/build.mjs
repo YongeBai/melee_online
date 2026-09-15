@@ -64,7 +64,8 @@ const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'PSVECSquareMag','PSVECCrossProduct','HSD_MtxSRT','HSD_MkRotationMtx','sinf','cosf',
   'portPoseCreate','portPoseNode','portPoseTrack','portPoseRewind','portPoseStep','portPoseDestroy',
   'portFrsqrte','portFres','portRound25','portEstimateBits','PSVECNormalize','PSVECMag','PSMTXTrans',
-  'MTXFrustum','MTXPerspective','MTXOrtho','MTXRotRad','C_MTXLookAt','PSMTXQuat','PSMTXInverse','PSMTXRotAxisRad'];
+  'MTXFrustum','MTXPerspective','MTXOrtho','MTXRotRad','C_MTXLookAt','PSMTXQuat','PSMTXInverse','PSMTXRotAxisRad',
+  'portSkinMatrices','portSkinVertices'];
 const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
   '-fno-builtin-sinf', '-fno-builtin-cosf', '-fno-builtin-tanf',
   '-ffunction-sections', '-fdata-sections', '-I' + path.join(output, 'include'),
@@ -76,13 +77,14 @@ execFileSync(compiler, [...flags, ...units, selectedSdk,...estimateObjects, path
   path.join(root, 'engines/browser-native/math.c'),
   path.join(root, 'engines/browser-native/matrix-special.c'),
   path.join(root, 'engines/browser-native/pose.c'),
+  path.join(root, 'engines/browser-native/skin.c'),
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, 'melee-native.mjs')], {cwd:upstream, stdio:'inherit'});
 for (const name of ['archive.mjs', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
-  'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
+  'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
 const wasm = fs.readFileSync(path.join(output, 'melee-native.wasm'));
 const module = new WebAssembly.Module(wasm);

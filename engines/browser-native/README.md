@@ -100,7 +100,14 @@ assembly fallback or gameplay mismatch.
 - `mesh-assets.mjs` decodes static GX display lists and typed vertex arrays for all
   27 default fighter models. It preserves strip winding, matrix indices, packed
   colors and fixed-point coordinates. The browser verifies 2,179 mesh sections.
-  Skinning, materials, textures and actual browser GPU draw calls remain.
+  Materials, textures and actual browser GPU draw calls remain.
+- `skin-assets.mjs` imports inverse-bind matrices and envelope palettes with
+  original influence ordering and weights. `skin.c` prepares rigid/shared and
+  blended matrices using native SDK/HSD math, then transforms reference vertices.
+  Identical palettes share one calculation per frame. Browser checks cover 32
+  animated frames of all 27 default models and replay; five independent examples
+  distinguish HSD's single-influence and blended coordinate spaces. GPU draws,
+  normal matrices and material/texture combining are still pending.
 
 `node scripts/native-port/audit-link.mjs` probes original joint loading and fighter
 creation with the implemented native math/heap/error boundaries. It requires a
