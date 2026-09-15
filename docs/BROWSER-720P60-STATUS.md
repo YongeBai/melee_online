@@ -277,6 +277,16 @@ was52.80 visible FPS, but the separate cold sessions cannot establish a
 causal depth cost. There is no target gain to justify wrong occlusion, so
 the corrected renderer remains mandatory.
 [Visual-invalid depth control](benchmarks/browser-2026-09-15-raw-depth-same-core-negative-control.json).
+The corrected Stadium animation-state specialization compiled one guarded
+function and recorded 4.64million cumulative calls, but its valid 35-second
+same-checkpoint off/on/on/off measured **46.20 / 48.12 / 49.80 / 50.46 distinct
+visible FPS**. The first pair favors it by1.92FPS and the reversed pair loses
+0.66FPS. All106 common controller/gameplay fingerprints match; every visible
+image gate fails. An initial 30-second trial was invalidated by fewer than
+1,200 shared frames in its cold warmup, and cannot establish a gain. Leave
+the specialization opt-in rather than interpreting sampled guest-animation
+time as a whole-frame FPS opportunity.
+[Stadium animation-state A/B/A](benchmarks/browser-2026-09-15-corrected-stadium-animation-state-abba.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation

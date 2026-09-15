@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-animation-state-specialization-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": "Pokémon Stadium, Ice Climbers mirror, two ordinary native-frame controller tracks, corrected 960x720 renderer, black decorative backdrop and low-detail fighter models",
+  "fixedCodegen": ["blockmerge", "animfusion"],
+  "toggledCodegen": "animstatefast",
+  "method": "One restored match checkpoint, off/on/on/off; each mode had a separate warmup and 35-second visible-image measurement. A first 30-second attempt lacked 1200 common frames during its cold warmup and failed the consistency gate, so these are the valid repeat measurements.",
+  "measuredDistinctVisibleFps": [46.2010, 48.1169, 49.8043, 50.4598],
+  "measuredSimulationFps": [46.2867, 48.2598, 50.1186, 50.7741],
+  "pairedDistinctVisibleDeltaFps": [1.9159, -0.6556],
+  "nativeInputConsistency": {"passed": true, "checked": 106, "mismatches": []},
+  "fastPathCoverage": {"compiledBlocks": 1, "cumulativeRunsSecondEnabledMeasurement": 4644101, "cumulativeCommonCallsSecondEnabledMeasurement": 3524754},
+  "allRunsBelow60DistinctVisibleFps": true,
+  "decision": "Reject as an FPS fix on the measured heavy Stadium configuration: the paired directions disagree and even the final unoptimized leg is faster. Keep specialization opt-in; no full-machine replay is claimed for this rejected configuration.",
+  "limits": "The counters are cumulative calls, not CPU duration. The controller consistency gate hashes sampled native frame indices, inputs, fighter state and poll gaps; it is not a full-state replay. Different results across warmup and late legs also show that a single cold run cannot certify sustained speed. Full raw run: /tmp/melee-corrected-stadium-animstate-abba-35s-3286-sep15.json."
+}
