@@ -1520,7 +1520,7 @@ if (params.has("qa")) {
         const reflectionAB=stageBackgroundAB||reverbAB||staticBackgroundAB||yoshiAnimationAB||yoshiOffscreenAB||stadiumAB||params.get("benchmarkreflectioncompare")==="1"||sceneryAB||modelAB||animationAB||shadowAB||decorationsAB||particlesAB;
         if(retainedConfigAB&&(!frameStress||headroomCheck.checked||checkpointControl.checked||dispatchProfileCheck.checked||queueCapacityAB||queueClockAB||codegenAB||reflectionAB||scaleAB||probeAB||pacingAB||fixedWorkAB||repeats>1))
           throw Error('Retained CPU group comparison requires only native-frame inputs and one codegen comparison');
-        if(frameStress&&(scaleAB||repeats>1))throw Error("Native-frame input supports single runs, codegen, pacing and cosmetic comparisons");
+        if(frameStress&&repeats>1)throw Error("Native-frame input supports single runs and matched comparisons");
         if(animationAB&&(params.get("scenery")!=="off"||params.get("sceneryanimation")==="off"))throw Error("Animation comparison requires scenery off and animation initially on");
         if(modelAB&&params.get("models")==="low")throw Error("Start model comparison at normal detail");
         if(params.get("benchmarkreflectioncompare")==="1"&&params.get("reflection")==="off")throw Error("Start reflection comparison with reflections enabled");
@@ -1569,7 +1569,7 @@ if (params.has("qa")) {
           : probeAB
           ? await compareBrowserProbe(host,duration,()=>host.adapter.request("meleeInspect",{}),{frameInput:frameStress,mode:params.get("benchmarkworkerprobecompare")==="1"?"worker":params.get("benchmarkharvestcompare")==="1"?"harvest":params.get("benchmarkprobecontext")==="1"?"context":params.get("benchmarkasynccontrol")==="1"?"async-overhead":params.get("benchmarkasynccompare")==="1"?"async":"overhead",onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);}})
           : scaleAB
-          ? await compareBrowserRenderScale(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,
+          ? await compareBrowserRenderScale(host,duration,()=>host.adapter.request("meleeInspect",{}),{measure,frameInput:frameStress,
               onProgress:text=>{progress.textContent=text;},onResult:result=>{output.textContent=JSON.stringify(result,null,2);},
             })
           : codegenAB

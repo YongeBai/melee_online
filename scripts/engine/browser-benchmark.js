@@ -368,7 +368,7 @@ export async function sampleBrowserCpuLocations(host, seconds) {
 
 // Compare rendering work at one fixed simulation checkpoint. Resolution
 // changes are cosmetic; neither run changes speed, CPU clock or frame count.
-export async function compareBrowserRenderScale(host, seconds, inspect, {onProgress=()=>{},onResult=()=>{},measure=measureBrowserGameplay}={}) {
+export async function compareBrowserRenderScale(host, seconds, inspect, {onProgress=()=>{},onResult=()=>{},measure=measureBrowserGameplay,frameInput=false}={}) {
   const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
   const results=[];let captured=false,original;
   try {
@@ -385,14 +385,24 @@ export async function compareBrowserRenderScale(host, seconds, inspect, {onProgr
         const profile=(await host.adapter.request('rendererDiagnostics',{})).coreProfile;
         const expected=[640*percent/100,528*percent/100];
         if(profile?.efbWidth!==expected[0]||profile?.efbHeight!==expected[1])throw Error('Internal render size did not update: '+JSON.stringify(profile));
+        if(frameInput)await command('frameInput',{enabled:true});
         await host.adapter.request('start',{});
         const result=await measure(host,seconds,inspect);
+        if(frameInput){
+          await command('frameInput',{enabled:false});
+          const stats=await command('frameInputStats');
+          const exercised=stats.valid&&stats.inputChanges?.every(n=>n>=8)&&stats.observedActions?.every(a=>a.length>=3);
+          result.controllerStress={...stats,kind:'two ordinary controller tracks sampled on native logic frames',notHumanPlay:true,exercisedBothPlayers:!!exercised};
+          if(!exercised){result.passed=false;result.invalidWorkload='Frame-based controller workload was invalid or inactive';}
+        }
         Object.assign(result,{percent,warmup,internalResolution:expected});
         results.push(result);onResult({kind:'same-checkpoint-render-scale-abba',passed:false,runs:results});
       }
     }
-    return {kind:'same-checkpoint-render-scale-abba',passed:results.filter(r=>!r.warmup&&r.percent===150).every(r=>r.passed),runs:results};
+    const inputConsistency=frameInput?compareFrameInputDigests(results):undefined;
+    return {kind:'same-checkpoint-render-scale-abba',passed:results.filter(r=>!r.warmup&&r.percent===150).every(r=>r.passed)&&(!frameInput||inputConsistency.passed),runs:results,...(frameInput?{inputConsistency}:{})};
   }finally {
+    if(frameInput)await command('frameInput',{enabled:false});
     await command('pause');
     try {if(captured)await command('release',{slot:5});if(original)await command('renderScale',{percent:original});}
     finally{await host.adapter.request('start',{});}

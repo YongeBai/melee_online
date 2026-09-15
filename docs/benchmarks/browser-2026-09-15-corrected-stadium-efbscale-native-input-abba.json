@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-15",
+  "kind": "corrected-renderer-same-checkpoint-efb-scale-abba",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": "Pokémon Stadium Ice Climbers mirror, two scripted ordinary human controllers on native logic frames, black decorative backdrop, low-detail models, blockmerge and animation fusion",
+  "method": "One saved Stadium match checkpoint, 35-second warmup and 35-second distinct-visible-image measurement per 200/150/150/200 leg. All legs use the corrected WebGL depth path and 960x720 output; rendererDiagnostics verifies EFB dimensions after each restore.",
+  "renderInternalResolution": {"scale200": [1280, 1056], "scale150": [960, 792]},
+  "internalPixelReductionPercent": 43.75,
+  "outputSourceResolution": [960, 720],
+  "measuredDistinctVisibleFps": [47.4876, 50.2310, 50.6312, 50.8602],
+  "measuredSimulationFps": [47.6590, 50.4882, 50.9169, 51.0316],
+  "pairedDistinctVisibleDeltaFps": [2.7435, -0.2290],
+  "inputConsistency": {"passed": true, "checked": 109, "mismatches": []},
+  "bothControllersActiveEveryLeg": true,
+  "allVisibleIntervalsBelow60": true,
+  "singleScale150IndependentControlDistinctVisibleFps": 41.7149,
+  "decision": "Both modes fail the 720p60 gate and paired directions disagree. Leave internal 2x unchanged for the playable default. A 43.75% EFB-pixel reduction cannot explain the entire 9+ FPS gap on this heavy Stadium scene.",
+  "limits": "The 1.5x independent trial booted in another fresh browser session and is not a causal control. Native-frame fingerprints include selected fighter state and inputs, not exact saved-state replay or physical latency. Render scale affects visual sharpness; the inspected 1.5x frame retained fighters, neutral Stadium collision floor and platforms, and native camera parameters were never changed. Raw saved-checkpoint report: /tmp/melee-corrected-stadium-efbscale-abba-3289-sep15.json."
+}

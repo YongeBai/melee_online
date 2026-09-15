@@ -126,6 +126,30 @@ test('render-scale A/B keeps a fixed checkpoint and verifies real internal dimen
  assert.ok(!calls.some(([,d])=>d.action==='codegen'));
 });
 
+test('render-scale comparisons reject inactive native input and require matching trajectories',async()=>{
+ const {compareBrowserRenderScale}=await import('./browser-benchmark.js');
+ let percent=200,track=0;const calls=[];
+ const host={adapter:{request:async(type,data)=>{
+  calls.push([type,data]);
+  if(type==='rendererDiagnostics')return{coreProfile:{efbWidth:640*percent/100,efbHeight:528*percent/100}};
+  if(data?.action==='renderScale'){if(data.percent)percent=data.percent;return{percent};}
+  if(data?.action==='frameInputStats')return{valid:true,startFrame:420,inputChanges:[12,13],observedActions:[[14,16,24],[14,17,25]],digests:[{frame:1200,input:5,state:track++===3?8:7},{frame:1320,input:6,state:7}],gaps:[]};
+  return{};
+ }}};
+ const result=await compareBrowserRenderScale(host,35,()=>{},{frameInput:true,measure:async()=>({passed:true})});
+ assert.equal(result.passed,false);assert.equal(result.inputConsistency.passed,false);
+ assert.ok(result.inputConsistency.mismatches.some(m=>m.state));
+ assert.equal(result.runs.filter(r=>!r.warmup).length,4);
+ assert.equal(calls.filter(([,d])=>d?.action==='frameInput'&&d.enabled).length,8);
+ assert.equal(calls.at(-1)[0],'start');
+ assert.equal(percent,200);
+ track=0;
+ const quiet={...host,adapter:{request:async(t,d)=>d?.action==='frameInputStats'?{valid:false,inputChanges:[0,0],observedActions:[[],[]],startFrame:420,digests:[]}:host.adapter.request(t,d)}};
+ const inactive=await compareBrowserRenderScale(quiet,35,()=>{},{frameInput:true,measure:async()=>({passed:true})});
+ assert.equal(inactive.passed,false);
+ assert.ok(inactive.runs.every(r=>!r.controllerStress.exercisedBothPlayers));
+});
+
 test('probe comparison never treats delivery counters as acceptance and releases on failure',async()=>{
  const {compareBrowserProbe}=await import('./browser-benchmark.js');const calls=[];const host={adapter:{request:async(t,d)=>{calls.push([t,d]);return{};}}};
  const result=await compareBrowserProbe(host,30,()=>{},{measureImage:async()=>({passed:true}),measureDelivery:async()=>({passed:true})});

@@ -287,6 +287,18 @@ image gate fails. An initial 30-second trial was invalidated by fewer than
 the specialization opt-in rather than interpreting sampled guest-animation
 time as a whole-frame FPS opportunity.
 [Stadium animation-state A/B/A](benchmarks/browser-2026-09-15-corrected-stadium-animation-state-abba.json).
+The 720p corrected OGL core normally renders a **1280×1056 internal EFB**
+before making its 960×720 output. A guarded1.5× mode reduces this to960×792,
+43.75% fewer internal pixels while retaining actual720p game content. The
+Stadium saved-checkpoint 35-second 2×/1.5×/1.5×/2× comparison with two active
+human controller tracks measured **47.49 / 50.23 / 50.63 / 50.86 distinct
+visible FPS**. Renderer diagnostics confirmed each EFB size, 109 shared
+native-controller fingerprints matched, and every gate failed. The first
+pair gains2.74FPS and the reverse loses0.23FPS, so this does not establish
+a repeatable gain or solve the missing9+ FPS. Leave2× as the playable default.
+The benchmark now supports active native-frame controller input for this
+scale comparison and rejects mismatched or inactive runs.
+[Corrected EFB scale with native input](benchmarks/browser-2026-09-15-corrected-stadium-efbscale-native-input-abba.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation
