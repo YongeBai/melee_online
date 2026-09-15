@@ -1,0 +1,236 @@
+{
+  "date": "2026-09-15",
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "source": {
+      "repository": "https://github.com/doldecomp/melee.git",
+      "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+    },
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+    "units": [
+      "src/melee/mp/mpcoll.c",
+      "src/melee/mp/mplib.c",
+      "src/melee/gr/ground.c",
+      "src/sysdolphin/baselib/random.c",
+      "src/sysdolphin/baselib/archive.c"
+    ],
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ],
+    "wasmBytes": 23261,
+    "wasmSha256": "f961cdf5da75b588fc1a1c02ba3cb68ff8305076be2ce8221f05306c2eb50fa2",
+    "imports": [
+      {
+        "module": "env",
+        "name": "_abort_js",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_close",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_write",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_seek",
+        "kind": "function"
+      },
+      {
+        "module": "env",
+        "name": "emscripten_resize_heap",
+        "kind": "function"
+      }
+    ],
+    "playable": false,
+    "gameplayParity": false,
+    "performanceCertified": false
+  },
+  "verification": {
+    "passed": true,
+    "rngValues": 4096,
+    "ecbVectors": 10,
+    "stages": [
+      {
+        "name": "GrNBa.dat",
+        "vertices": 26,
+        "lines": 23,
+        "joints": 1,
+        "convertedBytes": 664,
+        "abiPassed": true,
+        "pruningPassed": true,
+        "emptyLines": 0,
+        "degenerateLineCasePassed": true
+      },
+      {
+        "name": "GrNLa.dat",
+        "vertices": 16,
+        "lines": 16,
+        "joints": 1,
+        "convertedBytes": 472,
+        "abiPassed": true,
+        "pruningPassed": true,
+        "emptyLines": 0,
+        "degenerateLineCasePassed": true
+      },
+      {
+        "name": "GrOp.dat",
+        "vertices": 14,
+        "lines": 11,
+        "joints": 4,
+        "convertedBytes": 496,
+        "abiPassed": true,
+        "pruningPassed": true,
+        "emptyLines": 0,
+        "degenerateLineCasePassed": true
+      },
+      {
+        "name": "GrSt.dat",
+        "vertices": 34,
+        "lines": 29,
+        "joints": 2,
+        "convertedBytes": 864,
+        "abiPassed": true,
+        "pruningPassed": true,
+        "emptyLines": 0,
+        "degenerateLineCasePassed": true
+      },
+      {
+        "name": "GrIz.dat",
+        "vertices": 38,
+        "lines": 34,
+        "joints": 4,
+        "convertedBytes": 1056,
+        "abiPassed": true,
+        "pruningPassed": true,
+        "emptyLines": 0,
+        "degenerateLineCasePassed": true
+      },
+      {
+        "name": "GrPs.usd",
+        "vertices": 155,
+        "lines": 136,
+        "joints": 8,
+        "convertedBytes": 3784,
+        "abiPassed": true,
+        "pruningPassed": true,
+        "emptyLines": 0,
+        "degenerateLineCasePassed": true
+      }
+    ],
+    "emulator": false,
+    "playable": false,
+    "gameplayParity": false,
+    "performanceMeasured": false
+  },
+  "audit": {
+    "total": 1130,
+    "compiled": 981,
+    "failed": 149,
+    "missingSymbolsBeforeRuntimeLink": 481,
+    "callbackDiagnosticSuppressed": false,
+    "linkedGame": false,
+    "failuresByArea": {
+      "libs/dolphin": 79,
+      "src/melee": 64,
+      "src/sysdolphin": 6
+    },
+    "mostReferencedUnresolved": [
+      {
+        "symbol": "__assert",
+        "translationUnits": 610
+      },
+      {
+        "symbol": "OSReport",
+        "translationUnits": 128
+      },
+      {
+        "symbol": "HSD_SisLib_803A6368",
+        "translationUnits": 40
+      },
+      {
+        "symbol": "HSD_SisLib_803A5ACC",
+        "translationUnits": 39
+      },
+      {
+        "symbol": "HSD_SisLib_803A5CC4",
+        "translationUnits": 31
+      },
+      {
+        "symbol": "OSDisableInterrupts",
+        "translationUnits": 29
+      },
+      {
+        "symbol": "OSRestoreInterrupts",
+        "translationUnits": 29
+      },
+      {
+        "symbol": "HSD_SisLib_803A6B98",
+        "translationUnits": 28
+      },
+      {
+        "symbol": "HSD_SisLib_803A6754",
+        "translationUnits": 27
+      },
+      {
+        "symbol": "PSMTXConcat",
+        "translationUnits": 25
+      },
+      {
+        "symbol": "HSD_SisLib_803A611C",
+        "translationUnits": 21
+      },
+      {
+        "symbol": "PSMTXCopy",
+        "translationUnits": 19
+      },
+      {
+        "symbol": "HSD_SisLib_803A62A0",
+        "translationUnits": 18
+      },
+      {
+        "symbol": "PSMTXIdentity",
+        "translationUnits": 18
+      },
+      {
+        "symbol": "GXLoadPosMtxImm",
+        "translationUnits": 16
+      },
+      {
+        "symbol": "PSMTXMultVec",
+        "translationUnits": 16
+      },
+      {
+        "symbol": "PSVECCrossProduct",
+        "translationUnits": 16
+      },
+      {
+        "symbol": "HSD_Panic",
+        "translationUnits": 15
+      },
+      {
+        "symbol": "GXSetCurrentMtx",
+        "translationUnits": 14
+      },
+      {
+        "symbol": "GXSetVtxAttrFmt",
+        "translationUnits": 13
+      }
+    ],
+    "scope": "Game, HSD and SDK source; excludes Runtime/MSL implementations, includes optional SDK services."
+  },
+  "limits": [
+    "Subsystem verification only; no playable match",
+    "Expected values use source arithmetic and original asset bytes; Dolphin gameplay parity unverified",
+    "No graphics, audio, moving-stage callback, FPS or input-to-image measurement"
+  ]
+}

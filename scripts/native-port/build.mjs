@@ -1,0 +1,42 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const root = path.resolve(import.meta.dirname, '../..');
+const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
+const upstream = path.join(root, 'engines/melee-decomp');
+const output = path.join(root, 'dist/native-port');
+const compiler = process.env.EMCC || path.join(root, '.browser-tools/emsdk/upstream/emscripten/emcc');
+const git = args => execFileSync('git', args, {cwd:upstream, encoding:'utf8'}).trim();
+if (git(['rev-parse', 'HEAD']) !== source.commit || git(['status', '--porcelain', '--untracked-files=no']))
+  throw Error('Native port requires the clean pinned upstream checkout.');
+fs.mkdirSync(path.join(output, 'include/Runtime'), {recursive:true});
+// Override one platform typedef without changing the upstream checkout.
+const original = fs.readFileSync(path.join(upstream, 'src/Runtime/platform.h'), 'utf8');
+const needle = 'typedef signed int ssize_t;';
+if (original.split(needle).length !== 2) throw Error('Platform typedef patch no longer matches.');
+fs.writeFileSync(path.join(output, 'include/Runtime/platform.h'), original.replace(needle,
+  '#if !defined(__EMSCRIPTEN__)\n' + needle + '\n#endif'));
+const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/ground.c',
+  'src/sysdolphin/baselib/random.c', 'src/sysdolphin/baselib/archive.c'];
+const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
+  'portStagePrune', 'portStageMetric', 'portArchiveOpen', 'portArchiveSymbol',
+  'portArchiveClose'];
+const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
+  '-ffunction-sections', '-fdata-sections', '-I' + path.join(output, 'include'),
+  '-Isrc', '-Ilibs/dolphin/include'];
+execFileSync(compiler, [...flags, ...units, path.join(root, 'engines/browser-native/platform.c'),
+  '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
+  '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
+  '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
+  '-sASSERTIONS=1', '-o', path.join(output, 'melee-native.mjs')], {cwd:upstream, stdio:'inherit'});
+for (const name of ['archive.mjs', 'stage-collision.mjs', 'verify.mjs', 'index.html'])
+  fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
+const wasm = fs.readFileSync(path.join(output, 'melee-native.wasm'));
+const module = new WebAssembly.Module(wasm);
+const report = {source, compiler:execFileSync(compiler, ['--version'], {encoding:'utf8'}).split('\n')[0],
+  units, flags:flags.slice(0,6), wasmBytes:wasm.length,
+  wasmSha256:createHash('sha256').update(wasm).digest('hex'), imports:WebAssembly.Module.imports(module),
+  playable:false, gameplayParity:false, performanceCertified:false};
+fs.writeFileSync(path.join(output, 'build.json'), JSON.stringify(report, null, 2) + '\n');
+console.log(JSON.stringify(report, null, 2));

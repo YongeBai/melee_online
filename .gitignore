@@ -12,6 +12,7 @@
 # Pinned third-party engine checkouts; recreate with scripts/setup-engine.mjs.
 /engines/gecko/
 /engines/wasm-dolphin/
+/engines/melee-decomp/
 # Local native renderer and build toolchain.
 /engines/dolphin-native/
 /.local-tools/

@@ -9,6 +9,13 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 15: the user selected the direct decompiled-C browser port as the next
+approach. Its [first implemented milestone](BROWSER-NATIVE-PORT-STATUS.md) runs
+original collision/archive/RNG code and loads all six tournament collision
+subgraphs in Chrome without Dolphin. It is not yet playable and provides no
+replacement FPS measurement. Existing emulator results below remain historical
+evidence for that separate implementation.
+
 September 15 CPU/graphics attribution on an isolated same-source profiling
 core: Battlefield 1200-native-frame normal/mesh-omitted/omitted/normal runs
 were 50.24/62.32/62.69/55.41 uncapped work FPS. Omitting stage PObj display

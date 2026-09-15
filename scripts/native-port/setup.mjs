@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+const root = path.resolve(import.meta.dirname, '../..');
+const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
+const out = path.join(root, 'engines/melee-decomp');
+if (fs.existsSync(out)) throw Error('Source directory exists; refusing to overwrite it.');
+execFileSync('git', ['clone', '--no-checkout', source.repository, out], {stdio:'inherit'});
+execFileSync('git', ['checkout', '--detach', source.commit], {cwd:out, stdio:'inherit'});
+console.log('Pinned native-port source ready. No game assets are included.');

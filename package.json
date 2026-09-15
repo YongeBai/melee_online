@@ -6,12 +6,16 @@
     "start": "node scripts/start-local.mjs",
     "setup": "node scripts/setup-engine.mjs",
     "setup:native": "node scripts/native/setup-native.mjs",
-    "test": "node --test scripts/engine/*.test.mjs scripts/native/*.test.mjs scripts/assets/*.test.mjs",
+    "test": "node --test scripts/engine/*.test.mjs scripts/native/*.test.mjs scripts/assets/*.test.mjs scripts/native-port/*.test.mjs",
     "serve": "node --env-file-if-exists=.env scripts/serve.mjs",
     "build:browser": "node scripts/browser/package-release.mjs",
     "verify:browser-release": "node scripts/browser/verify-release.mjs",
     "test:browser": "node --test scripts/browser/*.test.mjs scripts/engine/browser-*.test.mjs",
     "serve:browser": "node scripts/browser/serve.mjs",
-    "setup:browser-source": "node scripts/browser/setup-source.mjs"
+    "setup:browser-source": "node scripts/browser/setup-source.mjs",
+    "setup:native-port": "node scripts/native-port/setup.mjs",
+    "build:native-port": "node scripts/native-port/build.mjs",
+    "verify:native-port": "node scripts/native-port/verify.mjs",
+    "test:native-port": "node --test scripts/native-port/*.test.mjs"
   }
 }
