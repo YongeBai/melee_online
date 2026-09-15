@@ -1,4 +1,7 @@
 import {convertStageCollision, loadStageCollision} from './stage-collision.mjs';
+import {verifyRuntime} from './verify-runtime.mjs';
+import {verifyFighters} from './verify-fighters.mjs';
+import {verifyAnimations} from './verify-animations.mjs';
 const equal=(a,b,message)=>{if(a.length!==b.length || a.some((x,i)=>!Object.is(x,b[i])))
   throw Error(message+': '+JSON.stringify({actual:a,expected:b}));};
 const stageKinds={'GrNBa.dat':36,'GrNLa.dat':37,'GrOp.dat':28,'GrSt.dat':10,'GrIz.dat':12,'GrPs.usd':16};
@@ -19,7 +22,7 @@ function referencePrune(image) {
   }
   return {lines:bytes.slice(lines,lines+count*16),empty};
 }
-export async function verifyNative(module, stageFiles=[]) {
+export async function verifyNative(module, stageFiles=[], fighterFiles=[], animationFiles=[],options={}) {
   let seed=0x12345678;
   module._portSeed(seed);
   for(let i=0;i<4096;i++) {
@@ -74,6 +77,9 @@ export async function verifyNative(module, stageFiles=[]) {
       stages.at(-1).degenerateLineCasePassed=true;
     } finally {mutation.dispose();}
   }
-  return {passed:true,rngValues:4096,ecbVectors:vectors,stages,emulator:false,
+  const runtime=verifyRuntime(module);
+  const fighters=verifyFighters(module,fighterFiles);
+  const animations=verifyAnimations(module,animationFiles,!!options.allAnimations);
+  return {passed:true,rngValues:4096,ecbVectors:vectors,stages,runtime,fighters,animations,emulator:false,
     playable:false,gameplayParity:false,performanceMeasured:false};
 }

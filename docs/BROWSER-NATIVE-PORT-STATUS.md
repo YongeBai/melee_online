@@ -5,6 +5,19 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Continued implementation: original OS/HSD allocation and GObj scheduling now run
+in WASM, with Melee's 25 callback-priority levels and checks for ordering, pause
+masks, deletion during callbacks and bounded object reuse. All 27 playable fighter
+components load their common attributes and execute the original gravity/friction
+routines. Original FObj/AObj code decoded all 5,508 clips (833,221 tracks) in Chrome,
+with 33,756,699 emitted updates per pass and identical results after rewind.
+Synthetic timeline vectors verify loop/end behavior. Eleven clips use the valid
+non-classical scaling flag, which the importer now retains.
+
+These numbers establish asset/decoder coverage only, not combat correctness or
+FPS. Fighter creation, the complete action-state loop, pose/bone application,
+matrix/vector platform routines, GX, audio and Dolphin parity remain.
+
 The first module loads collision data for Battlefield, Final Destination, Dream
 Land, Yoshi's Story, Fountain of Dreams and Pokémon Stadium. Original HSD archive
 code relocates the converted pointers; typed C reads match the source asset

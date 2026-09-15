@@ -17,20 +17,32 @@ const needle = 'typedef signed int ssize_t;';
 if (original.split(needle).length !== 2) throw Error('Platform typedef patch no longer matches.');
 fs.writeFileSync(path.join(output, 'include/Runtime/platform.h'), original.replace(needle,
   '#if !defined(__EMSCRIPTEN__)\n' + needle + '\n#endif'));
-const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/ground.c',
-  'src/sysdolphin/baselib/random.c', 'src/sysdolphin/baselib/archive.c'];
+const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/ground.c', 'src/melee/ft/ftcommon.c',
+  'src/sysdolphin/baselib/random.c', 'src/sysdolphin/baselib/archive.c',
+  'src/sysdolphin/baselib/memory.c', 'src/sysdolphin/baselib/initialize.c',
+  'src/sysdolphin/baselib/objalloc.c', 'libs/dolphin/src/dolphin/os/OSAlloc.c',
+  'src/sysdolphin/baselib/fobj.c', 'src/sysdolphin/baselib/spline.c', 'src/sysdolphin/baselib/aobj.c',
+  ...['gobj','gobjproc','gobjplink','gobjgxlink','gobjobject','gobjuserdata'].map(n=>'src/sysdolphin/baselib/'+n+'.c')];
 const exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'portStagePrune', 'portStageMetric', 'portArchiveOpen', 'portArchiveSymbol',
-  'portArchiveClose'];
+  'portArchiveClose', 'portRuntimeInit', 'portRuntimeStep', 'portRuntimeProbeCreate',
+  'portRuntimeProbePause', 'portRuntimeProbeRead', 'portRuntimeProbeReset',
+  'portRuntimeProbeClear', 'portRuntimeHeapFree', 'portRuntimeObjectsUsed', 'portRuntimeProcsUsed',
+  'portFighterAttribute', 'portFighterPhysicsProbe', 'portAnimationCreate', 'portAnimationRun', 'portAnimationDestroy',
+  'portAnimationTimeline'];
 const flags = ['-O2', '-fno-fast-math', '-ffp-contract=off', '-fno-strict-aliasing',
   '-ffunction-sections', '-fdata-sections', '-I' + path.join(output, 'include'),
   '-Isrc', '-Ilibs/dolphin/include'];
 execFileSync(compiler, [...flags, ...units, path.join(root, 'engines/browser-native/platform.c'),
+  path.join(root, 'engines/browser-native/runtime.c'),
+  path.join(root, 'engines/browser-native/fighter.c'),
+  path.join(root, 'engines/browser-native/animation.c'),
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, 'melee-native.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['archive.mjs', 'stage-collision.mjs', 'verify.mjs', 'index.html'])
+for (const name of ['archive.mjs', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+  'animation-assets.mjs', 'verify-animations.mjs', 'verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
 const wasm = fs.readFileSync(path.join(output, 'melee-native.wasm'));
 const module = new WebAssembly.Module(wasm);

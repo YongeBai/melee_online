@@ -9,15 +9,19 @@ import createMeleeNative from './melee-native.mjs';
 import {verifyNative} from './verify.mjs';
 try {
   const module=await createMeleeNative();
-  const response=await fetch('./stage-fixtures.json');
+  async function loadFixtures(manifest) {
+  const response=await fetch('./'+manifest);
   const files=response.ok?await response.json():[];
-  const stages=await Promise.all(files.map(async name=> {
-    if(!/^Gr[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid stage filename');
+  return await Promise.all(files.map(async name=> {
+    if(!/^(Gr|Pl)[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid asset filename');
     const response=await fetch('./fixtures/'+name);
     if(!response.ok)throw Error('Hosted stage unavailable');
     return {name,bytes:new Uint8Array(await response.arrayBuffer())};
   }));
-  const report=await verifyNative(module,stages);
+  }
+  const [stages,fighters,animations]=await Promise.all([loadFixtures('stage-fixtures.json'),loadFixtures('fighter-fixtures.json'),loadFixtures('animation-fixtures.json')]);
+  const report=await verifyNative(module,stages,fighters,animations,
+    {allAnimations:new URL(location.href).searchParams.get('allanimations')==='1'});
   document.getElementById('result').textContent=JSON.stringify(report,null,2);
   document.documentElement.dataset.result='passed';
 } catch(error) {

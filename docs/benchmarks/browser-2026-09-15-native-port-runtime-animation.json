@@ -1,0 +1,491 @@
+{
+  "date": "2026-09-15",
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "source": {
+      "repository": "https://github.com/doldecomp/melee.git",
+      "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+    },
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+    "units": [
+      "src/melee/mp/mpcoll.c",
+      "src/melee/mp/mplib.c",
+      "src/melee/gr/ground.c",
+      "src/melee/ft/ftcommon.c",
+      "src/sysdolphin/baselib/random.c",
+      "src/sysdolphin/baselib/archive.c",
+      "src/sysdolphin/baselib/memory.c",
+      "src/sysdolphin/baselib/initialize.c",
+      "src/sysdolphin/baselib/objalloc.c",
+      "libs/dolphin/src/dolphin/os/OSAlloc.c",
+      "src/sysdolphin/baselib/fobj.c",
+      "src/sysdolphin/baselib/spline.c",
+      "src/sysdolphin/baselib/aobj.c",
+      "src/sysdolphin/baselib/gobj.c",
+      "src/sysdolphin/baselib/gobjproc.c",
+      "src/sysdolphin/baselib/gobjplink.c",
+      "src/sysdolphin/baselib/gobjgxlink.c",
+      "src/sysdolphin/baselib/gobjobject.c",
+      "src/sysdolphin/baselib/gobjuserdata.c"
+    ],
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ],
+    "wasmBytes": 38900,
+    "wasmSha256": "a1df7b36eed8f88f65ba28dcdcdb14b71ddbb67f5448774b0cb5784a0f22028a",
+    "imports": [
+      {
+        "module": "env",
+        "name": "_abort_js",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_close",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_write",
+        "kind": "function"
+      },
+      {
+        "module": "wasi_snapshot_preview1",
+        "name": "fd_seek",
+        "kind": "function"
+      },
+      {
+        "module": "env",
+        "name": "emscripten_resize_heap",
+        "kind": "function"
+      }
+    ],
+    "playable": false,
+    "gameplayParity": false,
+    "performanceCertified": false
+  },
+  "runtime": {
+    "passed": true,
+    "frames": 126,
+    "allocationCycles": 120,
+    "heapIntegrity": true,
+    "callbackOrder": true,
+    "pauseResume": true,
+    "delayedDeletion": true,
+    "gameplay": false
+  },
+  "fighters": [
+    {
+      "name": "PlMr.dat",
+      "kind": "Mario",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlFx.dat",
+      "kind": "Fox",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlCa.dat",
+      "kind": "Captain",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlDk.dat",
+      "kind": "Donkey",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlKb.dat",
+      "kind": "Kirby",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlKp.dat",
+      "kind": "Koopa",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlLk.dat",
+      "kind": "Link",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlSk.dat",
+      "kind": "Seak",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlNs.dat",
+      "kind": "Ness",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlPe.dat",
+      "kind": "Peach",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlPp.dat",
+      "kind": "Popo",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlNn.dat",
+      "kind": "Nana",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlPk.dat",
+      "kind": "Pikachu",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlPr.dat",
+      "kind": "Purin",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlSs.dat",
+      "kind": "Samus",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlYs.dat",
+      "kind": "Yoshi",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlZd.dat",
+      "kind": "Zelda",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlLg.dat",
+      "kind": "Luigi",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlMt.dat",
+      "kind": "Mewtwo",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlMs.dat",
+      "kind": "Mars",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlGw.dat",
+      "kind": "Gamewatch",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlDr.dat",
+      "kind": "Drmario",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlCl.dat",
+      "kind": "Clink",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlPc.dat",
+      "kind": "Pichu",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlFe.dat",
+      "kind": "Emblem",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlGn.dat",
+      "kind": "Ganon",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    },
+    {
+      "name": "PlFc.dat",
+      "kind": "Falco",
+      "attributeValues": 20,
+      "gravitySteps": 600,
+      "groundFrictionCases": 5,
+      "passed": true
+    }
+  ],
+  "stages": [
+    {
+      "name": "GrNBa.dat",
+      "vertices": 26,
+      "lines": 23,
+      "joints": 1,
+      "convertedBytes": 664,
+      "abiPassed": true,
+      "pruningPassed": true,
+      "emptyLines": 0,
+      "degenerateLineCasePassed": true
+    },
+    {
+      "name": "GrNLa.dat",
+      "vertices": 16,
+      "lines": 16,
+      "joints": 1,
+      "convertedBytes": 472,
+      "abiPassed": true,
+      "pruningPassed": true,
+      "emptyLines": 0,
+      "degenerateLineCasePassed": true
+    },
+    {
+      "name": "GrOp.dat",
+      "vertices": 14,
+      "lines": 11,
+      "joints": 4,
+      "convertedBytes": 496,
+      "abiPassed": true,
+      "pruningPassed": true,
+      "emptyLines": 0,
+      "degenerateLineCasePassed": true
+    },
+    {
+      "name": "GrSt.dat",
+      "vertices": 34,
+      "lines": 29,
+      "joints": 2,
+      "convertedBytes": 864,
+      "abiPassed": true,
+      "pruningPassed": true,
+      "emptyLines": 0,
+      "degenerateLineCasePassed": true
+    },
+    {
+      "name": "GrIz.dat",
+      "vertices": 38,
+      "lines": 34,
+      "joints": 4,
+      "convertedBytes": 1056,
+      "abiPassed": true,
+      "pruningPassed": true,
+      "emptyLines": 0,
+      "degenerateLineCasePassed": true
+    },
+    {
+      "name": "GrPs.usd",
+      "vertices": 155,
+      "lines": 136,
+      "joints": 8,
+      "convertedBytes": 3784,
+      "abiPassed": true,
+      "pruningPassed": true,
+      "emptyLines": 0,
+      "degenerateLineCasePassed": true
+    }
+  ],
+  "animation": {
+    "allAnimations": true,
+    "clips": 5508,
+    "tracks": 833221,
+    "updatesPerPass": 33756699,
+    "nonClassicalClips": 11,
+    "nativeLoopAndEnd": true,
+    "rewindPassed": true,
+    "finiteOutput": true,
+    "archives": [
+      {
+        "name": "PlMrAJ.dat",
+        "clips": 195
+      },
+      {
+        "name": "PlFxAJ.dat",
+        "clips": 221
+      },
+      {
+        "name": "PlCaAJ.dat",
+        "clips": 213
+      },
+      {
+        "name": "PlDkAJ.dat",
+        "clips": 220
+      },
+      {
+        "name": "PlKbAJ.dat",
+        "clips": 330
+      },
+      {
+        "name": "PlKpAJ.dat",
+        "clips": 211
+      },
+      {
+        "name": "PlLkAJ.dat",
+        "clips": 205
+      },
+      {
+        "name": "PlSkAJ.dat",
+        "clips": 208
+      },
+      {
+        "name": "PlNsAJ.dat",
+        "clips": 212
+      },
+      {
+        "name": "PlPeAJ.dat",
+        "clips": 201
+      },
+      {
+        "name": "PlPpAJ.dat",
+        "clips": 200
+      },
+      {
+        "name": "PlNnAJ.dat",
+        "clips": 8
+      },
+      {
+        "name": "PlPkAJ.dat",
+        "clips": 202
+      },
+      {
+        "name": "PlPrAJ.dat",
+        "clips": 208
+      },
+      {
+        "name": "PlSsAJ.dat",
+        "clips": 208
+      },
+      {
+        "name": "PlYsAJ.dat",
+        "clips": 199
+      },
+      {
+        "name": "PlZdAJ.dat",
+        "clips": 205
+      },
+      {
+        "name": "PlLgAJ.dat",
+        "clips": 200
+      },
+      {
+        "name": "PlMtAJ.dat",
+        "clips": 205
+      },
+      {
+        "name": "PlMsAJ.dat",
+        "clips": 213
+      },
+      {
+        "name": "PlGwAJ.dat",
+        "clips": 196
+      },
+      {
+        "name": "PlDrAJ.dat",
+        "clips": 196
+      },
+      {
+        "name": "PlClAJ.dat",
+        "clips": 209
+      },
+      {
+        "name": "PlPcAJ.dat",
+        "clips": 204
+      },
+      {
+        "name": "PlFeAJ.dat",
+        "clips": 210
+      },
+      {
+        "name": "PlGnAJ.dat",
+        "clips": 207
+      },
+      {
+        "name": "PlFcAJ.dat",
+        "clips": 222
+      }
+    ]
+  },
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false
+}

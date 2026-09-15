@@ -4,6 +4,12 @@ This is the direct C-to-WebAssembly port, separate from Dolphin WASM. Its first
 working milestone executes original collision, archive, and RNG routines and
 loads the six tournament stages' collision subgraphs. It does not run a match.
 
+The next milestone also runs the original OS/HSD allocator and object scheduler,
+loads all 27 playable fighter components' common attributes, and executes original
+gravity/friction and FObj/AObj animation code. Chrome has decoded and replayed all
+5,508 clips in the 27 fighter animation archives. These are subsystem checks;
+the full fighter action-state machine, bone transforms and renderer are pending.
+
 ## Reproduce
 
 From the repository root with Node 24 and the existing Emscripten toolchain:
@@ -26,6 +32,7 @@ To include real stage data, run this **development build tool** before verificat
 ```sh
 node scripts/native-port/prepare-fixtures.mjs /path/to/development-fixture.iso
 node scripts/native-port/verify-browser.mjs
+node scripts/native-port/verify-browser.mjs --all-animations
 ```
 
 The browser automatically fetches the prepared hosted assets. There is no player
@@ -54,6 +61,21 @@ assembly fallback or gameplay mismatch.
 - `verify.mjs` checks RNG vectors, ECB override/interpolation, stage numeric data
   read through C structs, and collision-line pruning. Private mutated stage copies
   exercise degenerate-line rewiring and the native Poke Floats exemption.
+- `runtime.c` provides a WASM-owned arena to the original OS heap and HSD object
+  allocator. Original GObj callbacks run in Melee's 25 process-priority levels.
+  Order, 64-bit pause masks, delayed deletion, and 120 allocation/reuse cycles are
+  checked. This is a simulation bootstrap: graphics destructors abort until their
+  real implementations are registered, and full scene initialization is pending.
+- `fighter-assets.mjs` converts scalar common attributes and preserves packed
+  throw flags. Twenty named fields per component are read through C structs;
+  original falling and friction routines are checked against explicit arithmetic.
+  These probes do not invoke `Fighter_Create` or replace its initialization.
+- `animation-assets.mjs` decodes big-endian FigaTree/FigaTrack descriptors and
+  validates byte-coded streams. Payload bytes already use little-endian encoding.
+  The original FObj decoder and AObj timeline execute them, including Hermite
+  interpolation, rewind, loop and end behavior. Both classical-scale tree types
+  are retained; 11 retail clips use type zero. Pose application and bone mapping
+  remain to be connected and checked against Dolphin.
 
 These tests establish subsystem behavior and selected layout compatibility.
 Expected values come from documented/source arithmetic and original asset bytes,
