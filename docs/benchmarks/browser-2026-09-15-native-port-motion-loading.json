@@ -1,0 +1,657 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 182219,
+    "wasmSha256": "611e5c60bc9cf7d45aa52a7f3f2c390eff75c940aa81aa411dae67b76060afbf",
+    "flags": [
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-fno-strict-aliasing",
+      "-Wl,--fatal-warnings",
+      "-fno-builtin-sinf",
+      "-fno-builtin-cosf",
+      "-fno-builtin-tanf",
+      "-ffunction-sections",
+      "-fdata-sections"
+    ],
+    "auditObjectsOptimization": "-O0"
+  },
+  "portableSource": {
+    "recipeSha256": "a99387ad7821680bf289ef04184dc1a3372bd70b6d24bf85f03ca45e55ed88ed",
+    "patchedFiles": 75,
+    "commandLayouts": {
+      "records": 73,
+      "fields": 254,
+      "sha256": "b0bca5b26b3ed6a56e306f667cd0dfdfd31958f1ef04bb8905a69a0ef3eb6842",
+      "representation": "native numeric u32 with original MSB field positions"
+    }
+  },
+  "motions": {
+    "passed": true,
+    "components": [
+      {
+        "name": "PlMr.dat",
+        "kind": 0,
+        "rows": 303,
+        "own": 303,
+        "fallbacks": 0,
+        "clips": 195,
+        "commands": 2002
+      },
+      {
+        "name": "PlFx.dat",
+        "kind": 1,
+        "rows": 327,
+        "own": 327,
+        "fallbacks": 0,
+        "clips": 221,
+        "commands": 2119
+      },
+      {
+        "name": "PlCa.dat",
+        "kind": 2,
+        "rows": 318,
+        "own": 318,
+        "fallbacks": 0,
+        "clips": 213,
+        "commands": 2071
+      },
+      {
+        "name": "PlDk.dat",
+        "kind": 3,
+        "rows": 337,
+        "own": 337,
+        "fallbacks": 0,
+        "clips": 220,
+        "commands": 2203
+      },
+      {
+        "name": "PlKb.dat",
+        "kind": 4,
+        "rows": 479,
+        "own": 479,
+        "fallbacks": 0,
+        "clips": 330,
+        "commands": 3109
+      },
+      {
+        "name": "PlKp.dat",
+        "kind": 5,
+        "rows": 316,
+        "own": 316,
+        "fallbacks": 0,
+        "clips": 211,
+        "commands": 2222
+      },
+      {
+        "name": "PlLk.dat",
+        "kind": 6,
+        "rows": 314,
+        "own": 314,
+        "fallbacks": 0,
+        "clips": 205,
+        "commands": 2306
+      },
+      {
+        "name": "PlSk.dat",
+        "kind": 7,
+        "rows": 317,
+        "own": 317,
+        "fallbacks": 0,
+        "clips": 208,
+        "commands": 1961
+      },
+      {
+        "name": "PlNs.dat",
+        "kind": 8,
+        "rows": 326,
+        "own": 326,
+        "fallbacks": 0,
+        "clips": 212,
+        "commands": 1906
+      },
+      {
+        "name": "PlPe.dat",
+        "kind": 9,
+        "rows": 318,
+        "own": 318,
+        "fallbacks": 0,
+        "clips": 201,
+        "commands": 2658
+      },
+      {
+        "name": "PlPp.dat",
+        "kind": 10,
+        "rows": 321,
+        "own": 321,
+        "fallbacks": 0,
+        "clips": 200,
+        "commands": 1975
+      },
+      {
+        "name": "PlNn.dat",
+        "kind": 11,
+        "rows": 321,
+        "own": 8,
+        "fallbacks": 313,
+        "clips": 8,
+        "commands": 1973
+      },
+      {
+        "name": "PlPk.dat",
+        "kind": 12,
+        "rows": 320,
+        "own": 320,
+        "fallbacks": 0,
+        "clips": 202,
+        "commands": 1958
+      },
+      {
+        "name": "PlSs.dat",
+        "kind": 13,
+        "rows": 313,
+        "own": 313,
+        "fallbacks": 0,
+        "clips": 208,
+        "commands": 2038
+      },
+      {
+        "name": "PlYs.dat",
+        "kind": 14,
+        "rows": 314,
+        "own": 314,
+        "fallbacks": 0,
+        "clips": 199,
+        "commands": 2082
+      },
+      {
+        "name": "PlPr.dat",
+        "kind": 15,
+        "rows": 327,
+        "own": 327,
+        "fallbacks": 0,
+        "clips": 208,
+        "commands": 1866
+      },
+      {
+        "name": "PlMt.dat",
+        "kind": 16,
+        "rows": 314,
+        "own": 314,
+        "fallbacks": 0,
+        "clips": 205,
+        "commands": 1909
+      },
+      {
+        "name": "PlLg.dat",
+        "kind": 17,
+        "rows": 312,
+        "own": 312,
+        "fallbacks": 0,
+        "clips": 200,
+        "commands": 2030
+      },
+      {
+        "name": "PlMs.dat",
+        "kind": 18,
+        "rows": 327,
+        "own": 327,
+        "fallbacks": 0,
+        "clips": 213,
+        "commands": 2209
+      },
+      {
+        "name": "PlZd.dat",
+        "kind": 19,
+        "rows": 311,
+        "own": 311,
+        "fallbacks": 0,
+        "clips": 205,
+        "commands": 2266
+      },
+      {
+        "name": "PlCl.dat",
+        "kind": 20,
+        "rows": 314,
+        "own": 314,
+        "fallbacks": 0,
+        "clips": 209,
+        "commands": 2356
+      },
+      {
+        "name": "PlDr.dat",
+        "kind": 21,
+        "rows": 303,
+        "own": 303,
+        "fallbacks": 0,
+        "clips": 196,
+        "commands": 2025
+      },
+      {
+        "name": "PlFc.dat",
+        "kind": 22,
+        "rows": 327,
+        "own": 327,
+        "fallbacks": 0,
+        "clips": 222,
+        "commands": 2132
+      },
+      {
+        "name": "PlPc.dat",
+        "kind": 23,
+        "rows": 320,
+        "own": 320,
+        "fallbacks": 0,
+        "clips": 204,
+        "commands": 1960
+      },
+      {
+        "name": "PlGw.dat",
+        "kind": 24,
+        "rows": 323,
+        "own": 323,
+        "fallbacks": 0,
+        "clips": 196,
+        "commands": 1843
+      },
+      {
+        "name": "PlGn.dat",
+        "kind": 25,
+        "rows": 318,
+        "own": 318,
+        "fallbacks": 0,
+        "clips": 207,
+        "commands": 2061
+      },
+      {
+        "name": "PlFe.dat",
+        "kind": 26,
+        "rows": 327,
+        "own": 327,
+        "fallbacks": 0,
+        "clips": 210,
+        "commands": 2194
+      }
+    ],
+    "rows": 8767,
+    "loads": 26301,
+    "cacheHits": 17534,
+    "peerRequests": 520,
+    "scriptWords": 114939,
+    "trackBytes": 64254410,
+    "sceneClips": [
+      {
+        "name": "PlMrNr.dat",
+        "animation": "PlyMario5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 52,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMrNr.dat",
+        "animation": "PlyMario5K_Share_ACTION_Appeal_figatree",
+        "type": 0,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFxNr.dat",
+        "animation": "PlyFox5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlCaNr.dat",
+        "animation": "PlyCaptain5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 62,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDkNr.dat",
+        "animation": "PlyDonkey5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKbNr.dat",
+        "animation": "PlyKirby5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlKpNr.dat",
+        "animation": "PlyKoopa5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLkNr.dat",
+        "animation": "PlyLink5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSkNr.dat",
+        "animation": "PlySeak5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNsNr.dat",
+        "animation": "PlyNess5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPeNr.dat",
+        "animation": "PlyPeach5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPpNr.dat",
+        "animation": "PlyPopo5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNnNr.dat",
+        "animation": "PlyNana5K_Share_ACTION_SpecialAirS2_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlNnNr.dat",
+        "animation": "PlyPopo5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPkNr.dat",
+        "animation": "PlyPikachu5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlSsNr.dat",
+        "animation": "PlySamus5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirB_figatree",
+        "type": 0,
+        "frames": 42,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirF_figatree",
+        "type": 0,
+        "frames": 52,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirHi_figatree",
+        "type": 0,
+        "frames": 42,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirLw_figatree",
+        "type": 0,
+        "frames": 62,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_AttackAirN_figatree",
+        "type": 0,
+        "frames": 50,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirB_figatree",
+        "type": 0,
+        "frames": 32,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirF_figatree",
+        "type": 0,
+        "frames": 32,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirHi_figatree",
+        "type": 0,
+        "frames": 32,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirLw_figatree",
+        "type": 0,
+        "frames": 32,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlYsNr.dat",
+        "animation": "PlyYoshi5K_Share_ACTION_LandingAirN_figatree",
+        "type": 0,
+        "frames": 32,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPrNr.dat",
+        "animation": "PlyPurin5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMtNr.dat",
+        "animation": "PlyMewtwo5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlLgNr.dat",
+        "animation": "PlyLuigi5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 62,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlMsNr.dat",
+        "animation": "PlyMars5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlZdNr.dat",
+        "animation": "PlyZelda5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlClNr.dat",
+        "animation": "PlyClink5K_Share_ACTION_Wait_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlDrNr.dat",
+        "animation": "PlyDrmario5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 62,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFcNr.dat",
+        "animation": "PlyFalco5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlPcNr.dat",
+        "animation": "PlyPichu5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGwNr.dat",
+        "animation": "PlyGamewatch5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 62,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlGnNr.dat",
+        "animation": "PlyGanon5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      },
+      {
+        "name": "PlFeNr.dat",
+        "animation": "PlyEmblem5K_Share_ACTION_Wait1_figatree",
+        "type": 1,
+        "frames": 64,
+        "maxMatrixError": 0,
+        "rewindPassed": true
+      }
+    ],
+    "liveOwners": 0,
+    "playable": false
+  },
+  "commandFields": {
+    "passed": true,
+    "fields": 254,
+    "reads": 65024,
+    "writes": 800,
+    "unitReads": 10496,
+    "failingFields": [],
+    "representation": "native numeric command words retaining PPC MSB-first fields",
+    "gameplayParity": false
+  },
+  "audit": {
+    "compiled": 1047,
+    "failed": 83,
+    "entries": [
+      {
+        "entry": "HSD_JObjLoadJoint",
+        "missingCount": 49,
+        "abiMismatches": []
+      },
+      {
+        "entry": "Fighter_Create",
+        "missingCount": 150,
+        "abiMismatches": []
+      }
+    ],
+    "note": "Generic Fighter_Create probe omits the resident-file adapter, so its missing list includes implemented portResidentCopy. It is not a remaining-task count."
+  },
+  "gpu": {
+    "resolution": [
+      960,
+      720
+    ],
+    "softwareGpu": true,
+    "unchangedImages": 81,
+    "maxVertexError": 0.000003814697265625
+  },
+  "regression": {
+    "targetedTests": 46,
+    "allAnimationClips": 5508,
+    "sceneClips": 38,
+    "passed": true
+  },
+  "limitations": [
+    "Limited Fighter context for original animation loading, not Fighter_Create or combat",
+    "Action script graph conversion verified, action handlers not executed by this fixture",
+    "Shared PlCo tables, complete character metadata, native materials, gameplay camera, input, audio and match loop remain",
+    "Diagnostic GPU correctness does not measure hardware frame rate or input latency"
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "inputLatencyMeasured": false
+}

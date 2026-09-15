@@ -40,6 +40,13 @@ export function preparePortableSource(source,output) {
       const converted=reverseCommandBits(match[1]);
       text=text.replace(match[0],'struct gmScriptEventDefault {'+converted.text+'};');
       extraCommandFields.push(...converted.fields.map(f=>({...f,view:'dispatch',member:null,path:f.field,word:0})));
+      const motion=/struct ftData_80085FD4_ret \{([\s\S]*?)\n\};/.exec(text);
+      if(!motion)throw Error('Missing motion row flag view');
+      const flags='    /* +10:0 */ u8 x10_b0 : 1;\n    /* +10:1 */ u8 x10_b1 : 1;';
+      if(!motion[1].includes(flags))throw Error('Motion flags changed');
+      text=text.replace(motion[0],motion[0].replace(flags,'    u32 : 30;\n    u32 x10_b1 : 1;\n    u32 x10_b0 : 1;')+
+        '\n_Static_assert(sizeof(struct ftData_80085FD4_ret)==24,"Motion row ABI");');
+      extraCommandFields.push(...[0,1].map(i=>({field:'x10_b'+i,width:1,signed:false,shift:31-i,view:'motion',member:null,path:'x10_b'+i,word:4})));
     }
     if(file==='src/melee/ft/ftaction.c'||file==='src/melee/it/itanimlist.c') {
       let count=0;
@@ -61,6 +68,15 @@ export function preparePortableSource(source,output) {
       replace('    u32* ptr = (u32*) info;\n    ptr[info->loop_count + 3] -= 1;',
         '    info->event_return[info->loop_count - 1] = (CmdUnion*)\n        ((uintptr_t) info->event_return[info->loop_count - 1] - 1);');
       replace('info->ptr[0] = &info->ptr[info->loop_count][0];','info->u = info->event_return[info->loop_count - 2];');
+    }
+    if(file==='src/melee/ft/ftdata.c') {
+      // GameCube distinguishes ARAM from RAM by the address high bit. WASM
+      // instead validates a range in the immutable, prefetched native bundle.
+      let copies=0;
+      text=text.replace(/if \(temp_r4_2 < 0x80000000\) \{\s*lbArq_80014BD0\(temp_r4_2, (fp->x59C|arg0->x5A0),\s*OSRoundUp32B\(temp_r3->x8\), 0, 0\);\s*\} else \{\s*memcpy\(\1, \(void\*\) temp_r4_2, temp_r3->x8\);\s*\}/g,
+        (_,buffer)=>{copies++;return 'portResidentCopy('+buffer+', temp_r4_2, temp_r3->x8);';});
+      if(copies!==2)throw Error('Animation address dispatch changed');
+      text='#include <stddef.h>\n#include <stdint.h>\nextern void portResidentCopy(void*, uintptr_t, size_t);\n'+text;
     }
     if(file==='src/melee/lb/types.h') {
       commandLayout=adaptCommandLayouts(text);text=commandLayout.text;
@@ -126,7 +142,7 @@ static inline int portCommandSigned12(const void* words) {
 `);
   const manifest={recipeSha256:digest(fs.readFileSync(new URL(import.meta.url))),files:files.length,patches,
     callbackDiagnosticSuppressed:false,functionPointerCasts:false,
-    commandLayouts:{records:commandLayout.records.length+1,fields:commandLayout.fields.length,
+    commandLayouts:{records:commandLayout.records.length+2,fields:commandLayout.fields.length,
       sha256:digest(JSON.stringify(commandLayout.fields)),representation:'native numeric u32 with original MSB field positions'}};
   fs.writeFileSync(path.join(destination,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   return {directory:destination,manifest,commandFields:commandLayout.fields};

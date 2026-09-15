@@ -1,8 +1,8 @@
 /* Browser file boundary: JS prefetches and type-converts an asset before C can
  * request it. Original lbArchive loading/parsing/varargs/relocation is retained.
  * There are no disc waits or asynchronous callbacks in this synchronous path.
- * Only the HSD heap (0) is integrated; ARAM/other scene heaps must not silently
- * fall back here. The cache owns immutable bytes, each read returns a copy.
+ * Allocated archives use the HSD heap (0). Preload hits instead borrow pinned,
+ * immutable bytes; no GameCube ARAM address or disc callback is emulated.
  */
 #include <melee/lb/lbfile.h>
 #include <melee/lb/lbheap.h>
@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 #define FILE_CAPACITY 128
-struct ResidentFile { char name[32]; unsigned char* bytes; size_t size; };
+struct ResidentFile { char name[32]; unsigned char* bytes; size_t size; unsigned pins; };
 static struct ResidentFile files[FILE_CAPACITY];
 static unsigned file_count, read_count, allocation_count;
 static size_t byte_count;
@@ -50,10 +50,11 @@ unsigned portFileCount(void){return file_count;}
 size_t portFileBytes(void){return byte_count;}
 unsigned portFileReads(void){return read_count;}
 unsigned portFileAllocations(void){return allocation_count;}
-void portFileClear(void)
+int portFileClear(void)
 {
+    for(unsigned i=0;i<file_count;i++)if(files[i].pins)return -1;
     for(unsigned i=0;i<file_count;i++)free(files[i].bytes);
-    memset(files,0,sizeof(files));file_count=0;byte_count=0;read_count=0;
+    memset(files,0,sizeof(files));file_count=0;byte_count=0;read_count=0;return 0;
 }
 size_t lbFileGetSize(const char* name)
 {
@@ -86,4 +87,31 @@ void portFileArchiveClose(HSD_Archive* archive){lbArchive_80016EFC(archive);}
 HSD_Archive* portFileArchivePair(const char* name,const char* first,const char* second,void** addresses)
 {
     return lbArchive_LoadSymbols(name,&addresses[0],first,&addresses[1],second,(void**)NULL);
+}
+
+/* Original preload-cache hit semantics. The owner releases the pin when its
+ * motion table no longer references this resident animation bundle. */
+bool lbFile_800168A0(int heap_id,const char* name,void** dst,size_t* size)
+{
+    struct ResidentFile* file=find_file(name);
+    if(!file||!dst||!size||heap_id<0||heap_id>5)abort();
+    file->pins++;*dst=file->bytes;*size=file->size;return true;
+}
+void portFileRelease(const char* name)
+{
+    struct ResidentFile* file=find_file(name);if(!file||!file->pins)abort();file->pins--;
+}
+unsigned portFilePins(void)
+{
+    unsigned n=0;for(unsigned i=0;i<file_count;i++)n+=files[i].pins;return n;
+}
+void portResidentCopy(void* dst,uintptr_t source,size_t size)
+{
+    for(unsigned i=0;i<file_count;i++) {
+        uintptr_t begin=(uintptr_t)files[i].bytes;
+        if(source>=begin&&source-begin<=files[i].size&&size<=files[i].size-(source-begin)) {
+            memcpy(dst,(void*)source,size);return;
+        }
+    }
+    fprintf(stderr,"Animation address is outside resident native assets\n");abort();
 }

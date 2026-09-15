@@ -15,6 +15,11 @@ function withStrings(module,strings,callback) {
 export function installResidentFile(module,name,image) {
   if(!(image instanceof Uint8Array)||image.length<32||new DataView(image.buffer,image.byteOffset,image.byteLength).getUint32(0,true)!==image.length)
     throw Error('Resident archive must have native metadata from a typed importer');
+  return installResidentBytes(module,name,image);
+}
+// A bundle contains multiple individually converted archives at fixed offsets.
+export function installResidentBytes(module,name,image) {
+  if(!(image instanceof Uint8Array)||!image.length)throw Error("Invalid resident bundle");
   return withStrings(module,[name],namePointer=>{
     const pointer=module._malloc(image.length);if(!pointer)throw Error('Resident image allocation failed');
     try {

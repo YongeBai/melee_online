@@ -68,8 +68,9 @@ assembly fallback or gameplay mismatch.
 - `resident-files.c` supplies synchronous reads from browser-prefetched images to
   original Melee `lbArchive` C code. Immutable resident bytes and separately
   relocated archive copies have independent lifetimes. Only explicit .dat/.usd
-  names and HSD heap 0 are integrated; other heaps and asynchronous I/O remain
-  unresolved. The JS host installs typed images automatically, without a picker.
+  names and HSD heap 0 are integrated for allocated archive copies. Motion
+  bundles use pinned immutable preload-cache hits; a pinned cache cannot clear.
+  Other scene heaps and asynchronous I/O remain unresolved. The JS host installs typed images automatically, without a picker.
   Scene checks verify 162 loads, C varargs lookup, independent relocation, invalid
   installs, cache lifetime and archive release across all 27 models.
 - `stage-collision.mjs` converts the known `MapCollData`, `Vec2`, `MapLine`, and
@@ -92,10 +93,23 @@ assembly fallback or gameplay mismatch.
   overlay and color commands. Raw fighter/item/stage byte accesses use native
   word accessors. It keeps CommandInfo at 0x24 bytes with five return-stack words
   and removes the loop handler's invalid one-entry array access. Generated C
-  probes check 252 actual fields against independent bit extraction/insertion;
+  probes check 254 actual fields (including two motion flags) against independent bit extraction/insertion;
   original timer/loop/call/goto/animation-wait routines pass nested control checks.
   Raw script assets must still be type-converted before using this representation.
   The probes do not run fighter action handlers or claim gameplay parity.
+- `motion-assets.mjs` imports the 24-byte motion rows and action command graphs,
+  keeping shared subroutines, pointer identity, numeric flags and valid null jumps.
+  Only the imported graph is exposed; unrelated archive externs remain opaque.
+  `motion-animations.mjs` converts FigaTree archives without changing bundle offsets.
+  `motions.c` exercises original ftData loading with a limited Fighter context,
+  original Player partner lookup, GObj userdata ownership and the original two
+  animation buffers. It does not invoke Fighter_Create or execute combat handlers.
+  A checked resident-memory copy replaces only the GameCube ARAM/RAM address split.
+  Browser checks cover 8,767 rows, 26,301 loads, 17,534 cache checks, Nana fallback,
+  114,939 script words and loader-to-HSD animation across 39 clips/2,244 frames.
+  Original secondary-buffer partner behavior is retained, including its use of
+  the primary buffer when copying Popo's relocated tree. No performance claim is
+  based on this fixture.
 - `fighter-assets.mjs` converts scalar common attributes and preserves packed
   throw flags. Twenty named fields per component are read through C structs;
   original falling and friction routines are checked against explicit arithmetic.
@@ -199,7 +213,8 @@ not a frame-by-frame Dolphin oracle. Native gameplay parity is still unproven.
 ## Next milestones
 
 1. Connect `Fighter_Create` to the native HSD owner, remaining fighter archive
-   structures, motion tables and platform services. Audit big-endian bitfields
+   structures, shared PlCo data and platform services; replace the limited motion
+   fixture with full fighter ownership. Audit big-endian bitfields
    and pointer/function references explicitly; common attributes and animation
    decoding alone do not initialize a fighter.
 2. Run one two-fighter legal-stage match with scripted per-frame input. Compare

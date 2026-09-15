@@ -25,6 +25,12 @@ export function sceneLinkInputs(root,upstream,output) {
     .filter(file=>!failed.has(file)).map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
   const library=path.join(auditDir,'scene-hsd.a');fs.rmSync(library,{force:true});
   execFileSync(path.join(root,'.browser-tools/emsdk/upstream/emscripten/emar'),['rcs',library,...objects]);
-  return {files:[path.join(root,'engines/browser-native/scene.c'),guards,library],
+  // Only character filename definitions are needed by the animation loader.
+  // Explicit objects allow dead-code elimination without recursively extracting
+  // unrelated game/platform implementations from the full audit library.
+  const characterFiles=execFileSync('rg',['-l','char.*Init_AnimDatFilename.*=','src/melee/ft','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort();
+  if(characterFiles.length!==33||characterFiles.some(file=>failed.has(file)))throw Error('Character animation filename source set changed');
+  const characterObjects=characterFiles.map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
+  return {files:[path.join(root,'engines/browser-native/scene.c'),guards,library,...characterObjects],
     unavailableGX:missing,auditOptimization:'-O0',renderingReady:false};
 }

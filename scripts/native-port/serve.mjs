@@ -4,7 +4,7 @@ import {createServer} from 'node:http';
 import {pathToFileURL} from 'node:url';
 const output=path.resolve(import.meta.dirname,'../../dist/native-port');
 const port=Number(process.env.MELEE_NATIVE_PORT||3324);
-const files=new Set(['verify-commands.mjs','command-fields.mjs','resident-files.mjs','verify-resident-files.mjs','index.html','melee-native.mjs','melee-native.wasm','melee-scene.mjs','melee-scene.wasm','scene-build.json','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html',
+const files=new Set(['verify-commands.mjs','command-fields.mjs','motion-spec.mjs','motion-assets.mjs','motion-animations.mjs','verify-motions.mjs','resident-files.mjs','verify-resident-files.mjs','index.html','melee-native.mjs','melee-native.wasm','melee-scene.mjs','melee-scene.wasm','scene-build.json','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html',
   'stage-collision.mjs','fighter-assets.mjs','verify-fighters.mjs','animation-assets.mjs','verify-animations.mjs','math-reference.mjs','verify-math.mjs','verify.mjs','verify-runtime.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','model-fixtures.json',
   'stage-fixtures.json','fighter-fixtures.json','animation-fixtures.json','build.json']);

@@ -80,25 +80,31 @@ export function loadSceneAsset(module,input) {
   } catch(error){module._free(memory);throw error;}
 }
 
-export function loadSceneAnimation(module,input) {
-  readFigaTree(input);
+export function convertSceneAnimation(input,tree=readFigaTree(input)) {
   const archive=inspectArchive(input),d=archive.data;
-  const root=[...archive.publics].find(([name])=>name.endsWith('_figatree'))?.[1];
+  const root=archive.publics.get(tree.name);
   if(root===undefined||archive.externs.size)throw Error('Invalid scene animation archive');
+  const image=nativeArchiveImage(archive,new Map([[tree.name,root]])),out=new DataView(image.buffer,32,archive.dataSize);
+  for(const field of [0,4,8])out.setUint32(root+field,d.getUint32(root+field),true);
+  let track=d.getUint32(root+16),node=d.getUint32(root+12);
+  while(d.getInt8(node)!==-1) {
+    const count=d.getInt8(node++);if(count<0)throw Error('Invalid animation track count');
+    for(let i=0;i<count;i++,track+=12) {
+      out.setUint16(track,d.getUint16(track),true);out.setUint16(track+2,d.getUint16(track+2),true);
+    }
+  }
+  return {image,archive,root,tree};
+}
+
+export function loadSceneAnimation(module,input) {
+  const converted=convertSceneAnimation(input),{archive}=converted;
   const memory=module._malloc(archive.dataSize);
   if(!memory)throw Error('Scene animation allocation failed');
   try {
-    module.HEAPU8.set(archive.bytes.subarray(32,32+archive.dataSize),memory);
+    module.HEAPU8.set(converted.image.subarray(32,32+archive.dataSize),memory);
     const out=new DataView(module.HEAPU8.buffer,memory,archive.dataSize);
-    for(const slot of archive.relocations)out.setUint32(slot,memory+d.getUint32(slot),true);
-    for(const field of [0,4,8])out.setUint32(root+field,d.getUint32(root+field),true);
-    let track=d.getUint32(root+16),node=d.getUint32(root+12);
-    while(d.getInt8(node)!==-1) {
-      const count=d.getInt8(node++);if(count<0)throw Error('Invalid animation track count');
-      for(let i=0;i<count;i++,track+=12) {
-        out.setUint16(track,d.getUint16(track),true);out.setUint16(track+2,d.getUint16(track+2),true);
-      }
-    }
-    return {memory,tree:memory+root,dispose(){module._free(memory);}};
+    for(const slot of archive.relocations)out.setUint32(slot,memory+archive.data.getUint32(slot),true);
+    let disposed=false;
+    return {memory,tree:memory+converted.root,dispose(){if(!disposed){module._free(memory);disposed=true;}}};
   } catch(error){module._free(memory);throw error;}
 }

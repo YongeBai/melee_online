@@ -5,6 +5,27 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original fighter motion loading now runs in browser WASM. Typed imports cover
+8,767 motion rows and 57,434 action-script commands across all 27 playable
+components. The native loader passes 26,301 loads and 17,534 repeat/cache checks,
+including Nana's 313 Popo fallback rows. Script words, relocated targets, flags,
+FigaTree descriptors and track bytes are checked against the original data.
+Resident animation bundles are pinned until the GObj userdata destructor releases
+both original animation buffers; clearing a pinned cache is rejected.
+
+Loader-produced trees also pass original HSD animation checks: 39 clips and 2,244
+frames match the native pose reference exactly and rewind exactly. All 81 sampled
+960×720 images remain identical. These checks use a deliberately limited Fighter
+context, not full Fighter_Create, action execution or a playable match. The
+46 targeted tests and complete 5,508-clip browser regression pass.
+[Motion-loading checkpoint](benchmarks/browser-2026-09-15-native-port-motion-loading.json).
+
+The platform adapter replaces the GameCube ARAM/RAM address split with a checked
+copy from prefetched native animation bundles; original cache, copy, relocation,
+primary/secondary buffer and partner-selection routines remain. Two motion flag
+views retain their original word bits. Full shared PlCo data, remaining character
+metadata and native rendering/platform integration still precede a match loop.
+
 Command decoding now preserves the PowerPC bit positions when commands are
 represented as native numeric words. The unmodified-header probe failed at least
 one read/write check for all 252 field views. The corrected build passes 64,512
@@ -21,8 +42,7 @@ The 41 targeted tests, all 5,508 animation clips and 81 unchanged 960×720 diagn
 images pass. The wider audit still compiles 1,047 modules and has 83 failures;
 the last Fighter_Create link probe still has 149 missing platform dependencies
 and no signature mismatches. These are port correctness checks, not a combat or
-performance result. Typed motion/script graphs and shared fighter data are the
-next initialization dependencies. [Command-layout checkpoint](benchmarks/browser-2026-09-15-native-port-command-layout.json).
+performance result. This earlier checkpoint preceded motion/script import and original motion loading. [Command-layout checkpoint](benchmarks/browser-2026-09-15-native-port-command-layout.json).
 
 Original Melee archive loading now reads browser-prefetched native-layout images.
 It retains `lbArchive_LoadSymbols`, C varargs lookup, HSD relocation and archive
@@ -40,9 +60,9 @@ The scene GPU diagnostic also uses this original archive/GObj path. All 81 sampl
 regression and 40 targeted tests pass. [Archive/ownership checkpoint](benchmarks/browser-2026-09-15-native-port-resident-files.json).
 
 The file adapter currently handles explicit .dat/.usd filenames and the HSD heap
-only. Locale selection, ARAM/other heaps, asynchronous file callbacks, shared
-`PlCo` fighter tables, complete character metadata and motion-script conversion
-remain. No native competitive match or FPS/latency result exists yet.
+for allocated archive copies, plus pinned preload-cache hits for motion bundles.
+Locale selection, other scene heaps, asynchronous file callbacks, shared `PlCo`
+fighter tables and complete character metadata remain. No native competitive match or FPS/latency result exists yet.
 
 The original HSD scene path now loads and destroys all 27 model archives with
 resolved joint/envelope references. Three cycles per model leave no tracked scene

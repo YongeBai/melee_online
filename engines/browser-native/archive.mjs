@@ -65,3 +65,26 @@ export function nativeArchiveImage(archive,publics) {
   }
   return image;
 }
+
+// Build a native archive for an explicitly imported subgraph. The caller
+// supplies typed native data and only the pointers/publics it has validated.
+export function nativeSubgraphImage(data,relocations,publics) {
+  const view=new DataView(data.buffer,data.byteOffset,data.byteLength),slots=[...relocations];
+  if(new Set(slots).size!==slots.length||!publics.size)throw Error('Invalid native subgraph metadata');
+  for(const at of slots)if(!Number.isInteger(at)||at<0||at%4||at+4>data.length||view.getUint32(at,true)>=data.length)
+    throw Error('Invalid native subgraph relocation');
+  const strings=[];
+  for(const [name,at] of publics) {
+    if(!name||name.includes('\0')||!Number.isInteger(at)||at<0||at>=data.length)throw Error('Invalid native subgraph symbol');
+    strings.push(new TextEncoder().encode(name+'\0'));
+  }
+  const start=32+data.length,textStart=start+slots.length*4+publics.size*8;
+  const image=new Uint8Array(textStart+strings.reduce((n,s)=>n+s.length,0)),out=new DataView(image.buffer);
+  [image.length,data.length,slots.length,publics.size,0].forEach((v,i)=>out.setUint32(i*4,v,true));image.set(data,32);
+  slots.forEach((at,i)=>out.setUint32(start+i*4,at,true));let index=0,text=0;
+  for(const at of publics.values()) {
+    out.setUint32(start+slots.length*4+index*8,at,true);out.setUint32(start+slots.length*4+index*8+4,text,true);
+    image.set(strings[index],textStart+text);text+=strings[index++].length;
+  }
+  return image;
+}

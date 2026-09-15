@@ -41,7 +41,7 @@ export function verifyScene(module,files) {
     limitations:'Real HSD class loading, bind matrices, envelope reference resolution and destruction; no combat or HSD GPU execution'};
 }
 
-export function verifySceneAnimations(module,files,animations) {
+export function verifySceneAnimations(module,files,animations,{loadClip}={}) {
   const rows=[];
   for(const {name,bytes} of files) {
     const motion=animations.find(a=>a.name===name.replace('Nr','AJ'));
@@ -53,7 +53,7 @@ export function verifySceneAnimations(module,files,animations) {
       for(const {offset,tree} of animationArchives(motion.bytes,true)) {
         if(!first&&tree.type!==0)continue;first=false;
         const length=new DataView(motion.bytes.buffer,motion.bytes.byteOffset+offset,4).getUint32(0);
-        const clip=loadSceneAnimation(module,motion.bytes.subarray(offset,offset+length));
+        const clip=loadClip?loadClip({offset,tree}):loadSceneAnimation(module,motion.bytes.subarray(offset,offset+length));
         const pose=loadPose(module,asset.model.tree,tree),root=module._portSceneLoad(asset.root);
         const frames=Math.min(64,Math.ceil(tree.frames)+2),record=new Float32Array(frames*n*12);let maxError=0;
         try {
