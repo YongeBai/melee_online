@@ -1,0 +1,107 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-browser-gx-inner-helper-abba",
+  "coreId": "1aa4a051a7fe13b56f5f0d8e00faa029e63f62c52c913f236ee8635f8aaf4f11",
+  "stage": "Battlefield",
+  "characters": [
+    "Ice Climbers",
+    "Ice Climbers"
+  ],
+  "automaticHostedGame": true,
+  "sourceResolution": [
+    960,
+    720
+  ],
+  "inputConsistency": {
+    "passed": true,
+    "checked": 113,
+    "mismatches": [],
+    "limits": "32-bit rolling fingerprints of sampled native-frame indices, inputs, positions, actions and stocks, plus exact polling gaps; not full machine equivalence."
+  },
+  "diagnosticOnly": true,
+  "promoted": false,
+  "fullMachineReplayPassed": false,
+  "oldToleranceGate": true,
+  "strict720p60Gate": false,
+  "legs": [
+    {
+      "index": 0,
+      "enabled": false,
+      "seconds": 29.998609999999402,
+      "simulationFps": 58.06935721355205,
+      "gameRenderFps": 58.06935721355205,
+      "distinctVisibleImageFps": 57.10264575592116,
+      "p95ImageGapMs": 32.54999999701977,
+      "maxImageGapMs": 50.33000001311302,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "oldTolerancePassed": false,
+      "strictGoalPassed": false
+    },
+    {
+      "index": 1,
+      "enabled": true,
+      "seconds": 29.998640000000595,
+      "simulationFps": 60.002720123311065,
+      "gameRenderFps": 59.969385278798114,
+      "distinctVisibleImageFps": 59.63603683366861,
+      "p95ImageGapMs": 17.559999987483025,
+      "maxImageGapMs": 44.20499999821186,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "oldTolerancePassed": true,
+      "strictGoalPassed": false
+    },
+    {
+      "index": 2,
+      "enabled": true,
+      "seconds": 29.997784999996423,
+      "simulationFps": 60.00443032711297,
+      "gameRenderFps": 59.9710945324868,
+      "distinctVisibleImageFps": 59.63773658622506,
+      "p95ImageGapMs": 17.54500000178814,
+      "maxImageGapMs": 40.78000000119209,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "oldTolerancePassed": true,
+      "strictGoalPassed": false
+    },
+    {
+      "index": 3,
+      "enabled": false,
+      "seconds": 30.000480000004174,
+      "simulationFps": 58.565729614984676,
+      "gameRenderFps": 58.49906401496762,
+      "distinctVisibleImageFps": 57.66574401475441,
+      "p95ImageGapMs": 19.304999992251396,
+      "maxImageGapMs": 59.66500000655651,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "nonblackFraction": 1,
+      "oldTolerancePassed": false,
+      "strictGoalPassed": false
+    }
+  ],
+  "pairs": [
+    {
+      "firstOffToOnVisibleFps": 2.533391077747453,
+      "firstOffToOnSimulationFps": 1.933362909759012
+    },
+    {
+      "reverseOnToOffVisibleFps": 1.9719925714706505,
+      "reverseOnToOffSimulationFps": 1.4387007121282949
+    }
+  ],
+  "limits": "Measured with published diagnostic counters (lean dispatcher off), not the normal lean presentation mode. The original QA pass threshold was 59.5 FPS and marked the two on legs pass; this conflicts with the strict >=60 target and is corrected in source. Best distinct image cadence was 59.64/s and there were >40 ms max image gaps. Full-machine replay did not pass; no playable candidate promotion."
+}

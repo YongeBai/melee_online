@@ -17,6 +17,13 @@ const samples = () => Array.from({ length: 1801 }, (_, i) => ({
 test("accepts 30 seconds of changing 720p60 gameplay", () => {
   assert.equal(summarizeBrowserRun(samples(), before, after).passed, true);
 });
+test("strict 720p60 gate rejects a 59.67 distinct-image rate", () => {
+  const nearMiss=samples().map((s,i)=>({...s,hash:Math.min(i,1790)}));
+  const measured=summarizeBrowserRun(nearMiss,before,after);
+  assert.equal(measured.visibleFps<60,true);
+  assert.equal(measured.p95GapMs<=20,true);
+  assert.equal(measured.passed,false);
+});
 test("rejects 60 simulation ticks with black, repeated, low-resolution, or slow frames", () => {
   for (const alter of [
     s => ({ ...s, nonblack: false, hash: 1 }),

@@ -114,6 +114,56 @@ export function inspectTournamentStageGeometry(read32,read8,readFloat){
  return {objects,diagnosticOnly:true,limits:'Read-only native stage object/joint/DObj counts. Mesh identity and artwork role require isolated pictures; no performance or cache-safety conclusion.'};
 }
 
+// GALE01 PObj layout: class header, next, vertex descriptors, packed flags and
+// display-list length, display pointer, then a skin/shape/envelope union.
+// Count kinds before attempting to cache any polygon work. This reads only
+// structure and emits aggregates; a repeated pointer is not cache proof.
+export function inspectStagePolygonKinds(geometry,read32){
+ const valid=(p,n)=>Number.isInteger(p)&&!(p&3)&&p>=0x80003100&&p+n<=0x81800000;
+ const objects=[];
+ for(const object of geometry.objects||[]){
+  const kinds={rigidOrShared:0,shapeAnimated:0,envelope:0},
+   displayLists=new Set(),vertexDescriptors=new Set(),envelopeLists=new Set(),
+   polygons=new Set();
+  let polygonReferences=0,displayListBytes=0,nonPolygonUnionDraws=0;
+  for(const draw of object.draws||[]){
+   // JObj +0x18 is a union: spline and particle joints do not own DObjs.
+   // The generic geometry walk sees that union as a candidate draw on Yoshi's
+   // Randall map. Exclude it only from this read-only PObj inventory.
+   const joint=object.joints?.[draw.joint];
+   if(joint&&(joint.flags&(0x20|0x4000))){nonPolygonUnionDraws++;continue;}
+   let p=draw.mesh;const chain=new Set();
+   while(p){
+    if(!valid(p,24)||chain.has(p)||chain.size>=4096)
+     throw Error('Invalid stage polygon chain on map '+object.mapId+' draw '+draw.index+
+      ' at '+p.toString(16)+' after '+chain.size+' polygons');
+    chain.add(p);polygonReferences++;
+    if(!polygons.has(p)){
+     polygons.add(p);
+     const packed=read32(p+12),flags=packed>>>16,length=(packed&0xffff)*32,
+      kind=flags&0x3000,display=read32(p+16),verts=read32(p+8);
+     if(!valid(verts,20)||length>262144||!valid(display,length||1))
+      throw Error('Invalid stage polygon descriptor or display list');
+     if(kind===0)kinds.rigidOrShared++;
+     else if(kind===0x1000)kinds.shapeAnimated++;
+     else if(kind===0x2000){kinds.envelope++;const list=read32(p+20);
+      if(!valid(list,8))throw Error('Invalid stage envelope list');envelopeLists.add(list);}
+     else throw Error('Unknown stage polygon kind');
+     displayLists.add(display);vertexDescriptors.add(verts);displayListBytes+=length;
+    }
+    p=read32(p+4);
+   }
+  }
+  objects.push({mapId:object.mapId,category:object.category,draws:object.draws.length,
+   nonPolygonUnionDraws,
+   polygonReferences,uniquePolygons:polygons.size,kinds,
+   uniqueDisplayLists:displayLists.size,uniqueVertexDescriptors:vertexDescriptors.size,
+   uniqueEnvelopeLists:envelopeLists.size,displayListBytes});
+ }
+ return {diagnosticOnly:true,cacheSafe:false,objects,
+  limits:'Structural live PObj counts. Static addresses alone do not establish unchanged GX state, vertex bytes, material, transform or camera across frames.'};
+}
+
 // Final Destination map 2 is a low two-display grid, while map 3 also owns
 // the dark top surface that makes the playable floor legible. Full-scene QA
 // showed that hiding all 18 joint-4 meshes or its seven translucent draws

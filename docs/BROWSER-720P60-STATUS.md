@@ -9,6 +9,65 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 15 CPU/graphics attribution on an isolated same-source profiling
+core: Battlefield 1200-native-frame normal/mesh-omitted/omitted/normal runs
+were 50.24/62.32/62.69/55.41 uncapped work FPS. Omitting stage PObj display
+saved 3.86 and 2.10 ms/frame in adjacent pairs, with 2.79 and 1.25 ms/frame
+less CPU execution. A narrower matrix-setup bypass gave
+51.61/56.64/57.22/53.07 work FPS; it saved 1.37–1.72 ms/frame in total,
+mostly CPU. Both bypasses lose visible stage geometry or correct transforms,
+so neither is a playable FPS result. Eighty sampled input/gameplay digests
+matched per experiment, but warmed controls drifted. The bounded conclusion
+is that guest rendering and matrix setup can be high-return targets; caching
+or specializing them must pass graphics and complete-machine checks.
+[Profiler controls](benchmarks/browser-2026-09-15-mesh-matrix-profile.json).
+
+A read-only live inventory passed all six tournament stages with fixed match
+rules and 960×720 output. Battlefield and Final Destination had 58 and 86
+rigid/shared polygons; Yoshi's Story had 198 rigid/shared and two envelope
+polygons; Fountain had 199 rigid/shared, including the moving-platform map.
+Randall's spline joint was excluded from polygon counts after source-layout
+inspection. Most legal-stage geometry is structurally rigid, but repeated
+addresses do not prove that its materials, matrices, texture memory or GX
+commands can be reused. This QA did not measure sustained FPS.
+[Stage polygon inventory](benchmarks/browser-2026-09-15-stage-polygon-inventory.json).
+
+The matching USA 1.02 decompilation now makes a browser-native game runtime
+a credible larger CPU option. In a disposable source checkout, Emscripten
+parsed 952/1032 Melee C files after one `ssize_t` portability guard; most of
+the 80 failures came from stage callback type mismatches. Suppressing that
+diagnostic for a second syntax-only sweep yielded 1009/1032 parsed files;
+23 still fail on platform headers, generated includes or genuine type conflicts.
+Fighter, collision,
+HSD polygon display and scene code passed; sampled 32-bit object layouts
+passed offset assertions. A 1.1 KiB WASM harness linked and executed the
+actual decompiled `mpCollInterpolateECB` routine, yielding the six expected
+ECB/previous-ECB values. Its non-NaN test did not exercise unresolved
+report/assert fallbacks. This is a real source-function execution proof,
+not a linked game or an FPS result. A full client-side port still needs
+browser platform services and exact gameplay/rendering parity. Keep the
+automatic hosted startup and emulator play path while validating a native
+vertical slice. [Feasibility spike](BROWSER-NATIVE-MELEE-FEASIBILITY.md).
+
+An isolated recompilation of only `__GXWriteMatrix` proved real runtime
+coverage (~97,000 guarded helper calls in a 120-frame Dream Land IC/IC replay)
+but did not pass raw full-machine equality. The first candidate used a full
+FIFO check; the second matched the compiled two-32-bit fast-write pattern.
+Both replayed inputs and sampled gameplay fingerprints identically, but
+changed scheduler/RAM bytes and at least one FIFO snapshot byte. An unchanged
+codegen control on that core also drifted in scheduler/RAM, so those sections
+alone do not isolate the helper; its FIFO difference remains an unresolved
+candidate-specific risk. Neither helper is promoted. A same-checkpoint FPS
+control found Battlefield IC/IC off/on/on/off measured visible rates
+57.10/59.64/59.64/57.67 FPS at 960×720. Both adjacent pairs favor the helper
+by 2.53 and 1.97 FPS; 113 sampled native-input digests matched. This is
+repeatable but insufficient for all-stage performance, and full-machine
+replay still rejects it. The two on legs satisfied the old QA's 59.5-FPS
+*tolerance* but failed the user's strict 60 distinct-image/s goal. The QA
+source now uses 60 rather than 59.5 for simulation, render and visible rates.
+[GX inner replay](benchmarks/browser-2026-09-15-gx-inner-replay.json),
+[FPS comparison](benchmarks/browser-2026-09-15-gx-inner-abba.json).
+
 September 15 Yoshi static-stage cache opportunity control: a read-only native
 matrix inventory found 84/102 map-3 drawable objects with the same 12-float
 world transforms and object identities across 156 active native frames. The

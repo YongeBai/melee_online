@@ -1402,6 +1402,8 @@ if (params.has("qa")) {
   yoshiMeshInventoryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'yoshiGeometryInspect'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(yoshiMeshInventoryButton);
   const legalGeometryButton=document.createElement('button');legalGeometryButton.textContent='Inspect legal stage meshes';
   legalGeometryButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'tournamentStageGeometryInspect'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(legalGeometryButton);
+  const polygonKindsButton=document.createElement('button');polygonKindsButton.textContent='Count stage polygon kinds';
+  polygonKindsButton.onclick=async()=>{try{output.textContent=JSON.stringify(await host.adapter.request('meleeControl',{action:'tournamentPolygonKindsInspect'}),null,2);}catch(error){output.textContent=error.message;}};panel.append(polygonKindsButton);
   const fdDrawSelection=document.createElement('select');fdDrawSelection.setAttribute('aria-label','FD draw selection');
   for(const [value,label] of [['opaque','Opaque underside (visual pass)'],['translucent','Translucent floor (invalid preview)'],['all','All lower meshes (invalid preview)']]){const option=document.createElement('option');option.value=value;option.textContent=label;fdDrawSelection.append(option);}
   panel.append(fdDrawSelection);
@@ -1429,7 +1431,7 @@ if (params.has("qa")) {
   const renderCostCheck=document.createElement('input');renderCostCheck.type='checkbox';renderCostCheck.setAttribute('aria-label','Measure render dispatch cost');
   const renderCostLabel=document.createElement('label');renderCostLabel.append(renderCostCheck,' Compare scene draws bypassed (blank-output diagnostic)');panel.append(renderCostLabel);
   const renderCostScope=document.createElement('select');renderCostScope.setAttribute('aria-label','Render diagnostic scope');
-  for(const[value,label]of[['scene','Scene draw callbacks'],['link-stage','Stage GX link 3'],['link-fighters','Fighter GX link 5'],['link-effects','Effects GX links 7–8'],['link-hud','HUD GX link 11'],['link-shadows','Shadow GX link 4'],['link-environment','Fog/light GX links 0,10'],['yoshi-static','Yoshi matrix-stable visual meshes'],['drawable','Materials and meshes'],['mesh','Mesh skinning and submission'],['texture','Texture setup and loading'],['tev','Material combiner setup']])renderCostScope.add(new Option(label,value));
+  for(const[value,label]of[['scene','Scene draw callbacks'],['link-stage','Stage GX link 3'],['link-fighters','Fighter GX link 5'],['link-effects','Effects GX links 7–8'],['link-hud','HUD GX link 11'],['link-shadows','Shadow GX link 4'],['link-environment','Fog/light GX links 0,10'],['yoshi-static','Yoshi matrix-stable visual meshes'],['drawable','Materials and meshes'],['mesh','Mesh skinning and submission'],['matrixsetup','Polygon matrix selection'],['rigidmatrix','Rigid matrix loads'],['sharedmatrix','Shared-skin matrix loads'],['envelope','Envelope matrix loads'],['texture','Texture setup and loading'],['tev','Material combiner setup']])renderCostScope.add(new Option(label,value));
   renderCostScope.value=[...renderCostScope.options].some(o=>o.value===params.get('rendercostscope'))?params.get('rendercostscope'):'scene';panel.append(renderCostScope);
   const timingDriftCompare=document.createElement('input');timingDriftCompare.type='checkbox';timingDriftCompare.setAttribute('aria-label','Compare time-drift correction');
   const timingDriftLabel=document.createElement('label');timingDriftLabel.append(timingDriftCompare,' Compare time-drift correction');panel.append(timingDriftLabel);
@@ -2080,9 +2082,13 @@ if (params.has("qa")) {
             start.match.items !== -1 || start.match.cpuLevel !== 9 || start.match.teams !== 0 ||
             start.fighters[1].slotType !== 1 || start.fighters.some(f => f.stocks !== 4))
           throw Error(`Wrong match rules on ${option.textContent}`);
+        const polygonKinds=params.get('polygoninventory')==='1'
+          ? await host.adapter.request('meleeControl',{action:'tournamentPolygonKindsInspect'}) : null;
+        if(polygonKinds&&polygonKinds.stage!==start.match.stage)throw Error('Stage polygon inventory changed stage');
         const end = await waitForGame(s => s.sceneFrame >= start.sceneFrame + 300);
         stages.push({name:option.textContent,stage:start.match.stage,rules:start.match,
-          startFrame:start.sceneFrame,endFrame:end.sceneFrame,sourceResolution:[$("screen").width,$("screen").height]});
+          startFrame:start.sceneFrame,endFrame:end.sceneFrame,sourceResolution:[$("screen").width,$("screen").height],
+          ...(polygonKinds?{polygonKinds}:{})});
         await quitMatch();
         await waitForCss();
       }

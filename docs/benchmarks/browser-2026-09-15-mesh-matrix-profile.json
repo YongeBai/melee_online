@@ -1,0 +1,204 @@
+{
+  "date": "2026-09-15",
+  "kind": "same-checkpoint-render-ablation-wall-profile",
+  "productionCoreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "isolatedProfilingCoreSha256": "5d71de1780a8f148324a32f810907c53a5a504b48f5b8c67e0a39fd553da545e",
+  "automaticHostedGame": true,
+  "renderer": "960x720 browser OGL",
+  "framesPerLeg": 1200,
+  "experiments": [
+    {
+      "scope": "mesh",
+      "diagnosticOnly": true,
+      "passed": false,
+      "stage": "Battlefield",
+      "inputConsistency": {
+        "passed": true,
+        "checked": 80
+      },
+      "legs": [
+        {
+          "normalRender": true,
+          "nativeWorkFps": 50.23610917728139,
+          "nativeFrames": 1200,
+          "elapsedMs": 23887.200256,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4897.413,
+            "cpuExecute": 17344.1,
+            "cpuGpuDecode": 456.451,
+            "cpuGpuSync": 2239.063,
+            "cpuVideoWait": 19.279,
+            "glDraw": 179.36,
+            "glUniform": 563.177,
+            "glPresent": 661.614
+          }
+        },
+        {
+          "normalRender": false,
+          "nativeWorkFps": 62.319516862677446,
+          "nativeFrames": 1200,
+          "elapsedMs": 19255.604992,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4104.311,
+            "cpuExecute": 13991.207,
+            "cpuGpuDecode": 240.41,
+            "cpuGpuSync": 2061.257,
+            "cpuVideoWait": 19.633,
+            "glDraw": 57.189,
+            "glUniform": 167.313,
+            "glPresent": 637.808
+          }
+        },
+        {
+          "normalRender": false,
+          "nativeWorkFps": 62.69194518240387,
+          "nativeFrames": 1200,
+          "elapsedMs": 19141.214976,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4300.446,
+            "cpuExecute": 13653.988,
+            "cpuGpuDecode": 241.205,
+            "cpuGpuSync": 2215.594,
+            "cpuVideoWait": 17.186,
+            "glDraw": 68.531,
+            "glUniform": 195.526,
+            "glPresent": 653.67
+          }
+        },
+        {
+          "normalRender": true,
+          "nativeWorkFps": 55.40771234693996,
+          "nativeFrames": 1200,
+          "elapsedMs": 21657.634816,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4872.288,
+            "cpuExecute": 15152.667,
+            "cpuGpuDecode": 435.809,
+            "cpuGpuSync": 2287.954,
+            "cpuVideoWait": 20.377,
+            "glDraw": 187.307,
+            "glUniform": 547.889,
+            "glPresent": 658.433
+          }
+        }
+      ],
+      "pairs": [
+        {
+          "savedWallMsPerFrame": 3.8596627199999998,
+          "savedCpuExecuteMsPerFrame": 2.7940774999999984,
+          "savedGpuDecodeMsPerFrame": 0.1800341666666667,
+          "normalNativeWorkFps": 50.23610917728139,
+          "bypassedNativeWorkFps": 62.319516862677446
+        },
+        {
+          "savedWallMsPerFrame": 2.0970165333333353,
+          "savedCpuExecuteMsPerFrame": 1.2488991666666667,
+          "savedGpuDecodeMsPerFrame": 0.16217,
+          "normalNativeWorkFps": 55.40771234693996,
+          "bypassedNativeWorkFps": 62.69194518240387
+        }
+      ]
+    },
+    {
+      "scope": "matrixsetup",
+      "diagnosticOnly": true,
+      "passed": false,
+      "stage": "Battlefield",
+      "inputConsistency": {
+        "passed": true,
+        "checked": 80
+      },
+      "legs": [
+        {
+          "normalRender": true,
+          "nativeWorkFps": 51.6121272280391,
+          "nativeFrames": 1200,
+          "elapsedMs": 23250.349568,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4831.844,
+            "cpuExecute": 16769.427,
+            "cpuGpuDecode": 447.703,
+            "cpuGpuSync": 2247.199,
+            "cpuVideoWait": 21.512,
+            "glDraw": 187.167,
+            "glUniform": 556.696,
+            "glPresent": 674.202
+          }
+        },
+        {
+          "normalRender": false,
+          "nativeWorkFps": 56.64218048867985,
+          "nativeFrames": 1200,
+          "elapsedMs": 21185.625088,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4480.391,
+            "cpuExecute": 15328.126,
+            "cpuGpuDecode": 361.543,
+            "cpuGpuSync": 2124.033,
+            "cpuVideoWait": 15.42,
+            "glDraw": 142.215,
+            "glUniform": 425.208,
+            "glPresent": 613.757
+          }
+        },
+        {
+          "normalRender": false,
+          "nativeWorkFps": 57.220036399877664,
+          "nativeFrames": 1200,
+          "elapsedMs": 20971.67488,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4634.448,
+            "cpuExecute": 14938.884,
+            "cpuGpuDecode": 359.886,
+            "cpuGpuSync": 2267.17,
+            "cpuVideoWait": 20.187,
+            "glDraw": 143.847,
+            "glUniform": 434.28,
+            "glPresent": 668.122
+          }
+        },
+        {
+          "normalRender": true,
+          "nativeWorkFps": 53.07109190621297,
+          "nativeFrames": 1200,
+          "elapsedMs": 22611.179776,
+          "synchronousCompileAndLinkMs": 0,
+          "profile": {
+            "cpuAdvance": 4863.487,
+            "cpuExecute": 16040.789,
+            "cpuGpuDecode": 461.989,
+            "cpuGpuSync": 2171.718,
+            "cpuVideoWait": 16.481,
+            "glDraw": 197.492,
+            "glUniform": 584.084,
+            "glPresent": 650.781
+          }
+        }
+      ],
+      "pairs": [
+        {
+          "savedWallMsPerFrame": 1.720603733333334,
+          "savedCpuExecuteMsPerFrame": 1.2010841666666663,
+          "savedGpuDecodeMsPerFrame": 0.07179999999999997,
+          "normalNativeWorkFps": 51.6121272280391,
+          "bypassedNativeWorkFps": 56.64218048867985
+        },
+        {
+          "savedWallMsPerFrame": 1.3662540800000018,
+          "savedCpuExecuteMsPerFrame": 0.9182541666666673,
+          "savedGpuDecodeMsPerFrame": 0.08508583333333329,
+          "normalNativeWorkFps": 53.07109190621297,
+          "bypassedNativeWorkFps": 57.220036399877664
+        }
+      ]
+    }
+  ],
+  "limits": "Uncapped native-work diagnostic. Bypassed mesh frames omit essential geometry; bypassed matrix frames use stale transforms. No image-FPS or physical latency acceptance. Profiling slows the core, wall scopes overlap, and controls drift. Input equality is 80 sampled gameplay fingerprints per experiment, not full-machine equality. Pairwise differences bound opportunity and do not prove a shippable gain."
+}

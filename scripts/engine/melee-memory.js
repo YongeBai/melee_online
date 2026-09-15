@@ -11,7 +11,7 @@ import {planFountainParticles,inspectParticleBanks,PARTICLE_DRAW_CAVE,PARTICLE_D
 import {planShadowDiagnostic,SHADOW_DIAGNOSTIC_PROC} from './melee-shadow-diagnostic.js';
 import {planFountainAnimation,FOUNTAIN_ANIMATION_CAVE,FOUNTAIN_ANIMATION_BYTES} from './melee-fountain-animation.js';
 import {planFighterModelDetail} from './melee-model-detail.js';
-import {planFountainScenery,inspectFountainGeometry,inspectYoshiGeometry,inspectTournamentStageGeometry,planFinalDestinationBottomVisual,inspectYoshiStaticDrawObjectBytes,planYoshiOffscreenDecor,planYoshiStableDrawCostDiagnostic,planYoshiMinimalStage,planFountainGeometryView,planFountainDecorations} from './melee-scenery.js';
+import {planFountainScenery,inspectFountainGeometry,inspectYoshiGeometry,inspectTournamentStageGeometry,inspectStagePolygonKinds,planFinalDestinationBottomVisual,inspectYoshiStaticDrawObjectBytes,planYoshiOffscreenDecor,planYoshiStableDrawCostDiagnostic,planYoshiMinimalStage,planFountainGeometryView,planFountainDecorations} from './melee-scenery.js';
 const fountainGeometryBaseline=new WeakMap();
 import {planFountainReflection} from './melee-reflection.js';
 import { planStageBackground } from './melee-background.js';
@@ -433,6 +433,17 @@ export function controlMelee(module, api, action, options = {}) {
         throw Error('Tournament geometry inventory requires a live legal-stage match');
       return {...inspectTournamentStageGeometry(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a))),
         stage:current.match.stage,sceneFrame:current.sceneFrame};
+    }finally{if(!wasPaused)api.setCorePaused(0);}
+  }
+  if(action==='tournamentPolygonKindsInspect'){
+    const wasPaused=api.getCoreStateName?.()==='Paused';
+    if(!wasPaused&&!api.setCorePaused(1))throw Error('Could not pause for stage polygon inventory');
+    try{
+      const current=inspectMelee(module);
+      if(current.major!==2||current.minor!==2||current.sceneKind!==2||![2,3,8,28,31,32].includes(current.match?.stage))
+        throw Error('Stage polygon inventory requires a live legal-stage match');
+      const geometry=inspectTournamentStageGeometry(u32,a=>v.getUint8(at(a)),a=>v.getFloat32(at(a)));
+      return {...inspectStagePolygonKinds(geometry,u32),stage:current.match.stage,sceneFrame:current.sceneFrame};
     }finally{if(!wasPaused)api.setCorePaused(0);}
   }
   if(action==='finalDestinationBottomVisual'){

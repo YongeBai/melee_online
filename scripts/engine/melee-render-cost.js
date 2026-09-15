@@ -5,6 +5,10 @@ export const RENDER_DISPATCH=0x80390ed0;
 export const RENDER_COST_SCOPES={
   scene:{address:RENDER_DISPATCH,bytes:0xf0,hash:0xde45893f},
   mesh:{address:0x8036e8ac,bytes:0x144,hash:0x05e03a65},
+  matrixsetup:{address:0x8036e83c,bytes:0x70,hash:0x43015a0b},
+  rigidmatrix:{address:0x8036e12c,bytes:0x13c,hash:0x69370dda},
+  sharedmatrix:{address:0x8036e268,bytes:0x25c,hash:0x658e92a4},
+  envelope:{address:0x8036e4c4,bytes:0x378,hash:0x44f045ae},
   drawable:{address:0x8035e388,bytes:0xb8,hash:0x68cc1f2f},
   texture:{address:0x80360950,bytes:0x2e8,hash:0xe1eb5d2e},
   tev:{address:0x80385448,bytes:0x6c,hash:0xf543a920},
@@ -20,5 +24,5 @@ export function planRenderCostDiagnostic(read32,enabled,scope='scene'){
   if(hash!==expectedHash)throw Error('Render diagnostic requires original USA 1.02 dispatch');
   const target=enabled?original:ret;
   return{diagnosticOnly:true,passed:false,enabled,scope,writes:current===target?[]:[[address,target]],
-    limits:'Blank/incomplete rendering. Scene bypass removes object draw callbacks; drawable removes material setup and meshes; mesh removes skinning and primitive submission; texture removes texture resource/matrix/object setup and loading; tev removes compiled material combiner setup and constant updates. Each includes downstream graphics work. Not a gameplay optimization or GPU-only timing.'};
+    limits:'Blank/incomplete rendering. Scene bypass removes object draw callbacks; drawable removes material setup and meshes; mesh removes skinning and primitive submission; matrixsetup bypasses polygon matrix selection; rigidmatrix/sharedmatrix/envelope bypass their respective GX matrix loads; texture removes texture resource/matrix/object setup and loading; tev removes compiled material combiner setup and constant updates. Each includes downstream graphics work. Not a gameplay optimization or GPU-only timing.'};
 }

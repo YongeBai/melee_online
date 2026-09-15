@@ -1,0 +1,144 @@
+{
+  "date": "2026-09-15",
+  "profile": "read-only live six-stage polygon kind inventory",
+  "coreId": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "passed": true,
+  "automaticHostedGame": true,
+  "diagnosticOnly": true,
+  "cacheSafe": false,
+  "stages": [
+    {
+      "name": "Battlefield",
+      "stageId": 31,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "matchRules": {
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "mapObjects": 4,
+      "drawRecords": 57,
+      "nonPolygonUnionDraws": 0,
+      "uniquePolygons": 58,
+      "rigidOrShared": 58,
+      "shapeAnimated": 0,
+      "envelope": 0,
+      "displayListBytes": 68256
+    },
+    {
+      "name": "Final Destination",
+      "stageId": 32,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "matchRules": {
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "mapObjects": 9,
+      "drawRecords": 86,
+      "nonPolygonUnionDraws": 0,
+      "uniquePolygons": 86,
+      "rigidOrShared": 86,
+      "shapeAnimated": 0,
+      "envelope": 0,
+      "displayListBytes": 65344
+    },
+    {
+      "name": "Dream Land 64",
+      "stageId": 28,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "matchRules": {
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "mapObjects": 8,
+      "drawRecords": 69,
+      "nonPolygonUnionDraws": 0,
+      "uniquePolygons": 69,
+      "rigidOrShared": 69,
+      "shapeAnimated": 0,
+      "envelope": 0,
+      "displayListBytes": 2912
+    },
+    {
+      "name": "Yoshi's Story",
+      "stageId": 8,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "matchRules": {
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "mapObjects": 4,
+      "drawRecords": 196,
+      "nonPolygonUnionDraws": 1,
+      "uniquePolygons": 200,
+      "rigidOrShared": 198,
+      "shapeAnimated": 0,
+      "envelope": 2,
+      "displayListBytes": 76256
+    },
+    {
+      "name": "Fountain of Dreams",
+      "stageId": 2,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "matchRules": {
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "mapObjects": 7,
+      "drawRecords": 199,
+      "nonPolygonUnionDraws": 0,
+      "uniquePolygons": 199,
+      "rigidOrShared": 199,
+      "shapeAnimated": 0,
+      "envelope": 0,
+      "displayListBytes": 176960
+    },
+    {
+      "name": "Pokémon Stadium",
+      "stageId": 3,
+      "sourceResolution": [
+        960,
+        720
+      ],
+      "matchRules": {
+        "timeLimit": 480,
+        "items": -1,
+        "teams": 0,
+        "cpuLevel": 9
+      },
+      "mapObjects": 4,
+      "drawRecords": 136,
+      "nonPolygonUnionDraws": 0,
+      "uniquePolygons": 136,
+      "rigidOrShared": 136,
+      "shapeAnimated": 0,
+      "envelope": 0,
+      "displayListBytes": 65216
+    }
+  ],
+  "limits": "Counts are live memory structures, not frame-by-frame drawing or reuse proof. Spline/particle JObj union data is excluded from PObj counts. Rules and 960x720 output were verified in the same tournament-stage QA run. No sustained presentation-FPS measurement in this run."
+}

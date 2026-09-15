@@ -1,0 +1,137 @@
+{
+  "date": "2026-09-15",
+  "kind": "isolated-guest-gx-inner-helper-full-machine-replay",
+  "automaticHostedGame": true,
+  "renderSourceResolution": [
+    960,
+    720
+  ],
+  "diagnosticOnly": true,
+  "promoted": false,
+  "runs": [
+    {
+      "name": "fullCheck",
+      "coreId": "502fc2177476961e07aedbbebe018ae1dc29920c91ecb7c36ecc2ee5f7e2e00b",
+      "frames": 120,
+      "stage": 28,
+      "characters": [
+        14,
+        14
+      ],
+      "passed": false,
+      "fullMachineBytesEqual": false,
+      "fingerprintsEqual": true,
+      "sectionsDifferent": [
+        {
+          "name": "CoreTiming",
+          "bytes": 17
+        },
+        {
+          "name": "HW Memory RAM",
+          "bytes": 10
+        },
+        {
+          "name": "HW DVDInterface",
+          "bytes": 4
+        },
+        {
+          "name": "HW GPFifo",
+          "bytes": 3
+        }
+      ],
+      "gxRuns": [
+        {
+          "enabled": false,
+          "compiled": 1,
+          "runs": 0,
+          "fallbacks": 0
+        },
+        {
+          "enabled": true,
+          "compiled": 2,
+          "runs": 96559,
+          "fallbacks": 13
+        }
+      ]
+    },
+    {
+      "name": "fastFifo",
+      "coreId": "1aa4a051a7fe13b56f5f0d8e00faa029e63f62c52c913f236ee8635f8aaf4f11",
+      "frames": 120,
+      "stage": 28,
+      "characters": [
+        14,
+        14
+      ],
+      "passed": false,
+      "fullMachineBytesEqual": false,
+      "fingerprintsEqual": true,
+      "sectionsDifferent": [
+        {
+          "name": "CoreTiming",
+          "bytes": 19
+        },
+        {
+          "name": "HW Memory RAM",
+          "bytes": 13
+        },
+        {
+          "name": "HW GPFifo",
+          "bytes": 1
+        }
+      ],
+      "gxRuns": [
+        {
+          "enabled": false,
+          "compiled": 1,
+          "runs": 0,
+          "fallbacks": 0
+        },
+        {
+          "enabled": true,
+          "compiled": 2,
+          "runs": 97360,
+          "fallbacks": 7
+        }
+      ]
+    },
+    {
+      "name": "unchangedControl",
+      "coreId": "1aa4a051a7fe13b56f5f0d8e00faa029e63f62c52c913f236ee8635f8aaf4f11",
+      "frames": 120,
+      "stage": 28,
+      "characters": [
+        14,
+        14
+      ],
+      "passed": false,
+      "fullMachineBytesEqual": false,
+      "fingerprintsEqual": true,
+      "sectionsDifferent": [
+        {
+          "name": "CoreTiming",
+          "bytes": 18
+        },
+        {
+          "name": "HW Memory RAM",
+          "bytes": 1
+        }
+      ],
+      "gxRuns": [
+        {
+          "enabled": false,
+          "compiled": 1,
+          "runs": 0,
+          "fallbacks": 0
+        },
+        {
+          "enabled": false,
+          "compiled": 1,
+          "runs": 0,
+          "fallbacks": 0
+        }
+      ]
+    }
+  ],
+  "limits": "Same-checkpoint Dream Land Ice Climbers/Ice Climbers 120-frame input fingerprints matched. Raw full-machine replay failed for both helper candidates and also for unchanged-codegen control on the same core, so scheduler/RAM drift cannot be attributed solely to the helper. Candidate-only FIFO bytes differed. Do not enable helper in playable browser release."
+}

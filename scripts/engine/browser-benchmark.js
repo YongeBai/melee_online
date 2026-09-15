@@ -46,9 +46,9 @@ export function summarizeBrowserRun(samples, before, after) {
     seconds, simulationFps, gameRenderFps, visibleFps, p95GapMs,
     maxGapMs: gaps.at(-1), sourceResolution: [minWidth, minHeight],
     nonblackFraction: nonblack / samples.length,
-    passed: sameMatch && seconds >= 29.5 && simulationFps >= 59.5 && simulationFps <= 60.5 &&
-      gameRenderFps >= 59.5 && gameRenderFps <= 60.5 &&
-      visibleFps >= 59.5 && minWidth >= 960 && minHeight >= 720 &&
+    passed: sameMatch && seconds >= 29.5 && simulationFps >= 60 && simulationFps <= 60.5 &&
+      gameRenderFps >= 60 && gameRenderFps <= 60.5 &&
+      visibleFps >= 60 && minWidth >= 960 && minHeight >= 720 &&
       nonblack / samples.length >= .99 && p95GapMs <= 20,
   };
 }
