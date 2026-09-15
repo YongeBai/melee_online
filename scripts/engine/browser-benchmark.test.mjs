@@ -211,6 +211,19 @@ test('GPR comparison toggles only GPR caching and restores the original configur
  assert.deepEqual(changes.map(c=>c.regcache),[false,true,true,false,true]);assert.ok(changes.every(c=>c.integerfifo&&c.singleprefix&&!c.fprcache&&!c.fastmem));assert.deepEqual(result.runs.filter(r=>!r.warmup).map(r=>r.regcache),[false,true,true,false]);
 });
 
+test('reverse codegen order controls session drift and still restores the original mode',async()=>{
+ const {compareBrowserCodegen}=await import('./browser-benchmark.js');const modes=[];
+ const host={cachedInterpreterDisableMask:0,adapter:{request:async(type,data)=>{
+  if(type==='browserRollback'&&data?.action==='codegen')modes.push(data.regcache);
+  return{};
+ }}};
+ const result=await compareBrowserCodegen(host,35,()=>{},{feature:'regcache',order:'reverse',measure:async()=>({passed:false})});
+ assert.equal(result.order,'reverse');
+ assert.deepEqual(result.runs.filter(r=>!r.warmup).map(r=>r.enabled),[true,false,false,true]);
+ assert.deepEqual(modes,[true,false,false,true,true]);
+ await assert.rejects(compareBrowserCodegen(host,35,()=>{},{order:'random'}),/Unsupported codegen comparison order/);
+});
+
 test('compact integer locals compare independently and restore all flags',async()=>{
  const {compareBrowserCodegen,browserCodegenConfig}=await import('./browser-benchmark.js');const calls=[];
  const host={cachedInterpreterDisableMask:(1<<16)|(1<<18),compactGprLocals:false,adapter:{request:async(t,d)=>{if(d.action==='codegen')calls.push(d);return {};}}};

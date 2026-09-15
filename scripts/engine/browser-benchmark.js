@@ -194,9 +194,10 @@ export function parseBlockMapCounters(details) {
  return {mask:Number(match[1]),empty:Number(match[2]),collision:Number(match[3])};
 }
 
-export async function compareBrowserCodegen(host, seconds, inspect, {onProgress=()=>{}, onResult=()=>{}, measure=measureBrowserGameplay, feature="integerfifo", frameInput=false, retainedFpuGuard=false, retainedBranchFusion=false,retainedReadFusion=false}={}) {
+export async function compareBrowserCodegen(host, seconds, inspect, {onProgress=()=>{}, onResult=()=>{}, measure=measureBrowserGameplay, feature="integerfifo", frameInput=false, retainedFpuGuard=false, retainedBranchFusion=false,retainedReadFusion=false,order="normal"}={}) {
   const command=(action,data={})=>host.adapter.request('browserRollback',{action,...data});
   if (!["gxmatrixfast","displaylistfast","animstatefast","animcallbackfast","animfusion","hotfusion","matrixfast","constantaddr","callfusion","chainfusion","bswaprotate","qstatefull","qstatecache","cpformat","leandispatch","counterbatch","fusionredispatch","readbranchfusionfast","readbranchfusion","readfusion","stepcheck","fpuguardwide","idlechecks","branchfusion","fpuguard","blockmerge","integerfifo","singleprefix","fprcache","regcache","compactgpr","pssimd","psmemsimd","vectorfpr","vectorfpronly","vectorfprarith","psqhoist","widemap","stateconst","msrcache","fifocopy","fifobatch","frsqrtefast"].includes(feature)) throw Error("Unsupported codegen comparison");
+  if(!["normal","reverse"].includes(order))throw Error('Unsupported codegen comparison order');
   const original=browserCodegenConfig(host);
   const common={...original,...(retainedFpuGuard?{fpuguard:true}:{}),...(retainedBranchFusion?{branchfusion:true}:{}),...(retainedReadFusion?{readfusion:true}:{})};
   const originalIdleChecks=!!((host.cachedInterpreterDisableMask>>>0)&0x80000000);
@@ -207,7 +208,7 @@ export async function compareBrowserCodegen(host, seconds, inspect, {onProgress=
     if(retainedFpuGuard||retainedBranchFusion||retainedReadFusion)await command('codegen',common);
     await command('step');
     await command('capture',{slot:5}); captured=true;
-    for (const [index,enabled] of [false,true,true,false].entries()) {
+    for (const [index,enabled] of (order==="reverse"?[true,false,false,true]:[false,true,true,false]).entries()) {
       await command('pause');
       const vectorFeature=feature.startsWith('vectorfpr');
       const config=feature==='readbranchfusionfast' ? {...common,readfusion:enabled,branchfusion:enabled,fusionredispatch:enabled} : feature==='readbranchfusion' ? {...common,readfusion:enabled,branchfusion:enabled} : vectorFeature ? {...common,vectorfpr:enabled,pssimd:enabled&&feature!=='vectorfpronly',psmemsimd:enabled&&feature==='vectorfpr'} : {...common,[feature]:enabled};
@@ -334,11 +335,11 @@ export async function compareBrowserCodegen(host, seconds, inspect, {onProgress=
           result.qStateCoverage={enabled,emittedBlocks:Number(match[2]),emittedSites:Number(match[3]),scope:'Cumulative compiled coverage; not an execution count or CPU cost share.'};
         }
         Object.assign(result,config,{enabled,warmup});
-        results.push(result); onResult({kind:'same-checkpoint-codegen-abba',feature,passed:false,runs:results});
+        results.push(result); onResult({kind:'same-checkpoint-codegen-abba',feature,order,passed:false,runs:results});
       }
     }
     const inputConsistency=frameInput?compareFrameInputDigests(results):undefined;
-    return {kind:'same-checkpoint-codegen-abba',feature,passed:results.filter(r=>!r.warmup&&r.enabled).every(r=>r.passed)&&(!frameInput||inputConsistency.passed),runs:results,...(frameInput?{inputConsistency}:{})};
+    return {kind:'same-checkpoint-codegen-abba',feature,order,passed:results.filter(r=>!r.warmup&&r.enabled).every(r=>r.passed)&&(!frameInput||inputConsistency.passed),runs:results,...(frameInput?{inputConsistency}:{})};
   }finally {
     if(frameInput)await command('frameInput',{enabled:false});
     await command('pause');

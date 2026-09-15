@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-15",
+  "kind": "corrected-yoshi-guarded-display-list-order-control-and-replay",
+  "coreSha256": "78948685e737d4f0445cbf305cec417c53e7446ee38134a19e85d6e4cceaeade",
+  "workload": "Yoshi's Story Ice Climbers mirror, two active ordinary native-frame controller tracks, corrected 960x720 OGL worker rendering, black decorative backdrop, low-detail fighter models, blockmerge and animation fusion",
+  "pairedMethod": "35-second measurement after each 35-second warmup, one match checkpoint per sequence. Only displaylistfast toggled. The final reversed-order sequence used the newer QA order guard without changing the pinned WASM core or hosted game.",
+  "normalOrderDistinctVisibleFps": [[53.0293, 55.9455, 56.6322, 49.5314], [51.8021, 52.3150, 54.5993, 46.5913]],
+  "normalOrderNativeInputConsistency": [{"passed": true, "checked": 123}, {"passed": true, "checked": 118}],
+  "reverseOrderDistinctVisibleFps": [52.6293, 54.3680, 53.7120, 50.4020],
+  "reverseOrderNativeInputConsistency": {"passed": true, "checked": 120, "mismatches": []},
+  "reverseOrderPairedCandidateDeltaFps": [-1.7387, -3.3100],
+  "lateRunP95ImageGapMs": {"normalLastOff": [53.5350, 58.2200], "reverseLastOn": 49.9000},
+  "reverseLastOnSynchronousCompileAndLinkMs": 0,
+  "guardCoverage": {"reverseEnabledCompiledBlocks": 4, "reverseEnabledCumulativeCalls": 2500678, "reverseEnabledCumulativeDirtyCalls": 2069702, "fallbacks": 0},
+  "runningReplay": {"frames": 600, "configurationDifferenceOnly": "displaylistfast off/on; lean dispatch, direct WASM dispatcher, animation fusion and blockmerge held equal in both legs", "serializedBytesPerLeg": 121200956, "fullMachineBytesEqual": false, "repeatedDifferingSection": "CoreTiming only: 17 bytes in one run and 18 bytes in a saved-event inspection repeat", "fingerprintsEqual": true, "savedEventGlobalTickAndLogicalQueueEqual": true, "savedEventOrderedTimesTypesPayloadsEqual": true, "rawIdleCounterAndEventInsertionOrdinalsEqual": false, "otherSerializedSectionsEqual": true},
+  "allMeasuredVisibleRunsBelow60": true,
+  "decision": "Reject a repeatable visible-FPS gain: the reverse order favors ordinary display-list execution in both pairs, and the long-gap final leg follows run position. Keep displaylistfast opt-in and do not promote it as a correction for fighter draw cost. Strict raw state replay also fails on CoreTiming despite identical observable gameplay and logical event schedule.",
+  "limits": "The run-position gap is observed, not causally attributed to thermal throttling or browser tiering. Fingerprints are native-frame gameplay samples; strict byte replay separately rejects raw equivalence. No physical input-to-photon latency result. Full local reports: /tmp/melee-corrected-yoshi-displaylist-abba-35s-3286-sep15.json, /tmp/melee-corrected-yoshi-displaylist-repeat-35s-3286-sep15.json, /tmp/melee-corrected-yoshi-displaylist-reverse-35s-3292-sep15.json, and /tmp/melee-yoshi-displaylist-replay-scheduler-sep15.json."
+}

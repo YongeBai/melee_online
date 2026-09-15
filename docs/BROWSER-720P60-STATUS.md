@@ -334,6 +334,19 @@ not a playable optimization. The amount overlaps with the mesh bound in a
 separate checkpoint and cannot be added or subtracted from it. Prioritize
 full-image tests of guarded shared fighter geometry/display-list paths.
 [Corrected fighter draw bound](benchmarks/browser-2026-09-15-corrected-yoshi-fighter-draw-bound.json).
+Two corrected Yoshi guarded-display-list A/B/B/A sessions initially looked
+faster with the candidate but their final baseline legs developed long image
+gaps after healthy warmups. The reverse-order **on/off/off/on** control
+measured **52.63 / 54.37 / 53.71 / 50.40 distinct visible FPS**, now favoring
+the original path in both pairs. All120 native-input/gameplay fingerprints
+matched, the page stayed focused and the late candidate had zero new
+synchronous JIT compilation. The long-gap slowdown follows the final run
+position rather than the feature; its underlying cause is unproven. A
+corrected600-frame full-state replay changed only `displaylistfast` and
+matched input/gameplay and the saved execution-ordered event schedule, but
+failed raw byte equality in **17–18 CoreTiming bytes**. Leave the fast path
+opt-in. QA now supports both codegen comparison orders to catch this drift.
+[Display-list order and replay](benchmarks/browser-2026-09-15-corrected-yoshi-displaylist-order-and-replay.json).
 
 Frozen Stadium remains a Stadium-only TODO and cannot improve any other stage.
 The first broader cosmetic candidate froze two hidden Battlefield joint-animation
