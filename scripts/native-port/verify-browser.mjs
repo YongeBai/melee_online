@@ -25,6 +25,7 @@ try {
   const entities={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"'};
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
   if(startup||fighterInit) {
+    if(fighterInit&&(!verification.dynamics?.passed||verification.dynamics.rows.length!==27||verification.dynamics.sets!==40||verification.dynamics.nodes!==168||verification.dynamics.frames!==3240))throw Error('Incomplete original dynamic-bone coverage');
     if(fighterInit&&(!verification.perFighter?.passed||verification.perFighter.rows.length!==27||verification.perFighter.instances!==135))throw Error("Incomplete original per-fighter initialization");
     if(!verification.passed||verification.pools.length!==6||verification.lights.length!==2||verification.schedulerSteps!==120||verification.modelInstances!==54||verification.modelRows.length!==27||!verification.resetChecks||!verification.startupOrder?.passed)throw Error('Incomplete original fighter startup');
   } else if(scene) {

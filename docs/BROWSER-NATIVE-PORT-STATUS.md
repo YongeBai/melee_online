@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original dynamic-bone construction, selector updates, rest-pose simulation and
+teardown now run in the wider fighter target. The 27 components contain 40 base
+sets / 168 nodes. Two simultaneous default-costume instances per component pass
+3,240 update calls and 363,071 checks, including source parameter copies, initial
+world positions/segment lengths, all imported selector rows, independent state,
+finite deterministic updates and recovery of all 320 original pool entries.
+
+The typed importer distinguishes 60-byte source parameter records from 152-byte
+runtime nodes, preserves shared arrays, and treats animation cutoffs as integers
+rather than relocated animation pointers. Four additional Purin hat descriptors
+are imported but not executed. Animation-driven dynamics, Kirby copy hats,
+wind/stage interactions and retail per-frame parity remain unverified.
+
+All 74 targeted tests and the separate startup/scene browser regressions pass.
+The wider module is 2,808,039 bytes; this remains a diagnostic, not a playable
+match or a 720p60 result. Complete fighter-data loading/full construction,
+character OnLoad dependencies and match execution are still the next integration
+work. [Dynamic-bone checkpoint](benchmarks/browser-2026-09-15-native-port-dynamics.json).
+
 Original per-fighter field initialization now executes against native character
 data and the real action-state tables. All 27 character components pass five
 configurations each: 135 instances, five live together per character, and 69,876

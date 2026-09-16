@@ -7,6 +7,7 @@
 <script type="module">
 import create from './melee-fighter-init.mjs';
 import {verifyStartup,verifyStartupOrder} from './verify-startup.mjs';
+import {verifyDynamics} from './verify-dynamics.mjs';
 import {verifyFighterInitialization} from './verify-fighter-init.mjs';
 try {
   async function asset(name){const response=await fetch('./fixtures/'+name);if(!response.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await response.arrayBuffer());}
@@ -15,6 +16,7 @@ try {
   const report=verifyStartup(module,common,models);
   report.startupOrder=verifyStartupOrder(await create(),common);
   report.perFighter=verifyFighterInitialization(module,fighters,models);
+  report.dynamics=verifyDynamics(module,fighters,models);
   document.querySelector('#result').textContent=JSON.stringify(report,null,2);document.documentElement.dataset.result='passed';
 } catch(error){document.querySelector('#result').textContent=String(error.stack||error);document.documentElement.dataset.result='failed';}
 </script>

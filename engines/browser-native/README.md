@@ -350,3 +350,22 @@ remain requirements. Randall and FoD platform movement require the original stag
 callbacks; loading their collision data alone does not establish that movement.
 Frozen Stadium is approved. The accepted FoD/Ice Climbers performance exception
 does not waive gameplay correctness.
+
+## Original dynamic bones
+
+The `--fighter-init` target also runs original dynamic-bone allocation, parameter
+loading, animation-selector cutoffs, rest-pose updates and unload.
+`dynamics-assets.mjs` imports the typed `ftDynamics` subgraph; serialized parameter
+arrays have 60-byte records while runtime linked nodes are 152 bytes. Selector
+rows contain integer cutoffs, despite pointer-like decompilation declarations.
+Shared source arrays retain their aliasing. Extra Purin hat descriptors are
+imported but only default-model descriptors execute in this fixture.
+
+`verify-dynamics.mjs` tests two simultaneously live instances for all 27 fighter
+components. It checks 40 sets / 168 nodes, every imported selector row, 60 updates
+per instance, exact cross-instance state and recovery of the original 320-node
+pool. The fixture shares original field/model/collider initialization; cleanup
+returns dynamic nodes before releasing the fighter owner. It does not run a
+match, drive the normal fighter animation pipeline, test Kirby copy hats or
+establish retail per-frame parity, FPS or latency. The full constructor remains
+linked but unexecuted.

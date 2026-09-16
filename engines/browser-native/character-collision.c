@@ -1,6 +1,7 @@
 /* Original per-fighter field initialization, model/part setup and hurtbox
- * routines in a limited Fighter fixture. Combat, material drawing and dynamic-bone simulation are separate
- * integration steps; no replacement collision algorithm is used here. */
+ * routines in a limited Fighter fixture. The wider target also runs original
+ * dynamic-bone construction/simulation. Combat and material drawing remain
+ * separate integration steps; no replacement collision algorithm is used here. */
 #include <melee/ft/fighter.h>
 #include <melee/ft/ftcoll.h>
 #include <melee/ft/ft_0C88.h>
@@ -30,7 +31,7 @@ _Static_assert(offsetof(Fighter,x1670)==0x1670,"Dynamics collider array offset")
 _Static_assert(offsetof(Fighter,x1828)==0x1828,"Dynamics collider array extent");
 _Static_assert(sizeof(((Fighter*)0)->x1670)/sizeof(Fighter_x1670_t)==11,"Dynamics collider capacity");
 typedef struct { ftData_x30 hurt; int count; ftData_x38* dynamics; } CollisionData;
-typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; } CollisionFixture;
+typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; void (*release_dynamics)(Fighter*); } CollisionFixture;
 static CollisionFixture* context(HSD_GObj* object){if(!object||!object->user_data)abort();return object->user_data;}
 extern int portSceneInitialize(void);
 extern int portFighterStartupComplete(void);
@@ -49,6 +50,7 @@ static void initialize_part_pools(void)
 static void release_fixture(void* data)
 {
     CollisionFixture* c=data;
+    if(c->release_dynamics)c->release_dynamics(&c->fighter);
     if(c->fighter.parts)HSD_ObjFree(&fighter_parts_alloc_data,c->fighter.parts);
     if(c->fighter.dobj_list.data)HSD_ObjFree(&fighter_dobj_list_alloc_data,c->fighter.dobj_list.data);
     if(c->fighter.x203C.data)HSD_ObjFree(&fighter_x2040_alloc_data,c->fighter.x203C.data);
@@ -280,4 +282,47 @@ void portCostumeRelease(unsigned kind,unsigned costume)
     UnkCostumeStruct* c=&CostumeListsForeachCharacter[kind].costume_list[costume];
     if(!c->x14_archive)abort();lbArchive_80016EFC(c->x14_archive);
     c->joint=NULL;c->x4=NULL;c->x14_archive=NULL;
+}
+
+#include <melee/ft/ftdynamics.h>
+#include <melee/lb/lb_00F9.h>
+#include <melee/lb/types.h>
+_Static_assert(sizeof(ftDynamics)==20&&sizeof(BoneDynamicsDesc)==24,"Dynamics descriptor ABI");
+_Static_assert(sizeof(struct DynamicsData)==152&&sizeof(struct lb_00F9_UnkDesc1Inner)==60,"Dynamics runtime/source ABI");
+extern unsigned portDynamicsPoolFree(void);
+unsigned portDynamicsInitialize(void)
+{
+    static int initialized;if(!initialized){lb_8000FCDC();initialized=1;}return portDynamicsPoolFree();
+}
+int portDynamicsAttach(HSD_GObj* object,ftDynamics* data,unsigned part_count)
+{
+    CollisionFixture* c=context(object);Fighter* fp=&c->fighter;
+    if(!data||data->dynamicsNum<0||data->dynamicsNum>=Ft_Dynamics_NumMax||!c->data.x30||c->release_dynamics||part_count>140)return -1;
+    if(data->x4!=c->dynamics.x4)return -2;
+    unsigned total=0;
+    for(int i=0;i<data->dynamicsNum;i++) {
+        BoneDynamicsDesc* b=&data->ftDynamicBones->array[i];unsigned count=b->dyn_desc.count;
+        if(!count||b->bone_id<0||(unsigned)b->bone_id+count>part_count||!b->dyn_desc.data)return -3;
+        HSD_JObj* joint=fp->parts[b->bone_id].joint;
+        for(unsigned j=0;j<count;j++){if(!joint||joint!=fp->parts[b->bone_id+j].joint)return -4;joint=joint->child;}
+        total+=count;
+    }
+    if(total>portDynamicsInitialize())return -5;
+    c->data.x2C=data;ftCo_8009CF84(fp);c->release_dynamics=ftCo_UnloadDynamicBones;return fp->dynamics_num;
+}
+unsigned portDynamicsRead(HSD_GObj* object,unsigned set,unsigned field)
+{
+    Fighter* fp=&context(object)->fighter;
+    if(field==0)return fp->dynamics_num;
+    if(field==4){if(set>=140)abort();return fp->parts[set].flags_b0;}
+    if(set>=(unsigned)fp->dynamics_num)abort();BoneDynamicsDesc* b=&fp->dynamic_bone_sets[set];
+    switch(field){case 1:return (uintptr_t)b->dyn_desc.data;case 2:return b->dyn_desc.count;case 3:return b->bone_id;case 5:return (uintptr_t)&b->dyn_desc.pos;default:abort();}
+}
+void portDynamicsStep(HSD_GObj* object){if(!context(object)->release_dynamics)abort();ftCo_8009E0A8(object);}
+void portDynamicsSelect(HSD_GObj* object,unsigned selector,unsigned mode)
+{
+    Fighter* fp=&context(object)->fighter;if(!context(object)->release_dynamics||selector>255||mode>2)abort();
+    u8 mapping[1][2]={{0,selector}};s32 previous=fp->anim_id;unsigned b4=fp->x594_b4,b3=fp->x594_b3;
+    fp->anim_id=0;fp->x594_b4=mode==1;fp->x594_b3=mode==2;
+    ftCo_8009E7B4(fp,mapping);fp->anim_id=previous;fp->x594_b4=b4;fp->x594_b3=b3;
 }

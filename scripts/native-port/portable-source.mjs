@@ -93,6 +93,19 @@ export function preparePortableSource(source,output) {
         '    info->event_return[info->loop_count - 1] = (CmdUnion*)\n        ((uintptr_t) info->event_return[info->loop_count - 1] - 1);');
       replace('info->ptr[0] = &info->ptr[info->loop_count][0];','info->u = info->event_return[info->loop_count - 2];');
     }
+    if(file==='src/melee/lb/lb_00F9.c') {
+      // Serialized dynamics parameters are a variable-length array of 60-byte
+      // records, not the runtime union's two-entry placeholder view.
+      replace('data0 = &arg0->data->desc.lb_unk1.array[0];',
+        'data0 = (struct lb_00F9_UnkDesc1Inner*) arg0->data;');
+      text += '\nunsigned portDynamicsPoolFree(void) {\n'+
+        '  if(!lb_804D63A0)return 0; unsigned seen[320]={0},count=0;\n'+
+        '  for(struct DynamicsData* p=cur_data;p;p=p->next) {\n'+
+        '    uintptr_t delta=(uintptr_t)p-(uintptr_t)&lb_804D63A0->entries[0];\n'+
+        '    if(delta%sizeof(*p)||delta/sizeof(*p)>=320||seen[delta/sizeof(*p)]++)HSD_Panic(__FILE__,0,"Corrupt dynamics free list");\n'+
+        '    count++;\n  } return count;\n}\n';
+      text='#include <stdint.h>\n'+text;
+    }
     if(file==='src/melee/ft/kinds/ftKirby/ftkirby.c') {
       // This reset covers the first 33 words of the 34-word original aggregate.
       // Keep the exact extent, including the untouched final hat entry, but

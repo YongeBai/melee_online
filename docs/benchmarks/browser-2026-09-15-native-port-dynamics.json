@@ -1,0 +1,320 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2808039,
+    "wasmSha256": "6da17f0f1eb5973ec7fc4a85a50728cbb02f7aad0b14878b5b403e5c722f5764",
+    "portableRecipe": "4e2f2bbc4c2a5a6e6c23c05c3227262fc1448f6e9726b9cf43eb783be14e2a9c"
+  },
+  "originalFunctions": [
+    "lb_8000FCDC",
+    "ftCo_8009CF84",
+    "lb_8000FD48",
+    "lb_80011710",
+    "ftCo_8009E7B4",
+    "ftCo_8009E0A8",
+    "ftCo_UnloadDynamicBones"
+  ],
+  "dynamics": {
+    "passed": true,
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlFx.dat",
+        "sets": 1,
+        "nodes": 4,
+        "importedDescriptors": 1,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 633
+      },
+      {
+        "name": "PlCa.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlDk.dat",
+        "sets": 1,
+        "nodes": 6,
+        "importedDescriptors": 1,
+        "selectorRows": 1,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 1902
+      },
+      {
+        "name": "PlKb.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlKp.dat",
+        "sets": 1,
+        "nodes": 2,
+        "importedDescriptors": 1,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 181
+      },
+      {
+        "name": "PlLk.dat",
+        "sets": 1,
+        "nodes": 4,
+        "importedDescriptors": 1,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 1060
+      },
+      {
+        "name": "PlSk.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlNs.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlPe.dat",
+        "sets": 9,
+        "nodes": 45,
+        "importedDescriptors": 9,
+        "selectorRows": 86,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 11892
+      },
+      {
+        "name": "PlPp.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlNn.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlPk.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlPr.dat",
+        "sets": 1,
+        "nodes": 3,
+        "importedDescriptors": 5,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 735
+      },
+      {
+        "name": "PlSs.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlYs.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlZd.dat",
+        "sets": 9,
+        "nodes": 44,
+        "importedDescriptors": 9,
+        "selectorRows": 36,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 11734
+      },
+      {
+        "name": "PlLg.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlMt.dat",
+        "sets": 1,
+        "nodes": 8,
+        "importedDescriptors": 1,
+        "selectorRows": 1,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 2724
+      },
+      {
+        "name": "PlMs.dat",
+        "sets": 3,
+        "nodes": 12,
+        "importedDescriptors": 3,
+        "selectorRows": 5,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 2844
+      },
+      {
+        "name": "PlGw.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlDr.dat",
+        "sets": 6,
+        "nodes": 12,
+        "importedDescriptors": 6,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 2208
+      },
+      {
+        "name": "PlCl.dat",
+        "sets": 1,
+        "nodes": 4,
+        "importedDescriptors": 1,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 1087
+      },
+      {
+        "name": "PlPc.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      },
+      {
+        "name": "PlFe.dat",
+        "sets": 3,
+        "nodes": 12,
+        "importedDescriptors": 3,
+        "selectorRows": 6,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 2853
+      },
+      {
+        "name": "PlGn.dat",
+        "sets": 3,
+        "nodes": 12,
+        "importedDescriptors": 3,
+        "selectorRows": 2,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 2467
+      },
+      {
+        "name": "PlFc.dat",
+        "sets": 0,
+        "nodes": 0,
+        "importedDescriptors": 0,
+        "selectorRows": 0,
+        "instances": 2,
+        "frames": 120,
+        "changedValues": 0
+      }
+    ],
+    "checks": 363071,
+    "frames": 3240,
+    "changedValues": 42320,
+    "sets": 40,
+    "nodes": 168,
+    "limitation": "Original construction, selector, rest-pose simulation and teardown. Two default-costume instances per component; no match, animation-driven dynamics, stage/wind interaction, Kirby copy hats, or retail simulation parity claim. Extra Purin hat descriptors are imported but not executed."
+  },
+  "regression": {
+    "perFighterChecks": 69876,
+    "perFighterInstances": 135,
+    "startupPassed": true,
+    "scenePassed": true,
+    "sceneModels": 27,
+    "targetedTests": 74,
+    "compileAudit": {
+      "compiled": 1047,
+      "total": 1130,
+      "failed": 83
+    }
+  },
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "acceptanceCriteriaMet": false
+}
