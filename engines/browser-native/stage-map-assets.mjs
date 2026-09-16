@@ -3,10 +3,12 @@ import {convertSceneAsset} from './scene-assets.mjs';
 import {readJointAnimation} from './joint-animation-assets.mjs';
 import {readAnimationObject} from './animation-object-assets.mjs';
 import {convertMaterialAnimation} from './material-animation-assets.mjs';
+import {readMotionScripts} from './motion-assets.mjs';
+import {colorCommandWords} from './color-assets.mjs';
 
 // Typed Battlefield map graph. This deliberately publishes a private root until
 // the remaining stage roots (scripts, particle banks and collision) are assembled.
-export function convertBattlefieldMap(input) {
+export function convertBattlefieldMap(input,{callbacks=false}={}) {
   const a=inspectArchive(input),d=a.data,root=a.publics.get('map_head'),param=a.publics.get('grGroundParam');
   if(root===undefined||param===undefined||a.externs.size)throw Error('Missing stage map roots or unsupported externs');
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),out=new DataView(body.buffer),pointers=new Set(),writes=new Map(),claims=new Map(),packed=new Set(),seen=new Set();
@@ -56,6 +58,13 @@ export function convertBattlefieldMap(input) {
   const params=ptr(param+176),n=word(param+180);if(params===null||n<1||n>512)throw Error('Invalid stage parameters');
   for(let i=0;i<n;i++){const p=params+i*100;for(let j=0;j<20;j+=4)word(p+j);for(let j=20;j<100;j+=2)word(p+j,2);}
   if(d.getUint32(params)!==31)throw Error('Battlefield stage parameter row required');
-  return {root,param,table,count,models:rows,animations,cameras,lights,fogs,declaredOverrides,typedOverrideRows:17,pointerSlots:pointers,writes,packed,
-    image:nativeSubgraphImage(body,pointers,new Map([['native_stage_map',root],['native_stage_parameters',param]]))};
+  const publics=new Map([['native_stage_map',root],['native_stage_parameters',param]]);let yakumono=null;
+  if(callbacks){
+    yakumono=a.publics.get('yakumono_param');if(yakumono===undefined)throw Error('Missing Battlefield callback parameters');
+    const starts=[ptr(yakumono),ptr(yakumono+4)];if(starts.includes(null))throw Error('Missing Battlefield color script');
+    const scripts=readMotionScripts(a,starts,colorCommandWords,{terminalOpcodes:[0,6,7,10]});
+    tree(scripts);publics.set('native_stage_callbacks',yakumono);
+  }
+  return {root,param,table,count,models:rows,animations,cameras,lights,fogs,declaredOverrides,typedOverrideRows:17,pointerSlots:pointers,writes,packed,yakumono,
+    image:nativeSubgraphImage(body,pointers,publics)};
 }

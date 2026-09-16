@@ -31,7 +31,9 @@ import {installResidentFile,installResidentBytes,openResidentArchive} from './re
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
+const stageCallbacks=params.has('stagecallbacks');
 if(intro&&!withHud)throw Error('Intro requires native HUD');
+if(stageCallbacks&&(!intro||render))throw Error('Stage callback integration currently requires a simulation-only intro probe');
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
@@ -82,7 +84,7 @@ try {
   const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
-    const stageBytes=await asset('GrNBa.dat'),map=convertBattlefieldMap(stageBytes);
+    const stageBytes=await asset('GrNBa.dat'),map=convertBattlefieldMap(stageBytes,{callbacks:stageCallbacks});
     installResidentFile(module,'NativeBattlefieldMap.dat',map.image);
     const stageFile=openResidentArchive(module,'NativeBattlefieldMap.dat',['native_stage_map','native_stage_parameters']);
     module._portStageMapInstall(stageFile.archive,...stageFile.addresses);
@@ -90,16 +92,18 @@ try {
     installResidentFile(module,'NativeBattlefieldCollision.dat',collision.image);
     const collisionFile=openResidentArchive(module,'NativeBattlefieldCollision.dat',['coll_data']);
     module._portStageMapCollisionLoad(collisionFile.addresses[0]);
+    if(stageCallbacks){const callbacks=openResidentArchive(module,'NativeBattlefieldMap.dat',['native_stage_callbacks']);module._portBattlefieldCallbacksInitialize(callbacks.addresses[0]);}
     const cd=new DataView(collision.image.buffer,32),verts=cd.getUint32(0,true),count=cd.getUint32(4,true),scale=view().getFloat32(stageFile.addresses[1],true);
     if(module._portStageMapCollisionRead(0,0)!==count)throw Error('Stage collision vertex count');
     for(let i=0;i<count;i++)for(let axis=0;axis<2;axis++)if(module._portStageMapCollisionRead(1+axis,i)!==Math.fround(cd.getFloat32(verts+i*8+axis*4,true)*scale))throw Error('Stage collision world vertex');
     for(const id of [0,3,1,6]) {
-      const object=module._portStageMapCreate(id);
+      const object=stageCallbacks?module._portBattlefieldObject(id):module._portStageMapCreate(id);
       if(render)previewActors.push({name:'Battlefield group '+id,object,extraRoot:1,bytes:archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true))});
     }
     module._portStageMapBounds();module._portStageMapSpawn(0);
     if(render)module._portStageRenderInitialize();
     report.stage={name:'Battlefield',collisionLoaded:true,vertexChecks:count*2,modelGroups:[0,3,1,6],completeStageStartup:false};
+    if(stageCallbacks)report.stage.originalCallbacks=true;
   }
   report.constructorAttempted=true;
   console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
@@ -163,6 +167,19 @@ try {
           const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.intro[name]=drawn;
         }
       }});report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
+    }
+    if(stageCallbacks){
+      report.stage.transitions=[];let previous='';
+      for(let frame=0;frame<4500;frame++){
+        for(let slot=0;slot<2;slot++)module._portStageProbePad(slot,0,0,0);
+        step();
+        const groups=Array.from({length:7},(_,i)=>module._portBattlefieldObject(i)?i:-1).filter(i=>i>=0),key=groups.join(',');
+        if(key!==previous){report.stage.transitions.push({frame:frame+1,groups});previous=key;}
+        if(![0,3,6].every(i=>groups.includes(i)))throw Error('Original stage lost mandatory map groups');
+        if([0,1].some(slot=>module._portTournamentRead(10,slot)!==4))throw Error('Idle stage callback test lost stocks');
+      }
+      if(report.stage.transitions.length<3||report.stage.transitions.at(-1).groups.length!==4)throw Error('Original Battlefield background did not create and retire a transition');
+      report.stage.callbackFrames=4500;report.stage.callbacksVerified=true;
     }
     if(combat&&!live&&!params.has('workloadsteps'))await verifyCombat(module,[object,opponent],report.combat,{
       step,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,

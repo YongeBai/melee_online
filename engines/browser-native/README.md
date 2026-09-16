@@ -46,6 +46,11 @@ It exercises the original Ready/Go animations and completion callbacks, fighter
 entrance states and trophy platforms, input gating, and the stage's on-start
 callback. It verifies the clock remains stopped until Go completes. The stage's
 full on-init path remains separate work; this is not a complete scene boot.
+`--stage-callbacks` additionally runs the original Battlefield on-init and per-frame
+callbacks in a simulation-only probe. It imports typed background color scripts,
+checks 4,500 frames including background creation/fade/destruction, then exercises
+combat and stock loss. It rejects rendering until native camera-pass ordering and
+dynamic stage GPU ownership are integrated. No FPS claim applies to this probe.
 Use `--hud --timeout --render-steps --hardware` to render the final six seconds
 and timeout animation after advancing the real eight-minute clock. Use
 `--hud --live --workload --hardware --frames=3600` for the sustained input-driven
@@ -68,6 +73,7 @@ the first callbacks and a bounded list of zero/multi-step callbacks for diagnosi
 ```sh
 node scripts/native-port/probe-constructor.mjs --tournament
 node scripts/native-port/probe-constructor.mjs --intro --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --stage-callbacks
 node scripts/native-port/probe-constructor.mjs --intro --live --workload --hardware --frames=3600
 node scripts/native-port/probe-constructor.mjs --timeout
 node scripts/native-port/probe-constructor.mjs --workload-steps

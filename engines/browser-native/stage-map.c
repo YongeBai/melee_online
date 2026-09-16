@@ -2,6 +2,7 @@
 #include <melee/gr/ground.h>
 #include <melee/gr/grdatfiles.h>
 #include <melee/gr/granime.h>
+#include <melee/gr/grbattle.h>
 #include <melee/gr/types.h>
 #include <melee/sc/types.h>
 #include <melee/mp/mplib.h>
@@ -29,6 +30,8 @@ static HSD_GObj* owners[7];
 static HSD_GObj* render_lights;
 static int installed;
 static int collision_installed;
+static int callbacks_initialized;
+extern void portStageSelectResident(StKind);
 static void destroy_lights(HSD_Obj* object){HSD_LObjRemoveAll((HSD_LObj*)object);}
 void portStageRenderInitialize(void)
 {
@@ -57,12 +60,30 @@ void portStageMapInstall(HSD_Archive* archive,UnkStageDat* data,GroundParam* par
 }
 HSD_GObj* portStageMapCreate(unsigned index)
 {
-    if(!installed||index>=7||owners[index])abort();
+    if(!installed||callbacks_initialized||index>=7||owners[index])abort();
     owners[index]=Ground_GetStageGObj(index);
     if(!owners[index])abort();
     if(collision_installed)Ground_InitMapColl(owners[index]->hsd_obj,index);
     grAnime_801C8138(owners[index],index,0);
     return owners[index];
+}
+void portBattlefieldCallbacksInitialize(void* parameters)
+{
+    if(!installed||!collision_installed||callbacks_initialized||!parameters)abort();
+    for(unsigned i=0;i<7;i++)if(owners[i])abort();
+    portStageSelectResident(St_Kind_Battle);
+    stage_info.yakumono_param=parameters;
+    stage_info.on_touch_line=grNBa_StageData.on_touch_line;
+    stage_info.on_check_shadow_render=grNBa_StageData.on_check_shadow_render;
+    grNBa_StageData.on_init();
+    for(unsigned i=0;i<7;i++)owners[i]=Ground_GetMapGObj(i);
+    if(!owners[0]||!owners[1]||!owners[3]||!owners[6])abort();
+    callbacks_initialized=1;
+}
+unsigned portBattlefieldObject(unsigned index)
+{
+    if(!callbacks_initialized||index>=7)abort();
+    return (unsigned)Ground_GetMapGObj(index);
 }
 void portStageMapBounds(void){if(!owners[0])abort();Ground_801C39C0();Ground_801C3BB4();}
 /* Camera-related calls from Ground_801C0800 and fn_8016E730. Full Stage startup
@@ -133,7 +154,7 @@ double portStageMapRead(unsigned field,unsigned index)
     if(!installed)abort();
     if(field==0){if(index>=8)abort();return index<4?((float*)&stage_info.cam_info.cam_bounds)[index]:((float*)&stage_info.blast_zone)[index-4];}
     if(field==1){if(index>=261)abort();return (uintptr_t)stage_info.x280[index];}
-    if(field==2){if(index>=7||!owners[index])abort();return (uintptr_t)((Ground*)owners[index]->user_data)->x18;}
+    if(field==2){if(index>=7)abort();HSD_GObj* g=callbacks_initialized?Ground_GetMapGObj(index):owners[index];if(!g)abort();return (uintptr_t)((Ground*)g->user_data)->x18;}
     if(field==3){if(index>=261||!stage_info.x280[index])abort();Vec3 position;Ground_801C2D24(index,&position);return position.x;}
     if(field==4){if(index>=261||!stage_info.x280[index])abort();Vec3 position;Ground_801C2D24(index,&position);return position.y;}
     abort();

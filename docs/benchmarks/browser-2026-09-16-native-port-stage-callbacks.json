@@ -1,0 +1,445 @@
+{
+  "date": "2026-09-16",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "wasm": {
+    "bytes": 2987341,
+    "sha256": "b9efa7ed8ed80fce9b07038af5644c89fa028045f04bcf31211f1fc6afe3f400"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "scope": "Simulation-only original Battlefield on-init and per-frame callbacks in two-Falcon native VS fixture",
+  "validation": {
+    "targetedTests": 132,
+    "failedTests": 0,
+    "stage": {
+      "name": "Battlefield",
+      "collisionLoaded": true,
+      "vertexChecks": 52,
+      "modelGroups": [
+        0,
+        3,
+        1,
+        6
+      ],
+      "completeStageStartup": false,
+      "originalCallbacks": true,
+      "transitions": [
+        {
+          "frame": 1,
+          "groups": [
+            0,
+            1,
+            3,
+            6
+          ]
+        },
+        {
+          "frame": 2677,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            6
+          ]
+        },
+        {
+          "frame": 2877,
+          "groups": [
+            0,
+            2,
+            3,
+            6
+          ]
+        }
+      ],
+      "callbackFrames": 4500,
+      "callbacksVerified": true
+    },
+    "intro": {
+      "completed": true,
+      "frames": 124,
+      "transitions": [
+        {
+          "frame": 0,
+          "mask": 8,
+          "gate": 0,
+          "blocked": [
+            1,
+            1
+          ],
+          "clock": 0
+        },
+        {
+          "frame": 85,
+          "mask": 16,
+          "gate": 0,
+          "blocked": [
+            0,
+            0
+          ],
+          "clock": 0
+        },
+        {
+          "frame": 124,
+          "mask": 0,
+          "gate": 1,
+          "blocked": [
+            0,
+            0
+          ],
+          "clock": 0
+        }
+      ],
+      "fighterStates": [
+        [
+          322,
+          323,
+          324,
+          29,
+          42,
+          14
+        ],
+        [
+          322,
+          323,
+          324,
+          29,
+          42,
+          14
+        ]
+      ],
+      "accessories": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          2
+        ]
+      ]
+    },
+    "combat": {
+      "completed": true,
+      "frames": 683,
+      "traceSha256": "5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0"
+    },
+    "lifecycle": {
+      "frames": 807,
+      "stockChanges": [
+        {
+          "frame": 75,
+          "stocks": 3,
+          "falls": 1,
+          "outcome": 0
+        },
+        {
+          "frame": 319,
+          "stocks": 2,
+          "falls": 2,
+          "outcome": 0
+        },
+        {
+          "frame": 563,
+          "stocks": 1,
+          "falls": 3,
+          "outcome": 0
+        },
+        {
+          "frame": 807,
+          "stocks": 0,
+          "falls": 4,
+          "outcome": 2
+        }
+      ],
+      "states": [
+        {
+          "frame": 1,
+          "state": 20,
+          "stocks": 4,
+          "x": 13.18663501739502,
+          "y": 0.00009999999747378752
+        },
+        {
+          "frame": 16,
+          "state": 21,
+          "stocks": 4,
+          "x": 47.24662780761719,
+          "y": 0.00009999999747378752
+        },
+        {
+          "frame": 26,
+          "state": 29,
+          "stocks": 4,
+          "x": 70.24662780761719,
+          "y": 0.00009999999747378752
+        },
+        {
+          "frame": 75,
+          "state": 0,
+          "stocks": 3,
+          "x": 125.12676239013672,
+          "y": -111.18994140625
+        },
+        {
+          "frame": 135,
+          "state": 12,
+          "stocks": 3,
+          "x": 12.800000190734863,
+          "y": 135.066650390625
+        },
+        {
+          "frame": 195,
+          "state": 29,
+          "stocks": 3,
+          "x": 12.860000610351562,
+          "y": 79.8699951171875
+        },
+        {
+          "frame": 225,
+          "state": 42,
+          "stocks": 3,
+          "x": 37.619998931884766,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 229,
+          "state": 18,
+          "stocks": 3,
+          "x": 40.73999786376953,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 240,
+          "state": 15,
+          "stocks": 3,
+          "x": 43.230003356933594,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 243,
+          "state": 16,
+          "stocks": 3,
+          "x": 44.45941925048828,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 249,
+          "state": 17,
+          "stocks": 3,
+          "x": 48.231483459472656,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 261,
+          "state": 29,
+          "stocks": 3,
+          "x": 57.7232780456543,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 319,
+          "state": 0,
+          "stocks": 2,
+          "x": 122.11840057373047,
+          "y": -110.08993530273438
+        },
+        {
+          "frame": 379,
+          "state": 12,
+          "stocks": 2,
+          "x": 12.800000190734863,
+          "y": 135.066650390625
+        },
+        {
+          "frame": 439,
+          "state": 29,
+          "stocks": 2,
+          "x": 12.860000610351562,
+          "y": 79.8699951171875
+        },
+        {
+          "frame": 469,
+          "state": 42,
+          "stocks": 2,
+          "x": 37.619998931884766,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 473,
+          "state": 18,
+          "stocks": 2,
+          "x": 40.73999786376953,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 484,
+          "state": 15,
+          "stocks": 2,
+          "x": 43.230003356933594,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 487,
+          "state": 16,
+          "stocks": 2,
+          "x": 44.45941925048828,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 493,
+          "state": 17,
+          "stocks": 2,
+          "x": 48.231483459472656,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 505,
+          "state": 29,
+          "stocks": 2,
+          "x": 57.7232780456543,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 563,
+          "state": 0,
+          "stocks": 1,
+          "x": 122.11840057373047,
+          "y": -110.08993530273438
+        },
+        {
+          "frame": 623,
+          "state": 12,
+          "stocks": 1,
+          "x": 12.800000190734863,
+          "y": 135.066650390625
+        },
+        {
+          "frame": 683,
+          "state": 29,
+          "stocks": 1,
+          "x": 12.860000610351562,
+          "y": 79.8699951171875
+        },
+        {
+          "frame": 713,
+          "state": 42,
+          "stocks": 1,
+          "x": 37.619998931884766,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 717,
+          "state": 18,
+          "stocks": 1,
+          "x": 40.73999786376953,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 728,
+          "state": 15,
+          "stocks": 1,
+          "x": 43.230003356933594,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 731,
+          "state": 16,
+          "stocks": 1,
+          "x": 44.45941925048828,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 737,
+          "state": 17,
+          "stocks": 1,
+          "x": 48.231483459472656,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 749,
+          "state": 29,
+          "stocks": 1,
+          "x": 57.7232780456543,
+          "y": 27.20009994506836
+        },
+        {
+          "frame": 807,
+          "state": 0,
+          "stocks": 0,
+          "x": 122.11840057373047,
+          "y": -110.08993530273438
+        }
+      ],
+      "completed": true,
+      "crouch": {
+        "frames": 100,
+        "states": [
+          39,
+          40,
+          41,
+          14
+        ]
+      },
+      "before": {
+        "rules": [
+          1,
+          1,
+          480,
+          1,
+          0,
+          -1,
+          1,
+          1,
+          1,
+          0,
+          4,
+          0
+        ],
+        "clock": [
+          5284,
+          391,
+          3
+        ],
+        "stocks": [
+          4,
+          4
+        ]
+      },
+      "outcome": 2,
+      "after": {
+        "clock": [
+          6091,
+          378,
+          30
+        ],
+        "stocks": [
+          0,
+          4
+        ],
+        "outcome": 2,
+        "phase": 0
+      },
+      "transition": {
+        "phase": 1,
+        "outcome": 2,
+        "clock": 6091
+      },
+      "endFrames": 112
+    }
+  },
+  "remaining": [
+    "Original camera and GX-link pass ordering",
+    "GPU ownership of stage objects created and retired during background changes",
+    "Full stage asset initialization including particles, fog and shadows",
+    "All-character/all-stage gameplay, audio, full scenes and networking"
+  ],
+  "simulationOnly": true,
+  "performanceMeasured": false,
+  "presentationFpsMeasured": false,
+  "acceptanceMet": false
+}

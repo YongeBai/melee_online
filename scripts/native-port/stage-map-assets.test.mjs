@@ -13,15 +13,21 @@ function fixture(change=()=>{}) {
   d.setUint32(joint+4,1);for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
   d.setUint16(camera+6,1);d.setFloat32(camera+40,0.1);d.setFloat32(camera+44,1000);d.setFloat32(camera+48,40);d.setFloat32(camera+52,4/3);
   d.setUint16(light+8,4);body.set([10,20,30,255],light+12);ptr(1536,1544);ptr(1544,light);
+  ptr(1600,1620);ptr(1604,1632);d.setUint32(1620,9<<26);d.setUint32(1632,10<<26);
   change({d,body,relocs,param,joint,camera,light,ptr});
-  const names=new TextEncoder().encode('map_head\0grGroundParam\0'),start=32+body.length+relocs.size*4,image=new Uint8Array(start+16+names.length),out=new DataView(image.buffer);
-  [image.length,body.length,relocs.size,2,0].forEach((n,i)=>out.setUint32(i*4,n));image.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(start,root);out.setUint32(start+8,param);out.setUint32(start+12,9);image.set(names,start+16);return image;
+  const names=new TextEncoder().encode('map_head\0grGroundParam\0yakumono_param\0'),start=32+body.length+relocs.size*4,image=new Uint8Array(start+24+names.length),out=new DataView(image.buffer);
+  [image.length,body.length,relocs.size,3,0].forEach((n,i)=>out.setUint32(i*4,n));image.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(start,root);out.setUint32(start+8,param);out.setUint32(start+12,9);out.setUint32(start+16,1600);out.setUint32(start+20,23);image.set(names,start+24);return image;
 }
 test('stage map imports typed camera, light and model data while preserving packed flags/colors',()=>{
   const b=fixture(),copy=b.slice(),r=convertBattlefieldMap(b),d=new DataView(r.image.buffer,32);
   assert.deepEqual(b,copy);assert.equal(r.count,7);assert.equal(r.typedOverrideRows,17);assert.equal(r.declaredOverrides,34);
   assert.equal(d.getUint16(1406,true),1);assert.equal(d.getFloat32(1452,true),Math.fround(4/3));assert.equal(r.image[32+504],0xe0);assert.deepEqual([...r.image.subarray(1544,1548)],[10,20,30,255]);
   assert.equal(r.models.length,1);assert.equal(r.cameras.length,1);assert.equal(r.lights.length,1);
+});
+test('stage callbacks import typed color scripts and reject unsafe script roots',()=>{
+  const converted=convertBattlefieldMap(fixture(),{callbacks:true}),d=new DataView(converted.image.buffer,32);
+  assert.equal(converted.yakumono,1600);assert.equal(d.getUint32(1620,true),9<<26);assert.equal(d.getUint32(1632,true),10<<26);
+  for(const change of [a=>a.relocs.delete(1600),a=>a.ptr(1604,1792),a=>a.d.setUint32(1620,63<<26)])assert.throws(()=>convertBattlefieldMap(fixture(change),{callbacks:true}));
 });
 test('stage map refuses unsupported graphs and unsafe descriptor interpretation',()=>{
   for(const change of [

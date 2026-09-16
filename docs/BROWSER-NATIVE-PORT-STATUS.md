@@ -5,6 +5,18 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The simulation-only `--stage-callbacks` probe now calls Battlefield's original
+on-init callback and runs its original per-frame callbacks. Typed `yakumono_param`
+and color scripts support the real background transition: group 2 is created at
+probe frame 2,677; group 1 is retired at frame 2,877. The 4,500-frame probe retains
+all mandatory map groups and both fighters' four stocks, then passes combat,
+crouch, four KOs, respawns and match end. This adds no presented-FPS evidence.
+Rendering this mode is explicitly blocked until dynamic stage GPU resources and
+the original camera/GX-link pass order are connected. In particular,
+`grDisplay_801C5DB0` filters stage objects using the active camera and camera pass;
+the current generic object loop does not implement that complete ordering.
+[Battlefield callback checkpoint](benchmarks/browser-2026-09-16-native-port-stage-callbacks.json).
+
 The new `--intro` fixture removes the 120-frame startup skip. Both Falcons run
 original Entry/EntryStart/EntryEnd states with their original trophy-platform
 models. Native Ready completes at frame 85, releasing fighter input and invoking
