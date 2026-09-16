@@ -1,5 +1,5 @@
 import {animationArchives,validateTrack} from './animation-assets.mjs';
-function runTrack(module,track,frames,timeline=null) {
+export function runTrack(module,track,frames,timeline=null) {
   const stride=timeline?4:2;
   const data=module._malloc(track.bytes.length), out=module._malloc(frames*stride*4);
   if(!data||!out)throw Error('Animation allocation failed');

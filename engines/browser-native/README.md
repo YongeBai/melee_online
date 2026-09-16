@@ -121,8 +121,17 @@ assembly fallback or gameplay mismatch.
   `visibility-assets.mjs` imports all 127 costumes' selection tables. Original
   initialization, selection, hide/show and cached-update routines pass 87,649
   flag comparisons on the 27 default models, including mixed selections.
-  Alternate costume models, material drawing, dynamic-bone simulation and combat
-  remain pending. The fixture owns fixed-capacity display arrays; it does not
+  Costume texture indices and the five part IDs in ftData.x8 are now imported too.
+  `costume-assets.mjs` merges the typed model and material-animation graphs.
+  Original ftData_80085820/lbArchive_80017040 load both symbols and reuse the
+  costume cache. The browser DVD-cache boundary reports a parsed-archive miss;
+  original archive code copies prefetched bytes and owns the result.
+  Original ftAnim_80070308/80070458/800705E0 attach, select and reset 48 texture
+  controllers across the 27 default models: 7,468 image/palette checks pass.
+  Yoshi's two material-color animations pass another 2,424 comparisons. Track
+  reference values use the separately exercised original FObj interpreter.
+  Alternate costume models, per-character selection callbacks, material drawing,
+  dynamic-bone simulation and combat remain pending. The fixture owns fixed-capacity display arrays; it does not
   claim the full Fighter_Create allocation/initialization lifecycle.
 - `shared-assets.mjs` imports all 23 PlCo sections, including three shared
   models and HSD joint animation. Generated probes check all 536 common-parameter

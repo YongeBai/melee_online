@@ -128,3 +128,61 @@ unsigned portVisibilityRead(HSD_GObj* object,unsigned auxiliary,unsigned index)
     Fighter* fp=&context(object)->fighter;DObjList* list=auxiliary?&fp->x203C:&fp->dobj_list;
     if(index>=list->count)abort();return list->data[index]->flags;
 }
+
+#include <sysdolphin/baselib/tobj.h>
+#include <sysdolphin/baselib/aobj.h>
+_Static_assert(sizeof(HSD_MatAnimJoint)==12,"Material animation joint ABI");
+_Static_assert(sizeof(HSD_MatAnim)==16,"Material animation ABI");
+_Static_assert(sizeof(HSD_TexAnim)==24,"Texture animation ABI");
+unsigned portMaterialAttach(HSD_GObj* object,struct ftData_x8* data)
+{
+    Fighter* fp=&context(object)->fighter;fp->ft_data->x8=data;fp->x619_costume_id=0;
+    ftAnim_80070308(object);
+    return fp->tobj_list.n_costume_tobjs;
+}
+void portMaterialSelect(HSD_GObj* object,unsigned index,float frame)
+{
+    Fighter* fp=&context(object)->fighter;ftAnim_80070458(fp,&fp->tobj_list,index,frame);
+}
+void portMaterialReset(HSD_GObj* object){ftAnim_800705E0(&context(object)->fighter.tobj_list);}
+double portMaterialRead(HSD_GObj* object,unsigned index,unsigned field)
+{
+    Fighter* fp=&context(object)->fighter;if(index>=fp->tobj_list.n_costume_tobjs)abort();
+    HSD_TObj* t=fp->tobj_list.costume_tobjs[index];
+    switch(field){case 0:return (uintptr_t)t;case 1:return (uintptr_t)t->imagedesc;
+    case 2:return t->tlut_no;case 3:return t->aobj->framerate;
+    case 4:return (uintptr_t)t->imagetbl;case 5:return (uintptr_t)t->tluttbl;default:abort();}
+}
+
+void portMaterialColorSelect(HSD_GObj* object,unsigned index,float frame)
+{
+    Fighter* fp=&context(object)->fighter;if(index>=fp->dobj_list.count)abort();
+    HSD_MObj* m=fp->dobj_list.data[index]->mobj;if(!m||!m->aobj)abort();
+    HSD_MObjReqAnim(m,frame);HSD_MObjAnim(m);
+}
+unsigned portMaterialColorRead(HSD_GObj* object,unsigned index,unsigned channel)
+{
+    Fighter* fp=&context(object)->fighter;if(index>=fp->dobj_list.count||channel<1||channel>6)abort();
+    HSD_Material* m=fp->dobj_list.data[index]->mobj->mat;
+    switch(channel){case 1:return m->ambient.r;case 2:return m->ambient.g;case 3:return m->ambient.b;
+    case 4:return m->diffuse.r;case 5:return m->diffuse.g;case 6:return m->diffuse.b;default:abort();}
+}
+
+#include <melee/lb/lbarchive.h>
+HSD_Joint* portCostumeLoad(unsigned kind,unsigned costume)
+{
+    if(kind>=27||costume>=portCostumeCount(kind))abort();
+    ftData_80085820(kind,costume);return CostumeListsForeachCharacter[kind].costume_list[costume].joint;
+}
+HSD_MatAnimJoint* portCostumeAnimation(unsigned kind,unsigned costume)
+{
+    if(kind>=27||costume>=portCostumeCount(kind))abort();
+    return CostumeListsForeachCharacter[kind].costume_list[costume].x4;
+}
+void portCostumeRelease(unsigned kind,unsigned costume)
+{
+    if(kind>=27||costume>=portCostumeCount(kind))abort();
+    UnkCostumeStruct* c=&CostumeListsForeachCharacter[kind].costume_list[costume];
+    if(!c->x14_archive)abort();lbArchive_80016EFC(c->x14_archive);
+    c->joint=NULL;c->x4=NULL;c->x14_archive=NULL;
+}

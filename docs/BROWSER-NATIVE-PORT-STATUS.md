@@ -5,13 +5,28 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+The default costume path now uses original ftData_80085820 and
+lbArchive_80017040, with typed model and material-animation symbols in the same
+hosted archive. All 27 default models pass loading, cache reuse and teardown.
+The original material setup/selection/reset routines pass 7,468 texture-image
+and palette checks on 48 controllers. Yoshi's two material-color animations add
+2,424 checks. This covers 242 image descriptors and 92 palettes without modifying
+packed GX pixels or animation bytecode.
+
+All 68 targeted tests pass; the 81 diagnostic 960×720 image samples are unchanged.
+The diagnostic viewer still does not draw these material selections. Full match
+execution, the gameplay renderer, per-character texture callbacks and hardware
+FPS/input-latency measurements remain incomplete.
+[Costume/material animation checkpoint](benchmarks/browser-2026-09-15-native-port-costume-animation.json).
+
 Original auxiliary mesh loading and fighter-part visibility now run in the
 browser. All 27 entries bind 313 auxiliary display objects to their primary
 skeletons; geometry/reference checks and teardown pass. The port releases the
 temporary descriptor ID aliases after resolution to avoid stale joint pointers.
 Visibility import covers all 127 costumes. Runtime checks on the 27 default
 models pass 87,649 comparisons across hide/show, cached updates and mixed part
-selections. Alternate costume models and texture-animation setup are pending.
+selections. Alternate costume models remain pending; texture-animation setup is covered by
+the later checkpoint above.
 
 The 66 targeted tests pass. The 81 diagnostic 960×720 images remain unchanged;
 this asset viewer does not yet draw the new visibility decisions or run a match.

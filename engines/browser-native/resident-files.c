@@ -115,3 +115,11 @@ void portResidentCopy(void* dst,uintptr_t source,size_t size)
     }
     fprintf(stderr,"Animation address is outside resident native assets\n");abort();
 }
+
+/* The browser prefetch cache holds immutable native bytes, not already parsed
+ * DVD archives. Return a cache miss so original lbArchive_80017040 parses and
+ * owns its copy; CostumeListsForeachCharacter provides the game-level cache. */
+HSD_Archive* lbDvd_8001819C(const char* filename)
+{
+    if(!valid_name(filename))abort();return NULL;
+}

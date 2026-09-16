@@ -1,8 +1,10 @@
+import {loadCostume} from './costume-assets.mjs';
+import {verifyMaterialAnimation} from './verify-material-animation.mjs';
 import {convertVisibility} from './visibility-assets.mjs';
 import {convertAuxiliaryAsset} from './auxiliary-assets.mjs';
 import {convertCharacterCollision} from './character-collision-assets.mjs';
 import {installResidentFile,openResidentArchive} from './resident-files.mjs';
-import {loadSceneAsset,loadSceneAnimation} from './scene-assets.mjs';
+import {loadSceneAnimation} from './scene-assets.mjs';
 import {animationArchives} from './animation-assets.mjs';
 import {motionSpec} from './motion-spec.mjs';
 
@@ -19,7 +21,7 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
     const converted=convertCharacterCollision(bytes,name,partCount),model=models.find(m=>m.name===name.replace('.dat','Nr.dat')),
       animation=animations.find(m=>m.name===name.replace('.dat','AJ.dat'));
     if(!model||!animation)throw Error('Hosted collision model/animation missing');
-    const asset=loadSceneAsset(module,model.bytes),n=asset.model.tree.nodes.length;
+    const asset=loadCostume(module,model.bytes,model.name,kind),n=asset.model.tree.nodes.length;
     if(asset.model.tree.nodes.some(node=>node.flags&0x1000))throw Error('Instance joints require explicit part mapping');
     const group=ptr(groups+kind*4),skip=new Set();
     if(group){const start=ptr(group),count=ptr(group+4);for(let i=0;i<count;i++)skip.add(module.HEAPU8[start+i*4]);}
@@ -29,7 +31,7 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
     const length=new DataView(animation.bytes.buffer,animation.bytes.byteOffset+first.offset,4).getUint32(0);
     const clip=loadSceneAnimation(module,animation.bytes.subarray(first.offset,first.offset+length));
     const nodes=module._malloc(n*4),parts=module._malloc(partCount*4),matrices=module._malloc(n*48);
-    let file,auxFile,visibilityFile,object;let maxError=0,reads=0;const frames=32;
+    let file,auxFile,visibilityFile,material,object;let maxError=0,reads=0;const frames=32;
     try {
       installResidentFile(module,name,converted.image);file=openResidentArchive(module,name,['native_character_collision']);
       object=module._portSceneObjectCreate(asset.root);const root=module._portSceneObjectRoot(object);
@@ -50,6 +52,10 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
       }
       if(module._portCollisionPartRead(object,0,4)!==displayCount||module._portCollisionPartRead(object,0,5)!==displayCount)
         throw Error('Original display list or fighter material class mismatch');
+      const visibility=convertVisibility(bytes,name,module._portCostumeCount(kind));
+      installResidentFile(module,'Vis'+code+'.dat',visibility.image);
+      visibilityFile=openResidentArchive(module,'Vis'+code+'.dat',['native_visibility']);
+      material=verifyMaterialAnimation(module,object,model.name,model.bytes,asset.model,visibility,visibilityFile.addresses[0],asset);
       const auxiliary=convertAuxiliaryAsset(bytes,name);
       if(auxiliary.model.tree.nodes.length!==n||auxiliary.model.tree.nodes.some((node,i)=>node.parent!==asset.model.tree.nodes[i].parent))throw Error('Auxiliary skeleton shape mismatch');
       installResidentFile(module,'Aux'+code+'.dat',auxiliary.image);
@@ -61,9 +67,6 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
         if(Math.abs(actual-expected)>0.00001*(1+Math.abs(expected)))throw Error('Auxiliary geometry/reference metric mismatch');
       }
       for(let i=0;i<auxiliaryDisplays.length;i++)if(!module._portCollisionAuxiliaryRead(object,i,0)||module._portCollisionAuxiliaryRead(object,i,2)!==1)throw Error('Auxiliary material class mismatch');
-      const visibility=convertVisibility(bytes,name,module._portCostumeCount(kind));
-      installResidentFile(module,'Vis'+code+'.dat',visibility.image);
-      visibilityFile=openResidentArchive(module,'Vis'+code+'.dat',['native_visibility']);
       const flags=[Array.from({length:displayCount},(_,i)=>module._portVisibilityRead(object,0,i)),
         Array.from({length:auxiliaryDisplays.length},(_,i)=>module._portVisibilityRead(object,1,i))];
       let visibilityChecks=0;const visibilityCleared=[true,true,true,true];
@@ -132,7 +135,7 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
           for(let i=0;i<converted.hurtboxes.length;i++)for(let j=0;j<6;j++)same(i,15+j,record[frame*converted.hurtboxes.length*6+i*6+j]);
         }
       }
-      rows.push({name,partCount,reservedParts:skip.size,originalParts:true,fighterMaterials:displayCount,auxiliaryDisplays:auxiliaryDisplays.length,visibilityGroups:visibility.models,importedCostumes:visibility.rows.length,visibilityChecks,hurtboxes:converted.hurtboxes.length,dynamicColliders:converted.dynamicColliders.length,frames,reads,maxWorldError:maxError,rewindPassed:true});
+      rows.push({name,partCount,reservedParts:skip.size,originalParts:true,originalCostumeLoader:true,costumeCacheReused:true,fighterMaterials:displayCount,auxiliaryDisplays:auxiliaryDisplays.length,visibilityGroups:visibility.models,importedCostumes:visibility.rows.length,visibilityChecks,materialAnimation:material.report,hurtboxes:converted.hurtboxes.length,dynamicColliders:converted.dynamicColliders.length,frames,reads,maxWorldError:maxError,rewindPassed:true});
       if(kind===0) {
         // Exercise the real eleven-entry limit, not only the retail corpus's
         // zero/one dynamics colliders. Keep this synthetic fixture separate.
