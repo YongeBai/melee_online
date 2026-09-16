@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original fighter model construction and part allocation now replace the generic
+scene setup in the integration fixture. All 27 entries use the fighter joint
+class, 2,179 fighter polygon objects and original HSD part/display pools. Initial
+bone flags and pool teardown pass. Two simultaneous copies of every default
+model have distinct runtime joints; 30,824 texture/color checks show no state
+leaking between instances.
+
+The original initializer uses shared costume descriptor IDs. Envelope checks now
+validate pointers against the owning live skeleton, rather than requiring the
+loader's most recent ID-table entry to identify every older instance. This fixes
+a diagnostic assumption exposed by testing two fighters together.
+
+The 68 targeted tests and 81 diagnostic 720p snapshots pass. Full startup link
+probes now cover global and per-fighter initialization: the generic math/heap
+probe reports 107 and 144 unresolved symbols, respectively, with no ABI mismatch.
+These include callback dependencies and scene-specific adapters excluded from
+that probe; they are not counts of functions executed during initialization.
+[Original fighter-model checkpoint](benchmarks/browser-2026-09-15-native-port-fighter-model.json).
+
 The default costume path now uses original ftData_80085820 and
 lbArchive_80017040, with typed model and material-animation symbols in the same
 hosted archive. All 27 default models pass loading, cache reuse and teardown.

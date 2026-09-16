@@ -41,7 +41,7 @@ for(let i=0;i<portableFiles.length;i++) {
   platformObjects.push(object);
 }
 const results=[];
-for(const entry of ['HSD_JObjLoadJoint','Fighter_Create']) {
+for(const entry of ['HSD_JObjLoadJoint','Fighter_FirstInitialize_80067A84','Fighter_UnkInitLoad_80068914','Fighter_Create']) {
   const target=path.join(out,entry+'.wasm');fs.rmSync(target,{force:true});
   const result=spawnSync(compiler,[...platformObjects,library,
     '--no-entry','-sEXPORTED_FUNCTIONS=_'+entry,'-Wl,--fatal-warnings','-Wl,--error-limit=0','-o',target],

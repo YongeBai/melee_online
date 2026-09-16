@@ -41,16 +41,21 @@ static void destroy_joint_object(HSD_Obj* object)
 {
     HSD_JObjRemoveAll((HSD_JObj*)object);
 }
-HSD_JObj* portSceneLoad(HSD_Joint* descriptor)
+int portSceneInitialize(void)
 {
     if(!initialized) {
-        if(portRuntimeInit()<0)return NULL;
+        if(portRuntimeInit()<0)return -1;
         HSD_ListInitAllocData();HSD_IDInitAllocData();HSD_IDSetup();
         HSD_VecInitAllocData();HSD_MtxInitAllocData();HSD_RObjInitAllocData();
         HSD_AObjInitAllocData();portAnimationInit();
         portRuntimeSetJointDestructor(destroy_joint_object);
         initialized=1;
     }
+    return 0;
+}
+HSD_JObj* portSceneLoad(HSD_Joint* descriptor)
+{
+    if(portSceneInitialize()<0)return NULL;
     return HSD_JObjLoadJoint(descriptor);
 }
 void portSceneDestroy(HSD_JObj* root) { HSD_JObjRemoveAll(root); }
@@ -85,7 +90,7 @@ void portSceneFlags(unsigned count,HSD_JObj** nodes,unsigned* output)
     for(unsigned i=0;i<count;i++)output[i]=nodes[i]->flags;
 }
 // Weighted values are compared with the independently decoded source archive.
-// Reference IDs verify real HSD envelope resolution, not just object counts.
+// Runtime joint identities verify HSD envelope resolution, not just object counts.
 double portSceneMetric(unsigned count,HSD_JObj** nodes,unsigned metric)
 {
     double value=0;
@@ -104,7 +109,13 @@ double portSceneMetric(unsigned count,HSD_JObj** nodes,unsigned metric)
                 if(metric==6)value++;
                 if(pobj_type(p)==POBJ_ENVELOPE)for(HSD_SList* l=p->u.envelope_list;l;l=l->next)
                     for(HSD_Envelope* e=l->data;e;e=e->next) {
-                        if(metric==7) {if(!e->jobj||HSD_IDGetDataFromTable(NULL,e->jobj->id,NULL)!=e->jobj)abort();value+=e->weight;}
+                        if(metric==7) {
+                            /* Descriptor IDs are reused when two fighters share
+                             * a costume. Runtime envelopes must reference this
+                             * instance, not the loader's most recent ID entry. */
+                            unsigned found=0;for(unsigned k=0;k<count;k++)if(nodes[k]==e->jobj){found=1;break;}
+                            if(!found)abort();value+=e->weight;
+                        }
                     }
             }
         }

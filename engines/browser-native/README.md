@@ -131,8 +131,15 @@ assembly fallback or gameplay mismatch.
   Yoshi's two material-color animations pass another 2,424 comparisons. Track
   reference values use the separately exercised original FObj interpreter.
   Alternate costume models, per-character selection callbacks, material drawing,
-  dynamic-bone simulation and combat remain pending. The fixture owns fixed-capacity display arrays; it does not
-  claim the full Fighter_Create allocation/initialization lifecycle.
+  dynamic-bone simulation and combat remain pending.
+  The fixture now calls original Fighter_UnkUpdateCostumeJoint_800686E4,
+  ftParts_80074E58 and ftCo_800C884C. Fighter joint/polygon classes and HSD part
+  pools replace the generic model constructor and fixed arrays. Selective pool
+  initialization still precedes full Fighter_FirstInitialize integration.
+  Two simultaneous instances of each default model retain separate joints and
+  materials; 30,824 checks verify texture/color isolation. Envelope ownership
+  checks use the live skeleton because descriptor IDs are shared between copies.
+  Full Fighter_Create, player initialization and the match lifecycle remain pending.
 - `shared-assets.mjs` imports all 23 PlCo sections, including three shared
   models and HSD joint animation. Generated probes check all 536 common-parameter
   field offsets. Original bone lookup, remapping, part groups and landing

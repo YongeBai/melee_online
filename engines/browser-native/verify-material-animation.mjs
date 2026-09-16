@@ -1,7 +1,7 @@
 import {readModelMaterials} from './material-assets.mjs';
 import {runTrack} from './verify-animations.mjs';
 
-export function verifyMaterialAnimation(module,object,name,bytes,model,visibility,descriptor,costume) {
+export function verifyMaterialAnimation(module,object,name,bytes,model,visibility,descriptor,costume,twin) {
   const converted=costume.animation,assets=readModelMaterials(bytes,model),textures=[],colors=[];let displayIndex=0;
   if(converted&&(converted.nodes.length!==model.tree.nodes.length||converted.nodes.some((n,i)=>n.parent!==model.tree.nodes[i].parent)))throw Error('Material animation hierarchy mismatch');
   for(let joint=0;joint<model.tree.nodes.length;joint++) {
@@ -15,9 +15,20 @@ export function verifyMaterialAnimation(module,object,name,bytes,model,visibilit
   }
   const selected=visibility.textureRows[0]??[];
   if(selected.length!==visibility.textureCount||selected.some(i=>i>=textures.length||!textures[i].animation?.animation))throw Error('Costume texture has no animation');
-  let checks=0,frames=0,colorChecks=0;
+  let checks=0,frames=0,colorChecks=0,isolationChecks=0;
   const root=costume.animationRoot,base=converted?root-converted.root:0;
   if(module._portMaterialAttach(object,descriptor)!==visibility.textureCount)throw Error('Original costume texture count mismatch');
+  if(!twin||module._portMaterialAttach(twin,descriptor)!==visibility.textureCount)throw Error('Second fighter material setup failed');
+  const twinTextures=selected.map((_,i)=>[1,2].map(field=>module._portMaterialRead(twin,i,field)));
+  const twinColors=colors.map(({index})=>Array.from({length:6},(_,i)=>module._portMaterialColorRead(twin,index,i+1)));
+  function checkIsolation() {
+    for(let i=0;i<selected.length;i++)for(let field=1;field<=2;field++) {
+      if(module._portMaterialRead(twin,i,field)!==twinTextures[i][field-1])throw Error('Material update leaked into second fighter');isolationChecks++;
+    }
+    for(let i=0;i<colors.length;i++)for(let channel=1;channel<=6;channel++) {
+      if(module._portMaterialColorRead(twin,colors[i].index,channel)!==twinColors[i][channel-1])throw Error('Material color leaked into second fighter');isolationChecks++;
+    }
+  }
   const pointers=new Set();
   for(let i=0;i<selected.length;i++) {
     const {animation}=textures[selected[i]],count=Math.ceil(animation.animation.end)+1;
@@ -27,6 +38,7 @@ export function verifyMaterialAnimation(module,object,name,bytes,model,visibilit
       return {track,values:runTrack(module,track,count)};
     });
     const pointer=module._portMaterialRead(object,i,0);if(!pointer||pointers.has(pointer))throw Error('Costume texture selection aliases unexpectedly');pointers.add(pointer);
+    if(pointer===module._portMaterialRead(twin,i,0))throw Error('Fighter instances share a runtime texture');
     if(module._portMaterialRead(object,i,3)!==0)throw Error('Original costume animation rate not frozen');
     function verify(frame) {
       for(const {track,values} of reference) {
@@ -39,7 +51,7 @@ export function verifyMaterialAnimation(module,object,name,bytes,model,visibilit
     }
     // Ascending, descending and repeated requests exercise seeking at rate 0.
     for(const sequence of [Array.from({length:count},(_,i)=>i),Array.from({length:count},(_,i)=>count-1-i),[0,count-1,0]])for(const frame of sequence) {
-      module._portMaterialSelect(object,i,frame);verify(frame);frames++;
+      module._portMaterialSelect(object,i,frame);verify(frame);checkIsolation();frames++;
     }
     module._portMaterialReset(object);verify(0);
   }
@@ -50,7 +62,7 @@ export function verifyMaterialAnimation(module,object,name,bytes,model,visibilit
       return {track,values:runTrack(module,track,count)};
     });
     for(const sequence of [Array.from({length:count},(_,i)=>i),Array.from({length:count},(_,i)=>count-1-i)])for(const frame of sequence) {
-      module._portMaterialColorSelect(object,index,frame);
+      module._portMaterialColorSelect(object,index,frame);checkIsolation();
       for(const {track,values} of reference) {
         const value=values[frame*2];if(value<0||value>1)throw Error('Material color outside normalized range');
         if(module._portMaterialColorRead(object,index,track.objType)!==Math.trunc(value*255))throw Error('Original material color mismatch: '+name+'/'+index+'/'+frame);
@@ -58,5 +70,5 @@ export function verifyMaterialAnimation(module,object,name,bytes,model,visibilit
       }
     }
   }
-  return {report:{name,textures:selected.length,images:converted?.images.size??0,palettes:converted?.palettes.size??0,checks,frames,colorAnimations:colors.length,colorChecks,originalAttach:true,originalSelect:true,originalReset:true}};
+  return {report:{name,textures:selected.length,images:converted?.images.size??0,palettes:converted?.palettes.size??0,checks,frames,colorAnimations:colors.length,colorChecks,isolationChecks,twoInstances:true,originalAttach:true,originalSelect:true,originalReset:true}};
 }

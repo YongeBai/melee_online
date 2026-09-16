@@ -9,6 +9,7 @@ import {animationArchives} from './animation-assets.mjs';
 import {motionSpec} from './motion-spec.mjs';
 
 export function verifyCharacterCollision(module,fighters,models,animations) {
+  if(module._portFighterModelLive())throw Error('Fighter model pools were already in use');
   const rows=[],allocations=module._portFileAllocations(),objects=module._portRuntimeObjectsUsed();
   let capacityChecks=0;
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
@@ -34,15 +35,17 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
     let file,auxFile,visibilityFile,material,object;let maxError=0,reads=0;const frames=32;
     try {
       installResidentFile(module,name,converted.image);file=openResidentArchive(module,name,['native_character_collision']);
-      object=module._portSceneObjectCreate(asset.root);const root=module._portSceneObjectRoot(object);
+      object=module._portFighterModelCreate(kind);const root=module._portSceneObjectRoot(object);
       if(module._portSceneCollect(root,nodes,n)!==n)throw Error('Collision scene node count mismatch');
       for(let part=0;part<partCount;part++)view().setUint32(parts+part*4,partNodes[part]<0?0:ptr(nodes+partNodes[part]*4),true);
       if(module._portCollisionAttach(object,file.addresses[0],partCount,parts,kind)!==0)throw Error('Original collision initialization rejected: '+name);
       let displayCount=0;const depths=[];
+      const boneMap=ptr(map+4),b3Parts=new Set([0,...[1,2,3,4,52].map(i=>module.HEAPU8[boneMap+i])]),b4Parts=new Set([1,53].map(i=>module.HEAPU8[boneMap+i]));
       for(const [i,node] of asset.model.tree.nodes.entries())depths[i]=node.parent<0?0:depths[node.parent]+1;
       for(let part=0;part<partCount;part++) {
         const index=partNodes[part];
         if(module._portCollisionPartRead(object,part,0)!==ptr(parts+part*4))throw Error('Original part-to-joint mapping mismatch');
+        if(module._portCollisionPartRead(object,part,10)!==(Number(b3Parts.has(part))|(Number(b4Parts.has(part))<<1)))throw Error('Original part allocation flags mismatch: '+name+'/'+part+' got '+module._portCollisionPartRead(object,part,10)+' flags3 '+[...b3Parts]+' flags4 '+[...b4Parts]);
         if(index<0)continue;
         const node=asset.model.tree.nodes[index],displays=new Set(asset.model.meshes.filter(m=>m.joint===index).map(m=>m.dobj)).size;
         displayCount+=displays;
@@ -52,10 +55,22 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
       }
       if(module._portCollisionPartRead(object,0,4)!==displayCount||module._portCollisionPartRead(object,0,5)!==displayCount)
         throw Error('Original display list or fighter material class mismatch');
+      if(module._portCollisionPartRead(object,0,8)!==1||module._portCollisionPartRead(object,0,9)!==asset.model.meshes.length)throw Error('Original fighter joint/polygon class mismatch');
       const visibility=convertVisibility(bytes,name,module._portCostumeCount(kind));
       installResidentFile(module,'Vis'+code+'.dat',visibility.image);
       visibilityFile=openResidentArchive(module,'Vis'+code+'.dat',['native_visibility']);
-      material=verifyMaterialAnimation(module,object,model.name,model.bytes,asset.model,visibility,visibilityFile.addresses[0],asset);
+      const twinNodes=module._malloc(n*4),twinParts=module._malloc(partCount*4);let twin=0;
+      try {
+        twin=module._portFighterModelCreate(kind);
+        if(!twin||module._portSceneCollect(module._portSceneObjectRoot(twin),twinNodes,n)!==n)throw Error('Second fighter model failed to load');
+        for(let part=0;part<partCount;part++) {
+          const pointer=partNodes[part]<0?0:ptr(twinNodes+partNodes[part]*4);
+          if(pointer&&pointer===ptr(parts+part*4))throw Error('Two fighter instances share a runtime joint');
+          view().setUint32(twinParts+part*4,pointer,true);
+        }
+        if(module._portCollisionAttach(twin,file.addresses[0],partCount,twinParts,kind)!==0)throw Error('Second fighter part initialization failed');
+        material=verifyMaterialAnimation(module,object,model.name,model.bytes,asset.model,visibility,visibilityFile.addresses[0],asset,twin);
+      } finally {if(twin)module._portSceneObjectFree(twin);module._free(twinNodes);module._free(twinParts);}
       const auxiliary=convertAuxiliaryAsset(bytes,name);
       if(auxiliary.model.tree.nodes.length!==n||auxiliary.model.tree.nodes.some((node,i)=>node.parent!==asset.model.tree.nodes[i].parent))throw Error('Auxiliary skeleton shape mismatch');
       installResidentFile(module,'Aux'+code+'.dat',auxiliary.image);
@@ -135,14 +150,14 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
           for(let i=0;i<converted.hurtboxes.length;i++)for(let j=0;j<6;j++)same(i,15+j,record[frame*converted.hurtboxes.length*6+i*6+j]);
         }
       }
-      rows.push({name,partCount,reservedParts:skip.size,originalParts:true,originalCostumeLoader:true,costumeCacheReused:true,fighterMaterials:displayCount,auxiliaryDisplays:auxiliaryDisplays.length,visibilityGroups:visibility.models,importedCostumes:visibility.rows.length,visibilityChecks,materialAnimation:material.report,hurtboxes:converted.hurtboxes.length,dynamicColliders:converted.dynamicColliders.length,frames,reads,maxWorldError:maxError,rewindPassed:true});
+      rows.push({name,partCount,reservedParts:skip.size,originalParts:true,originalFighterModel:true,originalPartAllocation:true,fighterPolygons:asset.model.meshes.length,originalCostumeLoader:true,costumeCacheReused:true,fighterMaterials:displayCount,auxiliaryDisplays:auxiliaryDisplays.length,visibilityGroups:visibility.models,importedCostumes:visibility.rows.length,visibilityChecks,materialAnimation:material.report,hurtboxes:converted.hurtboxes.length,dynamicColliders:converted.dynamicColliders.length,frames,reads,maxWorldError:maxError,rewindPassed:true});
       if(kind===0) {
         // Exercise the real eleven-entry limit, not only the retail corpus's
         // zero/one dynamics colliders. Keep this synthetic fixture separate.
         module._portSceneObjectFree(object);object=0;
         const synthetic=module._malloc(16+11*20),bone=converted.hurtboxes[0][0];
         try {
-          object=module._portSceneObjectCreate(asset.root);
+          object=module._portFighterModelCreate(kind);
           const root=module._portSceneObjectRoot(object);module._portSceneCollect(root,nodes,n);
           for(let part=0;part<partCount;part++)view().setUint32(parts+part*4,partNodes[part]<0?0:ptr(nodes+partNodes[part]*4),true);
           for(const [i,value] of [0,0,12,synthetic+16].entries())view().setUint32(synthetic+i*4,value,true);
@@ -164,7 +179,7 @@ export function verifyCharacterCollision(module,fighters,models,animations) {
       if(object)module._portSceneObjectFree(object);file?.dispose();auxFile?.dispose();visibilityFile?.dispose();clip.dispose();asset.dispose();for(const p of [nodes,parts,matrices])module._free(p);
       if(module._portFileClear()!==0)throw Error('Collision fixture retained file cache');
     }
-    if(module._portFileAllocations()!==allocations||module._portRuntimeObjectsUsed()!==objects||module._portSceneLiveObjects())throw Error('Collision fixture owner leaked');
+    if(module._portFighterModelLive()||module._portFileAllocations()!==allocations||module._portRuntimeObjectsUsed()!==objects||module._portSceneLiveObjects())throw Error('Collision fixture owner leaked');
   }
   return {passed:true,rows,capacityChecks,hurtboxes:rows.reduce((n,r)=>n+r.hurtboxes,0),frames:rows.reduce((n,r)=>n+r.frames,0),
     limitation:'Original part/material setup, auxiliary meshes, default-model visibility and collision routines; all costume visibility descriptors imported, alternate models untested; limited Fighter context, no combat, dynamic-bone simulation or material drawing'};
