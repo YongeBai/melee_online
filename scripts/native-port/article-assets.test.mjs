@@ -7,7 +7,7 @@ function fixture(code='Fx',mutate=()=>{}) {
   const body=new Uint8Array(4096),d=new DataView(body.buffer),relocs=new Set();
   const ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};
   ptr(72,128);const slots=Object.keys(fighterArticleProfiles[code].articles).map(Number);
-  const states=[800,900,1100],scripts=[1800,1860,1892];
+  const states=[800,900,1100,1200],scripts=[1800,1860,1892,1904];
   for(const [i,slot] of slots.entries()) {
     const a=160+i*24;ptr(128+slot*4,a);ptr(a,256);ptr(a+4,512+i*40);ptr(a+12,states[i]);ptr(a+16,392);
     for(let j=0;j<fighterArticleProfiles[code].articles[slot][0];j++)ptr(states[i]+j*16+12,scripts[i]);
@@ -22,8 +22,9 @@ function fixture(code='Fx',mutate=()=>{}) {
   d.setUint32(1892,15<<26);d.setUint32(1896,0);
   // Deliberately untyped extra data must not become a public Article.
   if(code==='Fx'){ptr(144,3000);body[3000]=0xe3;}
+  if(code==='Kb'){for(const i of [1,3]){relocs.delete(164+i*24);d.setUint32(164+i*24,0);}ptr(144,3000);for(let i=0;i<3;i++)d.setFloat32(3032+i*4,1);}
   mutate({body,d,relocs,ptr,states,scripts});
-  const text=new TextEncoder().encode('ftData'+({Mt:'Mewtwo',Ys:'Yoshi',Kp:'Koopa',Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
+  const text=new TextEncoder().encode('ftData'+({Kb:'Kirby',Mt:'Mewtwo',Ys:'Yoshi',Kp:'Koopa',Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(text,pub+8);return bytes;
 }
 test('Fox/Falco Articles preserve script branches, special floats and model graphs without exporting extra fighter data',()=>{
@@ -43,7 +44,7 @@ test('Article import rejects malformed animated states, malformed scripts and de
     a=>a.ptr(164,256),a=>a.ptr(812,256),a=>a.ptr(1804,1804),a=>a.d.setUint32(1820,63<<26),
     a=>a.ptr(176,4092),a=>a.ptr(172,4088),
   ])assert.throws(()=>convertFighterArticles(fixture('Fx',mutate),'PlFx.dat'),undefined,String(mutate));
-  assert.throws(()=>convertFighterArticles(fixture(),'PlKb.dat'),/pending/);
+  assert.throws(()=>convertFighterArticles(fixture(),'PlXx.dat'),/pending/);
 });
 test('item sound command lengths follow their secondary dispatch, including unknown no-op cases',()=>{
   for(const sub of [0,1,2,10,11,3,255]) {
@@ -271,4 +272,12 @@ test('Climbers import shared rope models and preserve numeric integer fields; Na
     assert.equal(v.getFloat32(1296,true),1.25);assert.equal(r.attachments.length,code==='Pp'?2:0);
   }
   assert.throws(()=>convertFighterArticles(formFixture('Pp',({d,relocs})=>{d.setUint32(1316,0);relocs.delete(1316);}), 'PlPp.dat'),/Missing Popo rope/);
+});
+
+test('Kirby Articles preserve four native items and the separate capture joint',()=>{
+  const bytes=fixture('Kb'),before=bytes.slice(),r=convertFighterArticles(bytes,'PlKb.dat'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(bytes,before);assert.deepEqual(r.rows.map(x=>[x.slot,x.stateCount,x.specialWords]),[[0,1,4],[1,1,0],[2,1,1],[3,1,0]]);
+  assert.deepEqual(r.extraRows,[{slot:4,source:3000,joint:3000}]);assert.equal(d.getFloat32(512,true),35);assert.equal(d.getUint32(188,true),0);assert.equal(r.attachments[0].nodes,1);
+  assert.throws(()=>convertFighterArticles(fixture('Kb',a=>a.relocs.delete(144)),'PlKb.dat'));
+  assert.throws(()=>convertFighterArticles(fixture('Kb',a=>a.ptr(164,256)),'PlKb.dat'));
 });

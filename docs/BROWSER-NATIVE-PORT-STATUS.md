@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's original constructor and base moves now run in the direct port. The
+full tournament-scene test passes 3,550 rendered frames, plus 124 intro frames,
+covering five aerial jumps and ground/air inhale release, Hammer, Final Cutter
+and Stone. Original stocks remain four. A focused ground/air Cutter run passes
+GPU vertex checks on all 962 rendered frames. The full scene per-vertex attempt
+reached its 600-second limit inside readback and remains incomplete.
+
+All 26 independently selected fighter codes now pass the constructor/input
+regression: 3,692 live motion-word checks, covering 27 components including Nana.
+All 197 unit tests pass. This does **not** establish complete Kirby support:
+copy hats, opponent capture/spit/swallow, copied attacks and copy loss still
+require integration and verification. Full scenes/menus/audio, other costumes,
+retail parity, networking, deployment and presentation/latency acceptance remain.
+A separate 960×720 Battlefield Kirby mirror submits all 3,600 draws for 3,600
+simulation steps in 60.033 seconds, with no catch-up callbacks. Mean simulation
+CPU time is 0.511 ms; mean draw submission is 5.326 ms (p95 8.6 ms, max 19.9 ms).
+This is one scripted combat sample, with no GPU readbacks; distinct displayed
+FPS and input-to-photon latency remain unmeasured.
+[Kirby base evidence](benchmarks/browser-2026-09-16-native-port-kirby-base.json).
+
 The rendering-state copy optimization is retained after A/B/A/B controls on the
 Fountain Ice Climbers mirror. It removes temporary array copies and callbacks
 while retaining independent queued state and all original shader/camera values.
@@ -68,9 +88,10 @@ prominent. Removing temporary state-copy allocations is the next experiment.
 These are submission/simulation measurements, not distinct displayed
 FPS or input-to-photon latency. Intro/preparation time is excluded.
 
-Kirby is the remaining component awaiting constructor/input integration. Other
-costumes, full scenes/menus/audio, retail parity, networking and native-port
-deployment also remain. The overall 720p60 competitive acceptance criterion is
+Kirby's constructor and base move integration is recorded above;
+copy abilities and opponent capture remain pending. Other costumes, full
+scenes/menus/audio, retail parity, networking and native-port deployment also
+remain. The overall 720p60 competitive acceptance criterion is
 **not achieved**. [Ice Climbers evidence](benchmarks/browser-2026-09-16-native-port-climbers.json).
 
 Previous Peach checkpoint (before the shared motion-word correction):

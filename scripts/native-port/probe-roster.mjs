@@ -1,13 +1,13 @@
 // Sequential constructor/input regression after changes shared by all fighters.
-// This intentionally excludes unintegrated Kirby and is not a parity or FPS test.
+// Covers every fighter selection; this is not a move-parity or FPS test.
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 
 const root=path.resolve(import.meta.dirname,'../..'),out=path.join(root,'dist/native-port');
-const codes=['Ca','Dk','Ms','Gn','Fe','Fx','Fc','Pr','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe','Pp'];
+const codes=['Ca','Dk','Ms','Gn','Fe','Fx','Fc','Pr','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe','Pp','Kb'];
 const report={scope:'Original constructors and scripted walk/jump/aerial/recovery, with live numeric motion-word checks',
-  build:JSON.parse(fs.readFileSync(path.join(out,'fighter-init-build.json'))),excluded:['Kb'],rows:[],passed:false,gameplayParity:false,performanceMeasured:false};
+  build:JSON.parse(fs.readFileSync(path.join(out,'fighter-init-build.json'))),excluded:[],rows:[],passed:false,gameplayParity:false,performanceMeasured:false};
 for(const code of codes){
   const log=fs.openSync(path.join(out,'roster-'+code+'.log'),'w');let result;
   try{result=spawnSync(process.execPath,[path.join(import.meta.dirname,'probe-constructor.mjs'),'--character='+code,'--input'],{cwd:root,stdio:['ignore',log,log],timeout:60000});}

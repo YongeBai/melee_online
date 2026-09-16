@@ -32,6 +32,21 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Kirby's base package imports four native Articles (Cutter beam, Hammer, loose
+star and swallowed-fighter star), the separate capture joint, and effect bank 5
+with nineteen particle commands, six texture groups and nine model effects.
+The original constructor and controller move suite run without Dolphin:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --input --kirby-moves --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --input --kirby-move=cutter --render-steps --verify-vertices --hardware
+```
+
+This checks five aerial jumps and ground/air inhale release, Hammer, Final Cutter
+and Stone. The jump test holds the ordinary jump input through the original
+command-script eligibility gates. Copy hats, opponent swallowing/spitting and
+copied neutral specials still require integration and validation.
+
 Ice Climbers load Popo and Nana through the original player-owned constructor.
 Both fighter roots import their three Articles; Nana uses Popo's registered item
 kinds. The shared Ice Climbers bank has one model, seventeen particle commands
@@ -61,8 +76,8 @@ that order. Negative half-stick input now remains -64 in Nana's history instead
 of becoming zero. These fixes affect gameplay correctness, including move IDs
 used for staling; earlier fixture results do not certify the corrected build.
 The roster regression checks live move IDs and copy flags against the numeric
-state word on every input frame. It excludes unintegrated Kirby and does not
-establish retail parity or displayed FPS.
+state word on every input frame. It includes Kirby and does not establish
+complete move coverage, retail parity or displayed FPS.
 
 Peach imports five move Articles, her model-only effect bank, and the shared
 Bob-omb, Mr. Saturn and Beam Sword Articles used by her original rare-pull logic.

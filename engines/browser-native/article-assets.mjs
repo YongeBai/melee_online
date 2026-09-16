@@ -14,6 +14,7 @@ export const itemCommandWords=Object.freeze([1,1,1,1,1,2,1,2,1,1,5,6,1,1,1,1,
 // descriptors shared by seven runtime states. Non-Article x48 entries remain
 // the fighter base importer's responsibility.
 export const fighterArticleProfiles=Object.freeze({
+  Kb:{slots:5,articles:{0:[1,4],1:[1,0],2:[1,1],3:[1,0]}},
   Fx:{slots:5,articles:{0:[2,10],1:[9,10],2:[3,2]}},
   Fc:{slots:5,articles:{0:[2,10],1:[9,10],3:[3,2]}},
   Mr:{slots:4,articles:{0:[1,5],2:[2,1]}},
@@ -37,6 +38,7 @@ export const fighterArticleProfiles=Object.freeze({
   Ss:{slots:5,articles:{0:[2,7],1:[9,8],2:[4,16],3:[0,25]}},
 });
 export function initializeFighterArticleArchive(input,code){
+  if(code==='Kb')return initializeArchiveExternals(input,['PlyKirby5K_LHaveN_ACTION_HandLMiddle_animjoint','PlyKirby5K_RHaveN_ACTION_HandRMiddle_animjoint']);
   if(code==='Pp')return initializeArchiveExternals(input,['ItmIceclimberGumStrings_TopN_joint']);
   if(code==='Nn')return initializeArchiveExternals(input,['ItmIceclimberGumStrings_TopN_joint','ItmIceclimberGum_TopN_joint','ItmIceclimberIceShot_TopN_animjoint','ItmIceclimberIceShot_TopN_joint']);
   if(code==='Gw')return initializeArchiveExternals(input,['ItmGamewatchBreath_TopN_ACTION_LandingAirHi_animjoint','ItmGamewatchRescue_TopN_ACTION_SpecialHiAir_animjoint']);
@@ -152,6 +154,11 @@ export function convertFighterArticles(input,name) {
       for(const at of scene.pointerSlots)pointer(at);for(const [at,size]of scene.writes)scalar(at,size);
       extraRows.push({slot,source:joint,joint,nodes:scene.model.tree.nodes.length});
     }
+  }
+  if(code==='Kb'){
+    // ftKb_SpecialN_800F5898 returns the fifth x48 entry as a joint.
+    const root=a.publics.get('ftDataKirby'),table=pointer(root+0x48),joint=pointer(table+16);
+    attachment(joint,'Kirby capture accessory');extraRows.push({slot:4,source:joint,joint});
   }
   if(code==='Ys'){
     const root=a.publics.get('ftDataYoshi'),table=pointer(root+0x48),joint=pointer(table+12);

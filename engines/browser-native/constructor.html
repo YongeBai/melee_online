@@ -7,6 +7,7 @@
 <script type="module">
 import {convertPeachCommonItems} from './common-item-assets.mjs';
 import {verifyPeachMoves,verifyPeachPulls,verifyPeachContact} from './verify-peach.mjs';
+import {verifyKirbyMoves} from './verify-kirby.mjs';
 import {verifyClimberMoves} from './verify-climbers.mjs';
 import create from './melee-fighter-init.mjs';
 import {shaderIdentityFiles,validateShaderCatalog} from './shader-catalog.mjs';
@@ -39,7 +40,7 @@ import {verifyStartup} from './verify-startup.mjs';
 import {convertStoryItem} from './stage-item-assets.mjs';
 import {convertItemRuntime} from './item-runtime-assets.mjs';
 import {verifyColors} from './verify-colors.mjs';
-import {convertFighterArticles} from './article-assets.mjs';
+import {convertFighterArticles,fighterArticleProfiles} from './article-assets.mjs';
 import {loadFighterPackage} from './fighter-package.mjs';
 import {fighterArchives} from './fighter-assets.mjs';
 import {motionSpec} from './motion-spec.mjs';
@@ -84,7 +85,7 @@ try {
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
   let peachCommon=null;
-  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe','Pp','Nn'].includes(c))||stageKey==='story') {
+  if([code,opponentCode].some(c=>fighterArticleProfiles[c])||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -279,7 +280,7 @@ try {
       }
       let itemModels=stageItemModels;
       if(peachCommon){itemModels??=new Map();const {source,base}=peachCommon,a=inspectArchive(source.source);for(const row of source.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:'Common item '+row.kind,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
-      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe','Pp','Nn'].includes(pkg.code)){
+      for(const pkg of packages)if(fighterArticleProfiles[pkg.code]){
         const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg===pkg)?.owner;
         if(!owner)throw Error('Loaded opponent requires two-fighter scene');
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=combatState(owner)[8]+source.imports.find(i=>i.label==='articles').at;
@@ -436,6 +437,11 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('kirbymoves')){report.kirbyMoves={};verifyKirbyMoves(module,object,report.kirbyMoves,{step,only:params.get('kirbymove'),onStep:renderSteps?phase=>{
+        const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+        const name=drawn.actors.some(a=>a.name==='Kirby item 1'&&a.draws)?'hammer':drawn.actors.some(a=>a.name==='Kirby item 0'&&a.draws)?'cutter':phase.final[0]===394?'stone':null;
+        if(name&&!report.preview[name]){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+      }:undefined});}
       if(params.has('climbersmoves')){report.climbersMoves={};verifyClimberMoves(module,object,report.climbersMoves,{step,only:params.get('climbersmove'),onStep:renderSteps?phase=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;if(phase.trace.at(-1).links===40&&Math.hypot(phase.final[0][4]-phase.final[1][4],phase.final[0][5]-phase.final[1][5])>20&&!report.preview.belay){report.preview.belay=drawn;const img=document.createElement('img');img.id='native-preview-belay';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}}:undefined});}
       if(params.has('peachcontact')){report.peachContact={};verifyPeachContact(module,[object,opponent],report.peachContact,{step,mode:params.get('peachcontact'),onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});}
       if(params.has('peachpulls')){report.peachPulls={};verifyPeachPulls(module,object,report.peachPulls,{step,onStep:renderSteps?phase=>{if(phase.kind!==99){

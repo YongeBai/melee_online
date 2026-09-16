@@ -1,0 +1,847 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "9b8e693",
+  "scope": "Kirby base constructor and selected original moves, all-roster constructor/input coverage. Copy abilities and competitive acceptance remain pending.",
+  "wasmSha256": "0c9be41d9f45dd5828372b3c57afda9ccbd537741501e4eff8726c7d54d36674",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "aabb0eeffc7138f246099d8573e27956865d5eb702b48cb851100a7439abcac0",
+    "engines/browser-native/constructor.html": "88916a408996723e1779784b53bcb46b89006417ce8fa58f09cd55426c6a5518",
+    "engines/browser-native/effect-assets.mjs": "84bd025764c8ca8e44cb146926e8fdaad2a6536398592e520a4971f86590e7a4",
+    "engines/browser-native/verify-kirby.mjs": "73af005b61353f2daa2407d906dbe659e3ac6e0746e13be6759b779a5d967889",
+    "scripts/native-port/probe-constructor.mjs": "f4ab2007f9fcace1ed3c26feffead20b565f2c9a217f7ab9ad0db73da2f3771a",
+    "scripts/native-port/probe-roster.mjs": "54222e0a9d56fbf9e2a736c2431368393a3d7b4862d64fcabc3e77bcc2d23c30"
+  },
+  "hardware": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "assets": {
+    "articleSlots": 4,
+    "extraJointSlot": 4,
+    "articleStateCounts": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "articleSpecialWords": [
+      4,
+      0,
+      1,
+      0
+    ],
+    "effectBank": 5,
+    "particleCommands": 19,
+    "textureGroups": 6,
+    "effectModels": 9,
+    "externalResolution": "Original archive NULL initialization for the two known Kirby hand animation symbols"
+  },
+  "fullScene": {
+    "passed": true,
+    "resolution": [
+      960,
+      720
+    ],
+    "renderedFrames": 3550,
+    "moveFrames": 3408,
+    "introFrames": 124,
+    "initialStocks": 4,
+    "finalStocks": 4,
+    "inputFrames": 142,
+    "motionWordChecks": 142,
+    "phases": [
+      {
+        "name": "reach top platform",
+        "frames": 375,
+        "states": [
+          24,
+          25,
+          341,
+          342,
+          42,
+          14
+        ],
+        "itemKinds": []
+      },
+      {
+        "name": "five aerial jumps",
+        "frames": 548,
+        "states": [
+          24,
+          25,
+          341,
+          342,
+          343,
+          344,
+          345,
+          32,
+          42,
+          14
+        ],
+        "itemKinds": []
+      },
+      {
+        "name": "ground inhale release",
+        "frames": 230,
+        "states": [
+          353,
+          354,
+          355,
+          14
+        ],
+        "itemKinds": []
+      },
+      {
+        "name": "air inhale release",
+        "frames": 273,
+        "states": [
+          24,
+          25,
+          371,
+          372,
+          354,
+          355,
+          14
+        ],
+        "itemKinds": []
+      },
+      {
+        "name": "ground hammer",
+        "frames": 241,
+        "states": [
+          383,
+          14
+        ],
+        "itemKinds": [
+          51
+        ]
+      },
+      {
+        "name": "air hammer",
+        "frames": 319,
+        "states": [
+          24,
+          25,
+          384,
+          43,
+          14
+        ],
+        "itemKinds": [
+          51
+        ]
+      },
+      {
+        "name": "ground final cutter",
+        "frames": 401,
+        "states": [
+          385,
+          390,
+          388,
+          14
+        ],
+        "itemKinds": [
+          50
+        ]
+      },
+      {
+        "name": "air final cutter",
+        "frames": 419,
+        "states": [
+          24,
+          25,
+          389,
+          390,
+          391,
+          388,
+          14
+        ],
+        "itemKinds": [
+          50
+        ]
+      },
+      {
+        "name": "ground stone release",
+        "frames": 272,
+        "states": [
+          393,
+          394,
+          395,
+          29,
+          42,
+          14
+        ],
+        "itemKinds": []
+      },
+      {
+        "name": "air stone release",
+        "frames": 330,
+        "states": [
+          24,
+          25,
+          396,
+          397,
+          394,
+          395,
+          29,
+          42,
+          14
+        ],
+        "itemKinds": []
+      }
+    ],
+    "camera": "Original camera callbacks and projection; no camera offset or gameplay parameter changes",
+    "screenshotsReviewed": [
+      "Hammer",
+      "Final Cutter",
+      "Stone"
+    ]
+  },
+  "focusedGPU": {
+    "passed": true,
+    "renderedFrames": 962,
+    "moveFrames": 820,
+    "scope": "Ground/air Final Cutter plus common input sequence; every draw uses GPU vertex readback",
+    "cutterSnapshot": {
+      "vertices": 14036,
+      "positionComponents": 42108,
+      "normalComponents": 42108,
+      "maxScaledPositionError": 0.000004196975311148773,
+      "maxNormalError": 1.2327405474188424e-7,
+      "roundoffPositionComponents": 0,
+      "maxPositionRoundoffAllowance": 0.002528980844571817,
+      "byOwner": {
+        "1551776": {
+          "vertices": 670,
+          "ndcMin": [
+            -31.382130728556156,
+            -7.567939433925444,
+            -0.00008394442726895555
+          ],
+          "ndcMax": [
+            15.163714235426696,
+            86.68023374850434,
+            0.00796910302107919
+          ]
+        },
+        "1554656": {
+          "vertices": 458,
+          "ndcMin": [
+            -466.1001463127255,
+            -781.7790789329952,
+            -0.057018083562716766
+          ],
+          "ndcMax": [
+            697.019751890003,
+            1672.821956446086,
+            0.08460278492712331
+          ]
+        },
+        "1556544": {
+          "vertices": 9348,
+          "ndcMin": [
+            -2.3619503817819805,
+            -1.818783176561681,
+            -0.0008671475186939967
+          ],
+          "ndcMax": [
+            0.8494853230589435,
+            0.6433627271889139,
+            -0.000566694186785818
+          ]
+        },
+        "1560992": {
+          "vertices": 3236,
+          "ndcMin": [
+            -0.698613823101331,
+            -0.8609272535807344,
+            -0.0007231680541286631
+          ],
+          "ndcMax": [
+            -0.3844065020279457,
+            -0.6388654193933344,
+            -0.0006614006941619967
+          ]
+        },
+        "1654496": {
+          "vertices": 213,
+          "ndcMin": [
+            -0.5512697701273169,
+            -1.0009963231524526,
+            -0.000768226702771578
+          ],
+          "ndcMax": [
+            -0.27180722820292524,
+            -0.7694600193133396,
+            -0.0007106791318727046
+          ]
+        },
+        "11550400": {
+          "vertices": 23,
+          "ndcMin": [
+            -0.4108379403421492,
+            -0.8208302796787131,
+            -0.0007168155123150681
+          ],
+          "ndcMax": [
+            -0.15097718693066953,
+            -0.21145142653966398,
+            -0.0007086198861526118
+          ]
+        },
+        "11557984": {
+          "vertices": 88,
+          "ndcMin": [
+            -0.8819556285508691,
+            -0.8064198508470588,
+            -0.0006939641221445418
+          ],
+          "ndcMax": [
+            -0.3170263953650941,
+            -0.5196049916890747,
+            -0.0006809102955516554
+          ]
+        }
+      }
+    }
+  },
+  "fullSceneGPUAttempt": {
+    "passed": false,
+    "error": "Constructor did not finish within 600 seconds",
+    "pausedFrames": [
+      {
+        "function": "verifyDrawVertices",
+        "url": "",
+        "location": {
+          "scriptId": "55",
+          "lineNumber": 104,
+          "columnNumber": 31
+        }
+      },
+      {
+        "function": "flush",
+        "url": "",
+        "location": {
+          "scriptId": "55",
+          "lineNumber": 214,
+          "columnNumber": 26
+        }
+      },
+      {
+        "function": "draw",
+        "url": "",
+        "location": {
+          "scriptId": "17",
+          "lineNumber": 206,
+          "columnNumber": 112
+        }
+      },
+      {
+        "function": "verifyKirbyMoves.onStep",
+        "url": "",
+        "location": {
+          "scriptId": "5",
+          "lineNumber": 439,
+          "columnNumber": 153
+        }
+      },
+      {
+        "function": "tick",
+        "url": "",
+        "location": {
+          "scriptId": "8",
+          "lineNumber": 14,
+          "columnNumber": 63
+        }
+      },
+      {
+        "function": "neutral",
+        "url": "",
+        "location": {
+          "scriptId": "8",
+          "lineNumber": 16,
+          "columnNumber": 40
+        }
+      },
+      {
+        "function": "verifyKirbyMoves",
+        "url": "",
+        "location": {
+          "scriptId": "8",
+          "lineNumber": 25,
+          "columnNumber": 54
+        }
+      },
+      {
+        "function": "",
+        "url": "",
+        "location": {
+          "scriptId": "5",
+          "lineNumber": 439,
+          "columnNumber": 56
+        }
+      }
+    ],
+    "interpretation": "Timed out inside expensive vertex readback; not a passing test or a performance measurement"
+  },
+  "unitTests": {
+    "passed": 197,
+    "failed": 0
+  },
+  "pending": [
+    "Copy-hat and copied-attack asset graphs, loading and rendering",
+    "Opponent inhale/capture/spit/swallow and copy-loss checks",
+    "Retail gameplay parity",
+    "All costumes, full scenes/menus and audio",
+    "Networking and native-port deployment",
+    "Distinct displayed FPS and input-to-photon latency"
+  ],
+  "acceptanceMet": false,
+  "roster": {
+    "passed": true,
+    "selections": 26,
+    "components": 27,
+    "totalInputFrames": 3692,
+    "totalMotionWordChecks": 3692,
+    "excluded": [],
+    "rows": [
+      {
+        "code": "Ca",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Dk",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Ms",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Gn",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Fe",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Fx",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Fc",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Pr",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Mr",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Lg",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Dr",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Pk",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Pc",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Ss",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Kp",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Lk",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Cl",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Ys",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Mt",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Gw",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Ns",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Sk",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Zd",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Pe",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Pp",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      },
+      {
+        "code": "Kb",
+        "passed": true,
+        "frames": 142,
+        "motionWordChecks": 142,
+        "moveIds": [
+          1,
+          13
+        ]
+      }
+    ]
+  },
+  "sourceCommit": "a75407433c85ac15fab45f92ff79c1481f1fa82f",
+  "timing": {
+    "stage": "Battlefield",
+    "matchup": "Kirby mirror",
+    "resolution": [
+      960,
+      720
+    ],
+    "frames": 3600,
+    "drawSubmissions": 3600,
+    "elapsedMs": 60032.60000002384,
+    "stepCpu": {
+      "samples": 3600,
+      "meanMs": 0.510777777739697,
+      "p50Ms": 0.5,
+      "p95Ms": 0.7999999821186066,
+      "maxMs": 2.699999988079071
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 5.326472222275204,
+      "p50Ms": 4.899999976158142,
+      "p95Ms": 8.600000023841858,
+      "maxMs": 19.900000005960464
+    },
+    "rafDrawIntervals": {
+      "samples": 3599,
+      "meanMs": 16.670602945261763,
+      "p50Ms": 16.69999999999709,
+      "p95Ms": 16.700000000004366,
+      "maxMs": 33.29999999999927
+    },
+    "cadence": {
+      "callbacks": 3604,
+      "zeroStepCallbacks": 4,
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1,
+      "timingSamples": [
+        {
+          "callback": 1,
+          "frame": 0,
+          "steps": 0,
+          "timestamp": -1074.2919999880792,
+          "callbackTime": 2.100000023841858,
+          "interval": null,
+          "debt": 0
+        },
+        {
+          "callback": 2,
+          "frame": 0,
+          "steps": 0,
+          "timestamp": -7.699999988079071,
+          "callbackTime": 4.4000000059604645,
+          "interval": 1066.592,
+          "debt": 0
+        },
+        {
+          "callback": 3,
+          "frame": 0,
+          "steps": 0,
+          "timestamp": 9.000000011920747,
+          "callbackTime": 9.100000023841858,
+          "interval": 16.699999999999818,
+          "debt": 0
+        },
+        {
+          "callback": 4,
+          "frame": 0,
+          "steps": 1,
+          "timestamp": 25.70000001192102,
+          "callbackTime": 25.900000005960464,
+          "interval": 16.700000000000273,
+          "debt": 0.033333333333605
+        },
+        {
+          "callback": 5,
+          "frame": 1,
+          "steps": 1,
+          "timestamp": 42.30000001192093,
+          "callbackTime": 42.5,
+          "interval": 16.59999999999991,
+          "debt": -0.0333333333331538
+        },
+        {
+          "callback": 6,
+          "frame": 2,
+          "steps": 1,
+          "timestamp": 59.00000001192075,
+          "callbackTime": 59.20000001788139,
+          "interval": 16.699999999999818,
+          "debt": -3.552713678800501e-15
+        },
+        {
+          "callback": 7,
+          "frame": 3,
+          "steps": 1,
+          "timestamp": 75.70000001192102,
+          "callbackTime": 75.90000000596046,
+          "interval": 16.700000000000273,
+          "debt": 0.033333333333601445
+        },
+        {
+          "callback": 8,
+          "frame": 4,
+          "steps": 1,
+          "timestamp": 92.30000001192093,
+          "callbackTime": 92.5,
+          "interval": 16.59999999999991,
+          "debt": -0.033333333333157356
+        },
+        {
+          "callback": 211,
+          "frame": 207,
+          "steps": 0,
+          "timestamp": 3475.4000000119213,
+          "callbackTime": 3475.7000000178814,
+          "interval": 16.5,
+          "debt": 16.4000000000003
+        }
+      ]
+    },
+    "workload": {
+      "framesWithAttack": 1974,
+      "framesWithHitlag": 336,
+      "framesWithDamage": 3508,
+      "stockChanges": [
+        {
+          "frame": 1827,
+          "slot": 1,
+          "stocks": 3
+        }
+      ],
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 59,
+          "attack": 335
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 348
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 57,
+          "attack": 344
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 40,
+          "attack": 247
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 354
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 346
+        }
+      ]
+    },
+    "gpuReadbacks": false,
+    "finalGpuErrorCheck": true,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "scope": "One scripted close-combat sample; not full move coverage, display FPS, or a cross-device guarantee"
+  }
+}
