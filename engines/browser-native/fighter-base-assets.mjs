@@ -1,4 +1,5 @@
 import {inspectArchive,nativeSubgraphImage} from './archive.mjs';
+import {fighterArchives} from './fighter-assets.mjs';
 import {convertFighterInitialization} from './fighter-init-assets.mjs';
 import {convertFighterMotions} from './motion-assets.mjs';
 import {convertSpecialAttributes} from './attribute-assets.mjs';
@@ -9,12 +10,13 @@ import {convertDynamics} from './dynamics-assets.mjs';
 import {convertCharacterCollision} from './character-collision-assets.mjs';
 import {convertAuxiliaryAsset} from './auxiliary-assets.mjs';
 
-// Constructor bring-up: Captain's complete ftData graph has no x48 item table.
+// Complete typed ftData graph for fighters without an x48 item/extra table.
 // Keep independently validated graphs separate initially. This deliberately
 // duplicates unreachable source bytes; archive compaction is a later size task.
 export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCount,costumes}) {
-  if(name!=='PlCa.dat')throw Error('Complete base archive is currently limited to Captain Falcon');
-  const a=inspectArchive(input),source=a.publics.get('ftDataCaptain'),d=a.data;
+  const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1],symbol=fighterArchives[code];
+  if(!symbol)throw Error('Unknown complete fighter archive');
+  const a=inspectArchive(input),source=a.publics.get('ftData'+symbol),d=a.data;
   if(source===undefined||source+96>a.dataSize||a.relocations.has(source+0x48)||d.getUint32(source+0x48))throw Error('Unsupported complete fighter root');
   const chunks=[],pointers=new Set(),fields=new Array(24).fill(null),imports=[];let length=96;
   function append(bytes){const at=(length+3)&~3;chunks.push({at,bytes:Uint8Array.from(bytes)});length=at+bytes.length;return at;}
@@ -47,5 +49,5 @@ export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCoun
   const bytes=new Uint8Array(length),out=new DataView(bytes.buffer);for(const c of chunks)bytes.set(c.bytes,c.at);
   fields.forEach((p,i)=>{if(p!==null){out.setUint32(i*4,p,true);pointers.add(i*4);}});
   return {kind:init.kind,root:0,fields,imports,motionCount:init.count,demoCount:demo.count,specialBytes:special.bytes.length,
-    image:nativeSubgraphImage(bytes,pointers,new Map([['ftDataCaptain',0]]))};
+    image:nativeSubgraphImage(bytes,pointers,new Map([['ftData'+symbol,0]]))};
 }

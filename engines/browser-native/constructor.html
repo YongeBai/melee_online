@@ -19,17 +19,22 @@ import {convertStatusModels,verifyHudIconSelector} from './status-assets.mjs';
 import {verifyResidentEffectBank} from './verify-effects.mjs';
 import {verifyStartup} from './verify-startup.mjs';
 import {convertFighterBase} from './fighter-base-assets.mjs';
+import {fighterArchives} from './fighter-assets.mjs';
 import {readFighterMotions} from './motion-assets.mjs';
 import {convertMotionAnimations} from './motion-animations.mjs';
 import {motionSpec} from './motion-spec.mjs';
 import {attributeSpec} from './attribute-spec.mjs';
-import {convertCaptainEffects,convertCommonEffects} from './effect-assets.mjs';
+import {convertFighterEffects,convertCommonEffects} from './effect-assets.mjs';
 import {convertBattlefieldMap} from './stage-map-assets.mjs';
 import {convertStageCollision} from './stage-collision.mjs';
 import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
+const code=params.get('character')??'Ca',character=fighterArchives[code],kind=motionSpec.codes.indexOf(code);
+if(!character||kind<0)throw Error('Unknown fighter component');
+const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat',effectName='Ef'+code+'Data.dat';
+report.character={code,name:character,kind};
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
 const stageCallbacks=params.has('stagecallbacks');let dynamicStage=null;
 if(intro&&!withHud)throw Error('Intro requires native HUD');
@@ -38,41 +43,41 @@ const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)dia
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
   const modelNames=await (await fetch('./model-fixtures.json')).json();
-  const [module,common,baseBytes,animationBytes,models]=await Promise.all([create({print:capture,printErr:capture}),asset('PlCo.dat'),asset('PlCa.dat'),asset('PlCaAJ.dat'),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
+  const [module,common,baseBytes,animationBytes,models]=await Promise.all([create({print:capture,printErr:capture}),asset('PlCo.dat'),asset(baseName),asset(motionName),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
   if(render)report.projectionChecks=verifyNativeProjection(module);
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true),kind=2;
+  const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
   const partCount=ptr(ptr(module._portSharedGlobal(4)+kind*4)+8),costumes=module._portCostumeCount(kind);
-  const source=convertFighterBase(baseBytes,'PlCa.dat',{motionSpec,attributeSpec,partCount,costumes});
-  installResidentFile(module,'PlCa.dat',source.image);
-  const file=openResidentArchive(module,'PlCa.dat',['ftDataCaptain']),root=file.addresses[0],image=new DataView(source.image.buffer),bodySize=image.getUint32(4,true),relocations=new Set();
+  const source=convertFighterBase(baseBytes,baseName,{motionSpec,attributeSpec,partCount,costumes});
+  installResidentFile(module,baseName,source.image);
+  const file=openResidentArchive(module,baseName,['ftData'+character]),root=file.addresses[0],image=new DataView(source.image.buffer),bodySize=image.getUint32(4,true),relocations=new Set();
   for(let i=0;i<image.getUint32(8,true);i++)relocations.add(image.getUint32(32+bodySize+i*4,true));
   let checks=0;
   for(let i=0;i<24;i++){checks++;if(ptr(root+i*4)!==(source.fields[i]===null?0:root+source.fields[i]))throw Error('Complete base root relocation '+i);}
   for(let at=0;at<bodySize;){checks++;if(relocations.has(at)){if(ptr(root+at)!==root+image.getUint32(32+at,true))throw Error('Base subgraph relocation '+at);at+=4;}else {if(module.HEAPU8[root+at]!==source.image[32+at])throw Error('Base subgraph payload '+at);at++;}}
   file.dispose();
   report.baseArchive={passed:true,checks,bytes:source.image.length,partCount,costumes,motionRows:source.motionCount,demoRows:source.demoCount,imports:source.imports,relocations:relocations.size};
-  const motions=readFighterMotions(baseBytes,'PlCa.dat',motionSpec),bundle=convertMotionAnimations(animationBytes,motions.motions);
-  installResidentBytes(module,'PlCaAJ.dat',bundle.image);
-  loadCostume(module,models.find(m=>m.name==='PlCaNr.dat').bytes,'PlCaNr.dat',kind);
+  const motions=readFighterMotions(baseBytes,baseName,motionSpec),bundle=convertMotionAnimations(animationBytes,motions.motions);
+  installResidentBytes(module,motionName,bundle.image);
+  loadCostume(module,models.find(m=>m.name===modelName).bytes,modelName,kind);
   module._portMatchCameraInitialize();
   module._portEffectsInitialize();
-  const commonEffectBytes=await asset('EfCoData.dat'),captainEffectBytes=await asset('EfCaData.dat');
-  const effects=convertCommonEffects(commonEffectBytes),captainEffects=convertCaptainEffects(captainEffectBytes);
+  const commonEffectBytes=await asset('EfCoData.dat'),fighterEffectBytes=await asset(effectName);
+  const effects=convertCommonEffects(commonEffectBytes),fighterEffects=convertFighterEffects(fighterEffectBytes,code);
   installResidentFile(module,'EfCoData.dat',effects.image);
   const effectData=module._portCommonEffectsLoad();
   if(!effectData)throw Error('Original common effect-bank loader failed');
   report.commonEffects=verifyResidentEffectBank(module,effects,effectData);
-  installResidentFile(module,'EfCaData.dat',captainEffects.image);
+  installResidentFile(module,effectName,fighterEffects.image);
   if(tournament){
     installResidentFile(module,'PdPm.dat',convertPlayerParameters(await asset('PdPm.dat')).image);
     const hudBytes=await asset('IfAll.usd'),status=convertStatusModels(hudBytes,{hud:withHud,damage:damageHud});
     installResidentFile(module,'NativeStatus.dat',status.image);
     const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models',...(withHud?['ScInfDmg_scene_data']:[])]);
     module._portTournamentStatusInstall(statusFile.archive);report.statusModels=status.models;
-    module._portTournamentInitialize();report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
+    module._portTournamentInitializeKinds(kind,kind);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
     if(withHud){
       report.iconSelectorChecks=verifyHudIconSelector(module);
       module._portTournamentHudInitialize(statusFile.addresses[1]);
@@ -115,6 +120,7 @@ try {
   const object=module._portFighterConstruct(kind,0);
   if(!object)throw Error('Original constructor returned no fighter');
   report.constructorCompleted=true;report.object=object;
+  report.fighterEffects=verifyResidentEffectBank(module,fighterEffects,module._portEffectsBankData(fighterEffects.bank));
   const state=()=>Array.from({length:13},(_,i)=>module._portFighterConstructRead(object,i));
   report.state=state();
   if(!report.state.every(Number.isFinite)||!report.state[7]||!report.state[8]||report.state[9]!==15||report.state[10]!==1||report.state[11]!==kind||report.state[12]!==0)throw Error('Constructed fighter state/ownership invariant');
@@ -145,7 +151,11 @@ try {
     const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
     let preview,canvas;
     function recordHud(drawn){
-      if(drawn.materialDraws?.immediateDraws&&!report.preview.particles){
+      if(drawn.materialDraws?.afterimageDraws){
+        const stats=report.afterimages??={frames:0,draws:0,vertices:0};stats.frames++;stats.draws+=drawn.materialDraws.afterimageDraws;stats.vertices+=drawn.materialDraws.afterimageVertices;
+        if(!report.preview.afterimage){report.preview.afterimage=drawn;const img=document.createElement('img');img.id='native-preview-afterimage';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+      }
+      if(drawn.materialDraws?.particleDraws&&!report.preview.particles){
         report.preview.particles=drawn;
         const img=document.createElement('img');img.id='native-preview-particles';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
       }
@@ -164,18 +174,19 @@ try {
         if(report.hud.statusFrames===30){const img=document.createElement('img');img.id='native-preview-status';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.status=drawn;}
       }
     }
+    if(code!=='Ca')report.schedulerContext=report.schedulerContext.replaceAll('Falcons',character+' fighters').replaceAll('Falcon',character);
     if(render) {
       const sharedArchive=inspectArchive(common),sharedRoot=sharedArchive.publics.get('ftLoadCommonData');
       const accessoryModels=new Map([[1,sharedArchive.data.getUint32(sharedArchive.data.getUint32(sharedRoot+8*4))],[2,sharedArchive.data.getUint32(sharedRoot+16*4)]].map(([kind,root])=>[kind,archiveRootView(sharedArchive,'accessory_Share_joint',root)]));
-      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
+      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:(code==='Ca'?'Falcon':character)+' P'+(i+1),object:owner,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name===modelName).bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       const effectModels=new Map();
-      for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],[captainEffectBytes,captainEffects,module._portEffectsRead(0,0)]]){
+      for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],[fighterEffectBytes,fighterEffects,module._portEffectsBankData(fighterEffects.bank)]]){
         if(!data)throw Error('Missing loaded render effect bank');
         const archive=inspectArchive(bytes),base=data-source.root-8;
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
-      preview=createNativeMatchPreview(module,canvas,previewActors,{effects:stageCallbacks?effectModels:null,stage:dynamicStage,hud:hudPreview,verify:!live&&!renderSteps,callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
+      preview=createNativeMatchPreview(module,canvas,previewActors,{effects:stageCallbacks?effectModels:null,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(intro){
@@ -233,7 +244,7 @@ try {
       module._Player_80031848(0);
       console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
       for(const [name,frames,buttons,x,y] of [['walk',12,0,0.5,0],['release',12,0,0,0],['jump',4,0x400,0,0],['air',20,0,0,0],['attack',4,0x100,0,0],['recover',90,0,0,0]]){
-        for(let i=0;i<frames;i++){module._portStageProbePad(0,buttons,x,y);step();report.input.frames++;if(renderSteps){preview.draw();report.renderedSteps=(report.renderedSteps??0)+1;}}
+        for(let i=0;i<frames;i++){module._portStageProbePad(0,buttons,x,y);step();report.input.frames++;if(renderSteps){recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}}
         report.input.states.push({name,state:state()});
         const latest=report.input.states.at(-1).state;
         if(name==='walk'&&(!(latest[4]>report.afterSteps[4])||![15,16,17].includes(latest[0])))throw Error('Scripted walking input did not produce walking movement');

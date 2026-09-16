@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {convertCaptainEffects,convertCommonEffects} from '../../engines/browser-native/effect-assets.mjs';
+import {convertCaptainEffects,convertCommonEffects,convertFighterEffects} from '../../engines/browser-native/effect-assets.mjs';
 function fixture(mutate=()=>{}) {
   const body=new Uint8Array(1792),d=new DataView(body.buffer),relocs=new Set(),cmd=128,tex=1296,joint=1616;
   const ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};ptr(0,cmd);ptr(4,tex);
@@ -48,4 +48,23 @@ test('common effects import all model entries and retain empty shape topology',(
 test('common effect shape graphs reject cycles and unsupported morph data',()=>{
   for(const mutate of [a=>a.ptr(a.shape,a.shape),a=>a.ptr(a.shape+16,a.joint),a=>a.d.setUint16(a.cmd+2,4)])
     assert.throws(()=>convertCommonEffects(commonFixture(mutate)));
+});
+function fighterBankFixture({symbol,bank,count,groups,models},mutate=()=>{}) {
+  const body=new Uint8Array(1024),d=new DataView(body.buffer),relocs=new Set(),cmd=192,tex=400,joint=512;
+  const ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};
+  if(count){ptr(0,cmd);ptr(4,tex);d.setUint16(cmd,0x42);d.setUint16(cmd+2,bank);d.setUint32(cmd+4,bank*1000);d.setUint32(cmd+8,count);d.setUint32(tex,groups);}
+  for(let i=0;i<models;i++)ptr(12+i*20,joint);
+  for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  mutate({d,ptr,cmd,tex});
+  const name=new TextEncoder().encode(symbol+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return bytes;
+}
+test('fighter effect banks preserve bank identity, model count and model-only null banks',()=>{
+  for(const [code,spec] of Object.entries({Dk:{symbol:'effDonkeyDataTable',bank:8,count:0,groups:0,models:7},Ms:{symbol:'effMarsDataTable',bank:16,count:4,groups:3,models:2},Gn:{symbol:'effGanonDataTable',bank:19,count:17,groups:7,models:6},Fe:{symbol:'effEmblemDataTable',bank:49,count:4,groups:3,models:2}})){
+    const input=fighterBankFixture(spec),before=input.slice(),result=convertFighterEffects(input,code);
+    assert.equal(result.bank,spec.bank);assert.equal(result.effects.length,spec.models);assert.equal(result.commands.length,spec.count);assert.equal(result.textures.length,spec.groups);assert.deepEqual(input,before);
+    if(!spec.count){assert.equal(result.cmd,null);assert.equal(result.tex,null);assert.throws(()=>convertFighterEffects(fighterBankFixture(spec,a=>a.ptr(0,a.cmd)),code));}
+    else assert.throws(()=>convertFighterEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,4)),code));
+  }
+  assert.throws(()=>convertFighterEffects(new Uint8Array(),'Fx'),/pending/);
 });

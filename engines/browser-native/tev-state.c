@@ -93,6 +93,8 @@ const PortTevState* portMaterialDrawState(HSD_JObj* joint,unsigned index,unsigne
  * billboards, fighter flags and owner callbacks remain original C. */
 #include <emscripten.h>
 static int drawing;
+static unsigned immediate_kind;
+unsigned portImmediateKind(void){return immediate_kind;}
 /* Geometry is decoded into explicit WebGL VAOs; the host binds a complete VAO
  * for every polygon. Clearing GX's FIFO descriptor cannot leave stale host
  * attributes. Scoped particle callbacks use the immediate descriptor instead. */
@@ -106,10 +108,21 @@ void portNativeDrawParticles(HSD_GObj* owner,unsigned pass)
     extern void portRenderContextEnter(void),portRenderContextLeave(void);
     if(drawing||capturing||!owner||owner->render_cb!=efLib_render_callback||pass>2)abort();
     portRenderContextEnter();drawing=capturing=1;memset(&state,0,sizeof(state));
-    portTextureCaptureReset();portModelCaptureReset();portImmediateBegin();
+    portTextureCaptureReset();portModelCaptureReset();immediate_kind=0;portImmediateBegin();
     HSD_GObj* previous=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
     owner->render_cb(owner,pass);
     HSD_GObj_804D7814=previous;portImmediateEnd();drawing=capturing=0;portRenderContextLeave();
+}
+// Sword trails are a separate original immediate draw inside a fighter pass.
+// Keep their complete native arithmetic; only scope the GX receiver.
+void ftCo_800C2600(HSD_GObj* owner,u32 pass)
+{
+    extern void port_unlinked_ftCo_800C2600(HSD_GObj*,u32);
+    if(!drawing||capturing||!owner||owner!=HSD_GObj_804D7814||pass>2)abort();
+    capturing=1;memset(&state,0,sizeof(state));
+    portTextureCaptureReset();portModelCaptureReset();immediate_kind=1;portImmediateBegin();
+    port_unlinked_ftCo_800C2600(owner,pass);
+    portImmediateEnd();capturing=0;
 }
 static HSD_DObj* drawing_display;
 static unsigned emitted;

@@ -6,9 +6,12 @@ import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const cpuProfile=process.argv.includes('--cpu-profile');
+const character=process.argv.find(x=>x.startsWith('--character='))?.slice(12)??'Ca';
+if(!/^[A-Z][a-z]$/.test(character))throw Error('Character must be a two-letter fighter archive code');
 const workload=process.argv.includes('--workload'),workloadSteps=process.argv.includes('--workload-steps');
 const stageCallbacks=process.argv.includes('--stage-callbacks'),intro=stageCallbacks||process.argv.includes('--intro'),damageHud=intro||process.argv.includes('--damage-hud'),hud=damageHud||process.argv.includes('--hud');
 const tournament=hud||workloadSteps||process.argv.includes('--tournament')||process.argv.includes('--timeout'),hardware=process.argv.includes('--hardware'),callbacks=!process.argv.includes('--manual-draw'),input=process.argv.includes('--input'),renderSteps=process.argv.includes('--render-steps'),live=process.argv.includes('--live'),render=renderSteps||live||process.argv.includes('--render'),camera=render||process.argv.includes('--camera'),control=process.argv.includes('--combat-control'),combat=tournament||(camera&&!input)||control||process.argv.includes('--combat'),stage=combat||input||process.argv.includes('--stage'),step=stage||process.argv.includes('--step');
+if(character!=='Ca'&&combat&&!live)throw Error('Use a non-Captain character with --input, --live or constructor/step; scripted combat/lifecycle assertions need broader validation');
 if(tournament&&input)throw Error('Tournament probe requires two fighters; use --tournament alone for lifecycle checks');
 if(workload&&(!live||!tournament))throw Error('Use --workload with --tournament --live');
 if(live&&input)throw Error('Use --live for browser input or --input for scripted input, not both');
@@ -34,7 +37,7 @@ try {
     if(m.method==='Runtime.consoleAPICalled')for(const arg of m.params.args){const value=arg.value;if(typeof value!=='string')continue;if(value.startsWith('NATIVE_CONSTRUCTOR_RESULT '))probe=JSON.parse(value.slice(26));else if(value.startsWith('NATIVE_CONSTRUCTOR_START '))partial=JSON.parse(value.slice(25));else {diagnostics.push(value);if(diagnostics.length>64)diagnostics.shift();}}
   });
   await command('Runtime.enable');await command('Debugger.enable');await command('Page.enable');
-  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/constructor.html'+(combat?'?step=1&stage=1&combat=1'+(control?'&control=1':'')+(camera?'&camera=1':'')+(render?'&render=1':'')+(callbacks?'&callbacks=1':'&callbacks=0')+(tournament?'&tournament=1':'')+(hud?'&hud=1':'')+(damageHud?'&damagehud=1':'')+(intro?'&intro=1':'')+(stageCallbacks?'&stagecallbacks=1':'')+(process.argv.includes('--timeout')?'&timeout=1':'')+(live?'&live=1&liveframes='+liveFrames:'')+(workload?'&workload=1':'')+(workloadSteps?'&workloadsteps='+liveFrames:'')+(renderSteps?'&rendersteps=1':''):input?'?step=1&stage=1&input=1'+(render?'&render=1':'')+(renderSteps?'&rendersteps=1':''):stage?'?step=1&stage=1':step?'?step=1':'')});
+  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/constructor.html'+(combat?'?step=1&stage=1&combat=1'+(control?'&control=1':'')+(camera?'&camera=1':'')+(render?'&render=1':'')+(callbacks?'&callbacks=1':'&callbacks=0')+(tournament?'&tournament=1':'')+(hud?'&hud=1':'')+(damageHud?'&damagehud=1':'')+(intro?'&intro=1':'')+(stageCallbacks?'&stagecallbacks=1':'')+(process.argv.includes('--timeout')?'&timeout=1':'')+(live?'&live=1&liveframes='+liveFrames:'')+(workload?'&workload=1':'')+(workloadSteps?'&workloadsteps='+liveFrames:'')+(renderSteps?'&rendersteps=1':''):input?'?step=1&stage=1&input=1'+(render?'&render=1':'')+(renderSteps?'&rendersteps=1':''):stage?'?step=1&stage=1':step?'?step=1':'?probe=1')+'&character='+character+(process.argv.includes('--verify-vertices')?'&verifyvertices=1':'')});
   if(cpuProfile){
     let first;
     for(let i=0;i<120;i++){
@@ -81,12 +84,19 @@ try {
     }
   }
   if(render&&!live&&!renderSteps&&probe.preview&&!probe.error) {
-    for(const [name,snapshot] of Object.entries(probe.preview))if(!snapshot.materialShaderChecks?.passed||!snapshot.materialDraws?.draws||!snapshot.materialDraws?.vertexChecks?.vertices||(callbacks&&(!intro||name!=='settled')&&snapshot.actors.filter(a=>a.name.startsWith('Falcon')).some(a=>!a.draws)))throw Error('Incomplete native material draw verification: '+name);
+    for(const [name,snapshot] of Object.entries(probe.preview))if(!snapshot.materialShaderChecks?.passed||!snapshot.materialDraws?.draws||!snapshot.materialDraws?.vertexChecks?.vertices||(callbacks&&(!intro||name!=='settled')&&snapshot.actors.filter(a=>/ P[12]$/.test(a.name)).some(a=>!a.draws)))throw Error('Incomplete native material draw verification: '+name);
     for(const [id,name] of [['native-preview-settled','settled'],['native-preview','final']]) {
       const evaluated=await command('Runtime.evaluate',{expression:'(()=>{const r=document.getElementById('+JSON.stringify(id)+').getBoundingClientRect();return {x:r.x,y:r.y+scrollY,width:r.width,height:r.height,scale:1};})()',returnByValue:true});
       const shot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:evaluated.result.value});
       fs.writeFileSync(path.join(output,'native-match-'+name+'.png'),Buffer.from(shot.data,'base64'));
     }
+  }
+  if(['Ms','Fe'].includes(character)&&input&&renderSteps&&!probe.error&&!probe.afterimages?.draws)throw Error('Sword input probe did not render original afterimages');
+  if(process.argv.includes('--verify-vertices')&&probe.preview?.afterimage&&!probe.error&&!probe.preview.afterimage.materialDraws?.vertexChecks?.byOwner?.afterimage?.vertices)throw Error('Afterimage vertices were not GPU-verified');
+  if(probe.preview?.afterimage&&!probe.error){
+    const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-afterimage').src",returnByValue:true});
+    if(!shot.result.value?.startsWith('data:image/png;base64,'))throw Error('Missing afterimage screenshot');
+    fs.writeFileSync(path.join(output,character+'-native-match-afterimage.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
   }
   if(probe.preview?.particles&&!probe.error){
     const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-particles').src",returnByValue:true});
@@ -113,8 +123,8 @@ try {
     }
   }
   const rendererSources=Object.fromEntries(['material-gpu.mjs','native-pixel.mjs'].map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(output,name))).digest('hex')]));
-  const report={rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};
-  fs.writeFileSync(path.join(output,(cpuProfile?'profiled-':'')+(hardware?'hardware-':'')+(stageCallbacks?'stage-callbacks-':'')+(intro?'intro-':'')+(damageHud?'damage-':hud?'hud-':'')+(workload?'workload-':workloadSteps?'workload-steps-':'')+(tournament?(process.argv.includes('--timeout')?'tournament-timeout-':'tournament-'):'')+(renderSteps?(input?'constructor-input-render-probe.json':'constructor-render-steps-probe.json'):live?'constructor-live-probe.json':render?'constructor-render-probe.json':camera?'constructor-camera-probe.json':control?'constructor-combat-control-probe.json':combat?'constructor-combat-probe.json':input?'constructor-input-probe.json':stage?'constructor-stage-probe.json':step?'constructor-step-probe.json':'constructor-probe.json')),JSON.stringify(report,null,2)+'\n');fs.writeFileSync(path.join(output,'constructor-chrome.log'),stderr);
+  const report={character,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};
+  fs.writeFileSync(path.join(output,(character==='Ca'?'':character+'-')+(cpuProfile?'profiled-':'')+(hardware?'hardware-':'')+(stageCallbacks?'stage-callbacks-':'')+(intro?'intro-':'')+(damageHud?'damage-':hud?'hud-':'')+(workload?'workload-':workloadSteps?'workload-steps-':'')+(tournament?(process.argv.includes('--timeout')?'tournament-timeout-':'tournament-'):'')+(renderSteps?(input?'constructor-input-render-probe.json':'constructor-render-steps-probe.json'):live?'constructor-live-probe.json':render?'constructor-render-probe.json':camera?'constructor-camera-probe.json':control?'constructor-combat-control-probe.json':combat?'constructor-combat-probe.json':input?'constructor-input-probe.json':stage?'constructor-stage-probe.json':step?'constructor-step-probe.json':'constructor-probe.json')),JSON.stringify(report,null,2)+'\n');fs.writeFileSync(path.join(output,'constructor-chrome.log'),stderr);
   console.log(JSON.stringify(probe,null,2));if(!probe.constructorVerified||probe.error||(step&&probe.schedulerSteps!==(intro?0:120))||(input&&!probe.input?.completed)||(combat&&!live&&!workloadSteps&&!probe.combat?.completed)||(tournament&&!live&&!(probe.lifecycle?.completed||probe.timeout?.completed||probe.simulationWorkload?.completed))||(live&&(probe.live?.frames!==liveFrames||(workload?!(probe.live?.workload.framesWithAttack>100&&probe.live?.workload.framesWithHitlag>30&&probe.live.workload.windows.every(w=>w.hitlag>0)):(!probe.live?.movement||!probe.live?.jump||!probe.live?.attack||probe.live.stateChanges.some(s=>s.state<14))))))process.exitCode=2;
 } finally {
   socket?.close();for(const p of pending.values())p.reject(Error('Probe closed'));pending.clear();

@@ -829,3 +829,46 @@ a first combat particle image when drawing every step. Live timing resets partic
 counters after the introductory prelude. Slow draw calls are recorded with frame,
 material/program counts and resource counts to distinguish compilation/allocation
 from general frame pacing. Draw submission is not distinct presentation.
+
+## Roster constructors and sword trails
+
+The complete fighter archive assembler accepts the original symbol for each
+fighter whose `ftData.x48` item/extra table is absent. Captain Falcon, Donkey Kong,
+Marth, Ganondorf and Roy currently use that path. It still rejects an unconverted
+item table. The native constructor resolves the original external character kind
+through `Player_800325C8` and lets `Player_80031AD0` own creation and registration.
+Tournament initialization accepts both fighter kinds through the same mapping.
+
+Each new fighter automatically loads its own hosted animation, model and effect
+bank. Donkey Kong's effect bank has seven models and no particle bank; its 42
+unreferenced export-time shape relocations remain outside the exposed graph.
+Marth/Roy have two effect models each; Ganondorf has six. All table metadata and
+reachable descriptor types are checked before constructing the native archive.
+
+Sword trails execute the original `ftCo_800C2600` arithmetic, vertex colors and
+triangle strip. A wrapper scopes the existing immediate GX receiver around the
+original function. The original SDK `GXSetTevClampMode` definition is compiled:
+it is empty in the retail SDK, rather than an unimplemented graphics operation.
+Particle and afterimage submission counters are separate. GPU transform feedback
+can verify every input-test frame, including afterimage vertices:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Ms --input --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Fe --input --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Dk --input --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Gn --input --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ms --stage-callbacks --live --workload --hardware --frames=3600
+```
+
+Non-Captain input and live workload reports have a character prefix. The older
+scripted combat/lifecycle assertions still require Captain and are not treated
+as coverage of the entire roster. These are development fixtures, not complete
+character-select or competitive-play support.
+
+Live slow-draw records include synchronous shader compilation times and the
+origin of each new program (model, particle or sword trail). On Mesa, use
+`MESA_SHADER_CACHE_DISABLE=true` on the probe command to diagnose first-use
+compilation without its persistent disk cache. The report records that setting;
+it is a diagnostic condition, not a player requirement. A sword-only prewarm
+experiment was removed: the following model/particle programs still stalled the
+frame. Broader shader preparation remains necessary for consistent cold startup.

@@ -7,7 +7,7 @@ export function verifyResidentEffectBank(module,source,data) {
   let checks=0;const check=(ok,message)=>{checks++;if(!ok)throw Error('Resident effects: '+message);};
   check(base>0,'loaded data base');
   for(const at of source.pointerSlots)check(d.getUint32(base+at,true)===base+s.getUint32(at,true),'HSD relocation '+at);
-  check(d.getUint32(data-8,true)===base+source.cmd&&d.getUint32(data-4,true)===base+source.tex,'original bank roots');
+  check(d.getUint32(data-8,true)===(source.cmd===null?0:base+source.cmd)&&d.getUint32(data-4,true)===(source.tex===null?0:base+source.tex),'original bank roots');
   for(const [i,c] of source.commands.entries()) {
     check(d.getUint32(base+source.cmd+12+i*4,true)===(c?base+c.offset:0),'command relative relocation');
     if(!c)continue;const p=base+c.offset;

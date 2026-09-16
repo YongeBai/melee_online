@@ -76,9 +76,11 @@ void portTournamentStatusInstall(HSD_Archive* archive)
     if(!archive||started||*ifAll_GetArchive())abort();
     *ifAll_GetArchive()=archive;ifStatus_802F7134();
 }
-void portTournamentInitialize(void)
+void portTournamentInitializeKinds(unsigned left,unsigned right)
 {
-    if(initialized)abort();StartMeleeData data={0};
+    extern int portFighterCharacterKind(unsigned);
+    int characters[2]={portFighterCharacterKind(left),portFighterCharacterKind(right)};
+    if(initialized||characters[0]<0||characters[1]<0)abort();StartMeleeData data={0};
     portInitializeVsRouting();Player_80036DD8();gm_801A3E88();
     gm_SetupRulesDefaults(&data.rules);
     data.rules.match_kind=MatchKind_Stock;data.rules.is_stock=true;data.rules.is_vs=true;
@@ -86,10 +88,11 @@ void portTournamentInitialize(void)
     data.rules.item_freq=-1;data.rules.x20=0;data.rules.is_teams=false;data.rules.stkind=St_Kind_Battle;
     for(unsigned i=0;i<GM_MAX_PLAYERS;i++){
         gm_SetupPlayerDefaults(&data.players[i]);
-        if(i<2){data.players[i].slot_type=Gm_PKind_Human;data.players[i].ckind=CKind_Captain;data.players[i].stocks=4;data.players[i].team=i;}
+        if(i<2){data.players[i].slot_type=Gm_PKind_Human;data.players[i].ckind=characters[i];data.players[i].stocks=4;data.players[i].team=i;}
     }
     gm_SetupSubColors(&data);fn_8016DCC0(&data);initialized=1;
 }
+void portTournamentInitialize(void){portTournamentInitializeKinds(Ft_Kind_Captain,Ft_Kind_Captain);}
 void portTournamentBegin(void)
 {
     if(!initialized||started||!Player_GetEntity(0)||!Player_GetEntity(1))abort();

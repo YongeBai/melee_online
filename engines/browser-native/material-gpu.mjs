@@ -21,19 +21,19 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     lightPosition:new Float32Array(24),lightDirection:new Float32Array(24),lightAngular:new Float32Array(24),lightDistance:new Float32Array(24),bias:new Float32Array(8)};
   function packRows(target,rows,stride){target.fill(0);for(let i=0;i<rows.length;i++)if(rows[i])target.set(rows[i],i*stride);return target;}
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
-  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0;const immediatePlans=[];
+  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
-  function program(state,attributes){
+  function program(state,attributes,origin){
     const variant=materialShaderKey(state,attributes);if(variants.has(variant))return variants.get(variant);
     const sources=generateMaterialShaders(state,attributes),key=sources.vertex+'\n'+sources.fragment;
     if(programs.has(key)){const p=programs.get(key);variants.set(variant,p);return p;}
-    let vs,fs,p;
+    const compilationStart=performance.now();let vs,fs,p;
     try {
       vs=shader(gl.VERTEX_SHADER,sources.vertex);fs=shader(gl.FRAGMENT_SHADER,sources.fragment);p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,fs);
       gl.transformFeedbackVaryings(p,['transformedPosition','transformedNormal','raster0','raster1','verifiedTexcoord'],gl.INTERLEAVED_ATTRIBS);gl.linkProgram(p);
       if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
       const uniforms=new Map(),result={program:p,uniform(name){if(!uniforms.has(name))uniforms.set(name,gl.getUniformLocation(p,name));return uniforms.get(name);}};
-      programs.set(key,result);variants.set(variant,result);return result;
+      programs.set(key,result);variants.set(variant,result);shaderCompilations.push({program:programs.size,origin,cpuMs:performance.now()-compilationStart});return result;
     } catch(error){if(p)gl.deleteProgram(p);throw error;}finally{if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);}
   }
   function image(t){
@@ -115,12 +115,12 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
     const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
-    queue.push({owner,plan,state,camera:snapshot,program:program(state,plan.mesh.attrs)});
+    queue.push({owner,plan,state,camera:snapshot,program:program(state,plan.mesh.attrs,'model')});
   };
   if(module.onNativeImmediate)throw Error('Immediate draw receiver already owned');
-  module.onNativeImmediate=(primitive,count,ptr,cull,textured,tev)=>{
+  module.onNativeImmediate=(primitive,count,ptr,cull,textured,tev,kind)=>{
     const data=Float32Array.from(new Float32Array(module.HEAPU8.buffer,ptr,count*9)),triangles=immediateTriangles(primitive,count);
-    if(!data.every(Number.isFinite)||cull>3)throw Error('Invalid immediate geometry');
+    if(!data.every(Number.isFinite)||cull>3||![0,1].includes(kind))throw Error('Invalid immediate geometry');
     let plan=immediatePlans[immediateUsed];
     if(!plan){
       plan={vao:gl.createVertexArray(),vertex:gl.createBuffer(),indices:gl.createBuffer()};immediatePlans.push(plan);
@@ -129,13 +129,15 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,plan.indices);
     }
     immediateUsed++;immediateVertices+=count;
+    if(kind===0){particleDraws++;particleVertices+=count;}else{afterimageDraws++;afterimageVertices+=count;}
     gl.bindVertexArray(plan.vao);gl.bindBuffer(gl.ARRAY_BUFFER,plan.vertex);gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,plan.indices);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,triangles,gl.DYNAMIC_DRAW);
     const attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
     plan.mesh={triangles,flags:cull<<14,attrs,vertices:verifyVertices?Array.from({length:count},(_,i)=>({9:[...data.slice(i*9,i*9+3)],11:[...data.slice(i*9+3,i*9+7)],13:[...data.slice(i*9+7,i*9+9)]})):[]};
     const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
-    queue.push({owner:'particles',plan,state,camera:snapshot,program:program(state,attrs)});
+    const selectedProgram=program(state,attrs,kind===0?'particles':'afterimage');
+    queue.push({owner:kind===0?'particles':'afterimage',plan,state,camera:snapshot,program:selectedProgram});
   };
   function upload(model,bytes,nodes,owner){
     const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
@@ -178,7 +180,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     }catch(error){dispose();throw error;}
   }
   function selectCamera(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);}
-  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];draws=0;immediateUsed=0;immediateVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,byOwner:{}};},
+  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,byOwner:{}};},
     flush({ordered=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
@@ -192,7 +194,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
         gl.drawElements(gl.TRIANGLES,draw.plan.mesh.triangles.length,gl.UNSIGNED_INT,0);draws++;
       }
       if(gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
-      return {vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,immediateVertices,draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
+      return {vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}

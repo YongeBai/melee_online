@@ -5,6 +5,40 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The constructor fixture now also loads Donkey Kong, Marth, Ganondorf and Roy
+through the original player/character mapping and their own hosted archives.
+Each passes 120 settling steps and 142 rendered input steps (walk, jump, aerial
+attack, recovery), with GPU vertex verification. Marth and Roy's original sword
+trails now use the typed GX immediate boundary; their original interpolation and
+color arithmetic are retained. The inspected screenshots show the original
+trails. The complete archive assembler still rejects unconverted x48 item/extra
+graphs, so this is five constructor-capable fighters, not full roster support.
+
+The retained two-Marth Battlefield fixture completes 3,600 simulation steps and
+3,600 draw submissions in 60.025 seconds at 960×720, without catch-up callbacks.
+Simulation averages 0.577 ms; draw submission averages 6.152 ms (p95 8.3 ms,
+maximum 16.5 ms). It draws 7,021 particle primitives and 895 sword trails. This
+sample uses the driver's normal cache and excludes the 124-frame Ready/Go prelude.
+It measures submissions, not distinct presentation or input-to-photon latency.
+
+Cold shader compilation is a confirmed remaining source of stutter. With Mesa's
+persistent shader cache disabled, one frame spends 26 ms compiling three new
+programs within a 43.9 ms draw submission. An origin-tagged repeat identifies
+the sword shader on frame 94, then a model and two particle programs on frame 95;
+those three compilations consume 40 ms of that run's 60.2 ms draw. Sword-only
+prewarming was tested and removed: its cold-cache maximum is still 47.3 ms versus
+50.4 ms without it. Preparing the broader material/effect shader set is the next
+stutter experiment; the narrow prewarm is not carried as a claimed win.
+
+The final binary retains the unchanged Falcon combat trace, original Ready/Go,
+4,500 stage-callback frames, four KOs and three respawns. All 137 targeted tests,
+base/scene/fighter builds and base subsystem verification pass.
+[Roster, trail and compilation evidence](benchmarks/browser-2026-09-16-native-port-roster-trails.json).
+Full scenes/stages/roster, audio, controller/network integration, deployment,
+fidelity and presentation/latency validation still prevent acceptance.
+
+Previous checkpoints below describe their state at the time.
+
 A sampled CPU profile identified repeated JavaScript uniform packing and exhaustive
 alpha checks in the renderer. Reusing typed packing buffers and classifying alpha
 at its comparison boundaries reduces mean draw submission from 9.102 ms in the

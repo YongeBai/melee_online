@@ -34,6 +34,7 @@ unsigned portEffectModels(unsigned* output,unsigned capacity)
 }
 // Match startup uses 70 original camera subjects. No projection/camera offsets.
 void portMatchCameraInitialize(void) { static int ready;if(!ready){Camera_Init(70);Camera_Create();ready=1;} }
+void* portEffectsBankData(unsigned bank) { if(bank>=50)abort();return efAsync_DatEntries[bank].data; }
 void* portEffectsLoad(void) { efAsync_LoadSync(4);return efAsync_DatEntries[4].data; }
 void* portCommonEffectsLoad(void) { efAsync_LoadSync(0);return efAsync_DatEntries[0].data; }
 double portEffectsRead(unsigned field,unsigned index) {

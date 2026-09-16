@@ -143,11 +143,19 @@ void portMatchPlayerInitialize(void) { Player_InitAllPlayers(); }
 float portProbeRulesInitialize(void) { gm_SetupRulesDefaults(gm_GetStartMeleeRules());return gm_8016B248(); }
 // The original player owner calls the complete Fighter_Create and registers its
 // result. Scheduled gameplay looks up this registration, not just the GObj.
+int portFighterCharacterKind(unsigned kind)
+{
+    if(kind>=27)return -1;
+    for(int character=CKind_Captain;character<=CKind_Ganon;character++)if(Player_800325C8(character,0)==kind)return character;
+    return -1;
+}
 HSD_GObj* portFighterConstruct(unsigned kind,unsigned slot)
 {
-    if(!portFighterStartupComplete()||kind!=Ft_Kind_Captain||slot>=6)return NULL;
+    if(!portFighterStartupComplete()||kind>=27||slot>=6)return NULL;
     if(Player_GetEntity(slot))return NULL;
-    Player_SetPlayerCharacter(slot,CKind_Captain);
+    int character=portFighterCharacterKind(kind);
+    if(character<0)return NULL;
+    Player_SetPlayerCharacter(slot,character);
     Player_SetSlottype(slot,Gm_PKind_Human);
     Player_SetStocks(slot,4);
     Player_SetHandicap(slot,9);

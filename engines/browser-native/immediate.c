@@ -1,4 +1,4 @@
-/* GX immediate vertices emitted by original particle drawing. Serialize writes
+/* GX immediate vertices emitted by original particle and sword-trail drawing. Serialize writes
  * in console byte order, validate the active descriptor, then submit a complete
  * primitive. Console FIFO commands outside a scoped draw are unsupported. */
 #include <dolphin/gx.h>
@@ -10,6 +10,7 @@
 #include <stdio.h>
 extern void portRequireMaterialCapture(int);
 extern const void* portImmediateTevState(void);
+extern unsigned portImmediateKind(void);
 #define require(x) do{if(!(x)){fprintf(stderr,"Invalid immediate draw at %d\n",__LINE__);abort();}portRequireMaterialCapture(1);}while(0)
 static unsigned active,types[26],formats[8][26][3],cursor,expected,count,primitive,stride,format,cull;
 static const unsigned char* arrays[26];
@@ -31,9 +32,9 @@ void GXEnableTexOffsets(GXTexCoordID coord,u8 line,u8 point){require(active&&coo
  * these explicit failures until that separate primitive path is integrated. */
 void GXSetPointSize(u8 size,GXTexOffset offset){fprintf(stderr,"Native particle point expansion pending\n");abort();}
 void GXSetLineWidth(u8 size,GXTexOffset offset){fprintf(stderr,"Native particle line expansion pending\n");abort();}
-EM_JS(void,emit_immediate,(unsigned primitive,unsigned count,const float* vertices,unsigned cull,unsigned textured,const void* tev),{
+EM_JS(void,emit_immediate,(unsigned primitive,unsigned count,const float* vertices,unsigned cull,unsigned textured,const void* tev,unsigned kind),{
     if(typeof Module.onNativeImmediate!=='function')throw Error('Immediate draw receiver absent');
-    Module.onNativeImmediate(primitive,count,vertices,cull,textured,tev);
+    Module.onNativeImmediate(primitive,count,vertices,cull,textured,tev,kind);
 });
 static unsigned word(const unsigned char* p){return (unsigned)p[0]<<24|(unsigned)p[1]<<16|(unsigned)p[2]<<8|p[3];}
 static float real(const unsigned char* p){union{unsigned u;float f;}v={.u=word(p)};require(isfinite(v.f));return v.f;}
@@ -52,7 +53,7 @@ static void emit(void)
         }
     }
     require(p==fifo+expected);expected=cursor=0;
-    emit_immediate(primitive,count,vertices,cull,types[GX_VA_TEX0]!=0,portImmediateTevState());
+    emit_immediate(primitive,count,vertices,cull,types[GX_VA_TEX0]!=0,portImmediateTevState(),portImmediateKind());
 }
 void GXBegin(GXPrimitive type,GXVtxFmt fmt,u16 n)
 {

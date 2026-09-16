@@ -1,6 +1,7 @@
 // Link the wider original game graph while keeping the real browser resident
-// file boundary. Unreferenced original definitions are renamed, not stubbed;
-// every caller of the public names still resolves to resident-files.c.
+// file boundary. Original definitions are renamed, not stubbed. File callers
+// resolve to resident-files.c; the sword-trail wrapper scopes the GX receiver
+// and calls the complete original drawing function.
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -15,6 +16,7 @@ export function renameBoundaryDefinitions(text,names) {
 }
 export function gameLinkInputs(root,upstream,output) {
   const replacements={
+    'src/melee/ft/ftafterimage.c':['ftCo_800C2600'],
     'src/melee/lb/lbfile.c':['lbFileGetSize','lbFile_8001668C','lbFile_800168A0'],
     'src/melee/lb/lbheap.c':['lbHeap_80015BD0','lbHeap_80015CA8'],
     'src/melee/lb/lbdvd.c':['lbDvd_8001819C'],
@@ -32,7 +34,7 @@ export function gameLinkInputs(root,upstream,output) {
     fs.writeFileSync(result,renameBoundaryDefinitions(text,names).replace(/^#include "([^"]+)"/gm,(_,name)=>'#include '+JSON.stringify(path.join(portable,path.dirname(file),name))));
     return result;
   });
-  const names=JSON.parse(fs.readFileSync(new URL('./game-unimplemented.json',import.meta.url))).functions.filter(name=>!['GXSetFog','GXGetTexBufferSize','GXGetProjectionv','GXEnableTexOffsets','GXSetPointSize','GXSetLineWidth'].includes(name));
+  const names=JSON.parse(fs.readFileSync(new URL('./game-unimplemented.json',import.meta.url))).functions.filter(name=>!['GXSetTevClampMode','GXSetFog','GXGetTexBufferSize','GXGetProjectionv','GXEnableTexOffsets','GXSetPointSize','GXSetLineWidth'].includes(name));
   const headers=execFileSync('rg',['--files','libs/dolphin/include','-g','*.h'],{cwd:upstream,encoding:'utf8'}).trim().split('\n')
     .map(file=>fs.readFileSync(path.join(upstream,file),'utf8')).join('\n');
   const definitions=names.map(name=>{

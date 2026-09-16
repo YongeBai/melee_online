@@ -93,7 +93,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
   let stageOwners=new Set(),effectOwners=new Set();
-  const particleStats={draws:0,vertices:0,frames:0,peakDraws:0};
+  const particleStats={draws:0,vertices:0,frames:0,peakDraws:0},afterimageStats={draws:0,vertices:0,frames:0,peakDraws:0};
   const resourceStats={stageCreated:0,stageRetired:0,effectCreated:0,effectRetired:0,peakEffectModels:0};
   const effectList=effects?module._malloc(512*12):0;
   if(effects&&!effectList)throw Error('Effect owner allocation');
@@ -127,7 +127,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     materialShaderChecks=materials&&verify?verifyGpuMaterialShader(gl):null;
     for(const actor of actors)addActor(actor);
     return {
-      resetParticleStats(){for(const key of Object.keys(particleStats))particleStats[key]=0;},
+      resetImmediateStats(){for(const stats of [particleStats,afterimageStats])for(const key of Object.keys(stats))stats[key]=0;},
       draw(){
         if(callbacks){
           if(!materialRenderer)throw Error('Original callbacks require native materials');
@@ -157,8 +157,10 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           }
           }
           const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),materialDraws=materialRenderer.flush({ordered:true});
-          particleStats.draws+=materialDraws.immediateDraws;particleStats.vertices+=materialDraws.immediateVertices;if(materialDraws.immediateDraws)particleStats.frames++;particleStats.peakDraws=Math.max(particleStats.peakDraws,materialDraws.immediateDraws);
-          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,particleStats:{...particleStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
+          for(const [stats,draws,vertices] of [[particleStats,materialDraws.particleDraws,materialDraws.particleVertices],[afterimageStats,materialDraws.afterimageDraws,materialDraws.afterimageVertices]]){
+            stats.draws+=draws;stats.vertices+=vertices;if(draws)stats.frames++;stats.peakDraws=Math.max(stats.peakDraws,draws);
+          }
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot);
         module._portStageRenderBegin();
