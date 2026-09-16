@@ -1148,3 +1148,49 @@ Shader records are tied to the exact current WASM and shader-generator hashes;
 re-record after a changed build instead of bypassing identity validation. These
 checks do not establish complete stage startup, Randall landing/ride parity,
 Shy Guy combat interactions, all-character coverage or distinct presented FPS.
+
+## Frozen Pokémon Stadium profile
+
+`--map=stadium` selects the user-approved frozen layout. Its original stage
+initializer, flat terrain callbacks, collision topology, material animations,
+background particle process and gameplay camera remain. An explicit boundary
+replaces the transformation scheduler with checks that its original phase is
+zero and its terrain is the default form. The timer is not artificially enlarged
+or reset on each frame. The long probe checks the scheduler was called, active
+collision joints remain 4 and 6, and every collision vertex stays unchanged.
+
+The background screen is a static cosmetic profile. It keeps the original screen
+quad and frame, hides its transformation overlays, and uses a defined dark
+material/texture. It does not construct offscreen SIS text/capture cameras or copy
+another view of the match each frame. The original inactive stage-camera subject
+is still created. VS screen notifications are accepted without altering gameplay.
+This is not a completed port of the original live jumbotron or a measured A/B
+speedup against it; that text/capture path still needs integration. The profile
+also omits the screen-content timer/RNG sequence. Exact RNG parity to an unfrozen
+retail Stadium scene is not claimed.
+
+The typed importer clears the 75 original transformation externs using the
+original DAT-load rule, bounds their chains to transformation descriptor slots,
+and rejects unrelated external names/layouts. It imports the resident base model and lights,
+packed color/timer fields, collision descriptors, and all 30 stage particle scripts
+with ten texture groups. Transformation archives are never requested in this
+frozen profile. Hosted startup requires no player-supplied disc.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --map=stadium --stage-callbacks --stage-only --stage-frames=9000 --render --hardware --record-shaders
+node scripts/native-port/probe-constructor.mjs --map=stadium --stage-callbacks --workload-steps --frames=3600
+node scripts/native-port/probe-constructor.mjs --map=stadium --stage-callbacks --live --workload --frames=3600 --hardware --record-shaders --defer-gpu-errors
+node scripts/native-port/merge-shader-catalogs.mjs shader-record-stadium-Ca-live.json shader-record-stadium-Ca-cycle.json
+MESA_SHADER_CACHE_DISABLE=true node scripts/native-port/probe-constructor.mjs --map=stadium --stage-callbacks --live --workload --frames=3600 --hardware --prewarm-shaders --defer-gpu-errors
+```
+
+The fixture explicitly reports its modified callback profile. It is not a full
+matchup, edge-case collision, network, displayed-FPS or latency certification.
+
+`--stadium-fireworks-off` additionally excludes bank 30 from particle drawing
+only after validating the active Stadium stage. Its original spawning, particle
+scripts, lifetime and random-number calls continue running. Common/fighter
+effects remain visible; point batches stop before consuming excluded particles.
+The exclusion resets on stage installation, and other stages reject the flag.
+Use the same core and prepared shader catalog for fireworks-on/off comparisons;
+do not infer a performance gain just from the reduced draw count.

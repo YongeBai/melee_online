@@ -6,6 +6,8 @@
 #include <melee/gr/grlast.h>
 #include <melee/gr/grizumi.h>
 #include <melee/gr/grstory.h>
+#include <melee/gr/grpstadium.h>
+#include <melee/gr/grdisplay.h>
 #include <melee/gr/groldpupupu.h>
 #include <melee/gr/types.h>
 #include <melee/sc/types.h>
@@ -23,6 +25,8 @@
 #include <sysdolphin/baselib/controller.h>
 #include <sysdolphin/baselib/particle.h>
 #include <sysdolphin/baselib/tobj.h>
+#include <sysdolphin/baselib/dobj.h>
+#include <sysdolphin/baselib/mobj.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,6 +62,11 @@ static HSD_GObj* render_lights;
 static int installed;
 static int collision_installed;
 static int callbacks_initialized;
+static unsigned stadium_transform_callbacks;
+extern void portParticleHideBank(unsigned bank);
+static float stadium_vertices[4096];
+static unsigned char stadium_black_pixels[512] __attribute__((aligned(32)));
+static HSD_ImageDesc stadium_black_image={stadium_black_pixels,16,16,GX_TF_RGB565,0,0,0};
 extern void portStageSelectResident(StKind);
 void portStageDrawPasses(void)
 {
@@ -87,6 +96,7 @@ void portStageRenderBegin(void)
 void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam* param,unsigned kind)
 {
     switch(kind){
+    case St_Kind_PStadium:model_count=10;stage_callbacks=&grPs_StageData;break;
     case St_Kind_Story:model_count=4;stage_callbacks=&grSt_StageData;break;
     case St_Kind_Izumi:model_count=5;stage_callbacks=&grIz_StageData;break;
     case St_Kind_Battle:model_count=7;stage_callbacks=&grNBa_StageData;break;
@@ -95,6 +105,7 @@ void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam*
     default:abort();
     }
     stage_kind=kind;
+    portParticleHideBank(32); /* Reset the render-only profile on stage load. */
     if(installed||!archive||!data||!param||data->unkC!=model_count||portSceneInitialize()<0)abort();
     portRuntimeSetSceneDestructors(destroy_lights);
     Ground_801BFFB0();
@@ -138,12 +149,16 @@ void portStageCallbacksInitialize(void* parameters)
     stage_info.on_check_shadow_render=stage_callbacks->on_check_shadow_render;
     stage_callbacks->on_init();
     for(unsigned i=0;i<model_count;i++)owners[i]=Ground_GetMapGObj(i);
-    if(!owners[0]||!owners[1]||!owners[3])abort();
+    if(!owners[0]||!owners[1]||(stage_kind==St_Kind_PStadium?(!owners[2]||!owners[5]):!owners[3]))abort();
     if(stage_kind==St_Kind_Battle&&!owners[6])abort();
     if((stage_kind==St_Kind_Last||stage_kind==St_Kind_Izumi||stage_kind==St_Kind_Story)&&!owners[2])abort();
     if(stage_kind==St_Kind_Izumi&&!owners[4])abort();
     if(stage_kind==St_Kind_OldPupupu&&(!owners[4]||!owners[5]||!owners[6]||!owners[7]||!Ground_GetMapGObj(8)))abort();
     if(stage_kind==St_Kind_Izumi)stage_callbacks->on_load();
+    if(stage_kind==St_Kind_PStadium){
+        if(stage_info.coll_data->vert_count>2048)abort();
+        for(int i=0;i<stage_info.coll_data->vert_count;i++){stadium_vertices[i*2]=mpGetGroundCollVtx()[i].pos.x;stadium_vertices[i*2+1]=mpGetGroundCollVtx()[i].pos.y;}
+    }
     callbacks_initialized=1;
 }
 void portBattlefieldCallbacksInitialize(void* parameters){portStageCallbacksInitialize(parameters);}
@@ -360,4 +375,71 @@ void portStageMapClear(void)
     if(render_lights){HSD_LObj_803668EC(NULL);HSD_GObjFree(render_lights);render_lights=NULL;}
     for(unsigned i=0;i<model_count;i++)if(owners[i]){Ground* ground=owners[i]->user_data;if(ground->x18)HSD_GObjFree(ground->x18);HSD_GObjFree(owners[i]);owners[i]=NULL;}
     Ground_801BFFB0();stage_info.param=NULL;installed=0;
+}
+
+/* User-approved frozen Stadium rules: suppress only the transformation state
+ * machine. Original initialization, base terrain and other callbacks remain. */
+void grStadium_801D4548(Ground_GObj* object)
+{
+    if(stage_kind!=St_Kind_PStadium||!object||!object->user_data)abort();
+    Ground* g=object->user_data;
+    if(g->map_id!=2||g->u.stadium.xDC!=0||g->u.stadium.xDE!=5||!g->u.stadium.xE4||g->u.stadium.xE8)abort();
+    stadium_transform_callbacks++;
+}
+
+/* Frozen Stadium cosmetic profile: static native screen geometry, no duplicate
+ * scene capture or offscreen text cameras. The original gameplay camera's
+ * stage subject is still created and remains inactive outside transformations. */
+void grStadium_801D1290(Ground_GObj* object)
+{
+    if(stage_kind!=St_Kind_PStadium||!object||!object->user_data)abort();
+    Ground* g=object->user_data;if(g->map_id!=1)abort();
+    grAnime_801C8138(object,g->map_id,0);grAnime_801C77FC(object,0,7);
+    const int overlays[]={3,4,5,6,7,8,9};
+    for(unsigned i=0;i<sizeof(overlays)/sizeof(overlays[0]);i++){
+        HSD_JObj* joint=Ground_801C3FA4(object,overlays[i]);if(!joint)abort();HSD_JObjSetFlags(joint,JOBJ_HIDDEN);
+    }
+    HSD_JObj* screen=Ground_801C3FA4(object,2);
+    if(!screen||!screen->u.dobj||screen->u.dobj->next||!screen->u.dobj->mobj)abort();
+    HSD_JObjClearFlags(screen,JOBJ_HIDDEN);
+    HSD_MObj* material=screen->u.dobj->mobj;
+    if(!material->tobj||material->tobj->next||!material->tobj->imagedesc||material->tobj->imagedesc->width!=16||material->tobj->imagedesc->height!=16)abort();
+    material->tobj->imagedesc=&stadium_black_image;
+    HSD_MObjClearFlags(material,2);HSD_MObjSetFlags(material,1);
+    HSD_MObjSetDiffuseColor(material,0,0,0);HSD_MObjCompileTev(material);
+    g->u.display.xF4=NULL;Ground_801C10B8(object,fn_801D11E4);
+    g->x11_flags.b012=1;object->render_cb=grDisplay_801C5DB0;
+}
+void grStadium_801D1390(Ground_GObj* object)
+{
+    if(stage_kind!=St_Kind_PStadium||!object||!object->user_data||((Ground*)object->user_data)->map_id!=1)abort();
+    grStadium_801D1E20(); /* Keep the original background particle process. */
+}
+void grStadium_801D2528(Ground_GObj* object,int mode,int duration)
+{
+    if(stage_kind!=St_Kind_PStadium||!object||!object->user_data||mode<0||mode>17)abort();
+    Ground* g=object->user_data;if(g->map_id!=1)abort();
+    /* VS notifications remain accepted by the static display; they do not
+     * create text/capture objects or change the gameplay camera. */
+    g->u.display.xEA=g->u.display.xE4;g->u.display.xE4=mode;
+}
+
+/* Read-only frozen-profile assertions after original collision initialization. */
+void portStadiumFireworksOff(void)
+{
+    if(stage_kind!=St_Kind_PStadium||!callbacks_initialized)abort();
+    portParticleHideBank(30);
+}
+double portStadiumRead(unsigned field)
+{
+    if(stage_kind!=St_Kind_PStadium||!callbacks_initialized)abort();
+    Ground* g=Ground_GetMapGObj(2)->user_data;
+    if(field==0)return g->u.stadium.xDC;
+    if(field==1)return g->u.stadium.xDE;
+    if(field==2)return g->u.stadium.xD8;
+    if(field==3)return stadium_transform_callbacks;
+    if(field==4){unsigned mask=0;if(stage_info.coll_data->joint_count!=8)abort();for(int i=0;i<8;i++)if(mpGetGroundCollJoint()[i].flags&CollJoint_Enabled)mask|=1u<<i;return mask;}
+    if(field==5){double error=0;for(int i=0;i<stage_info.coll_data->vert_count;i++){CollVtx* v=&mpGetGroundCollVtx()[i];if(!isfinite(v->pos.x)||!isfinite(v->pos.y))abort();error=fmax(error,fmax(fabs(v->pos.x-stadium_vertices[i*2]),fabs(v->pos.y-stadium_vertices[i*2+1])));}return error;}
+    if(field==6)return ((Ground*)Ground_GetMapGObj(1)->user_data)->u.display.xF4!=NULL;
+    abort();
 }

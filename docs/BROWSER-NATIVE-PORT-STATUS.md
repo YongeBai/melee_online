@@ -5,6 +5,33 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Frozen Pokémon Stadium now runs in the native fixture, with the original main
+floor, platforms, collision and camera setup. Its approved frozen profile keeps
+the base terrain and a static background screen. The transformation scheduler and
+live jumbotron text/capture path are explicitly excluded; unfrozen-retail RNG
+parity is not claimed. All 9,000 terrain/collision checks pass without drift.
+
+A repeated A/B/A/B experiment identifies background fireworks drawing as a useful
+cost to remove. Controls average 7.66/7.63 ms per draw submission and miss 3/7
+submissions. With only Stadium's particle-bank drawing excluded, costs fall to
+6.64/6.68 ms (12.9% lower), and both runs submit all 3,600 draws in about 60 seconds
+with no catch-up callbacks. Candidate p95 values are 8.7/9.7 ms versus 12.2 ms for
+both controls. Maxima remain 18.0/18.8 ms. All runs use the same core, all 41 shaders
+prepared, no driver cache and no live shader compilation. Preparing shaders alone
+had failed to eliminate the stalls.
+
+Particle simulation and random-number calls continue unchanged. All four recorded
+combat traces match, as do final fighter states, contact windows and stock losses
+against unpaced simulation. The 9,000-step rendered candidate has identical
+camera values, collision checks and peak simulated particle count (392) to its
+control. Common and fighter effects remain enabled. These remain selected
+720p fixture draw-submission measurements, not independently measured display
+presentations or physical input latency; full roster, menus, audio, network and
+competitive parity are still incomplete.
+[Stadium evidence](benchmarks/browser-2026-09-16-native-port-stadium.json).
+
+Previous Yoshi's Story checkpoint:
+
 Yoshi's Story now runs its original stage callbacks, Randall spline movement and
 Shy Guy spawning in the native fixture. A missing original stage initializer
 caused Randall's collision to remain stationary; restoring that initializer fixes

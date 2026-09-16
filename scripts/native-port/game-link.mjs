@@ -16,6 +16,7 @@ export function renameBoundaryDefinitions(text,names) {
 }
 export function gameLinkInputs(root,upstream,output) {
   const replacements={
+    'src/melee/gr/grpstadium.c':['grStadium_801D4548','grStadium_801D1290','grStadium_801D1390','grStadium_801D2528'],
     'src/melee/it/item.c':['Item_80267978'],
     'src/melee/it/it_26B1.c':['it_8026B3F8'],
     'src/melee/ft/ftafterimage.c':['ftCo_800C2600'],

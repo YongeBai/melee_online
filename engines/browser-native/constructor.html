@@ -7,7 +7,8 @@
 <script type="module">
 import create from './melee-fighter-init.mjs';
 import {shaderIdentityFiles,validateShaderCatalog} from './shader-catalog.mjs';
-import {archiveRootView,inspectArchive,initializeArchiveExternals} from './archive.mjs';
+import {archiveRootView,inspectArchive} from './archive.mjs';
+import {initializeStageArchive} from './stage-archive.mjs';
 import {verifyNativeProjection} from './native-camera.mjs';
 import {combatWorkload,verifyCombatWorkload} from './combat-workload.mjs';
 import {startNativeLive} from './native-live.mjs';
@@ -38,6 +39,9 @@ const diagnostics=[],report={constructorAttempted:false,constructorCompleted:fal
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
 const stageKey=params.get('map')??'battlefield',stageSpec=nativeStages[stageKey];
 if(!stageSpec)throw Error('Unknown native stage');
+const stadiumFireworksOff=params.get('stadiumfireworks')==='off';
+if(stadiumFireworksOff&&stageKey!=='stadium')throw Error('Stadium fireworks profile requires Stadium');
+if(stadiumFireworksOff)report.stageCosmetics={fireworks:false,originalSimulation:true};
 const fountainCosmeticsOff=params.get('fountaincosmetics')==='off',fountainSceneryOff=params.get('fountainscenery')==='off';
 if(fountainSceneryOff&&!fountainCosmeticsOff)throw Error('Fountain scenery reduction requires its cosmetic profile');
 if(fountainCosmeticsOff&&stageKey!=='fountain')throw Error('Fountain cosmetic profile requires Fountain');
@@ -111,7 +115,7 @@ try {
   const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
-    const rawStageBytes=await asset(stageSpec.file),stageBytes=stageKey==='story'?initializeArchiveExternals(rawStageBytes,['GrdStoryHeiho_TopN_shapeanim_joint']):rawStageBytes,map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
+    const rawStageBytes=await asset(stageSpec.file),stageBytes=initializeStageArchive(rawStageBytes,stageKey),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
     for(let byte=0;byte<256;byte++)if(module._portStageShadowBits(byte)!==(byte>>>7))throw Error('Stage shadow MSB layout');
     for(const rate of [0,0.25,1,2])for(const flags of [0,0x20000000,0x40000000,0xffffffff])if(module._portStageAnimationProbe(rate,flags)!==1)throw Error('Stage animation callback ABI');
     installResidentFile(module,'NativeStageMap.dat',map.image);
@@ -138,6 +142,7 @@ try {
       report.stageItem={passed:true,checks,relocations:relocations.size,kind:data.kind,states:data.stateCount,joints:data.model.boneCount,meshes:data.model.scene.model.meshes.length,initialized:true};
     }
     if(stageCallbacks){const callbacks=openResidentArchive(module,'NativeStageMap.dat',['native_stage_callbacks']);module._portStageCallbacksInitialize(callbacks.addresses[0]);}
+    if(stadiumFireworksOff){if(!stageCallbacks)throw Error('Stadium fireworks profile requires callbacks');module._portStadiumFireworksOff();}
     if(fountainCosmeticsOff){if(!stageCallbacks)throw Error('Fountain cosmetic profile requires callbacks');module._portFountainReflectionOff();}
     for(const id of stageSpec.initial) {
       const object=stageCallbacks?module._portStageObject(id):module._portStageMapCreate(id);
@@ -162,7 +167,7 @@ try {
     module._portStageMapBounds();module._portStageMapSpawn(0);
     if(render)module._portStageRenderInitialize();
     report.stage={name:stageSpec.name,kind:stageSpec.kind,collisionLoaded:true,vertexChecks:count*2,modelGroups:stageSpec.initial,splineCount:map.splineCount,shadowCount:map.shadowCount,shadowFlagCases:256,animationCallbackCases:16,completeStageStartup:false};
-    if(stageCallbacks)report.stage.originalCallbacks=true;
+    if(stageCallbacks){report.stage.originalCallbacks=stageKey!=='stadium';if(stageKey==='stadium')report.stage.callbackProfile='Original terrain/particles; frozen transformations and static background screen';}
   }
   report.constructorAttempted=true;
   console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
@@ -268,6 +273,8 @@ try {
       const wind=stageKey==='dreamland'?{directions:[],activeFrames:0,displacementChecks:0,windTransitionFrames:0,maxError:0,strength:module._portDreamlandWindRead(4,0)}:null;
       if(wind)report.stage.wind=wind;
       const platforms=stageKey==='fountain'?Array.from({length:2},(_,i)=>({initial:module._portFountainPlatformRead(0,i),min:Infinity,max:-Infinity,upFrames:0,downFrames:0,phases:[],collisionChecks:0,maxCollisionError:0})):null;
+      const stadium=stageKey==='stadium'?{frozen:true,staticBackgroundScreen:true,originalTimer:module._portStadiumRead(2),checks:0,maxCollisionError:0}:null;
+      if(stadium)report.stage.stadium=stadium;
       const randall=stageKey==='story'?{hiddenFrames:0,minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity,leftFrames:0,rightFrames:0,upFrames:0,downFrames:0,collisionChecks:0,maxCollisionError:0}:null;
       let lastRandall=randall?[module._portRandallRead(0),module._portRandallRead(1)]:null,previousItems=new Set();
       const itemBuffer=randall?module._malloc(128*4):0,shyGuys=randall?{peak:0,spawns:0,retirements:0,minX:Infinity,maxX:-Infinity}:null;
@@ -294,6 +301,11 @@ try {
             const error=Math.abs(after[4]-before.state[4]-before.offset);wind.maxError=Math.max(wind.maxError,error);wind.displacementChecks++;
             if(error>.0001)throw Error('Original Dream Land wind displacement mismatch '+JSON.stringify({frame,slot,error,before,after}));
           }
+        }
+        if(stadium){
+          const phase=module._portStadiumRead(0),form=module._portStadiumRead(1),timer=module._portStadiumRead(2),mask=module._portStadiumRead(4),error=module._portStadiumRead(5);
+          if(phase!==0||form!==5||timer!==stadium.originalTimer||mask!==0x50||error!==0||module._portStadiumRead(6)!==1)throw Error('Frozen Stadium invariant '+JSON.stringify({frame,phase,form,timer,mask,error}));
+          stadium.checks++;stadium.maxCollisionError=Math.max(stadium.maxCollisionError,error);
         }
         if(platforms)for(let i=0;i<2;i++){
           const p=platforms[i],height=module._portFountainPlatformRead(0,i),phase=module._portFountainPlatformRead(1,i),error=module._portFountainPlatformRead(3,i);
@@ -337,6 +349,7 @@ try {
       if(wind&&(!wind.activeFrames||!wind.displacementChecks||(stageFrames>=9000&&wind.directions.length!==2)))throw Error('Dream Land original wind was not exercised');
       if(platforms&&platforms.some(p=>!p.upFrames||!p.downFrames||p.max-p.min<1))throw Error('Both Fountain platforms must move up and down');
       if(randall){module._free(itemBuffer);if(!randall.leftFrames||!randall.rightFrames||!randall.upFrames||!randall.downFrames||randall.maxX-randall.minX<100||!shyGuys.peak||!shyGuys.spawns||!shyGuys.retirements)throw Error('Randall cycle or Shy Guy lifecycle not exercised');}
+      if(stadium){stadium.transformCallbacks=module._portStadiumRead(3);if(stadium.transformCallbacks<stageFrames)throw Error('Frozen Stadium scheduler was not exercised');stadium.enabledJointMask=module._portStadiumRead(4);}
       report.stage.callbackFrames=stageFrames;report.stage.callbacksVerified=true;
     }
     if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat'))await verifyCombat(module,[object,opponent],report.combat,{

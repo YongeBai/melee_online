@@ -46,6 +46,16 @@ export function preparePortableSource(source,output) {
     if(file==='src/sysdolphin/baselib/psdisp.c') {
       text=text.replace(/GXWGFifo\.(\w+)\s*=\s*([^;]+);/g,'portGXWrite_$1($2);');
       if(text.includes('GXWGFifo.'))throw Error('Unconverted particle FIFO access');
+      // Render-only bank exclusion. The caller validates the stage; allocation,
+      // lifetime, RNG, sorting and all simulation callbacks stay original.
+      replace('typedef struct {\n    HSD_Particle* head;',
+        'static unsigned portHiddenParticleBank = 32;\nvoid portParticleHideBank(unsigned bank) { HSD_ASSERT(0, bank <= 32); portHiddenParticleBank = bank; }\nstatic int portParticleHidden(HSD_Particle* p) { return portHiddenParticleBank < 32 && p->bank == portHiddenParticleBank; }\n\ntypedef struct {\n    HSD_Particle* head;');
+      replace('                if (!(pp->size < FLT_EPSILON)) {',
+        '                if (portParticleHidden(pp)) { pp = pp->next; continue; }\n                if (!(pp->size < FLT_EPSILON)) {');
+      // Point batches must not consume an excluded particle before the outer
+      // walker can skip it. Do not unlink or alter any particle state.
+      if(text.split('    while (q != NULL) {').length!==3)throw Error('Particle point batch shape changed');
+      text=text.replaceAll('    while (q != NULL) {','    while (q != NULL) {\n        if (portParticleHidden(q)) break;');
     }
     if(file==='src/sysdolphin/baselib/objalloc.c') {
       // WASM's address-zero page is mapped. An omitted pool initializer must

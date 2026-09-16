@@ -1,4 +1,5 @@
-import {initializeArchiveExternals,inspectArchive,archiveRootView,nativeSubgraphImage} from './archive.mjs';
+import {initializeStageArchive} from './stage-archive.mjs';
+import {inspectArchive,archiveRootView,nativeSubgraphImage} from './archive.mjs';
 import {convertSceneAsset} from './scene-assets.mjs';
 import {readJointAnimation} from './joint-animation-assets.mjs';
 import {convertMaterialAnimation} from './material-animation-assets.mjs';
@@ -26,9 +27,9 @@ export function convertCommonEffects(input) {
   return convertEffects(input,{name:'effCommonDataTable',bank:0,first:0,count:592,groups:36,models:47});
 }
 export function convertStageParticles(input,stage) {
-  const specs={story:[3,2],battlefield:[6,2],destination:[5,3],dreamland:[3,3],fountain:[14,4]};
+  const specs={stadium:[30,10],story:[3,2],battlefield:[6,2],destination:[5,3],dreamland:[3,3],fountain:[14,4]};
   const spec=specs[stage];if(!spec)throw Error('Unsupported stage particle bank '+stage);
-  return convertEffects(stage==='story'?initializeArchiveExternals(input,['GrdStoryHeiho_TopN_shapeanim_joint']):input,{stage:true,name:'map_ptcl',bank:30,first:30000,count:spec[0],groups:spec[1],models:0});
+  return convertEffects(initializeStageArchive(input,stage),{stage:true,name:'map_ptcl',bank:30,first:30000,count:spec[0],groups:spec[1],models:0});
 }
 function convertEffects(input,spec) {
   const a=inspectArchive(input),d=a.data,root=a.publics.get(spec.name);

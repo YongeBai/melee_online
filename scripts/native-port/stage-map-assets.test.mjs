@@ -160,3 +160,20 @@ test('Story imports both binding tables, signed collision-joint triples and stag
   assert.deepEqual(source,copy);assert.equal(r.count,4);assert.equal(d.getUint32(4,true),2);assert.equal(d.getInt16(2840,true),-1);assert.equal(d.getInt16(2844,true),1);assert.equal(d.getFloat32(1600,true),600);
   for(const change of [a=>a.d.setUint32(4,1),a=>a.d.setUint32(1800+2*52+36,2),a=>a.ptr(2840,1300),a=>a.d.setFloat32(1600,NaN)])assert.throws(()=>convertStageMap(story(change),{stage:'story',callbacks:true}));
 });
+
+test('Stadium preserves active models, null transformation descriptors and packed callback colors',()=>{
+  const build=change=>fixture(a=>{
+    const {d,ptr,joint,light,body}=a;ptr(8,1800);d.setUint32(12,10);
+    for(let i=0;i<10;i++)for(let j=0;j<52;j+=4){const from=64+j,to=1800+i*52+j;d.setUint32(to,d.getUint32(from));if(a.relocs.has(from))a.relocs.add(to);}
+    for(const i of [3,4,6,7,8,9])for(const j of [0,16,24]){const p=1800+i*52+j;d.setUint32(p,0);a.relocs.delete(p);}
+    ptr(1800+9*52+32,2900);d.setUint32(1800+9*52+36,1);d.setInt16(2900,7);d.setInt16(2902,-1);d.setInt16(2904,0);
+    ptr(24,2400);d.setUint32(28,48);for(let i=0;i<24;i++){if(i<4)ptr(2400+i*8,light);body[2404+i*8]=0xe0;}
+    ptr(40,2592);d.setUint32(44,44);for(let i=0;i<2;i++)ptr(2592+i*4,joint);
+    a.relocs.delete(1600);a.relocs.delete(1604);for(let i=0;i<84;i++)body[1600+i]=0;
+    for(let i=0;i<28;i+=4)d.setInt32(1600+i,3600+i);body.set([150,180,200,255],1628);for(let i=72;i<82;i+=2)d.setInt16(1600+i,i-80);
+    d.setUint32(1100,3);change?.(a);
+  },4096);
+  const source=build(),copy=source.slice(),r=convertStageMap(source,{stage:'stadium',callbacks:true}),v=new DataView(r.image.buffer,32);
+  assert.deepEqual(source,copy);assert.equal(r.count,10);assert.equal(v.getInt32(1600,true),3600);assert.equal(v.getInt16(1672,true),-8);assert.deepEqual([...r.image.subarray(1660,1664)],[150,180,200,255]);assert.equal(v.getInt16(2902,true),-1);
+  for(const change of [a=>a.d.setUint32(28,24),a=>a.d.setUint32(44,43),a=>a.d.setUint32(1800+9*52+36,2),a=>a.ptr(1628,1300)])assert.throws(()=>convertStageMap(build(change),{stage:'stadium',callbacks:true}));
+});

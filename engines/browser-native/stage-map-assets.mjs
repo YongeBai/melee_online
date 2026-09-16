@@ -1,4 +1,5 @@
-import {inspectArchive,archiveRootView,nativeSubgraphImage,initializeArchiveExternals} from './archive.mjs';
+import {initializeStageArchive} from './stage-archive.mjs';
+import {inspectArchive,archiveRootView,nativeSubgraphImage} from './archive.mjs';
 import {convertSceneAsset} from './scene-assets.mjs';
 import {readJointAnimation} from './joint-animation-assets.mjs';
 import {readAnimationObject} from './animation-object-assets.mjs';
@@ -10,6 +11,7 @@ import {colorCommandWords} from './color-assets.mjs';
 // the remaining stage roots (scripts, particle banks and collision) are assembled.
 export function convertBattlefieldMap(input,options={}) {return convertStageMap(input,{...options,stage:'battlefield'});}
 export const nativeStages=Object.freeze({
+  stadium:Object.freeze({name:'Pokémon Stadium',file:'GrPs.usd',kind:3,count:10,jointCounts:[0,0,0,0,0,0,0,0,0,1],overrideRows:24,specialCount:44,callbackScripts:0,initial:[0,1,2,5],mandatory:[0,1,2,5]}),
   story:Object.freeze({name:"Yoshi's Story",file:'GrSt.dat',kind:8,count:4,bindingCount:2,jointCounts:[0,0,1,0],overrideRows:10,specialCount:7,splineCount:1,callbackScripts:0,initial:[0,1,2,3],mandatory:[0,1,2,3]}),
   fountain:Object.freeze({name:'Fountain of Dreams',file:'GrIz.dat',kind:2,count:5,overrideRows:17,specialCount:4,shadowCount:6,splineCount:1,callbackScripts:0,initial:[0,1,2,3,4],mandatory:[0,1,2,3,4]}),
   battlefield:Object.freeze({name:'Battlefield',file:'GrNBa.dat',kind:31,count:7,overrideRows:17,specialCount:4,callbackScripts:2,initial:[0,3,1,6],mandatory:[0,3,6]}),
@@ -18,7 +20,7 @@ export const nativeStages=Object.freeze({
 });
 export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) {
   const spec=nativeStages[stage];if(!spec)throw Error('Unsupported native stage '+stage);
-  const a=inspectArchive(stage==='story'?initializeArchiveExternals(input,['GrdStoryHeiho_TopN_shapeanim_joint']):input),d=a.data,root=a.publics.get('map_head'),param=a.publics.get('grGroundParam');
+  const a=inspectArchive(initializeStageArchive(input,stage)),d=a.data,root=a.publics.get('map_head'),param=a.publics.get('grGroundParam');
   if(root===undefined||param===undefined||a.externs.size)throw Error('Missing stage map roots or unsupported externs');
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),out=new DataView(body.buffer),pointers=new Set(),writes=new Map(),claims=new Map(),packed=new Set(),seen=new Set();
   const rows=[],cameras=[],lights=[],fogs=[],active=new Set(),ownedObjects=new Set();
@@ -68,9 +70,9 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
   // eight-byte stride and exits on a match. Import every referenced light row;
   // reject a map whose lights could require the retail out-of-table scan.
   if(overrides===null||special===null||declaredOverrides!==spec.overrideRows*2||(shadow??special)-overrides!==spec.overrideRows*8||specialCount!==spec.specialCount)throw Error('Unexpected stage light override layout');
-  const overrideLights=new Set();for(let i=0;i<spec.overrideRows;i++){const p=overrides+i*8,q=ptr(p);if(q===null)throw Error('Null stage light override');light(q);raw(p+4,4);overrideLights.add(q);}
+  const overrideLights=new Set();for(let i=0;i<spec.overrideRows;i++){const p=overrides+i*8,q=ptr(p);if(q===null&&stage!=='stadium')throw Error('Null stage light override');light(q);raw(p+4,4);overrideLights.add(q);}
   if(lights.some(l=>!overrideLights.has(l.offset)))throw Error('Light is absent from bounded retail override prefix');
-  for(let i=0;i<specialCount;i++){const p=ptr(special+i*4);if(p===null||!claims.has(p+4))throw Error('Untyped stage special joint');}
+  for(let i=0;i<specialCount;i++){const p=ptr(special+i*4);if(p===null&&stage==='stadium')continue;if(p===null||!claims.has(p+4))throw Error('Untyped stage special joint');}
   // GroundParam's packed colors and padding stay bytes. Every numeric field and
   // nested StageParam row has an explicit source layout.
   for(const p of [0,12,16,20,24,28,32,36,40,48,52,56,60,64,68,72,76,80,84,88,92,96,100,180])word(param+p);
@@ -86,6 +88,10 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
       // then nine floats. These drive wind strength, bounds and original timing.
       for(let i=0;i<8;i+=2)word(yakumono+i,2);
       for(let i=8;i<52;i+=4){word(yakumono+i);if(i>=16&&!Number.isFinite(d.getFloat32(yakumono+i)))throw Error('Nonfinite Dream Land parameter');}
+    }
+    if(stage==='stadium'){
+      for(let i=0;i<28;i+=4)word(yakumono+i);raw(yakumono+28,4);
+      for(let i=32;i<72;i+=4)word(yakumono+i);for(let i=72;i<82;i+=2)word(yakumono+i,2);
     }
     if(stage==='story')for(let i=0;i<36;i+=4){word(yakumono+i);if(!Number.isFinite(d.getFloat32(yakumono+i)))throw Error('Nonfinite Story parameter');}
     if(stage==='fountain'){
