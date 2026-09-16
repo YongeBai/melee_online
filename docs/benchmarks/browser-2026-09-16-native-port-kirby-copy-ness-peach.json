@@ -138,7 +138,7 @@
         0,
         80.63999938964844
       ],
-      "gpuError": true,
+      "completedWithoutProbeError": true,
       "introFrames": 124,
       "resolution": [
         960,
@@ -222,7 +222,7 @@
         0,
         15.279999732971191
       ],
-      "gpuError": true,
+      "completedWithoutProbeError": true,
       "introFrames": 124,
       "resolution": [
         960,
@@ -312,7 +312,7 @@
           20
         ]
       },
-      "gpuError": true,
+      "completedWithoutProbeError": true,
       "introFrames": 124
     },
     "peach": {
@@ -396,7 +396,7 @@
           0
         ]
       },
-      "gpuError": true,
+      "completedWithoutProbeError": true,
       "introFrames": 124
     }
   },
@@ -482,7 +482,7 @@
           20
         ]
       },
-      "gpuError": true,
+      "completedWithoutProbeError": true,
       "allRenderedFramesVertexVerified": true,
       "validationTimeoutSeconds": 600,
       "secondaryVertexChecks": {
@@ -643,7 +643,7 @@
           0
         ]
       },
-      "gpuError": true,
+      "completedWithoutProbeError": true,
       "allRenderedFramesVertexVerified": true,
       "validationTimeoutSeconds": 300,
       "secondaryVertexChecks": {

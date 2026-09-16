@@ -69,11 +69,26 @@ to trigger the original Toad counter and spores. Every position and action
 change comes from controller inputs and original simulation. Other copied
 abilities remain pending.
 
+Fox's copy (`--opponent=Fx`) imports its two-state laser, nine-state Blaster,
+four-joint hat and model-only muzzle effect bank 33. The lifecycle test covers
+ground/air firing, release recovery, loss and reacquisition. Contact mode uses
+40-unit separation so the laser exists for an observable frame before hitting;
+it also checks that Fox's copied laser causes damage without hitlag.
+
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy --stage-callbacks --render-steps --hardware
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy=spit --stage-callbacks --render-steps --hardware
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --combat --kirby-copy=acquire --render-steps --verify-vertices --hardware
 ```
+
+For slower per-vertex validation, use an explicit bounded budget, for example:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ns --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600
+```
+
+This only extends the diagnostic timeout; it changes no gameplay or performance
+setting. The accepted range is 1–3600 seconds.
 
 Ice Climbers load Popo and Nana through the original player-owned constructor.
 Both fighter roots import their three Articles; Nana uses Popo's registered item

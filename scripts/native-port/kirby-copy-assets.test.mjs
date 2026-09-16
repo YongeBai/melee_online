@@ -27,7 +27,7 @@ test('Mario copy imports the original hat, visibility and fireball; only unreach
 });
 test('Mario copy rejects malformed roots, changed exporter references, additional reachable data and descriptor overlap',()=>{
   for(const change of [a=>a.relocs.delete(300),a=>a.d.setUint32(316,1),a=>a.ptr(42868,1024),a=>a.ptr(316,42852),a=>a.ptr(280,300),a=>a.ptr(260,42836),a=>a.ptr(4000,1024)])assert.throws(()=>convertKirbyCopy(fixture(change),'Mr'));
-  assert.throws(()=>convertKirbyCopy(fixture(),'Fx'),/pending/);
+  assert.throws(()=>convertKirbyCopy(fixture(),'Xx'),/pending/);
 });
 
 test('Luigi and Dr. Mario copies retain their separate Article extents and null animation topology',()=>{
@@ -65,4 +65,20 @@ test('Ness and Peach copies preserve both original Articles and multi-animation 
   for(const code of ['Ns','Pe']){const input=dualFixture(code),before=input.slice(),r=convertKirbyCopy(input,code);assert.deepEqual(input,before);assert.deepEqual(r.articles.rows.map(a=>a.stateCount),code==='Ns'?[3,1]:[2,1]);assert.equal(r.articles.rows[1].joint,code==='Ns'?2304:null);assert.equal(r.unreferencedRelocations.length,code==='Ns'?11:8);assert(r.pointerSlots.has(1016));
     for(const change of [a=>a.ptr(1016,400),a=>a.ptr(code==='Ns'?54312:35888,1200),a=>a.relocs.delete(1016)])assert.throws(()=>convertKirbyCopy(dualFixture(code,change),code));
   }
+});
+
+function blasterFixture(change=()=>{}){
+  const body=new Uint8Array(75416),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(1000,1200);d.setUint32(1004,1);ptr(1008,1100);ptr(1012,400);ptr(1016,424);
+  for(const joint of [1200,2048,2304])for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  for(const [article,attributes,special,states,model,joint]of [[400,0,132,600,500,2048],[424,200,332,680,516,2304]]){ptr(article,attributes);ptr(article+4,special);ptr(article+12,states);ptr(article+16,model);ptr(model,joint);d.setUint32(model+4,1);}
+  for(const [at,to]of [[49320,2048],[49336,49320],[75392,2304],[75408,75392]])ptr(at,to);
+  change({d,ptr,relocs});
+  const name=new TextEncoder().encode('ftDataKirbyCopyFox\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,1000);bytes.set(name,pub+8);return bytes;
+}
+test('Fox copy preserves separate laser and nine-state Blaster Articles with null animations',()=>{
+  const input=blasterFixture(),before=input.slice(),r=convertKirbyCopy(input,'Fx');assert.deepEqual(input,before);
+  assert.deepEqual(r.articles.rows.map(a=>[a.stateCount,a.specialWords]),[[2,10],[9,10]]);assert(r.articles.rows.every(a=>a.animations.every(s=>s.joint===null&&s.material===null)));assert.equal(r.unreferencedRelocations.length,4);
+  for(const change of [a=>a.ptr(75408,49320),a=>a.ptr(49324,600),a=>a.relocs.delete(1016),a=>a.ptr(600,1200)])assert.throws(()=>convertKirbyCopy(blasterFixture(change),'Fx'));
 });

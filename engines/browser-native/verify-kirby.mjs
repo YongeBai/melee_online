@@ -39,7 +39,7 @@ export function verifyKirbyMoves(module,object,report,{step,onStep=()=>{},only=n
 export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='swallow'}){
   const require=(ok,message)=>{if(!ok)throw Error('Kirby copy: '+message);};
   const read=()=>objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
-  const copyKind=read()[1][11],profile={8:{item:145,explosion:146,ground:435,air:439,hold:110},9:{item:134,counter:135,ground:449,air:451,distance:18},2:{item:null,ground:433,air:434},25:{item:null,ground:528,air:529},0:{item:130,ground:399,air:400},17:{item:132,ground:431,air:432},21:{item:131,ground:512,air:513}}[copyKind];
+  const copyKind=read()[1][11],profile={1:{item:136,blaster:138,ground:423,air:426,contactDistance:40},8:{item:145,explosion:146,ground:435,air:439,hold:110},9:{item:134,counter:135,ground:449,air:451,distance:18},2:{item:null,ground:433,air:434},25:{item:null,ground:528,air:529},0:{item:130,ground:399,air:400},17:{item:132,ground:431,air:432},21:{item:131,ground:512,air:513}}[copyKind];
   require(read()[0][11]===4&&profile,'Kirby versus a supported copy');require(['swallow','acquire','spit','contact'].includes(mode),'mode');
   Object.assign(report,{completed:false,copyKind,projectileKind:profile.item,secondaryItemKind:profile.explosion??profile.counter??null,attackStates:[profile.ground,profile.air],frames:0,states:[[],[]],trace:[],itemKinds:[],retailParityVerified:false});
   const buffer=module._malloc(512),stocks=read().map(s=>s[18]);let phase='approach';
@@ -51,12 +51,12 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     for(const item of items){require(item.every(Number.isFinite)&&(!(item[0]===profile.item)||item[5]===objects[0]),'finite items and Kirby projectile ownership');if(!report.itemKinds.includes(item[0]))report.itemKinds.push(item[0]);}
     s.forEach((v,i)=>{if(!report.states[i].includes(v[0]))report.states[i].push(v[0]);});
     const hat=Array.from({length:3},(_,i)=>module._portKirbyRead(objects[0],i));
+    if(report.contactBefore&&!report.contactImpact&&s[1][13]>report.contactBefore[1][13])report.contactImpact=s.map(v=>v.slice());
     report.trace.push({phase,state:s,hat,items});report.final=s;report.hat=hat;onStep(report);return s;
   }
   const neutral=n=>{for(let i=0;i<n;i++)tick();};
   function attack(air=false){tick([0x200,0,0]);if(profile.hold&&!air)for(let i=1;i<profile.hold;i++)tick([0x200,0,0]);}
-  function approach(){
-    const separation=profile.distance??20;
+  function approach(separation=profile.distance??20){
     for(let i=0;i<120;i++)tick([0,0,i<5&&read()[0][5]>1?-1:0],[0,0,i<5&&read()[1][5]>1?-1:0]);
     for(let i=0;i<180;i++){const s=read(),dx=s[1][4]-s[0][4];if(Math.abs(Math.abs(dx)-separation)<1)break;tick([0,Math.sign(dx)*.5*(Math.abs(dx)>separation?1:-1),0]);}
     const dir=Math.sign(read()[1][4]-read()[0][4])||1;for(let i=0;i<4;i++)tick([0,dir*.5,0],[0,-dir*.5,0]);neutral(20);
@@ -70,7 +70,7 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     phase='swallow';tick([0,0,-1]);neutral(140);
     require(report.hat[0]===copyKind&&report.hat[1]&&report.hat[2],'original copy hat acquired');require(read().every(s=>s[0]===14),'both fighters recover');
     report.firstHat=report.hat.slice();
-    if(mode==='contact'){phase='copied attack contact approach';approach();
+    if(mode==='contact'){phase='copied attack contact approach';approach(profile.contactDistance??profile.distance??20);
       if(copyKind===8){for(let i=0;i<120&&Math.abs(read()[1][4])>1;i++)tick([0,0,0],[0,-Math.sign(read()[1][4])*.5,0]);approach();}
       report.contactBefore=read();require(report.contactBefore.every(s=>s[0]===14&&s[3]===0),'grounded contact approach');}
     if(mode==='contact'&&copyKind===8){
@@ -95,10 +95,11 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     }
     neutral(240);
     require(report.states[0].includes(profile.ground)&&(profile.item===null||report.itemKinds.includes(profile.item)),'original copied attack state and any required item');
+    if(profile.blaster)require(report.itemKinds.includes(profile.blaster),'original copied Blaster item');
     if(profile.explosion)require(report.itemKinds.includes(profile.explosion),'charged copied PK Flash explodes');
     if(mode==='contact'&&profile.counter)require(report.states[0].includes(450)&&report.itemKinds.includes(profile.counter),'native Toad counter and spores');
     require(read()[0][0]===14&&report.hat[0]===copyKind,'copy retained after attack');require(!module._portItemsList(buffer,128),'projectile retirement');
-    if(mode==='contact'){report.contactAfter=read();require(report.contactAfter[1][13]>report.contactBefore[1][13],'copied attack damages opponent');require(report.contactAfter[0][13]===report.contactBefore[0][13],'attacker damage unchanged');report.completed=true;return;}
+    if(mode==='contact'){if(profile.blaster)require(report.contactImpact?.[1][14]===0,'Fox laser does not cause hitlag');report.contactAfter=read();require(report.contactAfter[1][13]>report.contactBefore[1][13],'copied attack damages opponent');require(report.contactAfter[0][13]===report.contactBefore[0][13],'attacker damage unchanged');report.completed=true;return;}
     if(mode==='acquire'){report.completed=true;return;}
     phase='air copied neutral special';for(let i=0;i<10;i++)tick([0x400,0,0]);neutral(8);attack(true);neutral(300);require(report.states[0].includes(profile.air)&&read()[0][0]===14,'air copy and recovery');
     phase='taunt copy loss';tick([8,0,0]);neutral(300);require(report.hat[0]===4&&!report.hat[1]&&report.itemKinds.includes(52),'original copy loss and star');require(read()[0][0]===14&&!module._portItemsList(buffer,128),'taunt and star retirement');

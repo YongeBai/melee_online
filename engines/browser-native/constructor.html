@@ -106,7 +106,7 @@ try {
   const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Pp'?['Nn']:c==='Nn'?['Pp']:c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
   for(const selected of packageCodes)packages.push(await loadFighterPackage(module,selected,packageOptions));
   const kirbyCopies=[];
-  if(packageCodes.includes('Kb'))for(const selected of packages.filter(p=>['Mr','Lg','Dr','Ca','Gn','Ns','Pe'].includes(p.code))){
+  if(packageCodes.includes('Kb'))for(const selected of packages.filter(p=>['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx'].includes(p.code))){
     const copyName='PlKbCp'+selected.code+'.dat',bytes=await asset(copyName),source=convertKirbyCopy(bytes,selected.code);installResidentFile(module,copyName,source.image);
     const effectName='EfKb'+(selected.code==='Dr'?'Mr':selected.code)+'.dat';
     // Original effect entries 42 (Ness) and 45 (Peach) have no file.

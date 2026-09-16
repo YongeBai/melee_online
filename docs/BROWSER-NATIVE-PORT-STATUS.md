@@ -5,6 +5,16 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Fox copy now passes the 1,993-frame full rendered lifecycle, plus 124
+intro frames: ground/air Blaster, hat loss and reacquisition. A separate
+979-frame contact test observes the laser raise Fox from 8 to 11 damage without
+hitlag. The same 979-frame sequence passes focused GPU vertex validation, with
+20,538 vertices checked in the saved firing frame. The original four-joint hat,
+two-state laser, nine-state gun and model-only muzzle effect are imported.
+All 208 unit tests and the Mario copied-fireball contact regression pass.
+These are correctness checks; no new performance or retail-parity claim is made.
+[Fox-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-fox.json).
+
 Kirby's Ness and Peach copies now pass full rendered lifecycle tests: 2,239 and
 1,971 frames respectively, plus 124 intro frames each. The two-item copy loader
 preserves PK Flash and its explosion, and Toad and its spores. The original
