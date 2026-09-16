@@ -32,7 +32,7 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
-Falco now runs through the complete fighter archive assembler, original OnLoad
+Fox and Falco now run through the complete fighter archive assembler, original OnLoad
 article registration, item constructor and item scheduler. The original neutral
 special creates its blaster and laser; the live renderer tracks their original
 model owners, retires resources when they disappear, and refreshes bindings on
@@ -52,11 +52,22 @@ node scripts/native-port/probe-constructor.mjs --character=Fc --input --projecti
 node scripts/native-port/probe-constructor.mjs --character=Fc --input --projectile-shield
 ```
 
+Replace `--character=Fc` with `--character=Fx` to check Fox. Add
+`--projectile-reflect` to exercise the defender's original down special; the
+test requires projectile ownership transfer, protected defender damage, and
+damage to the original shooter. The renderer includes the original reflector
+model and other model effects even in the smaller input fixture.
+
 The contact fixture moves the second fighter with normalized walking input.
-It requires damage, hitlag and knockback for a hit; no projectile or damage for
-the no-fire control; and shield stun with protected damage for shielding.
-These are limited move/interaction checks, not full Falco competitive parity.
-Fox still needs its extra x48 graph before complete construction is enabled.
+It requires damage and Falco hitlag/knockback, while explicitly requiring Fox's
+ordinary laser hit to omit both. The no-fire control requires no projectile or
+damage; shielding must preserve damage and enter shield stun. These are limited
+move/interaction checks, not full Fox/Falco competitive parity.
+
+Fox's extra x48 slot is a relocation-free signed-word choice record, not an
+Article or model. Its values are imported from the hosted archive using a bounded
+terminated-pair parser. The pinned Fox code only reads x48 slots 0–2; no new
+gameplay meaning is assigned to the retained extra. Unexpected layouts fail.
 
 The earlier article subsystem check imports Fox/Falco laser, blaster and illusion data
 into original item model owners, then executes the original hitbox command

@@ -5,6 +5,27 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Fox is now the seventh constructor-capable fighter. Its blocking x48 extra
+was a small relocation-free integer record rather than another model/article;
+the importer preserves the source values and validates the terminated layout.
+The original constructor, movement, jump, aerial attack and neutral special run.
+Fox's laser contact deals 3% without hitlag or knockback; the separate shield
+case protects damage and enters shield stun. Reflection transfers projectile
+ownership and deals 5% to the original shooter while protecting the defender.
+The no-fire control produces neither a projectile nor damage.
+
+Visual inspection caught a missing reflector model in the smaller input
+fixture, whose live effect-model collection was previously disabled. It now
+draws the original reflector, muzzle flash and other resident model effects.
+The inspected 960×720 reflection image and GPU vertex checks pass. Native
+camera code and framing are unchanged. These are selected mechanics checks,
+not full Fox move parity or a new performance/presentation result.
+All 147 targeted tests and the fighter build pass. Falco's rendered laser
+contact regression retains its damage, hitlag and knockback behavior.
+[Fox and reflection evidence](benchmarks/browser-2026-09-16-native-port-fox-reflection.json).
+
+Previous Falco checkpoint:
+
 Falco is now the sixth constructor-capable fighter. Its original neutral special
 spawns the blaster and laser through Melee's item constructor and scheduler;
 the renderer tracks and retires the original item model owners. The contact

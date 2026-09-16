@@ -1,0 +1,758 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "179b4c5",
+  "scope": "Fox complete base archive assembly, native neutral-special contact and reflection, and restored model effects in input renderer; incomplete competitive-play acceptance",
+  "wasmSha256": "d93140228855c2a1dab3633682f9c43cd8381609ff1f976c7b44144c23fc980f",
+  "portableRecipeSha256": "eb5cc4b6c625c81ba6f920353da200f953b5a796d0c0267d40fe6adab1e0a98f",
+  "browser": "Google Chrome 151.0.7922.137",
+  "resolution": [
+    960,
+    720
+  ],
+  "sourceHashes": {
+    "fox-extra-assets.mjs": "3414bf238421e392b4a5706f9d68d991c84598ad7dd6efdffff37922ae1662d9",
+    "fighter-base-assets.mjs": "f29fc366b7088901883e53595dc2242a9f141c86480310685d1507aa59b9ea60",
+    "constructor.html": "1cf8f05c7a8cc314dbb262784b1d7da704d144f7f41d8bb2031e701e17471e5b",
+    "native-match-preview.mjs": "5d9817e35a251b0de9ec1b30bd0006c8725df324e299a0f420d19d7f69669323",
+    "material-gpu.mjs": "a79aafbed32eb2901fea1bb1d5414e791b7e129108aec94149917befdcf0190e"
+  },
+  "constructor": {
+    "verified": true,
+    "character": {
+      "code": "Fx",
+      "name": "Fox",
+      "kind": 1
+    },
+    "schedulerSteps": 120,
+    "inputFrames": 142,
+    "inputCompleted": true,
+    "baseArchive": {
+      "passed": true,
+      "checks": 1708332,
+      "bytes": 1726446,
+      "partCount": 73,
+      "costumes": 4,
+      "motionRows": 327,
+      "demoRows": 14,
+      "imports": [
+        {
+          "label": "initialization",
+          "at": 96,
+          "size": 244980,
+          "pointers": 680
+        },
+        {
+          "label": "visibility",
+          "at": 245288,
+          "size": 244960,
+          "pointers": 15
+        },
+        {
+          "label": "demo motions",
+          "at": 490248,
+          "size": 244960,
+          "pointers": 29
+        },
+        {
+          "label": "secondary animations",
+          "at": 735236,
+          "size": 244960,
+          "pointers": 961
+        },
+        {
+          "label": "gameplay parameters",
+          "at": 980196,
+          "size": 244996,
+          "pointers": 22
+        },
+        {
+          "label": "dynamics",
+          "at": 1225192,
+          "size": 304,
+          "pointers": 3
+        },
+        {
+          "label": "hurtboxes",
+          "at": 1225496,
+          "size": 556,
+          "pointers": 2
+        },
+        {
+          "label": "auxiliary model",
+          "at": 1226052,
+          "size": 244960,
+          "pointers": 617
+        },
+        {
+          "label": "articles",
+          "at": 1471012,
+          "size": 245004,
+          "pointers": 228
+        },
+        {
+          "label": "Fox extra",
+          "at": 1716016,
+          "size": 24,
+          "pointers": 0
+        }
+      ],
+      "relocations": 2584
+    }
+  },
+  "extraRecord": {
+    "source": "Fox USA 1.02 ftData.x48 slot 4",
+    "representation": "Bounded terminated s32 pairs; source indices/weights imported, no nested relocations",
+    "readAudit": "Pinned Fox OnLoad reads item slots 0, 1 and 2; retained extra receives no invented gameplay use"
+  },
+  "cases": {
+    "hit": {
+      "rawReport": "Fx-projectile-contact-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "mode": "hit",
+      "frames": 180,
+      "laserFrames": 3,
+      "peakItems": 2,
+      "contact": {
+        "damageBefore": 0,
+        "damageAfter": 3,
+        "shooterDamageBefore": 0,
+        "shooterDamageAfter": 0,
+        "reflectedFrames": 0,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "shieldBefore": 60,
+        "shieldAfter": 60,
+        "defenderStates": [
+          14
+        ]
+      },
+      "traceSha256": "b00d7e7207e19272188ad6090fa4892da8cdf1f930be68529941035f5df5bfbe",
+      "renderedItems": [
+        {
+          "name": "Fox item 1",
+          "passes": [
+            14,
+            0,
+            2
+          ],
+          "draws": 16
+        },
+        {
+          "name": "Fox item 0",
+          "passes": [
+            0,
+            0,
+            4
+          ],
+          "draws": 4
+        }
+      ],
+      "renderedEffects": [
+        {
+          "name": "Effect 0:18",
+          "passes": [
+            0,
+            0,
+            2
+          ],
+          "draws": 2
+        },
+        {
+          "name": "Effect 3:5",
+          "passes": [
+            0,
+            0,
+            1
+          ],
+          "draws": 1
+        }
+      ],
+      "gpuVertices": {
+        "vertices": 23830,
+        "positionComponents": 71490,
+        "normalComponents": 71490,
+        "maxScaledPositionError": 0.0000036368604222555677,
+        "maxNormalError": 1.0889083146281564e-7,
+        "byOwner": {
+          "1537888": {
+            "vertices": 458,
+            "ndcMin": [
+              -884.1047867609118,
+              -2356.700054910059,
+              -0.11005125513762505
+            ],
+            "ndcMax": [
+              583.0573461645039,
+              834.9213211983911,
+              0.04811853518257276
+            ]
+          },
+          "1539008": {
+            "vertices": 8608,
+            "ndcMin": [
+              -2.411336482035214,
+              -1.0195877210707776,
+              -0.0006619055387693904
+            ],
+            "ndcMax": [
+              0.17697636549840912,
+              0.9809060485687628,
+              -0.0004680709760080247
+            ]
+          },
+          "1543456": {
+            "vertices": 6972,
+            "ndcMin": [
+              -0.7987109464046374,
+              -0.2112246193141396,
+              -0.0005552695392766503
+            ],
+            "ndcMax": [
+              -0.5767419816235376,
+              0.077653630999859,
+              -0.0005331718344212058
+            ]
+          },
+          "11634944": {
+            "vertices": 6972,
+            "ndcMin": [
+              -0.14937155543705774,
+              -0.19391368827882433,
+              -0.0005439890241411154
+            ],
+            "ndcMax": [
+              0.05785563770438409,
+              0.13184112055515276,
+              -0.0005164744382457505
+            ]
+          },
+          "11796000": {
+            "vertices": 95,
+            "ndcMin": [
+              -0.526328371630899,
+              -0.14328122736111362,
+              -0.0005562561721320446
+            ],
+            "ndcMax": [
+              -0.39139439942832094,
+              0.06810980816696825,
+              -0.0005235244438500198
+            ]
+          },
+          "11804064": {
+            "vertices": 588,
+            "ndcMin": [
+              -0.6128039320634328,
+              -0.0934877192018032,
+              -0.0005461492791497102
+            ],
+            "ndcMax": [
+              -0.5256096733662718,
+              -0.027123322467161367,
+              -0.0005415184127312323
+            ]
+          },
+          "11833344": {
+            "vertices": 110,
+            "ndcMin": [
+              -0.8271451487815474,
+              -0.2088440893588852,
+              -0.0005991203812234966
+            ],
+            "ndcMax": [
+              -0.4869853454896908,
+              0.05663028255047064,
+              -0.0004950995946009095
+            ]
+          },
+          "11837056": {
+            "vertices": 27,
+            "ndcMin": [
+              -0.5516857275012734,
+              -0.19712775860601173,
+              -0.0005669088387594045
+            ],
+            "ndcMax": [
+              -0.5024206834384436,
+              0.11662177215253985,
+              -0.0005213716671532146
+            ]
+          }
+        }
+      },
+      "resources": {
+        "stageCreated": 0,
+        "stageRetired": 0,
+        "effectCreated": 2,
+        "effectRetired": 2,
+        "peakEffectModels": 3,
+        "itemCreated": 2,
+        "itemRetired": 2,
+        "peakItemModels": 2
+      }
+    },
+    "shield": {
+      "rawReport": "Fx-projectile-shield-constructor-input-probe.json",
+      "completed": true,
+      "mode": "shield",
+      "frames": 180,
+      "laserFrames": 3,
+      "peakItems": 2,
+      "contact": {
+        "damageBefore": 0,
+        "damageAfter": 0,
+        "shooterDamageBefore": 0,
+        "shooterDamageAfter": 0,
+        "reflectedFrames": 0,
+        "peakHitlag": 3,
+        "peakKnockback": 0,
+        "shieldBefore": 56.920013427734375,
+        "shieldAfter": 6.100080966949463,
+        "defenderStates": [
+          179,
+          181
+        ]
+      },
+      "traceSha256": "bb1ad1957785a3600dcc32d8f1703e3969e436444e7cb6080ea03bda1a71c1cf"
+    },
+    "reflect": {
+      "rawReport": "Fx-projectile-reflect-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "mode": "reflect",
+      "frames": 180,
+      "laserFrames": 8,
+      "peakItems": 2,
+      "contact": {
+        "damageBefore": 0,
+        "damageAfter": 0,
+        "shooterDamageBefore": 0,
+        "shooterDamageAfter": 5,
+        "reflectedFrames": 5,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "shieldBefore": 60,
+        "shieldAfter": 60,
+        "defenderStates": [
+          361,
+          362
+        ]
+      },
+      "traceSha256": "84b350cf8d32dc0eebb02f9a683e715820d1360945be52664bf00c94192a2dd7",
+      "renderedItems": [
+        {
+          "name": "Fox item 1",
+          "passes": [
+            14,
+            0,
+            2
+          ],
+          "draws": 16
+        },
+        {
+          "name": "Fox item 0",
+          "passes": [
+            0,
+            0,
+            4
+          ],
+          "draws": 4
+        }
+      ],
+      "renderedEffects": [
+        {
+          "name": "Effect 3:0",
+          "passes": [
+            1,
+            0,
+            0
+          ],
+          "draws": 1
+        },
+        {
+          "name": "Effect 0:18",
+          "passes": [
+            0,
+            0,
+            2
+          ],
+          "draws": 2
+        },
+        {
+          "name": "Effect 3:5",
+          "passes": [
+            0,
+            0,
+            1
+          ],
+          "draws": 1
+        }
+      ],
+      "gpuVertices": {
+        "vertices": 24613,
+        "positionComponents": 73839,
+        "normalComponents": 73839,
+        "maxScaledPositionError": 0.000006825464964105155,
+        "maxNormalError": 1.2402047178117215e-7,
+        "byOwner": {
+          "1537888": {
+            "vertices": 458,
+            "ndcMin": [
+              -298.8490749853805,
+              -279.85309254633694,
+              -0.017376877183739814
+            ],
+            "ndcMax": [
+              965.7980806115561,
+              2485.187558428498,
+              0.11671106653255982
+            ]
+          },
+          "1539008": {
+            "vertices": 9348,
+            "ndcMin": [
+              -2.412770924506392,
+              -1.0195298215757234,
+              -0.0006619807864906443
+            ],
+            "ndcMax": [
+              0.17605302663881528,
+              0.981175555844807,
+              -0.000468097943533482
+            ]
+          },
+          "1543456": {
+            "vertices": 6972,
+            "ndcMin": [
+              -0.7996829117572477,
+              -0.21107521984424138,
+              -0.0005553007970567749
+            ],
+            "ndcMax": [
+              -0.5776870138541399,
+              0.07782187615693721,
+              -0.0005332046739392065
+            ]
+          },
+          "11634944": {
+            "vertices": 6972,
+            "ndcMin": [
+              -0.16400922311922386,
+              -0.18745998881200399,
+              -0.0005450139876073349
+            ],
+            "ndcMax": [
+              0.04750513995205256,
+              0.06556382425658436,
+              -0.0005204355587079939
+            ]
+          },
+          "11796000": {
+            "vertices": 43,
+            "ndcMin": [
+              -0.14499889985635744,
+              -0.19142014720548647,
+              -0.0005286135724442824
+            ],
+            "ndcMax": [
+              0.024255192385922972,
+              0.046497246668546585,
+              -0.0005286135724442824
+            ]
+          },
+          "11804064": {
+            "vertices": 588,
+            "ndcMin": [
+              -0.6137518030419483,
+              -0.09332587738265352,
+              -0.0005461738049515588
+            ],
+            "ndcMax": [
+              -0.526550442654024,
+              -0.026958657927189995,
+              -0.0005415384102643706
+            ]
+          },
+          "11833120": {
+            "vertices": 95,
+            "ndcMin": [
+              -0.5272692323053302,
+              -0.14311698536641373,
+              -0.000556275571467991
+            ],
+            "ndcMax": [
+              -0.39232520502011475,
+              0.06828401765403842,
+              -0.0005235379266747211
+            ]
+          },
+          "11837952": {
+            "vertices": 110,
+            "ndcMin": [
+              -0.8728814406437365,
+              -0.21821406436968238,
+              -0.0006102493294979289
+            ],
+            "ndcMax": [
+              -0.5251484959861878,
+              0.05199045882983794,
+              -0.0005027097604619222
+            ]
+          },
+          "11838336": {
+            "vertices": 27,
+            "ndcMin": [
+              -0.552627464211707,
+              -0.19696714429221274,
+              -0.0005669309341036911
+            ],
+            "ndcMax": [
+              -0.5033604686553453,
+              0.11679445901357424,
+              -0.0005213916638796265
+            ]
+          }
+        }
+      },
+      "resources": {
+        "stageCreated": 0,
+        "stageRetired": 0,
+        "effectCreated": 6,
+        "effectRetired": 5,
+        "peakEffectModels": 5,
+        "itemCreated": 2,
+        "itemRetired": 2,
+        "peakItemModels": 2
+      }
+    },
+    "control": {
+      "rawReport": "Fx-projectile-control-constructor-input-probe.json",
+      "completed": true,
+      "mode": "control",
+      "frames": 180,
+      "laserFrames": 0,
+      "peakItems": 0,
+      "contact": {
+        "damageBefore": 0,
+        "damageAfter": 0,
+        "shooterDamageBefore": 0,
+        "shooterDamageAfter": 0,
+        "reflectedFrames": 0,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "shieldBefore": 60,
+        "shieldAfter": 60,
+        "defenderStates": [
+          14
+        ]
+      },
+      "traceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "falcoRegression": {
+      "rawReport": "Fc-projectile-contact-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "mode": "hit",
+      "frames": 180,
+      "laserFrames": 5,
+      "peakItems": 2,
+      "contact": {
+        "damageBefore": 0,
+        "damageAfter": 3,
+        "shooterDamageBefore": 0,
+        "shooterDamageAfter": 0,
+        "reflectedFrames": 0,
+        "peakHitlag": 3,
+        "peakKnockback": 23.44444465637207,
+        "shieldBefore": 60,
+        "shieldAfter": 60,
+        "defenderStates": [
+          14,
+          78
+        ]
+      },
+      "traceSha256": "de664c78756f7fd27109d2d8c34fa3f022b14a89bc5fec9cd5b562ad72860d91",
+      "renderedItems": [
+        {
+          "name": "Falco item 1",
+          "passes": [
+            14,
+            0,
+            2
+          ],
+          "draws": 16
+        },
+        {
+          "name": "Falco item 0",
+          "passes": [
+            0,
+            0,
+            4
+          ],
+          "draws": 4
+        }
+      ],
+      "renderedEffects": [
+        {
+          "name": "Effect 0:18",
+          "passes": [
+            0,
+            0,
+            2
+          ],
+          "draws": 2
+        },
+        {
+          "name": "Effect 3:5",
+          "passes": [
+            0,
+            0,
+            1
+          ],
+          "draws": 1
+        }
+      ],
+      "gpuVertices": {
+        "vertices": 21494,
+        "positionComponents": 64482,
+        "normalComponents": 64482,
+        "maxScaledPositionError": 0.000003002795485266902,
+        "maxNormalError": 1.195455666680445e-7,
+        "byOwner": {
+          "1537888": {
+            "vertices": 458,
+            "ndcMin": [
+              -76.30341831267322,
+              -61.15852500923899,
+              -0.00447730636304337
+            ],
+            "ndcMax": [
+              111.81541370723936,
+              136.01358965673845,
+              0.008319772305669203
+            ]
+          },
+          "1539008": {
+            "vertices": 8608,
+            "ndcMin": [
+              -2.7070078721201134,
+              -1.0795275345352966,
+              -0.0007033439110862192
+            ],
+            "ndcMax": [
+              0.056273983160576205,
+              1.0262544934912732,
+              -0.0004879194979497606
+            ]
+          },
+          "1543456": {
+            "vertices": 5804,
+            "ndcMin": [
+              -0.8072903130374784,
+              -0.22770471006004045,
+              -0.0005857841718769256
+            ],
+            "ndcMax": [
+              -0.5888878860001493,
+              0.12933897292196067,
+              -0.000549572932654089
+            ]
+          },
+          "11364480": {
+            "vertices": 5804,
+            "ndcMin": [
+              -0.1637162458286777,
+              -0.21155945915635008,
+              -0.0005684739451079345
+            ],
+            "ndcMax": [
+              0.04109068390104506,
+              0.17845706135558653,
+              -0.0005351259326159081
+            ]
+          },
+          "11505376": {
+            "vertices": 95,
+            "ndcMin": [
+              -0.5809549953818743,
+              -0.1458272983676078,
+              -0.0005808284186785141
+            ],
+            "ndcMax": [
+              -0.4800917677518965,
+              0.0742688221227718,
+              -0.000545788671086662
+            ]
+          },
+          "11510464": {
+            "vertices": 588,
+            "ndcMin": [
+              -0.6702368637703321,
+              -0.0628328561476804,
+              -0.0005728352679564324
+            ],
+            "ndcMax": [
+              -0.5779451173884703,
+              -0.026944426821561968,
+              -0.0005609237824073227
+            ]
+          },
+          "11531968": {
+            "vertices": 110,
+            "ndcMin": [
+              -0.8608334117194707,
+              -0.22504180249118103,
+              -0.0006283102148120139
+            ],
+            "ndcMax": [
+              -0.5055371563243305,
+              0.053106862920747795,
+              -0.0005150432664822083
+            ]
+          },
+          "11532512": {
+            "vertices": 27,
+            "ndcMin": [
+              -0.6131351274132634,
+              -0.2006237860095926,
+              -0.0005883139431587096
+            ],
+            "ndcMax": [
+              -0.5561797143468571,
+              0.12383791276069568,
+              -0.0005393489912010928
+            ]
+          }
+        }
+      },
+      "resources": {
+        "stageCreated": 0,
+        "stageRetired": 0,
+        "effectCreated": 3,
+        "effectRetired": 3,
+        "peakEffectModels": 3,
+        "itemCreated": 2,
+        "itemRetired": 2,
+        "peakItemModels": 2
+      }
+    }
+  },
+  "visualInspection": {
+    "reflectionImage": "dist/native-port/Fx-native-match-projectile-reflect.png",
+    "sha256": "62995777bf93dd5e8407cc894a143be4a301b4cdca33af98acaa1b734b3d9abc",
+    "observed": "Fox, original blaster/laser, visible hexagonal reflector and model muzzle effect; native 4:3 framing",
+    "cameraCodeChanged": false,
+    "pixelParityAgainstDolphin": false
+  },
+  "checks": {
+    "targetedTests": 147,
+    "failed": 0,
+    "fighterBuild": true
+  },
+  "limitations": [
+    "Seven constructor-capable fighters; other characters and full Fox/Falco move parity remain",
+    "Small input fixture now draws model effects; complete particle/camera-pass rendering is still the separate stage-callback path",
+    "Tournament stages/scenes, audio, controller/network integration and deployment remain incomplete",
+    "No new timed performance sample, distinct-presentation measurement or input-to-photon measurement"
+  ],
+  "acceptanceMet": false,
+  "performanceMeasured": false
+}

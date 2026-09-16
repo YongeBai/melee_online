@@ -51,7 +51,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(code==='Fc') {
+  if(['Fx','Fc'].includes(code)) {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -197,11 +197,11 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=null;
-      if(code==='Fc'){
+      if(['Fx','Fc'].includes(code)){
         itemModels=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(baseBytes),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
-        for(const row of articles.rows)itemModels.set(base+row.joint,{name:'Falco item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
+        for(const row of articles.rows)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
       }
-      preview=createNativeMatchPreview(module,canvas,previewActors,{items:itemModels,effects:stageCallbacks?effectModels:null,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
+      preview=createNativeMatchPreview(module,canvas,previewActors,{items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(intro){
@@ -269,17 +269,18 @@ try {
       }
       report.input.completed=true;
       if(params.has('projectiles')) {
-        if(code!=='Fc')throw Error('Projectile input fixture currently requires Falco');
-        const projectileControl=params.has('projectilecontrol'),projectileShield=params.has('projectileshield');
-        const archive=inspectArchive(baseBytes),root=archive.publics.get('ftDataFalco'),attrs=archive.data.getUint32(root+4),laserKind=archive.data.getUint32(attrs+28);
+        if(!['Fx','Fc'].includes(code))throw Error('Projectile input fixture requires Fox or Falco');
+        const projectileControl=params.has('projectilecontrol'),projectileShield=params.has('projectileshield'),projectileReflect=params.has('projectilereflect');
+        const archive=inspectArchive(baseBytes),root=archive.publics.get('ftData'+character),attrs=archive.data.getUint32(root+4),laserKind=archive.data.getUint32(attrs+28);
         if(opponent){
           module._Player_80031848(1);
           for(let frame=0;frame<90;frame++){module._portStageProbePad(0,0,0,0);module._portStageProbePad(1,0,0,frame<5?-1:0);step();}
           // Place the defender using walking input, never a position/state write.
           for(let frame=0;combatState(opponent)[4]<state()[4]+35&&frame<120;frame++){module._portStageProbePad(1,0,.5,0);step();}
-          for(let frame=0;frame<12;frame++){module._portStageProbePad(1,projectileShield?0x20:0,0,0);step();}
+          if(projectileReflect){module._portStageProbePad(1,0,-.5,0);step();}
+          for(let frame=0;frame<12;frame++){module._portStageProbePad(1,projectileReflect?0x200:projectileShield?0x20:0,0,projectileReflect?-1:0);step();}
         }
-        const before=opponent?combatState(opponent):null,buffer=module._malloc(128),traces=new Map(),defenderStates=new Set();let laserFrames=0,peakItems=0,peakHitlag=0,peakKnockback=0;
+        const before=opponent?combatState(opponent):null,shooterBefore=combatState(object),buffer=module._malloc(128),traces=new Map(),defenderStates=new Set();let laserFrames=0,peakItems=0,peakHitlag=0,peakKnockback=0,reflectedFrames=0;
         try {
           for(let frame=0;frame<180;frame++) {
             module._portStageProbePad(0,!projectileControl&&frame<2?0x200:0,0,0);step();
@@ -288,18 +289,19 @@ try {
             for(const item of new Uint32Array(module.HEAPU8.buffer,buffer,count)) {
               const values=Array.from({length:8},(_,field)=>module._portItemRead(item,field));
               if(!values.every(Number.isFinite))throw Error('Nonfinite live item state');
-              if(values[0]===laserKind){laserFrames++;const trace=traces.get(item)??[];trace.push({frame,state:values});traces.set(item,trace);if(values[5]!==object)throw Error('Projectile owner mismatch');}
+              if(values[0]===laserKind){laserFrames++;const trace=traces.get(item)??[];trace.push({frame,state:values});traces.set(item,trace);if(projectileReflect&&values[5]===opponent)reflectedFrames++;else if(values[5]!==object)throw Error('Projectile owner mismatch');}
             }
             if(renderSteps){const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
-              if(!report.preview.projectile&&drawn.actors.some(a=>a.name==='Falco item 0'&&a.draws)){report.preview.projectile=drawn;const img=document.createElement('img');img.id='native-preview-projectile';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+              if(!report.preview.projectile&&drawn.actors.some(a=>a.name===character+' item 0'&&a.draws)){report.preview.projectile=drawn;const img=document.createElement('img');img.id='native-preview-projectile';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
             }
           }
           const rows=[...traces.values()];
-          if(projectileControl?(laserFrames||peakItems):(!laserFrames||!rows.some(t=>t.length>2&&Math.abs(t.at(-1).state[2]-t[0].state[2])>10)||module._portItemsList(buffer,32)))throw Error('Laser spawn/travel/retirement disagrees with input');
           const after=opponent?combatState(opponent):null;
-          report.projectiles={completed:false,mode:projectileControl?'control':projectileShield?'shield':'hit',frames:180,laserKind,laserFrames,peakItems,traces:rows,contact:opponent?{before,after,peakHitlag,peakKnockback,defenderStates:[...defenderStates]}:null};
+          const shooterAfter=combatState(object);
+          report.projectiles={completed:false,mode:projectileControl?'control':projectileShield?'shield':projectileReflect?'reflect':'hit',frames:180,laserKind,laserFrames,peakItems,traces:rows,contact:opponent?{before,after,shooterBefore,shooterAfter,reflectedFrames,peakHitlag,peakKnockback,defenderStates:[...defenderStates]}:null};
+          if(projectileControl?(laserFrames||peakItems):(!laserFrames||!rows.some(t=>t.length>2&&Math.max(...t.map(s=>s.state[2]))-Math.min(...t.map(s=>s.state[2]))>10)||module._portItemsList(buffer,32)))throw Error('Laser spawn/travel/retirement disagrees with input');
           if(opponent){
-            const correct=projectileControl?(after[13]===before[13]&&peakHitlag===0&&peakKnockback===0):projectileShield?(after[13]===before[13]&&after[17]<before[17]&&defenderStates.has(181)&&peakHitlag>0):(after[13]>before[13]&&peakHitlag>0&&peakKnockback>0);
+            const correct=projectileControl?(after[13]===before[13]&&peakHitlag===0&&peakKnockback===0):projectileShield?(after[13]===before[13]&&after[17]<before[17]&&defenderStates.has(181)&&peakHitlag>0):projectileReflect?(after[13]===before[13]&&shooterAfter[13]>shooterBefore[13]&&reflectedFrames>0):(after[13]>before[13]&&(code==='Fx'?peakHitlag===0&&peakKnockback===0:peakHitlag>0&&peakKnockback>0));
             if(!correct)throw Error('Projectile contact disagrees with hit/control/shield input');
           }
           report.projectiles.completed=true;
