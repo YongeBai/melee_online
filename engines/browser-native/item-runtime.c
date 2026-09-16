@@ -25,10 +25,17 @@ void it_8026B3F8(Article* article,s32 kind)
     if(!initialized||!article||kind<It_Kind_Kuriboh||kind>=It_PKind_Start)abort();
     port_unlinked_it_8026B3F8(article,kind);
 }
+void portStoryItemInstall(Article* article)
+{
+    if(!initialized||!article||it_804A0F60[It_Kind_Heiho-It_Kind_Old_Kuri])abort();
+    it_8026B40C(article,It_Kind_Heiho);
+}
 void Item_80267978(HSD_GObj* object)
 {
     Item* item=object->user_data;int kind=item->kind;
-    if(!initialized||kind<It_Kind_Kuriboh||kind>=It_PKind_Start||!character_articles[kind-It_Kind_Kuriboh]) {
+    int resident=kind>=It_Kind_Kuriboh&&kind<It_PKind_Start&&character_articles[kind-It_Kind_Kuriboh];
+    if(kind==It_Kind_Heiho)resident=it_804A0F60[It_Kind_Heiho-It_Kind_Old_Kuri]!=NULL;
+    if(!initialized||!resident) {
         fprintf(stderr,"Native item asset not resident: kind %d\n",kind);abort();
     }
     port_unlinked_Item_80267978(object);

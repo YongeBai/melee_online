@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Yoshi's Story now runs its original stage callbacks, Randall spline movement and
+Shy Guy spawning in the native fixture. A missing original stage initializer
+caused Randall's collision to remain stationary; restoring that initializer fixes
+it. All 9,000 collision/model checks now pass (maximum error under 0.000004 game
+units). The rendered cycle shows Randall beside the stage, with original geometry,
+platforms, HUD and camera behavior retained. Shy Guys are created and retired by
+the original item code. All 159 unit tests pass; Fountain's moving-platform
+statistics and Battlefield's combat trace remain unchanged.
+
+The two-Captain live workload submits all 3,600 draws in 60.03 seconds both before
+and after shader preparation. The prepared run disables the driver shader cache,
+uses all 40 prepared programs without live compilation, and has no catch-up
+callbacks. Mean simulation cost is 0.62 ms; mean draw submission is 8.40 ms,
+p95 11.4 ms, maximum 19.2 ms. Recorded gameplay traces match. No stage graphics
+were removed. These are 720p simulation/draw-submission measurements, not distinct
+presented FPS or end-to-end latency. Randall landing/ride parity, Shy Guy combat
+interactions and full roster/scene/audio coverage remain unverified.
+[Yoshi's Story evidence](benchmarks/browser-2026-09-16-native-port-story.json).
+
 Fountain now has an explicitly simplified rendered fixture. It omits the star
 draws, samples a defined black water-reflection texture, and optionally removes
 75 background draws. The main floor, fixed top platform and both moving

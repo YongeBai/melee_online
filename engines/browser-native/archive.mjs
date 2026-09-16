@@ -39,6 +39,25 @@ export function inspectArchive(input) {
     externs:symbols(externStart, externCount, true)};
 }
 
+// lbArchive_InitializeDAT explicitly binds every external symbol to NULL.
+// Use only at that game-loader boundary, with the expected symbols supplied
+// by the caller. This is not a substitute for an archive's later extern links.
+export function initializeArchiveExternals(input,allowedSymbols) {
+  const a=inspectArchive(input),allowed=new Set(allowedSymbols);
+  if([...a.externs.keys()].some(name=>!allowed.has(name)))throw Error('Unexpected archive external symbol');
+  if(!a.externs.size)return a.bytes;
+  const bytes=Uint8Array.from(a.bytes),out=new DataView(bytes.buffer),seen=new Set();
+  for(const start of a.externs.values())for(let at=start;at!==0xffffffff;){
+    if(at%4||at<0||at+4>a.dataSize||seen.has(at)||a.relocations.has(at))throw Error('Invalid archive external chain');
+    seen.add(at);const next=a.data.getUint32(at);out.setUint32(32+at,0);at=next;
+  }
+  // Keep the existing public string table offsets; remove only the extern rows.
+  const start=32+a.dataSize+a.relocations.size*4+a.publics.size*8,end=start+a.externs.size*8;
+  const image=new Uint8Array(bytes.length-(end-start));image.set(bytes.subarray(0,start));image.set(bytes.subarray(end),start);
+  const header=new DataView(image.buffer);header.setUint32(0,image.length);header.setUint32(16,0);
+  return image;
+}
+
 // Prepare the container for the original native HSD parser. Descriptor scalars
 // still require a typed importer; packed payloads and strings are untouched.
 export function nativeArchiveImage(archive,publics) {

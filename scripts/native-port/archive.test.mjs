@@ -97,3 +97,17 @@ test('native container removes unconverted public entry points', async()=> {
   assert.equal(a.publics.size,2);assert.equal(v.getUint32(12,true),1);
   assert.equal(new TextDecoder().decode(native.subarray(172)),'coll_data\0');
 });
+
+test('game archive initialization clears only declared external chains and preserves source data', async()=>{
+  const {initializeArchiveExternals}=await import('../../engines/browser-native/archive.mjs');
+  const original=fixture().bytes,start=32+120+12+8,externalName=new TextEncoder().encode('external_shape\0');
+  const bytes=new Uint8Array(original.length+8+externalName.length),v=new DataView(bytes.buffer);
+  bytes.set(original.subarray(0,start));bytes.set(original.subarray(start),start+8);bytes.set(externalName,original.length+8);
+  v.setUint32(0,bytes.length);v.setUint32(16,1);v.setUint32(start,40);v.setUint32(start+4,10);
+  v.setUint32(32+40,44);v.setUint32(32+44,0xffffffff);
+  const before=bytes.slice(),buffer=Buffer.from(bytes),r=inspectArchive(initializeArchiveExternals(buffer,['external_shape']));
+  assert.deepEqual([...buffer],[...before]);assert.equal(r.externs.size,0);assert.equal(r.data.getUint32(40),0);assert.equal(r.data.getUint32(44),0);
+  assert.deepEqual([...r.publics],[['coll_data',0]]);assert.deepEqual([...r.relocations],[0,8,36]);assert.equal(r.data.getFloat32(48),1.25);
+  assert.throws(()=>initializeArchiveExternals(bytes,[]),/Unexpected/);
+  for(const value of [40,43,120,36]){const bad=before.slice();new DataView(bad.buffer).setUint32(32+44,value);assert.throws(()=>initializeArchiveExternals(bad,['external_shape']),/external chain/);}
+});

@@ -1,4 +1,4 @@
-import {inspectArchive,archiveRootView,nativeSubgraphImage} from './archive.mjs';
+import {inspectArchive,archiveRootView,nativeSubgraphImage,initializeArchiveExternals} from './archive.mjs';
 import {convertSceneAsset} from './scene-assets.mjs';
 import {readJointAnimation} from './joint-animation-assets.mjs';
 import {readAnimationObject} from './animation-object-assets.mjs';
@@ -10,6 +10,7 @@ import {colorCommandWords} from './color-assets.mjs';
 // the remaining stage roots (scripts, particle banks and collision) are assembled.
 export function convertBattlefieldMap(input,options={}) {return convertStageMap(input,{...options,stage:'battlefield'});}
 export const nativeStages=Object.freeze({
+  story:Object.freeze({name:"Yoshi's Story",file:'GrSt.dat',kind:8,count:4,bindingCount:2,jointCounts:[0,0,1,0],overrideRows:10,specialCount:7,splineCount:1,callbackScripts:0,initial:[0,1,2,3],mandatory:[0,1,2,3]}),
   fountain:Object.freeze({name:'Fountain of Dreams',file:'GrIz.dat',kind:2,count:5,overrideRows:17,specialCount:4,shadowCount:6,splineCount:1,callbackScripts:0,initial:[0,1,2,3,4],mandatory:[0,1,2,3,4]}),
   battlefield:Object.freeze({name:'Battlefield',file:'GrNBa.dat',kind:31,count:7,overrideRows:17,specialCount:4,callbackScripts:2,initial:[0,3,1,6],mandatory:[0,3,6]}),
   dreamland:Object.freeze({name:'Dream Land',file:'GrOp.dat',kind:28,count:8,overrideRows:19,specialCount:8,shadowCount:10,callbackScripts:0,initial:[0,3,7,5,4,6,1],mandatory:[0,1,3,4,5,6,7]}),
@@ -17,7 +18,7 @@ export const nativeStages=Object.freeze({
 });
 export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) {
   const spec=nativeStages[stage];if(!spec)throw Error('Unsupported native stage '+stage);
-  const a=inspectArchive(input),d=a.data,root=a.publics.get('map_head'),param=a.publics.get('grGroundParam');
+  const a=inspectArchive(stage==='story'?initializeArchiveExternals(input,['GrdStoryHeiho_TopN_shapeanim_joint']):input),d=a.data,root=a.publics.get('map_head'),param=a.publics.get('grGroundParam');
   if(root===undefined||param===undefined||a.externs.size)throw Error('Missing stage map roots or unsupported externs');
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),out=new DataView(body.buffer),pointers=new Set(),writes=new Map(),claims=new Map(),packed=new Set(),seen=new Set();
   const rows=[],cameras=[],lights=[],fogs=[],active=new Set(),ownedObjects=new Set();
@@ -30,7 +31,7 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
   function empty(at){if(ptr(at)!==null)throw Error('Unsupported non-null stage descriptor '+at);}
   function tree(t){for(const at of t.words instanceof Map?t.words.keys():t.words)t.pointers.has(at)?ptr(at):word(at);for(const at of t.halves||[])word(at,2);for(const at of t.packed||[])raw(at,1);}
   function aobj(at){once('aobj',at,p=>{const object=ptr(p+12);if(object!==null&&!ownedObjects.has(object))model(object);tree(readAnimationObject(a,p,0,ownedObjects));});}
-  function jointAnim(at){once('jointanim',at,p=>{const t=readJointAnimation(a,p);tree(t);for(const n of t.nodes)if(n.animation)tree(n.animation);});}
+  function jointAnim(at){once('jointanim',at,p=>{const t=readJointAnimation(a,p,ownedObjects);tree(t);for(const n of t.nodes)if(n.animation)tree(n.animation);});}
   function shapeAnimObject(at){once('shapeobject',at,p=>{shapeAnimObject(ptr(p));empty(p+4);});}
   function shapeAnimJoint(at){once('shapejoint',at,p=>{shapeAnimJoint(ptr(p));shapeAnimJoint(ptr(p+4));shapeAnimObject(ptr(p+8));});}
   function materialAnim(at){once('matanim',at,p=>tree(convertMaterialAnimation(archiveRootView(a,'stage_Share_matanim_joint',p))));}
@@ -51,11 +52,11 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
     for(let k=0;k<3;k++){const q=ptr(p+[8,16,20][k]);if(q===null){if(k===2&&type===0)continue;throw Error('Missing stage spline array');}range(q,sizes[k]*4);for(let j=0;j<sizes[k];j++){if(!Number.isFinite(d.getFloat32(q+j*4)))throw Error('Nonfinite stage spline');word(q+j*4);}}
   });}
   const binding=ptr(root),bindingCount=word(root+4),table=ptr(root+8),count=word(root+12);
-  if(count!==spec.count||bindingCount!==1||table===null||binding===null)throw Error('Unexpected '+spec.name+' map layout');
+  if(count!==spec.count||bindingCount!==(spec.bindingCount??1)||table===null||binding===null)throw Error('Unexpected '+spec.name+' map layout');
   for(let i=0;i<bindingCount;i++){const p=binding+i*12;model(ptr(p));const pairs=ptr(p+4),n=word(p+8);if(n>261||pairs===null)throw Error('Invalid stage joint binding');for(let j=0;j<n*2;j++)word(pairs+j*2,2);}
   const animations=[];
   for(let i=0;i<count;i++){
-    const p=table+i*52;model(ptr(p));const ja=list(ptr(p+4),jointAnim)||0,ma=list(ptr(p+8),materialAnim)||0,sa=list(ptr(p+12),shapeAnimJoint)||0;camera(ptr(p+16));list(ptr(p+20),cameraAnim);lightList(ptr(p+24));fog(ptr(p+28));empty(p+32);if(word(p+36)!==0)throw Error('Unsupported GrJoint count');const flags=ptr(p+40);if(flags!==null)raw(flags,Math.max(ja,ma,sa));const indices=ptr(p+44),n=word(p+48);if(n>4096||(n&&indices===null))throw Error('Invalid stage update joints');if(indices!==null)for(let j=0;j<n;j++)word(indices+j*2,2);animations.push({joint:ja,material:ma,shape:sa});
+    const p=table+i*52;model(ptr(p));const ja=list(ptr(p+4),jointAnim)||0,ma=list(ptr(p+8),materialAnim)||0,sa=list(ptr(p+12),shapeAnimJoint)||0;camera(ptr(p+16));list(ptr(p+20),cameraAnim);lightList(ptr(p+24));fog(ptr(p+28));const joints=ptr(p+32),jointCount=word(p+36);if(jointCount!==(spec.jointCounts?.[i]??0)||(jointCount>0)!==(joints!==null))throw Error('Unsupported GrJoint count');for(let j=0;j<jointCount*3;j++)word(joints+j*2,2);const flags=ptr(p+40);if(flags!==null)raw(flags,Math.max(ja,ma,sa));const indices=ptr(p+44),n=word(p+48);if(n>4096||(n&&indices===null))throw Error('Invalid stage update joints');if(indices!==null)for(let j=0;j<n;j++)word(indices+j*2,2);animations.push({joint:ja,material:ma,shape:sa});
   }
   const splines=ptr(root+16),splineCount=word(root+20);
   if(splineCount!==(spec.splineCount??(stage==='destination'?2:0))||(splineCount>0)!==(splines!==null))throw Error('Unexpected stage spline table');
@@ -86,6 +87,7 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
       for(let i=0;i<8;i+=2)word(yakumono+i,2);
       for(let i=8;i<52;i+=4){word(yakumono+i);if(i>=16&&!Number.isFinite(d.getFloat32(yakumono+i)))throw Error('Nonfinite Dream Land parameter');}
     }
+    if(stage==='story')for(let i=0;i<36;i+=4){word(yakumono+i);if(!Number.isFinite(d.getFloat32(yakumono+i)))throw Error('Nonfinite Story parameter');}
     if(stage==='fountain'){
       // grIzumi_YakumonoParam: 21 four-byte fields; x4 is an unused integer
       // field. Preserve its bits; all other fields are platform float parameters.

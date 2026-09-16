@@ -5,6 +5,7 @@
 #include <melee/gr/grbattle.h>
 #include <melee/gr/grlast.h>
 #include <melee/gr/grizumi.h>
+#include <melee/gr/grstory.h>
 #include <melee/gr/groldpupupu.h>
 #include <melee/gr/types.h>
 #include <melee/sc/types.h>
@@ -86,6 +87,7 @@ void portStageRenderBegin(void)
 void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam* param,unsigned kind)
 {
     switch(kind){
+    case St_Kind_Story:model_count=4;stage_callbacks=&grSt_StageData;break;
     case St_Kind_Izumi:model_count=5;stage_callbacks=&grIz_StageData;break;
     case St_Kind_Battle:model_count=7;stage_callbacks=&grNBa_StageData;break;
     case St_Kind_Last:model_count=10;stage_callbacks=&grNLa_StageData;break;
@@ -96,6 +98,9 @@ void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam*
     if(installed||!archive||!data||!param||data->unkC!=model_count||portSceneInitialize()<0)abort();
     portRuntimeSetSceneDestructors(destroy_lights);
     Ground_801BFFB0();
+    /* Original VS startup allocates the per-map collision enable flags before
+     * stage objects can initialize or update their collision bindings. */
+    Ground_801C0378(0x40);
     UnkArchiveStruct* entry=grDatFiles_GetArchive();entry->unk0=archive;entry->unk4=data;entry->unk8=0;
     stage_info.grkind=stage_callbacks->grkind;stage_info.param=param;installed=1;
 }
@@ -135,7 +140,7 @@ void portStageCallbacksInitialize(void* parameters)
     for(unsigned i=0;i<model_count;i++)owners[i]=Ground_GetMapGObj(i);
     if(!owners[0]||!owners[1]||!owners[3])abort();
     if(stage_kind==St_Kind_Battle&&!owners[6])abort();
-    if((stage_kind==St_Kind_Last||stage_kind==St_Kind_Izumi)&&!owners[2])abort();
+    if((stage_kind==St_Kind_Last||stage_kind==St_Kind_Izumi||stage_kind==St_Kind_Story)&&!owners[2])abort();
     if(stage_kind==St_Kind_Izumi&&!owners[4])abort();
     if(stage_kind==St_Kind_OldPupupu&&(!owners[4]||!owners[5]||!owners[6]||!owners[7]||!Ground_GetMapGObj(8)))abort();
     if(stage_kind==St_Kind_Izumi)stage_callbacks->on_load();
@@ -224,6 +229,35 @@ double portFountainPlatformRead(unsigned field,unsigned index)
     }
     if(field==4)return mpGetGroundCollVtx()[joint->inner->vtx_start].pos.y;
     if(field==5)return selected->u.izumi3.xC6;
+    abort();
+}
+
+/* Observe Randall's original spline-driven joint and registered collision.
+ * No replacement path, timing or transform is supplied by the browser. */
+double portRandallRead(unsigned field)
+{
+    if(stage_kind!=St_Kind_Story||!callbacks_initialized)abort();
+    HSD_GObj* object=Ground_GetMapGObj(2);if(!object||!object->user_data)abort();
+    Ground* ground=object->user_data;HSD_JObj* model=ground->u.randall.jobj;
+    int index=Ground_801C32D4(2,1);if(index!=0||!model)abort();
+    CollJoint* joint=&mpGetGroundCollJoint()[index];
+    if(joint->x20!=model||!joint->inner||joint->inner->vtx_count<2)abort();
+    if(field==3)return (model->flags&JOBJ_HIDDEN)!=0;
+    if(field==4)return (joint->flags&CollJoint_Hidden)!=0;
+    MtxPtr matrix=model->mtx;
+    if(field==0)return matrix[0][3];
+    if(field==1)return matrix[1][3];
+    if(field==2){
+        double maximum=0;
+        for(int i=0;i<joint->inner->vtx_count;i++){
+            CollVtx* vertex=&mpGetGroundCollVtx()[joint->inner->vtx_start+i];
+            double x=(double)vertex->x0*matrix[0][0]+(double)vertex->x4*matrix[0][1]+matrix[0][3];
+            double y=(double)vertex->x0*matrix[1][0]+(double)vertex->x4*matrix[1][1]+matrix[1][3];
+            if(!isfinite(x)||!isfinite(y)||!isfinite(vertex->pos.x)||!isfinite(vertex->pos.y))abort();
+            maximum=fmax(maximum,fmax(fabs(vertex->pos.x-x),fabs(vertex->pos.y-y)));
+        }
+        return maximum;
+    }
     abort();
 }
 

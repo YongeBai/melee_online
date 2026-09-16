@@ -13,9 +13,14 @@ export const characterArticleSlots=Object.freeze(Object.fromEntries(Object.entri
 
 // Publish only complete model/common-attribute/hurtbox subgraphs, not an Article
 // or ftData root whose special attributes, animation states and scripts are pending.
-export function convertItemModels(input,name) {
-  const a=inspectArchive(input),d=a.data,code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1],slots=characterArticleSlots[code],source=a.publics.get('ftData'+fighterArchives[code]);
-  if(!slots||source===undefined)throw Error('Unknown item model archive');
+export function convertItemModels(input,name) {return convertModels(input,name,null);}
+export function convertArticleModels(input,entries) {
+  if(!Array.isArray(entries)||!entries.length||entries.length>256||new Set(entries.map(e=>e.slot)).size!==entries.length||entries.some(e=>!Number.isInteger(e.slot)||e.slot<0))throw Error('Invalid article model entries');
+  return convertModels(input,null,entries);
+}
+function convertModels(input,name,entries) {
+  const a=inspectArchive(input),d=a.data,code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1],slots=entries?entries.map(e=>e.slot):characterArticleSlots[code],source=a.publics.get('ftData'+fighterArchives[code]);
+  if(!slots||!entries&&source===undefined)throw Error('Unknown item model archive');
   const root=(a.dataSize+3)&~3,bytes=new Uint8Array(root+8+slots.length*12),out=new DataView(bytes.buffer);bytes.set(a.bytes.subarray(32,32+a.dataSize));
   const pointers=new Set(),types=new Map(),external=new Map(),rows=[];
   const bounds=(at,size,align=4)=>{if(!Number.isInteger(at)||at<0||at%align||at+size>d.byteLength)throw Error('Item model bounds');};
@@ -26,9 +31,9 @@ export function convertItemModels(input,name) {
     claim(at,4,'ptr',allowed);if(allowed){out.setUint32(at,0,true);return null;}const value=d.getUint32(at);if(!a.relocations.has(at)){if(value)throw Error('Unrelocated item model pointer');out.setUint32(at,0,true);return null;}bounds(value,1,1);pointers.add(at);out.setUint32(at,value,true);return value;}
   function word(at,float=false){claim(at,4,'word');if(a.relocations.has(at))throw Error('Item model scalar relocation');if(float&&!Number.isFinite(d.getFloat32(at)))throw Error('Nonfinite item model parameter');out.setUint32(at,d.getUint32(at),true);return float?d.getFloat32(at):d.getUint32(at);}
   function packed(at){claim(at,1,'byte');if(a.relocations.has(at&~3))throw Error('Item model packed relocation');return d.getUint8(at);}
-  const table=slots.length?pointer(source+0x48):null;if(slots.length&&table===null)throw Error('Missing character article table');
+  const table=!entries&&slots.length?pointer(source+0x48):null;if(!entries&&slots.length&&table===null)throw Error('Missing character article table');
   for(const [i,slot] of slots.entries()) {
-    const article=pointer(table+slot*4);if(article===null)throw Error('Missing character article');bounds(article,24);
+    const article=entries?entries[i].article:pointer(table+slot*4);if(article===null)throw Error('Missing character article');bounds(article,24);
     const attributes=pointer(article),model=pointer(article+16),hurt=pointer(article+8),dynamics=pointer(article+20);
     if(attributes===null||model===null||dynamics!==null)throw Error('Unsupported item model graph');
     bounds(attributes,0x84);const flags=[packed(attributes),packed(attributes+1)],scalars=[];packed(attributes+2);packed(attributes+3);
@@ -52,5 +57,5 @@ export function convertItemModels(input,name) {
     rows.push({slot,article,attributes,model,hurt,flags,scalars,joint,boneCount,attachId,modelFlags,hurtboxes,scene});
   }
   out.setUint32(root,rows.length,true);out.setUint32(root+4,rows.length?root+8:0,true);if(rows.length)pointers.add(root+4);
-  return {root,rows,typedBytes:new Set(types.keys()),image:nativeSubgraphImage(bytes,pointers,new Map([['native_item_models',root]]))};
+  return {root,rows,typedBytes:new Set(types.keys()),typedClaims:types,image:nativeSubgraphImage(bytes,pointers,new Map([['native_item_models',root]]))};
 }

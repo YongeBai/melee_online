@@ -38,9 +38,9 @@ special creates its blaster and laser; the live renderer tracks their original
 model owners, retires resources when they disappear, and refreshes bindings on
 reused object addresses. The shared Fox effect bank supplies Falco's own effects.
 
-The item residency boundary currently accepts imported character Articles only.
-Unsupported kinds fail before their descriptors are read; common/Pokémon/stage
-article graphs remain to be loaded. Original item logic and update callbacks are
+The item residency boundary accepts imported character Articles and the explicit
+Yoshi's Story Shy Guy Article. Unsupported kinds fail before their descriptors
+are read; common/Pokémon/other-stage article graphs remain to be loaded. Original item logic and update callbacks are
 unchanged. The seven shared item color descriptors and their 55 script commands
 are imported with their packed priorities; original color state passes the same
 independent reference used for fighter colors.
@@ -1115,3 +1115,36 @@ duration was zero and no causal benefit was established.
 See the shader-preparation benchmark evidence for raw timing summaries, source
 identities and limits. These remain fixture measurements, not a complete playable
 native port or distinct-presentation certification.
+
+
+## Yoshi's Story integration
+
+The `--map=story` fixture imports `GrSt.dat` and runs the original
+`grstory.c` stage callbacks. Randall retains his spline animation, collision
+binding and puff callback. The original Shy Guy item registration, constructor,
+animations, hurtboxes and spawn/retirement callbacks run with a typed resident
+Article. The stage's external shape-animation pointers are initialized to null
+by the same rule as original `lbArchive_InitializeDAT`; unknown symbols fail.
+No stage graphics or gameplay objects are omitted by this profile.
+
+The bring-up now calls original `Ground_801C0378` before creating stage objects,
+as VS startup does. Without its per-map collision-control allocation, Randall's
+model animated while his collision stayed at the initial location. The stage
+probe checks collision vertices against the current model matrix on every step,
+requiring movement in all four directions and Shy Guy creation and retirement.
+For a visible cloud sample, ordinary controller input drops both fighters through
+their starting platforms and walks them toward the edges; the original camera
+follows them. This does not assign camera or fighter transforms.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --map=story --stage-callbacks --stage-only --stage-frames=9000 --render --hardware --record-shaders
+node scripts/native-port/probe-constructor.mjs --map=story --stage-callbacks --live --workload --frames=3600 --hardware --record-shaders --defer-gpu-errors
+node scripts/native-port/merge-shader-catalogs.mjs shader-record-story-Ca-live.json shader-record-story-Ca-cycle.json
+MESA_SHADER_CACHE_DISABLE=true node scripts/native-port/probe-constructor.mjs --map=story --stage-callbacks --live --workload --frames=3600 --hardware --prewarm-shaders --defer-gpu-errors
+```
+
+Run probes sequentially: their diagnostic screenshots share output filenames.
+Shader records are tied to the exact current WASM and shader-generator hashes;
+re-record after a changed build instead of bypassing identity validation. These
+checks do not establish complete stage startup, Randall landing/ride parity,
+Shy Guy combat interactions, all-character coverage or distinct presented FPS.

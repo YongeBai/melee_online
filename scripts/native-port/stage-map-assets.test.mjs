@@ -140,3 +140,23 @@ test('Fountain imports platform float parameters, unused integer bits and typed 
   assert.deepEqual(map.extraModels,[{name:'GrdIzumiStar_TopN_joint',root:1300}]);assert.equal(d.getUint16(3404,true),8);assert.equal(d.getUint32(3400,true),3456);
   for(const change of [a=>a.d.setFloat32(1608,NaN),a=>a.ptr(1608,1300),a=>a.d.setUint32(36,5),a=>a.d.setUint32(20,2),a=>a.d.setUint16(3404,0)])assert.throws(()=>convertStageMap(fountain(change),{stage:'fountain',callbacks:true}));
 });
+
+function story(change=()=>{}) {
+  return destination(a=>{
+    const {d,ptr,light,joint,relocs}=a;
+    d.setUint32(4,2);ptr(60,joint);ptr(64,1560);d.setUint32(68,1);d.setUint32(12,4);
+    for(let at=2400;at<2552;at+=4){d.setUint32(at,0);relocs.delete(at);}
+    d.setUint32(28,20);ptr(32,0);relocs.delete(32);d.setUint32(36,0);ptr(40,2480);d.setUint32(44,7);
+    for(let i=0;i<10;i++)ptr(2400+i*8,light);
+    for(let i=0;i<7;i++)ptr(2480+i*4,joint);
+    d.setUint32(20,1);ptr(1800+2*52+32,2840);d.setUint32(1800+2*52+36,1);
+    d.setInt16(2840,-1);d.setInt16(2842,-1);d.setInt16(2844,1);
+    for(let i=0;i<36;i+=4){relocs.delete(1600+i);d.setFloat32(1600+i,i?30:600);}
+    d.setUint32(1100,8);change(a);
+  });
+}
+test('Story imports both binding tables, signed collision-joint triples and stage timers',()=>{
+  const source=story(),copy=source.slice(),r=convertStageMap(source,{stage:'story',callbacks:true}),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(source,copy);assert.equal(r.count,4);assert.equal(d.getUint32(4,true),2);assert.equal(d.getInt16(2840,true),-1);assert.equal(d.getInt16(2844,true),1);assert.equal(d.getFloat32(1600,true),600);
+  for(const change of [a=>a.d.setUint32(4,1),a=>a.d.setUint32(1800+2*52+36,2),a=>a.ptr(2840,1300),a=>a.d.setFloat32(1600,NaN)])assert.throws(()=>convertStageMap(story(change),{stage:'story',callbacks:true}));
+});

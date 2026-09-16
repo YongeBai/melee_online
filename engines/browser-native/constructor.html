@@ -7,7 +7,7 @@
 <script type="module">
 import create from './melee-fighter-init.mjs';
 import {shaderIdentityFiles,validateShaderCatalog} from './shader-catalog.mjs';
-import {archiveRootView,inspectArchive} from './archive.mjs';
+import {archiveRootView,inspectArchive,initializeArchiveExternals} from './archive.mjs';
 import {verifyNativeProjection} from './native-camera.mjs';
 import {combatWorkload,verifyCombatWorkload} from './combat-workload.mjs';
 import {startNativeLive} from './native-live.mjs';
@@ -20,6 +20,7 @@ import {convertStatusModels,verifyHudIconSelector} from './status-assets.mjs';
 import {verifyResidentEffectBank} from './verify-effects.mjs';
 import {verifyStartup} from './verify-startup.mjs';
 import {convertFighterBase} from './fighter-base-assets.mjs';
+import {convertStoryItem} from './stage-item-assets.mjs';
 import {convertItemRuntime} from './item-runtime-assets.mjs';
 import {verifyColors} from './verify-colors.mjs';
 import {convertFighterArticles} from './article-assets.mjs';
@@ -49,7 +50,7 @@ const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tourna
 const stageCallbacks=params.has('stagecallbacks'),stageOnly=params.has('stageonly');
 const stageFrames=Number(params.get('stageframes')??4500);
 if(!Number.isInteger(stageFrames)||stageFrames<4500||stageFrames>27000||stageOnly&&!stageCallbacks)throw Error('Invalid stage callback probe');
-const cameraValidation=stageCallbacks&&stageKey==='destination'?{clipPlanes:[1,30000]}:{};let dynamicStage=null;
+const cameraValidation=stageCallbacks&&stageKey==='destination'?{clipPlanes:[1,30000]}:{};let dynamicStage=null,stageItemModels=null;
 if(intro&&!withHud)throw Error('Intro requires native HUD');
 if(stageCallbacks&&!intro)throw Error('Stage callback integration requires the intro probe');
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
@@ -61,7 +62,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc'].includes(code)) {
+  if(['Fx','Fc'].includes(code)||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -110,7 +111,7 @@ try {
   const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
-    const stageBytes=await asset(stageSpec.file),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
+    const rawStageBytes=await asset(stageSpec.file),stageBytes=stageKey==='story'?initializeArchiveExternals(rawStageBytes,['GrdStoryHeiho_TopN_shapeanim_joint']):rawStageBytes,map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
     for(let byte=0;byte<256;byte++)if(module._portStageShadowBits(byte)!==(byte>>>7))throw Error('Stage shadow MSB layout');
     for(const rate of [0,0.25,1,2])for(const flags of [0,0x20000000,0x40000000,0xffffffff])if(module._portStageAnimationProbe(rate,flags)!==1)throw Error('Stage animation callback ABI');
     installResidentFile(module,'NativeStageMap.dat',map.image);
@@ -128,6 +129,14 @@ try {
     const cd=new DataView(collision.image.buffer,32),verts=cd.getUint32(0,true),count=cd.getUint32(4,true),scale=view().getFloat32(stageFile.addresses[1],true);
     if(module._portStageMapCollisionRead(0,0)!==count)throw Error('Stage collision vertex count');
     for(let i=0;i<count;i++)for(let axis=0;axis<2;axis++)if(module._portStageMapCollisionRead(1+axis,i)!==Math.fround(cd.getFloat32(verts+i*8+axis*4,true)*scale))throw Error('Stage collision world vertex');
+    if(stageKey==='story'){
+      const data=convertStoryItem(stageBytes);installResidentFile(module,'NativeStoryItem.dat',data.image);
+      const file=openResidentArchive(module,'NativeStoryItem.dat',['native_story_article']),base=file.addresses[0]-data.article;
+      const image=new DataView(data.image.buffer),size=image.getUint32(4,true),relocations=new Set(Array.from({length:image.getUint32(8,true)},(_,i)=>image.getUint32(32+size+i*4,true)));let checks=0;
+      for(let at=0;at<size;){checks++;if(relocations.has(at)){if(ptr(base+at)!==base+image.getUint32(32+at,true))throw Error('Story item relocation mismatch');at+=4;}else{if(module.HEAPU8[base+at]!==data.image[32+at])throw Error('Story item payload mismatch');at++;}}
+      module._portStoryItemInstall(file.addresses[0]);stageItemModels=new Map([[base+data.model.joint,{name:'Shy Guy',bytes:archiveRootView(inspectArchive(data.source),'item_Share_joint',data.model.joint)}]]);
+      report.stageItem={passed:true,checks,relocations:relocations.size,kind:data.kind,states:data.stateCount,joints:data.model.boneCount,meshes:data.model.scene.model.meshes.length,initialized:true};
+    }
     if(stageCallbacks){const callbacks=openResidentArchive(module,'NativeStageMap.dat',['native_stage_callbacks']);module._portStageCallbacksInitialize(callbacks.addresses[0]);}
     if(fountainCosmeticsOff){if(!stageCallbacks)throw Error('Fountain cosmetic profile requires callbacks');module._portFountainReflectionOff();}
     for(const id of stageSpec.initial) {
@@ -227,9 +236,9 @@ try {
         const archive=inspectArchive(bytes),base=data-source.root-8;
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
-      let itemModels=null;
+      let itemModels=stageItemModels;
       if(['Fx','Fc'].includes(code)){
-        itemModels=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(baseBytes),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
+        itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(baseBytes),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
       }
       preview=createNativeMatchPreview(module,canvas,previewActors,{gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});
@@ -259,9 +268,19 @@ try {
       const wind=stageKey==='dreamland'?{directions:[],activeFrames:0,displacementChecks:0,windTransitionFrames:0,maxError:0,strength:module._portDreamlandWindRead(4,0)}:null;
       if(wind)report.stage.wind=wind;
       const platforms=stageKey==='fountain'?Array.from({length:2},(_,i)=>({initial:module._portFountainPlatformRead(0,i),min:Infinity,max:-Infinity,upFrames:0,downFrames:0,phases:[],collisionChecks:0,maxCollisionError:0})):null;
+      const randall=stageKey==='story'?{hiddenFrames:0,minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity,leftFrames:0,rightFrames:0,upFrames:0,downFrames:0,collisionChecks:0,maxCollisionError:0}:null;
+      let lastRandall=randall?[module._portRandallRead(0),module._portRandallRead(1)]:null,previousItems=new Set();
+      const itemBuffer=randall?module._malloc(128*4):0,shyGuys=randall?{peak:0,spawns:0,retirements:0,minX:Infinity,maxX:-Infinity}:null;
+      if(randall){if(!itemBuffer)throw Error('Stage item probe allocation');report.stage.randall=randall;report.stage.shyGuys=shyGuys;}
       const lastHeights=platforms?.map(p=>p.initial);if(platforms)report.stage.platforms=platforms;
       for(let frame=0;frame<stageFrames;frame++){
-        for(let slot=0;slot<2;slot++)module._portStageProbePad(slot,0,0,0);
+        // In the Story visual fixture, use a normal down-stick flick to drop
+        // both fighters from their starting platforms; native camera follows.
+        for(let slot=0;slot<2;slot++){
+          const storyView=stageOnly&&randall,position=storyView?combatState([object,opponent][slot])[4]:0;
+          const x=storyView&&frame>=60&&frame<240&&Math.abs(position)<54?(slot?0.5:-0.5):0;
+          module._portStageProbePad(slot,0,x,storyView&&frame<5?-1:0);
+        }
         const beforeWind=wind?[object,opponent].map((o,slot)=>({state:combatState(o),offset:module._portDreamlandWindRead(3,slot)})):null;
         if(wind){const direction=module._portDreamlandWindRead(0,0);if(direction&&!wind.directions.includes(direction))wind.directions.push(direction);if(direction)wind.activeFrames++;}
         step();
@@ -282,6 +301,24 @@ try {
           p.min=Math.min(p.min,height);p.max=Math.max(p.max,height);p.upFrames+=height>lastHeights[i]?1:0;p.downFrames+=height<lastHeights[i]?1:0;lastHeights[i]=height;
           if(!p.phases.includes(phase))p.phases.push(phase);p.collisionChecks++;p.maxCollisionError=Math.max(p.maxCollisionError,error);
         }
+        if(randall){
+          const hidden=module._portRandallRead(3);if(hidden!==module._portRandallRead(4))throw Error('Randall model/collision visibility differs');
+          if(hidden){randall.hiddenFrames++;lastRandall=null;}else {
+          const x=module._portRandallRead(0),y=module._portRandallRead(1),error=module._portRandallRead(2);
+          if(![x,y,error].every(Number.isFinite)||error>.0001)throw Error('Randall collision mismatch '+JSON.stringify({frame,x,y,error}));
+          randall.minX=Math.min(randall.minX,x);randall.maxX=Math.max(randall.maxX,x);randall.minY=Math.min(randall.minY,y);randall.maxY=Math.max(randall.maxY,y);
+          randall.leftFrames+=lastRandall&&x<lastRandall[0]?1:0;randall.rightFrames+=lastRandall&&x>lastRandall[0]?1:0;randall.upFrames+=lastRandall&&y>lastRandall[1]?1:0;randall.downFrames+=lastRandall&&y<lastRandall[1]?1:0;lastRandall=[x,y];randall.collisionChecks++;randall.maxCollisionError=Math.max(randall.maxCollisionError,error);
+          }
+          const count=module._portItemsList(itemBuffer,128);if(count>128)throw Error('Story item capacity');const current=new Set(new Uint32Array(module.HEAPU8.buffer,itemBuffer,count));
+          shyGuys.peak=Math.max(shyGuys.peak,count);for(const item of current){if(module._portItemRead(item,0)!==210)throw Error('Unexpected Story item');const x=module._portItemRead(item,2);if(!Number.isFinite(x))throw Error('Nonfinite Story item position');shyGuys.minX=Math.min(shyGuys.minX,x);shyGuys.maxX=Math.max(shyGuys.maxX,x);if(!previousItems.has(item))shyGuys.spawns++;}
+          for(const item of previousItems)if(!current.has(item))shyGuys.retirements++;previousItems=current;
+        }
+        if(randall&&preview&&!report.stage.randallVisible&&module._portRandallRead(0)>70&&module._portRandallRead(0)<72&&module._portRandallRead(1)>-21){
+          const drawn=preview.draw(),actor=drawn.actors.find(a=>a.name==="Yoshi's Story group 2");
+          if(!actor?.draws)throw Error('Randall did not render at the side of the stage');
+          report.stage.randallVisible={frame:frame+1,x:module._portRandallRead(0),y:module._portRandallRead(1),actor};
+          const img=document.createElement('img');img.id='native-randall';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
+        }
         report.stage.peakStageParticles=Math.max(report.stage.peakStageParticles,module._portEffectsRead(9,30));
         const groups=Array.from({length:stageSpec.count},(_,i)=>module._portStageObject(i)?i:-1).filter(i=>i>=0),key=groups.join(',');
         if(key!==previous){report.stage.transitions.push({frame:frame+1,groups});previous=key;}
@@ -299,6 +336,7 @@ try {
       if(stageKey==='destination'&&stageFrames>=27000&&(report.stage.transitions.length<5||!report.stage.transitions.some(t=>t.groups.includes(9))||report.stage.transitions.at(-1).groups.join(',')!==stageSpec.initial.join(',')))throw Error('Original Final Destination background did not complete two ownership cycles');
       if(wind&&(!wind.activeFrames||!wind.displacementChecks||(stageFrames>=9000&&wind.directions.length!==2)))throw Error('Dream Land original wind was not exercised');
       if(platforms&&platforms.some(p=>!p.upFrames||!p.downFrames||p.max-p.min<1))throw Error('Both Fountain platforms must move up and down');
+      if(randall){module._free(itemBuffer);if(!randall.leftFrames||!randall.rightFrames||!randall.upFrames||!randall.downFrames||randall.maxX-randall.minX<100||!shyGuys.peak||!shyGuys.spawns||!shyGuys.retirements)throw Error('Randall cycle or Shy Guy lifecycle not exercised');}
       report.stage.callbackFrames=stageFrames;report.stage.callbacksVerified=true;
     }
     if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat'))await verifyCombat(module,[object,opponent],report.combat,{

@@ -7,7 +7,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const stageKey=process.argv.find(x=>x.startsWith('--map='))?.slice(6)??'battlefield';
-if(!['battlefield','destination','dreamland','fountain'].includes(stageKey))throw Error('Unknown native map');
+if(!['battlefield','destination','dreamland','fountain','story'].includes(stageKey))throw Error('Unknown native map');
 const stageOnly=process.argv.includes('--stage-only'),stageFrames=Number(process.argv.find(x=>x.startsWith('--stage-frames='))?.slice(15)??4500);
 if(!Number.isInteger(stageFrames)||stageFrames<4500||stageFrames>27000||stageOnly&&(!process.argv.includes('--stage-callbacks')||process.argv.includes('--live')))throw Error('Stage-only requires --stage-callbacks without --live, 4500..27000 frames');
 const fountainCosmeticsOff=process.argv.includes('--fountain-cosmetics-off'),fountainSceneryOff=process.argv.includes('--fountain-scenery-off');
@@ -141,6 +141,12 @@ try {
       if(!shot.result.value.startsWith('data:image/png;base64,'))throw Error('Missing countdown screenshot');
       fs.writeFileSync(path.join(output,'native-match-countdown.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
     }
+  }
+  if(stageOnly&&stageKey==='story'&&render&&!probe.error){
+    if(!probe.stage.randallVisible)throw Error('Missing visible Randall sample');
+    const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-randall').src",returnByValue:true});
+    if(!shot.result.value?.startsWith('data:image/png;base64,'))throw Error('Missing Randall screenshot');
+    fs.writeFileSync(path.join(output,'native-story-randall.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
   }
   const rendererSources=Object.fromEntries(['material-gpu.mjs','native-pixel.mjs','native-match-preview.mjs','combat-workload.mjs'].map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(output,name))).digest('hex')]));
   const report={stage:stageKey,character,fountainCosmeticsOff,fountainSceneryOff,recordShaders,prewarmShaders,deferredGpuErrors,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};

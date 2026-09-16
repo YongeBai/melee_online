@@ -1,0 +1,595 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "bf7eeec",
+  "scope": "Native Yoshi’s Story callback, Randall collision and Shy Guy integration; selected two-Captain fixture, incomplete competitive acceptance",
+  "wasmSha256": "7d616e0ae80bfc416e1242d8c38043a92471ea972a095e200fc7e32a5f74fd78",
+  "portableRecipeSha256": "a3c4fe2db173b40b23642d30b72c8c97a41047c81cc8bf412fa34e0b9413f335",
+  "sourceHashes": {
+    "stage-map.c": "c75c7693b3094eeb20cfdfe05ca722221055d8bde515bea019664369b49b4dba",
+    "stage-map-assets.mjs": "184e67d45b20e366ad08d20b64329bce333a1eeed0aae677dd7c8c59be90587f",
+    "stage-item-assets.mjs": "a0ce97480dabf016aff12adda530de353c0ada435875ead5ed5abae9d872b00f",
+    "item-model-assets.mjs": "bc2b833e1f0c36e8d181a70322d574e5c912aa80d006fba3ab28be066766d0c1",
+    "item-runtime.c": "51be9852f4e96cfd3379bcba4a68e3a52ebc35b33c94a3fb2fc1bf3cdc45d07e",
+    "archive.mjs": "f005d0af5fc627bb2f0dff7b9b529fc561956cc41a6184ee426bcdf41518da22",
+    "constructor.html": "a4163cfd058b207c46195ec1b52a082bb215abc9912c67af738161d6e296b76f"
+  },
+  "validation": {
+    "unitTests": 159,
+    "failedTests": 0,
+    "fighterBuild": true,
+    "stage": {
+      "name": "Yoshi's Story",
+      "kind": 8,
+      "collisionLoaded": true,
+      "vertexChecks": 68,
+      "modelGroups": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "splineCount": 1,
+      "shadowCount": 0,
+      "shadowFlagCases": 256,
+      "animationCallbackCases": 16,
+      "completeStageStartup": false,
+      "originalCallbacks": true,
+      "transitions": [
+        {
+          "frame": 1,
+          "groups": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "peakStageParticles": 0,
+      "randall": {
+        "hiddenFrames": 0,
+        "minX": -97.47500610351562,
+        "maxX": 97.4749984741211,
+        "minY": -38.5,
+        "maxY": -18.899991989135742,
+        "leftFrames": 4026,
+        "rightFrames": 4323,
+        "upFrames": 707,
+        "downFrames": 781,
+        "collisionChecks": 9000,
+        "maxCollisionError": 0.000003919005393981934
+      },
+      "shyGuys": {
+        "peak": 4,
+        "spawns": 13,
+        "retirements": 12,
+        "minX": -292,
+        "maxX": 304
+      },
+      "renderedFrames": 75,
+      "randallVisible": {
+        "frame": 543,
+        "x": 71.68584442138672,
+        "y": -18.899995803833008,
+        "actor": {
+          "name": "Yoshi's Story group 2",
+          "passes": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "draws": 1
+        }
+      },
+      "callbackFrames": 9000,
+      "callbacksVerified": true
+    },
+    "stageItem": {
+      "passed": true,
+      "checks": 813130,
+      "relocations": 46,
+      "kind": 210,
+      "states": 3,
+      "joints": 2,
+      "meshes": 1,
+      "initialized": true
+    },
+    "finalGpuVertexChecks": {
+      "vertices": 27307,
+      "positionComponents": 81921,
+      "normalComponents": 81921,
+      "maxScaledPositionError": 8.717067072819031e-7,
+      "maxNormalError": 1.0897232183282313e-7,
+      "roundoffPositionComponents": 0,
+      "maxPositionRoundoffAllowance": 0.00028729286576404165,
+      "byOwner": {
+        "1459200": {
+          "vertices": 28,
+          "ndcMin": [
+            -0.2404488175600763,
+            0.6735738062567096,
+            -0.01534367160665423
+          ],
+          "ndcMax": [
+            0.3060570192123063,
+            0.7807559800284086,
+            -0.01534367160665423
+          ]
+        },
+        "1538624": {
+          "vertices": 5845,
+          "ndcMin": [
+            -13.40105375500959,
+            -11.17325127681829,
+            -0.0010212311221836413
+          ],
+          "ndcMax": [
+            13.40105375500959,
+            18.499445523883317,
+            -0.00014048057060884656
+          ]
+        },
+        "1545120": {
+          "vertices": 6822,
+          "ndcMin": [
+            -3.3397639759436957,
+            -3.742829681999219,
+            -0.00029087610303042677
+          ],
+          "ndcMax": [
+            3.3397639759436957,
+            0.4414686895627243,
+            -0.00014665238006634476
+          ]
+        },
+        "1548832": {
+          "vertices": 4,
+          "ndcMin": [
+            0.5050663067673001,
+            -0.6898540010405615,
+            -0.0002503723550049005
+          ],
+          "ndcMax": [
+            0.7236012974695061,
+            -0.4268646640090573,
+            -0.00024982953274013474
+          ]
+        },
+        "1551936": {
+          "vertices": 7272,
+          "ndcMin": [
+            -0.7270689877120262,
+            -0.33709173743927084,
+            -0.00025076561050299637
+          ],
+          "ndcMax": [
+            -0.5810564782585355,
+            -0.07464929534837476,
+            -0.0002458126620228967
+          ]
+        },
+        "1621536": {
+          "vertices": 7272,
+          "ndcMin": [
+            0.5891122699693155,
+            -0.33620559599234096,
+            -0.00025130293138318327
+          ],
+          "ndcMax": [
+            0.7394252548301429,
+            -0.058921777035589755,
+            -0.0002468274521924785
+          ]
+        },
+        "14933504": {
+          "vertices": 4,
+          "ndcMin": [
+            -0.48961227399501855,
+            -0.8964472900161822,
+            -0.015331470802450542
+          ],
+          "ndcMax": [
+            -0.17018715104029894,
+            -0.5855641708536594,
+            -0.015331470802450542
+          ]
+        },
+        "14933888": {
+          "vertices": 8,
+          "ndcMin": [
+            -0.34167154423888596,
+            -0.8548822858936544,
+            -0.01534367160665423
+          ],
+          "ndcMax": [
+            -0.11001941764100844,
+            -0.6900856703647958,
+            -0.01534367160665423
+          ]
+        },
+        "14939744": {
+          "vertices": 16,
+          "ndcMin": [
+            -0.5485511042156275,
+            -0.6056153741322168,
+            -0.01534367160665423
+          ],
+          "ndcMax": [
+            -0.22350276107797776,
+            -0.5067615449441295,
+            -0.01534367160665423
+          ]
+        },
+        "14958720": {
+          "vertices": 4,
+          "ndcMin": [
+            0.1871050870840508,
+            -0.8964472900161822,
+            -0.015331470802450542
+          ],
+          "ndcMax": [
+            0.5065302100387704,
+            -0.5855641708536594,
+            -0.015331470802450542
+          ]
+        },
+        "14960032": {
+          "vertices": 8,
+          "ndcMin": [
+            0.33557451038974423,
+            -0.8548822858936544,
+            -0.01534367160665423
+          ],
+          "ndcMax": [
+            0.5672266289142189,
+            -0.6900856703647958,
+            -0.01534367160665423
+          ]
+        },
+        "14965568": {
+          "vertices": 16,
+          "ndcMin": [
+            0.12869494233959988,
+            -0.6056153741322168,
+            -0.01534367160665423
+          ],
+          "ndcMax": [
+            0.45374326125704095,
+            -0.5067615449441295,
+            -0.01534367160665423
+          ]
+        },
+        "14987520": {
+          "vertices": 4,
+          "ndcMin": [
+            0.5915227303790187,
+            0.6017816910276583,
+            -0.00025183284005248744
+          ],
+          "ndcMax": [
+            0.729539020092336,
+            0.7636457528056401,
+            -0.00025150004760246693
+          ]
+        },
+        "particles": {
+          "vertices": 4,
+          "ndcMin": [
+            0.5745606146680792,
+            -0.6593182202260754,
+            -0.0002478259894454375
+          ],
+          "ndcMax": [
+            0.7521097780447416,
+            -0.44318173290681057,
+            -0.0002478259894454375
+          ]
+        }
+      }
+    },
+    "resourceStats": {
+      "stageCreated": 3,
+      "stageRetired": 0,
+      "effectCreated": 4,
+      "effectRetired": 4,
+      "peakEffectModels": 2,
+      "itemCreated": 13,
+      "itemRetired": 12,
+      "peakItemModels": 4
+    },
+    "randallScreenshotSha256": "ce50d3e1fe2ecebd07db8285de09f44cefc3a39e78b41b3a06be9c22f22a2b1e",
+    "visualReview": "Original stage geometry, all three platforms, two fighters, HUD and Randall visible to the right. Normalized controller input drops fighters through platforms and walks them to the edges; native camera code unchanged.",
+    "fountainRegression": {
+      "frames": 9000,
+      "platforms": [
+        {
+          "initial": 20,
+          "min": -1,
+          "max": 34.26292419433594,
+          "upFrames": 320,
+          "downFrames": 335,
+          "phases": [
+            1,
+            2,
+            0,
+            3,
+            4
+          ],
+          "collisionChecks": 9000,
+          "maxCollisionError": 9.5367431640625e-7
+        },
+        {
+          "initial": 28,
+          "min": -1,
+          "max": 28,
+          "upFrames": 348,
+          "downFrames": 551,
+          "phases": [
+            1,
+            2,
+            0,
+            3,
+            4
+          ],
+          "collisionChecks": 9000,
+          "maxCollisionError": 9.5367431640625e-7
+        }
+      ]
+    },
+    "battlefieldRegression": {
+      "combatFrames": 683,
+      "traceSha256": "cdc288ae093576c0051e8655cee2a9260ac65b51d00b5142c453c51c331888ca",
+      "stageCallbackFrames": 4500,
+      "lifecycleCompleted": true,
+      "originalTraceUnchanged": true
+    },
+    "foxProjectileRegression": {
+      "completed": true,
+      "mode": "hit",
+      "frames": 180,
+      "renderedSteps": 322,
+      "laserKind": 54,
+      "defenderDamage": 3,
+      "peakHitlag": 0,
+      "peakKnockback": 0,
+      "gpuVertexVerificationRequested": true
+    },
+    "fastWorkload": {
+      "completed": true,
+      "frames": 3600,
+      "finalFighterValuesMatch": true,
+      "stockChangesMatch": true,
+      "contactWindowsMatch": true
+    }
+  },
+  "fix": {
+    "problem": "Randall’s animated model moved while collision vertices remained at their initial position.",
+    "cause": "The native bring-up omitted Ground_801C0378, which original VS startup calls to allocate and clear per-map collision-control flags.",
+    "solution": "Call the unchanged original initializer before stage object creation; retain original spline animation and Ground_UpdateMapColl.",
+    "noForcedCollisionUpdatesInValidation": true
+  },
+  "limitations": [
+    "Incomplete full scene startup; this is the native development fixture, not the public playable release.",
+    "Randall collision/model tracking tested; fighter landing/ride parity and Shy Guy combat interactions remain unverified.",
+    "All-character/move coverage, audio, menus, network rollback, distinct displayed FPS and input-to-photon latency remain incomplete.",
+    "No game assets or generated binaries are included in this evidence."
+  ],
+  "acceptanceMet": false,
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "preparedCombat": {
+    "runs": [
+      {
+        "name": "story-live-record",
+        "frames": 3600,
+        "draws": 3600,
+        "elapsedMs": 60027.5,
+        "simulationHz": 59.9725125983924,
+        "drawSubmissionHz": 59.9725125983924,
+        "stepCpu": {
+          "samples": 3600,
+          "meanMs": 0.6423055555837022,
+          "p50Ms": 0.6000000238418579,
+          "p95Ms": 0.9000000059604645,
+          "maxMs": 2.0999999940395355
+        },
+        "drawSubmissionCpu": {
+          "samples": 3600,
+          "meanMs": 8.322944444475903,
+          "p50Ms": 7.799999982118607,
+          "p95Ms": 11.800000011920929,
+          "maxMs": 26.099999994039536
+        },
+        "catchupCallbacks": 0,
+        "shaderPreparation": null,
+        "shaderCoverage": {
+          "programs": 40,
+          "prepared": 0,
+          "preparedUsed": 0,
+          "unpreparedUsed": 40
+        },
+        "liveShaderCompilations": 6,
+        "workload": {
+          "framesWithAttack": 1887,
+          "framesWithHitlag": 324,
+          "framesWithDamage": 3300,
+          "stockChanges": [
+            {
+              "frame": 1730,
+              "slot": 1,
+              "stocks": 3
+            }
+          ],
+          "windows": [
+            {
+              "firstFrame": 1,
+              "frames": 600,
+              "hitlag": 42,
+              "attack": 250
+            },
+            {
+              "firstFrame": 601,
+              "frames": 600,
+              "hitlag": 60,
+              "attack": 352
+            },
+            {
+              "firstFrame": 1201,
+              "frames": 600,
+              "hitlag": 51,
+              "attack": 305
+            },
+            {
+              "firstFrame": 1801,
+              "frames": 600,
+              "hitlag": 51,
+              "attack": 300
+            },
+            {
+              "firstFrame": 2401,
+              "frames": 600,
+              "hitlag": 60,
+              "attack": 340
+            },
+            {
+              "firstFrame": 3001,
+              "frames": 600,
+              "hitlag": 60,
+              "attack": 340
+            }
+          ]
+        },
+        "gameplayTraceSha256": "a9457f0330becd7f8b391dd453392326859a12b83c6025d9cb9e6c37faed3215",
+        "resolution": [
+          960,
+          720
+        ],
+        "presentationFpsMeasured": false,
+        "inputToPhotonMeasured": false
+      },
+      {
+        "name": "story-prepared-live",
+        "frames": 3600,
+        "draws": 3600,
+        "elapsedMs": 60031.90000000596,
+        "simulationHz": 59.968116951148346,
+        "drawSubmissionHz": 59.968116951148346,
+        "stepCpu": {
+          "samples": 3600,
+          "meanMs": 0.6203333333796925,
+          "p50Ms": 0.5999999940395355,
+          "p95Ms": 0.9000000059604645,
+          "maxMs": 1.600000023841858
+        },
+        "drawSubmissionCpu": {
+          "samples": 3600,
+          "meanMs": 8.397944444302055,
+          "p50Ms": 7.9000000059604645,
+          "p95Ms": 11.400000005960464,
+          "maxMs": 19.19999998807907
+        },
+        "catchupCallbacks": 0,
+        "shaderPreparation": {
+          "requested": 40,
+          "compiled": 40,
+          "cpuMs": 492.90000000596046,
+          "fighterStateUnchanged": true
+        },
+        "shaderCoverage": {
+          "programs": 40,
+          "prepared": 40,
+          "preparedUsed": 40,
+          "unpreparedUsed": 0
+        },
+        "liveShaderCompilations": 0,
+        "workload": {
+          "framesWithAttack": 1887,
+          "framesWithHitlag": 324,
+          "framesWithDamage": 3300,
+          "stockChanges": [
+            {
+              "frame": 1730,
+              "slot": 1,
+              "stocks": 3
+            }
+          ],
+          "windows": [
+            {
+              "firstFrame": 1,
+              "frames": 600,
+              "hitlag": 42,
+              "attack": 250
+            },
+            {
+              "firstFrame": 601,
+              "frames": 600,
+              "hitlag": 60,
+              "attack": 352
+            },
+            {
+              "firstFrame": 1201,
+              "frames": 600,
+              "hitlag": 51,
+              "attack": 305
+            },
+            {
+              "firstFrame": 1801,
+              "frames": 600,
+              "hitlag": 51,
+              "attack": 300
+            },
+            {
+              "firstFrame": 2401,
+              "frames": 600,
+              "hitlag": 60,
+              "attack": 340
+            },
+            {
+              "firstFrame": 3001,
+              "frames": 600,
+              "hitlag": 60,
+              "attack": 340
+            }
+          ]
+        },
+        "gameplayTraceSha256": "a9457f0330becd7f8b391dd453392326859a12b83c6025d9cb9e6c37faed3215",
+        "resolution": [
+          960,
+          720
+        ],
+        "presentationFpsMeasured": false,
+        "inputToPhotonMeasured": false
+      }
+    ],
+    "driverShaderCacheDisabled": true,
+    "gameplayTraceDefinition": "JSON SHA256 of stateChanges, workload and final fighter values excluding resident pointers at indices 7/8.",
+    "sameGameplayTrace": true,
+    "allGraphicsRetained": true,
+    "measurement": "CPU step and draw-submission timing in hardware Chrome; rates are not independently observed display presentations."
+  },
+  "commands": [
+    "node --test scripts/native-port/*.test.mjs",
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --map=story --stage-callbacks --stage-only --stage-frames=9000 --render --hardware --record-shaders",
+    "node scripts/native-port/probe-constructor.mjs --map=story --stage-callbacks --live --workload --frames=3600 --hardware --record-shaders --defer-gpu-errors",
+    "node scripts/native-port/merge-shader-catalogs.mjs shader-record-story-Ca-live.json shader-record-story-Ca-cycle.json",
+    "MESA_SHADER_CACHE_DISABLE=true node scripts/native-port/probe-constructor.mjs --map=story --stage-callbacks --live --workload --frames=3600 --hardware --prewarm-shaders --defer-gpu-errors",
+    "node scripts/native-port/probe-constructor.mjs --map=fountain --stage-callbacks --stage-only --stage-frames=9000",
+    "node scripts/native-port/probe-constructor.mjs --stage-callbacks --render --hardware",
+    "node scripts/native-port/probe-constructor.mjs --character=Fx --input --projectile-combat --render-steps --verify-vertices --hardware",
+    "node scripts/native-port/probe-constructor.mjs --map=story --stage-callbacks --workload-steps --frames=3600"
+  ]
+}
