@@ -1,0 +1,105 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2916417,
+    "wasmSha256": "d5926882d7b8b38f791f94c7cbd0c6218de10778142b12ff7372f837664202f3"
+  },
+  "softwareGpu": true,
+  "originalPObjReference": {
+    "models": 27,
+    "samples": 81,
+    "draws": 6537,
+    "positions": 25656,
+    "normals": 24621,
+    "reflections": 141,
+    "maxPositionError": 0,
+    "maxNormalError": 0
+  },
+  "skinArithmetic": {
+    "passed": true,
+    "cases": 5,
+    "viewNormalCases": 2
+  },
+  "liveSnapshots": {
+    "settled": {
+      "resolution": [
+        960,
+        720
+      ],
+      "programs": 16,
+      "pixelStates": 12,
+      "samples": 5,
+      "draws": 254,
+      "positions": 794,
+      "normals": 737,
+      "reflections": 11,
+      "maxPositionError": 0,
+      "maxNormalError": 0
+    },
+    "final": {
+      "resolution": [
+        960,
+        720
+      ],
+      "programs": 16,
+      "pixelStates": 12,
+      "samples": 5,
+      "draws": 254,
+      "positions": 794,
+      "normals": 737,
+      "reflections": 11,
+      "maxPositionError": 0,
+      "maxNormalError": 0
+    }
+  },
+  "combatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+  "unchangedCombatTrace": true,
+  "combiner": {
+    "passed": true,
+    "programs": 219,
+    "capturedPrograms": 32,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 14016
+  },
+  "defaultRosterCombiner": {
+    "passed": true,
+    "programs": 220,
+    "capturedPrograms": 33,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 14080
+  },
+  "regressions": {
+    "targetedTests": 109,
+    "fighterBrowser": true,
+    "stageMapBrowser": true,
+    "sceneBrowser": true,
+    "animatedGpuModels": 27,
+    "maxVertexError": 0.000003814697265625
+  },
+  "commands": [
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --render",
+    "node scripts/native-port/build.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --tev",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/verify-browser.mjs --stage-map",
+    "node scripts/native-port/verify-browser.mjs --scene",
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs"
+  ],
+  "playable": false,
+  "visualParity": false,
+  "performanceMeasured": false,
+  "limitations": [
+    "Material capture now invokes the actual class override and scopes current GObj/JObj; the preceding checkpoint used base HSD setup.",
+    "Matrix equality compares original PObj setup to the shared CPU palette and original inverse-transpose helper; GPU normal/lighting rendering is not yet integrated.",
+    "Captured textures, TEV, pixel and channel settings remain disconnected from the diagnostic model shader.",
+    "Original light activation, effects, HUD, audio, full match lifecycle and complete roster gameplay remain incomplete.",
+    "Native camera framing was inspected in the same diagnostic; known white material surfaces persist. No retail visual parity, 720p60 or input-to-photon result."
+  ]
+}

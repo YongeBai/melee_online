@@ -12,8 +12,8 @@ export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
     'GXInitLightSpot','GXInitLightDistAttn','GXInitLightPos','GXGetLightPos','GXInitLightDir','GXGetLightDir',
     'GXInitSpecularDir','GXInitSpecularDirHA','GXInitLightColor','GXGetLightColor']);
   const materialDrawing=['GXSetNumIndStages','GXSetIndTexOrder','GXSetIndTexCoordScale','GXSetIndTexMtx','GXSetTevIndirect'];
-  const tevSource=path.join(root,'engines/browser-native/tev-state.c'),textureSource=path.join(root,'engines/browser-native/texture-state.c'),pixelSource=path.join(root,'engines/browser-native/pixel-state.c');
-  const tevFunctions=new Set([...(fs.readFileSync(tevSource,'utf8')+fs.readFileSync(textureSource,'utf8')+fs.readFileSync(pixelSource,'utf8')).matchAll(/\bvoid (GX\w+)\(/g)].map(m=>m[1]));
+  const tevSource=path.join(root,'engines/browser-native/tev-state.c'),textureSource=path.join(root,'engines/browser-native/texture-state.c'),pixelSource=path.join(root,'engines/browser-native/pixel-state.c'),modelSource=path.join(root,'engines/browser-native/model-state.c');
+  const tevFunctions=new Set([...(fs.readFileSync(tevSource,'utf8')+fs.readFileSync(textureSource,'utf8')+fs.readFileSync(pixelSource,'utf8')+fs.readFileSync(modelSource,'utf8')).matchAll(/\bvoid (GX\w+)\(/g)].map(m=>m[1]));
   const missing=[...new Set([...report.results.find(x=>x.entry==='HSD_JObjLoadJoint').missing,...materialDrawing])].filter(name=>!memoryLightFunctions.has(name)&&!tevFunctions.has(name));
   if(missing.some(name=>!name.startsWith('GX')))throw Error('Scene loader has unresolved non-GX dependencies');
   const headers=execFileSync('rg',['--files','libs/dolphin/include/dolphin/gx','-g','*.h'],{cwd:upstream,encoding:'utf8'})
@@ -39,6 +39,6 @@ export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
   if(characterFiles.length!==33||characterFiles.some(file=>failed.has(file)))throw Error('Character animation filename source set changed');
   if(additionalFiles.some(file=>failed.has(file)))throw Error('Required character loader failed the compile audit');
   const characterObjects=[...new Set([...characterFiles,...additionalFiles])].map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
-  return {files:[path.join(root,'engines/browser-native/scene.c'),tevSource,textureSource,pixelSource,guards,library,...characterObjects],
+  return {files:[path.join(root,'engines/browser-native/scene.c'),tevSource,textureSource,pixelSource,modelSource,guards,library,...characterObjects],
     unavailableGX:missing,auditOptimization:'-O0',renderingReady:false};
 }

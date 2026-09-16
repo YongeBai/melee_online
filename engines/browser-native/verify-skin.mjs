@@ -19,7 +19,21 @@ export function verifySkinArithmetic(module) {
       if(Math.abs(positions[i*3]-x)>0.00001||positions[i*3+1]!==2||positions[i*3+2]!==3)
         throw Error('Skin coordinate-space case failed: '+i);
     });
-    return {passed:true,cases:5};
+    const scratch=module._malloc(48*4);if(!scratch)throw Error('View-normal arithmetic allocation');
+    try {
+      module.HEAPF32.set([0,0,1,1,0,1,0,2,-1,0,0,3],scratch/4);
+      module.HEAPF32.set([2,1,0,7,0,3,0,9,0,0,4,11],scratch/4+12);
+      module._portSkinViewMatrices(1,scratch,scratch+48,scratch+96,scratch+144);
+      const expectedPosition=[0,0,4,12,0,3,0,11,-2,-1,0,-4],expectedNormal=[0,0,0.25,0,-1/6,1/3,0,0,-0.5,0,0,0];
+      for(const [offset,expected] of [[96,expectedPosition],[144,expectedNormal]])for(let i=0;i<12;i++)
+        if(Math.abs(module.HEAPF32[(scratch+offset)/4+i]-expected[i])>0.000001)throw Error('Normal inverse-transpose golden case');
+      // Original HSD copies the input for a singular matrix, including its
+      // translation column. GX normal loads later select only the 3x3 part.
+      module.HEAPF32.set([0,0,0,7,0,1,0,9,0,0,1,11],scratch/4+12);
+      module._portSkinViewMatrices(1,scratch,scratch+48,scratch+96,scratch+144);
+      for(let i=0;i<12;i++)if(module.HEAPF32[(scratch+96)/4+i]!==module.HEAPF32[(scratch+144)/4+i])throw Error('HSD singular normal fallback');
+    } finally {module._free(scratch);}
+    return {passed:true,cases:5,viewNormalCases:2};
   } finally {skin.dispose();}
 }
 

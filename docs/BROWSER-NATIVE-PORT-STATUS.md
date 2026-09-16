@@ -5,6 +5,23 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+The shared skin palette now has an original-renderer reference. PObj matrix
+setup agrees exactly across 81 poses of the 27 default model components:
+25,656 position matrices, 24,621 normal matrices and 141 reflection matrices.
+The two live Falcon/Battlefield snapshots also agree exactly. Golden cases
+check camera rotation with nonuniform scale/shear and HSD's singular-matrix
+fallback. These checks validate setup arithmetic, not GPU lighting.
+
+The capture now dispatches the actual material class callbacks with their
+owning fighter/GObj context. The preceding material checkpoint called the base
+HSD setup, which missed fighter-specific alpha/overlay stages. The corrected
+live snapshots use 16 distinct programs each and pass 14,016 integer GPU channel
+checks; the combat trace stays unchanged. All 109 targeted tests pass. The
+diagnostic picture still has the known white-surface errors from its simplified
+shader. Original lighting activation and connecting native material state to
+actual draws remain the next integration steps; no match FPS is claimed.
+[Original model-matrix checkpoint](benchmarks/browser-2026-09-15-native-port-model-state.json).
+
 Full original `HSD_MObjSetup` now runs through the material capture boundary,
 including pixel-engine and color-channel setup. All 1,753 default-fighter
 material instances match their original depth/blending/alpha-test descriptors

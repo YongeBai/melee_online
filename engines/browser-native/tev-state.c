@@ -8,6 +8,8 @@
 #include <sysdolphin/baselib/tev.h>
 #include <sysdolphin/baselib/tobj.h>
 #include <sysdolphin/baselib/state.h>
+#include <sysdolphin/baselib/pobj.h>
+#include <sysdolphin/baselib/gobj.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -25,6 +27,7 @@ static void require(int condition){if(!capturing||!condition){fprintf(stderr,"In
 void portRequireMaterialCapture(int condition){require(condition);}
 void portTextureCaptureReset(void);
 void portPixelCaptureReset(void);
+void portModelCaptureReset(void);
 static s32* stage(unsigned id){require(id<16);return state.stage[id];}
 void GXPixModeSync(void){require(1);state.syncs++;}
 void GXSetTevColor(GXTevRegID id,GXColor c){require(id<4);state.registers|=1u<<id;state.reg[id][0]=c.r;state.reg[id][1]=c.g;state.reg[id][2]=c.b;state.reg[id][3]=c.a;}
@@ -41,19 +44,38 @@ void GXSetTevSwapMode(GXTevStageID id,GXTevSwapSel ras,GXTevSwapSel tex){s32* s=
 void GXSetTevKColorSel(GXTevStageID id,GXTevKColorSel sel){stage(id)[24]=sel;}
 void GXSetTevKAlphaSel(GXTevStageID id,GXTevKAlphaSel sel){stage(id)[25]=sel;}
 
-const PortTevState* portMaterialTev(HSD_JObj* joint,unsigned index)
+static const PortTevState* capture(HSD_JObj* joint,unsigned index,int polygon,Mtx view,HSD_GObj* owner)
 {
     if(capturing||!joint||!union_type_dobj(joint))abort();
     HSD_DObj* display=joint->u.dobj;
     while(index--){if(!display)abort();display=display->next;}
     if(!display||!display->mobj)abort();
     HSD_MObj* material=display->mobj;
+    if(HSD_MOBJ_METHOD(material)->setup!=hsdMObj.setup&&(!owner||!owner->user_data)){
+        fprintf(stderr,"Custom native material requires its render owner\n");abort();
+    }
+    HSD_GObj* previous_owner=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
+    HSD_JObj* previous_joint=HSD_JObjGetCurrent();HSD_JObjRef(previous_joint);HSD_JObjSetCurrent(joint);
     memset(&state,0,sizeof(state));capturing=1;
     portTextureCaptureReset();
     portPixelCaptureReset();
+    portModelCaptureReset();
     /* Force a complete snapshot rather than relying on previous draw caches. */
     HSD_StateInvalidate(HSD_STATE_COLOR_CHANNEL|HSD_STATE_RENDER_MODE|HSD_STATE_TEV_REGISTER);
-    HSD_MObjSetup(material,material->rendermode);
-    HSD_MObjUnset(material,material->rendermode);
+    HSD_MObjSetCurrent(material);
+    HSD_MOBJ_METHOD(material)->setup(material,material->rendermode);
+    if(polygon>=0) {
+        HSD_PObj* p=display->pobj;while(polygon--){if(!p)abort();p=p->next;}if(!p||!view)abort();
+        HSD_JObjSetupMatrix(joint);Mtx model_view;PSMTXConcat(view,joint->mtx,model_view);
+        HSD_PObjClearMtxMark(NULL,0);
+        HSD_POBJ_METHOD(p)->setup_mtx(p,view,model_view,material->rendermode);
+        HSD_PObjClearMtxMark(NULL,0);
+    }
+    HSD_MOBJ_METHOD(material)->unset(material,material->rendermode);
+    HSD_MObjSetCurrent(NULL);
+    HSD_JObjSetCurrent(previous_joint);HSD_JObjUnref(previous_joint);HSD_GObj_804D7814=previous_owner;
     capturing=0;return &state;
 }
+const PortTevState* portMaterialTev(HSD_JObj* joint,unsigned index,HSD_GObj* owner){return capture(joint,index,-1,NULL,owner);}
+const PortTevState* portMaterialDrawState(HSD_JObj* joint,unsigned index,unsigned polygon,Mtx view,HSD_GObj* owner)
+{if(polygon>4096)abort();return capture(joint,index,(int)polygon,view,owner);}

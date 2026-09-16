@@ -1,5 +1,6 @@
-/* Native palette preparation follows HSD SetupEnvelopeModelMtx. Camera/view
- * multiplication is left to the GPU boundary; output is in model world space.
+/* Native palette preparation follows HSD SetupEnvelopeModelMtx. The shared
+ * palette is in world space; portSkinViewMatrices optionally produces original
+ * view-space position and inverse-transpose normal matrices for the renderer.
  */
 #include <sysdolphin/baselib/mtx.h>
 #include <dolphin/mtx.h>
@@ -60,4 +61,11 @@ int portSkinMatrices(unsigned node_count,Mtx* world,Mtx* inverse,unsigned* has_i
 void portSkinVertices(unsigned count,Vec* positions,unsigned* indices,Mtx* matrices,Vec* output)
 {
     for(unsigned i=0;i<count;i++)PSMTXMultVec(matrices[indices[i]],&positions[i],&output[i]);
+}
+void portSkinViewMatrices(unsigned count,Mtx view,Mtx* world,Mtx* positions,Mtx* normals)
+{
+    for(unsigned i=0;i<count;i++) {
+        PSMTXConcat(view,world[i],positions[i]);
+        HSD_MtxInverseTranspose(positions[i],normals[i]);
+    }
 }

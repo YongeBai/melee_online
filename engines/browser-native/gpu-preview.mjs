@@ -14,6 +14,8 @@ import {verifyGpuTev} from './verify-tev.mjs';
 import {readNativeTextures,decodeNativeTexture,gxTextureLod} from './native-texture.mjs';
 import {readNativePixel} from './native-pixel.mjs';
 import {verifyNativePixel} from './verify-material-state.mjs';
+import {createNativeModelProbe} from './verify-model-state.mjs';
+import {verifySkinArithmetic} from './verify-skin.mjs';
 const canvas=document.querySelector('canvas'),status=document.querySelector('#status'),result=document.querySelector('#result');
 const parameters=new URL(location.href).searchParams;
 const fullScene=parameters.get('scene')==='1';
@@ -30,6 +32,7 @@ try {
   const module=await createMeleeNative();if(module._portRuntimeInit()<0)throw Error('Native runtime initialization failed');
   const pipeline=createMeshPipeline(gl),scratch=module._malloc(144);
   const conventions=verifyGpuConventions(gl,pipeline);
+  const skinArithmetic=verifySkinArithmetic(module);
   // Diagnostic front view only. The actual gameplay camera must come from the
   // native match; no pitch/yaw/projection adjustment is applied to /play/.
   module.HEAPF32.set([0,12,75,0,1,0,0,12,0],scratch/4);
@@ -100,31 +103,34 @@ try {
           }
           for(const g of native.generators)texgenTypes.add(g.type+'/'+g.source+'/'+g.normalize);
         }
-        pose={step(world,flags){module._portSceneAnimate(root);module._portSceneMatrices(n,nodes,world);module._portSceneFlags(n,nodes,flags);},dispose};
+        pose={nodes,step(world,flags){module._portSceneAnimate(root);module._portSceneMatrices(n,nodes,world);module._portSceneFlags(n,nodes,flags);},dispose};
       } catch(error){dispose();throw error;}
     } else {
       const limited=loadPose(module,model.tree,animationArchives(motion).next().value.tree);
       pose={step(world,flags){module._portPoseStep(limited.pointer,world);module._portPoseFlags(limited.pointer,flags);},dispose:limited.dispose};
     }
-    let skin,gpu,flags;
+    let skin,gpu,flags,modelProbe;
     try {
       skin=loadSkin(module,model,readSkinBindings(bytes,model),{referenceVertices});
       gpu=uploadMesh(gl,pipeline,model,skin,assets,transforms);flags=module._malloc(model.tree.nodes.length*4);
+      if(fullScene)modelProbe=createNativeModelProbe(module,model,bytes,pose.nodes,skin);
       return {model,pose,skin,gpu,materialCount,textureChecks,texturePixelChecks,textureMatrixChecks,texgenTypes:[...texgenTypes],
+        checkModel(){return modelProbe?.check(Float32Array.from({length:12},(_,i)=>view[(i%4)*4+Math.floor(i/4)]));},
         step(){pose.step(skin.world,flags);skin.step();
           gpu.updatePalette(module.HEAPF32.subarray(skin.matrices/4,skin.matrices/4+skin.groupCount*12));},
         draw(){gl.viewport(0,0,960,720);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
           const draws=gpu.draw(view,projection,new Uint32Array(module.HEAPU8.buffer,flags,model.tree.nodes.length));
           const error=gl.getError();if(error!==gl.NO_ERROR)throw Error('GPU error: '+error);return draws;},
-        dispose(){gpu.dispose();skin.dispose();pose.dispose();module._free(flags);}};
-    } catch(error){gpu?.dispose();skin?.dispose();pose.dispose();if(flags)module._free(flags);throw error;}
+        dispose(){modelProbe?.dispose();gpu.dispose();skin.dispose();pose.dispose();module._free(flags);}};
+    } catch(error){modelProbe?.dispose();gpu?.dispose();skin?.dispose();pose.dispose();if(flags)module._free(flags);throw error;}
   }
   for(const name of names) {
     status.textContent='Verifying native GPU resources: '+name;
-    const actor=await load(name,true),snapshots=[];let maxError=0,maxScaledError=0;
+    const actor=await load(name,true),snapshots=[],modelMatrixChecks=[];let maxError=0,maxScaledError=0;
     try {
       for(let frame=0;frame<=32;frame++) {
         actor.step();if(frame%16!==0)continue;
+        if(fullScene)modelMatrixChecks.push({frame,...actor.checkModel()});
         const positions=actor.gpu.readPositions(),expected=module.HEAPF32.subarray(actor.skin.transformed/4,actor.skin.transformed/4+positions.length);
         positions.forEach((v,i)=>{const error=Math.abs(v-expected[i]),scaled=error/(1+Math.abs(expected[i]));
           maxError=Math.max(maxError,error);maxScaledError=Math.max(maxScaledError,scaled);
@@ -136,13 +142,13 @@ try {
         snapshots.push({frame,draws,coloredPixels,sha256});
       }
       rows.push({name,vertices:actor.model.totalVertices,paletteMatrices:actor.skin.groupCount,materialCount:actor.materialCount,textureChecks:actor.textureChecks,texturePixelChecks:actor.texturePixelChecks,textureMatrixChecks:actor.textureMatrixChecks,texgenTypes:actor.texgenTypes,maxError,maxScaledError,
-        snapshots,distinctImages:snapshots.some(s=>s.sha256!==snapshots[0].sha256)});
+        modelMatrixChecks,snapshots,distinctImages:snapshots.some(s=>s.sha256!==snapshots[0].sha256)});
     } finally {actor.dispose();}
   }
   if(fullScene&&(module._portFileAllocations()||module._portRuntimeObjectsUsed()||module._portSceneLiveObjects()))
     throw Error('Native scene benchmark leaked archive or object ownership');
   const tev=fullScene?verifyGpuTev(gl,[...tevPrograms.values()]):null;
-  const report={passed:true,originalGameArchiveLoader:fullScene,originalGObjOwnership:fullScene,originalHsdObjects:fullScene,resolution:[960,720],conventions,tev,pixelStates:[...pixelStates.values()].map(({state,materials})=>({state,materials})),models:rows,emulator:false,playable:false,gameplayParity:false,
+  const report={passed:true,originalGameArchiveLoader:fullScene,originalGObjOwnership:fullScene,originalHsdObjects:fullScene,resolution:[960,720],conventions,skinArithmetic,tev,pixelStates:[...pixelStates.values()].map(({state,materials})=>({state,materials})),models:rows,emulator:false,playable:false,gameplayParity:false,
     performanceMeasured:false,renderer:gl.getParameter(gl.RENDERER),
     limitations:'Diagnostic unlit first-UV image; no native lighting, TEV, material animation, part selection, gameplay camera or match simulation'};
   const actor=await load(selected,false);actor.step();actor.draw();

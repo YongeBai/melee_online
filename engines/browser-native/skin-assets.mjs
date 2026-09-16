@@ -79,7 +79,7 @@ export function loadSkin(module,model,bindings,{referenceVertices=true}={}) {
     }));
     const positionPtr=referenceVertices?upload(positions):0,indexPtr=referenceVertices?upload(indices):0,
       transformed=referenceVertices?alloc(positions.byteLength):0;
-    return {world,matrices,transformed,positions,indices,groupCount:bindings.groups.length,
+    return {world,matrices,transformed,positions,indices,bindings,groupCount:bindings.groups.length,
       step(){const result=module._portSkinMatrices(n,world,inverse,has,flags,parents,bindings.groups.length,groups,influences,matrices);
         if(result!==0)throw Error('Native skin matrices failed: '+result);
         if(referenceVertices)module._portSkinVertices(model.totalVertices,positionPtr,indexPtr,matrices,transformed);},

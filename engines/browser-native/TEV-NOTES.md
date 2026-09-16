@@ -1,8 +1,19 @@
 # Native material combiners
 
-`tev-state.c` calls Melee's full original `HSD_MObjSetup`/`HSD_MObjUnset` and
+`tev-state.c` dispatches Melee's original material class setup/unset methods and
 records its GX material setters. Capture is explicitly scoped; GX calls outside it still
 abort. This is a boundary for the direct port, not CPU emulation or a FIFO.
+The earlier pixel-state checkpoint called the base HSD setup directly. Class
+dispatch now also invokes the fighter override with the correct current GObj
+and JObj, preserving per-fighter alpha and color-overlay behavior. Custom
+materials fail explicitly if no owning render object is supplied.
+
+`portMaterialDrawState` additionally invokes the original PObj matrix setup for
+a specific polygon section. `model-state.c` records position/normal loads while
+`texture-state.c` records normal-projection loads. The independent shared skin
+palette, camera concatenation and original inverse-transpose helper agree
+exactly with those loads across 81 default-model poses and both live match
+snapshots. This is a CPU setup cross-check; GPU lighting remains unimplemented.
 Capture also runs original `HSD_TObjSetup` and coordinate-generator setup.
 `texture-state.c` records image and palette selections, filters, LOD arguments,
 texgen selectors and texture matrices. Its temporary GX handles are scoped to
@@ -40,7 +51,7 @@ are not present in the tested fixtures. Lighting channels and pixel-engine
 settings are captured by `pixel-state.c`. The scene test checks those settings
 against source custom PE descriptors or explicit HSD defaults for every material.
 Snapshots invalidate HSD's previous-draw caches to record all required state.
-Live light selection/activation, specular light updates and per-joint normal
-matrices are still pending; captured channel masks currently have no active
+Live light selection/activation, specular light updates and applying per-joint
+normal matrices on the GPU are still pending; channel masks currently have no active
 lights. The pixel-state reader and scalar alpha-test oracle do not apply blend,
 depth or alpha tests to actual material draws yet.
