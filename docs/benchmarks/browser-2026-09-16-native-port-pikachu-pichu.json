@@ -1,0 +1,2345 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "b8ad00c",
+  "scope": "Pikachu/Pichu default-costume native moves and Jolt contacts; limited Battlefield timing, not full competitive acceptance",
+  "wasmSha256": "ec053ec9508d5e9898d49050efc6e596f135aec2d4e2607d4afbddfebbcd5537",
+  "portableRecipeSha256": "272b977aebb5466656c582eb0520c1fee065720bd1a055397d55d02c91712f6a",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "452b86187509ca3186425e07e2062dac727b9da540272575adeedb4e8cb73740",
+    "engines/browser-native/effect-assets.mjs": "e93c18e981b71641662fb22d76aa70b040f0c7d2ad2191bebce697e9fa595284",
+    "engines/browser-native/verify-pikachu.mjs": "566035417e4a9ca8a041279d6a0e9a07d48e7dcf404f8ca538a3c41406308728",
+    "engines/browser-native/native-match-preview.mjs": "08d193b80fcf2d191ef438de9905e67f456f9ad662643db90e9d2c9ceaef957b",
+    "engines/browser-native/constructor.html": "1cb40ae166ffe930e91c91e5720c9db55d0912af2dd8ab267b7c97295ed4f273",
+    "scripts/native-port/probe-constructor.mjs": "8858074492d6588fc67573dc256cf86a4795e6bd3ee272994b4237fc67e38f25"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "resolution": [
+    960,
+    720
+  ],
+  "validation": {
+    "unitTests": 167,
+    "failedTests": 0,
+    "build": true,
+    "characters": {
+      "Pk": {
+        "baseArchive": {
+          "passed": true,
+          "checks": 1448228,
+          "bytes": 1461894,
+          "partCount": 53,
+          "costumes": 4,
+          "motionRows": 320,
+          "demoRows": 14,
+          "imports": [
+            {
+              "label": "initialization",
+              "at": 96,
+              "size": 207604,
+              "pointers": 670
+            },
+            {
+              "label": "visibility",
+              "at": 207948,
+              "size": 207584,
+              "pointers": 51
+            },
+            {
+              "label": "demo motions",
+              "at": 415532,
+              "size": 207584,
+              "pointers": 29
+            },
+            {
+              "label": "secondary animations",
+              "at": 623144,
+              "size": 207584,
+              "pointers": 208
+            },
+            {
+              "label": "gameplay parameters",
+              "at": 830728,
+              "size": 207620,
+              "pointers": 20
+            },
+            {
+              "label": "dynamics",
+              "at": 1038348,
+              "size": 20,
+              "pointers": 0
+            },
+            {
+              "label": "hurtboxes",
+              "at": 1038368,
+              "size": 456,
+              "pointers": 1
+            },
+            {
+              "label": "auxiliary model",
+              "at": 1038824,
+              "size": 207584,
+              "pointers": 713
+            },
+            {
+              "label": "articles",
+              "at": 1246408,
+              "size": 207628,
+              "pointers": 231
+            }
+          ],
+          "relocations": 1948
+        },
+        "effectBank": {
+          "passed": true,
+          "checks": 3282,
+          "models": 5,
+          "commands": 10,
+          "textures": 3,
+          "relocations": 1242,
+          "unreferencedRelocations": 0
+        },
+        "moves": {
+          "completed": true,
+          "frames": 1618,
+          "renderedSteps": 1760,
+          "kinds": [
+            81,
+            89,
+            90
+          ],
+          "phases": [
+            {
+              "name": "ground Thunder Jolt",
+              "frames": 251,
+              "states": [
+                341,
+                14
+              ],
+              "itemKinds": [
+                89,
+                90
+              ],
+              "peakItems": 2,
+              "itemFrames": 99,
+              "initial": [
+                14,
+                2,
+                48,
+                0,
+                6.12748908996582,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                193,
+                0,
+                6.12748908996582,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "selfDamage": 0,
+              "traceSha256": "aa2281516dc61e9b5cd2d324d58bb7bb24827659e3bcb39921ef68f2597cacf4"
+            },
+            {
+              "name": "air Thunder Jolt",
+              "frames": 313,
+              "states": [
+                24,
+                25,
+                342,
+                341,
+                14
+              ],
+              "itemKinds": [
+                89,
+                90
+              ],
+              "peakItems": 2,
+              "itemFrames": 99,
+              "initial": [
+                14,
+                2,
+                193,
+                0,
+                6.12748908996582,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                243,
+                0,
+                6.12748908996582,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "selfDamage": 0,
+              "traceSha256": "4d8786f2ec7fffe6e9bf51c56e3e9996f60b0f7a49cdb4310b4357ac0d2317a0"
+            },
+            {
+              "name": "Thunder",
+              "frames": 407,
+              "states": [
+                15,
+                16,
+                14,
+                359,
+                360,
+                361,
+                362
+              ],
+              "itemKinds": [
+                81
+              ],
+              "peakItems": 4,
+              "itemFrames": 52,
+              "initial": [
+                14,
+                2,
+                243,
+                0,
+                6.12748908996582,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                192,
+                0,
+                58.12435531616211,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "selfDamage": 0,
+              "traceSha256": "257285e316a21c5df5984c4fdc3b55956fe66108efc857b3b52fb8a195830c6a"
+            },
+            {
+              "name": "up special",
+              "frames": 297,
+              "states": [
+                353,
+                357,
+                358,
+                43,
+                14
+              ],
+              "itemKinds": [],
+              "peakItems": 0,
+              "itemFrames": 0,
+              "initial": [
+                14,
+                2,
+                192,
+                0,
+                58.12435531616211,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                241,
+                0,
+                8.835955619812012,
+                54.40010070800781,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              "dashStarts": [
+                {
+                  "frame": 14,
+                  "state": 357,
+                  "position": [
+                    58.12435531616211,
+                    9.896100044250488
+                  ]
+                },
+                {
+                  "frame": 27,
+                  "state": 357,
+                  "position": [
+                    49.21795654296875,
+                    54.31136703491211
+                  ]
+                }
+              ],
+              "selfDamage": 0,
+              "traceSha256": "54e8026fcec3cd321f1f8056baa1d2658cd69dbb1c016416d473e3937a8f2c81"
+            },
+            {
+              "name": "Skull Bash",
+              "frames": 350,
+              "states": [
+                343,
+                344,
+                347,
+                350,
+                351,
+                29,
+                42,
+                14
+              ],
+              "itemKinds": [],
+              "peakItems": 0,
+              "itemFrames": 0,
+              "initial": [
+                14,
+                2,
+                241,
+                0,
+                8.835955619812012,
+                54.40010070800781,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                217,
+                0,
+                -63.14183044433594,
+                0.00009999999747378752,
+                0,
+                1601056,
+                9905728,
+                15,
+                1,
+                12,
+                0,
+                0,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              "selfDamage": 0,
+              "traceSha256": "d0ba6c8e67cc24a84a040fc98088919cb8c11a434653de8b0af4dc52fa863e4a"
+            }
+          ],
+          "perFrameGpuVertexChecks": true,
+          "finalGpuErrorCheck": true
+        },
+        "contacts": {
+          "contact": {
+            "completed": true,
+            "kind": 89,
+            "itemFrames": 10,
+            "peakItems": 2,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -8.262134552001953,
+              0.00009999999747378752,
+              0,
+              1601164,
+              9905728,
+              15,
+              1,
+              12,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              139,
+              0,
+              -9.111734390258789,
+              0.00009999999747378752,
+              0,
+              1601164,
+              9905728,
+              15,
+              1,
+              12,
+              1,
+              7,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              21.205337524414062,
+              0.00009999999747378752,
+              0,
+              1601056,
+              9905728,
+              15,
+              1,
+              12,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              122,
+              0,
+              21.205337524414062,
+              0.00009999999747378752,
+              0,
+              1601056,
+              9905728,
+              15,
+              1,
+              12,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 4,
+            "peakKnockback": 14.579999923706055,
+            "defenderStates": [
+              14,
+              78
+            ]
+          },
+          "control": {
+            "completed": true,
+            "kind": 89,
+            "itemFrames": 0,
+            "peakItems": 0,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -8.262134552001953,
+              0.00009999999747378752,
+              0,
+              1601164,
+              9905728,
+              15,
+              1,
+              12,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              207,
+              0,
+              -8.262134552001953,
+              0.00009999999747378752,
+              0,
+              1601164,
+              9905728,
+              15,
+              1,
+              12,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              21.205337524414062,
+              0.00009999999747378752,
+              0,
+              1601056,
+              9905728,
+              15,
+              1,
+              12,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              207,
+              0,
+              21.205337524414062,
+              0.00009999999747378752,
+              0,
+              1601056,
+              9905728,
+              15,
+              1,
+              12,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 0,
+            "peakKnockback": 0,
+            "defenderStates": [
+              14
+            ]
+          },
+          "shield": {
+            "completed": true,
+            "kind": 89,
+            "itemFrames": 9,
+            "peakItems": 2,
+            "before": [
+              179,
+              -1,
+              -1,
+              0,
+              -8.262134552001953,
+              0.00009999999747378752,
+              0,
+              1601164,
+              9905728,
+              15,
+              1,
+              12,
+              1,
+              0,
+              0,
+              0,
+              1,
+              56.920013427734375,
+              4
+            ],
+            "after": [
+              179,
+              -1,
+              -1,
+              0,
+              -10.080135345458984,
+              0.00009999999747378752,
+              0,
+              1601164,
+              9905728,
+              15,
+              1,
+              12,
+              1,
+              0,
+              0,
+              0,
+              1,
+              3.160064458847046,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              21.205337524414062,
+              0.00009999999747378752,
+              0,
+              1601056,
+              9905728,
+              15,
+              1,
+              12,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              122,
+              0,
+              21.205337524414062,
+              0.00009999999747378752,
+              0,
+              1601056,
+              9905728,
+              15,
+              1,
+              12,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 0,
+            "defenderStates": [
+              179,
+              181
+            ]
+          }
+        },
+        "live": [
+          {
+            "prepared": false,
+            "driverShaderCacheDisabled": false,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60022.80000001192,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.4477777778440052,
+              "p50Ms": 0.4000000059604645,
+              "p95Ms": 0.7000000178813934,
+              "maxMs": 1.699999988079071
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 5.460861111424036,
+              "p50Ms": 5.100000023841858,
+              "p95Ms": 7.200000017881393,
+              "maxMs": 13.5
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.670630730757722,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.799999999995634,
+              "maxMs": 33.399999999999636
+            },
+            "cadence": {
+              "callbacks": 3603,
+              "zeroStepCallbacks": 3,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -848.499999976158,
+                  "callbackTime": 1.9000000059604645,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 1.4000000238420398,
+                  "callbackTime": 4.5,
+                  "interval": 849.9000000000001,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 18.100000023841858,
+                  "callbackTime": 18.30000001192093,
+                  "interval": 16.699999999999818,
+                  "debt": 0.03333333333315025
+                },
+                {
+                  "callback": 4,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 34.800000023841676,
+                  "callbackTime": 35.400000005960464,
+                  "interval": 16.699999999999818,
+                  "debt": 0.0666666666663005
+                },
+                {
+                  "callback": 5,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 51.40000002384204,
+                  "callbackTime": 51.900000005960464,
+                  "interval": 16.600000000000364,
+                  "debt": -3.552713678800501e-15
+                },
+                {
+                  "callback": 6,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 68.10000002384186,
+                  "callbackTime": 68.7000000178814,
+                  "interval": 16.699999999999818,
+                  "debt": 0.0333333333331467
+                },
+                {
+                  "callback": 7,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 84.80000002384168,
+                  "callbackTime": 85.60000002384186,
+                  "interval": 16.699999999999818,
+                  "debt": 0.06666666666629695
+                },
+                {
+                  "callback": 8,
+                  "frame": 5,
+                  "steps": 1,
+                  "timestamp": 101.40000002384204,
+                  "callbackTime": 101.7000000178814,
+                  "interval": 16.600000000000364,
+                  "debt": -7.105427357601002e-15
+                },
+                {
+                  "callback": 333,
+                  "frame": 330,
+                  "steps": 0,
+                  "timestamp": 5517.800000023843,
+                  "callbackTime": 5518,
+                  "interval": 16.600000000000364,
+                  "debt": 16.400000000000155
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 2496,
+              "framesWithHitlag": 351,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 84,
+                  "attack": 468
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 63,
+                  "attack": 467
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 460
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 48,
+                  "attack": 368
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 45,
+                  "attack": 358
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 51,
+                  "attack": 375
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 25,
+              "prepared": 0,
+              "preparedUsed": 0,
+              "unpreparedUsed": 25
+            },
+            "shaderCompilations": [
+              {
+                "frame": 196,
+                "program": 22,
+                "origin": "model",
+                "cpuMs": 4.0999999940395355
+              },
+              {
+                "frame": 203,
+                "program": 23,
+                "origin": "model",
+                "cpuMs": 4.700000017881393
+              },
+              {
+                "frame": 2277,
+                "program": 24,
+                "origin": "model",
+                "cpuMs": 2.7000000178813934
+              },
+              {
+                "frame": 2677,
+                "program": 25,
+                "origin": "model",
+                "cpuMs": 2.0999999940395355
+              }
+            ],
+            "slowDraws": [],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "717e98490ae90d2a28a16d3a75770f992078d8f4feed0d902dfdd5bda39f60dd"
+          },
+          {
+            "prepared": true,
+            "driverShaderCacheDisabled": true,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60032.70000001788,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.5509166665954722,
+              "p50Ms": 0.5999999940395355,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.5
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 5.478500000188748,
+              "p50Ms": 5.200000017881393,
+              "p95Ms": 7,
+              "maxMs": 20.799999982118607
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67063073075774,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.799999999995634,
+              "maxMs": 33.399999999999636
+            },
+            "cadence": {
+              "callbacks": 3604,
+              "zeroStepCallbacks": 4,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -505.61799999403956,
+                  "callbackTime": 1.800000011920929,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -5.5999999940395355,
+                  "callbackTime": 3.300000011920929,
+                  "interval": 500.01800000000003,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 11.000000005960374,
+                  "callbackTime": 11.200000017881393,
+                  "interval": 16.59999999999991,
+                  "debt": 0
+                },
+                {
+                  "callback": 4,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 27.700000005960646,
+                  "callbackTime": 28,
+                  "interval": 16.700000000000273,
+                  "debt": 0.033333333333605
+                },
+                {
+                  "callback": 5,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 44.400000005960464,
+                  "callbackTime": 49.80000001192093,
+                  "interval": 16.699999999999818,
+                  "debt": 0.06666666666675525
+                },
+                {
+                  "callback": 6,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 61.00000000596037,
+                  "callbackTime": 61.30000001192093,
+                  "interval": 16.59999999999991,
+                  "debt": -3.552713678800501e-15
+                },
+                {
+                  "callback": 7,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 77.60000000596028,
+                  "callbackTime": 77.90000000596046,
+                  "interval": 16.59999999999991,
+                  "debt": -0.06666666666676235
+                },
+                {
+                  "callback": 8,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 94.40000000596046,
+                  "callbackTime": 94.60000002384186,
+                  "interval": 16.800000000000182,
+                  "debt": 0.0666666666667517
+                },
+                {
+                  "callback": 337,
+                  "frame": 333,
+                  "steps": 0,
+                  "timestamp": 5577.4000000059605,
+                  "callbackTime": 5578.200000017881,
+                  "interval": 16.600000000000364,
+                  "debt": 16.399999999999697
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 2496,
+              "framesWithHitlag": 351,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 84,
+                  "attack": 468
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 63,
+                  "attack": 467
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 460
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 48,
+                  "attack": 368
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 45,
+                  "attack": 358
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 51,
+                  "attack": 375
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 27,
+              "prepared": 27,
+              "preparedUsed": 25,
+              "unpreparedUsed": 0
+            },
+            "shaderCompilations": [],
+            "slowDraws": [
+              {
+                "frame": 1,
+                "costMs": 20.799999982118607,
+                "materials": {
+                  "vertexChecks": null,
+                  "immediateDraws": 44,
+                  "immediateVertices": 176,
+                  "particleDraws": 44,
+                  "particleVertices": 176,
+                  "afterimageDraws": 0,
+                  "afterimageVertices": 0,
+                  "shaderCompilations": [],
+                  "draws": 183,
+                  "programs": 27,
+                  "images": 75,
+                  "originalMaterialState": true,
+                  "visualParity": false,
+                  "performanceMeasured": false
+                },
+                "resources": {
+                  "stageCreated": 3,
+                  "stageRetired": 0,
+                  "effectCreated": 4,
+                  "effectRetired": 4,
+                  "peakEffectModels": 2,
+                  "itemCreated": 0,
+                  "itemRetired": 0,
+                  "peakItemModels": 0
+                }
+              }
+            ],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "717e98490ae90d2a28a16d3a75770f992078d8f4feed0d902dfdd5bda39f60dd"
+          }
+        ]
+      },
+      "Pc": {
+        "baseArchive": {
+          "passed": true,
+          "checks": 1627033,
+          "bytes": 1638240,
+          "partCount": 46,
+          "costumes": 4,
+          "motionRows": 320,
+          "demoRows": 14,
+          "imports": [
+            {
+              "label": "initialization",
+              "at": 96,
+              "size": 232980,
+              "pointers": 672
+            },
+            {
+              "label": "visibility",
+              "at": 233324,
+              "size": 232960,
+              "pointers": 54
+            },
+            {
+              "label": "demo motions",
+              "at": 466284,
+              "size": 232960,
+              "pointers": 32
+            },
+            {
+              "label": "secondary animations",
+              "at": 699272,
+              "size": 232960,
+              "pointers": 229
+            },
+            {
+              "label": "gameplay parameters",
+              "at": 932232,
+              "size": 232996,
+              "pointers": 22
+            },
+            {
+              "label": "dynamics",
+              "at": 1165228,
+              "size": 20,
+              "pointers": 0
+            },
+            {
+              "label": "hurtboxes",
+              "at": 1165248,
+              "size": 576,
+              "pointers": 1
+            },
+            {
+              "label": "auxiliary model",
+              "at": 1165824,
+              "size": 232960,
+              "pointers": 344
+            },
+            {
+              "label": "articles",
+              "at": 1398784,
+              "size": 233004,
+              "pointers": 217
+            }
+          ],
+          "relocations": 1597
+        },
+        "effectBank": {
+          "passed": true,
+          "checks": 3282,
+          "models": 5,
+          "commands": 10,
+          "textures": 3,
+          "relocations": 1242,
+          "unreferencedRelocations": 0
+        },
+        "moves": {
+          "completed": true,
+          "frames": 1618,
+          "renderedSteps": 1760,
+          "kinds": [
+            82,
+            91,
+            92
+          ],
+          "phases": [
+            {
+              "name": "ground Thunder Jolt",
+              "frames": 251,
+              "states": [
+                341,
+                14
+              ],
+              "itemKinds": [
+                91,
+                92
+              ],
+              "peakItems": 2,
+              "itemFrames": 99,
+              "initial": [
+                14,
+                2,
+                52,
+                0,
+                5.977489471435547,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                3,
+                13,
+                0,
+                5.977489471435547,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                1,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "selfDamage": 1,
+              "traceSha256": "0a19561dbb3e0f986523454c1bb03199693e74a3d08bb3c91f6554bd32075d25"
+            },
+            {
+              "name": "air Thunder Jolt",
+              "frames": 313,
+              "states": [
+                24,
+                25,
+                342,
+                341,
+                14
+              ],
+              "itemKinds": [
+                91,
+                92
+              ],
+              "peakItems": 2,
+              "itemFrames": 99,
+              "initial": [
+                14,
+                3,
+                13,
+                0,
+                5.977489471435547,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                1,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                4,
+                63,
+                0,
+                5.977489471435547,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                2,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "selfDamage": 1,
+              "traceSha256": "88771afdf403ea7978edb9783f0ac85102f74ab5cf9002b8da84a66ea8e13702"
+            },
+            {
+              "name": "Thunder",
+              "frames": 407,
+              "states": [
+                15,
+                16,
+                14,
+                359,
+                360,
+                361,
+                362
+              ],
+              "itemKinds": [
+                82
+              ],
+              "peakItems": 4,
+              "itemFrames": 52,
+              "initial": [
+                14,
+                4,
+                63,
+                0,
+                5.977489471435547,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                2,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                12,
+                0,
+                57.76435852050781,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                5,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "selfDamage": 3,
+              "traceSha256": "6272034c8f5d4db7eec2ab248af5b59cb58871163d272d33647a0d433ca7b7b8"
+            },
+            {
+              "name": "up special",
+              "frames": 297,
+              "states": [
+                353,
+                357,
+                358,
+                43,
+                14
+              ],
+              "itemKinds": [],
+              "peakItems": 0,
+              "itemFrames": 0,
+              "initial": [
+                14,
+                2,
+                12,
+                0,
+                57.76435852050781,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                5,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                26,
+                0,
+                -16.557497024536133,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                9,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              "dashStarts": [
+                {
+                  "frame": 14,
+                  "state": 357,
+                  "position": [
+                    57.76435852050781,
+                    4.397900581359863
+                  ]
+                },
+                {
+                  "frame": 30,
+                  "state": 357,
+                  "position": [
+                    53.36655807495117,
+                    48.06466293334961
+                  ]
+                }
+              ],
+              "selfDamage": 4,
+              "traceSha256": "5b668c3fabe61042d1b67d6ab60ee4f400f60f8996a35ec7b9ebc8bd7882fe92"
+            },
+            {
+              "name": "Skull Bash",
+              "frames": 350,
+              "states": [
+                343,
+                344,
+                347,
+                350,
+                346,
+                14
+              ],
+              "itemKinds": [],
+              "peakItems": 0,
+              "itemFrames": 0,
+              "initial": [
+                14,
+                2,
+                26,
+                0,
+                -16.557497024536133,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                9,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              "final": [
+                14,
+                2,
+                73,
+                0,
+                53.29251480102539,
+                0.00009999999747378752,
+                0,
+                1634400,
+                9932608,
+                15,
+                1,
+                23,
+                0,
+                10,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              "selfDamage": 1,
+              "traceSha256": "b3af412b1d10532fad1503ed4a3b1f704847b52ac310ca5f04b40fbdf1ef82b0"
+            }
+          ],
+          "perFrameGpuVertexChecks": true,
+          "finalGpuErrorCheck": true
+        },
+        "contacts": {
+          "contact": {
+            "completed": true,
+            "kind": 91,
+            "itemFrames": 8,
+            "peakItems": 2,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.1937127113342285,
+              0.00009999999747378752,
+              0,
+              1634508,
+              9932512,
+              15,
+              1,
+              23,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              141,
+              0,
+              -7.9622802734375,
+              0.00009999999747378752,
+              0,
+              1634508,
+              9932512,
+              15,
+              1,
+              23,
+              1,
+              7,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.945337295532227,
+              0.00009999999747378752,
+              0,
+              1634400,
+              9932512,
+              15,
+              1,
+              23,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              122,
+              0,
+              19.945337295532227,
+              0.00009999999747378752,
+              0,
+              1634400,
+              9932512,
+              15,
+              1,
+              23,
+              0,
+              1,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 4,
+            "peakKnockback": 14.73806381225586,
+            "defenderStates": [
+              14,
+              75
+            ]
+          },
+          "control": {
+            "completed": true,
+            "kind": 91,
+            "itemFrames": 0,
+            "peakItems": 0,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.1937127113342285,
+              0.00009999999747378752,
+              0,
+              1634508,
+              9932512,
+              15,
+              1,
+              23,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              3,
+              27,
+              0,
+              -7.1937127113342285,
+              0.00009999999747378752,
+              0,
+              1634508,
+              9932512,
+              15,
+              1,
+              23,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.945337295532227,
+              0.00009999999747378752,
+              0,
+              1634400,
+              9932512,
+              15,
+              1,
+              23,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              4,
+              27,
+              0,
+              19.945337295532227,
+              0.00009999999747378752,
+              0,
+              1634400,
+              9932512,
+              15,
+              1,
+              23,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 0,
+            "peakKnockback": 0,
+            "defenderStates": [
+              14
+            ]
+          },
+          "shield": {
+            "completed": true,
+            "kind": 91,
+            "itemFrames": 8,
+            "peakItems": 2,
+            "before": [
+              179,
+              -1,
+              -1,
+              0,
+              -7.1937127113342285,
+              0.00009999999747378752,
+              0,
+              1634508,
+              9932512,
+              15,
+              1,
+              23,
+              1,
+              0,
+              0,
+              0,
+              1,
+              56.920013427734375,
+              4
+            ],
+            "after": [
+              179,
+              -1,
+              -1,
+              0,
+              -8.801712989807129,
+              0.00009999999747378752,
+              0,
+              1634508,
+              9932512,
+              15,
+              1,
+              23,
+              1,
+              0,
+              0,
+              0,
+              1,
+              3.160064458847046,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.945337295532227,
+              0.00009999999747378752,
+              0,
+              1634400,
+              9932512,
+              15,
+              1,
+              23,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              122,
+              0,
+              19.945337295532227,
+              0.00009999999747378752,
+              0,
+              1634400,
+              9932512,
+              15,
+              1,
+              23,
+              0,
+              1,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 0,
+            "defenderStates": [
+              179,
+              181
+            ]
+          }
+        },
+        "live": [
+          {
+            "prepared": false,
+            "driverShaderCacheDisabled": false,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60022.40000000596,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.5803611115117868,
+              "p50Ms": 0.5999999940395355,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.800000011920929
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 5.0924166665722925,
+              "p50Ms": 4.9000000059604645,
+              "p95Ms": 7.300000011920929,
+              "maxMs": 13.599999994039536
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67063073075771,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.799999999995634,
+              "maxMs": 33.29999999999927
+            },
+            "cadence": {
+              "callbacks": 3603,
+              "zeroStepCallbacks": 3,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -698.6999999940394,
+                  "callbackTime": 1.5999999940395355,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 1.2000000059606464,
+                  "callbackTime": 4.199999988079071,
+                  "interval": 699.9000000000001,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 17.800000005960555,
+                  "callbackTime": 18,
+                  "interval": 16.59999999999991,
+                  "debt": -0.0666666666667588
+                },
+                {
+                  "callback": 4,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 34.50000000596037,
+                  "callbackTime": 34.79999998211861,
+                  "interval": 16.699999999999818,
+                  "debt": -0.03333333333360855
+                },
+                {
+                  "callback": 5,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 51.200000005960646,
+                  "callbackTime": 51.400000005960464,
+                  "interval": 16.700000000000273,
+                  "debt": -3.552713678800501e-15
+                },
+                {
+                  "callback": 6,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 67.80000000596056,
+                  "callbackTime": 68.69999998807907,
+                  "interval": 16.59999999999991,
+                  "debt": -0.06666666666676235
+                },
+                {
+                  "callback": 7,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 84.50000000596037,
+                  "callbackTime": 85,
+                  "interval": 16.699999999999818,
+                  "debt": -0.0333333333336121
+                },
+                {
+                  "callback": 8,
+                  "frame": 5,
+                  "steps": 1,
+                  "timestamp": 101.20000000596065,
+                  "callbackTime": 102.19999998807907,
+                  "interval": 16.700000000000273,
+                  "debt": -7.105427357601002e-15
+                },
+                {
+                  "callback": 249,
+                  "frame": 246,
+                  "steps": 0,
+                  "timestamp": 4117.60000000596,
+                  "callbackTime": 4118.199999988079,
+                  "interval": 16.599999999999454,
+                  "debt": 16.399999999999345
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 2265,
+              "framesWithHitlag": 321,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 81,
+                  "attack": 461
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 63,
+                  "attack": 467
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 54,
+                  "attack": 414
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 48,
+                  "attack": 368
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 39,
+                  "attack": 297
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 36,
+                  "attack": 258
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 26,
+              "prepared": 0,
+              "preparedUsed": 0,
+              "unpreparedUsed": 26
+            },
+            "shaderCompilations": [
+              {
+                "frame": 196,
+                "program": 22,
+                "origin": "model",
+                "cpuMs": 3.800000011920929
+              },
+              {
+                "frame": 203,
+                "program": 23,
+                "origin": "model",
+                "cpuMs": 3.5999999940395355
+              },
+              {
+                "frame": 2277,
+                "program": 24,
+                "origin": "model",
+                "cpuMs": 4.4000000059604645
+              },
+              {
+                "frame": 2666,
+                "program": 25,
+                "origin": "model",
+                "cpuMs": 4
+              },
+              {
+                "frame": 2677,
+                "program": 26,
+                "origin": "model",
+                "cpuMs": 4.5999999940395355
+              }
+            ],
+            "slowDraws": [],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "991cc7420fe09f263131d0438d9be2e67716b6bf300280ede00cdd1b5e50520b"
+          },
+          {
+            "prepared": true,
+            "driverShaderCacheDisabled": true,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60034.40000000596,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.5557222226841583,
+              "p50Ms": 0.5999999940395355,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.800000011920929
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 4.842749999513229,
+              "p50Ms": 4.5999999940395355,
+              "p95Ms": 6.5,
+              "maxMs": 17.400000005960464
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67065851625371,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.799999999995634,
+              "maxMs": 33.29999999999927
+            },
+            "cadence": {
+              "callbacks": 3604,
+              "zeroStepCallbacks": 4,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -419.58799999403936,
+                  "callbackTime": 1.7999999821186066,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -2.9999999940396265,
+                  "callbackTime": 2.9000000059604645,
+                  "interval": 416.58799999999974,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 13.700000005960646,
+                  "callbackTime": 13.799999982118607,
+                  "interval": 16.700000000000273,
+                  "debt": 0
+                },
+                {
+                  "callback": 4,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 30.300000005960555,
+                  "callbackTime": 30.5,
+                  "interval": 16.59999999999991,
+                  "debt": -0.0666666666667588
+                },
+                {
+                  "callback": 5,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 47.00000000596037,
+                  "callbackTime": 49.900000005960464,
+                  "interval": 16.699999999999818,
+                  "debt": -0.03333333333360855
+                },
+                {
+                  "callback": 6,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 63.700000005960646,
+                  "callbackTime": 63.79999998211861,
+                  "interval": 16.700000000000273,
+                  "debt": -3.552713678800501e-15
+                },
+                {
+                  "callback": 7,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 80.30000000596056,
+                  "callbackTime": 80.5,
+                  "interval": 16.59999999999991,
+                  "debt": -0.06666666666676235
+                },
+                {
+                  "callback": 8,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 97.00000000596037,
+                  "callbackTime": 97.19999998807907,
+                  "interval": 16.699999999999818,
+                  "debt": -0.0333333333336121
+                },
+                {
+                  "callback": 253,
+                  "frame": 249,
+                  "steps": 0,
+                  "timestamp": 4180.10000000596,
+                  "callbackTime": 4180.299999982119,
+                  "interval": 16.599999999999454,
+                  "debt": 16.39999999999934
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 2265,
+              "framesWithHitlag": 321,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 81,
+                  "attack": 461
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 63,
+                  "attack": 467
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 54,
+                  "attack": 414
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 48,
+                  "attack": 368
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 39,
+                  "attack": 297
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 36,
+                  "attack": 258
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 27,
+              "prepared": 27,
+              "preparedUsed": 26,
+              "unpreparedUsed": 0
+            },
+            "shaderCompilations": [],
+            "slowDraws": [
+              {
+                "frame": 1,
+                "costMs": 17.400000005960464,
+                "materials": {
+                  "vertexChecks": null,
+                  "immediateDraws": 44,
+                  "immediateVertices": 176,
+                  "particleDraws": 44,
+                  "particleVertices": 176,
+                  "afterimageDraws": 0,
+                  "afterimageVertices": 0,
+                  "shaderCompilations": [],
+                  "draws": 155,
+                  "programs": 27,
+                  "images": 75,
+                  "originalMaterialState": true,
+                  "visualParity": false,
+                  "performanceMeasured": false
+                },
+                "resources": {
+                  "stageCreated": 3,
+                  "stageRetired": 0,
+                  "effectCreated": 2,
+                  "effectRetired": 2,
+                  "peakEffectModels": 2,
+                  "itemCreated": 0,
+                  "itemRetired": 0,
+                  "peakItemModels": 0
+                }
+              }
+            ],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "991cc7420fe09f263131d0438d9be2e67716b6bf300280ede00cdd1b5e50520b"
+          }
+        ]
+      }
+    },
+    "falcoRegression": {
+      "reflected": true,
+      "contact": {
+        "before": [
+          361,
+          314,
+          8,
+          0,
+          62.52003860473633,
+          0.00009999999747378752,
+          0,
+          1465484,
+          10091328,
+          15,
+          1,
+          22,
+          1,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "after": [
+          361,
+          314,
+          22,
+          0,
+          62.52003860473633,
+          0.00009999999747378752,
+          0,
+          1465484,
+          10091328,
+          15,
+          1,
+          22,
+          1,
+          0,
+          0,
+          0,
+          -1,
+          60,
+          4
+        ],
+        "shooterBefore": [
+          14,
+          2,
+          55,
+          0,
+          28.16823387145996,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10091328,
+          15,
+          1,
+          22,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "shooterAfter": [
+          14,
+          2,
+          136,
+          0,
+          25.421567916870117,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10091328,
+          15,
+          1,
+          22,
+          0,
+          5,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "reflectedFrames": 5,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "defenderStates": [
+          361,
+          362
+        ]
+      },
+      "gpu": true
+    }
+  },
+  "traceDefinition": "SHA-256(JSON.stringify({initial,final,stateChanges,inputChanges,workload})) from live fixture; timing excluded",
+  "invariants": {
+    "startup": "Automatically fetched hosted fixtures; no player ISO/file picker",
+    "camera": "Original native camera callbacks and 4:3 framing retained; Jolt and Thunder captures inspected",
+    "gameplay": "Original C gameplay/physics unchanged; no WASM hash change"
+  },
+  "limitations": [
+    "Selected moves and default costumes only; complete retail frame parity and all matchups remain unverified.",
+    "Thunder fixture walks clear of Battlefield platforms before checking owner contact; broader stage interactions remain.",
+    "Contact fixtures use the original default damage rules and controller-owned fighters, not a complete VS scene.",
+    "Live workload exercises ordinary attacks/shields; Jolt and special interactions are separate integration probes.",
+    "Prepared draw maxima still exceed 16.67 ms in these samples; no live shader compilation explains those spikes.",
+    "Distinct displayed FPS and physical input latency are not measured; roster/scenes/audio/network/deployment remain incomplete."
+  ]
+}

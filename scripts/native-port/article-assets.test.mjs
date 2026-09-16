@@ -23,7 +23,7 @@ function fixture(code='Fx',mutate=()=>{}) {
   // Deliberately untyped extra data must not become a public Article.
   if(code==='Fx'){ptr(144,3000);body[3000]=0xe3;}
   mutate({body,d,relocs,ptr,states,scripts});
-  const text=new TextEncoder().encode('ftData'+({Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
+  const text=new TextEncoder().encode('ftData'+({Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(text,pub+8);return bytes;
 }
 test('Fox/Falco Articles preserve script branches, special floats and model graphs without exporting extra fighter data',()=>{
@@ -69,6 +69,16 @@ test('Mario-family Article profiles convert shared joint/material animations and
   }
 });
 test('Article animation import rejects morph tracks and packed/type conflicts',()=>{
-  assert.throws(()=>convertFighterArticles(fixture('Mr',a=>a.ptr(808,2200)),'PlMr.dat'),/morph/);
+  assert.throws(()=>convertFighterArticles(fixture('Mr',a=>{a.ptr(808,2200);a.ptr(2208,2220);a.ptr(2224,2240);}),'PlMr.dat'),/morph/);
   assert.throws(()=>convertFighterArticles(fixture('Mr',a=>a.ptr(800,512)),'PlMr.dat'));
+});
+
+test('Pikachu/Pichu import typed Thunder/Jolt states and retain empty shape topology',()=>{
+  for(const code of ['Pk','Pc']){
+    const input=fixture(code,({ptr})=>{ptr(1108,2200);ptr(2200,2212);ptr(2220,2224);}),r=convertFighterArticles(input,'Pl'+code+'.dat');
+    assert.deepEqual(r.rows.map(x=>[x.slot,x.stateCount,x.specialWords]),[[0,1,3],[1,2,4],[2,1,1]]);
+    assert.deepEqual(r.rows[2].animations[0].shapeTree,{joints:2,objects:1});
+    assert.equal(new DataView(r.image.buffer,32).getUint32(2200,true),2212);
+    assert.throws(()=>convertFighterArticles(fixture(code,({ptr})=>{ptr(1108,2200);ptr(2200,2200);}), 'Pl'+code+'.dat'),/Cyclic/);
+  }
 });

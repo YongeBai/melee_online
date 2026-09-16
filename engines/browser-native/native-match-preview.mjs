@@ -101,11 +101,16 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     if(!items)return;
     const count=module._portItemsList(itemList,512);if(count>512)throw Error('Item renderer capacity');
     const current=Array.from(new Uint32Array(module.HEAPU8.buffer,itemList,count),object=>{
-      const descriptor=module._portItemRead(object,8),source=items.get(descriptor);
+      const descriptor=module._portItemRead(object,8);
+      // Item_802680CC creates an empty JObj when the Article has no model.
+      // Thunder Jolt's controller remains simulated while its separate child
+      // supplies the visible geometry; it needs no GPU model resource.
+      if(!descriptor)return null;
+      const source=items.get(descriptor);
       if(!source)throw Error('Unregistered item model descriptor '+descriptor);
       return {...source,object,itemKey:object+':'+module._portSceneObjectRoot(object)+':'+descriptor};
-    });
-    itemOwners=new Set(current.map(a=>a.object));const keys=new Set(current.map(a=>a.itemKey));
+    }).filter(Boolean);
+    itemOwners=new Set(new Uint32Array(module.HEAPU8.buffer,itemList,count));const keys=new Set(current.map(a=>a.itemKey));
     for(let i=resources.length-1;i>=0;i--)if(resources[i].itemKey&&!keys.has(resources[i].itemKey)){releaseResource(resources[i]);resources.splice(i,1);resourceStats.itemRetired++;}
     resourceStats.peakItemModels=Math.max(resourceStats.peakItemModels,current.length);
     for(const actor of current){

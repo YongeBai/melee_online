@@ -5,6 +5,33 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Pikachu and Pichu now pass default-costume constructor, input and rendered special
+integration checks. Their original linked Jolt/Thunder Articles and shared effect
+bank are loaded. The renderer now accepts native no-model controller items while
+keeping their simulation/render ownership and drawing the separate visible child.
+Pikachu's empty shape-animation topology is retained; actual morph tracks still
+fail explicitly. No original gameplay C or core WASM changes were needed.
+
+Each move probe renders 1,760 frames with per-frame GPU vertex checks, exercising
+ground/air Jolt, Thunder's bolt-to-owner contact, two directed Quick Attack/Agility
+dashes, and Skull Bash charge/release. Pichu retains self-damage: 1 per Jolt, 3 for
+Thunder, 4 across Agility and 1 for Skull Bash in this sequence. Jolt contact,
+no-fire control and shield checks pass for both; Falco reflection still passes.
+These are selected integration checks, not complete move/matchup or retail parity.
+
+All four two-fighter Battlefield timing samples submit 3,600 draws in about
+60 seconds with no catch-up callbacks. Prepared cold-driver-cache Pikachu/Pichu
+runs have matching gameplay traces and no live compilation, using a 27-program
+catalog. Their mean simulation costs are 0.551/0.556 ms and mean draw submission
+costs 5.479/4.843 ms; p95 draw costs are 7.0/6.5 ms. Maxima are **20.8/17.4 ms**,
+so shader preparation does not eliminate every long submission. These measurements
+do not establish distinct displayed FPS or input-to-photon latency. All 167 tests
+and the fighter build pass. Full roster/costume coverage, scenes/audio, retail
+parity, networking and deployment remain incomplete.
+[Pikachu/Pichu evidence](benchmarks/browser-2026-09-16-native-port-pikachu-pichu.json).
+
+Previous Mario-family checkpoint:
+
 Mario, Luigi and Dr. Mario now pass default-costume constructor, controller input
 and rendered special-move integration checks. The shared Article importer handles
 original joint/material animation data for fireballs, pills and capes. The probes

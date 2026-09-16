@@ -12,6 +12,8 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Pk:{name:'effPikachuDataTable',bank:7,first:7000,count:10,groups:3,models:5},
+    Pc:{name:'effPikachuDataTable',bank:7,first:7000,count:10,groups:3,models:5},
     Mr:{name:'effMarioDataTable',bank:1,first:1000,count:14,groups:6,models:2},
     Dr:{name:'effMarioDataTable',bank:1,first:1000,count:14,groups:6,models:2},
     Lg:{name:'effLuigiDataTable',bank:18,first:18000,count:12,groups:6,models:2},

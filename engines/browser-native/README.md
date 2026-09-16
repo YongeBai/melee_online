@@ -1,7 +1,7 @@
 # Browser-native Melee port
 
-This is the direct C-to-WebAssembly port, separate from Dolphin WASM. The current
-two-Falcon/Battlefield fixture runs original VS stock/timer logic and native HSD
+This is the direct C-to-WebAssembly port, separate from Dolphin WASM. The development
+match fixtures run original VS stock/timer logic and native HSD
 model draws through WebGL. It is not a complete competitive release; see the
 [current status](../../docs/BROWSER-NATIVE-PORT-STATUS.md) and lifecycle probe below.
 The earlier subsystem milestones described here execute original collision,
@@ -12,7 +12,7 @@ loads all 27 playable fighter components' common attributes, and executes origin
 gravity/friction and FObj/AObj animation code. Chrome has decoded and replayed all
 5,508 clips in the 27 fighter animation archives. These are subsystem checks;
 selected SDK math and a limited animated bone hierarchy also run natively. The
-full fighter action-state machine and renderer are pending.
+complete roster and full game scenes remain pending.
 The separate scene bring-up target now uses original HSD class ownership,
 reference resolution, matrix updates, destruction and Melee's `lbAnim` attachment.
 It drives the diagnostic GPU view, but the original GX material/draw boundary and
@@ -31,6 +31,25 @@ run `node scripts/native-port/verify-gpu.mjs --tev` for live captured programs.
 The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
+
+Pikachu and Pichu's three Article slots now import Thunder and ground/air Thunder
+Jolt. Their shared effect bank retains the original model/particle animations.
+Pikachu's empty shape-animation topology is preserved; real morph tracks still
+fail explicitly. A Jolt controller with a null model descriptor remains in the
+native simulation and render-owner set while its child supplies GPU geometry.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Pk --input --pikachu-moves --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Pc --input --projectile-combat
+node scripts/native-port/probe-constructor.mjs --character=Pc --input --projectile-control
+node scripts/native-port/probe-constructor.mjs --character=Pc --input --projectile-shield
+```
+
+The move sequence covers ground/air Jolt, Thunder, two directed Quick Attack or
+Agility dashes, and Skull Bash charge/release. It walks beyond Battlefield's
+platforms before checking Thunder's bolt-to-owner contact. Pichu's original
+self-damage remains active. These are selected default-costume integration
+checks; complete move/matchup and retail-trace parity remain open.
 
 Mario, Luigi and Dr. Mario now use the same original item runtime. Their typed
 Article imports include joint and material animations: fireballs, pills and the

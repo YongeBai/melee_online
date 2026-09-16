@@ -18,6 +18,8 @@ export const fighterArticleProfiles=Object.freeze({
   Mr:{slots:4,articles:{0:[1,5],2:[2,1]}},
   Lg:{slots:1,articles:{0:[1,4]}},
   Dr:{slots:4,articles:{1:[6,5],3:[2,1]}},
+  Pk:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
+  Pc:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
 });
 export function convertFighterArticles(input,name) {
   const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1];
@@ -45,6 +47,15 @@ export function convertFighterArticles(input,name) {
   }
   function raw(at){if(at<0||at>=a.dataSize||claims.has(at)||a.relocations.has(at&~3))throw Error('Article packed overlap');packed.add(at);}
   function tree(t){for(const at of t.words instanceof Map?t.words.keys():t.words)t.pointers.has(at)?pointer(at):scalar(at);for(const at of t.halves||[])scalar(at,2);for(const at of t.packed||[])raw(at);}
+  function shapeTopology(root){
+    const seen=new Set();let joints=0,objects=0;
+    function visit(at,type){
+      if(at===null)return;if(seen.has(at)||seen.size>=4096)throw Error('Cyclic/shared article shape topology');seen.add(at);
+      if(type==='joint'){bounds(at,12);joints++;const child=pointer(at),next=pointer(at+4),object=pointer(at+8);visit(child,'joint');visit(next,'joint');visit(object,'object');}
+      else {bounds(at,8);objects++;const next=pointer(at),animation=pointer(at+4);if(animation!==null)throw Error('Article morph graph pending');visit(next,'object');}
+    }
+    visit(root,'joint');return {joints,objects};
+  }
   for(const model of models.rows) {
     const [stateCount,specialWords]=fighterArticleProfiles[code].articles[model.slot];
     const special=pointer(model.article+4),states=pointer(model.article+12);
@@ -54,10 +65,10 @@ export function convertFighterArticles(input,name) {
     const scripts=[],animations=[];
     for(let j=0;j<stateCount;j++) {
       const at=states+j*16,joint=pointer(at),material=pointer(at+4),shape=pointer(at+8),script=pointer(at+12);
-      if(shape!==null)throw Error('Article morph graph pending');
+      const shapeTree=shape===null?null:shapeTopology(shape);
       if(joint!==null){const t=readJointAnimation(a,joint);tree(t);for(const node of t.nodes)if(node.animation)tree(node.animation);}
       if(material!==null)tree(convertMaterialAnimation(archiveRootView(a,'item_Share_matanim_joint',material)));
-      if(script!==null)scripts.push(script);animations.push({joint,material,shape,script});
+      if(script!==null)scripts.push(script);animations.push({joint,material,shape,shapeTree,script});
     }
     const script=readMotionScripts(a,scripts,itemCommandWords);
     tree(script);
