@@ -13,6 +13,9 @@
 #include <melee/if/ifall.h>
 #include <melee/if/if_2F6E.h>
 #include <melee/if/iftime.h>
+#include <melee/if/ifstatus.h>
+#include <melee/if/ifstock.h>
+#include <melee/if/types.h>
 #include <melee/sc/types.h>
 #include <sysdolphin/baselib/gobj.h>
 #include <sysdolphin/baselib/cobj.h>
@@ -21,6 +24,7 @@
 #include <stdlib.h>
 static int initialized,started;
 static int hud_initialized;
+static int damage_initialized;
 extern unsigned portRuntimeStep(void);
 extern void portInitializeVsRouting(void);
 extern void portHudInitializeBase(SceneDesc*);
@@ -30,6 +34,16 @@ void portTournamentHudInitialize(SceneDesc* scene)
 {
     if(!initialized||started||hud_initialized||!scene)abort();
     portHudInitializeBase(scene);ifTime_Reset();ifTime_CreateTimers();hud_initialized=1;
+}
+void portTournamentDamageInitialize(void)
+{
+    if(!hud_initialized||started||damage_initialized||!Player_GetEntity(0)||!Player_GetEntity(1))abort();
+    ifStatus_802F66A4();ifStock_802FAEC4();ifStatus_802F665C(2);damage_initialized=1;
+}
+int portHudPlayerRead(unsigned slot,unsigned field)
+{
+    if(!damage_initialized||slot>=2)abort();IfDamageState* s=&ifStatus_GetHUDInfo()->players[slot];
+    switch(field){case 0:return s->damage_percent;case 1:return s->old_damage;case 2:return s->HUD_parent_entity!=NULL;case 3:return s->next!=NULL;default:abort();}
 }
 void portHudRenderBegin(void)
 {

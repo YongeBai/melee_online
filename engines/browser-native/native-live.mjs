@@ -1,18 +1,23 @@
 // Fixed simulation cadence. Retain backlog under load; pause explicitly when
 // hidden. Old rAF timestamps must not move the wall-clock origin backwards.
-export function createNativeFrameClock(start,rate=60) {
-  const duration=1000/rate;let previous=start,debt=0,maxDebt=0;
+export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1}={}) {
+  const duration=1000/rate;let previous=start,debt=0,maxDebt=0,waitingForOrigin=align;
+  if(!Number.isFinite(toleranceMs)||toleranceMs<0||toleranceMs>=duration/2)throw Error('Native frame clock tolerance');
   return {
     take(now,limit=4){
       if(!Number.isFinite(now)||!Number.isInteger(limit)||limit<0)throw Error('Native frame clock input');
-      if(previous===null){previous=now;return 0;}
-      if(now<previous)return 0;
+      if(previous!==null&&now<previous)return 0;
+      if(previous===null||waitingForOrigin){previous=now;waitingForOrigin=false;return 0;}
       debt+=now-previous;previous=now;maxDebt=Math.max(maxDebt,debt);
       // rAF timestamps can be quantized to 0.1 ms. At a frame boundary that
       // otherwise alternates zero/two steps even at a perfect 60 Hz cadence.
-      // Borrow at most that precision and retain the negative debt so the
-      // tolerance never accumulates into faster simulation time.
-      const count=Math.min(limit,Math.max(0,Math.floor((debt+.1)/duration)));debt-=count*duration;return count;
+      // Retain any negative debt: the bounded tolerance is repaid and never
+      // accumulates into faster simulation time.
+      // Borrow only for the first step, never to add a catch-up step. Borrowing
+      // for a second step oscillates zero/two callbacks when display phase
+      // drifts across the tolerance boundary, despite a stable refresh cadence.
+      const whole=Math.max(0,Math.floor((debt+1e-6)/duration));
+      const count=Math.min(limit,whole||(debt+toleranceMs>=duration?1:0));debt-=count*duration;return count;
     },
     reset(){previous=null;debt=0;},
     get debtMs(){return debt;},get maxDebtMs(){return maxDebt;},
@@ -23,9 +28,12 @@ export function createNativeFrameClock(start,rate=60) {
 // Input samples enter the existing normalized HSD boundary; no game-state
 // positions, action states, damage or velocities are assigned here.
 export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null}={}) {
-  const stateChanges=[],inputChanges=[],keys=new Set(),clock=createNativeFrameClock(performance.now()),stepTimes=[],drawTimes=[],intervals=[];
+  // The first callback can carry a timestamp from before lengthy startup work.
+  // Discard such timestamps, then anchor to the first valid display callback.
+  // A quarter millisecond of repaid tolerance covers observed display jitter.
+  const stateChanges=[],inputChanges=[],keys=new Set(),clock=createNativeFrameClock(performance.now(),60,{align:true,toleranceMs:.25}),stepTimes=[],drawTimes=[],intervals=[];
   let raf=0,stopped=false,frames=0,draws=0,started=performance.now(),lastDraw=null,lastCallback=null;
-  const cadence={callbacks:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0};
+  const cadence={callbacks:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
   const initial=objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
   const buttons=new Map([['KeyZ',0x100],['KeyS',0x200],['KeyX',0x400],['KeyC',0x120],['ShiftLeft',0x20],['ShiftRight',0x40]]);
   const handled=new Set([...buttons.keys(),'ArrowLeft','ArrowRight','ArrowUp','ArrowDown']);
@@ -44,6 +52,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       if(document.hidden){reset();raf=requestAnimationFrame(frame);return;}
       const steps=clock.take(now,frameLimit?Math.min(4,frameLimit-frames):4);
       cadence.callbacks++;if(!steps)cadence.zeroStepCallbacks++;if(steps>1)cadence.multiStepCallbacks++;
+      if(cadence.timingSamples.length<128&&(cadence.callbacks<=8||steps!==1))cadence.timingSamples.push({callback:cadence.callbacks,frame:frames,steps,timestamp:now-started,callbackTime:performance.now()-started,interval:lastCallback===null?null:now-lastCallback,debt:clock.debtMs});
       if(lastCallback!==null&&now-lastCallback>25)cadence.rafGapsOver25Ms++;lastCallback=now;
       // Bound work per callback while retaining debt: never skip simulation
       // frames to inflate the rendered frame rate. Hidden tabs pause explicitly.

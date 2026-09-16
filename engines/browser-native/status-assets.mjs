@@ -4,9 +4,22 @@ import {readJointAnimation} from './joint-animation-assets.mjs';
 import {convertMaterialAnimation} from './material-animation-assets.mjs';
 import {readAnimationObject} from './animation-object-assets.mjs';
 
-// Original eight countdown/match-status models. The rest of IfAll remains
-// unpublished until its own typed import and native initialization are ready.
-export function convertStatusModels(input,{hud=false}={}) {
+// USA 1.02 selector at 0x80168B34 retains the character argument unless an
+// explicit special-case branch replaces it. Ordinary costume rows stride 30.
+export function verifyHudIconSelector(module) {
+  const bases=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,18,19,20,21,22,23,24,28,26,26,58,27,59,14];
+  let cases=0;
+  for(let kind=0;kind<bases.length;kind++)for(const internal of [0,7])for(let costume=0;costume<6;costume++){
+    const expected=kind>=26&&kind<=31?bases[kind]:((kind===18||kind===19)&&internal===7?25:bases[kind])+costume*30;
+    if(module._gm_80168B34(kind,internal,costume)!==expected)throw Error('Native HUD icon selector '+kind+'/'+internal+'/'+costume);cases++;
+  }
+  return {passed:true,cases};
+}
+
+// Original eight match-status models, with optional typed HUD scene, timers,
+// damage and stock models. Other IfAll roots remain unpublished.
+export function convertStatusModels(input,{hud=false,damage=false}={}) {
+  if(damage&&!hud)throw Error('Damage HUD requires the HUD scene');
   const a=inspectArchive(input),d=a.data,name='ScInfCnt_scene_models',root=a.publics.get(name);
   if(root===undefined||a.externs.size)throw Error('Missing status model root');
   const data=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),out=new DataView(data.buffer),pointers=new Set(),writes=new Map(),models=[];
@@ -54,7 +67,7 @@ export function convertStatusModels(input,{hud=false}={}) {
     const lightAnimations=new Set();
     const lightAnim=p=>{if(p===null)return;if(lightAnimations.has(p))throw Error('Cyclic HUD light animation');lightAnimations.add(p);lightAnim(ptr(p));aobj(ptr(p+4));wanim(ptr(p+8));wanim(ptr(p+12));};
     list(ptr(scene+8),p=>{light(ptr(p));list(ptr(p+4),lightAnim);});empty(scene+12);
-    for(const name of ['ScInfTim_scene_models','tdsce'])list(required(name),p=>hudModels.push({...model(p),kind:name}));
+    for(const name of ['ScInfTim_scene_models','tdsce',...(damage?['DmgNum_scene_models','DmgMrk_scene_models','Stc_scemdls']:[])])list(required(name),p=>hudModels.push({...model(p),kind:name}));
   }
   return {models:models.slice(0,8),hudModels,camera,image:nativeSubgraphImage(data,pointers,publics)};
 }

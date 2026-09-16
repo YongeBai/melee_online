@@ -82,6 +82,9 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
       gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK,feedback);gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER,buffer);gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER,vertices.length*68,gl.STREAM_READ);gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER,0,buffer);gl.enable(gl.RASTERIZER_DISCARD);gl.beginTransformFeedback(gl.POINTS);gl.drawArrays(gl.POINTS,0,vertices.length);gl.endTransformFeedback();gl.disable(gl.RASTERIZER_DISCARD);
       const values=new Float32Array(vertices.length*17);gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER,0,values);
       for(const [i,v] of vertices.entries()) {
+        const bound=vertexChecks.byOwner[draw.owner]??={vertices:0,ndcMin:[Infinity,Infinity,Infinity],ndcMax:[-Infinity,-Infinity,-Infinity]};
+        const point=[...values.subarray(i*17,i*17+3),1],clip=Array.from({length:4},(_,r)=>point.reduce((sum,x,c)=>sum+x*draw.camera.projection[c*4+r],0));
+        if(clip[3]!==0)for(let axis=0;axis<3;axis++){const ndc=clip[axis]/clip[3];bound.ndcMin[axis]=Math.min(bound.ndcMin[axis],ndc);bound.ndcMax[axis]=Math.max(bound.ndcMax[axis],ndc);}bound.vertices++;
         const slot=v[0]?v[0][0]/3:draw.state.model.current??0,position=draw.state.model.positions[slot],normal=draw.state.model.normals[slot];
         if(!position)throw Error('Native GPU position slot missing');
         const dot=(m,r,p,w)=>m?m[r*4]*p[0]+m[r*4+1]*p[1]+m[r*4+2]*(p[2]??0)+m[r*4+3]*w:0;
@@ -108,6 +111,13 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
   function upload(model,bytes,nodes,owner){
     const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
     const indexOf=(first,target)=>{for(let i=0,at=first;at!==null&&i<4096;i++,at=archive.relocations.has(at+4)?d.getUint32(at+4):null)if(at===target)return i;throw Error('Native draw ownership');};
+    function refreshBindings(){
+      // Native pools can reuse the owner/root addresses while replacing child
+      // objects. Geometry is immutable, but those live polygon identities are
+      // not a lifetime token. Refresh without reallocating GPU mesh buffers.
+      for(const key of nativeKeys)nativePlans.delete(key);nativeKeys.length=0;
+      for(const plan of plans){const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[plan.mesh.joint],polygon=module._portMaterialPolygon(joint,plan.display,plan.polygon),key=owner+':'+joint+':'+polygon;if(nativePlans.has(key))throw Error('Duplicate native polygon ownership');nativePlans.set(key,plan);nativeKeys.push(key);}
+    }
     function dispose(){for(const key of nativeKeys)nativePlans.delete(key);for(const b of buffers)gl.deleteBuffer(b);for(const v of vaos)gl.deleteVertexArray(v);models.delete(result);}
     let result;
     try {
@@ -123,8 +133,8 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
         buffer(gl.ELEMENT_ARRAY_BUFFER,Uint32Array.from(mesh.triangles));
         plans.push({mesh,vao,display:indexOf(model.tree.nodes[mesh.joint].display,mesh.dobj),polygon:indexOf(d.getUint32(mesh.dobj+12),mesh.pobj)});
       }
-      for(const plan of plans){const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[plan.mesh.joint],polygon=module._portMaterialPolygon(joint,plan.display,plan.polygon),key=owner+':'+joint+':'+polygon;if(nativePlans.has(key))throw Error('Duplicate native polygon ownership');nativePlans.set(key,plan);nativeKeys.push(key);}
-      result={enqueue(flags,visibility,show=true){
+      refreshBindings();
+      result={refreshBindings,enqueue(flags,visibility,show=true){
         let count=0;if(!show)return count;
         for(const [i,plan] of plans.entries()) {
           const {mesh}=plan;if((flags[mesh.joint]&16)||!visibility[i])continue;
@@ -139,7 +149,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     }catch(error){dispose();throw error;}
   }
   function selectCamera(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);}
-  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];draws=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0};},
+  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];draws=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,byOwner:{}};},
     flush({ordered=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep

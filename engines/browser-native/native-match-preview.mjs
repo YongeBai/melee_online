@@ -35,7 +35,9 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         const source=hud.models.get(descriptor);if(!source)throw Error('Unregistered original HUD model '+descriptor);
         const model=readModelMeshes(source.bytes),n=model.tree.nodes.length,nodes=module._malloc(n*4);
         if(!nodes)throw Error('HUD nodes allocation');
-        try{if(module._portSceneCollect(root,nodes,n)!==n)throw Error('HUD hierarchy mismatch');const gpu=materialRenderer.upload(model,source.bytes,nodes,owner);hudResources.set(key,{gpu,nodes,name:source.name});}catch(error){module._free(nodes);throw error;}
+        try{if(module._portSceneCollect(root,nodes,n)!==n)throw Error('HUD hierarchy mismatch');const gpu=materialRenderer.upload(model,source.bytes,nodes,owner);hudResources.set(key,{gpu,nodes,n,name:source.name});}catch(error){module._free(nodes);throw error;}
+      }else{
+        const r=hudResources.get(key);if(module._portSceneCollect(root,r.nodes,r.n)!==r.n)throw Error('Reused HUD hierarchy mismatch');r.gpu.refreshBindings();
       }
       rows.push({owner,name:hudResources.get(key).name,draws:0});
     }

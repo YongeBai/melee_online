@@ -5,6 +5,42 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The `--damage-hud` fixture now includes original damage percentages, character
+emblems and stock icons alongside the timer/status graphics. The settled combat
+display matches fighter damage (0% and 29%), and the rendered four-KO sequence
+includes stock-icon counts 4, 3, 2 and 1 through native respawns. All 1,703
+combat/lifecycle steps render, and the full eight-minute timeout still passes.
+The combat trace remains unchanged.
+
+The stock-icon bring-up found an uninitialized local in decompiled
+`gm_80168B34`. Inspection of USA 1.02 executable code at `0x80168B34–0x80168BF4`
+confirmed ordinary cases retain the character ID before adding `costume * 30`.
+The portable recipe now preserves that behavior, and 396 selector cases pass.
+This tests icon selection, not all-character gameplay. A separate respawn fault
+came from reusing native owner/root addresses with new child polygons. The HUD
+renderer now refreshes those bindings while retaining immutable GPU meshes.
+
+Callback timing diagnostics also rejected a naive first-rAF clock anchor: Chrome
+delivered an initial timestamp 208 ms before live startup, creating false catch-up
+work. Live pacing now rejects stale timestamps before anchoring to a display
+callback. A bounded 0.25 ms tolerance covers observed jitter, with negative debt
+retained and repaid; mixed-refresh tests verify no accumulated speed-up. The
+tolerance alone merely moved the oscillation boundary. Borrowing is now limited
+to the first step, so small display-frequency drift produces one isolated phase
+correction rather than repeated zero/two-step callbacks. Actual simulation debt
+is retained, including genuine stalls; no simulation frames are skipped.
+
+The completed full-HUD combat run records 3,600 simulation steps and 3,600 draw
+submissions in 60.026 seconds at 960×720, versus 3,563 submissions for the prior
+clock. Mean simulation time is 0.522 ms; mean draw submission is 8.946 ms
+(p95 10.9 ms). No multi-step callbacks occurred; one isolated clock correction
+produced a 33.3 ms draw interval. Final observed gameplay fields match the
+control. All 131 targeted tests pass. This is still a partial two-Falcon fixture,
+and neither distinct presentation nor input-to-photon latency is measured.
+[Damage/stock HUD and pacing checkpoint](benchmarks/browser-2026-09-15-native-port-damage-hud.json).
+
+Previous checkpoints below describe their state at the time.
+
 The `--hud` fixture now draws the original timer, final-five-seconds countdown,
 and match-end status models through the original HUD camera and light setup.
 Queued draws retain their own camera, preserving the gameplay projection when

@@ -14,7 +14,7 @@ import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyCombat} from './verify-combat.mjs';
 import {convertPlayerParameters} from './player-parameters.mjs';
-import {convertStatusModels} from './status-assets.mjs';
+import {convertStatusModels,verifyHudIconSelector} from './status-assets.mjs';
 import {verifyResidentEffectBank} from './verify-effects.mjs';
 import {verifyStartup} from './verify-startup.mjs';
 import {convertFighterBase} from './fighter-base-assets.mjs';
@@ -28,8 +28,8 @@ import {convertStageCollision} from './stage-collision.mjs';
 import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
-const params=new URLSearchParams(location.search),tournament=params.has('tournament'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
-const withHud=tournament&&params.has('hud');let hudPreview=null;
+const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
+const damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
@@ -63,12 +63,13 @@ try {
   installResidentFile(module,'EfCaData.dat',convertCaptainEffects(await asset('EfCaData.dat')).image);
   if(tournament){
     installResidentFile(module,'PdPm.dat',convertPlayerParameters(await asset('PdPm.dat')).image);
-    const hudBytes=await asset('IfAll.usd'),status=convertStatusModels(hudBytes,{hud:withHud});
+    const hudBytes=await asset('IfAll.usd'),status=convertStatusModels(hudBytes,{hud:withHud,damage:damageHud});
     installResidentFile(module,'NativeStatus.dat',status.image);
     const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models',...(withHud?['ScInfDmg_scene_data']:[])]);
     module._portTournamentStatusInstall(statusFile.archive);report.statusModels=status.models;
     module._portTournamentInitialize();report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
     if(withHud){
+      report.iconSelectorChecks=verifyHudIconSelector(module);
       module._portTournamentHudInitialize(statusFile.addresses[1]);
       const archive=inspectArchive(hudBytes),base=statusFile.addresses[1]-archive.publics.get('ScInfDmg_scene_data');
       hudPreview={models:new Map([...status.models,...status.hudModels].map((model,i)=>[base+model.joint,{name:model.kind??'status '+i,bytes:archiveRootView(archive,'hud_Share_joint',model.joint)}]))};
@@ -124,12 +125,17 @@ try {
     report.afterSteps=state();
     if(!report.afterSteps.every(Number.isFinite)||report.afterSteps[9]!==15||report.afterSteps[10]!==1)throw Error('Scheduled fighter state/ownership invariant');
     if(withStage&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on Battlefield');
+    if(damageHud){module._portTournamentDamageInitialize();report.hud.damage=true;}
     if(tournament){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
     const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
     let preview,canvas;
     function recordHud(drawn){
       if(!drawn.hud)return;
       report.hud.drawnFrames=(report.hud.drawnFrames??0)+1;
+      if(damageHud){
+        report.hud.stockDrawCounts??=[];
+        for(const row of drawn.hud.objects)if(row.name==='Stc_scemdls'&&!report.hud.stockDrawCounts.includes(row.draws))report.hud.stockDrawCounts.push(row.draws);
+      }
       if(drawn.hud.objects.some(o=>o.name==='tdsce')){
         report.hud.countdownFrames=(report.hud.countdownFrames??0)+1;
         if(report.hud.countdownFrames===30){const img=document.createElement('img');img.id='native-preview-countdown';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.countdown=drawn;}
@@ -151,6 +157,10 @@ try {
       onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
     });
+    if(damageHud&&!live&&!params.has('workloadsteps')){
+      report.hud.afterCombat=[object,opponent].map((object,slot)=>({damage:combatState(object)[13],display:module._portHudPlayerRead(slot,0)}));
+      if(report.hud.afterCombat.some(p=>p.display!==Math.min(999,Math.floor(p.damage))))throw Error('HUD damage differs from settled fighter damage');
+    }
     if(live){
       const controls=document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Effects, HUD, audio and full match rules are incomplete.';canvas.before(controls);
       const limit=Number(params.get('liveframes')??0);if(!Number.isInteger(limit)||limit<0||limit>36000)throw Error('Invalid live frame limit');
@@ -182,6 +192,7 @@ try {
     if(params.has('workloadsteps')){const count=Number(params.get('workloadsteps'));if(!tournament||live||!Number.isInteger(count)||count<180||count>36000)throw Error('Invalid unpaced workload');report.simulationWorkload={};verifyCombatWorkload(module,[object,opponent],report.simulationWorkload,count);}
     else if(tournament&&!live&&params.has('timeout')){report.timeout={};verifyTimeout(module,report.timeout,{onStep:renderSteps?()=>{recordHud(preview.draw());report.timeoutRenderedSteps=(report.timeoutRenderedSteps??0)+1;}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
     else if(tournament&&!live){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
+    if(damageHud)report.hud.finalPlayers=[0,1].map(slot=>Array.from({length:4},(_,field)=>module._portHudPlayerRead(slot,field)));
     if(preview&&!live)preview.dispose();
   }
 } catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}

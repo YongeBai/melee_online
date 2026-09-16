@@ -38,12 +38,27 @@ after updating, then build `--fighter-init`. The browser still loads all assets
 automatically; no player ISO or file picker is involved.
 
 `--hud` implies the tournament fixture and adds the original timer, countdown,
-and match-end status graphics. It uses the original HUD camera independently
-of the gameplay camera. Damage percentages and stock icons remain pending.
+and match-end status graphics. `--damage-hud` also adds native damage percentages,
+character emblems and stock icons. Both use the original HUD camera independently
+of the gameplay camera.
 Use `--hud --timeout --render-steps --hardware` to render the final six seconds
 and timeout animation after advancing the real eight-minute clock. Use
 `--hud --live --workload --hardware --frames=3600` for the sustained input-driven
 combat workload. Draw submissions are not a measurement of distinct presentation.
+
+The damage HUD checks 396 icon-selector cases across character IDs and costume
+rows. The portable recipe repairs an uninitialized decompilation local using
+the USA 1.02 executable's `gm_80168B34` behavior: ordinary cases retain the
+character ID before adding the costume stride. The rendered lifecycle checks
+stock icons through repeated native respawns, including reused object addresses.
+The same `--render`, `--render-steps`, `--timeout` and `--live --workload` options
+work with `--damage-hud`.
+
+Live pacing rejects rAF timestamps older than startup before choosing a display
+origin. Its 0.25 ms timing tolerance is repaid and applies only to the first
+step; it cannot borrow an extra catch-up step and oscillate between zero and two
+steps near a timing boundary. Real backlog remains owed. Timing samples include
+the first callbacks and a bounded list of zero/multi-step callbacks for diagnosis.
 
 ```sh
 node scripts/native-port/probe-constructor.mjs --tournament

@@ -65,6 +65,13 @@ export function preparePortableSource(source,output) {
       const wrapper='void portHudInitializeBase(SceneDesc* sp14)\n{\n    HSD_LightDesc* lightdesc;\n    ifAll_ShowHUD();\n'+prefix.slice(bodyStart)+'}\nHSD_LObj* portHudLights(void) { return ifAll_804A0FD8.gobj_2->hsd_obj; }\n\n';
       replace(prefix,wrapper+prefix.slice(0,bodyStart)+'    portHudInitializeBase(sp14);\n\n');
     }
+    if(file==='src/melee/gm/gm_1601.c') {
+      // USA 1.02 0x80168B34..0x80168BF4 keeps ckind in r3 on the ordinary
+      // branch, then adds costume * 30. The decomp's uninitialized local is
+      // not that behavior and can select a blank stock-icon texture on WASM.
+      replace('f32 gm_80168B34(CharacterKind ckind, int arg1, int arg2)\n{\n    int base;',
+              'f32 gm_80168B34(CharacterKind ckind, int arg1, int arg2)\n{\n    int base = ckind;');
+    }
     if(file==='src/sysdolphin/baselib/cobj.c') {
       // Browser framebuffer rendering uses the original offscreen branch.
       // Keep its native projection/viewport and current-camera ownership;
