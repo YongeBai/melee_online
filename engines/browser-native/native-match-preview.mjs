@@ -134,12 +134,13 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       else {if(module._portSceneCollect(module._portSceneObjectRoot(actor.object),old.nodes,old.model.tree.nodes.length)!==old.model.tree.nodes.length)throw Error('Reused effect hierarchy mismatch');old.materialGpu.refreshBindings();}
     }
   }
+  let cosmeticStageOwners=new Set();
   function syncStage(){
     if(!stage)return;
     const current=stage().map(a=>({...a,stageKey:a.name+':'+a.object+':'+module._portSceneObjectRoot(a.object)})),keys=new Set(current.map(a=>a.stageKey));
-    stageOwners=new Set(current.map(a=>a.object));
+    stageOwners=new Set(current.map(a=>a.object));cosmeticStageOwners=new Set(current.filter(a=>a.cosmeticHidden).map(a=>a.object));
     for(let i=resources.length-1;i>=0;i--)if(resources[i].stageKey&&!keys.has(resources[i].stageKey)){releaseResource(resources[i]);resources.splice(i,1);resourceStats.stageRetired++;}
-    for(const actor of current)if(!actor.emptyStageObject&&!resources.some(r=>r.stageKey===actor.stageKey)){addActor(actor);if(resources.some(r=>r.stageKey===actor.stageKey))resourceStats.stageCreated++;}
+    for(const actor of current)if(!actor.emptyStageObject&&!actor.cosmeticHidden&&!resources.some(r=>r.stageKey===actor.stageKey)){addActor(actor);if(resources.some(r=>r.stageKey===actor.stageKey))resourceStats.stageCreated++;}
   }
   let materialShaderChecks;
   try {
@@ -163,6 +164,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
             module.onNativeObject=(owner,pass,link,classifier,particles)=>{
               // Execute the original particle callback in the original camera pass.
               // Unsupported primitives and unknown models still fail explicitly.
+              if(cosmeticStageOwners.has(owner))return;
               if(particles){module._portNativeDrawParticles(owner,pass);particlePasses++;return;}
               const i=resources.findIndex(r=>r.owner===owner),r=resources[i];
               if(!r&&!stageOwners.has(owner)&&!effectOwners.has(owner)&&!itemOwners.has(owner))throw Error('Unregistered native render object '+owner+' link '+link+' class '+classifier);

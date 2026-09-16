@@ -765,13 +765,34 @@ records their hide/return phases and verifies distinct ownership. It does not
 freeze, teleport or rewrite platform state. Source collision vertices are
 validated before callbacks move the platforms.
 
-This is not a rendered or performance-qualified fourth stage. The current
-`--render --hardware` attempt fails explicitly at unsupported point geometry:
+The full original graphics path still fails explicitly at unsupported point geometry:
 the star mesh contains 24,630 GX point vertices. Point rasterization and the
 water reflection camera / mutable-image capture still need integration. The
 reflection allocation is created by original code during startup, but it must
 not be mistaken for a completed rendered reflection. Fighter carrying, landing,
 drop-through and broader native visual/gameplay parity remain separate gates.
+
+An explicit cosmetic profile now supports a rendered Fountain fixture:
+
+`node scripts/native-port/probe-constructor.mjs --map=fountain --stage-callbacks --stage-only --stage-frames=9000 --render --hardware --fountain-cosmetics-off --fountain-scenery-off`
+
+`--fountain-cosmetics-off` skips the star object's drawing and initializes the
+original 80×60 RGB565 reflection image to black, with defined constant texture
+coordinates. `--fountain-scenery-off` additionally skips the 75 background draws
+belonging to map group 1. Group 0 has no visible geometry in this fixture; an
+initial exclusion of that group was rejected as a no-op. Main-stage group 3 and
+both moving-platform group-4 owners continue to render. All original stage
+processes, particle scripts, random consumption and platform collision updates
+remain scheduled; the cosmetic profile does not freeze the stage or change the
+camera. These flags are restricted to Fountain and are recorded in reports.
+
+The 9,000-step rendered check preserves the control's platform statistics and
+camera snapshot, passes sampled GPU vertex checks, and has been visually
+inspected with the floor, top platform and both moving platforms present.
+Timed comparisons use the same cosmetic profile on both sides and vary only
+the group-1 scenery flag. They do not compare against a complete full-reflection
+renderer. See the [Fountain cosmetic evidence](../../docs/benchmarks/browser-2026-09-16-native-port-fountain-cosmetics.json)
+for measured submission costs and the remaining acceptance gates.
 
 ## Battlefield integration probe
 

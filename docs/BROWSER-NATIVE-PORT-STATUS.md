@@ -5,6 +5,28 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Fountain now has an explicitly simplified rendered fixture. It omits the star
+draws, samples a defined black water-reflection texture, and optionally removes
+75 background draws. The main floor, fixed top platform and both moving
+platforms remain visible. Original stage processes and particle scripts keep
+running. The 9,000-step platform and collision statistics match the simulation
+control; the camera snapshot is unchanged and sampled GPU vertex checks pass.
+All 155 unit tests pass. Battlefield's combat trace and final image are
+unchanged from the preceding checkpoint, with GPU and lifecycle checks passing.
+
+An A/B/A/B test of background removal measures mean draw-submission costs of
+10.38 → 8.47 → 10.63 → 8.51 ms, about a 19% reduction. Candidate p95 values are
+10.9/11.2 ms versus 13.6/14.3 ms for controls. Both candidates submit all 3,600
+draws in approximately 60 seconds, without catch-up callbacks or live shader
+compilation; controls submit 3,596/3,591 draws. All four recorded gameplay traces
+match, and final state/contact/stock checks also match the no-cosmetics fast
+simulation. Candidate maxima are still 19.6/22.0 ms. These measurements cover
+the selected two-Captain workload on this host, not distinct displayed FPS,
+latency, all matchups, or the complete original reflection renderer.
+[Fountain cosmetic evidence](benchmarks/browser-2026-09-16-native-port-fountain-cosmetics.json).
+
+Previous Fountain simulation checkpoint:
+
 Fountain of Dreams now has a simulation fixture with the original two moving
 platforms. Across 9,000 steps, both rise, fall, disappear and return. Each passes
 9,000 checks against its collision joint transform; maximum error is below

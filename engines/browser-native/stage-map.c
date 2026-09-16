@@ -21,6 +21,7 @@
 #include <sysdolphin/baselib/jobj.h>
 #include <sysdolphin/baselib/controller.h>
 #include <sysdolphin/baselib/particle.h>
+#include <sysdolphin/baselib/tobj.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -172,6 +173,24 @@ unsigned portStageObjects(unsigned* output,unsigned capacity)
         output[count*2]=(unsigned)object;output[count*2+1]=id;count++;
     }
     return count;
+}
+
+/* Optional cosmetic-only profile. Original owners and particle/platform
+ * processes remain scheduled. No camera or gameplay transform is changed. */
+void portFountainReflectionOff(void)
+{
+    typedef struct { Mtx matrix; HSD_ImageDesc* image; } Reflection;
+    _Static_assert(sizeof(Reflection)==52,"Fountain reflection ABI");
+    if(stage_kind!=St_Kind_Izumi||!callbacks_initialized)abort();
+    Ground* ground=Ground_GetMapGObj(3)->user_data;
+    if(!ground||!ground->u.izumi.xC8)abort();
+    Reflection* reflection=ground->u.izumi.xC8->user_data;
+    if(!reflection||!reflection->image||!reflection->image->image_ptr||
+       reflection->image->width!=80||reflection->image->height!=60||reflection->image->format!=GX_TF_RGB565)abort();
+    /* Constant black sampling with q=1. This is a texture matrix only; using
+     * an uninitialized reflection matrix would create undefined coordinates. */
+    memset(reflection->matrix,0,sizeof(reflection->matrix));reflection->matrix[2][3]=1;
+    memset(reflection->image->image_ptr,0,GXGetTexBufferSize(80,60,GX_TF_RGB565,0,0));
 }
 
 /* Observe the two distinct original platform owners and their registered
