@@ -76,3 +76,14 @@ test('Node Buffer motion imports neither modify input nor use its backing-buffer
   assert.deepEqual(Uint8Array.from(padded),original);
   assert.equal(new DataView(native.image.buffer).getUint32(32+112,true),0xc0000000);
 });
+
+test('demo motions use their original counts, table and 44 KiB source limit',async()=>{
+  const {convertFighterMotions}=await import('../../engines/browser-native/motion-assets.mjs');
+  const {bytes,v,spec}=fighterFixture();spec.demoCounts=[1];v.setUint32(192,20);v.setUint32(32+20,96);v.setUint32(32+104,0xB000);
+  const r=convertFighterMotions(bytes,'PlMr.dat',spec,{demo:true});
+  assert.equal(r.demo,true);assert.equal(r.count,1);assert.equal(r.motions[0].animationSize,0xB000);
+  assert.equal(new TextDecoder().decode(r.image.subarray(r.image.length-25)),'native_demo_motion_table\0');
+  assert.throws(()=>convertFighterMotions(bytes,'PlMr.dat',spec));
+  v.setUint32(32+104,0xB001);assert.throws(()=>convertFighterMotions(bytes,'PlMr.dat',spec,{demo:true}));
+  spec.demoCounts=[];assert.throws(()=>convertFighterMotions(bytes,'PlMr.dat',spec,{demo:true}));
+});

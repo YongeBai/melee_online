@@ -97,6 +97,14 @@ HSD_GObj* portFighterInitModelCreate(unsigned kind,unsigned slot,FighterInitBind
     Fighter_UnkInitLoad_80068914(object,&info);gFtDataList[kind]=previous;
     attach_model(object);return object;
 }
+// This calls the complete original constructor. It does not use CollisionFixture
+// or skip effects, OnLoad, shadows, state initialization or scheduled callbacks.
+HSD_GObj* portFighterConstruct(unsigned kind,unsigned slot)
+{
+    if(!portFighterStartupComplete()||kind!=Ft_Kind_Captain||slot>=6||gFtDataList[kind])return NULL;
+    struct plAllocInfo info={0};info.internal_id=kind;info.slot=slot;info.x5=-1;
+    return Fighter_Create(&info);
+}
 void portFighterPlayerConfigure(unsigned slot,unsigned controller,unsigned costume,unsigned team,unsigned player,float scale,unsigned flags)
 {
     if(slot>=6||controller>4||costume>255||team>3||player>5||scale<=0)abort();

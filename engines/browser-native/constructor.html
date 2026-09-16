@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Melee native constructor probe</title>
+<h1>Original fighter constructor probe</h1>
+<p>Development probe. This page does not run a playable match.</p>
+<pre id="result">Loading hosted assets…</pre>
+<script type="module">
+import create from './melee-fighter-init.mjs';
+import {verifyStartup} from './verify-startup.mjs';
+import {convertFighterBase} from './fighter-base-assets.mjs';
+import {readFighterMotions} from './motion-assets.mjs';
+import {convertMotionAnimations} from './motion-animations.mjs';
+import {motionSpec} from './motion-spec.mjs';
+import {attributeSpec} from './attribute-spec.mjs';
+import {loadCostume} from './costume-assets.mjs';
+import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
+const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
+const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();};
+try {
+  async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
+  const modelNames=await (await fetch('./model-fixtures.json')).json();
+  const [module,common,baseBytes,animationBytes,models]=await Promise.all([create({print:capture,printErr:capture}),asset('PlCo.dat'),asset('PlCa.dat'),asset('PlCaAJ.dat'),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
+  report.startupPassed=verifyStartup(module,common,models).passed;
+  const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true),kind=2;
+  const partCount=ptr(ptr(module._portSharedGlobal(4)+kind*4)+8),costumes=module._portCostumeCount(kind);
+  const source=convertFighterBase(baseBytes,'PlCa.dat',{motionSpec,attributeSpec,partCount,costumes});
+  installResidentFile(module,'PlCa.dat',source.image);
+  const file=openResidentArchive(module,'PlCa.dat',['ftDataCaptain']),root=file.addresses[0],image=new DataView(source.image.buffer),bodySize=image.getUint32(4,true),relocations=new Set();
+  for(let i=0;i<image.getUint32(8,true);i++)relocations.add(image.getUint32(32+bodySize+i*4,true));
+  let checks=0;
+  for(let i=0;i<24;i++){checks++;if(ptr(root+i*4)!==(source.fields[i]===null?0:root+source.fields[i]))throw Error('Complete base root relocation '+i);}
+  for(let at=0;at<bodySize;){checks++;if(relocations.has(at)){if(ptr(root+at)!==root+image.getUint32(32+at,true))throw Error('Base subgraph relocation '+at);at+=4;}else {if(module.HEAPU8[root+at]!==source.image[32+at])throw Error('Base subgraph payload '+at);at++;}}
+  file.dispose();
+  report.baseArchive={passed:true,checks,bytes:source.image.length,partCount,costumes,motionRows:source.motionCount,demoRows:source.demoCount,imports:source.imports,relocations:relocations.size};
+  const motions=readFighterMotions(baseBytes,'PlCa.dat',motionSpec),bundle=convertMotionAnimations(animationBytes,motions.motions);
+  installResidentBytes(module,'PlCaAJ.dat',bundle.image);
+  loadCostume(module,models.find(m=>m.name==='PlCaNr.dat').bytes,'PlCaNr.dat',kind);
+  module._portFighterPlayerConfigure(0,0,0,0,0,1,0);
+  report.constructorAttempted=true;
+  const object=module._portFighterConstruct(kind,0);
+  if(!object)throw Error('Original constructor returned no fighter');
+  report.constructorCompleted=true;report.object=object;
+} catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}
+document.querySelector('#result').textContent=JSON.stringify(report,null,2);
+document.documentElement.dataset.result=report.constructorCompleted?'constructed':'blocked';
+</script>

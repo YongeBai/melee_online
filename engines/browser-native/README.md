@@ -461,3 +461,24 @@ coordinates, followed by object/material/bone/file cleanup. Item animation state
 special attributes, command scripts, spawning and GPU material submission are
 not exercised. These objects never enter the gameplay Article table and do not
 substitute for complete projectile or attack behavior.
+
+## Full-constructor bring-up
+
+`fighter-base-assets.mjs` composes the verified subgraphs into a complete
+`ftDataCaptain` archive. It is restricted to Captain Falcon; characters with item
+or other unimported graphs fail rather than receiving missing fields. Subgraphs
+retain their internal pointer identities, but are embedded separately and carry
+redundant unreachable bytes. Compaction is pending. Demo-motion metadata now
+comes from `ftData_UnkIntPairs`; demo playback remains unverified.
+
+After building `--fighter-init`, run `node scripts/native-port/probe-constructor.mjs`.
+The browser automatically loads the hosted fixtures, checks the assembled root
+and every relocated byte/pointer, and invokes the unmodified `Fighter_Create`
+through `portFighterConstruct`. The probe does not replace it with the limited
+model owner or skip its effects, shadow, OnLoad or state setup. It runs in a fresh
+runtime because a failed original constructor can leave partial allocations.
+
+The current probe reaches the missing `EfCaData.dat` load and exits with status 2.
+`dist/native-port/constructor-probe.json` records that incomplete result. Passing
+the separate fighter/scene regression suites does not mean this constructor
+probe passes, and construction alone will not establish playable gameplay.

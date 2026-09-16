@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Captain Falcon's complete typed base-data root is now assembled and the original
+`Fighter_Create` is being invoked in a fresh browser probe. Original archive
+loading and initial fighter fields complete; construction then aborts because
+`EfCaData.dat` has not yet been imported. The effects call is not bypassed.
+This identifies the next actual constructor dependency, not a completed fighter.
+
+The assembled archive passes 899,695 payload/relocation checks, including all
+24 root fields and 2,135 nested relocations. Its validated subgraphs are embedded
+separately for bring-up, so the 914,670-byte archive contains redundant unreachable
+source bytes; it is not a compact production asset. This importer currently
+accepts Captain Falcon only, whose item-table pointer is null.
+
+Demo-motion metadata now uses the original per-character counts and 44 KiB
+source-size limit. All 386 rows import across the roster; demo playback is not
+yet exercised. All 82 targeted tests and the wider/scene browser suites pass.
+The constructor probe deliberately exits with status 2 while construction is
+incomplete. Full match execution, gameplay rendering and 720p60 remain unproven.
+[Constructor checkpoint](benchmarks/browser-2026-09-15-native-port-constructor-probe.json).
+
 Original item model setup now runs for all 77 Article slots registered by the
 playable characters. These contain 66 model graphs and 11 deliberately empty
 roots, totaling 438 runtime joints, 435 meshes and nine hurtboxes. Two concurrent

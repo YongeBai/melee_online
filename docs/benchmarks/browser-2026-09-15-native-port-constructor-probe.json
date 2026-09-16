@@ -1,0 +1,242 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2813610,
+    "wasmSha256": "b91984d52916a5654631b885d1057cd6b185a407ec5e7d5b56c65c2fae8324ef",
+    "portableRecipe": "9d596ac368c50d540110a5ea743777755fc03289c27d9f14371ed34e32af065a"
+  },
+  "constructor": {
+    "attempted": true,
+    "completed": false,
+    "diagnostics": [
+      "Native asset was not prefetched: EfCaData.dat",
+      "Aborted(native code called abort())"
+    ],
+    "exitCode": 2,
+    "originalFunction": "Fighter_Create",
+    "baseArchive": {
+      "passed": true,
+      "checks": 899695,
+      "bytes": 914670,
+      "partCount": 63,
+      "costumes": 6,
+      "motionRows": 318,
+      "demoRows": 14,
+      "imports": [
+        {
+          "label": "initialization",
+          "at": 96,
+          "size": 150900,
+          "pointers": 657
+        },
+        {
+          "label": "visibility",
+          "at": 151136,
+          "size": 150880,
+          "pointers": 14
+        },
+        {
+          "label": "demo motions",
+          "at": 302016,
+          "size": 150880,
+          "pointers": 26
+        },
+        {
+          "label": "secondary animations",
+          "at": 452924,
+          "size": 150880,
+          "pointers": 831
+        },
+        {
+          "label": "gameplay parameters",
+          "at": 603804,
+          "size": 150916,
+          "pointers": 20
+        },
+        {
+          "label": "dynamics",
+          "at": 754720,
+          "size": 20,
+          "pointers": 0
+        },
+        {
+          "label": "hurtboxes",
+          "at": 754740,
+          "size": 456,
+          "pointers": 1
+        },
+        {
+          "label": "auxiliary model",
+          "at": 755196,
+          "size": 150880,
+          "pointers": 564
+        }
+      ],
+      "relocations": 2135
+    }
+  },
+  "demoMetadata": {
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "rows": 16,
+        "commands": 43
+      },
+      {
+        "name": "PlFx.dat",
+        "rows": 14,
+        "commands": 88
+      },
+      {
+        "name": "PlCa.dat",
+        "rows": 14,
+        "commands": 28
+      },
+      {
+        "name": "PlDk.dat",
+        "rows": 14,
+        "commands": 77
+      },
+      {
+        "name": "PlKb.dat",
+        "rows": 18,
+        "commands": 57
+      },
+      {
+        "name": "PlKp.dat",
+        "rows": 14,
+        "commands": 58
+      },
+      {
+        "name": "PlLk.dat",
+        "rows": 14,
+        "commands": 60
+      },
+      {
+        "name": "PlSk.dat",
+        "rows": 14,
+        "commands": 25
+      },
+      {
+        "name": "PlNs.dat",
+        "rows": 14,
+        "commands": 51
+      },
+      {
+        "name": "PlPe.dat",
+        "rows": 14,
+        "commands": 42
+      },
+      {
+        "name": "PlPp.dat",
+        "rows": 14,
+        "commands": 52
+      },
+      {
+        "name": "PlNn.dat",
+        "rows": 14,
+        "commands": 26
+      },
+      {
+        "name": "PlPk.dat",
+        "rows": 14,
+        "commands": 55
+      },
+      {
+        "name": "PlPr.dat",
+        "rows": 14,
+        "commands": 50
+      },
+      {
+        "name": "PlSs.dat",
+        "rows": 14,
+        "commands": 44
+      },
+      {
+        "name": "PlYs.dat",
+        "rows": 14,
+        "commands": 25
+      },
+      {
+        "name": "PlZd.dat",
+        "rows": 14,
+        "commands": 57
+      },
+      {
+        "name": "PlLg.dat",
+        "rows": 16,
+        "commands": 31
+      },
+      {
+        "name": "PlMt.dat",
+        "rows": 14,
+        "commands": 43
+      },
+      {
+        "name": "PlMs.dat",
+        "rows": 14,
+        "commands": 57
+      },
+      {
+        "name": "PlGw.dat",
+        "rows": 14,
+        "commands": 42
+      },
+      {
+        "name": "PlDr.dat",
+        "rows": 14,
+        "commands": 62
+      },
+      {
+        "name": "PlCl.dat",
+        "rows": 14,
+        "commands": 56
+      },
+      {
+        "name": "PlPc.dat",
+        "rows": 14,
+        "commands": 38
+      },
+      {
+        "name": "PlFe.dat",
+        "rows": 14,
+        "commands": 69
+      },
+      {
+        "name": "PlGn.dat",
+        "rows": 14,
+        "commands": 36
+      },
+      {
+        "name": "PlFc.dat",
+        "rows": 14,
+        "commands": 68
+      }
+    ],
+    "components": 27,
+    "totalRows": 386,
+    "playbackVerified": false
+  },
+  "regression": {
+    "targetedTests": 82,
+    "fighterBrowserPassed": true,
+    "sceneBrowserPassed": true,
+    "sceneWasmBytes": 253196
+  },
+  "limitations": [
+    "Complete base archive importer is limited to Captain Falcon; other characters are rejected.",
+    "Embedded typed subgraphs duplicate unreachable source bytes; production archive compaction is pending.",
+    "The original constructor reaches its effects load, then aborts for missing EfCaData.dat; construction is not complete.",
+    "The probe runtime is discarded after failure; partial-constructor teardown is not claimed.",
+    "No original match loop, gameplay rendering, sustained FPS or input-to-photon measurement."
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "acceptanceCriteriaMet": false
+}
