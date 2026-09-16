@@ -1,0 +1,175 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2912271,
+    "wasmSha256": "6853ffd0953f979b8ae56577d6f7daccf43dbb302214e81e8b3e7275f5406d0e"
+  },
+  "softwareGpu": true,
+  "packedFlagByteCases": 256,
+  "preview": {
+    "settled": {
+      "resolution": [
+        960,
+        720
+      ],
+      "actors": [
+        {
+          "name": "Battlefield group 3",
+          "joints": 2,
+          "meshes": 2,
+          "draws": 2,
+          "vertices": 670,
+          "maxScaledVertexError": 1.1865765912644706e-7
+        },
+        {
+          "name": "Battlefield group 1",
+          "joints": 5,
+          "meshes": 1,
+          "draws": 1,
+          "vertices": 458,
+          "maxScaledVertexError": 0.0000034425272372755014
+        },
+        {
+          "name": "Battlefield group 6",
+          "joints": 16,
+          "meshes": 55,
+          "draws": 55,
+          "vertices": 9348,
+          "maxScaledVertexError": 2.1794825690432834e-7
+        },
+        {
+          "name": "Falcon P1",
+          "joints": 63,
+          "meshes": 98,
+          "draws": 63,
+          "vertices": 7895,
+          "maxScaledVertexError": 6.990044778226849e-7
+        },
+        {
+          "name": "Falcon P2",
+          "joints": 63,
+          "meshes": 98,
+          "draws": 63,
+          "vertices": 7895,
+          "maxScaledVertexError": 6.990044778226849e-7
+        }
+      ],
+      "eye": [
+        16.87077522277832,
+        77.73412322998047,
+        226.02481079101562
+      ],
+      "interest": [
+        23.269149780273438,
+        36.41569900512695,
+        0
+      ],
+      "fov": 30,
+      "aspect": 1.2173333168029785,
+      "playable": false,
+      "performanceMeasured": false,
+      "visualParity": false,
+      "limitations": "Diagnostic first-UV shader. Original lighting, TEV, transparency, material animation, effect rendering, HUD and complete stage callbacks remain incomplete."
+    },
+    "final": {
+      "resolution": [
+        960,
+        720
+      ],
+      "actors": [
+        {
+          "name": "Battlefield group 3",
+          "joints": 2,
+          "meshes": 2,
+          "draws": 0,
+          "vertices": 670,
+          "maxScaledVertexError": 1.1865765912644706e-7
+        },
+        {
+          "name": "Battlefield group 1",
+          "joints": 5,
+          "meshes": 1,
+          "draws": 1,
+          "vertices": 458,
+          "maxScaledVertexError": 8.589420778545099e-7
+        },
+        {
+          "name": "Battlefield group 6",
+          "joints": 16,
+          "meshes": 55,
+          "draws": 47,
+          "vertices": 9348,
+          "maxScaledVertexError": 4.091528904401369e-7
+        },
+        {
+          "name": "Falcon P1",
+          "joints": 63,
+          "meshes": 98,
+          "draws": 63,
+          "vertices": 7895,
+          "maxScaledVertexError": 8.652038376981425e-7
+        },
+        {
+          "name": "Falcon P2",
+          "joints": 63,
+          "meshes": 98,
+          "draws": 63,
+          "vertices": 7895,
+          "maxScaledVertexError": 8.14048239800935e-7
+        }
+      ],
+      "eye": [
+        21.64659309387207,
+        27.528520584106445,
+        142.09750366210938
+      ],
+      "interest": [
+        31.298805236816406,
+        10.70457935333252,
+        0
+      ],
+      "fov": 30,
+      "aspect": 1.2173333168029785,
+      "playable": false,
+      "performanceMeasured": false,
+      "visualParity": false,
+      "limitations": "Diagnostic first-UV shader. Original lighting, TEV, transparency, material animation, effect rendering, HUD and complete stage callbacks remain incomplete."
+    }
+  },
+  "combatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+  "simulationOnlyTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+  "visualReview": {
+    "inspected": [
+      "native-match-settled.png",
+      "native-match-final.png"
+    ],
+    "fightersVisible": true,
+    "stageGeometryVisible": true,
+    "originalCameraBridge": true,
+    "visualParity": false,
+    "knownFaults": [
+      "White stage surfaces from incomplete diagnostic material/TEV/alpha rendering.",
+      "HUD, effects, lighting, complete stage callbacks and full draw callback not integrated."
+    ]
+  },
+  "regressions": {
+    "targetedTests": 93,
+    "commonEffectsAndFighters": true,
+    "stageMap": true,
+    "scene": true,
+    "diagnosticGpuModels": 27,
+    "diagnosticGpuResolution": [
+      960,
+      720
+    ]
+  },
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "notes": "Two static snapshots of live original fighter/stage objects during the scripted combat probe. Software GPU correctness checks and readback are not FPS or latency measurements. No camera or physics offsets were applied."
+}

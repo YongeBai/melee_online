@@ -29,6 +29,25 @@
 #include <stddef.h>
 
 _Static_assert(sizeof(ftHurtboxInit)==40,"Hurtbox descriptor ABI");
+unsigned portPackedFlagBits(unsigned value)
+{
+    UnkFlagStruct flags;flags.byte=value;
+    return (flags.b0<<7)|(flags.b1<<6)|(flags.b2<<5)|(flags.b3<<4)|
+           (flags.b4<<3)|(flags.b5<<2)|(flags.b6<<1)|flags.b7;
+}
+/* Diagnostic normal-body preparation from ftDrawCommon_800805C8. This runs
+ * original visibility selection, but does not replace the full draw callback,
+ * special forms, refraction, materials, accessories or GPU submission. */
+int portFighterPreviewPrepare(HSD_GObj* object)
+{
+    if(!object||!object->user_data)abort();
+    Fighter* fp=object->user_data;
+    if(!fp->x21FC_flag.b7||fp->invisible||fp->x221E_b5)return 0;
+    if(fp->is_metal||fp->x2226_b5||fp->x2227_b3)abort();
+    ftParts_800750C8(fp,1,0);ftParts_800750C8(fp,4,0);
+    ftParts_800750C8(fp,2,0);ftParts_800750C8(fp,0,1);
+    return 1;
+}
 _Static_assert(sizeof(ftData_x38)==20,"Dynamics collider descriptor ABI");
 _Static_assert(offsetof(Fighter,x1670)==0x1670,"Dynamics collider array offset");
 _Static_assert(offsetof(Fighter,x1828)==0x1828,"Dynamics collider array extent");

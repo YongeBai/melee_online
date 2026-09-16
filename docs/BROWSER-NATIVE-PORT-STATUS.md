@@ -5,6 +5,24 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+A new diagnostic now renders the live two-Falcon/Battlefield simulation through
+its original camera at 960×720. The settled and post-combat snapshots show both
+fighters after original body-part visibility selection. GPU transforms match the
+native CPU reference across 26,266 vertices per snapshot; rendered and
+simulation-only probes retain the same combat trace hash.
+
+This exposed another portability fault: the shared game flag union reversed
+byte-to-bit meaning on WASM, so the original draw-enable byte hid fighters.
+Its layout now preserves PowerPC bit positions, with all 256 byte values checked.
+The 27-model GPU regression and the fighter/stage/scene checks pass, as do 93
+targeted tests. These GPU checks use SwiftShader, not performance hardware.
+
+Visual inspection still finds white stage surfaces: the diagnostic shader lacks
+original TEV, lighting and alpha behavior. Full draw callbacks, HUD and effect
+rendering remain unfinished. These are two snapshots, not an interactive match;
+no camera visual-parity, 720p60 or latency result is claimed.
+[Live render checkpoint](benchmarks/browser-2026-09-15-native-port-live-render.json).
+
 The common effect bank and native camera now run in the two-Falcon integration
 probe. Original effect loading covers 47 model descriptors, 592 particle commands
 and 36 texture groups. The model lifecycle test creates two instances of each

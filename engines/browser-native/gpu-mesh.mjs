@@ -86,14 +86,14 @@ export function uploadMesh(gl,pipeline,model,skin,assets,transforms) {
     const {program,uniforms:u}=pipeline;
     const activate=()=>{gl.useProgram(program);gl.bindVertexArray(vao);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,palette);gl.uniform1i(u.palette,0);gl.uniform1i(u.image,1);};
     return {draws,updatePalette(matrices){activate();gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,3,skin.groupCount,gl.RGBA,gl.FLOAT,matrices);},
-      draw(view,projection,flags) {
+      draw(view,projection,flags,visibility) {
         activate();gl.uniformMatrix4fv(u.viewMatrix,false,view);gl.uniformMatrix4fv(u.projectionMatrix,false,projection);
         gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(true);gl.disable(gl.BLEND);
         // GX's front winding is clockwise (also used by Dolphin OGLGfx).
         gl.frontFace(gl.CW);
         let count=0;
-        for(const draw of draws) {
-          if(flags[draw.joint]&16)continue;
+        for(const [index,draw] of draws.entries()) {
+          if((flags[draw.joint]&16)||(visibility&&!visibility[index]))continue;
           const cull=draw.flags&0xc000;
           if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);
           gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,draw.texture);

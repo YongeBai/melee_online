@@ -34,6 +34,12 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/gm/types.h') {
+      // This union is also read/written through its byte member. PPC b7 is
+      // bit zero; retain that meaning on the little-endian WASM compiler.
+      const fields=Array.from({length:8},(_,i)=>`        u8 b${i} : 1;`).join('\n');
+      replace(fields,fields.split('\n').reverse().join('\n'));
+    }
     if(file==='src/melee/cm/camera.c') {
       // Retail placed these separate symbols consecutively. C/WASM does not
       // promise that layout: use the actual original camera descriptor.

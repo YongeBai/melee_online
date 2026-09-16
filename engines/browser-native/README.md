@@ -600,3 +600,22 @@ lists/pools. All refer directly to the intended original symbols. The common
 effect lifecycle suite runs with `verify-browser.mjs --fighter-init`.
 The earlier combat-only checkpoint omitted common effects and is superseded by
 these checks; same-build deterministic state alone did not detect corruption.
+
+## Live match-object render diagnostic
+
+After `build.mjs --fighter-init`, run
+`node scripts/native-port/probe-constructor.mjs --render`. It uses a private
+static server and headless SwiftShader to capture two 960×720 snapshots, before
+and after the scripted combat sequence. The images and report stay in ignored
+`dist/native-port`. All assets load automatically.
+
+`native-match-preview.mjs` reads original live HSD matrices, DObj visibility and
+camera data. Normal fighter body selection calls the original `ftParts`
+functions; unsupported special render forms reject rather than silently changing
+appearance. The shared `UnkFlagStruct` retains retail byte/bit correspondence.
+Every GPU-transformed vertex is checked against the native CPU skinning result.
+
+This remains the unlit first-UV diagnostic shader. White stage surfaces expose
+missing TEV/alpha/material handling; no camera adjustment masks them. Lighting,
+full original draw callbacks, accessories, effects and HUD are not integrated.
+It is not a playable game or a benchmark.

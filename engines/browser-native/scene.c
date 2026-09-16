@@ -89,6 +89,16 @@ void portSceneFlags(unsigned count,HSD_JObj** nodes,unsigned* output)
 {
     for(unsigned i=0;i<count;i++)output[i]=nodes[i]->flags;
 }
+void portSceneMeshVisibility(unsigned count,HSD_JObj** nodes,const u16* indices,unsigned* output)
+{
+    for(unsigned i=0;i<count;i++) {
+        HSD_JObj* joint=nodes[indices[i*2]];
+        if(!joint||!union_type_dobj(joint))abort();
+        HSD_DObj* object=joint->u.dobj;
+        for(unsigned j=0;j<indices[i*2+1];j++){if(!object)abort();object=object->next;}
+        if(!object)abort();output[i]=!(object->flags&DOBJ_HIDDEN);
+    }
+}
 // Weighted values are compared with the independently decoded source archive.
 // Runtime joint identities verify HSD envelope resolution, not just object counts.
 double portSceneMetric(unsigned count,HSD_JObj** nodes,unsigned metric)
