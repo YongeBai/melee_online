@@ -1,4 +1,4 @@
-import {generateMaterialShaders} from './material-shader.mjs';
+import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture} from './native-texture.mjs';
 import {readNativePixel,gxAlphaTest} from './native-pixel.mjs';
@@ -11,22 +11,23 @@ import {inspectArchive} from './archive.mjs';
 // oracle. Full native GX callback/pass ordering and mutable-image invalidation
 // remain work for the playable renderer.
 export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
-  const programs=new Map(),images=new Map(),models=new Set(),view=module._malloc(48);
+  const programs=new Map(),variants=new Map(),images=new Map(),models=new Set(),view=module._malloc(48);
   if(!view)throw Error('Native material view allocation');
   const rows=(array,n)=>Float32Array.from({length:n*12},(_,i)=>array[i/12|0]?.[i%12]??0);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
   let queue=[],snapshot,draws=0,vertexChecks;
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes){
+    const variant=materialShaderKey(state,attributes);if(variants.has(variant))return variants.get(variant);
     const sources=generateMaterialShaders(state,attributes),key=sources.vertex+'\n'+sources.fragment;
-    if(programs.has(key))return programs.get(key);
+    if(programs.has(key)){const p=programs.get(key);variants.set(variant,p);return p;}
     let vs,fs,p;
     try {
       vs=shader(gl.VERTEX_SHADER,sources.vertex);fs=shader(gl.FRAGMENT_SHADER,sources.fragment);p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,fs);
       gl.transformFeedbackVaryings(p,['transformedPosition','transformedNormal','raster0','raster1','verifiedTexcoord'],gl.INTERLEAVED_ATTRIBS);gl.linkProgram(p);
       if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
       const uniforms=new Map(),result={program:p,uniform(name){if(!uniforms.has(name))uniforms.set(name,gl.getUniformLocation(p,name));return uniforms.get(name);}};
-      programs.set(key,result);return result;
+      programs.set(key,result);variants.set(variant,result);return result;
     } catch(error){if(p)gl.deleteProgram(p);throw error;}finally{if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);}
   }
   function image(t){

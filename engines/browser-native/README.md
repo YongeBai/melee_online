@@ -639,3 +639,35 @@ Complete original draw callbacks/order, image/palette mutation invalidation,
 exact filtering/LOD parity, accessories, effects and HUD remain incomplete.
 Unsupported pixel paths explicitly reject. This is not a playable game or a
 benchmark: the two snapshots use synchronous GPU verification readbacks.
+
+## Continuous native development fixture
+
+After the fighter build, serve this directory and open
+`/constructor.html?live=1`. Assets load automatically. Arrow keys move,
+X jumps, Z attacks, S uses specials, C grabs and Shift shields. This is a
+keyboard development fixture with two Falcons, partial Battlefield startup and
+original camera/material state; full competitive gameplay is not complete.
+Gamepad calibration, effects drawing, HUD, audio, full match rules and native
+menu/pause integration remain separate requirements.
+
+`native-live.mjs` drives the original scheduler at 60 steps per second. Slow
+rendering retains simulation debt, capped at four steps per callback; it never
+skips a simulation step to inflate FPS. Hidden tabs pause explicitly. Timing
+samples are bounded to the most recent 3,600 calls. Simulation-call time, draw
+submission time and rAF intervals are reported separately, without asserting
+distinct presentations or input-to-photon latency.
+
+`createNativeMatchPreview(...,{verify:false})` keeps original material setup,
+visibility and camera, but removes duplicate diagnostic capture and GPU
+readbacks. The shader cache keys only source-generating state; dynamic colors,
+matrices and resources remain uniforms/bindings. No frame-time improvement is
+claimed for that cache from the current short SwiftShader test.
+
+Reproduce these checks independently:
+
+`node scripts/native-port/probe-constructor.mjs --live` exercises real browser
+key events over 180 native steps and checks movement, jump, attack and absence
+of death/respawn. `--render-steps` draws all 683 scripted combat steps and retains
+the exact combat trace. `--input --render-steps` draws the 142-step walk/jump/
+aerial/landing sequence. `--render` retains full snapshot verification.
+None is a sustained hardware performance or broad gameplay-parity result.

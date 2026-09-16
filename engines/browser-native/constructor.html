@@ -7,6 +7,7 @@
 <script type="module">
 import create from './melee-fighter-init.mjs';
 import {archiveRootView,inspectArchive} from './archive.mjs';
+import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyCombat} from './verify-combat.mjs';
 import {verifyResidentEffectBank} from './verify-effects.mjs';
@@ -22,7 +23,7 @@ import {convertStageCollision} from './stage-collision.mjs';
 import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
-const render=new URLSearchParams(location.search).has('render'),previewActors=[];
+const params=new URLSearchParams(location.search),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
@@ -55,7 +56,7 @@ try {
   installResidentFile(module,'EfCaData.dat',convertCaptainEffects(await asset('EfCaData.dat')).image);
   module._portMatchPlayerInitialize();
   module._portFighterPlayerConfigure(0,0,0,0,0,1,0);
-  const withStage=new URLSearchParams(location.search).has('stage'),combat=new URLSearchParams(location.search).has('combat');
+  const withStage=live||params.has('stage'),combat=live||params.has('combat');
   if(combat){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const stageBytes=await asset('GrNBa.dat'),map=convertBattlefieldMap(stageBytes);
@@ -96,7 +97,7 @@ try {
     report.combat={completed:false,initial:[a,b],frames:0};
   }
   if(render||new URLSearchParams(location.search).has('camera')){module._portStageCameraStart();report.cameraStarted=true;}
-  if(new URLSearchParams(location.search).has('step')){
+  if(live||params.has('step')){
     report.schedulerContext=combat?'Battlefield geometry/collision, default rules, two player-owned Falcons and scripted normalized combat input. Full match startup and rendering remain incomplete.':withStage?'Battlefield geometry/collision and source spawn, without complete Stage startup, match rules, input or rendering.':'Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
     report.schedulerSteps=0;console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
     for(let i=0;i<120;i++){module._portRuntimeStep();report.schedulerSteps++;}
@@ -107,20 +108,31 @@ try {
     if(render) {
       for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
-      preview=createNativeMatchPreview(module,canvas,previewActors);report.preview={settled:preview.draw()};
-      const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);
+      preview=createNativeMatchPreview(module,canvas,previewActors,{verify:!live&&!renderSteps});report.preview={settled:preview.draw()};
+      if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
-    if(combat)await verifyCombat(module,[object,opponent],report.combat,{
+    if(combat&&!live)await verifyCombat(module,[object,opponent],report.combat,{
       control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
+      onStep:renderSteps?()=>{preview.draw();report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
     });
-    if(preview){report.preview.final=preview.draw();preview.dispose();}
+    if(live){
+      const controls=document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Effects, HUD, audio and full match rules are incomplete.';canvas.before(controls);
+      const limit=Number(params.get('liveframes')??0);if(!Number.isInteger(limit)||limit<0||limit>36000)throw Error('Invalid live frame limit');
+      await new Promise((resolve,reject)=>{
+        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{frameLimit:limit,
+          onProgress:s=>{report.live=s;document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
+          onComplete:s=>{report.live=s;resolve();},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();reject(error);}});
+        document.documentElement.dataset.live='ready';
+      });
+      preview.dispose();
+    }else if(preview){report.preview.final=preview.draw();}
     if(new URLSearchParams(location.search).has('input')){
       report.input={completed:false,frames:0,states:[]};
       module._Player_80031848(0);
       console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
       for(const [name,frames,buttons,x,y] of [['walk',12,0,0.5,0],['release',12,0,0,0],['jump',4,0x400,0,0],['air',20,0,0,0],['attack',4,0x100,0,0],['recover',90,0,0,0]]){
-        for(let i=0;i<frames;i++){module._portStageProbePad(0,buttons,x,y);module._portRuntimeStep();report.input.frames++;}
+        for(let i=0;i<frames;i++){module._portStageProbePad(0,buttons,x,y);module._portRuntimeStep();report.input.frames++;if(renderSteps){preview.draw();report.renderedSteps=(report.renderedSteps??0)+1;}}
         report.input.states.push({name,state:state()});
         const latest=report.input.states.at(-1).state;
         if(name==='walk'&&(!(latest[4]>report.afterSteps[4])||![15,16,17].includes(latest[0])))throw Error('Scripted walking input did not produce walking movement');
@@ -129,7 +141,9 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(preview)report.preview.final=preview.draw();
     }
+    if(preview&&!live)preview.dispose();
   }
 } catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}
 document.querySelector('#result').textContent=JSON.stringify(report,null,2);

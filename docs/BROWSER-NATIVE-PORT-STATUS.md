@@ -3,7 +3,28 @@
 The direct port is now an implemented, reproducible development target:
 [build and architecture](../engines/browser-native/README.md). It links original
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
-not a playable game yet, and there is no native-port FPS result.
+not a complete playable game yet, and there is no native-port presented-FPS result.
+
+The native development fixture now runs continuously with browser keyboard input
+at `constructor.html?live=1`. It uses the original simulation scheduler and a
+60 Hz frame clock, retaining simulation debt under load and explicitly pausing
+hidden tabs. Per-draw verification readbacks and duplicate diagnostic capture
+are disabled in this path. Snapshot verification remains available separately.
+
+Every one of the 683 scripted combat steps can now be drawn without changing
+the combat trace. A separate 142-step walk/jump/aerial/landing sequence also
+passes with all steps drawn. The browser-event smoke test completes 180 steps
+and returns to grounded idle after jumping, attacking and moving, with no death
+or respawn. All 117 targeted tests pass, including frame-clock and shader-cache
+invalidation checks. This is still two Falcons and partial Battlefield startup;
+full callbacks, effects drawing, HUD, audio, gamepad input and competitive match
+lifecycle remain incomplete.
+
+The software-GPU smoke run records about 0.29 ms per simulation step and 32.8 ms
+per draw submission (which can include driver waits). These short SwiftShader
+numbers are diagnostic, not hardware-browser FPS or input-to-photon results.
+Avoiding repeated shader-source generation did not yield a measured frame-time
+gain in this test. [Continuous renderer/input checkpoint](benchmarks/browser-2026-09-15-native-port-live-input.json).
 
 The live diagnostic now draws the two Falcon/Battlefield snapshots with original
 material state: native matrix palettes, lighting channels, texture generation,

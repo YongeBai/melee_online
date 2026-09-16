@@ -40,6 +40,12 @@ function alphaTest(a) {
   const left=compare(a.compare0,'alphaReference.x'),right=compare(a.compare1,'alphaReference.y'),op=['&&','||','!=','=='][a.operation];
   if(!left||!right||!op)throw Error('Native shader alpha comparison');return `((${left})${op}(${right}))`;
 }
+// Only shader-generating state belongs in this key. Matrices, light values,
+// colors, alpha references and texture resources are uploaded as uniforms.
+export function materialShaderKey({tev,textures,pixel},attributes) {
+  const a=pixel.alphaTest;
+  return JSON.stringify([tev.stages,textures.generators,textures.textures.map(t=>t.id),pixel.channelCount,pixel.channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b)]);
+}
 export function generateMaterialShaders({tev,textures,pixel},attributes) {
   const has=id=>attributes.some(a=>a.attr===id),gens=textures.generators;
   const outputs=['out vec4 raster0,raster1;','out vec3 transformedPosition,transformedNormal,verifiedTexcoord;',...gens.map(g=>`out vec3 texcoord${g.id};`)];

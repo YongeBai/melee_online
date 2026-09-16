@@ -1,0 +1,179 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "softwareGpu": true,
+  "resolution": [
+    960,
+    720
+  ],
+  "browserInput": {
+    "frames": 180,
+    "draws": 79,
+    "elapsedMs": 3056.2000000029802,
+    "stateChanges": [
+      {
+        "frame": 1,
+        "state": 24,
+        "x": 0,
+        "y": 0.00009999999747378752,
+        "buttons": 1024
+      },
+      {
+        "frame": 5,
+        "state": 25,
+        "x": 0,
+        "y": 3.100100040435791,
+        "buttons": 1024
+      },
+      {
+        "frame": 17,
+        "state": 65,
+        "x": 0,
+        "y": 30.16008949279785,
+        "buttons": 256
+      },
+      {
+        "frame": 55,
+        "state": 42,
+        "x": 0,
+        "y": 0.00010013580322265625,
+        "buttons": 0
+      },
+      {
+        "frame": 61,
+        "state": 20,
+        "x": 0,
+        "y": 0.00009999999747378752,
+        "buttons": 0
+      },
+      {
+        "frame": 89,
+        "state": 14,
+        "x": 38.2599983215332,
+        "y": 0.00009999999747378752,
+        "buttons": 0
+      }
+    ],
+    "inputChanges": [
+      {
+        "frame": 0,
+        "type": "keydown",
+        "code": "KeyX"
+      },
+      {
+        "frame": 12,
+        "type": "keyup",
+        "code": "KeyX"
+      },
+      {
+        "frame": 16,
+        "type": "keydown",
+        "code": "KeyZ"
+      },
+      {
+        "frame": 24,
+        "type": "keyup",
+        "code": "KeyZ"
+      },
+      {
+        "frame": 60,
+        "type": "keydown",
+        "code": "ArrowRight"
+      },
+      {
+        "frame": 64,
+        "type": "keyup",
+        "code": "ArrowRight"
+      }
+    ],
+    "movement": true,
+    "jump": true,
+    "attack": true,
+    "maxDebtMs": 364.20000000596065,
+    "stepCpu": {
+      "samples": 180,
+      "meanMs": 0.29277777787711884,
+      "p50Ms": 0.29999999701976776,
+      "p95Ms": 0.6000000089406967,
+      "maxMs": 0.7000000029802322
+    },
+    "drawSubmissionCpu": {
+      "samples": 79,
+      "meanMs": 32.80000000003773,
+      "p50Ms": 32.70000000298023,
+      "p95Ms": 35,
+      "maxMs": 37.599999994039536
+    },
+    "rafDrawIntervals": {
+      "samples": 78,
+      "meanMs": 33.97435897435897,
+      "p50Ms": 33.30000000000018,
+      "p95Ms": 33.400000000000546,
+      "maxMs": 50
+    },
+    "resolution": [
+      960,
+      720
+    ],
+    "gpuReadbacks": false,
+    "playable": false,
+    "performanceCertified": false,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false
+  },
+  "finalGroundedIdle": true,
+  "combat": {
+    "frames": 683,
+    "renderedSteps": 683,
+    "traceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+    "unchanged": true
+  },
+  "motion": {
+    "steps": 142,
+    "renderedSteps": 142,
+    "passed": true
+  },
+  "snapshotChecks": {
+    "passed": true,
+    "cases": [
+      "unlit material",
+      "diffuse toward light",
+      "clamped diffuse away",
+      "signed diffuse subtraction",
+      "diffuse accumulator clamp",
+      "SDK specular forces diffuse NONE",
+      "vertex material RGBA",
+      "alpha rejection",
+      "UV texgen and nearest sampling",
+      "normal reflection texgen",
+      "bump texture coordinates",
+      "vertex matrix texture coordinates",
+      "SRTG texture coordinates"
+    ],
+    "pixelChannelChecks": 52
+  },
+  "snapshotVertexChecks": {
+    "vertices": 23610,
+    "positionComponents": 70830,
+    "normalComponents": 70830,
+    "maxScaledPositionError": 0.000001988536994878627,
+    "maxNormalError": 1.5256513063999222e-7
+  },
+  "tests": 117,
+  "shaderCache": "Avoids repeated source generation; no measured frame-time benefit in short software-GPU runs.",
+  "commands": [
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --live",
+    "node scripts/native-port/probe-constructor.mjs --render-steps",
+    "node scripts/native-port/probe-constructor.mjs --input --render-steps",
+    "node scripts/native-port/probe-constructor.mjs --render",
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs"
+  ],
+  "playableCompetitiveMatch": false,
+  "acceptanceMet": false,
+  "remaining": "Original complete draw callbacks/order, image invalidation, effects, HUD, audio, full stage/match lifecycle, all characters/stages, gamepad input and sustained hardware presentation/latency checks."
+}
