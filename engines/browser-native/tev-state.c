@@ -6,6 +6,7 @@
 #include <sysdolphin/baselib/dobj.h>
 #include <sysdolphin/baselib/mobj.h>
 #include <sysdolphin/baselib/tev.h>
+#include <sysdolphin/baselib/tobj.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -20,6 +21,8 @@ _Static_assert(sizeof(PortTevState)==2192,"Native TEV snapshot ABI");
 static PortTevState state;
 static int capturing;
 static void require(int condition){if(!capturing||!condition){fprintf(stderr,"Invalid native TEV capture\n");abort();}}
+void portRequireMaterialCapture(int condition){require(condition);}
+void portTextureCaptureReset(void);
 static s32* stage(unsigned id){require(id<16);return state.stage[id];}
 void GXPixModeSync(void){require(1);state.syncs++;}
 void GXSetTevColor(GXTevRegID id,GXColor c){require(id<4);state.registers|=1u<<id;state.reg[id][0]=c.r;state.reg[id][1]=c.g;state.reg[id][2]=c.b;state.reg[id][3]=c.a;}
@@ -44,8 +47,13 @@ const PortTevState* portMaterialTev(HSD_JObj* joint,unsigned index)
     if(!display||!display->mobj)abort();
     HSD_MObj* material=display->mobj;
     memset(&state,0,sizeof(state));capturing=1;
+    portTextureCaptureReset();
     HSD_StateInitTev();
+    HSD_TObjSetup(material->tobj);
+    HSD_TObjSetupTextureCoordGen(material->tobj);
     HSD_MOBJ_METHOD(material)->setup_tev(material,material->tobj,material->rendermode);
     HSD_StateSetNumTevStages();
+    HSD_StateSetNumTexGens();
+    HSD_TObjSetup(NULL);
     capturing=0;return &state;
 }

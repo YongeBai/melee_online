@@ -11,6 +11,7 @@ import {verifyGpuConventions} from './verify-gpu-conventions.mjs';
 import {inspectArchive} from './archive.mjs';
 import {readNativeTev} from './native-tev.mjs';
 import {verifyGpuTev} from './verify-tev.mjs';
+import {readNativeTextures,decodeNativeTexture,gxTextureLod} from './native-texture.mjs';
 const canvas=document.querySelector('canvas'),status=document.querySelector('#status'),result=document.querySelector('#result');
 const parameters=new URL(location.href).searchParams;
 const fullScene=parameters.get('scene')==='1';
@@ -40,7 +41,7 @@ try {
   async function load(name,referenceVertices) {
     const [bytes,motion]=await Promise.all([fetchAsset(name),fetchAsset(name.replace('Nr','AJ'))]);
     const model=readModelMeshes(bytes),assets=readModelMaterials(bytes,model),transforms=textureMatrices(module,assets.textures);
-    let pose,materialCount=0;
+    let pose,materialCount=0,textureChecks=0,texturePixelChecks=0,textureMatrixChecks=0,texgenTypes=new Set();
     if(fullScene) {
       if(!residentModels.has(name)) {
         const converted=convertSceneAsset(bytes);
@@ -70,6 +71,30 @@ try {
           while(at!==mesh.dobj){if(at===null||index++>=4096)throw Error('Model TEV DObj ownership');at=archive.relocations.has(at+4)?archive.data.getUint32(at+4):null;}
           const joint=new Uint32Array(module.HEAPU8.buffer,nodes,n)[mesh.joint],program=readNativeTev(module,joint,index);
           const key=JSON.stringify(program.stages);if(!tevPrograms.has(key))tevPrograms.set(key,program);materialCount++;
+          const native=readNativeTextures(module),source=assets.materials.get(mesh.material);
+          const descriptors=[];for(let t=source.texture;t;t=t.next)descriptors.push(t);
+          if(native.textures.length!==descriptors.length)throw Error('Native/source texture count: '+name);
+          for(const [ti,t] of native.textures.entries()) {
+            const original=descriptors[ti],levels=decodeNativeTexture(module,t);
+            if(t.width!==original.image.width||t.height!==original.image.height||t.format!==original.image.format||t.wrapS!==original.wrapS||t.wrapT!==original.wrapT||t.magFilter!==original.magFilter||levels.length!==original.image.levels.length)
+              throw Error('Native/source texture configuration: '+name);
+            let minFilter=original.lod?.minFilter??5;if([8,9,10].includes(t.format)&&minFilter===5)minFilter=3;if(!original.image.mipmap)minFilter&=1;
+            const lod=gxTextureLod(original.image.minLOD,original.image.maxLOD,original.lod?.bias??0);
+            if(t.minFilter!==minFilter||Object.keys(lod).some(k=>t.lod[k]!==lod[k]))throw Error('Native/source texture filtering: '+name);
+            if((original.flags&15)===0) {
+              const matrix=native.matrices.find(m=>m.id===((original.flags&0x1000000)?57:64+t.id*3)),expected=transforms.get(original.offset);
+              const count=matrix?.type===1?8:12;
+              if(!matrix||matrix.values.slice(0,count).some((v,i)=>v!==expected[i]))throw Error('Native/source UV texture matrix: '+name);
+              textureMatrixChecks++;
+            }
+            for(const [level,image] of levels.entries()) {
+              const expected=original.image.levels[level];
+              if(image.pixels.length!==expected.pixels.length||image.pixels.some((v,i)=>v!==expected.pixels[i]))throw Error('Native/source texture pixels: '+name);
+              texturePixelChecks+=image.pixels.length/4;
+            }
+            textureChecks++;
+          }
+          for(const g of native.generators)texgenTypes.add(g.type+'/'+g.source+'/'+g.normalize);
         }
         pose={step(world,flags){module._portSceneAnimate(root);module._portSceneMatrices(n,nodes,world);module._portSceneFlags(n,nodes,flags);},dispose};
       } catch(error){dispose();throw error;}
@@ -81,7 +106,7 @@ try {
     try {
       skin=loadSkin(module,model,readSkinBindings(bytes,model),{referenceVertices});
       gpu=uploadMesh(gl,pipeline,model,skin,assets,transforms);flags=module._malloc(model.tree.nodes.length*4);
-      return {model,pose,skin,gpu,materialCount,
+      return {model,pose,skin,gpu,materialCount,textureChecks,texturePixelChecks,textureMatrixChecks,texgenTypes:[...texgenTypes],
         step(){pose.step(skin.world,flags);skin.step();
           gpu.updatePalette(module.HEAPF32.subarray(skin.matrices/4,skin.matrices/4+skin.groupCount*12));},
         draw(){gl.viewport(0,0,960,720);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -106,7 +131,7 @@ try {
         const sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels))].map(x=>x.toString(16).padStart(2,'0')).join('');
         snapshots.push({frame,draws,coloredPixels,sha256});
       }
-      rows.push({name,vertices:actor.model.totalVertices,paletteMatrices:actor.skin.groupCount,materialCount:actor.materialCount,maxError,maxScaledError,
+      rows.push({name,vertices:actor.model.totalVertices,paletteMatrices:actor.skin.groupCount,materialCount:actor.materialCount,textureChecks:actor.textureChecks,texturePixelChecks:actor.texturePixelChecks,textureMatrixChecks:actor.textureMatrixChecks,texgenTypes:actor.texgenTypes,maxError,maxScaledError,
         snapshots,distinctImages:snapshots.some(s=>s.sha256!==snapshots[0].sha256)});
     } finally {actor.dispose();}
   }

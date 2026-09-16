@@ -1,0 +1,173 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2915416,
+    "wasmSha256": "698d524ea740e03bbd771213fe91f692727772f2b12dd155473a0e24ce6b0cd3"
+  },
+  "softwareGpu": true,
+  "textureChecks": {
+    "models": 27,
+    "bindings": 1730,
+    "decodedTexels": 17744214,
+    "uvMatrices": 1683,
+    "coordinatePrograms": [
+      "1/4/0",
+      "0/1/1",
+      "1/5/0",
+      "2/13/0"
+    ],
+    "bumpModels": [
+      "PlSsNr.dat"
+    ]
+  },
+  "liveSnapshots": {
+    "settled": {
+      "resolution": [
+        960,
+        720
+      ],
+      "bindings": 236,
+      "actors": [
+        {
+          "name": "Battlefield group 3",
+          "bindings": 2,
+          "texgenTypes": [
+            "1/4/0"
+          ]
+        },
+        {
+          "name": "Battlefield group 1",
+          "bindings": 1,
+          "texgenTypes": [
+            "0/1/1"
+          ]
+        },
+        {
+          "name": "Battlefield group 6",
+          "bindings": 41,
+          "texgenTypes": [
+            "0/1/1",
+            "1/4/0"
+          ]
+        },
+        {
+          "name": "Falcon P1",
+          "bindings": 96,
+          "texgenTypes": [
+            "1/4/0",
+            "1/5/0",
+            "0/1/1"
+          ]
+        },
+        {
+          "name": "Falcon P2",
+          "bindings": 96,
+          "texgenTypes": [
+            "1/4/0",
+            "1/5/0",
+            "0/1/1"
+          ]
+        }
+      ]
+    },
+    "final": {
+      "resolution": [
+        960,
+        720
+      ],
+      "bindings": 236,
+      "actors": [
+        {
+          "name": "Battlefield group 3",
+          "bindings": 2,
+          "texgenTypes": [
+            "1/4/0"
+          ]
+        },
+        {
+          "name": "Battlefield group 1",
+          "bindings": 1,
+          "texgenTypes": [
+            "0/1/1"
+          ]
+        },
+        {
+          "name": "Battlefield group 6",
+          "bindings": 41,
+          "texgenTypes": [
+            "0/1/1",
+            "1/4/0"
+          ]
+        },
+        {
+          "name": "Falcon P1",
+          "bindings": 96,
+          "texgenTypes": [
+            "1/4/0",
+            "1/5/0",
+            "0/1/1"
+          ]
+        },
+        {
+          "name": "Falcon P2",
+          "bindings": 96,
+          "texgenTypes": [
+            "1/4/0",
+            "1/5/0",
+            "0/1/1"
+          ]
+        }
+      ]
+    }
+  },
+  "combatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+  "unchangedCombatTrace": true,
+  "combiner": {
+    "passed": true,
+    "programs": 215,
+    "capturedPrograms": 28,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 13760
+  },
+  "defaultRosterCombiner": {
+    "passed": true,
+    "programs": 220,
+    "capturedPrograms": 33,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 14080
+  },
+  "regressions": {
+    "targetedTests": 103,
+    "fighterBrowser": true,
+    "stageMapBrowser": true,
+    "sceneBrowser": true,
+    "animatedGpuModels": 27,
+    "maxVertexError": 0.000003814697265625
+  },
+  "commands": [
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --render",
+    "node scripts/native-port/verify-gpu.mjs --tev",
+    "node scripts/native-port/build.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --scene",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/verify-browser.mjs --stage-map",
+    "node scripts/native-port/verify-browser.mjs --scene",
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs"
+  ],
+  "playable": false,
+  "visualParity": false,
+  "performanceMeasured": false,
+  "limitations": [
+    "Captures original material TObj chain only; full MObj global shadow/toon additions are not integrated.",
+    "Images and palettes decode from live native memory but are not yet sampled through the original texgen/TEV programs in match drawing.",
+    "Reflection/highlight matrix capture passes finite checks; visual validation awaits original camera/light context and per-joint normal matrices.",
+    "Lighting, pixel-engine state, effects, HUD, audio, match lifecycle and complete roster gameplay remain incomplete.",
+    "No 720p60 or input-to-photon result."
+  ]
+}

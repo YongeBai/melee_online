@@ -5,6 +5,19 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original HSD texture setup now runs at the material boundary too. All 1,730
+runtime texture bindings across the 27 default fighter components match their
+source dimensions, formats, wrapping, filtering, mip levels and 17,744,214
+decoded texels. Runtime palettes and images are read from the native owner,
+preparing the renderer to handle animated selections. UV matrices match the
+separately exercised original texture-matrix routine. The sampler records SDK
+LOD precision, normal-based coordinate generation and Samus's bump path.
+The live Falcon/Battlefield probe captures and decodes 236 texture bindings per
+snapshot without changing its combat trace. These are resource/setup checks,
+not GPU texture sampling or a newly rendered match. Lighting, normal transforms,
+pixel-engine state and draw integration remain. All 103 targeted tests pass.
+[Texture boundary checkpoint](benchmarks/browser-2026-09-15-native-port-texture-state.json).
+
 The native material compiler now feeds a tested WebGL integer combiner. Original
 HSD setup was captured for all 1,753 material instances in the 27 default fighter
 components, covering 33 distinct programs. Those programs and 187 synthetic
