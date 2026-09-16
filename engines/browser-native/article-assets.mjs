@@ -23,6 +23,7 @@ export const fighterArticleProfiles=Object.freeze({
   Pc:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
   Kp:{slots:1,articles:{0:[1,6]}},
   Ys:{slots:4,articles:{0:[2,2],1:[1,2],2:[0,0]}},
+  Ns:{slots:11,articles:{0:[1,2],1:[1,3],2:[3,11],3:[1,5],4:[1,1],5:[1,1],6:[1,1],7:[1,1],8:[1,5],9:[1,1],10:[0,20]}},
   Mt:{slots:2,articles:{0:[1,2],1:[10,16]}},
   // Ten move Articles and a fighter outline visibility lookup in slot 10.
   Gw:{slots:11,articles:{0:[4,1],1:[1,1],2:[1,1],3:[2,1],4:[2,1],5:[2,1],6:[1,1],7:[2,1],8:[2,29],9:[2,1]}},
@@ -87,7 +88,13 @@ export function convertFighterArticles(input,name) {
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
-    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    if(code==='Ns'&&model.slot===10){
+      // itYoyoAttributes: twenty scalar words, two joints, material animation,
+      // and a final signed word. The original callbacks own all twenty links.
+      for(const off of [0x50,0x54])attachment(pointer(special+off),'yo-yo '+off);
+      materialAnimation(pointer(special+0x58));scalar(special+0x5C);
+    }
     if(code==='Gw'){
       // it_266F_ItemVars: two u16 counts plus packed joint-index arrays.
       // Chef's remaining 28 floats are three common fields and five entries.

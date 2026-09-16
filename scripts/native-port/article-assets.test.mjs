@@ -185,3 +185,37 @@ test('Game & Watch rejects malformed outline graphs, invalid indices and Chef fl
     a=>a.relocs.delete(a.rows[0].special),
   ])assert.throws(()=>convertFighterArticles(gamewatchFixture(mutate).bytes,'PlGw.dat'));
 });
+
+function nessFixture(mutate=()=>{}){
+  const body=new Uint8Array(8192),d=new DataView(body.buffer),relocs=new Set(),rows=[];let next=256;
+  const alloc=n=>{const at=next;next=(next+n+3)&~3;return at;};
+  const ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  const joint=()=>{const at=alloc(64);for(let i=0;i<3;i++)d.setFloat32(at+32+i*4,1);return at;};
+  ptr(72,128);
+  for(const [slotText,[stateCount,words]]of Object.entries(fighterArticleProfiles.Ns.articles)){
+    const slot=Number(slotText),article=alloc(24),attributes=alloc(132),special=alloc(slot===10?96:words*4),model=alloc(16),states=stateCount?alloc(stateCount*16):null;
+    ptr(128+slot*4,article);ptr(article,attributes);ptr(article+4,special);ptr(article+16,model);if(states!==null)ptr(article+12,states);
+    for(let i=0;i<words;i++)d.setFloat32(special+i*4,i+.25);
+    const attachments=[];
+    if(slot===9)d.setInt32(special,-1);
+    if(slot===10){for(const i of [0,1,2,16,17,18,19,23])d.setInt32(special+i*4,-1);for(const off of [80,84]){const root=joint();ptr(special+off,root);attachments.push(root);}const mat=alloc(12);ptr(special+88,mat);}
+    rows.push({slot,special,states,attachments});
+  }
+  mutate({body,d,ptr,rows,alloc,relocs});
+  const name=new TextEncoder().encode('ftDataNess\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),h=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>h.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>h.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return {bytes,rows};
+}
+test('Ness imports eleven Articles and yo-yo model/material attachments with signed attribute words',()=>{
+  const {bytes,rows}=nessFixture(),before=bytes.slice(),r=convertFighterArticles(bytes,'PlNs.dat'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(bytes,before);assert.equal(r.rows.length,11);assert.equal(r.rows[10].states,null);assert.equal(r.attachments.length,2);
+  for(const i of [0,1,2,16,17,18,19,23])assert.equal(d.getInt32(rows[10].special+i*4,true),-1);
+  assert.equal(d.getFloat32(rows[10].special+12,true),3.25);assert.equal(d.getInt32(rows[9].special,true),-1);
+  for(const root of rows[10].attachments)assert.ok(r.attachments.some(a=>a.joint===root));
+});
+test('Ness rejects absent yo-yo attachments, cyclic geometry and nonfinite launch parameters',()=>{
+  for(const mutate of [
+    a=>{const p=a.rows[10].special+80;a.d.setUint32(p,0);a.relocs.delete(p);},
+    a=>a.ptr(a.rows[10].attachments[0]+8,a.rows[10].attachments[0]),
+    a=>a.d.setFloat32(a.rows[3].special+16,NaN),a=>a.ptr(a.rows[10].special+88,a.rows[10].special),
+  ])assert.throws(()=>convertFighterArticles(nessFixture(mutate).bytes,'PlNs.dat'));
+});

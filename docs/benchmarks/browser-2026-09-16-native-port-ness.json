@@ -1,0 +1,1056 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "94c075d",
+  "scope": "Default-costume Ness constructor, move items, yo-yo chain and effects, selected moves/contacts including PK Thunder self-hit; two-Ness Battlefield timing. Not complete competitive acceptance.",
+  "wasmSha256": "5ecac7503f0b6db05f06274049c21626d0a21a07348a23b004a2e49f9325cd90",
+  "portableRecipeSha256": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "3cc575a93fd1ed4d61656fe3cfe2c7a08b62877ae8f43efda287115a828b8e37",
+    "engines/browser-native/effect-assets.mjs": "3d565de2228b449aa097143f58a4114c7d4a3a536d2fa74302617595854597d7",
+    "engines/browser-native/item-runtime.c": "8deb7dd44e365c98db057c5f4147437fedf0f69091402f34b7a330978f15167a",
+    "engines/browser-native/shared.c": "7be15698f551e747c77a9860e9b5c966770beaa36eab975cc7f42b7542adff56",
+    "engines/browser-native/constructor.html": "536869d5b186c90303aece6fa61946dd8c7e5454863b1525b78aff2c9d96c568",
+    "engines/browser-native/verify-ness.mjs": "0c18fb0628d6f065e1e220e54a79d2b3af7b3a3f9e7e088ed3e5bccc406fd17f",
+    "engines/browser-native/combat-workload.mjs": "771e28bcbb255a27561fb615c8d3025481fb3a8f905044f372233ae84c56be5f",
+    "scripts/native-port/probe-constructor.mjs": "3885bb0d12431971f8c9c334112786c67eb55072aec46d59f836ca254a2838f3"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "assetIntegration": {
+    "articles": [
+      "PK Fire",
+      "PK Fire pillar",
+      "PK Flash",
+      "PK Thunder ball",
+      "PK Thunder trail 1",
+      "PK Thunder trail 2",
+      "PK Thunder trail 3",
+      "PK Thunder trail 4",
+      "PK Flash explosion",
+      "bat",
+      "yo-yo"
+    ],
+    "serializedStates": [
+      1,
+      1,
+      3,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0
+    ],
+    "specialWords": [
+      2,
+      3,
+      11,
+      5,
+      1,
+      1,
+      1,
+      1,
+      5,
+      1,
+      20
+    ],
+    "yoyoAttachmentOffsets": [
+      "0x50",
+      "0x54"
+    ],
+    "yoyoMaterialAnimationOffset": "0x58",
+    "yoyoFinalSignedWordOffset": "0x5C",
+    "yoyoOriginalLinks": 20,
+    "effectBank": 10,
+    "effectModels": 3,
+    "particleCommands": 0,
+    "untypedEffectRelocations": 0,
+    "gameplayFunctionBodiesUnchanged": true,
+    "pkThunderLiveObjects": {
+      "ball": 1,
+      "trail": 6
+    }
+  },
+  "startupCorrection": {
+    "failure": "PK Thunder self-hit reached original timed-sound creation and aborted because its object pool was uninitialized.",
+    "change": "Call original lbAudioAx_8002835C before Fighter_FirstInitialize_80067A84.",
+    "audibleBrowserAudioImplemented": false
+  },
+  "validation": {
+    "unitTests": 185,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "sharedInitialization": {
+      "artifact": "fighter-init-browser-verification.json",
+      "passed": true,
+      "components": 27,
+      "instances": 135,
+      "dynamicBoneFrames": 3240,
+      "itemModelInstances": 154
+    },
+    "moves": {
+      "artifact": "ness-moves-Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "completed": true,
+      "frames": 3438,
+      "renderedFrames": 3580,
+      "phases": [
+        {
+          "name": "bat",
+          "frames": 181,
+          "states": [
+            341,
+            14
+          ],
+          "itemKinds": [
+            101
+          ],
+          "peakItems": 1,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "charged up smash yo-yo",
+          "frames": 286,
+          "states": [
+            342,
+            343,
+            344,
+            14
+          ],
+          "itemKinds": [
+            102
+          ],
+          "peakItems": 1,
+          "peakLinks": 20,
+          "finalState": 14
+        },
+        {
+          "name": "charged down smash yo-yo",
+          "frames": 286,
+          "states": [
+            345,
+            346,
+            347,
+            14
+          ],
+          "itemKinds": [
+            102
+          ],
+          "peakItems": 1,
+          "peakLinks": 20,
+          "finalState": 14
+        },
+        {
+          "name": "ground PK Fire",
+          "frames": 241,
+          "states": [
+            356,
+            14
+          ],
+          "itemKinds": [
+            66
+          ],
+          "peakItems": 1,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air PK Fire",
+          "frames": 259,
+          "states": [
+            24,
+            25,
+            357,
+            43,
+            14
+          ],
+          "itemKinds": [
+            66
+          ],
+          "peakItems": 1,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "charged PK Flash",
+          "frames": 410,
+          "states": [
+            348,
+            349,
+            350,
+            351,
+            14
+          ],
+          "itemKinds": [
+            68,
+            78
+          ],
+          "peakItems": 1,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air PK Flash",
+          "frames": 319,
+          "states": [
+            24,
+            25,
+            352,
+            353,
+            354,
+            349,
+            350,
+            351,
+            14
+          ],
+          "itemKinds": [
+            68,
+            78
+          ],
+          "peakItems": 1,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "ground PK Thunder",
+          "frames": 361,
+          "states": [
+            358,
+            359,
+            360,
+            14
+          ],
+          "itemKinds": [
+            69,
+            70,
+            71,
+            72,
+            73
+          ],
+          "peakItems": 7,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air PK Thunder",
+          "frames": 379,
+          "states": [
+            24,
+            25,
+            362,
+            363,
+            359,
+            360,
+            14
+          ],
+          "itemKinds": [
+            69,
+            70,
+            71,
+            72,
+            73
+          ],
+          "peakItems": 7,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "ground PSI Magnet",
+          "frames": 220,
+          "states": [
+            367,
+            368,
+            370,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air PSI Magnet",
+          "frames": 293,
+          "states": [
+            24,
+            25,
+            372,
+            373,
+            375,
+            370,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "peakLinks": 0,
+          "finalState": 14
+        },
+        {
+          "name": "steered PK Thunder self-hit",
+          "frames": 203,
+          "states": [
+            15,
+            16,
+            14,
+            24,
+            25,
+            362,
+            358,
+            359,
+            365
+          ],
+          "itemKinds": [
+            69,
+            70,
+            71,
+            72,
+            73
+          ],
+          "peakItems": 7,
+          "peakLinks": 0,
+          "finalState": 365
+        }
+      ]
+    },
+    "contacts": [
+      {
+        "mode": "fire",
+        "artifact": "ness-fire-Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 825,
+        "renderedFrames": 967,
+        "damage": 17,
+        "hitlag": 4,
+        "knockback": 39.43092727661133,
+        "blockedFrames": 0,
+        "peakLinks": 0,
+        "itemKinds": [
+          66,
+          67
+        ],
+        "attackerStates": [
+          356,
+          14
+        ],
+        "defenderStates": [
+          14,
+          79,
+          84,
+          85
+        ]
+      },
+      {
+        "mode": "fire-shield",
+        "artifact": "ness-fire-shield-Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 825,
+        "renderedFrames": 967,
+        "damage": 0,
+        "hitlag": 3,
+        "knockback": 0,
+        "blockedFrames": 3,
+        "peakLinks": 0,
+        "itemKinds": [
+          66
+        ],
+        "attackerStates": [
+          356,
+          14
+        ],
+        "defenderStates": [
+          182,
+          179,
+          181,
+          180,
+          14
+        ]
+      },
+      {
+        "mode": "bat",
+        "artifact": "ness-bat-Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 18,
+        "hitlag": 9,
+        "knockback": 77.26721954345703,
+        "blockedFrames": 0,
+        "peakLinks": 0,
+        "itemKinds": [
+          101
+        ],
+        "attackerStates": [
+          341,
+          14
+        ],
+        "defenderStates": [
+          14,
+          80,
+          42
+        ]
+      },
+      {
+        "mode": "yoyo",
+        "artifact": "ness-yoyo-Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 8,
+        "hitlag": 5,
+        "knockback": 84.263916015625,
+        "blockedFrames": 0,
+        "peakLinks": 20,
+        "itemKinds": [
+          102
+        ],
+        "attackerStates": [
+          345,
+          346,
+          347,
+          14
+        ],
+        "defenderStates": [
+          14,
+          88,
+          38,
+          183,
+          184,
+          186
+        ]
+      },
+      {
+        "mode": "grab",
+        "artifact": "ness-grab-Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 11,
+        "hitlag": 0,
+        "knockback": 122.8010025024414,
+        "blockedFrames": 0,
+        "peakLinks": 0,
+        "itemKinds": [],
+        "attackerStates": [
+          212,
+          213,
+          216,
+          219,
+          14
+        ],
+        "defenderStates": [
+          14,
+          226,
+          227,
+          239,
+          88,
+          38,
+          0,
+          12,
+          13,
+          29,
+          42
+        ]
+      },
+      {
+        "mode": "control",
+        "artifact": "ness-control-Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 0,
+        "hitlag": 0,
+        "knockback": 0,
+        "blockedFrames": 0,
+        "peakLinks": 0,
+        "itemKinds": [],
+        "attackerStates": [
+          14
+        ],
+        "defenderStates": [
+          14
+        ]
+      }
+    ],
+    "gpuYoyo": {
+      "artifact": "ness-yoyo-Ns-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 882,
+      "allRenderedFramesVertexChecked": true,
+      "projectionChecks": {
+        "passed": true,
+        "cases": 4,
+        "components": 12
+      },
+      "finalGpuErrorCheck": true
+    },
+    "selectedTimingTracesIdentical": true
+  },
+  "performance": [
+    {
+      "artifact": "deferred-errors-Ns-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": false,
+      "driverShaderCacheDisabled": false,
+      "frames": 3600,
+      "draws": 3596,
+      "elapsedMs": 60031.69999998808,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.4686944446547164,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7999999821186066,
+        "maxMs": 2.0999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3596,
+        "meanMs": 7.572803114284994,
+        "p50Ms": 6.9000000059604645,
+        "p95Ms": 12.099999994039536,
+        "maxMs": 27.19999998807907
+      },
+      "rafDrawIntervals": {
+        "samples": 3595,
+        "meanMs": 16.689179415854568,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.39999999999782
+      },
+      "cadence": {
+        "callbacks": 3600,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 4,
+        "rafGapsOver25Ms": 5
+      },
+      "workload": {
+        "framesWithAttack": 2048,
+        "framesWithHitlag": 381,
+        "framesWithDamage": 3508,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 360
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 367
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 280
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 64,
+            "attack": 359
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 367
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 56,
+            "attack": 315
+          }
+        ]
+      },
+      "slowestCapturedDraws": [
+        {
+          "frame": 1122,
+          "costMs": 27.19999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 248,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 22,
+            "effectRetired": 21,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1126,
+          "costMs": 23.899999976158142,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 246,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 22,
+            "effectRetired": 22,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1124,
+          "costMs": 23.299999982118607,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 256,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 22,
+            "effectRetired": 21,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1121,
+          "costMs": 21.5,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 248,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 22,
+            "effectRetired": 21,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1135,
+          "costMs": 20.30000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 254,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 22,
+            "effectRetired": 22,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 923,
+          "costMs": 19.30000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 79,
+            "immediateVertices": 316,
+            "particleDraws": 79,
+            "particleVertices": 316,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 258,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 19,
+            "effectRetired": 18,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1143,
+          "costMs": 19.19999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 83,
+            "immediateVertices": 332,
+            "particleDraws": 83,
+            "particleVertices": 332,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 261,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 23,
+            "effectRetired": 22,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1128,
+          "costMs": 18.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 254,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 22,
+            "effectRetired": 22,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1140,
+          "costMs": 18.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 254,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 22,
+            "effectRetired": 22,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1193,
+          "costMs": 17.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 90,
+            "immediateVertices": 360,
+            "particleDraws": 90,
+            "particleVertices": 360,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 260,
+            "programs": 27,
+            "images": 139,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 23,
+            "effectRetired": 23,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [
+        {
+          "frame": 196,
+          "program": 26,
+          "origin": "model",
+          "cpuMs": 3.800000011920929
+        },
+        {
+          "frame": 204,
+          "program": 27,
+          "origin": "model",
+          "cpuMs": 2.7999999821186066
+        },
+        {
+          "frame": 1426,
+          "program": 28,
+          "origin": "model",
+          "cpuMs": 2.199999988079071
+        },
+        {
+          "frame": 2277,
+          "program": 29,
+          "origin": "model",
+          "cpuMs": 2.100000023841858
+        },
+        {
+          "frame": 2677,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 2.4000000059604645
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 30,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 30
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    },
+    {
+      "artifact": "deferred-errors-prepared-Ns-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3599,
+      "elapsedMs": 60034.29999998212,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.49036111102335983,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 1.800000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 7.284273409593367,
+        "p50Ms": 6.9000000059604645,
+        "p95Ms": 9.900000005960464,
+        "maxMs": 33.80000001192093
+      },
+      "rafDrawIntervals": {
+        "samples": 3598,
+        "meanMs": 16.675264035574525,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000291
+      },
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 1,
+        "rafGapsOver25Ms": 2
+      },
+      "workload": {
+        "framesWithAttack": 2048,
+        "framesWithHitlag": 381,
+        "framesWithDamage": 3508,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 360
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 367
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 280
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 64,
+            "attack": 359
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 367
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 56,
+            "attack": 315
+          }
+        ]
+      },
+      "slowestCapturedDraws": [
+        {
+          "frame": 2677,
+          "costMs": 33.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 249,
+            "programs": 42,
+            "images": 159,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 57,
+            "effectRetired": 57,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [],
+      "shaderCoverage": {
+        "programs": 42,
+        "prepared": 42,
+        "preparedUsed": 30,
+        "unpreparedUsed": 0
+      },
+      "shaderPreparation": {
+        "requested": 42,
+        "compiled": 42,
+        "cpuMs": 655,
+        "fighterStateUnchanged": true
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    }
+  ],
+  "limitations": [
+    "Selected integration checks, not retail parity proof.",
+    "PSI Magnet absorption/healing and bat projectile reflection remain unverified.",
+    "No presented-FPS or input-to-photon measurement.",
+    "Timing workload uses close combat, not sustained special-move or yo-yo stress.",
+    "21 fighter components have constructor/input integration; six components, other costumes, complete scenes/menus/audio, networking, parity and deployment remain unfinished."
+  ],
+  "competitiveAcceptanceAchieved": false
+}

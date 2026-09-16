@@ -7,3 +7,8 @@ test('attack diagnostics distinguish Game & Watch normals from its landing state
   for(const [kind,id]of [[24,350],[24,352],[24,353],[24,375],[16,345],[0,341],[24,14]])assert.equal(isNormalAttackState(state(kind,id)),false);
   for(const kind of [0,16,24])assert.equal(isNormalAttackState(state(kind,65)),true);
 });
+test('attack diagnostics include Ness charged smash states and exclude PK Flash',()=>{
+  const state=id=>Object.assign(Array(19).fill(0),{0:id,11:8});
+  for(const id of [341,342,343,344,345,346,347])assert.equal(isNormalAttackState(state(id)),true);
+  for(const id of [348,349,350,351,358,368,14])assert.equal(isNormalAttackState(state(id)),false);
+});

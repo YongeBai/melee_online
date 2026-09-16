@@ -16,6 +16,7 @@ import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
+import {verifyNessMoves,verifyNessContact} from './verify-ness.mjs';
 import {verifyGamewatchMoves,verifyGamewatchContact} from './verify-gamewatch.mjs';
 import {verifyMewtwoMoves,verifyMewtwoContact} from './verify-mewtwo.mjs';
 import {verifyYoshiMoves,verifyYoshiContact} from './verify-yoshi.mjs';
@@ -75,7 +76,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw'].includes(code)||stageKey==='story') {
+  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(code)||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -268,7 +269,7 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw'].includes(code)){
+      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(code)){
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
         for(const row of articles.attachments){
@@ -447,6 +448,21 @@ try {
         if(code!=='Mt'||!opponent)throw Error('Mewtwo contact requires two fighters');
         report.mewtwoContact={};verifyMewtwoContact(module,[object,opponent],report.mewtwoContact,{step,mode:params.get('mewtwocontact'),onStep:renderSteps?()=>{
           const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+        }:undefined});
+      }
+      if(params.has('nesscontact')){
+        if(code!=='Ns'||!opponent)throw Error('Ness contact requires two fighters');
+        report.nessContact={};verifyNessContact(module,[object,opponent],report.nessContact,{step,mode:params.get('nesscontact'),onStep:renderSteps?()=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+        }:undefined});
+      }
+      if(params.has('nessmoves')){
+        if(code!=='Ns')throw Error('Ness move probe fighter');
+        report.nessMoves={};verifyNessMoves(module,object,report.nessMoves,{step,onStep:renderSteps?phase=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          for(const [name,active]of [['yoyo',phase.peakLinks===20&&phase.frames===35],['pkflash',phase.trace.at(-1).items.some(i=>i[0]===78)],['pkthunder',phase.trace.at(-1).items.some(i=>i[0]===73)]])if(active&&!report.preview[name]){
+            report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
+          }
         }:undefined});
       }
       if(params.has('gamewatchcontact')){

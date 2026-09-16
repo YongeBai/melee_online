@@ -5,6 +5,47 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Ness now passes the original default-costume constructor and basic input,
+twelve selected move phases and six rendered contact checks. Eleven move Articles,
+three effect models, yo-yo attachment geometry and material animation are
+imported. The renderer follows the original twenty-link yo-yo chain, retaining
+its physics, collision, ownership and lifecycle callbacks.
+
+The move sequence renders 3,580 frames, including charged up/down yo-yo smashes,
+PK Fire, charged PK Flash, ground/air PK Thunder, PSI Magnet and a controller-
+steered PK Thunder self-hit that launches the recovery state. That self-hit found
+a real startup omission: a motion script allocated a timed sound object before
+its pool was initialized. Startup now calls the original `lbAudioAx_8002835C`
+initializer before fighter startup. No gameplay function body or parameter was
+changed. Audible browser audio remains unfinished.
+
+The selected PK Fire/pillar contact deals seventeen damage, while a shield blocks
+the projectile with zero body damage. Bat, yo-yo and forward throw deal eighteen,
+eight and eleven respectively. The idle control remains at zero, and all contact
+items and string links retire. Projectile spacing was corrected using controller
+movement after the first shot spawned past a defender standing too close.
+PSI Magnet absorption/healing and bat reflection still require validation.
+
+An isolated yo-yo contact GPU-verifies all 882 rendered frames, including the
+original twenty-link string. Two 960×720 two-Ness Battlefield samples each
+simulate 3,600 frames in about 60 seconds. They submit 3,596/3,599 draws, with
+four/one catch-up callbacks. Simulation means are 0.469/0.490 ms and draw-submission
+means 7.573/7.284 ms. Preparing 42 shaders with the driver cache disabled removes
+five live compilations; selected gameplay traces match. Prepared draw p95 is
+9.9 ms versus 12.1 ms, but its maximum is 33.8 ms. These two samples do not prove
+a repeatable speedup, perfect cadence, distinct displayed FPS or input-to-photon
+latency. The workload is close combat, not sustained special-move stress.
+
+All 185 tests and the fighter build pass. The shared initialization regression
+passes for 27 components, 135 instances, 3,240 dynamic-bone frames and 154 item-model
+instances. Core hash: `5ecac750…`. Twenty-one components now have constructor/input
+integration. Six components, other costumes, complete scenes/menus/audio, retail
+parity, networking and native-port deployment remain unfinished. The overall
+720p60 competitive acceptance criterion is **not achieved**.
+[Ness evidence](benchmarks/browser-2026-09-16-native-port-ness.json).
+
+Previous Game & Watch checkpoint:
+
 Mr. Game & Watch now passes the original default-costume constructor and basic
 input checks, fourteen selected move phases and five rendered contact checks.
 The port imports all ten move Articles, typed item outline lists and the eleven

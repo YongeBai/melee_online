@@ -32,6 +32,33 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Ness imports eleven original move Articles, the yo-yo's two model attachments
+and material animation, and three effect models. The renderer enumerates the
+original twenty-link yo-yo chain without replacing its physics. Fighter startup
+now calls the original timed-sound-object pool initializer; PK Thunder self-hit
+exposed that missing initialization. Audible browser audio remains unfinished.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Ns --input --ness-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ns --input --ness-contact=yoyo --stage-callbacks --render-steps --hardware
+```
+
+Ness contact modes are `fire`, `fire-shield`, `bat`, `yoyo`, `grab` and
+`control`. The move sequence includes controller-steered PK Thunder self-hit.
+PSI Magnet absorption and bat reflection are separate, unfinished parity checks.
+
+Mr. Game & Watch imports ten move Articles and separate item/fighter outline
+visibility lists. He uses the common effect bank, matching the original game.
+Empty Oil Panic uses fighter parts; full release requires a separate absorption
+check. Selected Judge results are covered, not every random outcome.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Gw --input --gamewatch-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Gw --input --gamewatch-contact=judge --stage-callbacks --render-steps --hardware
+```
+
+Game & Watch contact modes are `chef`, `judge`, `grab`, `shield` and `control`.
+
 Mewtwo imports the original Disable and Shadow Ball Articles, all ten serialized
 Shadow Ball states, and its four effect models. The Shadow Ball attribute at
 0x20 is a signed integer counter; the importer preserves its integer bits.

@@ -54,6 +54,7 @@ unsigned portItemLinksList(unsigned* result,unsigned capacity)
         Item* item=object->user_data;ItemLink* first=NULL;
         if(item->kind==It_Kind_Samus_GBeam)first=item->xDD4_itemVar.samusgrapple.x0;
         else if(item->kind==It_Kind_Link_HShot||item->kind==It_Kind_CLink_HShot)first=item->xDD4_itemVar.linkhookshot.x0;
+        else if(item->kind==It_Kind_Ness_Yoyo)first=item->xDD4_itemVar.nessyoyo.x8;
         else continue;
         unsigned links=0;
         for(ItemLink* link=first;link;link=link->next){

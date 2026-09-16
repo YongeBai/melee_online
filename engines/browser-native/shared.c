@@ -3,6 +3,7 @@
 #include <melee/ft/fighter.h>
 #include <melee/ft/ftparts.h>
 #include <melee/ft/ftcommon.h>
+#include <melee/lb/lbaudio_ax.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -48,6 +49,9 @@ int portFighterInitialize(void)
     /* Resetting the original tables after partial loading would discard live
      * ownership. Full startup must be the first common-data initialization. */
     if(common_initialized||portSceneInitialize()<0)return -1;
+    /* Motion scripts can create timed sound GObjs (e.g. PK Thunder 2).
+     * Initialize their original pool before any fighter callback can run. */
+    lbAudioAx_8002835C();
     Fighter_FirstInitialize_80067A84();common_initialized=2;return 0;
 }
 uintptr_t portSharedGlobal(unsigned index)
