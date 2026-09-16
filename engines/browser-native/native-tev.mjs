@@ -6,9 +6,11 @@ export function readNativeTev(module,joint,displayIndex,owner=0) {
 }
 export function readNativeTevState(module,p) {
   if(!p||p%4||p+2192>module.HEAPU8.length)throw Error('Native TEV snapshot bounds');
-  const words=Int32Array.from(new Int32Array(module.HEAPU8.buffer,p,548)),n=words[0];
+  const words=new Int32Array(module.HEAPU8.buffer,p,548),n=words[0];
   if(n<1||n>16)throw Error('Native TEV stage capacity');
-  const rows=(at,count,stride)=>Array.from({length:count},(_,i)=>Array.from(words.slice(at+i*stride,at+(i+1)*stride)));
+  // Only retained rows need ownership. Copy directly into their final arrays;
+  // the native capture buffer may be reused as soon as this reader returns.
+  const rows=(at,count,stride)=>{const result=new Array(count);for(let i=0;i<count;i++){const row=new Array(stride);for(let j=0;j<stride;j++)row[j]=words[at+i*stride+j];result[i]=row;}return result;};
   const stages=rows(36,n,32);validateTevStages(stages);
   return {stages,registers:rows(4,4,4),konst:rows(20,4,4),registerMask:words[1],constantMask:words[2],syncs:words[3]};
 }

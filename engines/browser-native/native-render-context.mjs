@@ -5,7 +5,9 @@ export function readNativeRenderContext(module) {
   if(!p||p%4||p+632>module.HEAPU8.length)throw Error('Native render context bounds');
   const w=new Uint32Array(module.HEAPU8.buffer,p,158),f=new Float32Array(module.HEAPU8.buffer,p,158);
   if(w[0]>255||w[2]>1||w[3]!==7)throw Error('Native render context masks');
-  const floats=(at,n)=>{const a=Array.from(f.subarray(at,at+n));if(!a.every(Number.isFinite))throw Error('Native render context nonfinite');return a;};
+  // Keep independent queued values without allocating an intermediate view or
+  // invoking an array callback for every scalar.
+  const floats=(at,n)=>{const a=new Array(n);for(let i=0;i<n;i++){const value=f[at+i];if(!Number.isFinite(value))throw Error('Native render context nonfinite');a[i]=value;}return a;};
   const lights=Array.from({length:8},(_,i)=>{
     if(!(w[0]&(1<<i)))return null;const at=30+i*16,color=Array.from(w.subarray(at,at+4));
     if(color.some(x=>x>255))throw Error('Native light color range');

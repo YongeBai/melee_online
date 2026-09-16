@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readNativeTev,explicitTevStages,validateTevStages} from '../../engines/browser-native/native-tev.mjs';
+import {readNativeTevState,readNativeTev,explicitTevStages,validateTevStages} from '../../engines/browser-native/native-tev.mjs';
 import {generateTevFunction} from '../../engines/browser-native/tev-shader.mjs';
 import {evaluateTev,tevTestStage} from '../../engines/browser-native/tev-reference.mjs';
 
@@ -52,4 +52,27 @@ test('capture copies its buffer and validates states before shader generation',(
     const s=tevTestStage();s[index]=value;assert.throws(()=>generateTevFunction([s]),/Native TEV/);
   }
   assert.throws(()=>validateTevStages([]),/capacity/);assert.throws(()=>generateTevFunction([tevTestStage()],{swaps:['rgba']}),/swap table/);
+});
+
+function fixture(){
+  const heap=new Uint8Array(2208),words=new Int32Array(heap.buffer,16,548);
+  words.set([2,15,7,23]);words.set([-1024,255,9,-1],4);words.set([4,3,2,1],20);
+  for(const at of [36,68])words.set([255,255,0,0],at);
+  return {module:{HEAPU8:heap},words,pointer:16};
+}
+test('queued TEV snapshots retain signed registers, constants and stages after native buffer reuse',()=>{
+  const {module,words,pointer}=fixture(),first=readNativeTevState(module,pointer),saved=structuredClone(first);
+  assert.deepEqual(first.registers[0],[-1024,255,9,-1]);assert.deepEqual(first.konst[0],[4,3,2,1]);
+  assert.equal(first.stages.length,2);assert.equal(first.stages[1].length,32);
+  words.set([17,18,19,20],4);words.set([90,91,92,93],20);words[36+3]=4;
+  const second=readNativeTevState(module,pointer);
+  assert.deepEqual(second.registers[0],[17,18,19,20]);assert.equal(second.stages[0][3],4);
+  words.fill(0);module.HEAPU8=new Uint8Array(4096);
+  assert.deepEqual(first,saved);assert.deepEqual(second.konst[0],[90,91,92,93]);
+  assert.notStrictEqual(first.stages[0],second.stages[0]);
+});
+test('TEV snapshots still reject invalid capacity, stage fields and bounds',()=>{
+  for(const value of [0,17,-1]){const t=fixture();t.words[0]=value;assert.throws(()=>readNativeTevState(t.module,t.pointer),/capacity/);}
+  const t=fixture();t.words[36]=9;assert.throws(()=>readNativeTevState(t.module,t.pointer),/order/);
+  for(const pointer of [0,17,20])assert.throws(()=>readNativeTevState(t.module,pointer),/bounds/);
 });

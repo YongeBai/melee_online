@@ -1,0 +1,187 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "b4dee11",
+  "wasmSha256": "0c9be41d9f45dd5828372b3c57afda9ccbd537741501e4eff8726c7d54d36674",
+  "browser": "Google Chrome 151.0.7922.137",
+  "scope": "Native Fountain Ice Climbers mirror, fixed 3600-frame close-combat workload, 960x720, existing cosmetic profile. Original game, camera, shader math and graphics parameters unchanged.",
+  "hypothesis": "Temporary TEV and camera/light array allocations add per-draw CPU work and garbage collection.",
+  "change": "Copy retained integer rows and finite float values directly into independently owned plain arrays. Eliminate the unused full TEV-buffer copy, intermediate typed-array slices, and per-element array callbacks.",
+  "sources": {
+    "native-tev.mjs": {
+      "baseline": "1f8439137c3cf4bc50063262bdbc683c79c69acd3da1d3e1e1162d594e422bda",
+      "candidate": "0e8eac65f284c0f646b09c75b6e0b3f7de6896addd81a15c302c6c1179fea68b"
+    },
+    "native-render-context.mjs": {
+      "baseline": "18a294a648005840ef0dbd1fb3510cac96b75d84967bd90c406e538fc62fd3c6",
+      "candidate": "b77b5a64f25f8a2fd232a92f237d9d7e791a1c0b097ff88b6a180d608a694ca9"
+    }
+  },
+  "validation": {
+    "unitTests": 196,
+    "failedTests": 0,
+    "ownedSnapshotRegression": true,
+    "gpuRenderedFrames": 142,
+    "liveMotionWordChecks": 142,
+    "selectedFinalGameStateIdentical": true,
+    "combatWindowsIdentical": true,
+    "retailParityVerified": false
+  },
+  "runs": [
+    {
+      "id": "A1",
+      "readers": "baseline",
+      "artifact": "climbers-snapshot-A1.json",
+      "frames": 3600,
+      "draws": 3595,
+      "elapsedMs": 60030.09999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.777916667006082,
+        "p50Ms": 0.7999999821186066,
+        "p95Ms": 1.2000000178813934,
+        "maxMs": 1.800000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3595,
+        "meanMs": 8.836912378100925,
+        "p50Ms": 8,
+        "p95Ms": 14.199999988079071,
+        "maxMs": 25.19999998807907
+      },
+      "rafDrawIntervals": {
+        "samples": 3594,
+        "meanMs": 16.693823038396513,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.400000000001455
+      },
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "cadence": {
+        "callbacks": 3599,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 5,
+        "rafGapsOver25Ms": 6
+      }
+    },
+    {
+      "id": "B1",
+      "readers": "direct owned copies",
+      "artifact": "climbers-snapshot-B1.json",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60023.5,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.7642777777877119,
+        "p50Ms": 0.7999999821186066,
+        "p95Ms": 1.199999988079071,
+        "maxMs": 2.0999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.992305555674765,
+        "p50Ms": 5.699999988079071,
+        "p95Ms": 8.800000011920929,
+        "maxMs": 15.700000017881393
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670602945261784,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.399999999999636
+      },
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 3,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      }
+    },
+    {
+      "id": "A2",
+      "readers": "baseline",
+      "artifact": "climbers-snapshot-A2.json",
+      "frames": 3600,
+      "draws": 3598,
+      "elapsedMs": 60030.40000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.7727499999437067,
+        "p50Ms": 0.7999999821186066,
+        "p95Ms": 1.199999988079071,
+        "maxMs": 2.100000023841858
+      },
+      "drawSubmissionCpu": {
+        "samples": 3598,
+        "meanMs": 8.431322957142118,
+        "p50Ms": 8.099999994039536,
+        "p95Ms": 12.300000011920929,
+        "maxMs": 24.69999998807907
+      },
+      "rafDrawIntervals": {
+        "samples": 3597,
+        "meanMs": 16.679872115651143,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.29999999999927
+      },
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "cadence": {
+        "callbacks": 3601,
+        "zeroStepCallbacks": 3,
+        "multiStepCallbacks": 2,
+        "rafGapsOver25Ms": 4
+      }
+    },
+    {
+      "id": "B2",
+      "readers": "direct owned copies",
+      "artifact": "climbers-snapshot-B2.json",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60033.80000001192,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.7685000003129244,
+        "p50Ms": 0.7999999821186066,
+        "p95Ms": 1.199999988079071,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.96925000001159,
+        "p50Ms": 5.600000023841858,
+        "p95Ms": 8.599999994039536,
+        "maxMs": 18.599999994039536
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757757,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.399999999999636
+      },
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      }
+    }
+  ],
+  "meanSubmissionReductionPercent": 30.73087479139337,
+  "decision": "Retain: both candidate runs reduce submission CPU and complete all 3600 draws without catch-up callbacks; both controls are slower.",
+  "limitations": [
+    "Submission counts are not distinct displayed-FPS or input-to-photon measurements",
+    "Four one-minute samples on one host, not exhaustive all-stage/all-character acceptance",
+    "Fountain retains original moving platforms but uses the existing star/reflection/background cosmetic reductions",
+    "Kirby and full scene, menu, audio, networking and deployment integration remain"
+  ]
+}

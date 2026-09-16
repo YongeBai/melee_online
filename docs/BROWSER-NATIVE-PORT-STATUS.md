@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The rendering-state copy optimization is retained after A/B/A/B controls on the
+Fountain Ice Climbers mirror. It removes temporary array copies and callbacks
+while retaining independent queued state and all original shader/camera values.
+
+| Readers | Mean draw submission | p95 | Draws / 3,600 steps | Catch-up callbacks |
+| --- | ---: | ---: | ---: | ---: |
+| Original A1 | 8.837 ms | 14.2 ms | 3,595 | 5 |
+| Direct copies B1 | 5.992 ms | 8.8 ms | 3,600 | 0 |
+| Original A2 | 8.431 ms | 12.3 ms | 3,598 | 2 |
+| Direct copies B2 | 5.969 ms | 8.6 ms | 3,600 | 0 |
+
+Average submission cost falls about 31% across the two controls and candidates.
+All four runs finish 3,600 simulation steps in about 60 seconds with identical
+sampled final gameplay state and combat-window results. All 196 tests and the
+142-frame rendered GPU input check pass. This improves the selected 720p fixture;
+it does not establish distinct displayed FPS, input-to-photon latency or complete
+competitive acceptance. [Snapshot-copy evidence](benchmarks/browser-2026-09-16-native-port-snapshot-copy.json).
+
+Ice Climbers integration checkpoint before the snapshot-copy optimization:
+
 Ice Climbers now load both original player-owned fighters and their move assets.
 The full rendered controller suite passes 4,267 frames across walking/jumping,
 ground/air Ice Shot, Blizzard, linked Squall Hammer and Belay. Popo retains four
