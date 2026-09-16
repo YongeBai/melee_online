@@ -593,9 +593,18 @@ unsigned portFighterNativeDraw(HSD_GObj* object,unsigned pass)
 {
     if(!object||object->classifier!=HSD_GOBJ_CLASS_FIGHTER||!object->user_data||pass>2)abort();
     extern void portRenderContextEnter(void),portRenderContextLeave(void);
-    extern unsigned portNativeDrawObject(HSD_GObj*,unsigned,unsigned);
+    extern unsigned portNativeDrawObjectExtra(HSD_GObj*,unsigned,unsigned,HSD_JObj*);
     portRenderContextEnter();
     HSD_GObj* lights=HSD_GObjPLinkHead[3];while(lights&&lights->classifier!=12)lights=lights->next;
     if(!lights||!lights->render_cb)abort();lights->render_cb(lights,pass);
-    portRenderContextLeave();return portNativeDrawObject(object,pass,1);
+    portRenderContextLeave();return portNativeDrawObjectExtra(object,pass,1,((Fighter*)object->user_data)->x20A0_accessory);
+}
+unsigned portFighterRespawnPlatform(HSD_GObj* object)
+{
+    if(!object||object->classifier!=HSD_GOBJ_CLASS_FIGHTER||!object->user_data)abort();
+    HSD_JObj* joint=((Fighter*)object->user_data)->x20A0_accessory;
+    /* HSD records the source descriptor in id. Unknown accessories must be
+     * imported explicitly, never interpreted as respawn-platform geometry. */
+    if(joint&&(!Fighter_804D6534||joint->id!=(unsigned)((HSD_Joint**)Fighter_804D6534)[0]))abort();
+    return (unsigned)joint;
 }

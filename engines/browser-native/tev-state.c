@@ -133,18 +133,22 @@ static void bind_backend(HSD_JObj* joint)
     if(!(joint->flags&JOBJ_INSTANCE))for(HSD_JObj* child=joint->child;child;child=child->next)bind_backend(child);
     else if(joint->child)bind_backend(joint->child);
 }
-unsigned portNativeDrawObject(HSD_GObj* owner,unsigned pass,unsigned callback)
+unsigned portNativeDrawObjectExtra(HSD_GObj* owner,unsigned pass,unsigned callback,HSD_JObj* extra)
 {
     if(drawing||capturing||!owner||!owner->hsd_obj||pass>2||callback>1||(callback&&!owner->render_cb))abort();
     extern void portRenderContextEnter(void),portRenderContextLeave(void);
     portRenderContextEnter();drawing=1;emitted=0;draw_class_count=polygon_class_count=0;
-    bind_backend(owner->hsd_obj);
+    bind_backend(owner->hsd_obj);bind_backend(extra);
     HSD_GObj* previous=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
     if(callback)owner->render_cb(owner,pass);else HSD_GObj_JObjCallback(owner,pass);
     HSD_GObj_804D7814=previous;
     for(unsigned i=0;i<draw_class_count;i++)draw_classes[i]->disp=HSD_DObjDisp;
     for(unsigned i=0;i<polygon_class_count;i++)polygon_classes[i]->disp=HSD_PObjDisp;
     drawing=0;portRenderContextLeave();return emitted;
+}
+unsigned portNativeDrawObject(HSD_GObj* owner,unsigned pass,unsigned callback)
+{
+    return portNativeDrawObjectExtra(owner,pass,callback,NULL);
 }
 unsigned portMaterialPolygon(HSD_JObj* joint,unsigned display,unsigned polygon)
 {

@@ -5,6 +5,57 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The opt-in `--tournament` fixture now uses original VS rules/player defaults,
+the VS frame callback, controller mapping, match clock and process pause masks.
+Its settings are four stocks, eight minutes, no items, normal damage/speed and
+singles. The earlier fixture set stocks but left match kind at the default
+timed mode; it was not a stock-match lifecycle test. The new startup also sets
+the real mode-routing context to VS rather than leaving it at zero (title).
+
+The original player-statistics loader now receives typed `PdPm.dat` parameters.
+Eight original match-status models/animations from `IfAll.usd` are imported for
+the original end-sequence callbacks; their HUD drawing is still pending. Four
+controller-driven KOs decrement stocks and produce three native respawns, then
+original elimination, fighter freeze and scene-exit readiness. A separate test
+advances the eight-minute timer to its exact 28,800-frame timeout boundary.
+It does not shorten or directly edit the timer or stocks.
+
+A longer combat workload exposed another PowerPC stack-layout assumption in
+`ft_0899.c`: crouch/slope handling stored a float before a local vector. The
+portable recipe now uses the already-declared volatile scratch scalar instead,
+preserving the explicit f32 rounding. The reproduction previously trapped in
+`ftPartSetRotX`; an input-driven held-crouch/release regression covers this path.
+An unpaced 3,600-step workload checks attacks, shielding, KO/respawn and renewed
+contact after dropping through platforms before the real-time GPU run.
+
+The rendered lifecycle test exposed missing respawn-platform submission. The
+original fighter callback now includes that accessory's original joint and
+polygon classes; the GPU bridge registers/releases its geometry with the native
+object lifetime. Unknown accessory descriptors remain rejected. The new test
+draws the combat and KO/respawn sequence at 960×720. It is an unpaced correctness
+test, not proof of 60 distinct presented frames per second.
+
+The sustained scripted combat run now completes 3,600 simulation steps and 3,600
+draw submissions in 60.022 seconds at 960×720 on Radeon 890M/Chrome 151. Original
+hitlag occurs in every ten-second window, including renewed combat after a KO
+and respawn. Mean simulation-call time is 0.453 ms (p95 0.7 ms); mean draw
+submission time is 7.888 ms (p95 9.2 ms). Drawing is the larger measured cost in
+this partial workload; these timings do not include all missing game systems.
+
+A frame-clock regression caused rounded rAF timestamps to alternate zero/two
+simulation steps at some otherwise ideal 60 Hz boundaries. The clock now borrows
+at most 0.1 ms and repays that debt, with no accumulated speed-up. The hardware
+control submitted 3,560 draws for the same 3,600 simulation steps; the candidate
+submitted all 3,600, with identical observed final gameplay fields. A synthetic
+36,000-frame quantized-clock test checks the cause independently. This single
+hardware A/B measures submission cadence, not distinct presentation or
+input-to-photon latency. All 123 targeted tests pass.
+[VS lifecycle and pacing checkpoint](benchmarks/browser-2026-09-15-native-port-vs-lifecycle.json).
+
+Full stage startup, Ready/Go, HUD/effect drawing, audio, native menus/pause/results,
+all-character gameplay, gamepad input and production asset delivery remain
+incomplete. The original 720p60 competitive acceptance criterion is not met.
+
 The default native fixture now invokes the original fighter render callbacks
 and original HSD joint/display traversal for each of the three object passes.
 A scoped host material/primitive backend sends the selected polygons to WebGL;

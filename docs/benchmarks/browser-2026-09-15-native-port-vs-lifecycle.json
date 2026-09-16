@@ -1,0 +1,350 @@
+{
+  "date": "2026-09-15",
+  "scope": "Direct C-to-WASM native VS lifecycle, two Falcons and partial Battlefield; no emulator or GPU server",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "wasm": {
+    "wasmBytes": 2975670,
+    "wasmSha256": "abd576eeafa67d1999db0e7bc1b8e7f9d23b7f838ea5e0ff4a1d2e41523222b5"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+  "rules": {
+    "stocks": 4,
+    "timeLimitSeconds": 480,
+    "items": false,
+    "teams": false,
+    "damageRatio": 1,
+    "gameSpeed": 1,
+    "mode": "original VS"
+  },
+  "assets": {
+    "hostedAutomatically": true,
+    "playerParameters": "PdPm.dat",
+    "statusModels": [
+      {
+        "joint": 66824,
+        "nodes": 7,
+        "meshes": 6
+      },
+      {
+        "joint": 157064,
+        "nodes": 6,
+        "meshes": 5
+      },
+      {
+        "joint": 284712,
+        "nodes": 2,
+        "meshes": 1
+      },
+      {
+        "joint": 379816,
+        "nodes": 4,
+        "meshes": 6
+      },
+      {
+        "joint": 411784,
+        "nodes": 2,
+        "meshes": 1
+      },
+      {
+        "joint": 483784,
+        "nodes": 2,
+        "meshes": 1
+      },
+      {
+        "joint": 561384,
+        "nodes": 3,
+        "meshes": 2
+      },
+      {
+        "joint": 626120,
+        "nodes": 2,
+        "meshes": 1
+      }
+    ],
+    "gameDataCommitted": false
+  },
+  "validation": {
+    "targetedTests": 123,
+    "failedTests": 0,
+    "combatTrace": "f260487b080c516f10ca5f1286dc553abdcdf2468c544869a473f6b79d8fb6c0",
+    "legacyCombatTrace": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+    "lifecycle": {
+      "frames": 807,
+      "stockChanges": [
+        {
+          "frame": 75,
+          "stocks": 3,
+          "falls": 1,
+          "outcome": 0
+        },
+        {
+          "frame": 319,
+          "stocks": 2,
+          "falls": 2,
+          "outcome": 0
+        },
+        {
+          "frame": 563,
+          "stocks": 1,
+          "falls": 3,
+          "outcome": 0
+        },
+        {
+          "frame": 807,
+          "stocks": 0,
+          "falls": 4,
+          "outcome": 2
+        }
+      ],
+      "completed": true,
+      "crouch": {
+        "frames": 100,
+        "states": [
+          39,
+          40,
+          41,
+          14
+        ]
+      },
+      "outcome": 2,
+      "after": {
+        "clock": [
+          1591,
+          453,
+          30
+        ],
+        "stocks": [
+          0,
+          4
+        ],
+        "outcome": 2,
+        "phase": 0
+      },
+      "transition": {
+        "phase": 1,
+        "outcome": 2,
+        "clock": 1591
+      },
+      "endFrames": 112
+    },
+    "renderedCombatSteps": 683,
+    "renderedLifecycleSteps": 1020,
+    "respawnPlatformDrawFrames": 180,
+    "timeout": {
+      "completed": true,
+      "before": 684,
+      "frames": 28116,
+      "after": {
+        "frame": 28800,
+        "seconds": 0,
+        "fraction": 59,
+        "outcome": 1
+      },
+      "transition": {
+        "phase": 1,
+        "outcome": 1
+      }
+    }
+  },
+  "pacing": {
+    "change": "Allow at most 0.1 ms of timestamp precision debt and repay it; no cumulative speed-up",
+    "synthetic": "Quantized 60 Hz sequence now produces one step per callback for 36,000 frames; old clock produced zero/two-step callbacks",
+    "control": {
+      "frames": 3600,
+      "draws": 3560,
+      "elapsedMs": 60023.09999999404,
+      "workload": {
+        "framesWithAttack": 1976,
+        "framesWithHitlag": 324,
+        "framesWithDamage": 3301,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 33,
+            "attack": 273
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          }
+        ]
+      },
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.45705555567724837,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7999999970197678,
+        "maxMs": 1.8999999910593033
+      },
+      "drawSubmissionCpu": {
+        "samples": 3560,
+        "meanMs": 8.088764044956378,
+        "p50Ms": 7.799999997019768,
+        "p95Ms": 10.200000002980232,
+        "maxMs": 18.899999991059303
+      },
+      "rafDrawIntervals": {
+        "samples": 3559,
+        "meanMs": 16.85799381848756,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999999272,
+        "maxMs": 33.399999999999636
+      },
+      "resolution": [
+        960,
+        720
+      ],
+      "gpuReadbacks": false
+    },
+    "candidate": {
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60022.20000000298,
+      "workload": {
+        "framesWithAttack": 1976,
+        "framesWithHitlag": 324,
+        "framesWithDamage": 3301,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 33,
+            "attack": 273
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          }
+        ]
+      },
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 3,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.4527222223414315,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7000000029802322,
+        "maxMs": 1.7999999970197678
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.888416666752763,
+        "p50Ms": 7.700000002980232,
+        "p95Ms": 9.199999988079071,
+        "maxMs": 20.099999994039536
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.66601833842651,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 16.80000000000291
+      },
+      "resolution": [
+        960,
+        720
+      ],
+      "gpuReadbacks": false
+    },
+    "observedFinalGameplayIdentical": true,
+    "comparisonLimit": "One hardware A/B; work submission is not distinct presentation or measured input-to-photon"
+  },
+  "commands": [
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --combat",
+    "node scripts/native-port/probe-constructor.mjs --timeout",
+    "node scripts/native-port/probe-constructor.mjs --workload-steps",
+    "node scripts/native-port/probe-constructor.mjs --tournament --render-steps --hardware",
+    "node scripts/native-port/probe-constructor.mjs --tournament --live --workload --hardware --frames=3600"
+  ],
+  "acceptance": {
+    "complete": false,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "remaining": [
+      "Full original stage startup and Ready/Go",
+      "HUD/effect drawing and audio",
+      "Native menus, pause, results and rematches",
+      "All-character and all-stage gameplay parity",
+      "Gamepads and production hosted native assets",
+      "Distinct presentation and input-to-photon validation"
+    ]
+  }
+}

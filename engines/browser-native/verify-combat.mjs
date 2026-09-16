@@ -1,13 +1,13 @@
 import {createNativeCamera,checkNativeCamera} from './native-camera.mjs';
 // Integration probe over original Fighter callbacks. Inputs are normalized HSD
 // samples; no fighter positions, damage, motion states or physics are assigned.
-export async function verifyCombat(module,objects,report,{control=false,camera=false,progress=()=>{},onStep=()=>{}}={}) {
+export async function verifyCombat(module,objects,report,{control=false,camera=false,progress=()=>{},onStep=()=>{},step=()=>module._portRuntimeStep()}={}) {
   const state=o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i));
   const snapshot=()=>objects.map(state),trace=[],cameraTrace=[],nativeCamera=camera?createNativeCamera(module):null;
   try {
   const require=(ok,message)=>{if(!ok)throw Error('Combat: '+message);};
   function tick(a=[0,0,0],b=[0,0,0]) {
-    module._portStageProbePad(0,...a);module._portStageProbePad(1,...b);module._portRuntimeStep();report.frames++;
+    module._portStageProbePad(0,...a);module._portStageProbePad(1,...b);step();report.frames++;
     const current=snapshot();
     for(let i=0;i<2;i++)require(current[i].every(Number.isFinite)&&current[i][9]===15&&current[i][10]===1&&current[i][12]===i&&current[i][18]===4,'finite state, independent ownership and retained stocks');
     // Exclude pointer addresses; retain every observed gameplay field per step.

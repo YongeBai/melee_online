@@ -20,7 +20,26 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   if(!gl)throw Error('Native preview needs WebGL2');
   const info=gl.getExtension('WEBGL_debug_renderer_info'),gpuInfo={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};
   const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify}):null,resources=[];
-  function dispose(){for(const r of resources){r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
+  function dispose(){for(const r of resources){r.accessoryGpu?.dispose();if(r.accessoryNodes)module._free(r.accessoryNodes);r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
+  function syncAccessories(){
+    let count=0;
+    for(const r of resources){
+      if(!r.accessory)continue;
+      const root=r.accessory.root();
+      if(root!==(r.accessoryRoot??0)){
+        r.accessoryGpu?.dispose();r.accessoryGpu=null;
+        if(r.accessoryNodes)module._free(r.accessoryNodes);r.accessoryNodes=0;r.accessoryRoot=root;
+        if(root){
+          const model=readModelMeshes(r.accessory.bytes),n=model.tree.nodes.length;
+          r.accessoryNodes=module._malloc(n*4);if(!r.accessoryNodes)throw Error('Accessory node allocation');
+          if(module._portSceneCollect(root,r.accessoryNodes,n)!==n)throw Error('Accessory hierarchy mismatch');
+          r.accessoryGpu=materialRenderer.upload(model,r.accessory.bytes,r.accessoryNodes,r.owner);
+        }
+      }
+      if(root)count++;
+    }
+    return count;
+  }
   let materialShaderChecks;
   try {
     materialShaderChecks=materials&&verify?verifyGpuMaterialShader(gl):null;
@@ -45,13 +64,14 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         modelProbe=createNativeModelProbe(module,model,actor.bytes,nodes,skin,actor.object);
         }
         materialGpu=materialRenderer?.upload(model,actor.bytes,nodes,actor.object);
-        resources.push({materialGpu,name:actor.name,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
+        resources.push({materialGpu,accessory:actor.accessory,name:actor.name,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
     return {
       draw(){
         if(callbacks){
           if(!materialRenderer)throw Error('Original callbacks require native materials');
+          const accessories=syncAccessories();
           const snapshot=camera.snapshot();checkNativeCamera(snapshot);materialRenderer.begin(snapshot);
           const rows=resources.map(r=>({name:r.name,passes:[],draws:0}));
           for(let pass=0;pass<3;pass++){
@@ -62,7 +82,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
             }
           }
           const materialDraws=materialRenderer.flush({ordered:true}),renderContext=readNativeRenderContext(module);
-          return {gpuInfo,materialShaderChecks,materialDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:'Original fighter callbacks and original joint traversal; complete camera/GX-link stage ordering, dynamic accessories/effects and full match lifecycle remain.'};
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot);
         module._portStageRenderBegin();

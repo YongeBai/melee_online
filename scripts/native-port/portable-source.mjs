@@ -39,6 +39,22 @@ export function preparePortableSource(source,output) {
       // make a 12-float C object safe on the WASM stack.
       replace('    Mtx projMtx;','    Mtx44 projMtx;');
     }
+    if(file==='src/melee/ft/ft_0899.c') {
+      // Retail stack-layout workaround for the rounded leg-slope length.
+      // Indexing before sp1C overwrites an unrelated local on WASM, including
+      // the Fighter pointer when crouching. Use the declared volatile scratch
+      // scalar, retaining the original explicit f32 rounding/store/load.
+      replace('((volatile f32*) &sp1C)[-1] = (f32) ((f64) line_len * guess);','line_len_sqrt = (f32) ((f64) line_len * guess);');
+      replace('line_len = ((volatile f32*) &sp1C)[-1];','line_len = line_len_sqrt;');
+    }
+    if(file==='src/melee/gm/gm_1A3F.c') {
+      // Browser scene bring-up owns the top-level nonblocking bootstrap. Set
+      // the original routing context before running original VS callbacks;
+      // zero-initialized globals otherwise report GM_TITLE during the match.
+      // This does not replace mode loading, menus, or the results scene.
+      const marker='/* 479D30 */ static struct stateMachine state_machine;';
+      replace(marker,marker+'\nvoid portInitializeVsRouting(void) { state_machine = (struct stateMachine){0}; state_machine.routing.curr_mode = GM_VS; }\n');
+    }
     if(file==='src/sysdolphin/baselib/cobj.c') {
       // Browser framebuffer rendering uses the original offscreen branch.
       // Keep its native projection/viewport and current-camera ownership;

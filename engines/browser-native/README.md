@@ -1,8 +1,11 @@
 # Browser-native Melee port
 
-This is the direct C-to-WebAssembly port, separate from Dolphin WASM. Its first
-working milestone executes original collision, archive, and RNG routines and
-loads the six tournament stages' collision subgraphs. It does not run a match.
+This is the direct C-to-WebAssembly port, separate from Dolphin WASM. The current
+two-Falcon/Battlefield fixture runs original VS stock/timer logic and native HSD
+model draws through WebGL. It is not a complete competitive release; see the
+[current status](../../docs/BROWSER-NATIVE-PORT-STATUS.md) and lifecycle probe below.
+The earlier subsystem milestones described here execute original collision,
+archive and RNG routines and load six tournament stages' collision subgraphs.
 
 The next milestone also runs the original OS/HSD allocator and object scheduler,
 loads all 27 playable fighter components' common attributes, and executes original
@@ -28,6 +31,37 @@ run `node scripts/native-port/verify-gpu.mjs --tev` for live captured programs.
 The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
+
+The optional native VS lifecycle probe uses hosted `PdPm.dat` and `IfAll.usd`
+alongside the existing prepared fixtures. Re-run the development fixture tool
+after updating, then build `--fighter-init`. The browser still loads all assets
+automatically; no player ISO or file picker is involved.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --tournament
+node scripts/native-port/probe-constructor.mjs --timeout
+node scripts/native-port/probe-constructor.mjs --workload-steps
+node scripts/native-port/probe-constructor.mjs --tournament --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --tournament --live --hardware --frames=1800
+node scripts/native-port/probe-constructor.mjs --tournament --live --workload --hardware --frames=3600
+```
+
+This selects four stocks/eight minutes/no items through original VS rules and
+player initialization. Original controller/frame callbacks handle combat,
+stock loss, respawn, elimination, timeout and end-sequence freezing. Tests cause
+KOs through controller input and advance the full timer; they never edit a live
+fighter's stocks, position, damage or match time. The respawn platform is rendered
+through the original fighter callback and original model/animation. Status models
+are initialized for end-sequence logic but are not yet drawn by the HUD camera.
+The scene still uses partial Battlefield startup and two Falcons; intro, HUD,
+effects rendering, audio, menus/pause/results and the complete roster are pending.
+The optional workload drives both fighters toward each other with repeated attacks
+and intermittent shields. It reports attack/hitlag/damage frames separately from
+keyboard-event tests. These reports are not competitive gameplay or
+distinct-presentation certification.
+The unpaced workload executes the same controller script without rendering;
+it is a fast correctness check, never an FPS result. The lifecycle regression
+also holds/releases crouch to exercise the native slope-adjustment path.
 
 From the repository root with Node 24 and the existing Emscripten toolchain:
 

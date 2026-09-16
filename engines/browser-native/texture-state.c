@@ -80,3 +80,8 @@ void GXLoadTexMtxImm(f32 mtx[][4],u32 id,GXTexMtxType type)
     require(mtx&&(type==GX_MTX2x4||type==GX_MTX3x4));Matrix* m=&state.matrices[index];memset(m,0,sizeof(*m));m->u[0]=id;m->u[1]=type;
     memcpy(&m->f[4],mtx,(type==GX_MTX2x4?8:12)*sizeof(f32));state.matrix_mask|=1u<<index;
 }
+
+/* SDK queries over a live host texture handle retain the same scope checks. */
+u16 GXGetTexObjWidth(const GXTexObj* obj){return object((GXTexObj*)obj,0)->u[1];}
+u16 GXGetTexObjHeight(const GXTexObj* obj){return object((GXTexObj*)obj,0)->u[2];}
+GXTexFmt GXGetTexObjFmt(const GXTexObj* obj){return object((GXTexObj*)obj,0)->u[3];}
