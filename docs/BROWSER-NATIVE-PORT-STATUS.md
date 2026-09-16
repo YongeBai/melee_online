@@ -5,6 +5,17 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Mario copy now passes a 1,996-frame rendered tournament-scene test,
+plus 124 intro frames: capture, swallow, ground/air copied fireball, taunt copy
+loss, and reacquisition. A separate spit test passes 675 frames and leaves Mario
+with ten damage and Kirby without a copy. The focused acquisition/fireball run
+GPU-verifies all 756 rendered frames. Original hat destruction/recreation and
+projectile ownership/lifetime are checked; the multi-attachment renderer also
+passes the 882-frame Yoshi egg-lay regression. All 201 unit tests and the shared
+browser/core checks pass. Other Kirby copies remain pending. There is no new
+performance, retail parity, displayed-FPS or latency claim for this checkpoint.
+[Kirby Mario-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-mario.json).
+
 Kirby's original constructor and base moves now run in the direct port. The
 full tournament-scene test passes 3,550 rendered frames, plus 124 intro frames,
 covering five aerial jumps and ground/air inhale release, Hammer, Final Cutter
@@ -14,9 +25,9 @@ reached its 600-second limit inside readback and remains incomplete.
 
 All 26 independently selected fighter codes now pass the constructor/input
 regression: 3,692 live motion-word checks, covering 27 components including Nana.
-All 197 unit tests pass. This does **not** establish complete Kirby support:
-copy hats, opponent capture/spit/swallow, copied attacks and copy loss still
-require integration and verification. Full scenes/menus/audio, other costumes,
+The base checkpoint passed 197 unit tests. The subsequent Mario-copy milestone
+above covers one ability; the remaining copies still require integration and
+verification. Full scenes/menus/audio, other costumes,
 retail parity, networking, deployment and presentation/latency acceptance remain.
 A separate 960×720 Battlefield Kirby mirror submits all 3,600 draws for 3,600
 simulation steps in 60.033 seconds, with no catch-up callbacks. Mean simulation

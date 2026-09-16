@@ -44,8 +44,17 @@ node scripts/native-port/probe-constructor.mjs --character=Kb --input --kirby-mo
 
 This checks five aerial jumps and ground/air inhale release, Hammer, Final Cutter
 and Stone. The jump test holds the ordinary jump input through the original
-command-script eligibility gates. Copy hats, opponent swallowing/spitting and
-copied neutral specials still require integration and validation.
+command-script eligibility gates. Mario copy additionally imports the original
+hat/visibility descriptors, fireball Article and effect bank 32. These tests use
+ordinary controller inputs for capture, swallow/spit, copied ground/air fireball,
+taunt loss and reacquisition; they do not assign copy kind or action states.
+Other copied abilities remain pending.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy=spit --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --combat --kirby-copy=acquire --render-steps --verify-vertices --hardware
+```
 
 Ice Climbers load Popo and Nana through the original player-owned constructor.
 Both fighter roots import their three Articles; Nana uses Popo's registered item

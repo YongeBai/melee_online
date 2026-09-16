@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {convertCaptainEffects,convertCommonEffects,convertFighterEffects,convertStageParticles} from '../../engines/browser-native/effect-assets.mjs';
+import {convertCaptainEffects,convertCommonEffects,convertFighterEffects,convertStageParticles,convertKirbyCopyEffects} from '../../engines/browser-native/effect-assets.mjs';
 import {inspectArchive} from '../../engines/browser-native/archive.mjs';
 function fixture(mutate=()=>{}) {
   const body=new Uint8Array(1792),d=new DataView(body.buffer),relocs=new Set(),cmd=128,tex=1296,joint=1616;
@@ -95,4 +95,11 @@ test('fighter effect banks preserve bank identity, model count and model-only nu
     else assert.throws(()=>convertFighterEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,4)),code));
   }
   assert.throws(()=>convertFighterEffects(new Uint8Array(),'Xx'),/pending/);
+});
+
+test('Kirby Mario effect bank uses its own original bank and models',()=>{
+  const spec={symbol:'effKirbyMarioDataTable',bank:32,count:7,groups:3,models:1},input=fighterBankFixture(spec),r=convertKirbyCopyEffects(input,'Mr');
+  assert.equal(r.bank,32);assert.equal(r.first,32000);assert.equal(r.effects.length,1);assert.equal(r.commands.length,7);
+  assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,1)),'Mr'));
+  assert.throws(()=>convertKirbyCopyEffects(input,'Fx'),/pending/);
 });

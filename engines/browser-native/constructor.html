@@ -7,7 +7,7 @@
 <script type="module">
 import {convertPeachCommonItems} from './common-item-assets.mjs';
 import {verifyPeachMoves,verifyPeachPulls,verifyPeachContact} from './verify-peach.mjs';
-import {verifyKirbyMoves} from './verify-kirby.mjs';
+import {verifyKirbyMoves,verifyKirbyCopy} from './verify-kirby.mjs';
 import {verifyClimberMoves} from './verify-climbers.mjs';
 import create from './melee-fighter-init.mjs';
 import {shaderIdentityFiles,validateShaderCatalog} from './shader-catalog.mjs';
@@ -41,6 +41,8 @@ import {convertStoryItem} from './stage-item-assets.mjs';
 import {convertItemRuntime} from './item-runtime-assets.mjs';
 import {verifyColors} from './verify-colors.mjs';
 import {convertFighterArticles,fighterArticleProfiles} from './article-assets.mjs';
+import {convertKirbyCopy} from './kirby-copy-assets.mjs';
+import {convertKirbyCopyEffects} from './effect-assets.mjs';
 import {loadFighterPackage} from './fighter-package.mjs';
 import {fighterArchives} from './fighter-assets.mjs';
 import {motionSpec} from './motion-spec.mjs';
@@ -103,6 +105,12 @@ try {
   const effectFiles=new Map(),packageOptions={asset,models,motionSpec,attributeSpec,effectFiles};
   const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Pp'?['Nn']:c==='Nn'?['Pp']:c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
   for(const selected of packageCodes)packages.push(await loadFighterPackage(module,selected,packageOptions));
+  const kirbyCopies=[];
+  if(packageCodes.includes('Kb')&&packageCodes.includes('Mr')){
+    const bytes=await asset('PlKbCpMr.dat'),source=convertKirbyCopy(bytes,'Mr');installResidentFile(module,'PlKbCpMr.dat',source.image);
+    const effectBytes=await asset('EfKbMr.dat'),effectSource=convertKirbyCopyEffects(effectBytes,'Mr');installResidentFile(module,'EfKbMr.dat',effectSource.image);effectFiles.set('EfKbMr.dat',{bytes:effectBytes,source:effectSource});
+    kirbyCopies.push({code:'Mr',kind:0,bytes,source});
+  }
   const primary=packages.find(p=>p.code===code),secondary=packages.find(p=>p.code===opponentCode),baseBytes=primary.baseBytes;
   report.baseArchive=primary.baseArchive;report.opponentBaseArchive=secondary.baseArchive;
   report.residentFighters=packages.map(p=>({code:p.code,kind:p.kind,effectName:p.effectName}));
@@ -209,6 +217,8 @@ try {
     report.opponentEffects=secondary.effect?verifyResidentEffectBank(module,secondary.effect.source,module._portEffectsBankData(secondary.effect.source.bank)):{commonOnly:true};
     report.combat={completed:false,initial:[a,b],frames:0};
   }
+  for(const copy of kirbyCopies){module._ftKb_SpecialN_800EED50(copy.kind,0);copy.root=module._portKirbyCopyRoot(copy.kind);if(!copy.root)throw Error('Original Kirby copy loader failed');copy.base=copy.root-copy.source.root;}
+  report.kirbyCopies=kirbyCopies.map(c=>({code:c.code,root:c.root,hatNodes:c.source.scene.model.tree.nodes.length,hatMeshes:c.source.scene.model.meshes.length,articles:c.source.articles.rows.length}));
   const fighterOwners=[0,...(combat?[1]:[])].flatMap(slot=>[0,1].flatMap(index=>{const owner=module._Player_GetEntityAtIndex(slot,index);if(!owner)return [];const pkg=packages.find(p=>p.kind===combatState(owner)[11]);if(!pkg)throw Error('Missing native fighter form package');return [{slot,index,owner,pkg}];}));
   report.fighterForms=fighterOwners.map(({slot,index,owner,pkg})=>({slot,index,owner,code:pkg.code}));
   if(render||new URLSearchParams(location.search).has('camera')){module._portStageCameraStart();report.cameraStarted=true;}
@@ -268,8 +278,9 @@ try {
         }
         if(byDescriptor.size!==1)throw Error('Unexpected Link attachment parts');
       }
+      const copyHats=new Map(kirbyCopies.map(c=>[c.base+c.source.joint,archiveRootView(inspectArchive(c.bytes),'hat_Share_joint',c.source.joint)]));
       for(const {slot:i,owner,pkg} of fighterOwners){
-        previewActors.push({name:(pkg.code==='Ca'?'Falcon':pkg.character)+' P'+(i+1),object:owner,active:()=>!['Sk','Zd'].includes(pkg.code)||module._Player_GetEntity(i)===owner,collectNodes:['Lk','Cl'].includes(pkg.code)?(target,nodes)=>collectFighterCostume(owner,pkg,target,nodes):undefined,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:pkg.modelBytes});
+        previewActors.push({name:(pkg.code==='Ca'?'Falcon':pkg.character)+' P'+(i+1),object:owner,active:()=>!['Sk','Zd'].includes(pkg.code)||module._Player_GetEntity(i)===owner,collectNodes:['Lk','Cl'].includes(pkg.code)?(target,nodes)=>collectFighterCostume(owner,pkg,target,nodes):undefined,accessories:pkg.code==='Kb'?[{root:()=>module._portKirbyRead(owner,1),kind:()=>module._portKirbyRead(owner,2),models:copyHats}]:[],accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:pkg.modelBytes});
       }
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       const effectModels=new Map();
@@ -279,6 +290,7 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
+      for(const c of kirbyCopies){itemModels??=new Map();const a=inspectArchive(c.bytes);for(const row of c.source.articles.rows)if(row.joint!==null)itemModels.set(c.base+row.joint,{name:'Kirby copy '+c.code+' item '+row.slot,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
       if(peachCommon){itemModels??=new Map();const {source,base}=peachCommon,a=inspectArchive(source.source);for(const row of source.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:'Common item '+row.kind,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
       for(const pkg of packages)if(fighterArticleProfiles[pkg.code]){
         const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg===pkg)?.owner;
@@ -289,6 +301,7 @@ try {
           const bytes=archiveRootView(archive,'item_Share_joint',row.joint);
           if(row.label==='throw')accessoryModels.set(3,bytes);
           else if(row.label==='captured egg')accessoryModels.set(4,bytes);
+          else if(row.label==='Kirby capture accessory')accessoryModels.set(5,bytes);
           else itemModels.set(base+row.joint,{name:character+' '+row.label,bytes});
         }
       }
@@ -437,6 +450,11 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('kirbycopy')){report.kirbyCopy={};verifyKirbyCopy(module,[object,opponent],report.kirbyCopy,{step,mode:params.get('kirbycopy'),onStep:renderSteps?r=>{
+        const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+        const last=r.trace.at(-1),name=last.items.some(i=>i[0]===130)?'copyfire':last.items.some(i=>i[0]===52&&Math.hypot(i[2]-last.state[0][4],i[3]-last.state[0][5])>15)?'copystar':last.hat[1]&&last.state[0][0]===14?'copyhat':last.state[0][0]===359?'captured':null;
+        if(name&&!report.preview[name]){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+      }:undefined});}
       if(params.has('kirbymoves')){report.kirbyMoves={};verifyKirbyMoves(module,object,report.kirbyMoves,{step,only:params.get('kirbymove'),onStep:renderSteps?phase=>{
         const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
         const name=drawn.actors.some(a=>a.name==='Kirby item 1'&&a.draws)?'hammer':drawn.actors.some(a=>a.name==='Kirby item 0'&&a.draws)?'cutter':phase.final[0]===394?'stone':null;

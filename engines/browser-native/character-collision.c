@@ -28,8 +28,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <melee/ft/kinds/ftKirby/ftkirby.h>
 
 _Static_assert(sizeof(MotionState)==32 && offsetof(MotionState,_)==8,"Motion state numeric word ABI");
+/* Read-only copy-ability ownership; startup invokes the original archive loader. */
+unsigned portKirbyCopyRoot(unsigned kind)
+{
+    if(kind>=Ft_Kind_Max)abort();
+    unsigned value;memcpy(&value,(char*)&ft_80459B88+kind*sizeof(value),sizeof(value));return value;
+}
+unsigned portKirbyRead(HSD_GObj* object,unsigned field)
+{
+    if(!object||!object->user_data)abort();Fighter* fp=object->user_data;
+    if(fp->kind!=Ft_Kind_Kirby)abort();
+    switch(field){case 0:return fp->u.kb.hat.kind;case 1:return (unsigned)fp->u.kb.hat.jobj;case 2:return fp->u.kb.hat.jobj?fp->u.kb.hat.jobj->id:0;default:abort();}
+}
 _Static_assert(sizeof(ftHurtboxInit)==40,"Hurtbox descriptor ABI");
 unsigned portPackedFlagBits(unsigned value)
 {
@@ -637,6 +650,7 @@ unsigned portFighterAccessory(HSD_GObj* object,unsigned field)
     if(Fighter_804D6534&&joint->id==(unsigned)((HSD_Joint**)Fighter_804D6534)[0])kind=1;
     else if(Fighter_804D6514&&joint->id==(unsigned)Fighter_804D6514)kind=2;
     else if(gFtDataList[Ft_Kind_Yoshi]&&gFtDataList[Ft_Kind_Yoshi]->x48_items&&joint->id==(unsigned)gFtDataList[Ft_Kind_Yoshi]->x48_items[3])kind=4;
+    else if(gFtDataList[Ft_Kind_Kirby]&&gFtDataList[Ft_Kind_Kirby]->x48_items&&joint->id==(unsigned)gFtDataList[Ft_Kind_Kirby]->x48_items[4])kind=5;
     else {
         Fighter* fp=object->user_data;
         if(fp->kind==Ft_Kind_Samus&&fp->ft_data->x48_items&&fp->ft_data->x48_items[4]&&joint->id==(unsigned)*(HSD_Joint**)fp->ft_data->x48_items[4])kind=3;

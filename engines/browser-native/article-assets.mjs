@@ -1,6 +1,6 @@
 import {inspectArchive,archiveRootView,nativeSubgraphImage,initializeArchiveExternals} from './archive.mjs';
 import {convertSceneAsset} from './scene-assets.mjs';
-import {convertItemModels} from './item-model-assets.mjs';
+import {convertItemModels,convertArticleModels} from './item-model-assets.mjs';
 import {readJointAnimation} from './joint-animation-assets.mjs';
 import {convertMaterialAnimation} from './material-animation-assets.mjs';
 import {readMotionScripts} from './motion-assets.mjs';
@@ -49,10 +49,19 @@ export function initializeFighterArticleArchive(input,code){
   ]):input;
 }
 export function convertFighterArticles(input,name) {
+  return convertArticles(input,name,null);
+}
+// Copy-ability archives embed Articles directly, without an ftData x48 table.
+// This entry point accepts explicit, independently known descriptor extents.
+export function convertArticleEntries(input,entries,profiles) {
+  if(!Array.isArray(entries)||!entries.length||entries.some(e=>!Array.isArray(profiles[e.slot])||profiles[e.slot].length!==2||profiles[e.slot].some(n=>!Number.isInteger(n)||n<0||n>64)))throw Error('Invalid explicit Article profile');
+  return convertArticles(input,null,{entries,profiles});
+}
+function convertArticles(input,name,custom) {
   const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1];
-  if(!fighterArticleProfiles[code])throw Error('Complete article conversion pending: '+name);
+  if(!custom&&!fighterArticleProfiles[code])throw Error('Complete article conversion pending: '+name);
   input=initializeFighterArticleArchive(input,code);
-  const a=inspectArchive(input),d=a.data,models=convertItemModels(input,name),header=new DataView(models.image.buffer);
+  const a=inspectArchive(input),d=a.data,models=custom?convertArticleModels(input,custom.entries):convertItemModels(input,name),header=new DataView(models.image.buffer);
   const size=header.getUint32(4,true),n=header.getUint32(8,true),bytes=models.image.slice(32,32+size),out=new DataView(bytes.buffer);
   const pointers=new Set(Array.from({length:n},(_,i)=>header.getUint32(32+size+i*4,true))),claims=new Map(models.typedClaims),packed=new Set(),rows=[],extraRows=[],attachments=[];
   const bounds=(at,bytes)=>{if(!Number.isInteger(at)||at<0||at%4||at+bytes>a.dataSize)throw Error('Article bounds');};
@@ -93,7 +102,7 @@ export function convertFighterArticles(input,name) {
     attachments.push({joint,label,nodes:scene.model.tree.nodes.length});
   }
   for(const model of models.rows) {
-    const [stateCount,specialWords]=fighterArticleProfiles[code].articles[model.slot];
+    const [stateCount,specialWords]=(custom?.profiles??fighterArticleProfiles[code].articles)[model.slot];
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
@@ -193,5 +202,5 @@ export function convertFighterArticles(input,name) {
     const root=a.publics.get(code==='Lk'?'ftDataLink':'ftDataClink'),table=pointer(root+0x48),joint=pointer(table+24);
     attachment(joint,'fighter part');extraRows.push({slot:6,source:joint,joint});
   }
-  return {code,source:input,rows,extraRows,attachments,pointerSlots:pointers,image:nativeSubgraphImage(bytes,pointers,new Map(rows.map(r=>['native_article_'+r.slot,r.article])))};
+  return {code,source:input,rows,extraRows,attachments,typedBytes:new Set([...claims.keys(),...packed]),pointerSlots:pointers,image:nativeSubgraphImage(bytes,pointers,new Map(rows.map(r=>['native_article_'+r.slot,r.article])))};
 }

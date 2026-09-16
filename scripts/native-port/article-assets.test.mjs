@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {convertFighterArticles,itemCommandWords,fighterArticleProfiles} from '../../engines/browser-native/article-assets.mjs';
+import {convertFighterArticles,convertArticleEntries,itemCommandWords,fighterArticleProfiles} from '../../engines/browser-native/article-assets.mjs';
 import {readMotionScripts} from '../../engines/browser-native/motion-assets.mjs';
 
 function fixture(code='Fx',mutate=()=>{}) {
@@ -280,4 +280,11 @@ test('Kirby Articles preserve four native items and the separate capture joint',
   assert.deepEqual(r.extraRows,[{slot:4,source:3000,joint:3000}]);assert.equal(d.getFloat32(512,true),35);assert.equal(d.getUint32(188,true),0);assert.equal(r.attachments[0].nodes,1);
   assert.throws(()=>convertFighterArticles(fixture('Kb',a=>a.relocs.delete(144)),'PlKb.dat'));
   assert.throws(()=>convertFighterArticles(fixture('Kb',a=>a.ptr(164,256)),'PlKb.dat'));
+});
+
+test('Explicit Article entries preserve source offsets and reject invalid descriptor counts',()=>{
+  const input=fixture('Fx'),r=convertArticleEntries(input,[{slot:0,article:160}],{0:[2,10]});
+  assert.equal(r.rows.length,1);assert.equal(r.rows[0].article,160);assert(r.typedBytes.has(160));assert(!r.typedBytes.has(3000));
+  for(const profile of [{}, {0:[65,10]}, {0:[2,-1]}, {0:[2,10,1]}])assert.throws(()=>convertArticleEntries(input,[{slot:0,article:160}],profile));
+  assert.throws(()=>convertArticleEntries(input,[{slot:0,article:160},{slot:0,article:160}],{0:[2,10]}));
 });

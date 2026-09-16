@@ -23,7 +23,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks}):null,resources=[];
   const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
   if(hud&&(!hudList||!callbacks))throw Error('HUD requires original callbacks and object buffer');
-  function releaseResource(r){r.accessoryGpu?.dispose();if(r.accessoryNodes)module._free(r.accessoryNodes);r.materialGpu?.dispose();r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}
+  function releaseResource(r){for(const a of r.accessories){a.accessoryGpu?.dispose();if(a.accessoryNodes)module._free(a.accessoryNodes);}r.materialGpu?.dispose();r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}
   function dispose(){delete module.onNativeObject;if(itemList)module._free(itemList);if(effectList)module._free(effectList);for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources)releaseResource(r);materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
   function drawHud(){
     if(!hud)return null;
@@ -49,8 +49,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   }
   function syncAccessories(){
     let count=0;
-    for(const r of resources){
-      if(!r.accessory)continue;
+    for(const owner of resources)for(const r of owner.accessories){
       const root=r.accessory.root(),kind=root?(r.accessory.kind?.()??1):0;
       if(root!==(r.accessoryRoot??0)||kind!==(r.accessoryKind??0)){
         r.accessoryGpu?.dispose();r.accessoryGpu=null;
@@ -61,7 +60,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           const model=readModelMeshes(bytes),n=model.tree.nodes.length;
           r.accessoryNodes=module._malloc(n*4);if(!r.accessoryNodes)throw Error('Accessory node allocation');
           if(module._portSceneCollect(root,r.accessoryNodes,n)!==n)throw Error('Accessory hierarchy mismatch');
-          r.accessoryGpu=materialRenderer.upload(model,bytes,r.accessoryNodes,r.owner);
+          r.accessoryGpu=materialRenderer.upload(model,bytes,r.accessoryNodes,owner.owner);
         }
       }
       if(root)count++;
@@ -90,7 +89,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         modelProbe=createNativeModelProbe(module,model,actor.bytes,nodes,skin,actor.object);
         }
         materialGpu=materialRenderer?.upload(model,actor.bytes,nodes,actor.object);
-        resources.push({itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessory:actor.accessory,name:actor.name,active:actor.active,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
+        resources.push({itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessories:[actor.accessory,...(actor.accessories??[])].filter(Boolean).map(accessory=>({accessory})),name:actor.name,active:actor.active,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
   let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
