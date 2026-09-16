@@ -6,6 +6,9 @@ import {createHash} from 'node:crypto';
 import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
+const timeoutArgument=process.argv.find(x=>x.startsWith('--probe-seconds='));
+const probeSecondsOverride=Number(timeoutArgument?.slice('--probe-seconds='.length)??0);
+if(timeoutArgument!==undefined&&(!Number.isInteger(probeSecondsOverride)||probeSecondsOverride<1||probeSecondsOverride>3600))throw Error('Probe timeout must be 1..3600 seconds');
 const stageKey=process.argv.find(x=>x.startsWith('--map='))?.slice(6)??'battlefield';
 if(!['battlefield','destination','dreamland','fountain','story','stadium'].includes(stageKey))throw Error('Unknown native map');
 const stageOnly=process.argv.includes('--stage-only'),stageFrames=Number(process.argv.find(x=>x.startsWith('--stage-frames='))?.slice(15)??4500);
@@ -24,7 +27,7 @@ const opponent=process.argv.find(x=>x.startsWith('--opponent='))?.slice(11)??cha
 if(!/^[A-Z][a-z]$/.test(opponent))throw Error('Opponent must be a two-letter fighter archive code');
 const matchup=opponent===character?character:character+'-vs-'+opponent;
 const kirbyCopy=process.argv.find(x=>x.startsWith('--kirby-copy='))?.slice(13)??(process.argv.includes('--kirby-copy')?'swallow':null);
-if(kirbyCopy&&(character!=='Kb'||!['Mr','Lg','Dr','Ca','Gn'].includes(opponent)||!process.argv.includes('--input')||!['swallow','acquire','spit','contact'].includes(kirbyCopy)))throw Error('Kirby copy requires Kb versus Mr/Lg/Dr/Ca/Gn and input');
+if(kirbyCopy&&(character!=='Kb'||!['Mr','Lg','Dr','Ca','Gn','Ns','Pe'].includes(opponent)||!process.argv.includes('--input')||!['swallow','acquire','spit','contact'].includes(kirbyCopy)))throw Error('Kirby copy requires Kb versus Mr/Lg/Dr/Ca/Gn/Ns/Pe and input');
 const kirbyMove=process.argv.find(x=>x.startsWith('--kirby-move='))?.slice(13);
 const kirbyMoves=!!kirbyMove||process.argv.includes('--kirby-moves');
 if(kirbyMoves&&(character!=='Kb'||!process.argv.includes('--input')||kirbyMove&&kirbyMove!=='cutter'))throw Error('Kirby moves require Kb and input');
@@ -159,7 +162,7 @@ try {
     }
   }
   // Per-vertex readback is intentionally expensive and is never a timing run.
-  const probeSeconds=peachPulls?600:renderSteps&&process.argv.includes('--verify-vertices')?(linkMoves?(stageCallbacks?1800:900):stageCallbacks?600:300):live||renderSteps||stageOnly?90:20;
+  const probeSeconds=probeSecondsOverride||(peachPulls?600:renderSteps&&process.argv.includes('--verify-vertices')?(linkMoves?(stageCallbacks?1800:900):stageCallbacks?600:300):live||renderSteps||stageOnly?90:20);
   for(let i=0;i<probeSeconds*10&&!probe&&!crashed&&browser.exitCode===null;i++)await delay(100);
   if(!probe){if(!crashed){try{await command('Debugger.pause');for(let i=0;i<20&&!frames;i++)await delay(100);}catch(error){diagnostics.push(String(error));}}
     probe={...(partial||{}),constructorCompleted:partial?.constructorCompleted===true,error:crashed?'Browser renderer crashed':'Constructor did not finish within '+probeSeconds+' seconds',diagnostics,pausedFrames:frames,playable:false,performanceMeasured:false};}
@@ -198,7 +201,7 @@ try {
   if(gamewatchContact&&!probe.error&&!probe.gamewatchContact?.completed)throw Error('Incomplete Game & Watch contact');
   if(formContact&&!probe.error&&!probe.formContact?.completed)throw Error('Incomplete form contact');
   if(kirbyCopy&&!probe.error&&!probe.kirbyCopy?.completed)throw Error('Incomplete Kirby copy');
-  if(kirbyCopy&&renderSteps&&!probe.error)for(const name of kirbyCopy==='spit'?['captured']:['acquire','contact'].includes(kirbyCopy)?['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','captured']:['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','copystar','captured']){
+  if(kirbyCopy&&renderSteps&&!probe.error)for(const name of [...(kirbyCopy==='spit'?['captured']:['acquire','contact'].includes(kirbyCopy)?['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','captured']:['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','copystar','captured']),...(probe.kirbyCopy.itemKinds.includes(probe.kirbyCopy.secondaryItemKind)?['copysecondary']:[])]){
     if(!probe.preview?.[name])throw Error('Missing Kirby '+name);
     const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-"+name+"').src",returnByValue:true});
     if(!shot.result.value?.startsWith('data:image/png;base64,'))throw Error('Missing Kirby copy screenshot');
@@ -296,7 +299,7 @@ try {
     fs.writeFileSync(path.join(output,'native-purin-sing.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
   }
   const rendererSources=Object.fromEntries(['material-gpu.mjs','native-pixel.mjs','native-match-preview.mjs','combat-workload.mjs'].map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(output,name))).digest('hex')]));
-  const report={stage:stageKey,kirbyCopy,kirbyMoves,kirbyMove,climbersMoves,climbersMove,peachMoves,peachPulls,peachContact,character,opponent,transform,liveTransform,formMoves,formMove,formContact,absorption,nessMoves,nessContact,gamewatchMoves,gamewatchContact,mewtwoMoves,mewtwoContact,yoshiMoves,yoshiContact,linkMoves,linkContact,koopaContact,koopaMoves,samusContact,samusMoves,pikachuMoves,marioMoves,purinMoves,purinContact,stadiumFireworksOff,fountainCosmeticsOff,fountainSceneryOff,recordShaders,prewarmShaders,deferredGpuErrors,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};
+  const report={validationTimeoutSeconds:probeSeconds,stage:stageKey,kirbyCopy,kirbyMoves,kirbyMove,climbersMoves,climbersMove,peachMoves,peachPulls,peachContact,character,opponent,transform,liveTransform,formMoves,formMove,formContact,absorption,nessMoves,nessContact,gamewatchMoves,gamewatchContact,mewtwoMoves,mewtwoContact,yoshiMoves,yoshiContact,linkMoves,linkContact,koopaContact,koopaMoves,samusContact,samusMoves,pikachuMoves,marioMoves,purinMoves,purinContact,stadiumFireworksOff,fountainCosmeticsOff,fountainSceneryOff,recordShaders,prewarmShaders,deferredGpuErrors,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};
   if(recordShaders&&!probe.error){
     const result=await command('Runtime.evaluate',{expression:'globalThis.nativeShaderSources',returnByValue:true});
     const identity={wasmSha256:report.build.wasmSha256,sources:Object.fromEntries(shaderIdentityFiles.map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(output,name))).digest('hex')]))};

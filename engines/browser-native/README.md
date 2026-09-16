@@ -57,7 +57,17 @@ effect banks (38 and 47). Use `--opponent=Ca` or `--opponent=Gn` with the same
 lifecycle command. Their `--kirby-copy=contact` test checks damage and hitlag at
 first contact: an idle target can be knocked offstage before a long recovery
 window ends. The separate full lifecycle test covers grounded/air attacks,
-recovery, copy loss and reacquisition. Other copied abilities remain pending.
+recovery, copy loss and reacquisition.
+
+Ness and Peach copies use two original Articles each. Their copy-effect table
+entries have no separate file; the original loader's no-file path is retained.
+Use `--opponent=Ns` or `--opponent=Pe` with the lifecycle command. Ness's test
+charges PK Flash, releases it in the air, loses the copy and reacquires it.
+Peach's test covers ground/air Toad, loss and reacquisition. The contact modes
+steer PK Flash toward a normally jumping opponent, or use the opponent's jab
+to trigger the original Toad counter and spores. Every position and action
+change comes from controller inputs and original simulation. Other copied
+abilities remain pending.
 
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy --stage-callbacks --render-steps --hardware

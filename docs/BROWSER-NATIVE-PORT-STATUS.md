@@ -5,6 +5,24 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Ness and Peach copies now pass full rendered lifecycle tests: 2,239 and
+1,971 frames respectively, plus 124 intro frames each. The two-item copy loader
+preserves PK Flash and its explosion, and Toad and its spores. The original
+copy-effect entries have no separate file, so the loader retains that path.
+Normal controller input steers a charged Flash into a jumping Ness (8 to 43
+damage, 20 frames of hitlag) and triggers Toad's counter with Peach's jab. In the
+full-scene Toad sample, Peach goes from 8 to about 13.73 damage while Kirby stays
+at zero; both stock counts remain four. These are fixture results, not canonical
+cross-fixture damage or retail-parity comparisons.
+
+Focused GPU validation passes all 1,099 Ness and 924 Peach frames, including the
+explosion and spores. The first Ness attempt hit its 300-second validation limit
+inside vertex readback and is recorded as incomplete; an explicit 600-second
+probe budget completed the same sequence. The game and performance target did
+not change. All 206 unit tests and Mario's copied-fireball contact regression
+pass. Full competitive 720p60, presented FPS and latency remain unproven.
+[Ness/Peach copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-ness-peach.json).
+
 Kirby's Falcon and Ganondorf copies now run original ground/air punch attacks,
 copy loss and reacquisition in full rendered tournament-scene tests: 1,998 and
 1,963 frames respectively, each plus 124 intro frames. Contact tests verify

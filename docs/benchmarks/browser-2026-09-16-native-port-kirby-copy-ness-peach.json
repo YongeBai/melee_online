@@ -1,0 +1,872 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "048e02f",
+  "scope": "Kirby Ness and Peach copy assets, charged/air PK Flash, ground/air Toad, loss/reacquisition, steered Flash contact and Toad counter contact. Full competitive acceptance remains pending.",
+  "wasmSha256": "20b2261e2e853a937e80c085c5b727d89f3a88344fda63b2907814edd8aaf6d9",
+  "wasmBytes": 2958062,
+  "sourceHashes": {
+    "engines/browser-native/kirby-copy-assets.mjs": "0eea82add5f64eaa368dd940f1e111acf1388ff8ba9151f6725c84ce4c9202f8",
+    "engines/browser-native/constructor.html": "f313e85ccd4000b82cedcdc8bcf4a08ed7aaab96d8ddd2b7cfee34190587384d",
+    "engines/browser-native/verify-kirby.mjs": "04c452a9d8dc7cd1cdc6c6acd918eaaf2ed3cc78d3575bdd0c813f4888435005",
+    "scripts/native-port/probe-constructor.mjs": "6a5d89f8499e6a08529583890faf0299ed08176a37457de05b91a5cd1014ab23"
+  },
+  "assets": {
+    "Ns": {
+      "hatJoints": 1,
+      "hatMeshes": 6,
+      "typedRelocations": 700,
+      "omittedExporterRelocations": 11,
+      "articleStates": [
+        3,
+        1
+      ],
+      "specialWords": [
+        11,
+        5
+      ],
+      "items": [
+        145,
+        146
+      ],
+      "effectTableEntry": 42,
+      "effectFile": null
+    },
+    "Pe": {
+      "hatJoints": 1,
+      "hatMeshes": 4,
+      "typedRelocations": 367,
+      "omittedExporterRelocations": 8,
+      "articleStates": [
+        2,
+        1
+      ],
+      "specialWords": [
+        1,
+        4
+      ],
+      "items": [
+        134,
+        135
+      ],
+      "effectTableEntry": 45,
+      "effectFile": null
+    }
+  },
+  "fullScene": {
+    "ness": {
+      "completed": true,
+      "renderedFrames": 2239,
+      "copyFrames": 2097,
+      "copyKind": 8,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          435,
+          436,
+          437,
+          438,
+          24,
+          25,
+          439,
+          440,
+          441,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          88,
+          38,
+          183,
+          184,
+          186
+        ]
+      ],
+      "itemKinds": [
+        145,
+        146,
+        52
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied neutral special",
+        "air copied neutral special",
+        "taunt copy loss",
+        "reacquire approach",
+        "reacquire inhale",
+        "reacquire swallow",
+        "reacquired neutral special"
+      ],
+      "firstHat": [
+        8,
+        16156512,
+        15920616
+      ],
+      "secondHat": [
+        8,
+        16188704,
+        15920616
+      ],
+      "finalHat": [
+        8,
+        16188704,
+        15920616
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        80.63999938964844
+      ],
+      "gpuError": true,
+      "introFrames": 124,
+      "resolution": [
+        960,
+        720
+      ]
+    },
+    "peach": {
+      "completed": true,
+      "renderedFrames": 1971,
+      "copyFrames": 1829,
+      "copyKind": 9,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          449,
+          24,
+          25,
+          451,
+          29,
+          42,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        134,
+        52
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied neutral special",
+        "air copied neutral special",
+        "taunt copy loss",
+        "reacquire approach",
+        "reacquire inhale",
+        "reacquire swallow",
+        "reacquired neutral special"
+      ],
+      "firstHat": [
+        9,
+        18708384,
+        18515336
+      ],
+      "secondHat": [
+        9,
+        18744448,
+        18515336
+      ],
+      "finalHat": [
+        9,
+        18744448,
+        18515336
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        15.279999732971191
+      ],
+      "gpuError": true,
+      "introFrames": 124,
+      "resolution": [
+        960,
+        720
+      ]
+    }
+  },
+  "contact": {
+    "ness": {
+      "completed": true,
+      "renderedFrames": 1099,
+      "copyFrames": 957,
+      "copyKind": 8,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          435,
+          436,
+          437
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          16,
+          24,
+          25,
+          88
+        ]
+      ],
+      "itemKinds": [
+        145,
+        146
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "steered copied PK Flash"
+      ],
+      "firstHat": [
+        8,
+        16156512,
+        15920616
+      ],
+      "finalHat": [
+        8,
+        16156512,
+        15920616
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        43
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          43
+        ],
+        "hitlag": [
+          0,
+          20
+        ]
+      },
+      "gpuError": true,
+      "introFrames": 124
+    },
+    "peach": {
+      "completed": true,
+      "renderedFrames": 924,
+      "copyFrames": 782,
+      "copyKind": 9,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          449,
+          450
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          44,
+          237,
+          90,
+          191,
+          192
+        ]
+      ],
+      "itemKinds": [
+        134,
+        135
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "copied neutral special"
+      ],
+      "firstHat": [
+        9,
+        18708384,
+        18515336
+      ],
+      "finalHat": [
+        9,
+        18708384,
+        18515336
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        13.729999542236328
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          13.729999542236328
+        ],
+        "hitlag": [
+          0,
+          0
+        ]
+      },
+      "gpuError": true,
+      "introFrames": 124
+    }
+  },
+  "focusedGpu": {
+    "ness": {
+      "completed": true,
+      "renderedFrames": 1099,
+      "copyFrames": 957,
+      "copyKind": 8,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          435,
+          436,
+          437
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          16,
+          24,
+          25,
+          88
+        ]
+      ],
+      "itemKinds": [
+        145,
+        146
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "steered copied PK Flash"
+      ],
+      "firstHat": [
+        8,
+        14660032,
+        14580328
+      ],
+      "finalHat": [
+        8,
+        14660032,
+        14580328
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        43
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          43
+        ],
+        "hitlag": [
+          0,
+          20
+        ]
+      },
+      "gpuError": true,
+      "allRenderedFramesVertexVerified": true,
+      "validationTimeoutSeconds": 600,
+      "secondaryVertexChecks": {
+        "vertices": 19624,
+        "positionComponents": 58872,
+        "normalComponents": 58872,
+        "maxScaledPositionError": 0.0000030498127944755315,
+        "maxNormalError": 1.2933149795557597e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.00040852866724620595,
+        "byOwner": {
+          "1558560": {
+            "vertices": 458,
+            "ndcMin": [
+              -255.1737870278306,
+              -1460.6215014506713,
+              -0.016128502832396138
+            ],
+            "ndcMax": [
+              977.8215754176323,
+              116.24952688047104,
+              0.10366244399456408
+            ]
+          },
+          "1560448": {
+            "vertices": 8608,
+            "ndcMin": [
+              -1.2288409863382477,
+              -1.425718159883429,
+              -0.0007764560561661858
+            ],
+            "ndcMax": [
+              1.6662450884074032,
+              0.8004477437924875,
+              -0.0005293729918684544
+            ]
+          },
+          "1564896": {
+            "vertices": 3971,
+            "ndcMin": [
+              -0.31885303385256847,
+              -0.5657701107960015,
+              -0.0006591137255178546
+            ],
+            "ndcMax": [
+              -0.08113064105337504,
+              -0.28589103425376333,
+              -0.000614971938603273
+            ]
+          },
+          "1655904": {
+            "vertices": 6512,
+            "ndcMin": [
+              0.10222443211414402,
+              -0.24121881071683457,
+              -0.0006618559049821273
+            ],
+            "ndcMax": [
+              0.31815963753212445,
+              0.02885207137735345,
+              -0.0006264613660833755
+            ]
+          },
+          "14729632": {
+            "vertices": 75,
+            "ndcMin": [
+              -0.7528128696011694,
+              -0.8101752329065983,
+              -0.0006495661338746662
+            ],
+            "ndcMax": [
+              0.9923643447189574,
+              1.1652512748075992,
+              -0.0006329288376647677
+            ]
+          }
+        }
+      }
+    },
+    "peach": {
+      "completed": true,
+      "renderedFrames": 924,
+      "copyFrames": 782,
+      "copyKind": 9,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          449,
+          450
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          44,
+          237,
+          90,
+          191,
+          192
+        ]
+      ],
+      "itemKinds": [
+        134,
+        135
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "copied neutral special"
+      ],
+      "firstHat": [
+        9,
+        17237056,
+        17186344
+      ],
+      "finalHat": [
+        9,
+        17237056,
+        17186344
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        19.189998626708984
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          19.189998626708984
+        ],
+        "hitlag": [
+          0,
+          0
+        ]
+      },
+      "gpuError": true,
+      "allRenderedFramesVertexVerified": true,
+      "validationTimeoutSeconds": 300,
+      "secondaryVertexChecks": {
+        "vertices": 20224,
+        "positionComponents": 60672,
+        "normalComponents": 60672,
+        "maxScaledPositionError": 0.0000028134079620352623,
+        "maxNormalError": 1.2222619005797242e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0004000934189953988,
+        "byOwner": {
+          "1558688": {
+            "vertices": 458,
+            "ndcMin": [
+              -155.44694344940737,
+              -205.37262144483918,
+              -0.012322303412520384
+            ],
+            "ndcMax": [
+              296.582695013128,
+              36.68465738356098,
+              0.01841527939544631
+            ]
+          },
+          "1560576": {
+            "vertices": 8608,
+            "ndcMin": [
+              -2.1907922824662096,
+              -1.3563848275106019,
+              -0.0009292128060422098
+            ],
+            "ndcMax": [
+              1.1986828773277296,
+              1.2783982955065245,
+              -0.0005949278802361943
+            ]
+          },
+          "1565024": {
+            "vertices": 3512,
+            "ndcMin": [
+              -0.3044380291223647,
+              -0.3440926993661478,
+              -0.0007560103671545612
+            ],
+            "ndcMax": [
+              -0.05752283417563176,
+              0.004648335749410498,
+              -0.0007061671117457207
+            ]
+          },
+          "1656032": {
+            "vertices": 6904,
+            "ndcMin": [
+              -0.09843775047196902,
+              -0.3936722666403601,
+              -0.0007676315657920323
+            ],
+            "ndcMax": [
+              0.3113654135834038,
+              0.11669510738196397,
+              -0.0006895378916178881
+            ]
+          },
+          "17223296": {
+            "vertices": 110,
+            "ndcMin": [
+              -0.45030317164921807,
+              -0.33100769914939054,
+              -0.0007915228289098236
+            ],
+            "ndcMax": [
+              -0.0824044492788978,
+              -0.0528958832342552,
+              -0.0006780569114475534
+            ]
+          },
+          "17236960": {
+            "vertices": 417,
+            "ndcMin": [
+              -0.11346365061120184,
+              -0.29641601530113315,
+              -0.0007384023908412087
+            ],
+            "ndcMax": [
+              0.016324453505720534,
+              -0.05746278493854028,
+              -0.0007051488231269302
+            ]
+          },
+          "17280448": {
+            "vertices": 215,
+            "ndcMin": [
+              -0.9239746666518365,
+              -0.36660106667698145,
+              -0.0008821554399037907
+            ],
+            "ndcMax": [
+              0.044055183362739725,
+              0.5502828553894127,
+              -0.0006451999092313288
+            ]
+          }
+        }
+      }
+    }
+  },
+  "incompleteGpuAttempt": {
+    "character": "Ns",
+    "validationTimeoutSeconds": 300,
+    "error": "Constructor did not finish within 300 seconds",
+    "pausedFunctions": [
+      "verifyDrawVertices",
+      "flush",
+      "draw",
+      "verifyKirbyCopy.onStep",
+      "tick",
+      "neutral",
+      "approach",
+      "verifyKirbyCopy",
+      ""
+    ],
+    "passed": false
+  },
+  "marioRegression": {
+    "completed": true,
+    "copyFrames": 788,
+    "copyKind": 0,
+    "states": [
+      [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        399
+      ],
+      [
+        39,
+        244,
+        29,
+        42,
+        14,
+        15,
+        288,
+        289,
+        291,
+        292,
+        18,
+        81
+      ]
+    ],
+    "itemKinds": [
+      130
+    ],
+    "phases": [
+      "approach",
+      "inhale",
+      "swallow",
+      "copied attack contact approach",
+      "copied neutral special"
+    ],
+    "firstHat": [
+      0,
+      13601920,
+      13528936
+    ],
+    "finalHat": [
+      0,
+      13601920,
+      13528936
+    ],
+    "stocks": [
+      4,
+      4
+    ],
+    "damage": [
+      0,
+      14
+    ],
+    "contact": {
+      "beforeDamage": [
+        0,
+        8
+      ],
+      "afterDamage": [
+        0,
+        14
+      ],
+      "hitlag": [
+        0,
+        0
+      ]
+    }
+  },
+  "controllerFixtureAdjustments": [
+    "Peach reacquisition walks to an 18-unit target separation; the earlier roughly 20-unit attempt remained outside inhale range.",
+    "PK Flash contact moves the opponent to center stage, steers the projectile with horizontal stick input, then uses ordinary opponent jump input to meet the original charged explosion height. A previous path hit a Battlefield platform and fizzled; another exploded above a grounded target.",
+    "All game action, position, damage, knockback and item state changes remain original simulation results."
+  ],
+  "validation": {
+    "unitTests": 206,
+    "invalidTimeoutOverridesRejected": [
+      "0",
+      "-1",
+      "3601",
+      "NaN"
+    ],
+    "visualInspection": [
+      "Ness copy cap",
+      "Peach copy crown",
+      "PK Flash charge and explosion",
+      "Toad and counter spores",
+      "native camera framing"
+    ],
+    "fixtureResultsAreNotAParityComparison": true,
+    "retailParityVerified": false,
+    "performanceMeasured": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "competitiveAcceptance": false
+  }
+}
