@@ -23,7 +23,7 @@ function fixture(code='Fx',mutate=()=>{}) {
   // Deliberately untyped extra data must not become a public Article.
   if(code==='Fx'){ptr(144,3000);body[3000]=0xe3;}
   mutate({body,d,relocs,ptr,states,scripts});
-  const text=new TextEncoder().encode('ftData'+({Kp:'Koopa',Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
+  const text=new TextEncoder().encode('ftData'+({Ys:'Yoshi',Kp:'Koopa',Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(text,pub+8);return bytes;
 }
 test('Fox/Falco Articles preserve script branches, special floats and model graphs without exporting extra fighter data',()=>{
@@ -132,4 +132,13 @@ test('Link-family attachment imports reject cycles, scalar overlap and unsupport
     a=>a.d.setFloat32(a.rows[3].special+0x2C,NaN),
     a=>{const shape=a.alloc(12),object=a.alloc(8),animation=a.alloc(16);a.ptr(a.rows[1].special+0x54,shape);a.ptr(shape+8,object);a.ptr(object+4,animation);},
   ])assert.throws(()=>convertFighterArticles(linkFixture('Lk',mutate).bytes,'PlLk.dat'));
+});
+
+test('Yoshi egg Articles preserve explicitly absent special attributes and animation states',()=>{
+  const empty=a=>{a.ptr(140,416);for(const at of [212,220]){a.d.setUint32(at,0);a.relocs.delete(at);}};
+  const input=fixture('Ys',empty),before=input.slice(),r=convertFighterArticles(input,'PlYs.dat');
+  assert.deepEqual(input,before);assert.deepEqual(r.rows.map(r=>[r.stateCount,r.specialWords]),[[2,2],[1,2],[0,0]]);
+  assert.equal(r.rows[2].special,null);assert.equal(r.rows[2].states,null);
+  assert.throws(()=>convertFighterArticles(fixture('Ys',a=>{empty(a);a.ptr(212,592);}), 'PlYs.dat'),/Missing complete/);
+  assert.throws(()=>convertFighterArticles(fixture('Ys',a=>{empty(a);a.d.setUint32(164,0);a.relocs.delete(164);}), 'PlYs.dat'),/Missing complete/);
 });

@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {adaptStageCallbacks,adaptLinkArrowTable} from './portable-source.mjs';
+import {adaptStageCallbacks,adaptLinkArrowTable,adaptYoshiAttributes} from './portable-source.mjs';
+import fs from 'node:fs';
+
+test('Yoshi loader view exposes the actual Egg Throw floats rather than byte padding',()=>{
+  const source=fs.readFileSync(new URL('../../engines/melee-decomp/src/melee/ft/kinds/ftYoshi/types.h',import.meta.url),'utf8');
+  const converted=adaptYoshiAttributes(source);
+  assert.equal(converted.includes('pad_xEC'),false);
+  assert.equal(converted.split('float x110;').length,3);
+  assert.throws(()=>adaptYoshiAttributes(converted),/overlay changed/);
+  assert.throws(()=>adaptYoshiAttributes(source.replace('float x110;','int x110;')),/overlay changed/);
+});
 const descriptor=callback=>`StageData stage = { Kind, callbacks, "GrTest", init, ${callback}, load, start, predicate, touch, shadow, 1, joints, 3 };`;
 test('preserves retail integer-bool values through the demo adapter and preserves stage callbacks and function bodies',()=>{
   const body='void demo(bool enabled) { state = enabled; }',source=body+'\n'+descriptor('demo');

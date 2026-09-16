@@ -83,6 +83,8 @@ export function parseAttributeLayout(text,name) {
 
 export function attributeProbeSource(spec) {
   return '#include <melee/ft/types.h>\n#include <stddef.h>\n#include <stdint.h>\n#include <string.h>\n#include <stdlib.h>\n'+
+    ['xEC','xF0','xF4','specialhi_base_angle','xFC','x100','x104','x108','x10C','x110'].map(name=>
+      `_Static_assert(offsetof(ftYoshiAttributes,${name})==offsetof(struct ftYs_DatAttrs,${name}) && sizeof(((ftYoshiAttributes*)0)->${name})==sizeof(((struct ftYs_DatAttrs*)0)->${name}),"Yoshi attribute overlay ${name}");\n`).join('')+
     spec.records.map((r,i)=>`_Static_assert(sizeof(${r.type})==${r.size},"Attribute size");\n`+
       r.fields.map(f=>`_Static_assert(offsetof(${r.type},${f.name})==${f.offset} && sizeof(((${r.type}*)0)->${f.name})==${f.width},"Attribute field ${f.name}");`).join('\n')+
       `\nstatic unsigned read_${i}(const ${r.type}* data,unsigned field){unsigned out=0;switch(field){\n`+

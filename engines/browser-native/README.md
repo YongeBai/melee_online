@@ -32,6 +32,28 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Yoshi imports the original thrown egg, landing star and Egg Lay Articles, plus
+the separate shell accessory attached to a captured fighter. The Egg Lay Article
+explicitly has no special-attribute or animation-state table. Its shell descriptor
+is recognized through loaded Yoshi data, regardless of the captured fighter kind.
+The original shield, roll, capture, escape and item callbacks remain unchanged.
+The loader's `ftYoshiAttributes` view labels offsets 0xEC–0x110 as byte padding,
+but `ftYs_DatAttrs` reads ten Egg Throw floats there. The portable header exposes
+those same float fields to the typed endian importer. Compiler assertions check
+the overlapping offsets and widths; no gameplay values or callbacks are changed.
+A charged, aimed throw is part of the regression sequence: leaving those bytes
+unswapped produced an enormous spin multiplier and an infinite angle-normalization
+loop on the first close-range egg collision.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Ys --input --yoshi-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ys --input --yoshi-contact=egg-lay --stage-callbacks --render-steps --hardware
+```
+
+Yoshi contact modes are `egg-lay`, `egg-throw`, `grab`, `shield` and `control`.
+They use controller inputs to position and attack; they do not rewrite fighter
+positions, damage, timers or move parameters.
+
 Link and Young Link import their original bomb, boomerang, hookshot, arrow and bow
 Articles, plus Young Link's milk. The original OnLoad callback inserts an extra
 nonvisual part; the preview binds costume joints by their descriptor identities

@@ -16,6 +16,7 @@ import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
+import {verifyYoshiMoves,verifyYoshiContact} from './verify-yoshi.mjs';
 import {verifyLinkMoves,verifyLinkContact} from './verify-link.mjs';
 import {verifyKoopaMoves,verifyKoopaContact} from './verify-koopa.mjs';
 import {verifySamusMoves,verifySamusContact} from './verify-samus.mjs';
@@ -72,7 +73,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl'].includes(code)||stageKey==='story') {
+  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys'].includes(code)||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -118,7 +119,7 @@ try {
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
-  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact')||params.has('koopacontact')||params.has('linkcontact');
+  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact')||params.has('koopacontact')||params.has('linkcontact')||params.has('yoshicontact');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const rawStageBytes=await asset(stageSpec.file),stageBytes=initializeStageArchive(rawStageBytes,stageKey),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
@@ -264,12 +265,13 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl'].includes(code)){
+      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys'].includes(code)){
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
         for(const row of articles.attachments){
           const bytes=archiveRootView(archive,'item_Share_joint',row.joint);
           if(row.label==='throw')accessoryModels.set(3,bytes);
+          else if(row.label==='captured egg')accessoryModels.set(4,bytes);
           else itemModels.set(base+row.joint,{name:character+' '+row.label,bytes});
         }
       }
@@ -429,6 +431,22 @@ try {
         report.linkContact={};verifyLinkContact(module,[object,opponent],report.linkContact,{step,mode:params.get('linkcontact'),onStep:renderSteps?()=>{
           const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
           if(!report.preview.linkhit&&combatState(opponent)[13]>0){report.preview.linkhit=drawn;const img=document.createElement('img');img.id='native-preview-linkhit';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
+      if(params.has('yoshicontact')){
+        if(code!=='Ys'||!opponent)throw Error('Yoshi contact requires two fighters');
+        report.yoshiContact={};verifyYoshiContact(module,[object,opponent],report.yoshiContact,{step,mode:params.get('yoshicontact'),onStep:renderSteps?()=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          if(!report.preview.capturedegg&&module._portFighterAccessory(opponent,1)===4){report.preview.capturedegg=drawn;const img=document.createElement('img');img.id='native-preview-capturedegg';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
+      if(params.has('yoshimoves')){
+        if(code!=='Ys')throw Error('Yoshi move probe fighter');
+        report.yoshiMoves={};verifyYoshiMoves(module,object,report.yoshiMoves,{step,onStep:renderSteps?phase=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          for(const [name,active]of [['eggshield',phase.name==='egg shield'&&phase.frames===30],['eggthrow',phase.name==='ground Egg Throw'&&phase.frames===30],['eggroll',phase.name==='Egg Roll'&&phase.frames===35],['yoshistars',phase.name==='ground Yoshi Bomb'&&phase.trace.at(-1).items.some(i=>i[0]===88)]])if(active&&!report.preview[name]){
+            report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
+          }
         }:undefined});
       }
       if(params.has('linkmoves')){

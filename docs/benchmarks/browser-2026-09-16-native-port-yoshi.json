@@ -1,0 +1,1599 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "0c9abc1",
+  "scope": "Default-costume Yoshi native constructor, items, effects, selected moves and contacts; two-Yoshi Battlefield CPU/draw-submission timing. Not complete competitive acceptance.",
+  "wasmSha256": "b4ee4a0c31a6836bffd42527a3132451c560531e6f9810f5c1c2b1d645843494",
+  "portableRecipeSha256": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "e4f82ac41a2d07f23a57df31806060d2c4c3254ec489938b680a11b5c155cdb0",
+    "engines/browser-native/effect-assets.mjs": "9523b95de8175a0d4d4b83ed26864d7b0daf24fc5f99cbbbcf89f161091cff6c",
+    "engines/browser-native/character-collision.c": "e00a53e5b3e9ae88fcd7410538912c64cf00e1d74306d54de765465dfa914d31",
+    "engines/browser-native/constructor.html": "fa4a42123f25607154d87b3af90a21e332992a254d4ea94cc72bb9634eab8b3f",
+    "engines/browser-native/verify-yoshi.mjs": "818f7a755754bb1f3317b214c0a2c5f37623fcc5cffca52626d96de75d4aa5d0",
+    "scripts/native-port/portable-source.mjs": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+    "scripts/native-port/attribute-spec.mjs": "ef60b4a0f50fb6d96af1d59d68bffc433b09c683b8ebf0b4f6239c59ea897120",
+    "scripts/native-port/probe-constructor.mjs": "071f19581a8c9c33c69cb539f2c2b887109cf2c5fca07e0dfc6001422b16cf98"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "attributeCorrection": {
+    "range": [
+      "0xEC",
+      "0x110"
+    ],
+    "floatCount": 10,
+    "loaderView": "ftYoshiAttributes",
+    "alternateView": "ftYs_DatAttrs",
+    "cause": "Loader view declares live Egg Throw floats as byte padding, so typed import left them big-endian.",
+    "failure": "One-frame charged close egg hit produced spin 4.739741933181994e21; subsequent it_80271830 angle normalization stalled.",
+    "actualSpinAttributes": [
+      -1.5,
+      -2.0999999046325684
+    ],
+    "sameOffsetsAndWidthsCompileAsserted": true,
+    "gameplayFunctionBodiesUnchanged": true
+  },
+  "validation": {
+    "unitTests": 178,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "moves": {
+      "artifact": "yoshi-moves-Ys-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "completed": true,
+      "frames": 1880,
+      "renderedFrames": 2022,
+      "phases": [
+        {
+          "name": "egg shield",
+          "frames": 105,
+          "states": [
+            345,
+            342,
+            343,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "ground Egg Throw",
+          "frames": 181,
+          "states": [
+            364,
+            14
+          ],
+          "itemKinds": [
+            86
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "charged aimed Egg Throw",
+          "frames": 194,
+          "states": [
+            364,
+            14
+          ],
+          "itemKinds": [
+            86
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "air Egg Throw",
+          "frames": 259,
+          "states": [
+            24,
+            25,
+            365,
+            364,
+            14
+          ],
+          "itemKinds": [
+            86
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "ground Egg Lay miss",
+          "frames": 151,
+          "states": [
+            346,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air Egg Lay miss",
+          "frames": 239,
+          "states": [
+            24,
+            25,
+            351,
+            29,
+            42,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "ground Yoshi Bomb",
+          "frames": 221,
+          "states": [
+            366,
+            368,
+            367,
+            14
+          ],
+          "itemKinds": [
+            88
+          ],
+          "peakItems": 2,
+          "finalState": 14
+        },
+        {
+          "name": "air Yoshi Bomb",
+          "frames": 239,
+          "states": [
+            24,
+            25,
+            368,
+            367,
+            14
+          ],
+          "itemKinds": [
+            88
+          ],
+          "peakItems": 2,
+          "finalState": 14
+        },
+        {
+          "name": "Egg Roll",
+          "frames": 291,
+          "states": [
+            360,
+            361,
+            362,
+            363,
+            359,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        }
+      ]
+    },
+    "contacts": [
+      {
+        "mode": "egg-lay",
+        "artifact": "yoshi-egg-lay-Ys-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 7,
+        "hitlag": 0,
+        "knockback": 0,
+        "eggAccessoryFrames": 199,
+        "blockedFrames": 0,
+        "attackerStates": [
+          346,
+          347,
+          349,
+          14
+        ],
+        "defenderStates": [
+          14,
+          276,
+          277,
+          29,
+          42
+        ]
+      },
+      {
+        "mode": "egg-throw",
+        "artifact": "yoshi-egg-throw-Ys-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 12,
+        "hitlag": 7,
+        "knockback": 56.72307586669922,
+        "eggAccessoryFrames": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          364,
+          14
+        ],
+        "defenderStates": [
+          14,
+          77
+        ]
+      },
+      {
+        "mode": "grab",
+        "artifact": "yoshi-grab-Ys-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 6,
+        "hitlag": 0,
+        "knockback": 54.097599029541016,
+        "eggAccessoryFrames": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          212,
+          213,
+          216,
+          219,
+          14
+        ],
+        "defenderStates": [
+          14,
+          226,
+          227,
+          239,
+          86,
+          42
+        ]
+      },
+      {
+        "mode": "shield",
+        "artifact": "yoshi-shield-Ys-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 0,
+        "hitlag": 4,
+        "knockback": 0,
+        "eggAccessoryFrames": 0,
+        "blockedFrames": 12,
+        "attackerStates": [
+          14,
+          44
+        ],
+        "defenderStates": [
+          345,
+          342,
+          344,
+          343,
+          14
+        ]
+      },
+      {
+        "mode": "control",
+        "artifact": "yoshi-control-Ys-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 0,
+        "hitlag": 0,
+        "knockback": 0,
+        "eggAccessoryFrames": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          14
+        ],
+        "defenderStates": [
+          14
+        ]
+      }
+    ],
+    "gpuCapture": {
+      "artifact": "yoshi-egg-lay-Ys-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 882,
+      "eggAccessoryFrames": 199,
+      "allRenderedFramesVertexChecked": true,
+      "shellSnapshotVertexChecks": {
+        "vertices": 17973,
+        "positionComponents": 53919,
+        "normalComponents": 53919,
+        "maxScaledPositionError": 0.0000028652732151935104,
+        "maxNormalError": 1.2172415864153407e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0004336091203097489,
+        "byOwner": {
+          "1554464": {
+            "vertices": 458,
+            "ndcMin": [
+              -235.4335746379864,
+              -43.1723254672723,
+              -0.006553257166180738
+            ],
+            "ndcMax": [
+              76.29259238261496,
+              60.92310984694596,
+              0.01581213771057441
+            ]
+          },
+          "1556352": {
+            "vertices": 8608,
+            "ndcMin": [
+              -1.2127881774725633,
+              -0.9175259486707659,
+              -0.0005467024531155073
+            ],
+            "ndcMax": [
+              0.9043085651844731,
+              0.7720045265728326,
+              -0.00041062898887339426
+            ]
+          },
+          "1560800": {
+            "vertices": 6632,
+            "ndcMin": [
+              -0.20040320896115743,
+              -0.2484315640935992,
+              -0.00048265648453744433
+            ],
+            "ndcMax": [
+              0.09953267474236303,
+              0.08087126001380296,
+              -0.0004575951799974434
+            ]
+          },
+          "1653024": {
+            "vertices": 2275,
+            "ndcMin": [
+              0.038981680146247144,
+              -0.0701434267697349,
+              -0.0004805701552517029
+            ],
+            "ndcMax": [
+              0.14962536813920344,
+              0.07988998684322882,
+              -0.00046331324708813703
+            ]
+          }
+        }
+      },
+      "projectionChecks": {
+        "passed": true,
+        "cases": 4,
+        "components": 12
+      }
+    },
+    "sharedStartup": {
+      "artifact": "fighter-init-browser-verification.json",
+      "passed": true,
+      "fighterComponents": 27,
+      "instances": 135,
+      "dynamicFrames": 3240,
+      "itemInstances": 154
+    },
+    "selectedTimingTracesIdentical": true
+  },
+  "performance": [
+    {
+      "artifact": "deferred-errors-Ys-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": false,
+      "driverShaderCacheDisabled": false,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60036.90000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.537833333371414,
+        "p50Ms": 0.5,
+        "p95Ms": 0.8999999761581421,
+        "maxMs": 1.699999988079071
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.197916666674945,
+        "p50Ms": 6.5,
+        "p95Ms": 11.900000005960464,
+        "maxMs": 28.19999998807907
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670658516253688,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000109
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 2121,
+        "framesWithHitlag": 412,
+        "framesWithDamage": 3508,
+        "stockChanges": [
+          {
+            "frame": 1336,
+            "slot": 1,
+            "stocks": 3
+          },
+          {
+            "frame": 2836,
+            "slot": 1,
+            "stocks": 2
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 72,
+            "attack": 350
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 76,
+            "attack": 380
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 56,
+            "attack": 290
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 400
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 48,
+            "attack": 304
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 397
+          }
+        ]
+      },
+      "slowDraws": [
+        {
+          "frame": 173,
+          "costMs": 17.30000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 253,
+            "programs": 27,
+            "images": 104,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 6,
+            "effectRetired": 6,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 175,
+          "costMs": 17.700000017881393,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 263,
+            "programs": 27,
+            "images": 104,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 6,
+            "effectRetired": 6,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 178,
+          "costMs": 21.700000017881393,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 255,
+            "programs": 27,
+            "images": 104,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 6,
+            "effectRetired": 6,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 227,
+          "costMs": 17.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 224,
+            "programs": 28,
+            "images": 114,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 18,
+            "effectRetired": 6,
+            "peakEffectModels": 12,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 421,
+          "costMs": 18.69999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 214,
+            "programs": 29,
+            "images": 118,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 31,
+            "effectRetired": 19,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 947,
+          "costMs": 19.700000017881393,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 222,
+            "programs": 29,
+            "images": 118,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 69,
+            "effectRetired": 57,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1847,
+          "costMs": 26.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 223,
+            "programs": 32,
+            "images": 131,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 109,
+            "effectRetired": 97,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2677,
+          "costMs": 18,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 93,
+            "immediateVertices": 372,
+            "particleDraws": 93,
+            "particleVertices": 372,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 34,
+                "origin": "model",
+                "cpuMs": 5.0999999940395355
+              }
+            ],
+            "draws": 217,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 159,
+            "effectRetired": 159,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2747,
+          "costMs": 28.19999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 104,
+            "immediateVertices": 416,
+            "particleDraws": 104,
+            "particleVertices": 416,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 248,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 171,
+            "effectRetired": 159,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2921,
+          "costMs": 18.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 146,
+            "immediateVertices": 584,
+            "particleDraws": 146,
+            "particleVertices": 584,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 276,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 172,
+            "effectRetired": 172,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2924,
+          "costMs": 17.69999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 146,
+            "immediateVertices": 584,
+            "particleDraws": 146,
+            "particleVertices": 584,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 286,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 172,
+            "effectRetired": 172,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2930,
+          "costMs": 21.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 148,
+            "immediateVertices": 592,
+            "particleDraws": 148,
+            "particleVertices": 592,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 280,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 172,
+            "effectRetired": 172,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2932,
+          "costMs": 17,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 148,
+            "immediateVertices": 592,
+            "particleDraws": 148,
+            "particleVertices": 592,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 288,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 172,
+            "effectRetired": 172,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 3107,
+          "costMs": 20.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 140,
+            "immediateVertices": 560,
+            "particleDraws": 140,
+            "particleVertices": 560,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 282,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 186,
+            "effectRetired": 174,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 3404,
+          "costMs": 18.30000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 210,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 198,
+            "effectRetired": 198,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 3467,
+          "costMs": 17,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 222,
+            "programs": 34,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 210,
+            "effectRetired": 198,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [
+        {
+          "frame": 202,
+          "program": 28,
+          "origin": "model",
+          "cpuMs": 6.199999988079071
+        },
+        {
+          "frame": 244,
+          "program": 29,
+          "origin": "model",
+          "cpuMs": 3.4000000059604645
+        },
+        {
+          "frame": 1336,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 4
+        },
+        {
+          "frame": 1406,
+          "program": 31,
+          "origin": "model",
+          "cpuMs": 4.5
+        },
+        {
+          "frame": 1406,
+          "program": 32,
+          "origin": "model",
+          "cpuMs": 4.199999988079071
+        },
+        {
+          "frame": 2277,
+          "program": 33,
+          "origin": "model",
+          "cpuMs": 2.2000000178813934
+        },
+        {
+          "frame": 2677,
+          "program": 34,
+          "origin": "model",
+          "cpuMs": 5.0999999940395355
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    },
+    {
+      "artifact": "yoshi-prepared-first.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60033.59999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.52527777813375,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2.0999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.70983333322737,
+        "p50Ms": 6.299999982118607,
+        "p95Ms": 10.300000011920929,
+        "maxMs": 21.099999994039536
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757733,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.399999999999636
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 2121,
+        "framesWithHitlag": 412,
+        "framesWithDamage": 3508,
+        "stockChanges": [
+          {
+            "frame": 1336,
+            "slot": 1,
+            "stocks": 3
+          },
+          {
+            "frame": 2836,
+            "slot": 1,
+            "stocks": 2
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 72,
+            "attack": 350
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 76,
+            "attack": 380
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 56,
+            "attack": 290
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 400
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 48,
+            "attack": 304
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 397
+          }
+        ]
+      },
+      "slowDraws": [
+        {
+          "frame": 1,
+          "costMs": 19.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 44,
+            "immediateVertices": 176,
+            "particleDraws": 44,
+            "particleVertices": 176,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 219,
+            "programs": 35,
+            "images": 81,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 4,
+            "effectRetired": 4,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 947,
+          "costMs": 17,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 222,
+            "programs": 35,
+            "images": 118,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 69,
+            "effectRetired": 57,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2027,
+          "costMs": 21.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 221,
+            "programs": 35,
+            "images": 131,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 122,
+            "effectRetired": 110,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2387,
+          "costMs": 18.799999982118607,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 223,
+            "programs": 35,
+            "images": 133,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 147,
+            "effectRetired": 135,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 3107,
+          "costMs": 21.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 140,
+            "immediateVertices": 560,
+            "particleDraws": 140,
+            "particleVertices": 560,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 282,
+            "programs": 35,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 186,
+            "effectRetired": 174,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [],
+      "shaderCoverage": {
+        "programs": 35,
+        "prepared": 35,
+        "preparedUsed": 34,
+        "unpreparedUsed": 0
+      },
+      "shaderPreparation": {
+        "requested": 35,
+        "compiled": 35,
+        "cpuMs": 655.5999999940395,
+        "fighterStateUnchanged": true
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    },
+    {
+      "artifact": "yoshi-prepared-repeat.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60036.29999998212,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5356111113064819,
+        "p50Ms": 0.5,
+        "p95Ms": 0.8999999761581421,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.2496388890180326,
+        "p50Ms": 6.800000011920929,
+        "p95Ms": 11.299999982118607,
+        "maxMs": 29.5
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.67063073075775,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.30000000000018
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 2121,
+        "framesWithHitlag": 412,
+        "framesWithDamage": 3508,
+        "stockChanges": [
+          {
+            "frame": 1336,
+            "slot": 1,
+            "stocks": 3
+          },
+          {
+            "frame": 2836,
+            "slot": 1,
+            "stocks": 2
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 72,
+            "attack": 350
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 76,
+            "attack": 380
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 56,
+            "attack": 290
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 400
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 48,
+            "attack": 304
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 397
+          }
+        ]
+      },
+      "slowDraws": [
+        {
+          "frame": 767,
+          "costMs": 29.5,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 220,
+            "programs": 35,
+            "images": 118,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 57,
+            "effectRetired": 45,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 1847,
+          "costMs": 19.5,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 223,
+            "programs": 35,
+            "images": 131,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 109,
+            "effectRetired": 97,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2747,
+          "costMs": 20.899999976158142,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 104,
+            "immediateVertices": 416,
+            "particleDraws": 104,
+            "particleVertices": 416,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 248,
+            "programs": 35,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 171,
+            "effectRetired": 159,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2755,
+          "costMs": 17.799999982118607,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 104,
+            "immediateVertices": 416,
+            "particleDraws": 104,
+            "particleVertices": 416,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 248,
+            "programs": 35,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 171,
+            "effectRetired": 159,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2761,
+          "costMs": 16.799999982118607,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 108,
+            "immediateVertices": 432,
+            "particleDraws": 108,
+            "particleVertices": 432,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 244,
+            "programs": 35,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 171,
+            "effectRetired": 159,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2763,
+          "costMs": 17.5,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 120,
+            "immediateVertices": 480,
+            "particleDraws": 120,
+            "particleVertices": 480,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 264,
+            "programs": 35,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 171,
+            "effectRetired": 159,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 3287,
+          "costMs": 16.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 94,
+            "immediateVertices": 376,
+            "particleDraws": 94,
+            "particleVertices": 376,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 236,
+            "programs": 35,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 198,
+            "effectRetired": 186,
+            "peakEffectModels": 13,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [],
+      "shaderCoverage": {
+        "programs": 35,
+        "prepared": 35,
+        "preparedUsed": 34,
+        "unpreparedUsed": 0
+      },
+      "shaderPreparation": {
+        "requested": 35,
+        "compiled": 35,
+        "cpuMs": 457.90000000596046,
+        "fighterStateUnchanged": true
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    }
+  ],
+  "limitations": [
+    "Selected integration checks, not retail parity proof.",
+    "No presented-FPS or input-to-photon measurement.",
+    "Timing workload uses close combat, not repeated projectile/capture stress.",
+    "18 fighter components have constructor/input integration; nine components, other costumes, complete scenes/menus/audio, networking, parity and deployment remain unfinished."
+  ],
+  "competitiveAcceptanceAchieved": false
+}

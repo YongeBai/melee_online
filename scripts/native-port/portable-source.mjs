@@ -5,6 +5,15 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 const digest=text=>createHash('sha256').update(text).digest('hex');
+export function adaptYoshiAttributes(text) {
+  // Both retail views describe the same buffer. The loader's view calls the
+  // Egg Throw fields padding, but SpecialHi reads them as floats through the
+  // second view. Expose those fields to the typed endian importer as well.
+  const padding='    u8 pad_xEC[0x114 - 0xEC];';
+  const fields=['xEC','xF0','xF4','specialhi_base_angle','xFC','x100','x104','x108','x10C','x110'];
+  if(text.split(padding).length!==2||fields.some(name=>!text.includes('float '+name+';')))throw Error('Yoshi attribute overlay changed');
+  return text.replace(padding,fields.map(name=>'    float '+name+';').join('\n'));
+}
 export function adaptLinkArrowTable(text) {
   // USA 1.02 places it_803F6A84 exactly 23 float words after it_803F6A28.
   // WASM does not preserve adjacency between unrelated C global objects.
@@ -43,6 +52,7 @@ export function preparePortableSource(source,output) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
     if(file==='src/melee/it/kinds/itlinkarrow.c')text=adaptLinkArrowTable(text);
+    if(file==='src/melee/ft/kinds/ftYoshi/types.h')text=adaptYoshiAttributes(text);
     if(file==='libs/dolphin/include/dolphin/gx/GXVert.h') {
       const declarations=['u8','s8','u16','s16','u32','s32','u64','s64','f32','f64'].map(t=>'void portGXWrite_'+t+'('+t+' value);').join('\n');
       replace('#define GXFIFO_ADDR 0xCC008000',declarations+'\n#define GXFIFO_ADDR 0xCC008000');

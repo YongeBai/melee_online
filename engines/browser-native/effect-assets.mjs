@@ -12,6 +12,7 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Ys:{name:'effYoshiDataTable',bank:9,first:9000,count:4,groups:3,models:1},
     Lk:{name:'effLinkDataTable',bank:6,first:null,count:0,groups:0,models:4},
     Cl:{name:'effLinkDataTable',bank:6,first:null,count:0,groups:0,models:4},
     Kp:{name:'effKoopaDataTable',bank:12,first:12000,count:9,groups:1,models:3},

@@ -5,6 +5,45 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Yoshi now passes the original constructor, default-costume rendering, selected
+controller moves and five contact checks. The port imports the thrown egg,
+landing stars, Egg Lay item, captured-fighter shell and Yoshi effect bank.
+The move sequence renders 2,022 frames and includes a charged, aimed egg throw.
+Rendered contacts cover Egg Lay capture/escape (seven damage), thrown egg
+(twelve damage), tongue grab/forward throw (six damage), egg shield (blocked
+hits with zero body damage), and a zero-damage control. An isolated captured-egg
+GPU check verifies all 882 rendered frames, including 199 shell frames.
+
+The charged throw exposed a concrete porting bug. The decompilation's loader
+attribute view labels ten active Egg Throw floats as byte padding. Our typed
+import therefore left them in GameCube byte order; the spin multiplier became
+about 2.7e23 and the original angle-normalization loop stalled. The portable
+header now exposes those floats at the same offsets as the alternate view,
+with compiler assertions for widths and offsets. Launch angle, speed, offsets
+and spin are converted correctly. No gameplay callback or parameter was tuned
+to bypass the failure. Charged travel and close-hit tests now pass.
+
+Three 960×720 two-Yoshi Battlefield samples each submit 3,600 draws in about
+60 seconds with no catch-up simulation callbacks. Simulation means are
+0.538/0.525/0.536 ms; draw-submission means are 7.198/6.710/7.250 ms. The last two
+runs prepare 35 shaders with the driver cache disabled and compile zero shaders
+during play, versus seven in the first run. Their selected gameplay traces match.
+Preparation removes compilation stalls but does not establish a repeatable average
+speedup: prepared draw p95 is 10.3/11.3 ms and maximum is 21.1/29.5 ms. These are
+close-combat engine/submission measurements, not distinct displayed FPS or
+input-to-photon latency.
+
+All 178 tests and the fighter build pass. The shared initialization regression
+covers 27 components, 135 instances, 3,240 dynamic-bone frames and 154 item-model
+instances. These are integration checks, not retail parity proof. Core hash:
+`b4ee4a0c…`. Eighteen fighter components have constructor/input integration;
+nine components, other costumes, complete scenes/menus/audio, retail parity,
+networking and native-port deployment remain unfinished. The overall 720p60
+competitive acceptance criterion is **not achieved**.
+[Yoshi evidence](benchmarks/browser-2026-09-16-native-port-yoshi.json).
+
+Previous Link-family checkpoint:
+
 Link and Young Link now pass default-costume constructor, controller, selected
 move/contact and full-scene rendering checks. The port imports their original
 bomb, boomerang, hookshot, arrow and bow Articles, plus Young Link's milk. Their
