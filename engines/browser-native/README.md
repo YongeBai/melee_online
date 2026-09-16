@@ -553,3 +553,29 @@ until it is destroyed. Clearing the map while collision remains live is rejected
 Full Stage/match startup, gameplay material rendering, audio playback, opponent
 interactions, rematch lifecycle and tournament-wide parity/performance remain
 required. These successful probes do not satisfy the 720p60 acceptance gate.
+
+
+### Two-fighter combat integration probe
+
+Run `node scripts/native-port/probe-constructor.mjs --combat` after building
+`--fighter-init`. The `--combat-control` variant omits attack buttons. Both
+variants automatically fetch the hosted fixtures; no player disc picker exists.
+The test creates two original player-owned Falcons, reuses the original kind
+cache, keeps separate camera subjects and enables each controller with the
+original Player routine. `portProbeRulesInitialize` calls
+`gm_SetupRulesDefaults` and verifies the default damage ratio is 1. This is
+not the complete tournament or VS initialization path.
+
+The combat probe records every scheduler step, checks finite fighter state,
+ownership, callback counts and stocks, then checks platform dropping, jab
+contact, hitlag, knockback, displacement, shielding, grabbing and forward throw
+states/damage. The no-attack control must have no damage, hitlag, knockback or
+shield stun. The recorded SHA-256 excludes pointer addresses and allows a fresh
+browser replay comparison. It does not compare against retail traces.
+
+The verified checkpoint has 120 settling plus 683 input steps, 20% after jabs,
+unchanged percent under shield and 29% after forward throw. Both original
+fighters retain four stocks. Two fresh browsers have matching trace hashes.
+These scheduler steps are not presented frames or a performance benchmark.
+General hit effects, item systems, native match rendering, device sampling,
+audio, complete stage callbacks and rematch teardown remain integration work.

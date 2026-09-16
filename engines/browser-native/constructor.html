@@ -6,6 +6,7 @@
 <pre id="result">Loading hosted assets…</pre>
 <script type="module">
 import create from './melee-fighter-init.mjs';
+import {verifyCombat} from './verify-combat.mjs';
 import {verifyStartup} from './verify-startup.mjs';
 import {convertFighterBase} from './fighter-base-assets.mjs';
 import {readFighterMotions} from './motion-assets.mjs';
@@ -43,7 +44,8 @@ try {
   installResidentFile(module,'EfCaData.dat',convertCaptainEffects(await asset('EfCaData.dat')).image);
   module._portMatchPlayerInitialize();
   module._portFighterPlayerConfigure(0,0,0,0,0,1,0);
-  const withStage=new URLSearchParams(location.search).has('stage');
+  const withStage=new URLSearchParams(location.search).has('stage'),combat=new URLSearchParams(location.search).has('combat');
+  if(combat){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const stageBytes=await asset('GrNBa.dat'),map=convertBattlefieldMap(stageBytes);
     installResidentFile(module,'NativeBattlefieldMap.dat',map.image);
@@ -69,13 +71,26 @@ try {
   report.state=state();
   if(!report.state.every(Number.isFinite)||!report.state[7]||!report.state[8]||report.state[9]!==15||report.state[10]!==1||report.state[11]!==kind||report.state[12]!==0)throw Error('Constructed fighter state/ownership invariant');
   report.constructorVerified=true;
+  let opponent=0;
+  const combatState=o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i));
+  if(combat){
+    module._portStageMapSpawn(1);opponent=module._portFighterConstruct(kind,1);
+    if(!opponent||opponent===object)throw Error('Second original constructor failed');
+    const a=combatState(object),b=combatState(opponent);
+    if(b[9]!==15||b[10]!==1||b[11]!==kind||b[12]!==1||a[8]!==b[8]||a[7]===b[7])throw Error('Shared kind / independent fighter ownership');
+    report.combat={completed:false,initial:[a,b],frames:0};
+  }
   if(new URLSearchParams(location.search).has('step')){
-    report.schedulerContext=withStage?'Battlefield geometry/collision and source spawn, without complete Stage startup, match rules, input or rendering.':'Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
+    report.schedulerContext=combat?'Battlefield geometry/collision, default rules, two player-owned Falcons and scripted normalized combat input. Full match startup and rendering remain incomplete.':withStage?'Battlefield geometry/collision and source spawn, without complete Stage startup, match rules, input or rendering.':'Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
     report.schedulerSteps=0;console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
     for(let i=0;i<120;i++){module._portRuntimeStep();report.schedulerSteps++;}
     report.afterSteps=state();
     if(!report.afterSteps.every(Number.isFinite)||report.afterSteps[9]!==15||report.afterSteps[10]!==1)throw Error('Scheduled fighter state/ownership invariant');
     if(withStage&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on Battlefield');
+    if(combat)await verifyCombat(module,[object,opponent],report.combat,{
+      control:new URLSearchParams(location.search).has('control'),
+      progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
+    });
     if(new URLSearchParams(location.search).has('input')){
       report.input={completed:false,frames:0,states:[]};
       module._Player_80031848(0);

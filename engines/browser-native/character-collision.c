@@ -8,6 +8,8 @@
 #include <melee/ft/ftdata.h>
 #include <melee/pl/player.h>
 #include <melee/pl/types.h>
+#include <melee/gm/gm_1601.h>
+#include <melee/gm/gmvs.h>
 #include <melee/ft/ftanim.h>
 #include <sysdolphin/baselib/id.h>
 #include <melee/ft/ftparts.h>
@@ -99,15 +101,18 @@ HSD_GObj* portFighterInitModelCreate(unsigned kind,unsigned slot,FighterInitBind
     attach_model(object);return object;
 }
 void portMatchPlayerInitialize(void) { Player_InitAllPlayers(); }
+// Probe default rules only; this does not initialize the VS match lifecycle.
+float portProbeRulesInitialize(void) { gm_SetupRulesDefaults(gm_GetStartMeleeRules());return gm_8016B248(); }
 // The original player owner calls the complete Fighter_Create and registers its
 // result. Scheduled gameplay looks up this registration, not just the GObj.
 HSD_GObj* portFighterConstruct(unsigned kind,unsigned slot)
 {
-    if(!portFighterStartupComplete()||kind!=Ft_Kind_Captain||slot>=6||gFtDataList[kind])return NULL;
+    if(!portFighterStartupComplete()||kind!=Ft_Kind_Captain||slot>=6)return NULL;
     if(Player_GetEntity(slot))return NULL;
     Player_SetPlayerCharacter(slot,CKind_Captain);
     Player_SetSlottype(slot,Gm_PKind_Human);
     Player_SetStocks(slot,4);
+    Player_SetHandicap(slot,9);
     Player_80031AD0(slot);
     return Player_GetEntity(slot);
 }
@@ -123,6 +128,9 @@ double portFighterConstructRead(HSD_GObj* object,unsigned field)
     case 9:{unsigned n=0;for(HSD_GObjProc* p=object->proc;p;p=p->child){if(p->gobj!=object||!p->on_invoke||++n>15)abort();}return n;}
     case 10:return fp->gobj==object&&fp->parts!=NULL&&fp->dat_attrs!=NULL&&fp->dat_attrs_backup!=NULL;
     case 11:return fp->kind;case 12:return fp->player_id;
+    case 13:return fp->dmg.x1830_percent;case 14:return fp->dmg.x195c_hitlag_frames;
+    case 15:return fp->dmg.x18A4_knockbackMagnitude;case 16:return fp->facing_dir;
+    case 17:return fp->shield_health;case 18:return Player_GetStocks(fp->player_id);
     default:abort();
     }
 }

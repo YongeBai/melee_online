@@ -1,0 +1,336 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2910494,
+    "wasmSha256": "9d6c1b41cab7542391b67301e86d59edea24e8bbea13d6326d5e9d6878d7a5e5",
+    "recipeSha256": "2ca28ecfee0e0c1dda5d81c37114c781325c64e06d8c8aef2f28015ae2272a4a"
+  },
+  "originalStartup": {
+    "sameKindCacheReused": true,
+    "independentOwners": true,
+    "independentCameraSubjects": true,
+    "callbacksPerFighter": 15,
+    "playerHandicap": 9,
+    "defaultRulesInitializer": "gm_SetupRulesDefaults",
+    "damageRatio": 1,
+    "completeMatchStartup": false
+  },
+  "combat": {
+    "passed": true,
+    "settlingSteps": 120,
+    "inputSteps": 683,
+    "totalSchedulerSteps": 803,
+    "afterDrop": [
+      {
+        "motion": 14,
+        "animation": 2,
+        "animationFrame": 47,
+        "groundOrAir": 0,
+        "position": [
+          -3.5999996662139893,
+          0.00009999999747378752,
+          0
+        ],
+        "callbacks": 15,
+        "ownerValid": true,
+        "kind": 2,
+        "slot": 0,
+        "damage": 0,
+        "hitlag": 0,
+        "knockback": 0,
+        "facing": 1,
+        "shieldHealth": 60,
+        "stocks": 4
+      },
+      {
+        "motion": 14,
+        "animation": 2,
+        "animationFrame": 30,
+        "groundOrAir": 0,
+        "position": [
+          3.5999996662139893,
+          0.00009999999747378752,
+          0
+        ],
+        "callbacks": 15,
+        "ownerValid": true,
+        "kind": 2,
+        "slot": 1,
+        "damage": 0,
+        "hitlag": 0,
+        "knockback": 0,
+        "facing": 1,
+        "shieldHealth": 60,
+        "stocks": 4
+      }
+    ],
+    "afterAttacks": [
+      {
+        "motion": 14,
+        "animation": 2,
+        "animationFrame": 8,
+        "groundOrAir": 0,
+        "position": [
+          9.04541301727295,
+          0.00009999999747378752,
+          0
+        ],
+        "callbacks": 15,
+        "ownerValid": true,
+        "kind": 2,
+        "slot": 0,
+        "damage": 0,
+        "hitlag": 0,
+        "knockback": 0,
+        "facing": 1,
+        "shieldHealth": 60,
+        "stocks": 4
+      },
+      {
+        "motion": 14,
+        "animation": 2,
+        "animationFrame": 2,
+        "groundOrAir": 0,
+        "position": [
+          18.44029426574707,
+          0.00009999999747378752,
+          0
+        ],
+        "callbacks": 15,
+        "ownerValid": true,
+        "kind": 2,
+        "slot": 1,
+        "damage": 20,
+        "hitlag": 0,
+        "knockback": 0,
+        "facing": -1,
+        "shieldHealth": 60,
+        "stocks": 4
+      }
+    ],
+    "peakHitlag": [
+      3,
+      3
+    ],
+    "peakKnockback": [
+      0,
+      26.478429794311523
+    ],
+    "motionStates": [
+      [
+        44,
+        14,
+        15
+      ],
+      [
+        14,
+        79
+      ]
+    ],
+    "shield": {
+      "frames": 90,
+      "motions": [
+        182,
+        179,
+        181
+      ],
+      "peakHitlag": 3,
+      "before": {
+        "motion": 14,
+        "animation": 2,
+        "animationFrame": 2,
+        "groundOrAir": 0,
+        "position": [
+          18.44029426574707,
+          0.00009999999747378752,
+          0
+        ],
+        "callbacks": 15,
+        "ownerValid": true,
+        "kind": 2,
+        "slot": 1,
+        "damage": 20,
+        "hitlag": 0,
+        "knockback": 0,
+        "facing": -1,
+        "shieldHealth": 60,
+        "stocks": 4
+      },
+      "after": {
+        "motion": 179,
+        "animation": -1,
+        "animationFrame": -1,
+        "groundOrAir": 0,
+        "position": [
+          20.216291427612305,
+          0.00009999999747378752,
+          0
+        ],
+        "callbacks": 15,
+        "ownerValid": true,
+        "kind": 2,
+        "slot": 1,
+        "damage": 20,
+        "hitlag": 0,
+        "knockback": 0,
+        "facing": -1,
+        "shieldHealth": 35.08008575439453,
+        "stocks": 4
+      }
+    },
+    "grab": {
+      "frames": 120,
+      "approachFrames": 11,
+      "motions": [
+        [
+          212,
+          213,
+          216,
+          219,
+          14
+        ],
+        [
+          14,
+          226,
+          227,
+          239,
+          86,
+          42
+        ]
+      ],
+      "before": [
+        {
+          "motion": 14,
+          "animation": 2,
+          "animationFrame": 11,
+          "groundOrAir": 0,
+          "position": [
+            13.18663501739502,
+            0.00009999999747378752,
+            0
+          ],
+          "callbacks": 15,
+          "ownerValid": true,
+          "kind": 2,
+          "slot": 0,
+          "damage": 0,
+          "hitlag": 0,
+          "knockback": 0,
+          "facing": 1,
+          "shieldHealth": 60,
+          "stocks": 4
+        },
+        {
+          "motion": 14,
+          "animation": 3,
+          "animationFrame": 6,
+          "groundOrAir": 0,
+          "position": [
+            20.216291427612305,
+            0.00009999999747378752,
+            0
+          ],
+          "callbacks": 15,
+          "ownerValid": true,
+          "kind": 2,
+          "slot": 1,
+          "damage": 20,
+          "hitlag": 0,
+          "knockback": 0,
+          "facing": -1,
+          "shieldHealth": 40.61006164550781,
+          "stocks": 4
+        }
+      ],
+      "after": [
+        {
+          "motion": 14,
+          "animation": 2,
+          "animationFrame": 52,
+          "groundOrAir": 0,
+          "position": [
+            13.18663501739502,
+            0.00009999999747378752,
+            0
+          ],
+          "callbacks": 15,
+          "ownerValid": true,
+          "kind": 2,
+          "slot": 0,
+          "damage": 0,
+          "hitlag": 0,
+          "knockback": 0,
+          "facing": 1,
+          "shieldHealth": 60,
+          "stocks": 4
+        },
+        {
+          "motion": 14,
+          "animation": 2,
+          "animationFrame": 25,
+          "groundOrAir": 0,
+          "position": [
+            50.85589599609375,
+            0.00009999999747378752,
+            0
+          ],
+          "callbacks": 15,
+          "ownerValid": true,
+          "kind": 2,
+          "slot": 1,
+          "damage": 29,
+          "hitlag": 0,
+          "knockback": 0,
+          "facing": -1,
+          "shieldHealth": 49.01002502441406,
+          "stocks": 4
+        }
+      ]
+    },
+    "traceSha256": "f8416124b40ad39a13d7dcf7b0e48c1f99725c898011902a9819b9843ba9d561",
+    "freshBrowserRepeatMatches": true
+  },
+  "control": {
+    "passed": true,
+    "settlingSteps": 120,
+    "inputSteps": 480,
+    "damage": [
+      0,
+      0
+    ],
+    "peakHitlag": [
+      0,
+      0
+    ],
+    "peakKnockback": [
+      0,
+      0
+    ],
+    "shieldMotions": [
+      182,
+      179
+    ],
+    "traceSha256": "bd19009a64c54fc46dfb0e43e988a64b2275a5213fed972d7221708728a16eba"
+  },
+  "validation": {
+    "targetedTests": 86,
+    "soloInputPassed": true,
+    "fighterBrowserPassed": true,
+    "stageMapBrowserPassed": true,
+    "sceneBrowserPassed": true
+  },
+  "playable": false,
+  "performanceMeasured": false,
+  "limitations": [
+    "Two Falcons, one stage, default rules and scripted normalized inputs. No full match lifecycle, complete stage callbacks, general effects, audio playback, browser device sampling, gameplay rendering or measured FPS/latency.",
+    "Rules defaults are initialized, but tournament timers, stock-end handling and the complete VS lifecycle are not integrated.",
+    "Common hit effects and item systems remain incomplete.",
+    "This is same-build repeatability, not a cross-check against retail gameplay or multiplayer rollback.",
+    "Archives and collision arrays remain pinned until the instance is destroyed; rematch cleanup is pending."
+  ]
+}

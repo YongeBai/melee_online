@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Two player-owned Falcons now interact on Battlefield through original fighter
+callbacks. The integration probe covers a platform drop, repeated jabs, hitlag,
+knockback/displacement, shield stun, grabbing and a forward throw. It initializes
+Melee's original default rules: leaving the rules zeroed had allowed damage but
+removed knockback. Both owners share the original kind cache while keeping
+separate camera subjects and all 15 callbacks.
+
+The attack sequence reaches 20%; shielding holds percent at 20%; the forward
+throw reaches 29%. A no-attack control stays at 0% with no hitlag or knockback.
+The attack run executes 803 scheduler steps including settling, and two fresh
+Chrome instances produce identical per-frame trace hashes. This is same-build
+repeatability, not retail gameplay parity or presented FPS. All 86 targeted
+tests and solo-input, fighter, stage-map and scene regressions pass.
+
+Full match startup, tournament rule handling, common effects/items, audio,
+browser device input and gameplay rendering remain incomplete. No 720p60 or
+input-to-photon result exists for the port.
+[Two-fighter combat checkpoint](benchmarks/browser-2026-09-15-native-port-combat.json).
+
 Battlefield's original stage-object path now creates all seven model groups
 (73 source joints and 64 meshes) and runs 120 animation updates. The original
 joint binding functions derive camera and blast-zone bounds from archive markers.
