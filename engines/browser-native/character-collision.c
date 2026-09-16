@@ -365,3 +365,57 @@ double portFighterAnimationRead(HSD_GObj* object,unsigned field,unsigned index)
     case 8:return fp->x1A6C;case 9:if(index>=3)abort();return ((float*)&fp->x1A70)[index];
     default:abort();}
 }
+
+#include <melee/ft/ft_07C1.h>
+#include <melee/ft/ft_07C6.h>
+#include <melee/ft/ft_081B.h>
+#include <melee/ft/ftcamera.h>
+#include <melee/ft/ftwaitanim.h>
+#include <melee/mp/mpcoll.h>
+typedef struct {
+    WaitStruct* idle;WaitStruct* crouch;ftData_x34* thrown;ftData_x38* contacts;
+    UnkFloat6_Camera* camera;ftData_x44_t* ecb;FtSFX* sounds;int* effect_bones;ftData_x58_t* ik;
+} GameplayBinding;
+_Static_assert(sizeof(GameplayBinding)==36&&sizeof(ftData_x44_t)==28&&sizeof(ftData_x58_t)==28,"Gameplay data ABI");
+int portGameplayAttach(HSD_GObj* object,GameplayBinding* binding,unsigned parts)
+{
+    CollisionFixture* c=context(object);Fighter* fp=&c->fighter;
+    if(!binding||!fp->parts||parts>140||!binding->thrown||!binding->contacts||!binding->camera||!binding->ecb||!binding->sounds||!binding->effect_bones||!binding->ik)return -1;
+    const s16 indices[]={binding->ecb->unk0,binding->ecb->unk2,binding->ecb->unk4,binding->ecb->unk6,binding->ecb->unk8,binding->ecb->unkA};
+    for(unsigned i=0;i<6;i++)if(indices[i]<0||(unsigned)indices[i]>=parts||!fp->parts[indices[i]].joint)return -2;
+    if(binding->thrown->x0<0||(unsigned)binding->thrown->x0>=parts||!fp->parts[binding->thrown->x0].joint)return -3;
+    for(unsigned i=0;i<2;i++)if(binding->contacts[i].x0<0||(unsigned)binding->contacts[i].x0>=parts||!fp->parts[binding->contacts[i].x0].joint)return -4;
+    c->data.x24=binding->idle;c->data.x28=binding->crouch;c->data.x34=binding->thrown;c->data.x38=binding->contacts;
+    c->data.x3C=binding->camera;c->data.x44=binding->ecb;c->data.x4C_sfx=binding->sounds;c->data.x54=binding->effect_bones;c->data.x58=binding->ik;
+    ft_80081B38(object);ft_8007C17C(object);ft_8007C630(object);return 0;
+}
+void portGameplayRescale(HSD_GObj* object,float scale)
+{
+    if(!context(object)->data.x44||scale<=0)abort();ft_80081C88(object,scale);
+}
+void portGameplayUpdate(HSD_GObj* object,float alpha)
+{
+    Fighter* fp=&context(object)->fighter;if(!fp->ft_data->x44)abort();
+    if(!(alpha>=0&&alpha<=1))abort();
+    mpColl_LoadECB(&fp->coll_data);mpCollInterpolateECB(&fp->coll_data,alpha);ft_8007C224(object);ft_8007C630(object);
+}
+double portGameplayRead(HSD_GObj* object,unsigned field,unsigned index)
+{
+    Fighter* fp=&context(object)->fighter;CollData* c=&fp->coll_data;
+    switch(field) {
+    case 0:return c->ecb_source.kind;case 1:return c->x0_gobj==object;case 2:return (uintptr_t)c->ecb_source.x108_joint;
+    case 3:if(index>=6)abort();return (uintptr_t)c->ecb_source.x10C_joint[index];
+    case 4:return c->ecb_source.x124;case 5:return c->ecb_source.x128;case 6:return c->ecb_source.x12C;
+    case 7:return c->ledge_snap_x;case 8:return c->ledge_snap_y;case 9:return c->ledge_snap_height;case 10:return c->x50;
+    case 11:return c->floor_skip;case 12:return c->joint_id_skip;case 13:return c->joint_id_only;
+    case 14:return c->x34_flags.b1234;case 15:return c->facing_dir;case 16:return fp->ecb_lock;
+    case 17:return (uintptr_t)&c->desired_ecb;case 18:return (uintptr_t)&c->ecb;
+    case 20:return (uintptr_t)fp->x1064_thrownHitbox.jobj;case 21:return fp->x1064_thrownHitbox.scale;case 22:return fp->x1064_thrownHitbox.state;
+    case 23:if(index>=3)abort();return ((float*)&fp->x1064_thrownHitbox.x4C)[index];
+    case 24:if(index>=3)abort();return ((float*)&fp->x1064_thrownHitbox.x58)[index];
+    case 25:if(index>=2)abort();return (uintptr_t)fp->x1614[index].x4;
+    case 26:if(index>=2)abort();return fp->x1614[index].x0;
+    case 27:if(index>=6)abort();return ((float*)&fp->x1614[index/3].x8)[index%3];
+    default:abort();
+    }
+}

@@ -25,6 +25,7 @@ try {
   const entities={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"'};
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
   if(startup||fighterInit) {
+    if(fighterInit&&verification.dynamics?.rows.some(r=>!r.animation?.gameplay?.passed||r.animation.gameplay.importedFields!==9||r.animation.gameplay.updates!==192))throw Error('Incomplete fighter environment-collision coverage');
     if(fighterInit&&(!verification.commandFields?.passed||verification.commandFields.fields!==266||verification.dynamics?.rows.some(r=>!r.animation?.passed||r.animation.clips.length!==3||r.animation.instances!==2||r.animation.frames!==192)))throw Error('Incomplete original fighter animation integration');
     if(fighterInit&&(!verification.dynamics?.passed||verification.dynamics.rows.length!==27||verification.dynamics.sets!==40||verification.dynamics.nodes!==168||verification.dynamics.frames!==3240))throw Error('Incomplete original dynamic-bone coverage');
     if(fighterInit&&(!verification.perFighter?.passed||verification.perFighter.rows.length!==27||verification.perFighter.instances!==135))throw Error("Incomplete original per-fighter initialization");

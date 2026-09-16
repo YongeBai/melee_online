@@ -1,0 +1,354 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2811093,
+    "wasmSha256": "26b79aa54f7f2385293857d677ef046391f89d43d8be79cfa5589662fc95b083",
+    "portableRecipe": "9be14bbcd4f3095eb08309e44b41a1c982857b5608ba80960bfcfaba2c2b4b6a"
+  },
+  "importedFtDataFields": [
+    "x24 idle choices",
+    "x28 crouch idle choices",
+    "x34 thrown-hitbox descriptor",
+    "x38 body-contact descriptors",
+    "x3C camera extents",
+    "x44 environment collision and ledge parameters",
+    "x4C sound IDs",
+    "x54 effect bone indices",
+    "x58 foot-placement parameters"
+  ],
+  "originalFunctions": [
+    "ft_80081B38",
+    "ft_80081C88",
+    "ft_8007C17C",
+    "ft_8007C224",
+    "ft_8007C630",
+    "mpColl_LoadECB",
+    "mpCollInterpolateECB"
+  ],
+  "gameplay": {
+    "passed": true,
+    "components": 27,
+    "updates": 5184,
+    "checks": 117908,
+    "scalarComparisons": 1862,
+    "maxContactError": 0.0000019073486328125,
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlFx.dat",
+        "passed": true,
+        "checks": 4369,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 71,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlCa.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlDk.dat",
+        "passed": true,
+        "checks": 4357,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 59,
+        "idleTables": 0,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlKb.dat",
+        "passed": true,
+        "checks": 4374,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 76,
+        "idleTables": 2,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlKp.dat",
+        "passed": true,
+        "checks": 4366,
+        "updates": 192,
+        "maxContactError": 0.0000019073486328125,
+        "importedFields": 9,
+        "scalarValues": 68,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlLk.dat",
+        "passed": true,
+        "checks": 4361,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 63,
+        "idleTables": 0,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlSk.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 9.5367431640625e-7,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlNs.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlPe.dat",
+        "passed": true,
+        "checks": 4372,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 74,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlPp.dat",
+        "passed": true,
+        "checks": 4362,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 64,
+        "idleTables": 0,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlNn.dat",
+        "passed": true,
+        "checks": 4362,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 64,
+        "idleTables": 0,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlPk.dat",
+        "passed": true,
+        "checks": 4362,
+        "updates": 192,
+        "maxContactError": 9.5367431640625e-7,
+        "importedFields": 9,
+        "scalarValues": 64,
+        "idleTables": 0,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlPr.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlSs.dat",
+        "passed": true,
+        "checks": 4355,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 57,
+        "idleTables": 0,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlYs.dat",
+        "passed": true,
+        "checks": 4362,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 64,
+        "idleTables": 0,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlZd.dat",
+        "passed": true,
+        "checks": 4372,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 74,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlLg.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlMt.dat",
+        "passed": true,
+        "checks": 4372,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 74,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlMs.dat",
+        "passed": true,
+        "checks": 4372,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 74,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlGw.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlDr.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlCl.dat",
+        "passed": true,
+        "checks": 4369,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 71,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlPc.dat",
+        "passed": true,
+        "checks": 4370,
+        "updates": 192,
+        "maxContactError": 9.5367431640625e-7,
+        "importedFields": 9,
+        "scalarValues": 72,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlFe.dat",
+        "passed": true,
+        "checks": 4373,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 75,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlGn.dat",
+        "passed": true,
+        "checks": 4366,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 68,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      },
+      {
+        "name": "PlFc.dat",
+        "passed": true,
+        "checks": 4368,
+        "updates": 192,
+        "maxContactError": 0,
+        "importedFields": 9,
+        "scalarValues": 70,
+        "idleTables": 1,
+        "limitation": "Original character collision initialization, resizing, animated ECB generation/interpolation, thrown-hitbox history and body-contact transforms. Stage line traversal, grounding, ledge grabs and full combat are not executed; camera/IK/sound/idle tables are imported but their consumers are not verified here."
+      }
+    ]
+  },
+  "regression": {
+    "targetedTests": 76,
+    "animationClips": 81,
+    "animationUpdates": 5184,
+    "dynamicsChecks": 363071,
+    "perFighterChecks": 69876,
+    "sceneBinaryUnchanged": true
+  },
+  "originalFighterCreateExecuted": false,
+  "stageCollisionTraversalExecuted": false,
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "acceptanceCriteriaMet": false
+}

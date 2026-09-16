@@ -388,3 +388,18 @@ The portable Fighter animation union retains numeric PowerPC bit positions on
 WASM. Its twelve fields are checked through the actual C members by the existing
 command-layout verifier. Retail instruction inspection independently confirms
 the source-kind, part-mask and transition-bone positions.
+
+## Character gameplay data and collision boxes
+
+`gameplay-assets.mjs` imports nine additional `ftData` fields into a dedicated
+root. It validates weighted idle tables, signed 16-bit collision bone indices,
+packed foot-placement indices, float dimensions and aliased sound-ID lists.
+The complete character root remains unavailable until all reachable data is typed.
+
+The wider target binds these fields to its existing initialized fighters and
+executes original environment collision-box setup/resize, `mpColl_LoadECB`,
+`mpCollInterpolateECB`, thrown-hitbox initialization/history and body-contact
+transforms. `verify-gameplay.mjs` checks these over the same animated sequences
+as the fighter-animation fixture. Camera, sound, idle and foot-placement data
+are imported; their complete gameplay consumers remain unverified. Stage-line
+traversal, landing/ledge interactions, combat and full match execution are pending.

@@ -5,6 +5,29 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Nine additional character-data fields are now imported with explicit layouts:
+idle/crouch choices, thrown-hitbox and body-contact descriptors, camera extents,
+environment-collision/ledge parameters, sound IDs, effect bones and foot-placement
+parameters. Packed bone bytes and signed shorts retain their meanings; shared
+sound lists retain aliasing. The original full ftData symbol remains hidden
+until the remaining graphs are typed.
+
+Original environment collision-box initialization, resizing, animated generation
+and interpolation now run on the same fighter objects as animation and dynamics.
+Across 27 components, 5,184 updates pass 117,908 checks, including thrown-hitbox
+position history and body-contact transforms. Maximum contact-coordinate error
+against independent matrix multiplication is 0.00000190735. The original resize
+routine applies its scale argument to ledge margins/offsets but takes size limits
+from the fighter's own scale; that distinction is preserved.
+
+All 76 targeted tests and the wider browser suite pass. The smaller scene binary
+is byte-identical to its verified predecessor. The wider module is 2,811,093
+bytes. Stage-line traversal, landing, ledge grabs, action scripts and combat are
+still unexecuted, and the native port still has no playable match or FPS result.
+Remaining base-data graph families include demo motions, per-part animations,
+shield poses and character items.
+[Gameplay-data/collision checkpoint](benchmarks/browser-2026-09-15-native-port-gameplay-parameters.json).
+
 Original fighter animation attachment, interpolation-skeleton construction,
 blending, frame progression and dynamics now execute on the same initialized
 fighter objects. All 27 components pass 81 real clips and 5,184 updates across
