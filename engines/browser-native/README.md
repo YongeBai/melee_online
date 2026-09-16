@@ -13,7 +13,8 @@ full fighter action-state machine and renderer are pending.
 The separate scene bring-up target now uses original HSD class ownership,
 reference resolution, matrix updates, destruction and Melee's `lbAnim` attachment.
 It drives the diagnostic GPU view, but the original GX material/draw boundary and
-fighter creation are still incomplete.
+complete roster creation are still incomplete. Captain Falcon now completes the
+original player-owned constructor; the final section describes its limited probe.
 
 ## Reproduce
 
@@ -478,7 +479,39 @@ through `portFighterConstruct`. The probe does not replace it with the limited
 model owner or skip its effects, shadow, OnLoad or state setup. It runs in a fresh
 runtime because a failed original constructor can leave partial allocations.
 
-The current probe reaches the missing `EfCaData.dat` load and exits with status 2.
-`dist/native-port/constructor-probe.json` records that incomplete result. Passing
-the separate fighter/scene regression suites does not mean this constructor
-probe passes, and construction alone will not establish playable gameplay.
+The probe now initializes original camera subjects, loads the converted Captain
+effect bank, initializes players, and calls `Player_80031AD0`, which owns and
+registers the result of `Fighter_Create`. It verifies all 15 callbacks, fighter
+ownership and the initial Fall state. Calling the constructor alone without
+player registration is insufficient: gameplay looks up the owning player entity.
+
+`node scripts/native-port/probe-constructor.mjs --step` additionally runs 120
+original scheduler calls in a fresh runtime. This is isolated bring-up without
+stage geometry, bounds, match rules, input or rendering. Empty bounds cause a
+Fall/death/Rebirth sequence; the result is not match validation or performance.
+The normal and step reports are separate ignored JSON artifacts. A timed-out
+probe captures a symbolized paused stack; any error or missing required milestone
+returns status 2. Constructor success does not satisfy the 720p60 acceptance gate.
+
+## Effect bank and particle bring-up
+
+`effect-assets.mjs` imports Captain's six effect descriptors and all nested
+scene/animation data, 17 particle command definitions and seven texture groups.
+HSD pointer relocation and particle-bank-relative relocation are separate.
+Packed scripts, pixels and palettes retain their original bytes; the source
+`psReadFloat` adapter assembles big-endian operand bits on the little-endian host.
+All source HSD relocations must be typed or import fails.
+
+`verify-effects.mjs` uses original `efLib_Init`, `efAsync_LoadSync`,
+`efLib_Create`, model callbacks and both particle update callbacks. An empty HSD
+joint is the test attachment owner; the test does not claim fighter attachment.
+Two concurrent instances per effect must animate independently, expire, drain
+particles naturally and return all ten measured object pools to baseline. The
+browser check validates finite particle positions/velocities/sizes and 4,104
+packed float bit patterns. It does not cover every particle opcode, GPU drawing,
+all effects, match behavior or retail numerical parity.
+
+The platform interrupt mask preserves nested disable/restore state while C runs
+synchronously on one browser thread. Any future threading or asynchronous C
+suspension needs a corresponding synchronization implementation. Original audio
+calls beyond integrated functionality still fail explicitly.

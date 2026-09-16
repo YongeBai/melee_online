@@ -6,6 +6,7 @@
 <pre id="result">Loading hosted assets…</pre>
 <script type="module">
 import create from './melee-fighter-init.mjs';
+import {verifyEffects} from './verify-effects.mjs';
 import {verifyItemModels} from './verify-item-models.mjs';
 import {verifyCommandFields} from './verify-commands.mjs';
 import {verifyStartup,verifyStartupOrder} from './verify-startup.mjs';
@@ -23,6 +24,7 @@ try {
   report.commandFields=verifyCommandFields(module);
   report.dynamics=verifyDynamics(module,fighters,models,animations);
   report.itemModels=verifyItemModels(module,fighters);
+  report.effects=verifyEffects(module,await asset('EfCaData.dat'));
   document.querySelector('#result').textContent=JSON.stringify(report,null,2);document.documentElement.dataset.result='passed';
 } catch(error){document.querySelector('#result').textContent=String(error.stack||error)+'\n'+diagnostics.join('\n');document.documentElement.dataset.result='failed';}
 </script>

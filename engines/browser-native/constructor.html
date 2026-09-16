@@ -12,10 +12,11 @@ import {readFighterMotions} from './motion-assets.mjs';
 import {convertMotionAnimations} from './motion-animations.mjs';
 import {motionSpec} from './motion-spec.mjs';
 import {attributeSpec} from './attribute-spec.mjs';
+import {convertCaptainEffects} from './effect-assets.mjs';
 import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
-const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();};
+const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
   const modelNames=await (await fetch('./model-fixtures.json')).json();
@@ -35,12 +36,29 @@ try {
   const motions=readFighterMotions(baseBytes,'PlCa.dat',motionSpec),bundle=convertMotionAnimations(animationBytes,motions.motions);
   installResidentBytes(module,'PlCaAJ.dat',bundle.image);
   loadCostume(module,models.find(m=>m.name==='PlCaNr.dat').bytes,'PlCaNr.dat',kind);
+  module._portMatchCameraInitialize();
+  module._portEffectsInitialize();
+  installResidentFile(module,'EfCaData.dat',convertCaptainEffects(await asset('EfCaData.dat')).image);
+  module._portMatchPlayerInitialize();
   module._portFighterPlayerConfigure(0,0,0,0,0,1,0);
   report.constructorAttempted=true;
+  console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
   const object=module._portFighterConstruct(kind,0);
   if(!object)throw Error('Original constructor returned no fighter');
   report.constructorCompleted=true;report.object=object;
+  const state=()=>Array.from({length:13},(_,i)=>module._portFighterConstructRead(object,i));
+  report.state=state();
+  if(!report.state.every(Number.isFinite)||!report.state[7]||!report.state[8]||report.state[9]!==15||report.state[10]!==1||report.state[11]!==kind||report.state[12]!==0)throw Error('Constructed fighter state/ownership invariant');
+  report.constructorVerified=true;
+  if(new URLSearchParams(location.search).has('step')){
+    report.schedulerContext='Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
+    report.schedulerSteps=0;console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
+    for(let i=0;i<120;i++){module._portRuntimeStep();report.schedulerSteps++;}
+    report.afterSteps=state();
+    if(!report.afterSteps.every(Number.isFinite)||report.afterSteps[9]!==15||report.afterSteps[10]!==1)throw Error('Scheduled fighter state/ownership invariant');
+  }
 } catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}
 document.querySelector('#result').textContent=JSON.stringify(report,null,2);
 document.documentElement.dataset.result=report.constructorCompleted?'constructed':'blocked';
+console.log('NATIVE_CONSTRUCTOR_RESULT '+JSON.stringify(report));
 </script>

@@ -123,6 +123,13 @@ double portSceneMetric(unsigned count,HSD_JObj** nodes,unsigned metric)
     return value;
 }
 unsigned portSceneLiveJoints(void) { return HSD_CLASS_INFO(&hsdJObj)->head.nb_exist; }
+unsigned portSceneLiveMetric(unsigned field)
+{
+    switch(field){case 0:return HSD_CLASS_INFO(&hsdJObj)->head.nb_exist;case 1:return HSD_CLASS_INFO(&hsdDObj)->head.nb_exist;
+    case 2:return HSD_CLASS_INFO(&hsdPObj)->head.nb_exist;case 3:return HSD_CLASS_INFO(&hsdMObj)->head.nb_exist;case 4:return HSD_CLASS_INFO(&hsdTObj)->head.nb_exist;
+    case 5:return HSD_AObjGetAllocData()->used;case 6:return HSD_IDGetAllocData()->used;case 7:return HSD_VecGetAllocData()->used;
+    case 8:return HSD_MtxGetAllocData()->used;case 9:return HSD_FObjGetAllocData()->used;default:abort();}
+}
 unsigned portSceneLiveObjects(void)
 {
     return HSD_CLASS_INFO(&hsdJObj)->head.nb_exist+HSD_CLASS_INFO(&hsdDObj)->head.nb_exist+

@@ -15,6 +15,7 @@
 #include <melee/ft/kinds/ftCommon/types.h>
 #include <melee/lb/lbcollision.h>
 #include <sysdolphin/baselib/gobj.h>
+#include <sysdolphin/baselib/gobjproc.h>
 #include <sysdolphin/baselib/gobjuserdata.h>
 #include <sysdolphin/baselib/jobj.h>
 #include <sysdolphin/baselib/dobj.h>
@@ -97,13 +98,33 @@ HSD_GObj* portFighterInitModelCreate(unsigned kind,unsigned slot,FighterInitBind
     Fighter_UnkInitLoad_80068914(object,&info);gFtDataList[kind]=previous;
     attach_model(object);return object;
 }
-// This calls the complete original constructor. It does not use CollisionFixture
-// or skip effects, OnLoad, shadows, state initialization or scheduled callbacks.
+void portMatchPlayerInitialize(void) { Player_InitAllPlayers(); }
+// The original player owner calls the complete Fighter_Create and registers its
+// result. Scheduled gameplay looks up this registration, not just the GObj.
 HSD_GObj* portFighterConstruct(unsigned kind,unsigned slot)
 {
     if(!portFighterStartupComplete()||kind!=Ft_Kind_Captain||slot>=6||gFtDataList[kind])return NULL;
-    struct plAllocInfo info={0};info.internal_id=kind;info.slot=slot;info.x5=-1;
-    return Fighter_Create(&info);
+    if(Player_GetEntity(slot))return NULL;
+    Player_SetPlayerCharacter(slot,CKind_Captain);
+    Player_SetSlottype(slot,Gm_PKind_Human);
+    Player_SetStocks(slot,4);
+    Player_80031AD0(slot);
+    return Player_GetEntity(slot);
+}
+double portFighterConstructRead(HSD_GObj* object,unsigned field)
+{
+    if(!object||object->classifier!=HSD_GOBJ_CLASS_FIGHTER||!object->user_data)abort();
+    Fighter* fp=object->user_data;
+    switch(field){
+    case 0:return fp->motion_id;case 1:return fp->anim_id;
+    case 2:return fp->cur_anim_frame;case 3:return fp->ground_or_air;
+    case 4:return fp->cur_pos.x;case 5:return fp->cur_pos.y;case 6:return fp->cur_pos.z;
+    case 7:return (uintptr_t)fp->x890_cameraBox;case 8:return (uintptr_t)fp->ft_data;
+    case 9:{unsigned n=0;for(HSD_GObjProc* p=object->proc;p;p=p->child){if(p->gobj!=object||!p->on_invoke||++n>15)abort();}return n;}
+    case 10:return fp->gobj==object&&fp->parts!=NULL&&fp->dat_attrs!=NULL&&fp->dat_attrs_backup!=NULL;
+    case 11:return fp->kind;case 12:return fp->player_id;
+    default:abort();
+    }
 }
 void portFighterPlayerConfigure(unsigned slot,unsigned controller,unsigned costume,unsigned team,unsigned player,float scale,unsigned flags)
 {

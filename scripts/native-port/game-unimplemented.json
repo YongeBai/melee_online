@@ -1,6 +1,7 @@
 {
   "description": "Explicit abort boundaries for the original fighter callback graph. These functions are not implemented or silently skipped. No playable build may exercise them.",
   "functions": [
+    "GXEnableTexOffsets",
     "AISetStreamVolLeft",
     "AISetStreamVolRight",
     "ARQPostRequest",
@@ -79,10 +80,8 @@
     "GXSetViewportJitter",
     "GXSetZTexture",
     "GXWaitDrawDone",
-    "OSDisableInterrupts",
     "OSGetTime",
     "OSResetSystem",
-    "OSRestoreInterrupts",
     "OSTicksToCalendarTime",
     "VIFlush",
     "VIGetNextField",

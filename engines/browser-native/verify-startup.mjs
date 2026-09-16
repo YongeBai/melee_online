@@ -4,6 +4,9 @@ import {installResidentFile} from './resident-files.mjs';
 import {loadCostume} from './costume-assets.mjs';
 import {motionSpec} from './motion-spec.mjs';
 export function verifyStartup(module,input,models) {
+  const outer=module._OSDisableInterrupts(),inner=module._OSDisableInterrupts();
+  if(outer!==1||inner!==0||module._OSRestoreInterrupts(inner)!==0||module._OSRestoreInterrupts(outer)!==0||module._OSRestoreInterrupts(1)!==1)throw Error('Nested platform interrupt-mask state');
+
   const require=(condition,message)=>{if(!condition)throw Error(message);};
   const resetChecks=module._portStartupResetCheck();require(resetChecks>1000,'Incomplete startup reset checks');
   const converted=convertSharedParameters(input,sharedSpec);installResidentFile(module,'PlCo.dat',converted.image);

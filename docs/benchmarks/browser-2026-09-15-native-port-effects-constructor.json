@@ -1,0 +1,157 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2901713,
+    "wasmSha256": "c2bc37881aedc5f777b2a4015f91acaf62c7b8e989a4c2902f321bf0ed2035be"
+  },
+  "effects": {
+    "passed": true,
+    "checks": 50508,
+    "operandChecks": 4104,
+    "commands": 17,
+    "textureGroups": 7,
+    "models": [
+      {
+        "index": 0,
+        "nodes": 13,
+        "meshes": 13,
+        "instances": 2,
+        "updates": 202,
+        "lifetime": 100,
+        "drainFrames": 0
+      },
+      {
+        "index": 1,
+        "nodes": 14,
+        "meshes": 12,
+        "instances": 2,
+        "updates": 182,
+        "lifetime": 90.0999984741211,
+        "drainFrames": 0
+      },
+      {
+        "index": 2,
+        "nodes": 10,
+        "meshes": 5,
+        "instances": 2,
+        "updates": 162,
+        "lifetime": 80,
+        "drainFrames": 0
+      },
+      {
+        "index": 3,
+        "nodes": 4,
+        "meshes": 3,
+        "instances": 2,
+        "updates": 52,
+        "lifetime": 25,
+        "drainFrames": 21
+      },
+      {
+        "index": 4,
+        "nodes": 1,
+        "meshes": 1,
+        "instances": 2,
+        "updates": 52,
+        "lifetime": 25,
+        "drainFrames": 0
+      },
+      {
+        "index": 5,
+        "nodes": 4,
+        "meshes": 2,
+        "instances": 2,
+        "updates": 92,
+        "lifetime": 45,
+        "drainFrames": 0
+      }
+    ],
+    "updates": 742,
+    "changed": 7780,
+    "particleSteps": 386,
+    "peakParticles": 187,
+    "peakGenerators": 120,
+    "retainedArchiveAllocations": 2,
+    "limitation": "Original effect bank loading, model creation, animation, countdown and expiration. No comprehensive particle interpreter corpus, GPU drawing, fighter-attached effects or match performance."
+  },
+  "constructor": {
+    "attempted": true,
+    "completed": true,
+    "verified": true,
+    "functions": [
+      "Player_80031AD0",
+      "Fighter_Create"
+    ],
+    "stateFields": [
+      "motion",
+      "animation",
+      "animationFrame",
+      "groundOrAir",
+      "x",
+      "y",
+      "z",
+      "cameraSubject",
+      "baseData",
+      "callbackCount",
+      "ownedPointersValid",
+      "kind",
+      "playerSlot"
+    ],
+    "state": [
+      29,
+      20,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1183648,
+      2268032,
+      15,
+      1,
+      2,
+      0
+    ],
+    "baseArchiveChecks": 899695,
+    "baseArchiveBytes": 914670,
+    "baseArchiveRelocations": 2135
+  },
+  "isolatedScheduler": {
+    "steps": 120,
+    "after": [
+      12,
+      2,
+      59,
+      1,
+      0,
+      0,
+      0,
+      1183648,
+      2268032,
+      15,
+      1,
+      2,
+      0
+    ],
+    "context": "Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation."
+  },
+  "validation": {
+    "targetedTests": 84,
+    "fighterBrowserPassed": true,
+    "sceneBrowserPassed": true
+  },
+  "limitations": [
+    "Only Captain Falcon complete construction is tested.",
+    "No initialized stage or match rules in scheduler probe; empty bounds cause death/rebirth.",
+    "No gameplay renderer, audio playback, input/combat parity or 720p60 measurement.",
+    "No visual camera validation of a native match yet."
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false
+}

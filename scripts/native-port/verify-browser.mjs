@@ -25,6 +25,7 @@ try {
   const entities={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"'};
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
   if(startup||fighterInit) {
+    if(fighterInit&&(!verification.effects?.passed||verification.effects.models.length!==6||verification.effects.updates!==742||verification.effects.operandChecks!==4104||!verification.effects.peakParticles||!verification.effects.peakGenerators))throw Error('Incomplete original effect model/particle lifecycle coverage');
     if(fighterInit&&(!verification.itemModels?.passed||verification.itemModels.rows.length!==27||verification.itemModels.rows.flatMap(r=>r.articles).length!==77||verification.itemModels.instances!==154||verification.itemModels.updates!==616||verification.itemModels.packedFlagChecks!==65536))throw Error('Incomplete original item model and hurtbox coverage');
     if(fighterInit&&verification.dynamics?.rows.some(r=>!r.animation?.originalMotionLoader||r.animation.loaderTreeChecks!==18||r.animation.liveBufferChecks!==6))throw Error('Incomplete owned motion-loader integration');
     if(fighterInit&&verification.dynamics?.rows.some(r=>!r.animation?.secondary?.passed||!r.animation.secondary.changedValues||r.animation.secondary.applications!==4*r.animation.secondary.variants||r.animation.secondary.poseApplications!==(r.name==='PlYs.dat'?0:6)))throw Error('Incomplete secondary animation and shield-pose coverage');

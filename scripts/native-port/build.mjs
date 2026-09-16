@@ -47,11 +47,11 @@ for(const [name,file] of [['float-utils',path.join(vendor,'Common/FloatUtils.cpp
 // This SDK file mixes portable C with inline PPC assembly. Select complete
 // unchanged C definitions from the pinned source rather than compile asm stubs.
 const sdkMatrix=fs.readFileSync(path.join(upstream,'libs/dolphin/src/dolphin/mtx/mtx.c'),'utf8');
-const selectedSdkFunctions=['MTXRotRad','C_MTXLookAt',...(fighterInit?['MTXLightPerspective']:[])];
+const selectedSdkFunctions=['MTXRotRad','C_MTXLookAt',...(fighterInit?['MTXLightFrustum','MTXLightPerspective','MTXLightOrtho']:[])];
 const selectedText=[['void MTXRotRad(', '\nvoid PSMTXRotTrig('],
-  ['void C_MTXLookAt(', '\nvoid MTXLightFrustum('],...(fighterInit?[['void MTXLightPerspective(', '\nvoid MTXLightOrtho(']]:[])].map(([start,end])=>{
-    if(sdkMatrix.split(start).length!==2||sdkMatrix.split(end).length!==2)throw Error('SDK function selection changed');
-    const from=sdkMatrix.indexOf(start),to=sdkMatrix.indexOf(end,from);
+  ['void C_MTXLookAt(', '\nvoid MTXLightFrustum('],...(fighterInit?[['void MTXLightFrustum(', null]]:[])].map(([start,end])=>{
+    if(sdkMatrix.split(start).length!==2||(end!==null&&sdkMatrix.split(end).length!==2))throw Error('SDK function selection changed');
+    const from=sdkMatrix.indexOf(start),to=end===null?sdkMatrix.length:sdkMatrix.indexOf(end,from);
     if(to<from)throw Error('Invalid SDK selection');return sdkMatrix.slice(from,to);
   });
 const selectedSdk=path.join(output,'sdk-camera.c');
@@ -87,7 +87,7 @@ const units = ['src/melee/mp/mpcoll.c', 'src/melee/mp/mplib.c', 'src/melee/gr/gr
   ...['gobj','gobjproc','gobjplink','gobjgxlink','gobjobject','gobjuserdata'].map(n=>'src/sysdolphin/baselib/'+n+'.c')];
 let exports = ['malloc', 'free', 'portInterpolate', 'portSeed', 'portRandom',
   'portStagePrune', 'portStageMetric', 'portArchiveOpen', 'portArchiveSymbol',
-  'portArchiveClose', 'portRuntimeInit', 'portRuntimeStep', 'portRuntimeProbeCreate',
+  'portArchiveClose', 'portRuntimeInit', 'OSDisableInterrupts', 'OSRestoreInterrupts', 'portRuntimeStep', 'portRuntimeProbeCreate',
   'portRuntimeProbePause', 'portRuntimeProbeRead', 'portRuntimeProbeReset',
   'portRuntimeProbeClear', 'portRuntimeHeapFree', 'portRuntimeObjectsUsed', 'portRuntimeProcsUsed',
   'portFighterAttribute', 'portFighterPhysicsProbe', 'portAnimationCreate', 'portAnimationRun', 'portAnimationDestroy',
@@ -123,9 +123,9 @@ if(scene) {
   exports.push('portFighterModelLive','portFighterModelCreate','portCostumeLoad','portCostumeAnimation','portCostumeRelease','portMaterialColorSelect','portMaterialColorRead','portMaterialAttach','portMaterialSelect','portMaterialReset','portMaterialRead','portCostumeCount','portVisibilityAttach','portVisibilitySelect','portVisibilityApply','portVisibilityRead','portCollisionAuxiliary','portCollisionAuxiliaryRead','portLightColor','GXInitLightSpot','GXInitLightDistAttn','GXInitLightPos','GXInitLightDir','GXInitLightColor','GXGetLightColor','portCollisionPartRead','portAttributeField','portAttributeSize','portAttributesLoad','portCollisionAttach','portCollisionReset','portCollisionWorld','portCollisionRead','portSharedInitialize','portSharedGlobal','portSceneJointAnimation','portCpuScript','portCpuChoose','portColorCreate','portColorDestroy','portColorSelect','portColorStep','portColorRead','portSharedField','portSharedPart','portSharedLanding','portMotionCreate','portMotionDestroy','portMotionLoad','portMotionEntry','portMotionLive','portMotionBuffers','portFilePins',
     'portSceneObjectDeleteNextStep','portSceneObjectCreate','portSceneObjectRoot','portSceneObjectFree','portSceneLoad','portSceneDestroy','portSceneCollect','portSceneMatrices','portSceneMetric','portSceneLiveJoints',
     'portFileInstall','portFileCount','portFileBytes','portFileReads','portFileAllocations','portFileClear','portFileArchive','portFileArchiveClose','portFileArchivePair',
-    'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects');
+    'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects','portSceneLiveMetric');
 }
-if(fighterInit)exports.push('portFighterConstruct','portItemModelCreate','portItemAttrFlags','portItemModelTransform','portItemModelRead','portOriginalItemModelLive','portFighterMotionRegister','portFighterMotionUnregister','portFighterMotionAttach','portFighterMotionLoad','portFighterMotionRead','portSecondaryAttach','portPartAnimationApply','portPartAnimationStep','portPartAnimationClear','portPartAnimationRead','portShieldPoseApply','portSecondaryJointRead','portGameplayAttach','portGameplayRescale','portGameplayUpdate','portGameplayRead','portFighterAnimationInitialize','portFighterAnimationStart','portFighterAnimationStep','portFighterAnimationRead','portDynamicsInitialize','portDynamicsPoolFree','portDynamicsAttach','portDynamicsRead','portDynamicsStep','portDynamicsSelect','Fighter_Create','portFighterInitModelCreate','portFighterPlayerConfigure','portFighterInitRead');
+if(fighterInit)exports.push('portMatchCameraInitialize','portParticleOperandBits','portEffectsInitialize','portEffectsLoad','portEffectsRead','portEffectCreate','portEffectParentCreate','portEffectLife','portEffectStep','portEffectsParticleStep','portMatchPlayerInitialize','portFighterConstruct','portFighterConstructRead','portItemModelCreate','portItemAttrFlags','portItemModelTransform','portItemModelRead','portOriginalItemModelLive','portFighterMotionRegister','portFighterMotionUnregister','portFighterMotionAttach','portFighterMotionLoad','portFighterMotionRead','portSecondaryAttach','portPartAnimationApply','portPartAnimationStep','portPartAnimationClear','portPartAnimationRead','portShieldPoseApply','portSecondaryJointRead','portGameplayAttach','portGameplayRescale','portGameplayUpdate','portGameplayRead','portFighterAnimationInitialize','portFighterAnimationStart','portFighterAnimationStep','portFighterAnimationRead','portDynamicsInitialize','portDynamicsPoolFree','portDynamicsAttach','portDynamicsRead','portDynamicsStep','portDynamicsSelect','Fighter_Create','portFighterInitModelCreate','portFighterPlayerConfigure','portFighterInitRead');
 if(startup)exports.push('portFighterInitialize','portStartupMetric','portStartupResetCheck');
 const selectedUnits=scene?units.filter(file=>!file.startsWith('src/melee/')):units;
 selectedUnits.push('src/melee/lb/lbcommand.c');
@@ -143,13 +143,13 @@ execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.
   path.join(root, 'engines/browser-native/skin.c'),
   ...(sceneInputs?[attributeProbe,path.join(root,'engines/browser-native/attributes.c'),path.join(root,'engines/browser-native/character-collision.c'),sharedProbe,path.join(root,'engines/browser-native/cpu.c'),path.join(root,'engines/browser-native/colors.c'),path.join(root,'engines/browser-native/shared.c'),path.join(root,'engines/browser-native/motions.c'),path.join(root,'engines/browser-native/resident-files.c'),...sceneInputs.files]:[]),
   ...(startup?[path.join(root,'engines/browser-native/startup.c')]:[]),
-  ...(gameInputs?[path.join(root,'engines/browser-native/item-model.c'),...gameInputs.files]:[]),
-  '--no-entry','-Wl,--error-limit=0',
+  ...(gameInputs?[path.join(root,'engines/browser-native/item-model.c'),path.join(root,'engines/browser-native/effects.c'),...gameInputs.files]:[]),
+  '--no-entry','--emit-symbol-map','-Wl,--error-limit=0',
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, moduleName+'.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['constructor.html','fighter-base-assets.mjs','item-model-assets.mjs','verify-item-models.mjs','secondary-animation-assets.mjs','verify-secondary-animation.mjs','gameplay-assets.mjs','verify-gameplay.mjs','verify-fighter-animation.mjs','dynamics-assets.mjs','verify-dynamics.mjs','fighter-init-assets.mjs','verify-fighter-init.mjs','fighter-init.html','startup.html','verify-startup.mjs','costume-assets.mjs','animation-object-assets.mjs','material-animation-assets.mjs','verify-material-animation.mjs','visibility-assets.mjs','auxiliary-assets.mjs','verify-lights.mjs','attribute-assets.mjs','verify-attributes.mjs','character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+for (const name of ['effect-assets.mjs','verify-effects.mjs','constructor.html','fighter-base-assets.mjs','item-model-assets.mjs','verify-item-models.mjs','secondary-animation-assets.mjs','verify-secondary-animation.mjs','gameplay-assets.mjs','verify-gameplay.mjs','verify-fighter-animation.mjs','dynamics-assets.mjs','verify-dynamics.mjs','fighter-init-assets.mjs','verify-fighter-init.mjs','fighter-init.html','startup.html','verify-startup.mjs','costume-assets.mjs','animation-object-assets.mjs','material-animation-assets.mjs','verify-material-animation.mjs','visibility-assets.mjs','auxiliary-assets.mjs','verify-lights.mjs','attribute-assets.mjs','verify-attributes.mjs','character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));

@@ -34,6 +34,14 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/sysdolphin/baselib/particle.c') {
+      replace('    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[0] = *p++;\n'+
+        '    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[1] = *p++;\n'+
+        '    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[2] = *p++;\n'+
+        '    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[3] = *p++;',
+        '    hsd_804D78D0 = ((u32)p[0]<<24)|((u32)p[1]<<16)|((u32)p[2]<<8)|p[3];\n    p += 4;');
+      text += '\nu32 portParticleOperandBits(u8* stream) { psReadFloat(&stream); return hsd_804D78D0; }\n';
+    }
     if(file==='src/melee/it/types.h') {
       const start=text.indexOf('struct ItemAttr {'),end=text.indexOf('    u8 x3;',start);
       if(start<0||end<start||!text.slice(start,end).includes('x1_67_cam_kind'))throw Error('Item attribute flag layout changed');

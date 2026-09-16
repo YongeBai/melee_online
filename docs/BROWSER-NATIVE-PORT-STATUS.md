@@ -5,24 +5,33 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
-Captain Falcon's complete typed base-data root is now assembled and the original
-`Fighter_Create` is being invoked in a fresh browser probe. Original archive
-loading and initial fighter fields complete; construction then aborts because
-`EfCaData.dat` has not yet been imported. The effects call is not bypassed.
-This identifies the next actual constructor dependency, not a completed fighter.
+Captain Falcon now completes the original player-owned `Fighter_Create` in
+Chrome, with all 15 scheduled callbacks, original character OnLoad, model,
+animation, camera subject and shadow setup. The probe verifies its ownership and
+initial Fall state. The isolated scheduler completes 120 calls and reaches
+Rebirth. This probe has no initialized stage or match rules: empty stage bounds
+cause that transition. It is not a playable match or gameplay-parity test.
 
-The assembled archive passes 899,695 payload/relocation checks, including all
-24 root fields and 2,135 nested relocations. Its validated subgraphs are embedded
-separately for bring-up, so the 914,670-byte archive contains redundant unreachable
-source bytes; it is not a compact production asset. This importer currently
-accepts Captain Falcon only, whose item-table pointer is null.
+Falcon's effects archive now loads through the original effect loader. Six model
+effects run on two independent owners each, with 742 model updates, 386 particle
+update pairs and exact cleanup across ten scene pools. Peak counts in this test
+are 187 particles and 120 generators. One effect requires 21 additional particle
+updates after model expiration. All 4,104 packed-float operand cases pass the
+big-endian stream adapter. GPU particle drawing is still unimplemented.
 
-Demo-motion metadata now uses the original per-character counts and 44 KiB
-source-size limit. All 386 rows import across the roster; demo playback is not
-yet exercised. All 82 targeted tests and the wider/scene browser suites pass.
-The constructor probe deliberately exits with status 2 while construction is
-incomplete. Full match execution, gameplay rendering and 720p60 remain unproven.
-[Constructor checkpoint](benchmarks/browser-2026-09-15-native-port-constructor-probe.json).
+The SDK interrupt-mask functions now preserve nested previous-state semantics
+for the synchronous, single-thread browser runtime. This does not implement audio
+playback or asynchronous hardware scheduling. The original camera subject pool
+is initialized with the match startup's capacity of 70; no camera offsets or
+projection changes were introduced. Gameplay framing still requires visual
+verification when the renderer is integrated.
+
+The complete Captain base importer remains restricted to Falcon. All 84 targeted
+tests and the wider/scene browser suites pass. No hosted data is committed and
+no player ISO is required. Stage/match startup, other complete character roots,
+combat/input, audio and the gameplay renderer remain integration work. There is
+still no native-port FPS or latency result.
+[Effects and constructor checkpoint](benchmarks/browser-2026-09-15-native-port-effects-constructor.json).
 
 Original item model setup now runs for all 77 Article slots registered by the
 playable characters. These contain 66 model graphs and 11 deliberately empty

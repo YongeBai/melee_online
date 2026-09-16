@@ -1,0 +1,29 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {convertCaptainEffects} from '../../engines/browser-native/effect-assets.mjs';
+function fixture(mutate=()=>{}) {
+  const body=new Uint8Array(1792),d=new DataView(body.buffer),relocs=new Set(),cmd=128,tex=1296,joint=1616;
+  const ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};ptr(0,cmd);ptr(4,tex);
+  for(let i=0;i<6;i++){d.setFloat32(8+i*20,10+i);ptr(12+i*20,joint);}
+  d.setUint16(cmd,0x42);d.setUint16(cmd+2,4);d.setUint32(cmd+4,4000);d.setUint32(cmd+8,17);
+  for(let i=0;i<17;i++){const at=cmd+80+i*64;d.setUint32(cmd+12+i*4,at-cmd);d.setUint16(at+2,i%7);d.setUint16(at+6,24);d.setUint32(at+8,0x400003);d.setFloat32(at+12,-1.25);d.setFloat32(at+44,2);body[at+60]=0xff;}
+  d.setUint32(tex,7);for(let i=0;i<7;i++){const at=tex+32+i*28;d.setUint32(tex+4+i*4,at-tex);d.setUint32(at,1);d.setUint32(at+12,8);d.setUint32(at+16,8);d.setUint32(at+24,256);}body.fill(0xa5,tex+256,tex+288);
+  d.setUint32(joint+4,1);for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  mutate({d,body,relocs,cmd,tex,joint});
+  const text=new TextEncoder().encode('effCaptainDataTable\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(text,pub+8);return bytes;
+}
+test('Captain effects keep relative bank offsets separate from HSD relocations and preserve byte streams',()=>{
+  const b=fixture(),before=b.slice(),r=convertCaptainEffects(b),v=new DataView(r.image.buffer,32);
+  assert.deepEqual(b,before);assert.equal(r.effects.length,6);assert.equal(r.count,17);assert.equal(r.textures.length,7);
+  assert.equal(v.getUint16(128,true),0x42);assert.equal(v.getUint16(130,true),4);assert.equal(v.getUint32(140,true),80);
+  assert.equal(v.getFloat32(220,true),-1.25);assert.equal(r.image[32+268],0xff);assert.equal(r.image[32+1552],0xa5);
+  assert.equal(r.pointerSlots.has(140),false);assert.equal(r.pointerSlots.has(1324),false);assert.equal(r.pointerSlots.has(0),true);
+});
+test('effect import rejects malformed banks, relocated relative words, payload overlap and unsupported model graphs',()=>{
+  for(const mutate of [
+    a=>a.d.setUint16(a.cmd,0x99),a=>a.d.setUint32(a.cmd+8,18),a=>a.d.setUint32(a.cmd+12,1),
+    a=>a.d.setFloat32(a.cmd+80+12,NaN),a=>a.relocs.add(a.cmd+12),a=>a.d.setUint32(a.tex+4,4),
+    a=>a.d.setUint32(a.tex+32+24,32),a=>a.d.setUint16(a.cmd+80+2,7),a=>{a.relocs.add(24);a.d.setUint32(24,a.joint);},
+  ])assert.throws(()=>convertCaptainEffects(fixture(mutate)));
+});

@@ -6,6 +6,7 @@
 #include <sysdolphin/baselib/memory.h>
 #include <sysdolphin/baselib/objalloc.h>
 #include <dolphin/os/OSAlloc.h>
+#include <dolphin/os.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -16,6 +17,24 @@ static u64 paused_links;
 static unsigned trace[256];
 static unsigned trace_count;
 static HSD_GObj* objects[8];
+
+/* This runtime executes C synchronously on one browser thread. Host callbacks
+ * enter only between calls; no asyncify or pthreads may enter these sections.
+ * Preserve the SDK's previous-mask return value, including nested callers.
+ * Audio/device scheduling is separate and is not implemented by this mask. */
+static BOOL interrupts_enabled = 1;
+BOOL OSDisableInterrupts(void)
+{
+    BOOL previous = interrupts_enabled;
+    interrupts_enabled = 0;
+    return previous;
+}
+BOOL OSRestoreInterrupts(BOOL level)
+{
+    BOOL previous = interrupts_enabled;
+    interrupts_enabled = level != 0;
+    return previous;
+}
 
 static void unsupported_destructor(HSD_Obj* object)
 {
