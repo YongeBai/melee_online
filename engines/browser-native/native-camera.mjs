@@ -27,3 +27,24 @@ export function checkNativeCamera(s) {
   check(Math.abs(p[0]-cot/s.aspect)<0.00001&&Math.abs(p[5]-cot)<0.00001&&p[14]===-1&&p[15]===0,'native perspective coefficients');
   check(Math.abs(p[10]+s.near/(s.far-s.near))<1e-6&&Math.abs(p[11]+s.far*s.near/(s.far-s.near))<1e-6,'original GX depth coefficients');
 }
+
+// Hand-computed SDK projection cases, including viewport offsets and depth.
+export function verifyNativeProjection(module) {
+  const identity=[1,0,0,0,0,1,0,0,0,0,1,0],cases=[
+    {point:[1,2,-4],matrix:identity,projection:[0,2,0,2,0,0,-1],viewport:[10,20,640,480,0,1],expected:[490,20,.75]},
+    {point:[1,2,-4],matrix:identity,projection:[1,.5,0,.25,0,.125,-.5],viewport:[10,20,640,480,0,1],expected:[490,140,0]},
+    {point:[1,0,-2],matrix:[1,0,0,1,0,1,0,-1,0,0,1,-2],projection:[0,1,.25,2,-.5,0,-2],viewport:[10,20,640,480,0,1],expected:[410,260,.5]},
+    {point:[0,0,-2],matrix:identity,projection:[0,1,0,1,0,0,-1],viewport:[0,0,960,720,.2,.8],expected:[480,360,.5]},
+  ];
+  const ptr=module._malloc(128);if(!ptr)throw Error('Projection check allocation');
+  try {
+    for(const c of cases){
+      new Uint32Array(module.HEAPU8.buffer,ptr,32).fill(0x76543210);module.HEAPF32.set([...c.matrix,...c.projection,...c.viewport],ptr/4);
+      module._GXProject(...c.point,ptr,ptr+48,ptr+76,ptr+104,ptr+108,ptr+112);
+      const actual=module.HEAPF32.subarray(ptr/4+26,ptr/4+29);
+      if(actual.some((v,i)=>!Number.isFinite(v)||Math.abs(v-c.expected[i])>1e-4))throw Error('Original SDK projection mismatch: '+actual);
+      for(const i of [25,29,30,31])if(new Uint32Array(module.HEAPU8.buffer,ptr,32)[i]!==0x76543210)throw Error('Original SDK projection output bounds');
+    }
+    return {passed:true,cases:cases.length,components:cases.length*3};
+  }finally{module._free(ptr);}
+}

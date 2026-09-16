@@ -34,6 +34,11 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/lb/lbvector.c') {
+      // MTXPerspective/MTXOrtho write 16 floats. Retail stack padding cannot
+      // make a 12-float C object safe on the WASM stack.
+      replace('    Mtx projMtx;','    Mtx44 projMtx;');
+    }
     if(file==='src/sysdolphin/baselib/cobj.c') {
       // Browser framebuffer rendering uses the original offscreen branch.
       // Keep its native projection/viewport and current-camera ownership;

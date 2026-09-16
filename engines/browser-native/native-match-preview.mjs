@@ -15,9 +15,10 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. The native-material path is still missing full draw callbacks.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true}={}) {
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
+  const info=gl.getExtension('WEBGL_debug_renderer_info'),gpuInfo={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};
   const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify}):null,resources=[];
   function dispose(){for(const r of resources){r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
   let materialShaderChecks;
@@ -49,6 +50,20 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     }
     return {
       draw(){
+        if(callbacks){
+          if(!materialRenderer)throw Error('Original callbacks require native materials');
+          const snapshot=camera.snapshot();checkNativeCamera(snapshot);materialRenderer.begin(snapshot);
+          const rows=resources.map(r=>({name:r.name,passes:[],draws:0}));
+          for(let pass=0;pass<3;pass++){
+            module._portStageRenderBegin();
+            for(const [i,r] of resources.entries()){
+              const count=r.prepare?module._portFighterNativeDraw(r.owner,pass):module._portNativeDrawObject(r.owner,pass,0);
+              rows[i].passes.push(count);rows[i].draws+=count;
+            }
+          }
+          const materialDraws=materialRenderer.flush({ordered:true}),renderContext=readNativeRenderContext(module);
+          return {gpuInfo,materialShaderChecks,materialDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:'Original fighter callbacks and original joint traversal; complete camera/GX-link stage ordering, dynamic accessories/effects and full match lifecycle remain.'};
+        }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot);
         module._portStageRenderBegin();
         materialRenderer?.begin(snapshot);

@@ -586,3 +586,16 @@ uintptr_t portFighterMotionRead(HSD_GObj* object,unsigned field)
     CollisionFixture* c=context(object);Fighter* fp=&c->fighter;if(!c->release_motions)abort();
     switch(field){case 0:return (uintptr_t)fp->x59C;case 1:return (uintptr_t)fp->x5A0;case 2:return (uintptr_t)fp->x590;case 3:return (uintptr_t)fp->x598;case 4:return fp->x58C;case 5:return (uintptr_t)fp->x5A4;case 6:return (uintptr_t)fp->x5A8;default:abort();}
 }
+
+/* Activate the original fighter-owned lights before invoking the complete
+ * original fighter render callback. Body selection/cleanup happens there. */
+unsigned portFighterNativeDraw(HSD_GObj* object,unsigned pass)
+{
+    if(!object||object->classifier!=HSD_GOBJ_CLASS_FIGHTER||!object->user_data||pass>2)abort();
+    extern void portRenderContextEnter(void),portRenderContextLeave(void);
+    extern unsigned portNativeDrawObject(HSD_GObj*,unsigned,unsigned);
+    portRenderContextEnter();
+    HSD_GObj* lights=HSD_GObjPLinkHead[3];while(lights&&lights->classifier!=12)lights=lights->next;
+    if(!lights||!lights->render_cb)abort();lights->render_cb(lights,pass);
+    portRenderContextLeave();return portNativeDrawObject(object,pass,1);
+}

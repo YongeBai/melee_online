@@ -1,6 +1,6 @@
-/* Capture the original HSD material combiner setup at its GX boundary.
- * These functions are valid only inside an explicit capture. They neither
- * suppress draws nor pretend that the remaining GX renderer is implemented. */
+/* Capture original HSD material state at its GX boundary. The scoped native
+ * draw backend below submits original callback-selected polygons to WebGL.
+ * Unsupported console drawing paths still fail explicitly. */
 #include <dolphin/gx.h>
 #include <sysdolphin/baselib/jobj.h>
 #include <sysdolphin/baselib/dobj.h>
@@ -87,3 +87,68 @@ static const PortTevState* capture(HSD_JObj* joint,unsigned index,int polygon,Mt
 const PortTevState* portMaterialTev(HSD_JObj* joint,unsigned index,HSD_GObj* owner){return capture(joint,index,-1,NULL,owner);}
 const PortTevState* portMaterialDrawState(HSD_JObj* joint,unsigned index,unsigned polygon,Mtx view,HSD_GObj* owner)
 {if(polygon>4096)abort();return capture(joint,index,(int)polygon,view,owner);}
+
+/* Original traversal/callback integration. Only the material/primitive backend
+ * methods are scoped to host submission; joint selection, display passes,
+ * billboards, fighter flags and owner callbacks remain original C. */
+#include <emscripten.h>
+static int drawing;
+static HSD_DObj* drawing_display;
+static unsigned emitted;
+EM_JS(void,portEmitDraw,(unsigned owner,unsigned joint,unsigned display,unsigned polygon,unsigned tev),{
+    if(typeof Module['onNativeDraw']!=='function')throw Error('Native draw receiver is absent');
+    Module['onNativeDraw'](owner,joint,display,polygon,tev);
+});
+static void native_polygon(HSD_PObj* polygon,Mtx view,Mtx position,u32 mode)
+{
+    require(drawing&&drawing_display&&polygon&&view&&position);
+    if((polygon->flags&(POBJ_CULLFRONT|POBJ_CULLBACK))==(POBJ_CULLFRONT|POBJ_CULLBACK))return;
+    if(pobj_type(polygon)==POBJ_SHAPEANIM){fprintf(stderr,"Native shape geometry submission is not integrated\n");abort();}
+    portModelCaptureReset();HSD_PObjClearMtxMark(NULL,0);
+    HSD_POBJ_METHOD(polygon)->setup_mtx(polygon,view,position,mode);
+    portEmitDraw((unsigned)HSD_GObj_804D7814,(unsigned)HSD_JObjGetCurrent(),(unsigned)drawing_display,(unsigned)polygon,(unsigned)&state);
+    emitted++;
+}
+static void native_display(HSD_DObj* display,Mtx view,Mtx position,u32 mode)
+{
+    if(!drawing||capturing||drawing_display||!display||!display->mobj||(mode&0x04000000))abort();
+    capturing=1;drawing_display=display;memset(&state,0,sizeof(state));
+    portTextureCaptureReset();portPixelCaptureReset();portModelCaptureReset();
+    HSD_StateInvalidate(HSD_STATE_COLOR_CHANNEL|HSD_STATE_RENDER_MODE|HSD_STATE_TEV_REGISTER);
+    HSD_DObjDisp(display,view,position,mode);
+    drawing_display=NULL;capturing=0;
+}
+static HSD_DObjInfo* draw_classes[32];static unsigned draw_class_count;
+static HSD_PObjInfo* polygon_classes[32];static unsigned polygon_class_count;
+static void bind_backend(HSD_JObj* joint)
+{
+    if(!joint)return;
+    if(union_type_dobj(joint))for(HSD_DObj* d=joint->u.dobj;d;d=d->next){
+        HSD_DObjInfo* dc=HSD_DOBJ_METHOD(d);
+        if(dc->disp!=native_display){if(dc->disp!=HSD_DObjDisp||draw_class_count==32)abort();draw_classes[draw_class_count++]=dc;dc->disp=native_display;}
+        for(HSD_PObj* p=d->pobj;p;p=p->next){HSD_PObjInfo* pc=HSD_POBJ_METHOD(p);
+            if(pc->disp!=native_polygon){if(pc->disp!=HSD_PObjDisp||polygon_class_count==32)abort();polygon_classes[polygon_class_count++]=pc;pc->disp=native_polygon;}
+        }
+    }
+    if(!(joint->flags&JOBJ_INSTANCE))for(HSD_JObj* child=joint->child;child;child=child->next)bind_backend(child);
+    else if(joint->child)bind_backend(joint->child);
+}
+unsigned portNativeDrawObject(HSD_GObj* owner,unsigned pass,unsigned callback)
+{
+    if(drawing||capturing||!owner||!owner->hsd_obj||pass>2||callback>1||(callback&&!owner->render_cb))abort();
+    extern void portRenderContextEnter(void),portRenderContextLeave(void);
+    portRenderContextEnter();drawing=1;emitted=0;draw_class_count=polygon_class_count=0;
+    bind_backend(owner->hsd_obj);
+    HSD_GObj* previous=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
+    if(callback)owner->render_cb(owner,pass);else HSD_GObj_JObjCallback(owner,pass);
+    HSD_GObj_804D7814=previous;
+    for(unsigned i=0;i<draw_class_count;i++)draw_classes[i]->disp=HSD_DObjDisp;
+    for(unsigned i=0;i<polygon_class_count;i++)polygon_classes[i]->disp=HSD_PObjDisp;
+    drawing=0;portRenderContextLeave();return emitted;
+}
+unsigned portMaterialPolygon(HSD_JObj* joint,unsigned display,unsigned polygon)
+{
+    if(!joint||!union_type_dobj(joint))abort();HSD_DObj* d=joint->u.dobj;
+    while(display--&&d)d=d->next;if(!d)abort();HSD_PObj* p=d->pobj;
+    while(polygon--&&p)p=p->next;if(!p)abort();return (unsigned)p;
+}

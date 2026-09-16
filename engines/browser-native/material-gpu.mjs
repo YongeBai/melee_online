@@ -8,10 +8,10 @@ import {inspectArchive} from './archive.mjs';
 
 // First integration of original native material state with actual GPU draws.
 // Resource/program caches are persistent; draw-state capture is still a debug
-// oracle. Full native GX callback/pass ordering and mutable-image invalidation
-// remain work for the playable renderer.
+// oracle. Original fighter callbacks now select draws; complete camera/GX-link
+// ordering and mutable-image invalidation remain work for the playable renderer.
 export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
-  const programs=new Map(),variants=new Map(),images=new Map(),models=new Set(),view=module._malloc(48);
+  const programs=new Map(),variants=new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
   if(!view)throw Error('Native material view allocation');
   const rows=(array,n)=>Float32Array.from({length:n*12},(_,i)=>array[i/12|0]?.[i%12]??0);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
@@ -97,10 +97,18 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
       vertexChecks.vertices+=vertices.length;vertexChecks.positionComponents+=vertices.length*3;vertexChecks.normalComponents+=vertices.length*3;
     } finally {gl.disable(gl.RASTERIZER_DISCARD);gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER,0,null);gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK,null);gl.deleteBuffer(buffer);gl.deleteTransformFeedback(feedback);}
   }
+  if(module.onNativeDraw)throw Error('Native draw receiver already owned');
+  module.onNativeDraw=(owner,joint,display,polygon,ptr)=>{
+    const plan=nativePlans.get(owner+':'+joint+':'+polygon);
+    if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
+    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+    checkNativeRenderContext(state.context,snapshot,state.pixel);
+    queue.push({owner,plan,state,program:program(state,plan.mesh.attrs)});
+  };
   function upload(model,bytes,nodes,owner){
-    const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[];
+    const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
     const indexOf=(first,target)=>{for(let i=0,at=first;at!==null&&i<4096;i++,at=archive.relocations.has(at+4)?d.getUint32(at+4):null)if(at===target)return i;throw Error('Native draw ownership');};
-    function dispose(){for(const b of buffers)gl.deleteBuffer(b);for(const v of vaos)gl.deleteVertexArray(v);models.delete(result);}
+    function dispose(){for(const key of nativeKeys)nativePlans.delete(key);for(const b of buffers)gl.deleteBuffer(b);for(const v of vaos)gl.deleteVertexArray(v);models.delete(result);}
     let result;
     try {
       for(const mesh of model.meshes) {
@@ -115,6 +123,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
         buffer(gl.ELEMENT_ARRAY_BUFFER,Uint32Array.from(mesh.triangles));
         plans.push({mesh,vao,display:indexOf(model.tree.nodes[mesh.joint].display,mesh.dobj),polygon:indexOf(d.getUint32(mesh.dobj+12),mesh.pobj)});
       }
+      for(const plan of plans){const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[plan.mesh.joint],polygon=module._portMaterialPolygon(joint,plan.display,plan.polygon),key=owner+':'+joint+':'+polygon;if(nativePlans.has(key))throw Error('Duplicate native polygon ownership');nativePlans.set(key,plan);nativeKeys.push(key);}
       result={enqueue(flags,visibility,show=true){
         let count=0;if(!show)return count;
         for(const [i,plan] of plans.entries()) {
@@ -130,12 +139,12 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     }catch(error){dispose();throw error;}
   }
   return {upload,begin(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);queue=[];draws=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0};},
-    flush(){
+    flush({ordered=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
       // actor order stable, completing opaque draws before blended draws.
-      for(const translucent of [false,true])for(const draw of queue) {
-        if((draw.state.pixel.blend.type!==0)!==translucent)continue;
+      const drawsInOrder=ordered?queue:[...queue.filter(d=>d.state.pixel.blend.type===0),...queue.filter(d=>d.state.pixel.blend.type!==0)];
+      for(const draw of drawsInOrder) {
         gl.bindVertexArray(draw.plan.vao);apply(draw.state,draw.program);pixelState(draw.state.pixel);
         const cull=draw.plan.mesh.flags&0xc000;
         if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);
@@ -144,6 +153,10 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
       }
       if(gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
       return {vertexChecks:verifyVertices?vertexChecks:null,draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
-    },dispose(){for(const model of [...models])model.dispose();for(const p of programs.values())gl.deleteProgram(p.program);for(const image of images.values())gl.deleteTexture(image);module._free(view);},
+    },inspect(){
+      const tev=new Map(),pixels=new Map(),lights=new Map();
+      for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}
+      return {tevPrograms:[...tev.values()],pixelStates:[...pixels.values()],lightStates:[...lights.values()]};
+    },dispose(){delete module.onNativeDraw;for(const model of [...models])model.dispose();for(const p of programs.values())gl.deleteProgram(p.program);for(const image of images.values())gl.deleteTexture(image);module._free(view);},
   };
 }

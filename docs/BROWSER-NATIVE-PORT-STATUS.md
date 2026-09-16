@@ -5,6 +5,33 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The default native fixture now invokes the original fighter render callbacks
+and original HSD joint/display traversal for each of the three object passes.
+A scoped host material/primitive backend sends the selected polygons to WebGL;
+it preserves the original visibility, billboard matrices, fighter-light setup
+and cleanup. Stage objects still use the generic original joint callback:
+complete stage/camera GX-link ordering, effects and accessories remain pending.
+The preceding JavaScript mesh-selection path remains only as an explicit
+`callbacks=0` / `--manual-draw` comparison.
+
+This exposed a missing original SDK `GXProject` dependency, now linked as
+unchanged C, and a 12-float projection local passed to 16-float SDK writers in
+`lbVector_WorldToScreen`, now sized correctly in the portable recipe. Four
+hand-computed projection cases check 12 outputs and output bounds. Both native
+callback snapshots pass all shader and vertex checks; all 683 continuously
+rendered combat steps retain the prior exact simulation trace. Browser input
+and the 142-step jump/landing sequence also pass. This is fidelity progress,
+not a claimed FPS improvement or complete competitive match.
+[Original draw callback checkpoint](benchmarks/browser-2026-09-15-native-port-draw-callbacks.json).
+
+Chrome also runs this partial fixture on the host's Radeon 890M through ANGLE
+OpenGL. A 30.011-second baseline completed 1,800 simulation steps and 1,799 draw
+submissions. Mean simulation-call time was 0.41 ms; mean draw submission was
+8.68 ms (p95 14.9 ms). Hardware shader goldens and every final-snapshot vertex
+check also pass. This is a near-60 submission cadence with early keyboard
+interaction followed by idle animation, not a competitive-combat or distinct
+presentation measurement. Hardware input-to-photon latency is still unmeasured.
+
 The native development fixture now runs continuously with browser keyboard input
 at `constructor.html?live=1`. It uses the original simulation scheduler and a
 60 Hz frame clock, retaining simulation debt under load and explicitly pausing

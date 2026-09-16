@@ -7,6 +7,7 @@
 <script type="module">
 import create from './melee-fighter-init.mjs';
 import {archiveRootView,inspectArchive} from './archive.mjs';
+import {verifyNativeProjection} from './native-camera.mjs';
 import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyCombat} from './verify-combat.mjs';
@@ -29,6 +30,7 @@ try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
   const modelNames=await (await fetch('./model-fixtures.json')).json();
   const [module,common,baseBytes,animationBytes,models]=await Promise.all([create({print:capture,printErr:capture}),asset('PlCo.dat'),asset('PlCa.dat'),asset('PlCaAJ.dat'),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
+  if(render)report.projectionChecks=verifyNativeProjection(module);
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
@@ -108,7 +110,7 @@ try {
     if(render) {
       for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
-      preview=createNativeMatchPreview(module,canvas,previewActors,{verify:!live&&!renderSteps});report.preview={settled:preview.draw()};
+      preview=createNativeMatchPreview(module,canvas,previewActors,{verify:!live&&!renderSteps,callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(combat&&!live)await verifyCombat(module,[object,opponent],report.combat,{

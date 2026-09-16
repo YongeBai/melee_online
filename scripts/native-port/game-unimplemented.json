@@ -55,7 +55,6 @@
     "GXInitFogAdjTable",
     "GXInvalidateTexAll",
     "GXInvalidateVtxCache",
-    "GXProject",
     "GXSetCopyClamp",
     "GXSetCopyClear",
     "GXSetCopyFilter",

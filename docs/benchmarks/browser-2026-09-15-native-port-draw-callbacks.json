@@ -1,0 +1,560 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2921068,
+    "wasmSha256": "d7e43d61a339505e7e21bdf1499f8af1602678b4cc57dcd65588e1b1fe828b01"
+  },
+  "software": {
+    "projection": {
+      "passed": true,
+      "cases": 4,
+      "components": 12
+    },
+    "snapshots": {
+      "settled": {
+        "resolution": [
+          960,
+          720
+        ],
+        "originalObjectCallbacks": true,
+        "actors": [
+          {
+            "name": "Battlefield group 3",
+            "passes": [
+              0,
+              0,
+              2
+            ],
+            "draws": 2
+          },
+          {
+            "name": "Battlefield group 1",
+            "passes": [
+              0,
+              0,
+              1
+            ],
+            "draws": 1
+          },
+          {
+            "name": "Battlefield group 6",
+            "passes": [
+              29,
+              0,
+              26
+            ],
+            "draws": 55
+          },
+          {
+            "name": "Falcon P1",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          },
+          {
+            "name": "Falcon P2",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          }
+        ],
+        "materialDraws": {
+          "vertexChecks": {
+            "vertices": 25020,
+            "positionComponents": 75060,
+            "normalComponents": 75060,
+            "maxScaledPositionError": 0.000006559333990524794,
+            "maxNormalError": 1.4021964345189986e-7
+          },
+          "draws": 184,
+          "programs": 25,
+          "images": 71,
+          "originalMaterialState": true,
+          "visualParity": false,
+          "performanceMeasured": false
+        },
+        "materialShaderChecks": {
+          "passed": true,
+          "cases": [
+            "unlit material",
+            "diffuse toward light",
+            "clamped diffuse away",
+            "signed diffuse subtraction",
+            "diffuse accumulator clamp",
+            "SDK specular forces diffuse NONE",
+            "vertex material RGBA",
+            "alpha rejection",
+            "UV texgen and nearest sampling",
+            "normal reflection texgen",
+            "bump texture coordinates",
+            "vertex matrix texture coordinates",
+            "SRTG texture coordinates"
+          ],
+          "pixelChannelChecks": 52
+        }
+      },
+      "final": {
+        "resolution": [
+          960,
+          720
+        ],
+        "originalObjectCallbacks": true,
+        "actors": [
+          {
+            "name": "Battlefield group 3",
+            "passes": [
+              0,
+              0,
+              0
+            ],
+            "draws": 0
+          },
+          {
+            "name": "Battlefield group 1",
+            "passes": [
+              0,
+              0,
+              1
+            ],
+            "draws": 1
+          },
+          {
+            "name": "Battlefield group 6",
+            "passes": [
+              29,
+              0,
+              18
+            ],
+            "draws": 47
+          },
+          {
+            "name": "Falcon P1",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          },
+          {
+            "name": "Falcon P2",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          }
+        ],
+        "materialDraws": {
+          "vertexChecks": {
+            "vertices": 23610,
+            "positionComponents": 70830,
+            "normalComponents": 70830,
+            "maxScaledPositionError": 0.000001988536994878627,
+            "maxNormalError": 1.5256513063999222e-7
+          },
+          "draws": 174,
+          "programs": 25,
+          "images": 71,
+          "originalMaterialState": true,
+          "visualParity": false,
+          "performanceMeasured": false
+        },
+        "materialShaderChecks": {
+          "passed": true,
+          "cases": [
+            "unlit material",
+            "diffuse toward light",
+            "clamped diffuse away",
+            "signed diffuse subtraction",
+            "diffuse accumulator clamp",
+            "SDK specular forces diffuse NONE",
+            "vertex material RGBA",
+            "alpha rejection",
+            "UV texgen and nearest sampling",
+            "normal reflection texgen",
+            "bump texture coordinates",
+            "vertex matrix texture coordinates",
+            "SRTG texture coordinates"
+          ],
+          "pixelChannelChecks": 52
+        }
+      }
+    }
+  },
+  "hardware": {
+    "gpu": {
+      "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+      "vendor": "Google Inc. (AMD)",
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+    },
+    "projection": {
+      "passed": true,
+      "cases": 4,
+      "components": 12
+    },
+    "snapshots": {
+      "settled": {
+        "resolution": [
+          960,
+          720
+        ],
+        "originalObjectCallbacks": true,
+        "actors": [
+          {
+            "name": "Battlefield group 3",
+            "passes": [
+              0,
+              0,
+              2
+            ],
+            "draws": 2
+          },
+          {
+            "name": "Battlefield group 1",
+            "passes": [
+              0,
+              0,
+              1
+            ],
+            "draws": 1
+          },
+          {
+            "name": "Battlefield group 6",
+            "passes": [
+              29,
+              0,
+              26
+            ],
+            "draws": 55
+          },
+          {
+            "name": "Falcon P1",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          },
+          {
+            "name": "Falcon P2",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          }
+        ],
+        "materialDraws": {
+          "vertexChecks": {
+            "vertices": 25020,
+            "positionComponents": 75060,
+            "normalComponents": 75060,
+            "maxScaledPositionError": 0.0000028525779555624165,
+            "maxNormalError": 1.1190485327272626e-7
+          },
+          "draws": 184,
+          "programs": 25,
+          "images": 71,
+          "originalMaterialState": true,
+          "visualParity": false,
+          "performanceMeasured": false
+        },
+        "materialShaderChecks": {
+          "passed": true,
+          "cases": [
+            "unlit material",
+            "diffuse toward light",
+            "clamped diffuse away",
+            "signed diffuse subtraction",
+            "diffuse accumulator clamp",
+            "SDK specular forces diffuse NONE",
+            "vertex material RGBA",
+            "alpha rejection",
+            "UV texgen and nearest sampling",
+            "normal reflection texgen",
+            "bump texture coordinates",
+            "vertex matrix texture coordinates",
+            "SRTG texture coordinates"
+          ],
+          "pixelChannelChecks": 52
+        }
+      },
+      "final": {
+        "resolution": [
+          960,
+          720
+        ],
+        "originalObjectCallbacks": true,
+        "actors": [
+          {
+            "name": "Battlefield group 3",
+            "passes": [
+              0,
+              0,
+              0
+            ],
+            "draws": 0
+          },
+          {
+            "name": "Battlefield group 1",
+            "passes": [
+              0,
+              0,
+              1
+            ],
+            "draws": 1
+          },
+          {
+            "name": "Battlefield group 6",
+            "passes": [
+              29,
+              0,
+              18
+            ],
+            "draws": 47
+          },
+          {
+            "name": "Falcon P1",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          },
+          {
+            "name": "Falcon P2",
+            "passes": [
+              62,
+              0,
+              1
+            ],
+            "draws": 63
+          }
+        ],
+        "materialDraws": {
+          "vertexChecks": {
+            "vertices": 23610,
+            "positionComponents": 70830,
+            "normalComponents": 70830,
+            "maxScaledPositionError": 0.0000037842576390830195,
+            "maxNormalError": 1.1400674393424737e-7
+          },
+          "draws": 174,
+          "programs": 25,
+          "images": 71,
+          "originalMaterialState": true,
+          "visualParity": false,
+          "performanceMeasured": false
+        },
+        "materialShaderChecks": {
+          "passed": true,
+          "cases": [
+            "unlit material",
+            "diffuse toward light",
+            "clamped diffuse away",
+            "signed diffuse subtraction",
+            "diffuse accumulator clamp",
+            "SDK specular forces diffuse NONE",
+            "vertex material RGBA",
+            "alpha rejection",
+            "UV texgen and nearest sampling",
+            "normal reflection texgen",
+            "bump texture coordinates",
+            "vertex matrix texture coordinates",
+            "SRTG texture coordinates"
+          ],
+          "pixelChannelChecks": 52
+        }
+      }
+    },
+    "baseline": {
+      "frames": 1800,
+      "draws": 1799,
+      "elapsedMs": 30011.40000000596,
+      "stateChanges": [
+        {
+          "frame": 1,
+          "state": 24,
+          "x": 0,
+          "y": 0.00009999999747378752,
+          "buttons": 1024
+        },
+        {
+          "frame": 5,
+          "state": 25,
+          "x": 0,
+          "y": 3.100100040435791,
+          "buttons": 1024
+        },
+        {
+          "frame": 7,
+          "state": 65,
+          "x": 0,
+          "y": 8.910099029541016,
+          "buttons": 256
+        },
+        {
+          "frame": 51,
+          "state": 29,
+          "x": 0,
+          "y": 5.1700568199157715,
+          "buttons": 0
+        },
+        {
+          "frame": 54,
+          "state": 42,
+          "x": 0,
+          "y": 0.00009989738464355469,
+          "buttons": 0
+        },
+        {
+          "frame": 58,
+          "state": 15,
+          "x": 0.25,
+          "y": 0.00009999999747378752,
+          "buttons": 0
+        },
+        {
+          "frame": 61,
+          "state": 14,
+          "x": 1.3352248668670654,
+          "y": 0.00009999999747378752,
+          "buttons": 0
+        }
+      ],
+      "inputChanges": [
+        {
+          "frame": 0,
+          "type": "keydown",
+          "code": "KeyX"
+        },
+        {
+          "frame": 6,
+          "type": "keyup",
+          "code": "KeyX"
+        },
+        {
+          "frame": 6,
+          "type": "keydown",
+          "code": "KeyZ"
+        },
+        {
+          "frame": 9,
+          "type": "keyup",
+          "code": "KeyZ"
+        },
+        {
+          "frame": 54,
+          "type": "keydown",
+          "code": "ArrowRight"
+        },
+        {
+          "frame": 60,
+          "type": "keyup",
+          "code": "ArrowRight"
+        }
+      ],
+      "movement": true,
+      "jump": true,
+      "attack": true,
+      "maxDebtMs": 35.30000000893958,
+      "stepCpu": {
+        "samples": 1800,
+        "meanMs": 0.4060555553436279,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.5999999940395355,
+        "maxMs": 1
+      },
+      "drawSubmissionCpu": {
+        "samples": 1799,
+        "meanMs": 8.67754307952505,
+        "p50Ms": 8,
+        "p95Ms": 14.899999991059303,
+        "maxMs": 23.299999997019768
+      },
+      "rafDrawIntervals": {
+        "samples": 1798,
+        "meanMs": 16.67530589543947,
+        "p50Ms": 16.69999999999891,
+        "p95Ms": 16.799999999999272,
+        "maxMs": 33.29999999999927
+      },
+      "resolution": [
+        960,
+        720
+      ],
+      "gpuReadbacks": false,
+      "playable": false,
+      "performanceCertified": false,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    },
+    "scope": "Two Falcons, partial Battlefield startup. Browser key events exercise jump/attack/landing/movement early in the run, then idle animation; this is not sustained competitive combat. Draw submissions and rAF callback intervals are not distinct display presentations or input-to-photon latency."
+  },
+  "combat": {
+    "frames": 683,
+    "renderedSteps": 683,
+    "traceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+    "unchanged": true
+  },
+  "motion": {
+    "steps": 142,
+    "renderedSteps": 142,
+    "passed": true
+  },
+  "combiner": {
+    "passed": true,
+    "programs": 223,
+    "capturedPrograms": 36,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 14272,
+    "softwareGpu": true,
+    "playable": false,
+    "performanceMeasured": false
+  },
+  "regressions": {
+    "targetedTests": 117,
+    "fighterBrowser": true,
+    "stageMapBrowser": true,
+    "sceneBrowser": true,
+    "animatedGpuModels": 27,
+    "maxVertexError": 0.000003814697265625
+  },
+  "commands": [
+    "node scripts/native-port/audit.mjs",
+    "node scripts/native-port/audit-link.mjs",
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --render",
+    "node scripts/native-port/probe-constructor.mjs --render-steps",
+    "node scripts/native-port/probe-constructor.mjs --input --render-steps",
+    "node scripts/native-port/probe-constructor.mjs --live",
+    "node scripts/native-port/probe-constructor.mjs --live --hardware --frames=1800",
+    "node scripts/native-port/probe-constructor.mjs --render --hardware",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/verify-browser.mjs --stage-map",
+    "node scripts/native-port/build.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --scene",
+    "node scripts/native-port/verify-browser.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --tev",
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs"
+  ],
+  "playableCompetitiveMatch": false,
+  "acceptanceMet": false,
+  "remaining": "Full stage/camera GX-link ordering, dynamic geometry/accessories/effects, HUD/audio, tournament match lifecycle, all roster/stage gameplay, gamepad input, sustained competitive presentation and input-to-photon verification."
+}

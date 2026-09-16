@@ -671,3 +671,36 @@ of death/respawn. `--render-steps` draws all 683 scripted combat steps and retai
 the exact combat trace. `--input --render-steps` draws the 142-step walk/jump/
 aerial/landing sequence. `--render` retains full snapshot verification.
 None is a sustained hardware performance or broad gameplay-parity result.
+
+## Original object draw callbacks
+
+The native fixture now defaults to original fighter callbacks and HSD joint /
+display traversal for all three object passes. The host backend in `tev-state.c`
+scopes the DObj/PObj draw methods around each object, calls original material
+setup and original matrix setup, and submits each selected runtime polygon to
+`material-gpu.mjs`. Class methods are restored before returning. Unknown geometry,
+custom primitive methods and shape-animation submission reject explicitly.
+Original fighter callbacks perform body selection, visibility projection, light
+overlays and cleanup. Stage objects currently use the generic original joint
+callback; full stage/camera GX-link traversal and dynamic effects/accessories
+are not yet integrated. Preserve that distinction when reporting coverage.
+
+The SDK's unchanged `GXProject` C routine is compiled from the pinned source.
+The portable recipe corrects `lbVector_WorldToScreen`'s local projection matrix
+from `Mtx` (12 floats) to `Mtx44` (16), as required by its SDK matrix writers.
+Four manually derived projection cases cover perspective/orthographic transforms,
+viewport offsets, depth mapping and output bounds.
+
+`--render`, `--render-steps`, `--input --render-steps` and `--live` all use the
+native callbacks by default. `--manual-draw` (or `callbacks=0` in the page URL)
+retains the preceding selection path as an explicit development reference.
+Neither path is certified for complete gameplay or sustained 720p60.
+
+Hardware diagnostics can use `--hardware`; the report records the actual WebGL
+renderer, so check it before assuming acceleration. `--live --hardware
+--frames=1800` runs a 30-second baseline (early keyboard movement, then idle),
+and `--render --hardware` checks shader goldens and transformed vertices on that
+driver. Hardware reports use a separate `hardware-` filename prefix. The observed
+Radeon 890M baseline had 1,799 draw submissions / 1,800 simulation steps over
+30.011 seconds, with mean simulation 0.41 ms and draw submission 8.68 ms. This is
+partial-scene submission timing, not competitive presentation or latency proof.

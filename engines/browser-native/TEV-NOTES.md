@@ -88,3 +88,11 @@ Still pending: complete original callback/Z-sort ordering, mutable image/palette
 cache invalidation, exact texture filtering/LOD parity, non-fullscreen viewport
 and scissor scaling, fog, indirect textures, effects and HUD. Unsupported pixel
 paths reject explicitly. Native visual parity and 720p60 are not established.
+
+
+The live fixture now defaults to the original fighter callbacks and HSD joint
+traversal. Scoped DObj/PObj backend methods retain original material setup and
+matrix setup while handing each selected polygon to WebGL. Native pass order
+replaces the preceding blanket opaque/blended regrouping. This is object-level
+traversal: full camera/stage GX-link order and dynamic primitive/effect submission
+remain incomplete. The old direct per-mesh capture is an explicit QA reference.
