@@ -34,6 +34,12 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/gr/ground.c') {
+      replace('    /* 0x4 */ u8 a : 1;\n    /* 0x4 */ u8 b : 1;\n    /* 0x4 */ u8 c : 1;\n    /* 0x4 */ u8 _ : 5;',
+        '    /* Original archive byte: a=0x80, b=0x40, c=0x20. */\n    u8 _ : 5; u8 c : 1; u8 b : 1; u8 a : 1;');
+      text+='\nunsigned portStageLightOverrideBits(unsigned bits) { LightOverrideEntry v={0}; ((u8*)&v)[4]=bits; return (v.a<<2)|(v.b<<1)|v.c; }\n';
+      text+='LightList** portStageSelectLights(UnkArchiveStruct* archive, LightList** list) { return Ground_801C20E0(archive,list); }\n';
+    }
     if(file==='src/sysdolphin/baselib/particle.c') {
       replace('    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[0] = *p++;\n'+
         '    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[1] = *p++;\n'+

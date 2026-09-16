@@ -13,6 +13,8 @@ import {convertMotionAnimations} from './motion-animations.mjs';
 import {motionSpec} from './motion-spec.mjs';
 import {attributeSpec} from './attribute-spec.mjs';
 import {convertCaptainEffects} from './effect-assets.mjs';
+import {convertBattlefieldMap} from './stage-map-assets.mjs';
+import {convertStageCollision} from './stage-collision.mjs';
 import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
@@ -41,6 +43,23 @@ try {
   installResidentFile(module,'EfCaData.dat',convertCaptainEffects(await asset('EfCaData.dat')).image);
   module._portMatchPlayerInitialize();
   module._portFighterPlayerConfigure(0,0,0,0,0,1,0);
+  const withStage=new URLSearchParams(location.search).has('stage');
+  if(withStage){
+    const stageBytes=await asset('GrNBa.dat'),map=convertBattlefieldMap(stageBytes);
+    installResidentFile(module,'NativeBattlefieldMap.dat',map.image);
+    const stageFile=openResidentArchive(module,'NativeBattlefieldMap.dat',['native_stage_map','native_stage_parameters']);
+    module._portStageMapInstall(stageFile.archive,...stageFile.addresses);
+    const collision=convertStageCollision(stageBytes);
+    installResidentFile(module,'NativeBattlefieldCollision.dat',collision.image);
+    const collisionFile=openResidentArchive(module,'NativeBattlefieldCollision.dat',['coll_data']);
+    module._portStageMapCollisionLoad(collisionFile.addresses[0]);
+    const cd=new DataView(collision.image.buffer,32),verts=cd.getUint32(0,true),count=cd.getUint32(4,true),scale=view().getFloat32(stageFile.addresses[1],true);
+    if(module._portStageMapCollisionRead(0,0)!==count)throw Error('Stage collision vertex count');
+    for(let i=0;i<count;i++)for(let axis=0;axis<2;axis++)if(module._portStageMapCollisionRead(1+axis,i)!==Math.fround(cd.getFloat32(verts+i*8+axis*4,true)*scale))throw Error('Stage collision world vertex');
+    for(const id of [0,3,1,6])module._portStageMapCreate(id);
+    module._portStageMapBounds();module._portStageMapSpawn(0);
+    report.stage={name:'Battlefield',collisionLoaded:true,vertexChecks:count*2,modelGroups:[0,3,1,6],completeStageStartup:false};
+  }
   report.constructorAttempted=true;
   console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
   const object=module._portFighterConstruct(kind,0);
@@ -51,11 +70,27 @@ try {
   if(!report.state.every(Number.isFinite)||!report.state[7]||!report.state[8]||report.state[9]!==15||report.state[10]!==1||report.state[11]!==kind||report.state[12]!==0)throw Error('Constructed fighter state/ownership invariant');
   report.constructorVerified=true;
   if(new URLSearchParams(location.search).has('step')){
-    report.schedulerContext='Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
+    report.schedulerContext=withStage?'Battlefield geometry/collision and source spawn, without complete Stage startup, match rules, input or rendering.':'Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
     report.schedulerSteps=0;console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
     for(let i=0;i<120;i++){module._portRuntimeStep();report.schedulerSteps++;}
     report.afterSteps=state();
     if(!report.afterSteps.every(Number.isFinite)||report.afterSteps[9]!==15||report.afterSteps[10]!==1)throw Error('Scheduled fighter state/ownership invariant');
+    if(withStage&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on Battlefield');
+    if(new URLSearchParams(location.search).has('input')){
+      report.input={completed:false,frames:0,states:[]};
+      module._Player_80031848(0);
+      console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
+      for(const [name,frames,buttons,x,y] of [['walk',12,0,0.5,0],['release',12,0,0,0],['jump',4,0x400,0,0],['air',20,0,0,0],['attack',4,0x100,0,0],['recover',90,0,0,0]]){
+        for(let i=0;i<frames;i++){module._portStageProbePad(0,buttons,x,y);module._portRuntimeStep();report.input.frames++;}
+        report.input.states.push({name,state:state()});
+        const latest=report.input.states.at(-1).state;
+        if(name==='walk'&&(!(latest[4]>report.afterSteps[4])||![15,16,17].includes(latest[0])))throw Error('Scripted walking input did not produce walking movement');
+        if(name==='air'&&(latest[3]!==1||latest[5]<=report.afterSteps[5]))throw Error('Scripted jump did not become airborne');
+        if(name==='attack'&&!(latest[0]>=65&&latest[0]<=69))throw Error('Scripted aerial attack did not enter an aerial attack state');
+        if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
+      }
+      report.input.completed=true;
+    }
   }
 } catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}
 document.querySelector('#result').textContent=JSON.stringify(report,null,2);

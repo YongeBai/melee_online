@@ -515,3 +515,41 @@ The platform interrupt mask preserves nested disable/restore state while C runs
 synchronously on one browser thread. Any future threading or asynchronous C
 suspension needs a corresponding synchronization implementation. Original audio
 calls beyond integrated functionality still fail explicitly.
+
+## Battlefield integration probe
+
+`stage-map-assets.mjs` imports the Battlefield map head, all seven models and
+their animation graphs, typed camera/light/fog descriptors, joint bindings and
+GroundParam/StageParam records. It publishes private native roots, since the
+complete stage archive's particle, script and item roots are still pending.
+Camera descriptors are checked as data; this is not rendered-camera parity.
+
+The original executable confirms an archive quirk: the light-override count is
+34, but the initialized table has 17 eight-byte rows. Retail looks up lights with
+that count and exits on the first match. The importer requires every referenced
+light to match within the typed 17-row prefix, preserves the original count and
+rejects other layouts. The generated C adapter reverses the packed a/b/c bitfield
+declarations to preserve the original byte's 0x80/0x40/0x20 flags on WASM.
+
+After building `--fighter-init`, run:
+
+`node scripts/native-port/verify-browser.mjs --stage-map`
+
+This verifies original Ground_GetStageGObj/grAnime ownership and animation,
+light selection, source-joint camera/blast bounds and object/callback teardown.
+It does not run complete Stage initialization or drawing. The normal match's
+camera projection is not changed.
+
+`node scripts/native-port/probe-constructor.mjs --stage` adds original
+mpLibLoad collision registration, source spawn placement and a required Falcon
+Fall-to-grounded-Wait transition. `--input` additionally enables input with
+Player_80031848 and injects normalized samples at HSD_PadGameStatus. Walking,
+airborne jumping, neutral-air attack state and grounded recovery are required;
+simply running frames is insufficient. The input samples are diagnostic, not
+browser raw-device calibration or latency validation.
+
+Collision arrays and both stage archives are owned by the fresh WASM instance
+until it is destroyed. Clearing the map while collision remains live is rejected.
+Full Stage/match startup, gameplay material rendering, audio playback, opponent
+interactions, rematch lifecycle and tournament-wide parity/performance remain
+required. These successful probes do not satisfy the 720p60 acceptance gate.

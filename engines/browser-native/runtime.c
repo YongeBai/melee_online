@@ -160,3 +160,10 @@ void portRuntimeSetJointDestructor(GObjFunc destructor)
        destructors[HSD_GObj_JObjKind]!=destructor)abort();
     destructors[HSD_GObj_JObjKind]=destructor;
 }
+void portRuntimeSetSceneDestructors(GObjFunc light)
+{
+    if(!arena||!light)abort();
+    destructors[HSD_GObj_CameraKind]=HSD_GObj_80391120;
+    destructors[HSD_GObj_FogKind]=HSD_GObj_803911C0;
+    destructors[HSD_GObj_LightKind]=light;
+}

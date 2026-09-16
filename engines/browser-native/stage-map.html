@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>Native Battlefield stage map bring-up</title>
+<h1>Original Battlefield map ownership</h1><p>Development integration probe, not a playable match.</p><pre id="result">Loading hosted stage…</pre>
+<script type="module">
+import create from './melee-fighter-init.mjs';
+import {verifyStageMap} from './verify-stage-map.mjs';
+const logs=[];const capture=x=>{logs.push(String(x));if(logs.length>64)logs.shift();};
+try {
+const [module,response]=await Promise.all([create({print:capture,printErr:capture}),fetch('./fixtures/GrNBa.dat')]);if(!response.ok)throw Error('Hosted stage unavailable');
+const report=verifyStageMap(module,new Uint8Array(await response.arrayBuffer()));document.querySelector('#result').textContent=JSON.stringify(report,null,2);document.documentElement.dataset.result='passed';
+} catch(error){document.querySelector('#result').textContent=String(error.stack||error)+'\n'+logs.join('\n');document.documentElement.dataset.result='failed';}
+</script>

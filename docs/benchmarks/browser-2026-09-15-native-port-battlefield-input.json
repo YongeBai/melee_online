@@ -1,0 +1,344 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2910497,
+    "wasmSha256": "12e6fc809eb463176c1f7ba8326b150afb6f701a2403d5855cfff34b4f6e920f",
+    "recipeSha256": "2ca28ecfee0e0c1dda5d81c37114c781325c64e06d8c8aef2f28015ae2272a4a"
+  },
+  "stageMap": {
+    "passed": true,
+    "checks": 121139,
+    "updates": 120,
+    "changed": 15570,
+    "rows": [
+      {
+        "index": 0,
+        "joints": 23,
+        "meshes": 0,
+        "selectedLights": 2,
+        "cameraOwner": false
+      },
+      {
+        "index": 1,
+        "joints": 6,
+        "meshes": 1,
+        "selectedLights": 2,
+        "cameraOwner": false
+      },
+      {
+        "index": 2,
+        "joints": 6,
+        "meshes": 1,
+        "selectedLights": 2,
+        "cameraOwner": false
+      },
+      {
+        "index": 3,
+        "joints": 3,
+        "meshes": 2,
+        "selectedLights": 2,
+        "cameraOwner": false
+      },
+      {
+        "index": 4,
+        "joints": 6,
+        "meshes": 1,
+        "selectedLights": 2,
+        "cameraOwner": false
+      },
+      {
+        "index": 5,
+        "joints": 19,
+        "meshes": 4,
+        "selectedLights": 2,
+        "cameraOwner": false
+      },
+      {
+        "index": 6,
+        "joints": 17,
+        "meshes": 55,
+        "selectedLights": 2,
+        "cameraOwner": false
+      }
+    ],
+    "camera": [
+      -160,
+      160,
+      100.80000305175781,
+      -82.4000015258789
+    ],
+    "blast": [
+      -224,
+      224,
+      164.8000030517578,
+      -144
+    ],
+    "flagCases": 256,
+    "typedRelocations": 1196,
+    "declaredLightOverrides": 34,
+    "typedLightOverrides": 17,
+    "playable": false,
+    "performanceMeasured": false,
+    "limitation": "Original stage model owners, animation, light selection and source-joint camera/blast bounds only. No collision registration, complete Stage startup, stage-specific callbacks, particle spawning, GPU rendering or match."
+  },
+  "constructor": {
+    "constructorAttempted": true,
+    "constructorCompleted": true,
+    "playable": false,
+    "performanceMeasured": false,
+    "startupPassed": true,
+    "baseArchive": {
+      "passed": true,
+      "checks": 899695,
+      "bytes": 914670,
+      "partCount": 63,
+      "costumes": 6,
+      "motionRows": 318,
+      "demoRows": 14,
+      "imports": [
+        {
+          "label": "initialization",
+          "at": 96,
+          "size": 150900,
+          "pointers": 657
+        },
+        {
+          "label": "visibility",
+          "at": 151136,
+          "size": 150880,
+          "pointers": 14
+        },
+        {
+          "label": "demo motions",
+          "at": 302016,
+          "size": 150880,
+          "pointers": 26
+        },
+        {
+          "label": "secondary animations",
+          "at": 452924,
+          "size": 150880,
+          "pointers": 831
+        },
+        {
+          "label": "gameplay parameters",
+          "at": 603804,
+          "size": 150916,
+          "pointers": 20
+        },
+        {
+          "label": "dynamics",
+          "at": 754720,
+          "size": 20,
+          "pointers": 0
+        },
+        {
+          "label": "hurtboxes",
+          "at": 754740,
+          "size": 456,
+          "pointers": 1
+        },
+        {
+          "label": "auxiliary model",
+          "at": 755196,
+          "size": 150880,
+          "pointers": 564
+        }
+      ],
+      "relocations": 2135
+    },
+    "stage": {
+      "name": "Battlefield",
+      "collisionLoaded": true,
+      "vertexChecks": 52,
+      "modelGroups": [
+        0,
+        3,
+        1,
+        6
+      ],
+      "completeStageStartup": false
+    },
+    "object": 1278016,
+    "state": [
+      29,
+      20,
+      0,
+      1,
+      0,
+      8,
+      0,
+      1184128,
+      2719360,
+      15,
+      1,
+      2,
+      0
+    ],
+    "constructorVerified": true,
+    "schedulerContext": "Battlefield geometry/collision and source spawn, without complete Stage startup, match rules, input or rendering.",
+    "schedulerSteps": 120,
+    "afterSteps": [
+      14,
+      2,
+      17,
+      0,
+      0,
+      0.00009999999747378752,
+      0,
+      1184128,
+      2719360,
+      15,
+      1,
+      2,
+      0
+    ],
+    "input": {
+      "completed": true,
+      "frames": 142,
+      "states": [
+        {
+          "name": "walk",
+          "state": [
+            16,
+            8,
+            12.726234436035156,
+            0,
+            3.9620871543884277,
+            0.00009999999747378752,
+            0,
+            1184128,
+            2719360,
+            15,
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "name": "release",
+          "state": [
+            14,
+            2,
+            11,
+            0,
+            4.7880859375,
+            0.00009999999747378752,
+            0,
+            1184128,
+            2719360,
+            15,
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "name": "jump",
+          "state": [
+            24,
+            15,
+            3,
+            0,
+            4.7880859375,
+            0.00009999999747378752,
+            0,
+            1184128,
+            2719360,
+            15,
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "name": "air",
+          "state": [
+            25,
+            16,
+            19,
+            1,
+            4.7880859375,
+            37.30008316040039,
+            0,
+            1184128,
+            2719360,
+            15,
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "name": "attack",
+          "state": [
+            65,
+            68,
+            4,
+            1,
+            4.7880859375,
+            38.52008056640625,
+            0,
+            1184128,
+            2719360,
+            15,
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "name": "recover",
+          "state": [
+            14,
+            2,
+            49,
+            0,
+            4.7880859375,
+            0.00009999999747378752,
+            0,
+            1184128,
+            2719360,
+            15,
+            1,
+            2,
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "validation": {
+    "targetedTests": 86,
+    "compileAudit": {
+      "passed": 1047,
+      "total": 1130,
+      "failed": 83
+    },
+    "fighterBrowserPassed": true,
+    "sceneBrowserPassed": true
+  },
+  "lightOverrideEvidence": {
+    "declaredCount": 34,
+    "typedPrefix": 17,
+    "allReferencedLightsWithinPrefix": true,
+    "retailRoutine": "Ground_801C20E0",
+    "countLoadAddress": "0x801c2144",
+    "strideAddress": "0x801c219c",
+    "strideBytes": 8
+  },
+  "playable": false,
+  "performanceMeasured": false,
+  "limitations": [
+    "Full Stage startup and stage-specific callbacks remain incomplete.",
+    "Only Captain Falcon has the complete base-archive constructor.",
+    "No opponent combat, audio playback, browser device input, match rules or gameplay rendering.",
+    "262 scheduler steps are not wall-clock FPS or presentation frames.",
+    "Collision arrays and archive owners live until the WASM instance is destroyed; rematch teardown remains incomplete."
+  ]
+}

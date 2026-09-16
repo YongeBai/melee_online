@@ -5,6 +5,29 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Battlefield's original stage-object path now creates all seven model groups
+(73 source joints and 64 meshes) and runs 120 animation updates. The original
+joint binding functions derive camera and blast-zone bounds from archive markers.
+All seven original light-selection paths pass, as do every one of the 256 packed
+light-override flag values and exact cleanup of the tested scene pools/callbacks.
+
+A combined Falcon/Battlefield probe loads the original collision arrays and
+checks all 52 world-vertex components against the source and original stage
+scale. Falcon spawns at the source marker, falls, lands and reaches grounded
+Wait after 120 scheduler calls. After the original player-enable routine runs,
+another 142 scripted input frames produce walking movement, a jump, neutral air
+and a return to grounded Wait. Required state and movement assertions pass.
+
+This is an integrated simulation bring-up probe, not a complete match. It uses
+four Battlefield model groups but has not integrated all Stage startup roots,
+stage-specific callbacks, general effects/items, audio playback, match rules,
+opponent combat, browser device sampling or gameplay rendering. The collision
+arrays and source archives are pinned for that WASM instance's lifetime; rematch
+teardown is not implemented by this probe. No FPS or input-to-photon measurement
+is reported. All 86 targeted tests and the stage-map, fighter and scene browser
+regressions pass.
+[Battlefield and input checkpoint](benchmarks/browser-2026-09-15-native-port-battlefield-input.json).
+
 Captain Falcon now completes the original player-owned `Fighter_Create` in
 Chrome, with all 15 scheduled callbacks, original character OnLoad, model,
 animation, camera subject and shadow setup. The probe verifies its ownership and
