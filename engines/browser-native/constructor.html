@@ -74,6 +74,7 @@ try {
       if(render)previewActors.push({name:'Battlefield group '+id,object,extraRoot:1,bytes:archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true))});
     }
     module._portStageMapBounds();module._portStageMapSpawn(0);
+    if(render)module._portStageRenderInitialize();
     report.stage={name:'Battlefield',collisionLoaded:true,vertexChecks:count*2,modelGroups:[0,3,1,6],completeStageStartup:false};
   }
   report.constructorAttempted=true;

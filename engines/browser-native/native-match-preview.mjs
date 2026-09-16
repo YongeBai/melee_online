@@ -7,6 +7,7 @@ import {createMeshPipeline,uploadMesh} from './gpu-mesh.mjs';
 import {createNativeCamera,checkNativeCamera} from './native-camera.mjs';
 import {readNativeTev} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture} from './native-texture.mjs';
+import {readNativeRenderContext,checkNativeRenderContext} from './native-render-context.mjs';
 import {readNativePixel} from './native-pixel.mjs';
 import {createNativeModelProbe} from './verify-model-state.mjs';
 
@@ -42,8 +43,10 @@ export function createNativeMatchPreview(module,canvas,actors) {
     return {
       draw(){
         const snapshot=camera.snapshot();checkNativeCamera(snapshot);
+        module._portStageRenderBegin();
+        const renderContext=readNativeRenderContext(module);checkNativeRenderContext(renderContext,snapshot);
         gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-        const rows=[],programs=new Map(),pixelStates=new Map();
+        const rows=[],programs=new Map(),pixelStates=new Map(),lightStates=new Map();
         for(const r of resources) {
           const {model,skin,gpu,nodes,flags,indices,visible}=r;
           const show=r.prepare?r.prepare():true;
@@ -59,6 +62,8 @@ export function createNativeMatchPreview(module,canvas,actors) {
             if(!programs.has(key))programs.set(key,{program,materials:0});programs.get(key).materials++;
             const textures=readNativeTextures(module);textureBindings+=textures.textures.length;
             const pixel=readNativePixel(module),pixelKey=JSON.stringify(pixel);
+            const context=readNativeRenderContext(module);checkNativeRenderContext(context,snapshot,pixel);
+            lightStates.set(JSON.stringify(context.lights),context.lights);
             if(!pixelStates.has(pixelKey))pixelStates.set(pixelKey,{state:pixel,materials:0});pixelStates.get(pixelKey).materials++;
             for(const t of textures.textures)decodeNativeTexture(module,t);
             for(const g of textures.generators)texgenTypes.add(g.type+'/'+g.source+'/'+g.normalize);
@@ -77,7 +82,7 @@ export function createNativeMatchPreview(module,canvas,actors) {
           rows.push({name:r.name,joints:model.tree.nodes.length,meshes:model.meshes.length,draws,vertices:positions.length/3,maxScaledVertexError,textureBindings,texgenTypes:[...texgenTypes],modelMatrixChecks});
         }
         if(gl.getError()!==gl.NO_ERROR)throw Error('Native match preview GPU failure');
-        return {resolution:[canvas.width,canvas.height],actors:rows,tevPrograms:[...programs.values()],pixelStates:[...pixelStates.values()],eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,playable:false,performanceMeasured:false,visualParity:false,limitations:'Diagnostic first-UV shader; original material setup is captured but not yet rendered. Original lighting, transparency, material animation, effect rendering, HUD and complete stage callbacks remain incomplete.'};
+        return {resolution:[canvas.width,canvas.height],actors:rows,tevPrograms:[...programs.values()],pixelStates:[...pixelStates.values()],renderContext,lightStates:[...lightStates.values()],eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,playable:false,performanceMeasured:false,visualParity:false,limitations:'Diagnostic first-UV shader; original material setup is captured but not yet rendered. Original lighting, transparency, material animation, effect rendering, HUD and complete stage callbacks remain incomplete.'};
       },dispose,
     };
   } catch(error){dispose();throw error;}

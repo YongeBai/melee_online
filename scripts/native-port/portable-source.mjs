@@ -34,6 +34,16 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/sysdolphin/baselib/cobj.c') {
+      // Browser framebuffer rendering uses the original offscreen branch.
+      // Keep its native projection/viewport and current-camera ownership;
+      // console VI and interlaced half-frame branches are not browser targets.
+      text+='\nbool portCObjSetCurrentOffscreen(HSD_CObj* cobj) { if(!cobj)return false; _HSD_ZListClear(); current=cobj; if(!setupOffscreenCamera(cobj))return false; HSD_CObjSetupViewingMtx(cobj); return true; }\n';
+    }
+    if(file==='src/melee/gr/types.h') {
+      const fields=Array.from({length:8},(_,i)=>`            /* +10:${i} */ u8 flags_b${i} : 1;`).join('\n');
+      replace(fields,'            u32 : 24;\n'+Array.from({length:8},(_,i)=>`            u32 flags_b${7-i} : 1;`).join('\n'));
+    }
     if(file==='src/sysdolphin/baselib/texp.c') {
       // The original compiler initializes only referenced constant channels.
       // Define the other channels rather than reading uninitialized C bytes.
@@ -70,6 +80,8 @@ export function preparePortableSource(source,output) {
         '    /* Original archive byte: a=0x80, b=0x40, c=0x20. */\n    u8 _ : 5; u8 c : 1; u8 b : 1; u8 a : 1;');
       text+='\nunsigned portStageLightOverrideBits(unsigned bits) { LightOverrideEntry v={0}; ((u8*)&v)[4]=bits; return (v.a<<2)|(v.b<<1)|v.c; }\n';
       text+='LightList** portStageSelectLights(UnkArchiveStruct* archive, LightList** list) { return Ground_801C20E0(archive,list); }\n';
+      text+='void portStageCreateGlobalLights(void) { Ground_801C466C(); }\n';
+      text+='unsigned portStageCallbackBits(unsigned bits) { StageCallbacks v={0}; v.flags=bits; return (v.flags_b0<<7)|(v.flags_b1<<6)|(v.flags_b2<<5)|(v.flags_b3<<4)|(v.flags_b4<<3)|(v.flags_b5<<2)|(v.flags_b6<<1)|v.flags_b7; }\n';
     }
     if(file==='src/sysdolphin/baselib/particle.c') {
       // Particle teardown likewise aliases several independent retail globals

@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2918814,
+    "wasmSha256": "5cbe8f593543bb58d36ce26755ffd785ced442645d62aa3cc98a4adfcfc58df9"
+  },
+  "softwareGpu": true,
+  "stageCallbackFlagCases": 256,
+  "stageLightAnimationAndTeardown": true,
+  "combatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+  "unchangedCombatTrace": true,
+  "liveSnapshots": {
+    "settled": {
+      "resolution": [
+        960,
+        720
+      ],
+      "programs": 20,
+      "pixelStates": 13,
+      "lightRegisterStates": 9,
+      "loadedLightMask": 3,
+      "originalProjectionExact": true,
+      "originalViewport": [
+        0,
+        0,
+        640,
+        480,
+        0,
+        1
+      ],
+      "originalScissor": [
+        0,
+        0,
+        640,
+        480
+      ],
+      "positions": 794,
+      "normals": 737,
+      "reflections": 11,
+      "maxPositionError": 0,
+      "maxNormalError": 0
+    },
+    "final": {
+      "resolution": [
+        960,
+        720
+      ],
+      "programs": 20,
+      "pixelStates": 13,
+      "lightRegisterStates": 9,
+      "loadedLightMask": 3,
+      "originalProjectionExact": true,
+      "originalViewport": [
+        0,
+        0,
+        640,
+        480,
+        0,
+        1
+      ],
+      "originalScissor": [
+        0,
+        0,
+        640,
+        480
+      ],
+      "positions": 794,
+      "normals": 737,
+      "reflections": 11,
+      "maxPositionError": 0,
+      "maxNormalError": 0
+    }
+  },
+  "combiner": {
+    "passed": true,
+    "programs": 227,
+    "capturedPrograms": 40,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 14528,
+    "softwareGpu": true,
+    "playable": false,
+    "performanceMeasured": false
+  },
+  "regressions": {
+    "targetedTests": 111,
+    "fighterBrowser": true,
+    "stageMapBrowser": true,
+    "sceneBrowser": true,
+    "animatedGpuModels": 27,
+    "maxVertexError": 0.000003814697265625
+  },
+  "commands": [
+    "node scripts/native-port/audit.mjs",
+    "node scripts/native-port/audit-link.mjs",
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --render",
+    "node scripts/native-port/verify-gpu.mjs --tev",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/verify-browser.mjs --stage-map",
+    "node scripts/native-port/build.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --scene",
+    "node scripts/native-port/verify-browser.mjs --scene",
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs"
+  ],
+  "visualInspection": "Native 4:3 framing retained; known white surfaces remain with diagnostic first-UV shader. No visual parity claim.",
+  "playable": false,
+  "visualParity": false,
+  "performanceMeasured": false,
+  "acceptanceMet": false,
+  "remaining": "Connect captured normal palettes, texgen, lighting, TEV and pixel state to actual draws; then finish interactive match lifecycle, effects, HUD, audio, all stage/character gameplay and sustained hardware-browser FPS/latency validation."
+}

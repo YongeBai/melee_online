@@ -5,6 +5,22 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+The live diagnostic now activates the original offscreen camera and original
+Ground stage-light constructor/animation process. Material capture includes
+diffuse/specular light registers and original per-joint specular updates. This
+also exposed a PowerPC-to-WASM layout bug in `StageCallbacks.flags`: the named
+bits must read the high bits of the 32-bit flags word. All 256 byte patterns now
+pass, and stage light objects/processes are checked through teardown.
+
+Both live snapshots retain exactly the original camera projection and matrix
+reference results, with the same combat trace. They now capture 20 distinct
+material programs and nine light-register states each; the expanded combiner
+suite passes 14,528 integer GPU channel checks. All 111 targeted tests pass.
+The visible preview still uses the diagnostic first-UV shader: captured native
+lighting/TEV/texgen/pixel state must now be connected to actual draws. This is
+rendering setup progress, not a measured performance improvement or visual-parity
+claim. [Camera/light checkpoint](benchmarks/browser-2026-09-15-native-port-render-context.json).
+
 The shared skin palette now has an original-renderer reference. PObj matrix
 setup agrees exactly across 81 poses of the 27 default model components:
 25,656 position matrices, 24,621 normal matrices and 141 reflection matrices.

@@ -23,10 +23,30 @@ _Static_assert(sizeof(GroundParam)==220&&sizeof(StageParam)==100,"Stage paramete
 extern int portSceneInitialize(void);
 extern void portRuntimeSetSceneDestructors(GObjFunc);
 extern LightList** portStageSelectLights(UnkArchiveStruct*,LightList**);
+extern void portStageCreateGlobalLights(void);
+extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
 static HSD_GObj* owners[7];
+static HSD_GObj* render_lights;
 static int installed;
 static int collision_installed;
 static void destroy_lights(HSD_Obj* object){HSD_LObjRemoveAll((HSD_LObj*)object);}
+void portStageRenderInitialize(void)
+{
+    if(!installed||render_lights)abort();
+    /* Original Ground creates a priority-zero light object at the end of that
+     * priority group. Keep its real animation process and stage selection. */
+    HSD_GObj* previous=NULL;
+    for(HSD_GObj* p=HSD_GObjPLinkHead[3];p&&p->p_priority==0;p=p->next)previous=p;
+    portStageCreateGlobalLights();
+    render_lights=previous?previous->next:HSD_GObjPLinkHead[3];
+    if(!render_lights||render_lights->classifier!=0xD||render_lights->p_priority||!render_lights->hsd_obj)abort();
+}
+void portStageRenderBegin(void)
+{
+    HSD_GObj* camera=Camera_80030A50();
+    if(!render_lights||!camera||!camera->hsd_obj)abort();
+    portRenderContextBegin(camera->hsd_obj,render_lights->hsd_obj);
+}
 void portStageMapInstall(HSD_Archive* archive,UnkStageDat* data,GroundParam* param)
 {
     if(installed||!archive||!data||!param||data->unkC!=7||portSceneInitialize()<0)abort();
@@ -127,6 +147,7 @@ unsigned portStageMapLights(unsigned index)
 void portStageMapClear(void)
 {
     if(!installed||collision_installed)abort();
+    if(render_lights){HSD_LObj_803668EC(NULL);HSD_GObjFree(render_lights);render_lights=NULL;}
     for(unsigned i=0;i<7;i++)if(owners[i]){Ground* ground=owners[i]->user_data;if(ground->x18)HSD_GObjFree(ground->x18);HSD_GObjFree(owners[i]);owners[i]=NULL;}
     Ground_801BFFB0();stage_info.param=NULL;installed=0;
 }

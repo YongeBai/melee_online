@@ -4,7 +4,7 @@ export function verifyStageMap(module,input) {
   const converted=convertBattlefieldMap(input);let checks=0,updates=0,changed=0;
   const check=(value,message)=>{checks++;if(!value)throw Error('Stage map: '+message);};
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=p=>view().getUint32(p,true);
-  for(let bits=0;bits<256;bits++)check(module._portStageLightOverrideBits(bits)===(bits>>>5),'packed override flags');
+  for(let bits=0;bits<256;bits++){check(module._portStageLightOverrideBits(bits)===(bits>>>5),'packed override flags');check(module._portStageCallbackBits((bits*0x1000000)>>>0)===bits,'stage callback MSB flags');}
   module._portSceneInitialize();
   const metrics=()=>Array.from({length:10},(_,i)=>module._portSceneLiveMetric(i)),before=metrics(),objects=module._portRuntimeObjectsUsed(),procs=module._portRuntimeProcsUsed();
   installResidentFile(module,'NativeBattlefieldMap.dat',converted.image);
@@ -13,6 +13,8 @@ export function verifyStageMap(module,input) {
   for(const [p,size] of converted.writes)check((size===2?view().getUint16(base+p,true):ptr(base+p))===(size===2?native.getUint16(p,true):native.getUint32(p,true)),'typed stage descriptor');
   module._portStageMapInstall(file.archive,root,param);const owners=[],buffers=[],rows=[];
   try {
+    module._portStageRenderInitialize();
+    check(module._portRuntimeProcsUsed()===procs+1,'original stage light animation process');
     for(let index=0;index<7;index++){
       const at=base+converted.table+index*52,model=converted.models.find(m=>base+m.root===ptr(at));
       const object=module._portStageMapCreate(index),n=model.nodes+1,nodes=module._malloc(n*4),matrix=module._malloc(n*48);buffers.push(nodes,matrix);

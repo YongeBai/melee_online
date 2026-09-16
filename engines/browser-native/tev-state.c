@@ -10,6 +10,8 @@
 #include <sysdolphin/baselib/state.h>
 #include <sysdolphin/baselib/pobj.h>
 #include <sysdolphin/baselib/gobj.h>
+#include <sysdolphin/baselib/cobj.h>
+#include <sysdolphin/baselib/lobj.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -23,6 +25,7 @@ typedef struct {
 _Static_assert(sizeof(PortTevState)==2192,"Native TEV snapshot ABI");
 static PortTevState state;
 static int capturing;
+int portMaterialCaptureActive(void){return capturing;}
 static void require(int condition){if(!capturing||!condition){fprintf(stderr,"Invalid native TEV capture\n");abort();}}
 void portRequireMaterialCapture(int condition){require(condition);}
 void portTextureCaptureReset(void);
@@ -60,13 +63,18 @@ static const PortTevState* capture(HSD_JObj* joint,unsigned index,int polygon,Mt
     portTextureCaptureReset();
     portPixelCaptureReset();
     portModelCaptureReset();
+    Mtx model_view;MtxPtr active_view=view;
+    if(!active_view&&HSD_CObjGetCurrent())active_view=HSD_CObjGetViewingMtxPtrDirect(HSD_CObjGetCurrent());
+    if(active_view){
+        HSD_JObjSetupMatrix(joint);PSMTXConcat(active_view,joint->mtx,model_view);
+        if((joint->flags&JOBJ_SPECULAR)&&!(material->rendermode&RENDER_SHADOW))HSD_LObjSetupSpecularInit(model_view);
+    }
     /* Force a complete snapshot rather than relying on previous draw caches. */
     HSD_StateInvalidate(HSD_STATE_COLOR_CHANNEL|HSD_STATE_RENDER_MODE|HSD_STATE_TEV_REGISTER);
     HSD_MObjSetCurrent(material);
     HSD_MOBJ_METHOD(material)->setup(material,material->rendermode);
     if(polygon>=0) {
         HSD_PObj* p=display->pobj;while(polygon--){if(!p)abort();p=p->next;}if(!p||!view)abort();
-        HSD_JObjSetupMatrix(joint);Mtx model_view;PSMTXConcat(view,joint->mtx,model_view);
         HSD_PObjClearMtxMark(NULL,0);
         HSD_POBJ_METHOD(p)->setup_mtx(p,view,model_view,material->rendermode);
         HSD_PObjClearMtxMark(NULL,0);
