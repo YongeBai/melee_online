@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {shaderIdentityFiles,validateShaderCatalog,mergeShaderCatalogs} from '../../engines/browser-native/shader-catalog.mjs';
+const directory=path.resolve(import.meta.dirname,'../../dist/native-port'),names=process.argv.slice(2);
+if(!names.length||names.some(n=>!/^shader-record-[A-Za-z0-9-]+\.json$/.test(n)))throw Error('Provide shader-record-*.json basenames from dist/native-port');
+const build=JSON.parse(fs.readFileSync(path.join(directory,'fighter-init-build.json')));
+const identity={wasmSha256:build.wasmSha256,sources:Object.fromEntries(shaderIdentityFiles.map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(directory,name))).digest('hex')]))};
+const catalogs=names.map(name=>validateShaderCatalog(JSON.parse(fs.readFileSync(path.join(directory,name))),identity));
+const merged=mergeShaderCatalogs(catalogs);merged.recordings=catalogs.map(c=>c.recording);
+fs.writeFileSync(path.join(directory,'native-shader-catalog.json'),JSON.stringify(merged)+'\n');
+console.log(JSON.stringify({programs:merged.programs.length,recordings:merged.recordings}));

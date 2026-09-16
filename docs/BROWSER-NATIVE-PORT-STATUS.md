@@ -5,6 +5,38 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Shader preparation now removes the observed mid-match compilation stalls in
+the selected cold-cache fixtures. Final Destination controls compiled seven
+programs during combat with 38.8/44.1 ms maximum draw submissions; preparation
+compiled those programs before the first draw, with zero live compilations.
+That first prepared run still had a 24.6 ms startup draw, and mean submission
+cost remained about 6.70 ms. A cumulative 74-program catalog also covers the
+tested Marth combat, long Final Destination cycle and Fox reflection fixtures.
+Prepared/unprepared cycle and reflection images match byte-for-byte; their GPU
+vertex checks pass. This catalog is not exhaustive roster/stage coverage.
+
+A CPU profile attributed 573 of 5,208 non-idle samples to per-frame GPU error
+polling. Deferring that diagnostic to the end of live probes reduced Marth's
+mean submission cost from 5.99/5.94 ms in two controls to 5.21/5.36 ms in two
+candidate runs. All four ran 3,600 simulation steps and draw submissions, with
+matching reported gameplay traces and particle/trail counts. Final GPU error
+checks pass. The p95 did not improve consistently, so this supports removing
+the synchronization cost, not a broad claim about worst-case latency. Validation
+retains per-frame checks; a one-time startup `gl.finish` experiment was reverted
+for lack of causal evidence. All 151 unit tests pass.
+
+The final 74-program, deferred-check Final Destination repeat completed 3,600
+steps and submissions in 60.039 seconds, with no live compilations or catch-up
+callbacks. Simulation averaged 0.499 ms; submission averaged 5.910 ms, p95
+7.9 ms and maximum 16.2 ms. Its reported gameplay trace matches the controls.
+
+These gains leave the main acceptance gaps unchanged: full scene/menu and audio
+integration, the other stages and remaining roster/moves, public static
+deployment, and actual distinct-presentation/input-to-photon measurement.
+[Shader preparation and profiling evidence](benchmarks/browser-2026-09-16-native-port-shader-preparation.json).
+
+Previous Final Destination checkpoint:
+
 Final Destination is now the second live stage fixture. The importer handles
 its ten model groups, spline references, shadow-light flags and callback scripts.
 Original startup exposed and fixed a PPC-to-WASM callback ABI mismatch by routing

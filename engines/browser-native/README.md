@@ -972,3 +972,48 @@ compilation without its persistent disk cache. The report records that setting;
 it is a diagnostic condition, not a player requirement. A sword-only prewarm
 experiment was removed: the following model/particle programs still stalled the
 frame. Broader shader preparation remains necessary for consistent cold startup.
+
+## Shader preparation and live GPU diagnostics
+
+The constructor fixture can record generated GLSL and compile those exact
+programs before its first draw. Preparation does not step the simulation or
+replay a match, and the probe asserts unchanged fighter state around it. Catalogs
+are local generated artifacts under ignored `dist/native-port`, keyed by the
+WASM hash and four shader/state-generator source hashes. A stale catalog fails
+explicitly. Exact generated-source lookup remains authoritative at draw time;
+unseen variants compile normally and are reported as uncovered.
+
+Use `--record-shaders` on a rendered constructor probe, then merge its records:
+
+```sh
+node scripts/native-port/merge-shader-catalogs.mjs shader-record-destination-Ca-live.json shader-record-destination-Ca-cycle.json shader-record-battlefield-Ms-input.json shader-record-battlefield-Fx-input.json shader-record-battlefield-Ms-live.json
+MESA_SHADER_CACHE_DISABLE=true node scripts/native-port/probe-constructor.mjs --character=Ms --stage-callbacks --live --workload --frames=3600 --hardware --prewarm-shaders --defer-gpu-errors
+```
+
+Records made after preparation include inherited programs, not just programs
+used by that workload. `shaderCoverage` distinguishes prepared/used/uncovered
+counts; new records also report `inheritedPrograms`. The current 74-program
+catalog covers selected Falcon/Final Destination, Marth/Battlefield and Fox
+reflection fixtures, not all characters, moves or stages. Catalogs contain GLSL,
+not textures/models; they still stay out of source control with generated assets.
+
+Cold-driver-cache Final Destination controls compiled seven programs during
+combat and had 38.8/44.1 ms maximum submissions. Preparation removed all seven
+compilations, but the first prepared run still had a 24.6 ms first draw. Mean
+submission time was unchanged at about 6.70 ms. Expanding the catalog removed
+Marth's additional compilation stalls. Prepared/unprepared images match exactly
+for the long Final Destination cycle and Fox reflection; GPU vertex checks pass.
+
+A sampled CPU profile then attributed 573 of 5,208 non-idle samples to the
+per-frame `gl.getError` call. `--defer-gpu-errors` moves that check to the end of
+a live probe. Validation and the default renderer retain per-frame checks.
+Two Marth controls averaged 5.99/5.94 ms submission; two deferred runs averaged
+5.21/5.36 ms with identical gameplay traces and successful final error checks.
+This avoids a CPU/GPU synchronization point; it does not reduce GPU work or
+prove lower input-to-photon latency. The p95 timings did not improve consistently.
+A one-time startup `gl.finish` experiment was reverted because its measured
+duration was zero and no causal benefit was established.
+
+See the shader-preparation benchmark evidence for raw timing summaries, source
+identities and limits. These remain fixture measurements, not a complete playable
+native port or distinct-presentation certification.

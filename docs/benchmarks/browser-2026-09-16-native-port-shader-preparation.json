@@ -1,0 +1,1089 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "e2f0011",
+  "scope": "Prepared generated shaders and deferred live GPU error checks; incomplete native-port competitive acceptance",
+  "wasmSha256": "d5cecbb8779fc97744d1c11ea23729e3044f3b4cfbd304c3edfc6eb6297eb522",
+  "browser": "Google Chrome 151.0.7922.137",
+  "resolution": [
+    960,
+    720
+  ],
+  "driverShaderCacheDisabled": true,
+  "measurements": "Fresh headless Chrome profiles, hardware WebGL, scripted normalized controller input. CPU submission timings, not distinct presentations or input-to-photon.",
+  "sourceHashes": {
+    "constructor.html": "edd5a908bc0875312ff29ecc2c82679f023bb30a98302bc7fa30d48f76cf8d29",
+    "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+    "native-live.mjs": "711a576fe699233a2ee6618d921545486a19164885abccf4d66f9128984db2a5",
+    "native-match-preview.mjs": "fe4cc9ffea025d9216896809254da41624bb8662a95894b24507ee6c3e6c24d1",
+    "shader-catalog.mjs": "41f4bec33aaa0b6d7415b9585aaa528627372a3e5959f8f9c2d401766b304656"
+  },
+  "runs": [
+    {
+      "name": "shader-cold-control",
+      "stage": "destination",
+      "character": "Ca",
+      "rendererSources": {
+        "material-gpu.mjs": "0f49ef86ec50e3e01ee56f0f809edd8b7cf02ae6c269d1edac16239e83f4d9f2",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "eade0b13b5d2ffcacd7ff7230d10a90a9aa10f0d4bf1ed1e80e0128329241bcd"
+      },
+      "preparation": null,
+      "coverage": {
+        "programs": 35,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 35
+      },
+      "frames": 3600,
+      "draws": 3599,
+      "elapsedMs": 60021,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5878611110730304,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.8999999910593033,
+        "maxMs": 2.0999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 6.700583495499856,
+        "p50Ms": 6.4000000059604645,
+        "p95Ms": 8.200000002980232,
+        "maxMs": 38.79999999701977
+      },
+      "multiStepCallbacks": 1,
+      "shaderCompilations": [
+        {
+          "frame": 196,
+          "program": 29,
+          "origin": "model",
+          "cpuMs": 11.700000002980232
+        },
+        {
+          "frame": 204,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 11.099999994039536
+        },
+        {
+          "frame": 1762,
+          "program": 31,
+          "origin": "model",
+          "cpuMs": 10
+        },
+        {
+          "frame": 1762,
+          "program": 32,
+          "origin": "model",
+          "cpuMs": 6.299999997019768
+        },
+        {
+          "frame": 2648,
+          "program": 33,
+          "origin": "model",
+          "cpuMs": 13.700000002980232
+        },
+        {
+          "frame": 2715,
+          "program": 34,
+          "origin": "model",
+          "cpuMs": 11.300000011920929
+        },
+        {
+          "frame": 2715,
+          "program": 35,
+          "origin": "model",
+          "cpuMs": 6.399999991059303
+        }
+      ],
+      "slowDraws": [
+        {
+          "frame": 196,
+          "costMs": 30.399999991059303,
+          "shaderCompilations": [
+            {
+              "program": 29,
+              "origin": "model",
+              "cpuMs": 11.700000002980232
+            }
+          ]
+        },
+        {
+          "frame": 204,
+          "costMs": 20.69999998807907,
+          "shaderCompilations": [
+            {
+              "program": 30,
+              "origin": "model",
+              "cpuMs": 11.099999994039536
+            }
+          ]
+        },
+        {
+          "frame": 1762,
+          "costMs": 28.200000002980232,
+          "shaderCompilations": [
+            {
+              "program": 31,
+              "origin": "model",
+              "cpuMs": 10
+            },
+            {
+              "program": 32,
+              "origin": "model",
+              "cpuMs": 6.299999997019768
+            }
+          ]
+        },
+        {
+          "frame": 2648,
+          "costMs": 31.099999994039536,
+          "shaderCompilations": [
+            {
+              "program": 33,
+              "origin": "model",
+              "cpuMs": 13.700000002980232
+            }
+          ]
+        },
+        {
+          "frame": 2715,
+          "costMs": 38.79999999701977,
+          "shaderCompilations": [
+            {
+              "program": 34,
+              "origin": "model",
+              "cpuMs": 11.300000011920929
+            },
+            {
+              "program": 35,
+              "origin": "model",
+              "cpuMs": 6.399999991059303
+            }
+          ]
+        }
+      ],
+      "gameplayTraceSha256": "53331e56eaf76597b8820ce1c721602eacf5bd0f590bd3266ef3f8a63ed415f9",
+      "particleStats": {
+        "draws": 11641,
+        "vertices": 46564,
+        "frames": 1689,
+        "peakDraws": 38
+      },
+      "afterimageStats": {
+        "draws": 0,
+        "vertices": 0,
+        "frames": 0,
+        "peakDraws": 0
+      },
+      "finalGpuErrorCheck": null
+    },
+    {
+      "name": "shader-cold-prepared",
+      "stage": "destination",
+      "character": "Ca",
+      "rendererSources": {
+        "material-gpu.mjs": "0f49ef86ec50e3e01ee56f0f809edd8b7cf02ae6c269d1edac16239e83f4d9f2",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "eade0b13b5d2ffcacd7ff7230d10a90a9aa10f0d4bf1ed1e80e0128329241bcd"
+      },
+      "preparation": {
+        "requested": 35,
+        "compiled": 35,
+        "cpuMs": 622.2999999970198,
+        "fighterStateUnchanged": true
+      },
+      "coverage": {
+        "programs": 35,
+        "prepared": 35,
+        "preparedUsed": 35,
+        "unpreparedUsed": 0
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60025.39999999106,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5563611113487018,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.8999999910593033,
+        "maxMs": 2.2000000029802322
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.700722222187453,
+        "p50Ms": 6.5,
+        "p95Ms": 8.5,
+        "maxMs": 24.600000008940697
+      },
+      "multiStepCallbacks": 0,
+      "shaderCompilations": [],
+      "slowDraws": [
+        {
+          "frame": 1,
+          "costMs": 24.600000008940697,
+          "shaderCompilations": []
+        }
+      ],
+      "gameplayTraceSha256": "53331e56eaf76597b8820ce1c721602eacf5bd0f590bd3266ef3f8a63ed415f9",
+      "particleStats": {
+        "draws": 11641,
+        "vertices": 46564,
+        "frames": 1689,
+        "peakDraws": 38
+      },
+      "afterimageStats": {
+        "draws": 0,
+        "vertices": 0,
+        "frames": 0,
+        "peakDraws": 0
+      },
+      "finalGpuErrorCheck": null
+    },
+    {
+      "name": "shader-cold-control-repeat",
+      "stage": "destination",
+      "character": "Ca",
+      "rendererSources": {
+        "material-gpu.mjs": "0f49ef86ec50e3e01ee56f0f809edd8b7cf02ae6c269d1edac16239e83f4d9f2",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "eade0b13b5d2ffcacd7ff7230d10a90a9aa10f0d4bf1ed1e80e0128329241bcd"
+      },
+      "preparation": null,
+      "coverage": {
+        "programs": 35,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 35
+      },
+      "frames": 3600,
+      "draws": 3597,
+      "elapsedMs": 60025.70000000298,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5980277776511179,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3597,
+        "meanMs": 6.6958576591769825,
+        "p50Ms": 6.5,
+        "p95Ms": 8.099999994039536,
+        "maxMs": 44.099999994039536
+      },
+      "multiStepCallbacks": 3,
+      "shaderCompilations": [
+        {
+          "frame": 196,
+          "program": 29,
+          "origin": "model",
+          "cpuMs": 21.400000005960464
+        },
+        {
+          "frame": 204,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 15.799999997019768
+        },
+        {
+          "frame": 1762,
+          "program": 31,
+          "origin": "model",
+          "cpuMs": 16
+        },
+        {
+          "frame": 1762,
+          "program": 32,
+          "origin": "model",
+          "cpuMs": 13.400000005960464
+        },
+        {
+          "frame": 2648,
+          "program": 33,
+          "origin": "model",
+          "cpuMs": 14.799999997019768
+        },
+        {
+          "frame": 2715,
+          "program": 34,
+          "origin": "model",
+          "cpuMs": 10.900000005960464
+        },
+        {
+          "frame": 2715,
+          "program": 35,
+          "origin": "model",
+          "cpuMs": 5.799999997019768
+        }
+      ],
+      "slowDraws": [
+        {
+          "frame": 196,
+          "costMs": 44.099999994039536,
+          "shaderCompilations": [
+            {
+              "program": 29,
+              "origin": "model",
+              "cpuMs": 21.400000005960464
+            }
+          ]
+        },
+        {
+          "frame": 204,
+          "costMs": 25.200000002980232,
+          "shaderCompilations": [
+            {
+              "program": 30,
+              "origin": "model",
+              "cpuMs": 15.799999997019768
+            }
+          ]
+        },
+        {
+          "frame": 1762,
+          "costMs": 39.599999994039536,
+          "shaderCompilations": [
+            {
+              "program": 31,
+              "origin": "model",
+              "cpuMs": 16
+            },
+            {
+              "program": 32,
+              "origin": "model",
+              "cpuMs": 13.400000005960464
+            }
+          ]
+        },
+        {
+          "frame": 2648,
+          "costMs": 36,
+          "shaderCompilations": [
+            {
+              "program": 33,
+              "origin": "model",
+              "cpuMs": 14.799999997019768
+            }
+          ]
+        },
+        {
+          "frame": 2715,
+          "costMs": 33.400000005960464,
+          "shaderCompilations": [
+            {
+              "program": 34,
+              "origin": "model",
+              "cpuMs": 10.900000005960464
+            },
+            {
+              "program": 35,
+              "origin": "model",
+              "cpuMs": 5.799999997019768
+            }
+          ]
+        }
+      ],
+      "gameplayTraceSha256": "53331e56eaf76597b8820ce1c721602eacf5bd0f590bd3266ef3f8a63ed415f9",
+      "particleStats": {
+        "draws": 11627,
+        "vertices": 46508,
+        "frames": 1688,
+        "peakDraws": 38
+      },
+      "afterimageStats": {
+        "draws": 0,
+        "vertices": 0,
+        "frames": 0,
+        "peakDraws": 0
+      },
+      "finalGpuErrorCheck": null
+    },
+    {
+      "name": "shader-cold-drained",
+      "stage": "destination",
+      "character": "Ca",
+      "rendererSources": {
+        "material-gpu.mjs": "0f49ef86ec50e3e01ee56f0f809edd8b7cf02ae6c269d1edac16239e83f4d9f2",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "27b88a84639f497dc517e0f76311d1d737cf5b042a252983e6afd26626fbdb58"
+      },
+      "preparation": {
+        "requested": 35,
+        "compiled": 35,
+        "cpuMs": 404.6000000089407,
+        "fighterStateUnchanged": true,
+        "gpuDrainMs": 0
+      },
+      "coverage": {
+        "programs": 35,
+        "prepared": 35,
+        "preparedUsed": 35,
+        "unpreparedUsed": 0
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60022.90000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5704166666790843,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 1.5
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.601305555668142,
+        "p50Ms": 6.4000000059604645,
+        "p95Ms": 7.9000000059604645,
+        "maxMs": 14.799999997019768
+      },
+      "multiStepCallbacks": 0,
+      "shaderCompilations": [],
+      "slowDraws": [],
+      "gameplayTraceSha256": "53331e56eaf76597b8820ce1c721602eacf5bd0f590bd3266ef3f8a63ed415f9",
+      "particleStats": {
+        "draws": 11641,
+        "vertices": 46564,
+        "frames": 1689,
+        "peakDraws": 38
+      },
+      "afterimageStats": {
+        "draws": 0,
+        "vertices": 0,
+        "frames": 0,
+        "peakDraws": 0
+      },
+      "finalGpuErrorCheck": null
+    },
+    {
+      "name": "shader-marth-prepared-first",
+      "stage": "battlefield",
+      "character": "Ms",
+      "rendererSources": {
+        "material-gpu.mjs": "0f49ef86ec50e3e01ee56f0f809edd8b7cf02ae6c269d1edac16239e83f4d9f2",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "eade0b13b5d2ffcacd7ff7230d10a90a9aa10f0d4bf1ed1e80e0128329241bcd"
+      },
+      "preparation": {
+        "requested": 66,
+        "compiled": 66,
+        "cpuMs": 582.6000000089407,
+        "fighterStateUnchanged": true
+      },
+      "coverage": {
+        "programs": 74,
+        "prepared": 66,
+        "preparedUsed": 33,
+        "unpreparedUsed": 8
+      },
+      "frames": 3600,
+      "draws": 3599,
+      "elapsedMs": 60027.20000000298,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.4856944445065326,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 5.713448180059123,
+        "p50Ms": 5.5,
+        "p95Ms": 6.9000000059604645,
+        "maxMs": 45.20000000298023
+      },
+      "multiStepCallbacks": 1,
+      "shaderCompilations": [
+        {
+          "frame": 95,
+          "program": 71,
+          "origin": "model",
+          "cpuMs": 13.299999997019768
+        },
+        {
+          "frame": 95,
+          "program": 72,
+          "origin": "particles",
+          "cpuMs": 7.299999997019768
+        },
+        {
+          "frame": 95,
+          "program": 73,
+          "origin": "particles",
+          "cpuMs": 7.199999988079071
+        },
+        {
+          "frame": 2677,
+          "program": 74,
+          "origin": "model",
+          "cpuMs": 12.200000002980232
+        }
+      ],
+      "slowDraws": [
+        {
+          "frame": 95,
+          "costMs": 45.20000000298023,
+          "shaderCompilations": [
+            {
+              "program": 71,
+              "origin": "model",
+              "cpuMs": 13.299999997019768
+            },
+            {
+              "program": 72,
+              "origin": "particles",
+              "cpuMs": 7.299999997019768
+            },
+            {
+              "program": 73,
+              "origin": "particles",
+              "cpuMs": 7.199999988079071
+            }
+          ]
+        },
+        {
+          "frame": 2677,
+          "costMs": 22.099999994039536,
+          "shaderCompilations": [
+            {
+              "program": 74,
+              "origin": "model",
+              "cpuMs": 12.200000002980232
+            }
+          ]
+        }
+      ],
+      "gameplayTraceSha256": "c6713697659898ebe42f874f5627dc5861a42d1a0ee49646f46fda6d7c44920e",
+      "particleStats": {
+        "draws": 7009,
+        "vertices": 28036,
+        "frames": 1026,
+        "peakDraws": 12
+      },
+      "afterimageStats": {
+        "draws": 894,
+        "vertices": 29580,
+        "frames": 894,
+        "peakDraws": 1
+      },
+      "finalGpuErrorCheck": null
+    },
+    {
+      "name": "shader-marth-prepared-repeat",
+      "stage": "battlefield",
+      "character": "Ms",
+      "rendererSources": {
+        "material-gpu.mjs": "0f49ef86ec50e3e01ee56f0f809edd8b7cf02ae6c269d1edac16239e83f4d9f2",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "eade0b13b5d2ffcacd7ff7230d10a90a9aa10f0d4bf1ed1e80e0128329241bcd"
+      },
+      "preparation": {
+        "requested": 74,
+        "compiled": 74,
+        "cpuMs": 792,
+        "fighterStateUnchanged": true
+      },
+      "coverage": {
+        "programs": 74,
+        "prepared": 74,
+        "preparedUsed": 41,
+        "unpreparedUsed": 0
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60031.69999998808,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.6180277775269416,
+        "p50Ms": 0.6000000089406967,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.987916666960551,
+        "p50Ms": 5.799999997019768,
+        "p95Ms": 7.0999999940395355,
+        "maxMs": 18.900000005960464
+      },
+      "multiStepCallbacks": 0,
+      "shaderCompilations": [],
+      "slowDraws": [
+        {
+          "frame": 1271,
+          "costMs": 18.900000005960464,
+          "shaderCompilations": []
+        }
+      ],
+      "gameplayTraceSha256": "c6713697659898ebe42f874f5627dc5861a42d1a0ee49646f46fda6d7c44920e",
+      "particleStats": {
+        "draws": 7021,
+        "vertices": 28084,
+        "frames": 1027,
+        "peakDraws": 12
+      },
+      "afterimageStats": {
+        "draws": 895,
+        "vertices": 29633,
+        "frames": 895,
+        "peakDraws": 1
+      },
+      "finalGpuErrorCheck": null
+    },
+    {
+      "name": "gpu-errors-deferred-first",
+      "stage": "battlefield",
+      "character": "Ms",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "fe4cc9ffea025d9216896809254da41624bb8662a95894b24507ee6c3e6c24d1"
+      },
+      "preparation": {
+        "requested": 74,
+        "compiled": 74,
+        "cpuMs": 772.5999999940395,
+        "fighterStateUnchanged": true
+      },
+      "coverage": {
+        "programs": 74,
+        "prepared": 74,
+        "preparedUsed": 41,
+        "unpreparedUsed": 0
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60031.59999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5450277776436673,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 1.800000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.212138889258107,
+        "p50Ms": 4.9000000059604645,
+        "p95Ms": 6.9000000059604645,
+        "maxMs": 16.600000023841858
+      },
+      "multiStepCallbacks": 0,
+      "shaderCompilations": [],
+      "slowDraws": [],
+      "gameplayTraceSha256": "c6713697659898ebe42f874f5627dc5861a42d1a0ee49646f46fda6d7c44920e",
+      "particleStats": {
+        "draws": 7021,
+        "vertices": 28084,
+        "frames": 1027,
+        "peakDraws": 12
+      },
+      "afterimageStats": {
+        "draws": 895,
+        "vertices": 29633,
+        "frames": 895,
+        "peakDraws": 1
+      },
+      "finalGpuErrorCheck": true
+    },
+    {
+      "name": "gpu-errors-control-repeat",
+      "stage": "battlefield",
+      "character": "Ms",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "fe4cc9ffea025d9216896809254da41624bb8662a95894b24507ee6c3e6c24d1"
+      },
+      "preparation": {
+        "requested": 74,
+        "compiled": 74,
+        "cpuMs": 752.6999999880791,
+        "fighterStateUnchanged": true
+      },
+      "coverage": {
+        "programs": 74,
+        "prepared": 74,
+        "preparedUsed": 41,
+        "unpreparedUsed": 0
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60027,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5125555554529031,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2.0999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.940027777834071,
+        "p50Ms": 5.799999982118607,
+        "p95Ms": 7.300000011920929,
+        "maxMs": 13.600000023841858
+      },
+      "multiStepCallbacks": 0,
+      "shaderCompilations": [],
+      "slowDraws": [],
+      "gameplayTraceSha256": "c6713697659898ebe42f874f5627dc5861a42d1a0ee49646f46fda6d7c44920e",
+      "particleStats": {
+        "draws": 7021,
+        "vertices": 28084,
+        "frames": 1027,
+        "peakDraws": 12
+      },
+      "afterimageStats": {
+        "draws": 895,
+        "vertices": 29633,
+        "frames": 895,
+        "peakDraws": 1
+      },
+      "finalGpuErrorCheck": true
+    },
+    {
+      "name": "gpu-errors-deferred-repeat",
+      "stage": "battlefield",
+      "character": "Ms",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "fe4cc9ffea025d9216896809254da41624bb8662a95894b24507ee6c3e6c24d1"
+      },
+      "preparation": {
+        "requested": 74,
+        "compiled": 74,
+        "cpuMs": 767.8999999761581,
+        "fighterStateUnchanged": true
+      },
+      "coverage": {
+        "programs": 74,
+        "prepared": 74,
+        "preparedUsed": 41,
+        "unpreparedUsed": 0
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60031.70000001788,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.48680555575423773,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2.300000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.364694444553719,
+        "p50Ms": 5,
+        "p95Ms": 7.5999999940395355,
+        "maxMs": 13.300000011920929
+      },
+      "multiStepCallbacks": 0,
+      "shaderCompilations": [],
+      "slowDraws": [],
+      "gameplayTraceSha256": "c6713697659898ebe42f874f5627dc5861a42d1a0ee49646f46fda6d7c44920e",
+      "particleStats": {
+        "draws": 7021,
+        "vertices": 28084,
+        "frames": 1027,
+        "peakDraws": 12
+      },
+      "afterimageStats": {
+        "draws": 895,
+        "vertices": 29633,
+        "frames": 895,
+        "peakDraws": 1
+      },
+      "finalGpuErrorCheck": true
+    },
+    {
+      "name": "shader-final-destination-prepared",
+      "stage": "destination",
+      "character": "Ca",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "fe4cc9ffea025d9216896809254da41624bb8662a95894b24507ee6c3e6c24d1"
+      },
+      "preparation": {
+        "requested": 74,
+        "compiled": 74,
+        "cpuMs": 925.1999999880791,
+        "fighterStateUnchanged": true
+      },
+      "coverage": {
+        "programs": 74,
+        "prepared": 74,
+        "preparedUsed": 35,
+        "unpreparedUsed": 0
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60038.70000001788,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.4988888887812694,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 1.5999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.9095555556399955,
+        "p50Ms": 5.5999999940395355,
+        "p95Ms": 7.9000000059604645,
+        "maxMs": 16.200000017881393
+      },
+      "multiStepCallbacks": 0,
+      "shaderCompilations": [],
+      "slowDraws": [],
+      "gameplayTraceSha256": "53331e56eaf76597b8820ce1c721602eacf5bd0f590bd3266ef3f8a63ed415f9",
+      "particleStats": {
+        "draws": 11641,
+        "vertices": 46564,
+        "frames": 1689,
+        "peakDraws": 38
+      },
+      "afterimageStats": {
+        "draws": 0,
+        "vertices": 0,
+        "frames": 0,
+        "peakDraws": 0
+      },
+      "finalGpuErrorCheck": true
+    }
+  ],
+  "profile": {
+    "window": {
+      "firstFrame": 301,
+      "lastFrame": 1206,
+      "intervalMicroseconds": 1000,
+      "performanceSampleInstrumented": true
+    },
+    "totalSamples": 14235,
+    "nonIdleSamples": 5208,
+    "topSelfSamples": [
+      {
+        "name": "(idle)",
+        "file": "",
+        "line": 0,
+        "selfSamples": 9027
+      },
+      {
+        "name": "getError",
+        "file": "",
+        "line": 0,
+        "selfSamples": 573
+      },
+      {
+        "name": "(anonymous)",
+        "file": "native-tev.mjs",
+        "line": 11,
+        "selfSamples": 318
+      },
+      {
+        "name": "apply",
+        "file": "material-gpu.mjs",
+        "line": 64,
+        "selfSamples": 233
+      },
+      {
+        "name": "floats",
+        "file": "native-render-context.mjs",
+        "line": 8,
+        "selfSamples": 167
+      },
+      {
+        "name": "(anonymous)",
+        "file": "native-model.mjs",
+        "line": 7,
+        "selfSamples": 164
+      },
+      {
+        "name": "(program)",
+        "file": "",
+        "line": 0,
+        "selfSamples": 157
+      },
+      {
+        "name": "packRows",
+        "file": "material-gpu.mjs",
+        "line": 30,
+        "selfSamples": 142
+      },
+      {
+        "name": "readNativePixel",
+        "file": "native-pixel.mjs",
+        "line": 2,
+        "selfSamples": 119
+      },
+      {
+        "name": "(garbage collector)",
+        "file": "",
+        "line": 0,
+        "selfSamples": 99
+      },
+      {
+        "name": "readNativeTevState",
+        "file": "native-tev.mjs",
+        "line": 7,
+        "selfSamples": 92
+      },
+      {
+        "name": "materialShaderKey",
+        "file": "material-shader.mjs",
+        "line": 45,
+        "selfSamples": 89
+      },
+      {
+        "name": "image",
+        "file": "material-gpu.mjs",
+        "line": 49,
+        "selfSamples": 81
+      },
+      {
+        "name": "matrices",
+        "file": "native-model.mjs",
+        "line": 7,
+        "selfSamples": 80
+      },
+      {
+        "name": "wasm-function[9215]",
+        "file": "melee-fighter-init.wasm",
+        "line": 1,
+        "selfSamples": 75
+      },
+      {
+        "name": "(anonymous)",
+        "file": "native-tev.mjs",
+        "line": 11,
+        "selfSamples": 70
+      },
+      {
+        "name": "rows",
+        "file": "native-tev.mjs",
+        "line": 11,
+        "selfSamples": 68
+      },
+      {
+        "name": "floats",
+        "file": "native-render-context.mjs",
+        "line": 8,
+        "selfSamples": 68
+      },
+      {
+        "name": "bindVertexArray",
+        "file": "",
+        "line": 0,
+        "selfSamples": 68
+      },
+      {
+        "name": "wasm-function[743]",
+        "file": "melee-fighter-init.wasm",
+        "line": 1,
+        "selfSamples": 66
+      }
+    ],
+    "instrumented": true
+  },
+  "catalog": {
+    "programs": 74,
+    "identity": {
+      "wasmSha256": "d5cecbb8779fc97744d1c11ea23729e3044f3b4cfbd304c3edfc6eb6297eb522",
+      "sources": {
+        "material-gpu.mjs": "0f49ef86ec50e3e01ee56f0f809edd8b7cf02ae6c269d1edac16239e83f4d9f2",
+        "material-shader.mjs": "8a168353fc9693290031d41c255ba9e79773d28791750bfc22f92137ce3cb0a1",
+        "tev-shader.mjs": "7bf1bb0483479204869fe56505efee0e8a1f1e55c6faf4563ef00f996e08376d",
+        "native-tev.mjs": "1f8439137c3cf4bc50063262bdbc683c79c69acd3da1d3e1e1162d594e422bda",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9"
+      }
+    },
+    "recordings": [
+      {
+        "stage": "destination",
+        "character": "Ca",
+        "frames": 3600,
+        "stageCallbackFrames": 0,
+        "workload": true,
+        "stageOnly": false
+      },
+      {
+        "stage": "destination",
+        "character": "Ca",
+        "frames": 0,
+        "stageCallbackFrames": 27000,
+        "workload": false,
+        "stageOnly": true
+      },
+      {
+        "stage": "battlefield",
+        "character": "Ms",
+        "frames": 142,
+        "stageCallbackFrames": 0,
+        "workload": false,
+        "stageOnly": false
+      },
+      {
+        "stage": "battlefield",
+        "character": "Fx",
+        "frames": 142,
+        "stageCallbackFrames": 0,
+        "workload": false,
+        "stageOnly": false
+      },
+      {
+        "stage": "battlefield",
+        "character": "Ms",
+        "frames": 3600,
+        "stageCallbackFrames": 0,
+        "workload": true,
+        "stageOnly": false
+      }
+    ],
+    "limits": "Cumulative source set from selected fixtures. Marth live record inherited 66 compiled programs and added 8; it did not use all 74. Core and four generator hashes are required; old extra backend hashes are provenance only."
+  },
+  "validation": {
+    "unitTests": 151,
+    "failed": 0,
+    "gameplayComparisons": "Reported final fighter fields except pointers 7/8, action-state transitions and workload counts match in both A/B/A groups. Particle/afterimage draw counts also match in Marth runs. FD particle draw counts differ with skipped submissions, as expected; no simulation changes.",
+    "destinationCycle": {
+      "callbackFrames": 27000,
+      "sampledStageDraws": 225,
+      "shaderCoverage": {
+        "programs": 74,
+        "prepared": 74,
+        "preparedUsed": 42,
+        "unpreparedUsed": 0
+      },
+      "gpuVertexChecks": true,
+      "imageMatchesUnprepared": true,
+      "imageSha256": "ae9796e36dbe3efc156dae66a072571650a6f6d7c77f0551493c680b828571bc"
+    },
+    "foxReflection": {
+      "gpuVertexChecks": true,
+      "shaderCoverage": {
+        "programs": 74,
+        "prepared": 74,
+        "preparedUsed": 25,
+        "unpreparedUsed": 0
+      },
+      "imageMatchesUnprepared": true,
+      "imageSha256": "62995777bf93dd5e8407cc894a143be4a301b4cdca33af98acaa1b734b3d9abc"
+    }
+  },
+  "decisions": {
+    "retain": "Optional source-identical precompilation and live-only deferred GPU check; correctness mode retains per-frame checks. Uncovered variants are counted and compile normally.",
+    "revert": "One-time startup gl.finish: measured 0 ms; improved run cannot establish causal benefit. shader-cold-drained is rejected code, not the retained performance result.",
+    "limits": [
+      "Shader preparation removed measured compilation stalls, not all frame jitter.",
+      "Deferral reduced mean CPU submission roughly 10–13% in these Marth samples, but p95 did not improve consistently; no claim of reduced GPU execution time.",
+      "No camera, gameplay, resolution, assets or no-ISO startup changes.",
+      "Coverage remains seven partial fighter fixtures and two live stage fixtures. Full scenes/menus, audio, all stages/moves, deployment, distinct presented FPS and input-to-photon validation remain unfinished."
+    ]
+  }
+}

@@ -19,7 +19,7 @@ export function nativePositionRoundoffBound(matrix,row,point) {
 // Resource/program caches are persistent; draw-state capture is still a debug
 // oracle. Original fighter callbacks now select draws; complete camera/GX-link
 // ordering and mutable-image invalidation remain work for the playable renderer.
-export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
+export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true}={}) {
   const programs=new Map(),variants=new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
   if(!view)throw Error('Native material view allocation');
   // WebGL copies uniform arguments during the call. Reuse scratch storage;
@@ -33,15 +33,17 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes,origin){
     const variant=materialShaderKey(state,attributes);if(variants.has(variant))return variants.get(variant);
-    const sources=generateMaterialShaders(state,attributes),key=sources.vertex+'\n'+sources.fragment;
-    if(programs.has(key)){const p=programs.get(key);variants.set(variant,p);return p;}
+    const result=compileProgram(generateMaterialShaders(state,attributes),origin);result.used=true;variants.set(variant,result);return result;
+  }
+  function compileProgram(sources,origin){
+    const key=sources.vertex+'\n'+sources.fragment;if(programs.has(key))return programs.get(key);
     const compilationStart=performance.now();let vs,fs,p;
     try {
       vs=shader(gl.VERTEX_SHADER,sources.vertex);fs=shader(gl.FRAGMENT_SHADER,sources.fragment);p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,fs);
       gl.transformFeedbackVaryings(p,['transformedPosition','transformedNormal','raster0','raster1','verifiedTexcoord'],gl.INTERLEAVED_ATTRIBS);gl.linkProgram(p);
       if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
-      const uniforms=new Map(),result={program:p,uniform(name){if(!uniforms.has(name))uniforms.set(name,gl.getUniformLocation(p,name));return uniforms.get(name);}};
-      programs.set(key,result);variants.set(variant,result);shaderCompilations.push({program:programs.size,origin,cpuMs:performance.now()-compilationStart});return result;
+      const uniforms=new Map(),result={program:p,sources,prepared:origin==='prewarm',used:false,uniform(name){if(!uniforms.has(name))uniforms.set(name,gl.getUniformLocation(p,name));return uniforms.get(name);}};
+      programs.set(key,result);shaderCompilations.push({program:programs.size,origin,cpuMs:performance.now()-compilationStart});return result;
     } catch(error){if(p)gl.deleteProgram(p);throw error;}finally{if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);}
   }
   function image(t){
@@ -192,7 +194,15 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     }catch(error){dispose();throw error;}
   }
   function selectCamera(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);}
-  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
+  return {upload,selectCamera,
+    prewarm(sources){
+      if(snapshot)throw Error('Shader preparation must precede the first draw');
+      const before=programs.size,start=performance.now();for(const source of sources)compileProgram(source,'prewarm');
+      return {requested:sources.length,compiled:programs.size-before,cpuMs:performance.now()-start};
+    },
+    shaderSources(){return [...programs.values()].map(p=>p.sources);},
+    shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
+    begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
     flush({ordered=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
@@ -205,7 +215,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
         if(verifyVertices)verifyDrawVertices(draw);
         gl.drawElements(gl.TRIANGLES,draw.plan.mesh.triangles.length,gl.UNSIGNED_INT,0);draws++;
       }
-      if(gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
+      if(checkErrors&&gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
       return {vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();

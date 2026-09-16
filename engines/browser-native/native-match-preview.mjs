@@ -15,12 +15,12 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. The native-material path is still missing full draw callbacks.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={}}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
   const info=gl.getExtension('WEBGL_debug_renderer_info'),gpuInfo={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};
-  const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify}):null,resources=[];
+  const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks}):null,resources=[];
   const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
   if(hud&&(!hudList||!callbacks))throw Error('HUD requires original callbacks and object buffer');
   function releaseResource(r){r.accessoryGpu?.dispose();if(r.accessoryNodes)module._free(r.accessoryNodes);r.materialGpu?.dispose();r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}
@@ -146,6 +146,10 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     materialShaderChecks=materials&&verify?verifyGpuMaterialShader(gl):null;
     for(const actor of actors)addActor(actor);
     return {
+      validateGpu(){if(gl.getError()!==gl.NO_ERROR)throw Error('Native GPU error at probe completion');return true;},
+      prewarm(sources){if(!materialRenderer)throw Error('Shader preparation requires material renderer');return materialRenderer.prewarm(sources);},
+      shaderSources(){return materialRenderer?.shaderSources()??[];},
+      shaderCoverage(){return materialRenderer?.shaderCoverage()??null;},
       resetImmediateStats(){for(const stats of [particleStats,afterimageStats])for(const key of Object.keys(stats))stats[key]=0;},
       draw(){
         if(callbacks){

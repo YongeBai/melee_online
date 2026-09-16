@@ -6,6 +6,7 @@
 <pre id="result">Loading hosted assets…</pre>
 <script type="module">
 import create from './melee-fighter-init.mjs';
+import {shaderIdentityFiles,validateShaderCatalog} from './shader-catalog.mjs';
 import {archiveRootView,inspectArchive} from './archive.mjs';
 import {verifyNativeProjection} from './native-camera.mjs';
 import {combatWorkload,verifyCombatWorkload} from './combat-workload.mjs';
@@ -167,6 +168,7 @@ try {
     if(tournament&&!intro){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
     const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
     let preview,canvas;
+    const saveShaders=()=>{report.shaderCoverage=preview?.shaderCoverage();if(params.has('recordshaders'))globalThis.nativeShaderSources=preview.shaderSources();};
     function recordHud(drawn){
       if(drawn.materialDraws?.afterimageDraws){
         const stats=report.afterimages??={frames:0,draws:0,vertices:0};stats.frames++;stats.draws+=drawn.materialDraws.afterimageDraws;stats.vertices+=drawn.materialDraws.afterimageVertices;
@@ -208,7 +210,17 @@ try {
         itemModels=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(baseBytes),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
       }
-      preview=createNativeMatchPreview(module,canvas,previewActors,{cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
+      preview=createNativeMatchPreview(module,canvas,previewActors,{gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});
+      if(params.has('prewarmshaders')){
+        const build=await (await fetch('./fighter-init-build.json')).json();
+        const hashes=await Promise.all(shaderIdentityFiles.map(async name=>{const bytes=await (await fetch('./'+name)).arrayBuffer(),hash=await crypto.subtle.digest('SHA-256',bytes);return [name,Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')];}));
+        const identity={wasmSha256:build.wasmSha256,sources:Object.fromEntries(hashes)},catalog=validateShaderCatalog(await (await fetch('./native-shader-catalog.json')).json(),identity);
+        const before=[object,opponent].filter(Boolean).map(combatState);
+        report.shaderPreparation=preview.prewarm(catalog.programs);
+        if(JSON.stringify(before)!==JSON.stringify([object,opponent].filter(Boolean).map(combatState)))throw Error('Shader preparation changed fighter state');
+        report.shaderPreparation.fighterStateUnchanged=true;
+      }
+      report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(intro){
@@ -260,7 +272,7 @@ try {
         document.documentElement.dataset.live='ready';
       });
       if(tournament)report.matchFinal=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
-      preview.dispose();
+      report.finalGpuErrorCheck=preview.validateGpu();saveShaders();preview.dispose();
     }else if(preview){report.preview.final=preview.draw();}
     if(new URLSearchParams(location.search).has('input')){
       report.input={completed:false,frames:0,states:[]};
@@ -321,7 +333,7 @@ try {
     else if(tournament&&!live&&params.has('timeout')){report.timeout={};verifyTimeout(module,report.timeout,{onStep:renderSteps?()=>{recordHud(preview.draw());report.timeoutRenderedSteps=(report.timeoutRenderedSteps??0)+1;}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
     else if(tournament&&!live&&!stageOnly){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
     if(damageHud)report.hud.finalPlayers=[0,1].map(slot=>Array.from({length:4},(_,field)=>module._portHudPlayerRead(slot,field)));
-    if(preview&&!live)preview.dispose();
+    if(preview&&!live){report.finalGpuErrorCheck=preview.validateGpu();saveShaders();preview.dispose();}
   }
 } catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}
 document.querySelector('#result').textContent=JSON.stringify(report,null,2);
