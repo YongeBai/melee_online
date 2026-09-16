@@ -29,6 +29,7 @@ import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
 const params=new URLSearchParams(location.search),tournament=params.has('tournament'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
+const withHud=tournament&&params.has('hud');let hudPreview=null;
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
@@ -62,11 +63,17 @@ try {
   installResidentFile(module,'EfCaData.dat',convertCaptainEffects(await asset('EfCaData.dat')).image);
   if(tournament){
     installResidentFile(module,'PdPm.dat',convertPlayerParameters(await asset('PdPm.dat')).image);
-    const status=convertStatusModels(await asset('IfAll.usd'));
+    const hudBytes=await asset('IfAll.usd'),status=convertStatusModels(hudBytes,{hud:withHud});
     installResidentFile(module,'NativeStatus.dat',status.image);
-    const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models']);
+    const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models',...(withHud?['ScInfDmg_scene_data']:[])]);
     module._portTournamentStatusInstall(statusFile.archive);report.statusModels=status.models;
     module._portTournamentInitialize();report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
+    if(withHud){
+      module._portTournamentHudInitialize(statusFile.addresses[1]);
+      const archive=inspectArchive(hudBytes),base=statusFile.addresses[1]-archive.publics.get('ScInfDmg_scene_data');
+      hudPreview={models:new Map([...status.models,...status.hudModels].map((model,i)=>[base+model.joint,{name:model.kind??'status '+i,bytes:archiveRootView(archive,'hud_Share_joint',model.joint)}]))};
+      report.hud={models:status.hudModels,camera:status.camera};
+    }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
   const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat');
@@ -120,16 +127,28 @@ try {
     if(tournament){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
     const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
     let preview,canvas;
+    function recordHud(drawn){
+      if(!drawn.hud)return;
+      report.hud.drawnFrames=(report.hud.drawnFrames??0)+1;
+      if(drawn.hud.objects.some(o=>o.name==='tdsce')){
+        report.hud.countdownFrames=(report.hud.countdownFrames??0)+1;
+        if(report.hud.countdownFrames===30){const img=document.createElement('img');img.id='native-preview-countdown';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.countdown=drawn;}
+      }
+      if(drawn.hud.objects.some(o=>o.name.startsWith('status ')&&o.draws)){
+        report.hud.statusFrames=(report.hud.statusFrames??0)+1;
+        if(report.hud.statusFrames===30){const img=document.createElement('img');img.id='native-preview-status';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.status=drawn;}
+      }
+    }
     if(render) {
       const sharedArchive=inspectArchive(common),respawnRoot=sharedArchive.data.getUint32(sharedArchive.data.getUint32(sharedArchive.publics.get('ftLoadCommonData')+8*4)),respawnBytes=archiveRootView(sharedArchive,'respawn_Share_joint',respawnRoot);
       for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,accessory:{root:()=>module._portFighterRespawnPlatform(owner),bytes:respawnBytes},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
-      preview=createNativeMatchPreview(module,canvas,previewActors,{verify:!live&&!renderSteps,callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
+      preview=createNativeMatchPreview(module,canvas,previewActors,{hud:hudPreview,verify:!live&&!renderSteps,callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(combat&&!live&&!params.has('workloadsteps'))await verifyCombat(module,[object,opponent],report.combat,{
       step,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
-      onStep:renderSteps?()=>{preview.draw();report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
+      onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
     });
     if(live){
@@ -161,8 +180,8 @@ try {
       if(preview)report.preview.final=preview.draw();
     }
     if(params.has('workloadsteps')){const count=Number(params.get('workloadsteps'));if(!tournament||live||!Number.isInteger(count)||count<180||count>36000)throw Error('Invalid unpaced workload');report.simulationWorkload={};verifyCombatWorkload(module,[object,opponent],report.simulationWorkload,count);}
-    else if(tournament&&!live&&params.has('timeout')){report.timeout={};verifyTimeout(module,report.timeout,{progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
-    else if(tournament&&!live){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
+    else if(tournament&&!live&&params.has('timeout')){report.timeout={};verifyTimeout(module,report.timeout,{onStep:renderSteps?()=>{recordHud(preview.draw());report.timeoutRenderedSteps=(report.timeoutRenderedSteps??0)+1;}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
+    else if(tournament&&!live){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
     if(preview&&!live)preview.dispose();
   }
 } catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}

@@ -47,17 +47,21 @@ export function verifyMatch(module,objects,report,{onStep=()=>{},progress=()=>{}
   report.completed=true;
 }
 
-export function verifyTimeout(module,report,{progress=()=>{}}={}) {
+export function verifyTimeout(module,report,{progress=()=>{},onStep=()=>{}}={}) {
   const read=field=>module._portTournamentRead(field,0);
   report.completed=false;report.before=read(12);report.frames=0;
   while(!read(15)&&report.frames<28801){
     module._portStageProbePad(0,0,0,0);module._portStageProbePad(1,0,0,0);
     module._portTournamentStep();report.frames++;
+    if(read(12)>=28440)onStep();
     if(report.frames%6000===0)progress();
   }
   report.after={frame:read(12),seconds:read(13),fraction:read(14),outcome:read(15)};
   if(report.after.frame!==28800||report.after.outcome!==1||report.after.seconds!==0||report.after.fraction!==59)throw Error('Original eight-minute timeout boundary');
-  module._portTournamentStep();report.transition={phase:read(20),outcome:read(16)};
+  module._portTournamentStep();onStep();report.transition={phase:read(20),outcome:read(16)};
   if(report.transition.phase!==1||report.transition.outcome!==1)throw Error('Original timeout match-end transition');
+  report.endFrames=0;
+  while(read(20)!==3&&report.endFrames<600){module._portTournamentStep();report.endFrames++;onStep();}
+  if(read(20)!==3||read(12)!==28800)throw Error('Original timeout exit and frozen clock');
   report.completed=true;
 }

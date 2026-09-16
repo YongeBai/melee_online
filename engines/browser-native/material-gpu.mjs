@@ -45,9 +45,9 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
       images.set(key,texture);return texture;
     }catch(error){gl.deleteTexture(texture);throw error;}
   }
-  function apply(state,p){
+  function apply(state,p,camera){
     gl.useProgram(p.program);const u=name=>p.uniform(name);
-    gl.uniformMatrix4fv(u('projection'),false,snapshot.projection);gl.uniform1i(u('currentMatrix'),state.model.current??0);
+    gl.uniformMatrix4fv(u('projection'),false,camera.projection);gl.uniform1i(u('currentMatrix'),state.model.current??0);
     gl.uniform4fv(u('positionRows'),rows(state.model.positions,10));gl.uniform4fv(u('normalRows'),rows(state.model.normals,10));
     const tex=new Float32Array(120),post=new Float32Array(240);
     for(const m of state.textures.matrices)(m.id<64?tex:post).set(m.values,(m.id<64?m.id-30:m.id-64)*4);
@@ -103,7 +103,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
     const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
-    queue.push({owner,plan,state,program:program(state,plan.mesh.attrs)});
+    queue.push({owner,plan,state,camera:snapshot,program:program(state,plan.mesh.attrs)});
   };
   function upload(model,bytes,nodes,owner){
     const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
@@ -132,20 +132,21 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
           const ptr=module._portMaterialDrawState(joint,plan.display,plan.polygon,view,owner);
           const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
           checkNativeRenderContext(state.context,snapshot,state.pixel);
-          queue.push({owner,plan,state,program:program(state,mesh.attrs)});count++;
+          queue.push({owner,plan,state,camera:snapshot,program:program(state,mesh.attrs)});count++;
         }
         return count;
       },dispose};models.add(result);return result;
     }catch(error){dispose();throw error;}
   }
-  return {upload,begin(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);queue=[];draws=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0};},
+  function selectCamera(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);}
+  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];draws=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0};},
     flush({ordered=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
       // actor order stable, completing opaque draws before blended draws.
       const drawsInOrder=ordered?queue:[...queue.filter(d=>d.state.pixel.blend.type===0),...queue.filter(d=>d.state.pixel.blend.type!==0)];
       for(const draw of drawsInOrder) {
-        gl.bindVertexArray(draw.plan.vao);apply(draw.state,draw.program);pixelState(draw.state.pixel);
+        gl.bindVertexArray(draw.plan.vao);apply(draw.state,draw.program,draw.camera);pixelState(draw.state.pixel);
         const cull=draw.plan.mesh.flags&0xc000;
         if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);
         if(verifyVertices)verifyDrawVertices(draw);

@@ -5,6 +5,22 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The `--hud` fixture now draws the original timer, final-five-seconds countdown,
+and match-end status models through the original HUD camera and light setup.
+Queued draws retain their own camera, preserving the gameplay projection when
+the later HUD pass changes it. Timer digits, object lifetimes and status animation
+use original C; these are not HTML replacements. The 28,800-frame timeout test
+renders the countdown and end sequence, and the four-KO test renders all 1,703
+combat/lifecycle steps. Both complete; the combat trace remains unchanged.
+
+With this HUD enabled, the 60.012-second combat run completed 3,600 simulation
+steps and 3,599 draw submissions at 960×720. Mean simulation time was 0.487 ms;
+mean draw submission was 8.307 ms (p95 9.8 ms). One double-step callback produced
+a 33.4 ms draw interval. All 126 targeted tests pass. This is still submission
+cadence, not a distinct presentation or latency measurement. Damage/stock HUD,
+effects, audio, complete stage startup and broad gameplay coverage remain.
+[HUD timer checkpoint](benchmarks/browser-2026-09-15-native-port-hud-timer.json).
+
 The opt-in `--tournament` fixture now uses original VS rules/player defaults,
 the VS frame callback, controller mapping, match clock and process pause masks.
 Its settings are four stocks, eight minutes, no items, normal damage/speed and

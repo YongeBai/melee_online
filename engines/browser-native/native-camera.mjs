@@ -1,12 +1,12 @@
 // The native match selects eye, interest, FOV and projection aspect. This bridge
 // only changes matrix storage order; GPU code owns GX-to-WebGL depth conversion.
-export function createNativeCamera(module) {
+export function createNativeCamera(module,{read=pointer=>module._portStageCameraSnapshot(pointer)}={}) {
   const pointer=module._malloc(38*4);if(!pointer)throw Error('Camera snapshot allocation');let disposed=false;
   const column=rows=>Float32Array.from({length:16},(_,i)=>rows[(i%4)*4+(i>>2)]);
   return {
     snapshot(){
       if(disposed)throw Error('Camera snapshot after release');
-      module._portStageCameraSnapshot(pointer);
+      read(pointer);
       const raw=Float32Array.from(module.HEAPF32.subarray(pointer/4,pointer/4+38));
       if(!raw.every(Number.isFinite))throw Error('Nonfinite camera snapshot');
       return {raw,view:column([...raw.subarray(0,12),0,0,0,1]),projection:column(raw.subarray(12,28)),eye:raw.slice(28,31),interest:raw.slice(31,34),fov:raw[34],aspect:raw[35],near:raw[36],far:raw[37]};
@@ -14,11 +14,11 @@ export function createNativeCamera(module) {
     dispose(){if(!disposed){module._free(pointer);disposed=true;}},
   };
 }
-export function checkNativeCamera(s) {
+export function checkNativeCamera(s,{hud=false}={}) {
   const check=(ok,message)=>{if(!ok)throw Error('Native camera: '+message);};
   check(s.fov>0&&s.fov<180&&s.near>0&&s.far>s.near,'perspective range');
-  check(s.near===Math.fround(0.1)&&s.far===16384,'Battlefield native clip planes');
-  check(s.aspect===Math.fround(1.2173333),'original Melee projection aspect');
+  check(hud?s.near===1&&s.far===3500:s.near===Math.fround(0.1)&&s.far===16384,'native clip planes');
+  check(s.aspect===Math.fround(hud?1.2166670560836792:1.2173333),'original Melee projection aspect');
   const rows=[s.raw.slice(0,3),s.raw.slice(4,7),s.raw.slice(8,11)],dot=(a,b)=>a.reduce((n,x,i)=>n+x*b[i],0);
   for(let i=0;i<3;i++)for(let j=0;j<3;j++)check(Math.abs(dot(rows[i],rows[j])-(i===j?1:0))<0.00002,'orthonormal native view');
   for(let i=0;i<3;i++)check(Math.abs(dot(rows[i],s.eye)+s.raw[i*4+3])<0.0001,'native eye maps to view origin');

@@ -12,12 +12,49 @@
 #include <melee/pl/player.h>
 #include <melee/if/ifall.h>
 #include <melee/if/if_2F6E.h>
+#include <melee/if/iftime.h>
+#include <melee/sc/types.h>
 #include <sysdolphin/baselib/gobj.h>
+#include <sysdolphin/baselib/cobj.h>
+#include <sysdolphin/baselib/jobj.h>
 #include <sysdolphin/baselib/controller.h>
 #include <stdlib.h>
 static int initialized,started;
+static int hud_initialized;
 extern unsigned portRuntimeStep(void);
 extern void portInitializeVsRouting(void);
+extern void portHudInitializeBase(SceneDesc*);
+extern HSD_LObj* portHudLights(void);
+extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
+void portTournamentHudInitialize(SceneDesc* scene)
+{
+    if(!initialized||started||hud_initialized||!scene)abort();
+    portHudInitializeBase(scene);ifTime_Reset();ifTime_CreateTimers();hud_initialized=1;
+}
+void portHudRenderBegin(void)
+{
+    if(!hud_initialized)abort();
+    portRenderContextBegin(ifAll_GetHUDGObj()->hsd_obj,portHudLights());
+}
+unsigned portHudObjects(unsigned* output,unsigned capacity)
+{
+    if(!hud_initialized||!output)abort();unsigned count=0;
+    for(HSD_GObj* object=HSD_GObjGXLinkHead[11];object;object=object->next_gx){
+        if(object->obj_kind!=HSD_GObj_JObjKind||!object->hsd_obj||count>=capacity)abort();
+        HSD_JObj* joint=object->hsd_obj;
+        output[count*3]=(unsigned)object;output[count*3+1]=(unsigned)joint;output[count*3+2]=joint->id;count++;
+    }
+    return count;
+}
+void portHudCameraSnapshot(float* output)
+{
+    if(!hud_initialized||!output)abort();HSD_CObj* c=ifAll_GetHUDGObj()->hsd_obj;
+    if(HSD_CObjGetProjectionType(c)!=PROJ_PERSPECTIVE)abort();
+    HSD_CObjGetViewingMtx(c,(float(*)[4])output);
+    MTXPerspective((float(*)[4])(output+12),HSD_CObjGetFov(c),HSD_CObjGetAspect(c),HSD_CObjGetNear(c),HSD_CObjGetFar(c));
+    HSD_CObjGetEyePosition(c,(Vec3*)(output+28));HSD_CObjGetInterest(c,(Vec3*)(output+31));
+    output[34]=HSD_CObjGetFov(c);output[35]=HSD_CObjGetAspect(c);output[36]=HSD_CObjGetNear(c);output[37]=HSD_CObjGetFar(c);
+}
 void portTournamentStatusInstall(HSD_Archive* archive)
 {
     if(!archive||started||*ifAll_GetArchive())abort();

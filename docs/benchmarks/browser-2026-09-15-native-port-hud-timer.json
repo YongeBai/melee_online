@@ -1,0 +1,220 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "wasm": {
+    "wasmSha256": "9695c598a8c1d9afa29f0ca802ae0eba56588f2225fb83115013a0718bafa4f8",
+    "wasmBytes": 2978516
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "scope": "Original HUD camera, timer, final-five-second countdown and end-status drawing; two Falcons and partial Battlefield",
+  "validation": {
+    "targetedTests": 126,
+    "failedTests": 0,
+    "combatTrace": "f260487b080c516f10ca5f1286dc553abdcdf2468c544869a473f6b79d8fb6c0",
+    "gameplayTraceUnchanged": true,
+    "renderedCombatSteps": 683,
+    "renderedLifecycleSteps": 1020,
+    "hud": {
+      "models": [
+        {
+          "joint": 63968,
+          "nodes": 14,
+          "meshes": 0,
+          "kind": "layout"
+        },
+        {
+          "joint": 728776,
+          "nodes": 11,
+          "meshes": 10,
+          "kind": "ScInfTim_scene_models"
+        },
+        {
+          "joint": 745992,
+          "nodes": 6,
+          "meshes": 10,
+          "kind": "tdsce"
+        }
+      ],
+      "camera": {
+        "offset": 64928,
+        "near": 1,
+        "far": 3500,
+        "fov": 41.53900146484375,
+        "aspect": 1.2166670560836792
+      },
+      "drawnFrames": 1703,
+      "statusFrames": 113
+    },
+    "timeout": {
+      "completed": true,
+      "before": 684,
+      "frames": 28116,
+      "after": {
+        "frame": 28800,
+        "seconds": 0,
+        "fraction": 59,
+        "outcome": 1
+      },
+      "transition": {
+        "phase": 1,
+        "outcome": 1
+      },
+      "endFrames": 112
+    },
+    "timeoutRenderedSteps": 474,
+    "timeoutHud": {
+      "models": [
+        {
+          "joint": 63968,
+          "nodes": 14,
+          "meshes": 0,
+          "kind": "layout"
+        },
+        {
+          "joint": 728776,
+          "nodes": 11,
+          "meshes": 10,
+          "kind": "ScInfTim_scene_models"
+        },
+        {
+          "joint": 745992,
+          "nodes": 6,
+          "meshes": 10,
+          "kind": "tdsce"
+        }
+      ],
+      "camera": {
+        "offset": 64928,
+        "near": 1,
+        "far": 3500,
+        "fov": 41.53900146484375,
+        "aspect": 1.2166670560836792
+      },
+      "drawnFrames": 1157,
+      "countdownFrames": 301,
+      "statusFrames": 113
+    },
+    "visualInspection": [
+      "Native timer and unchanged gameplay framing",
+      "Native Game! end animation",
+      "Native final-seconds countdown"
+    ]
+  },
+  "sustained": {
+    "frames": 3600,
+    "draws": 3599,
+    "elapsedMs": 60011.70000000298,
+    "resolution": [
+      960,
+      720
+    ],
+    "workload": {
+      "framesWithAttack": 1976,
+      "framesWithHitlag": 324,
+      "framesWithDamage": 3301,
+      "stockChanges": [
+        {
+          "frame": 2046,
+          "slot": 1,
+          "stocks": 3
+        }
+      ],
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 51,
+          "attack": 325
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 358
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 340
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 33,
+          "attack": 273
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 340
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 340
+        }
+      ]
+    },
+    "cadence": {
+      "callbacks": 3602,
+      "zeroStepCallbacks": 3,
+      "multiStepCallbacks": 1,
+      "rafGapsOver25Ms": 2
+    },
+    "stepCpu": {
+      "samples": 3600,
+      "meanMs": 0.4867500001564622,
+      "p50Ms": 0.5,
+      "p95Ms": 0.7999999970197678,
+      "maxMs": 1.5
+    },
+    "drawSubmissionCpu": {
+      "samples": 3599,
+      "meanMs": 8.306724090188137,
+      "p50Ms": 8.099999994039536,
+      "p95Ms": 9.799999997019768,
+      "maxMs": 31.799999997019768
+    },
+    "rafDrawIntervals": {
+      "samples": 3598,
+      "meanMs": 16.67065036131097,
+      "p50Ms": 16.69999999999709,
+      "p95Ms": 16.700000000004366,
+      "maxMs": 33.40000000000009
+    },
+    "gpuReadbacks": false
+  },
+  "commands": [
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs",
+    "node scripts/native-port/probe-constructor.mjs --hud --render --hardware",
+    "node scripts/native-port/probe-constructor.mjs --hud --render-steps --hardware",
+    "node scripts/native-port/probe-constructor.mjs --hud --timeout --render-steps --hardware",
+    "node scripts/native-port/probe-constructor.mjs --hud --live --workload --hardware --frames=3600"
+  ],
+  "acceptance": {
+    "complete": false,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "remaining": [
+      "Damage and stock HUD",
+      "Complete stage startup and Ready/Go",
+      "Effects/audio",
+      "Menus/pause/results/rematches",
+      "All characters and stages",
+      "Production asset delivery and device input",
+      "Presentation/latency validation"
+    ]
+  }
+}

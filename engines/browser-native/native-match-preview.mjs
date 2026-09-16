@@ -15,12 +15,34 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. The native-material path is still missing full draw callbacks.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null}={}) {
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
   const info=gl.getExtension('WEBGL_debug_renderer_info'),gpuInfo={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};
   const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify}):null,resources=[];
-  function dispose(){for(const r of resources){r.accessoryGpu?.dispose();if(r.accessoryNodes)module._free(r.accessoryNodes);r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
+  const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
+  if(hud&&(!hudList||!callbacks))throw Error('HUD requires original callbacks and object buffer');
+  function dispose(){for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources){r.accessoryGpu?.dispose();if(r.accessoryNodes)module._free(r.accessoryNodes);r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
+  function drawHud(){
+    if(!hud)return null;
+    const count=module._portHudObjects(hudList,32),objects=Array.from(new Uint32Array(module.HEAPU8.buffer,hudList,count*3)),active=new Set();
+    for(let i=0;i<count;i++)active.add(objects[i*3]+':'+objects[i*3+1]+':'+objects[i*3+2]);
+    for(const [key,r] of hudResources)if(!active.has(key)){r.gpu.dispose();module._free(r.nodes);hudResources.delete(key);}
+    const rows=[];
+    for(let i=0;i<count;i++){
+      const [owner,root,descriptor]=objects.slice(i*3,i*3+3),key=owner+':'+root+':'+descriptor;
+      if(!hudResources.has(key)){
+        const source=hud.models.get(descriptor);if(!source)throw Error('Unregistered original HUD model '+descriptor);
+        const model=readModelMeshes(source.bytes),n=model.tree.nodes.length,nodes=module._malloc(n*4);
+        if(!nodes)throw Error('HUD nodes allocation');
+        try{if(module._portSceneCollect(root,nodes,n)!==n)throw Error('HUD hierarchy mismatch');const gpu=materialRenderer.upload(model,source.bytes,nodes,owner);hudResources.set(key,{gpu,nodes,name:source.name});}catch(error){module._free(nodes);throw error;}
+      }
+      rows.push({owner,name:hudResources.get(key).name,draws:0});
+    }
+    const snapshot=hudCamera.snapshot();checkNativeCamera(snapshot,{hud:true});materialRenderer.selectCamera(snapshot);
+    for(let pass=0;pass<3;pass++){module._portHudRenderBegin();for(const row of rows)row.draws+=module._portNativeDrawObject(row.owner,pass,1);}
+    return {objects:rows,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect};
+  }
   function syncAccessories(){
     let count=0;
     for(const r of resources){
@@ -81,8 +103,8 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
               rows[i].passes.push(count);rows[i].draws+=count;
             }
           }
-          const materialDraws=materialRenderer.flush({ordered:true}),renderContext=readNativeRenderContext(module);
-          return {gpuInfo,materialShaderChecks,materialDraws,accessories,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
+          const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),materialDraws=materialRenderer.flush({ordered:true});
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot);
         module._portStageRenderBegin();

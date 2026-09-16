@@ -29,3 +29,11 @@ test('camera validation catches corrupted clip planes, aspect and view matrices'
   }
   const f=fixture();f.raw[28]=NaN;assert.throws(()=>createNativeCamera(f.module).snapshot(),/Nonfinite/);
 });
+test('HUD camera keeps its own original projection without changing a queued gameplay snapshot',()=>{
+  const f=fixture(),game=createNativeCamera(f.module),before=game.snapshot();
+  const hudRaw=Float32Array.from(f.raw),near=1,far=3500,aspect=Math.fround(1.2166670560836792),fov=Math.fround(41.53900146484375),cot=1/Math.tan(fov*Math.PI/360);
+  hudRaw.set([cot/aspect,0,0,0,0,cot,0,0,0,0,-near/(far-near),-far*near/(far-near),0,0,-1,0],12);hudRaw.set([fov,aspect,near,far],34);
+  const hud=createNativeCamera(f.module,{read:p=>f.module.HEAPF32.set(hudRaw,p/4)}),s=hud.snapshot();checkNativeCamera(s,{hud:true});
+  assert.throws(()=>checkNativeCamera(s),/clip planes/);assert.deepEqual(before.raw,f.raw);assert.deepEqual(game.snapshot().raw,before.raw);
+  assert.notDeepEqual(s.projection,before.projection);game.dispose();hud.dispose();
+});

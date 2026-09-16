@@ -55,6 +55,16 @@ export function preparePortableSource(source,output) {
       const marker='/* 479D30 */ static struct stateMachine state_machine;';
       replace(marker,marker+'\nvoid portInitializeVsRouting(void) { state_machine = (struct stateMachine){0}; state_machine.routing.curr_mode = GM_VS; }\n');
     }
+    if(file==='src/melee/if/ifall.c') {
+      // Expose the unchanged layout/camera/light prefix for incremental HUD
+      // bring-up. Full original initialization still invokes the same prefix.
+      const start=text.indexOf('void ifAll_802F390C(void)'),split=text.indexOf('    ifStatus_802F7134();',start);
+      if(start<0||split<0)throw Error('HUD initialization prefix changed');
+      const prefix=text.slice(start,split),bodyStart=prefix.indexOf('    ifAll_802F370C(sp14);');
+      if(bodyStart<0)throw Error('HUD layout initialization changed');
+      const wrapper='void portHudInitializeBase(SceneDesc* sp14)\n{\n    HSD_LightDesc* lightdesc;\n    ifAll_ShowHUD();\n'+prefix.slice(bodyStart)+'}\nHSD_LObj* portHudLights(void) { return ifAll_804A0FD8.gobj_2->hsd_obj; }\n\n';
+      replace(prefix,wrapper+prefix.slice(0,bodyStart)+'    portHudInitializeBase(sp14);\n\n');
+    }
     if(file==='src/sysdolphin/baselib/cobj.c') {
       // Browser framebuffer rendering uses the original offscreen branch.
       // Keep its native projection/viewport and current-camera ownership;

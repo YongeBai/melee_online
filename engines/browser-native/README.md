@@ -37,6 +37,14 @@ alongside the existing prepared fixtures. Re-run the development fixture tool
 after updating, then build `--fighter-init`. The browser still loads all assets
 automatically; no player ISO or file picker is involved.
 
+`--hud` implies the tournament fixture and adds the original timer, countdown,
+and match-end status graphics. It uses the original HUD camera independently
+of the gameplay camera. Damage percentages and stock icons remain pending.
+Use `--hud --timeout --render-steps --hardware` to render the final six seconds
+and timeout animation after advancing the real eight-minute clock. Use
+`--hud --live --workload --hardware --frames=3600` for the sustained input-driven
+combat workload. Draw submissions are not a measurement of distinct presentation.
+
 ```sh
 node scripts/native-port/probe-constructor.mjs --tournament
 node scripts/native-port/probe-constructor.mjs --timeout
