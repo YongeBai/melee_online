@@ -5,6 +5,51 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Sheik and Zelda now have original constructor/input integration, including both
+player-owned forms. They share the Zelda effect bank (seven models, ten particle
+commands, five texture groups). Four Sheik Articles and two Zelda Articles are
+typed; the renderer follows the original twenty-link chain.
+
+Sheik's chain test initially reached an out-of-bounds pose pointer. The x48 table
+contains two reference skeletons after its four Articles; the complete importer
+had omitted them. Both 58-joint graphs are now relocated and converted, with a
+synthetic regression test. No original gameplay function or parameter changed.
+
+Six selected move phases per character now pass (2,170 Sheik and 1,972 Zelda
+rendered frames). Needle and Din's Fire contacts deal eighteen and nine damage;
+shielded controls take zero, with nineteen and six blocked frames respectively.
+Idle controls take zero. Nayru's Love reflects a Mario fireball back for nine
+damage. The isolated chain sequence GPU-verifies all 423 rendered frames.
+
+The original transformation callback owns the form swap. Browser state reads
+follow the original active entity, and both forms remain registered with the
+renderer. A Mario fireball supplies six actual damage before ground and airborne
+round trips; damage and four stocks survive all four swaps. Controller movement
+and a double jump place the air test outside the side platforms. No state,
+position, damage or charge values are assigned by the harness.
+
+Both starting forms pass the damaged transformation sequence: 1,856 rendered
+frames starting as Sheik and 1,921 starting as Zelda. The latter also verifies
+that inactive fighter bodies do not draw. A separate keyboard-event browser
+run completes two swaps over 900 simulation frames; its timing is excluded
+because a build overlapped it.
+
+A separate 960×720 Sheik/Zelda Battlefield minute completes 3,600 simulation
+steps and 3,600 draw submissions in 60.026 seconds, with no catch-up callbacks.
+Mean simulation time is 0.486 ms and mean draw-submission time 7.425 ms; draw
+p95 is 10.0 ms and maximum 17.9 ms. This is one close-combat sample, not sustained
+special-move stress, distinct displayed-FPS proof or input-to-photon latency.
+All 187 tests and the fighter build pass; the Ness mirror regression remains
+valid. Core hash is `e375274d…`.
+
+There are now 23 components with constructor/input integration. Kirby, Peach,
+Popo and Nana remain, along with other costumes, full scenes/menus/audio,
+retail parity, networking and native-port deployment. The overall 720p60
+competitive acceptance criterion is **not achieved**.
+[Sheik/Zelda evidence](benchmarks/browser-2026-09-16-native-port-sheik-zelda.json).
+
+Previous mixed-fighter checkpoint:
+
 The match fixture now supports different fighters through `--opponent=CODE`.
 Each selected fighter has its own base, animation and costume package. Shared
 effect archives load once, while both fighters' items and cross-fighter

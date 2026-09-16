@@ -13,7 +13,7 @@ export async function loadFighterPackage(module,code,{asset,models,motionSpec,at
   if(!character||kind<0)throw Error('Unknown fighter package');
   const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat';
   // Original ftData effect selector is -1 for Game & Watch: common bank only.
-  const effectName=code==='Gw'?null:'Ef'+({Fc:'Fx',Dr:'Mr',Pc:'Pk',Cl:'Lk'}[code]??code)+'Data.dat';
+  const effectName=code==='Gw'?null:'Ef'+({Sk:'Zd',Fc:'Fx',Dr:'Mr',Pc:'Pk',Cl:'Lk'}[code]??code)+'Data.dat';
   const [baseBytes,animationBytes]=await Promise.all([asset(baseName),asset(motionName)]);
   const modelBytes=models.find(m=>m.name===modelName)?.bytes;if(!modelBytes)throw Error('Missing fighter costume '+modelName);
   const ptr=at=>new DataView(module.HEAPU8.buffer).getUint32(at,true);

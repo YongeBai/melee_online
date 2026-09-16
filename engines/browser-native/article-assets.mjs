@@ -23,6 +23,8 @@ export const fighterArticleProfiles=Object.freeze({
   Pc:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
   Kp:{slots:1,articles:{0:[1,6]}},
   Ys:{slots:4,articles:{0:[2,2],1:[1,2],2:[0,0]}},
+  Sk:{slots:6,articles:{0:[5,3],1:[1,1],2:[1,0],3:[0,25]}},
+  Zd:{slots:2,articles:{0:[2,12],1:[1,5]}},
   Ns:{slots:11,articles:{0:[1,2],1:[1,3],2:[3,11],3:[1,5],4:[1,1],5:[1,1],6:[1,1],7:[1,1],8:[1,5],9:[1,1],10:[0,20]}},
   Mt:{slots:2,articles:{0:[1,2],1:[10,16]}},
   // Ten move Articles and a fighter outline visibility lookup in slot 10.
@@ -88,7 +90,8 @@ export function convertFighterArticles(input,name) {
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
-    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Sk'&&model.slot===3&&j===0||code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    if(code==='Sk'&&model.slot===3)for(const off of [0x64,0x68])attachment(pointer(special+off),'chain '+off);
     if(code==='Ns'&&model.slot===10){
       // itYoyoAttributes: twenty scalar words, two joints, material animation,
       // and a final signed word. The original callbacks own all twenty links.
@@ -132,6 +135,17 @@ export function convertFighterArticles(input,name) {
     const script=readMotionScripts(a,scripts,itemCommandWords);
     tree(script);
     rows.push({...model,special,specialWords,states,stateCount,animations,scripts,script});
+  }
+  if(code==='Sk'){
+    // Chain blending uses item[2], the child of each original reference skeleton.
+    // These two x48 entries are joint graphs, not Articles or visible items.
+    const root=a.publics.get('ftDataSeak'),table=pointer(root+0x48);
+    for(const slot of [4,5]){
+      const joint=pointer(table+slot*4);if(joint===null)throw Error('Missing Sheik chain pose');
+      const scene=convertSceneAsset(archiveRootView(a,'chain_pose_Share_joint',joint));
+      for(const at of scene.pointerSlots)pointer(at);for(const [at,size]of scene.writes)scalar(at,size);
+      extraRows.push({slot,source:joint,joint,nodes:scene.model.tree.nodes.length});
+    }
   }
   if(code==='Ys'){
     const root=a.publics.get('ftDataYoshi'),table=pointer(root+0x48),joint=pointer(table+12);

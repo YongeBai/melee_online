@@ -219,3 +219,36 @@ test('Ness rejects absent yo-yo attachments, cyclic geometry and nonfinite launc
     a=>a.d.setFloat32(a.rows[3].special+16,NaN),a=>a.ptr(a.rows[10].special+88,a.rows[10].special),
   ])assert.throws(()=>convertFighterArticles(nessFixture(mutate).bytes,'PlNs.dat'));
 });
+
+function formFixture(code,mutate=()=>{}){
+  const body=new Uint8Array(8192),d=new DataView(body.buffer),relocs=new Set();
+  const ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  const joint=at=>{for(let i=0;i<3;i++)d.setFloat32(at+32+i*4,1);};
+  ptr(72,128);ptr(700,800);d.setUint32(704,1);joint(800);
+  for(const [slotText,[states,words]]of Object.entries(fighterArticleProfiles[code].articles)){
+    const slot=Number(slotText),article=256+slot*32,special=1024+slot*128,state=2048+slot*512;
+    ptr(128+slot*4,article);ptr(article,512);ptr(article+16,700);
+    if(words){ptr(article+4,special);for(let i=0;i<words;i++)d.setFloat32(special+i*4,1.25);}
+    if(states){ptr(article+12,state);for(let i=0;i<states;i++)ptr(state+i*16+12,6000);}
+  }
+  if(code==='Sk'){
+    d.setInt32(1408,20);for(const [off,at]of [[100,4000],[104,4100]]){ptr(1408+off,at);joint(at);}
+    for(const [slot,at]of [[4,4200],[5,4400]]){ptr(128+slot*4,at);joint(at);ptr(at+8,at+64);joint(at+64);d.setFloat32(at+64+20,.375);}
+  }
+  mutate({d,relocs,ptr});
+  const name=new TextEncoder().encode('ftData'+(code==='Sk'?'Seak':'Zelda')+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((r,i)=>v.setUint32(32+body.length+i*4,r));bytes.set(name,pub+8);return bytes;
+}
+test('Sheik imports both chain reference skeletons independently of the four Articles',()=>{
+  const input=formFixture('Sk'),before=input.slice(),r=convertFighterArticles(input,'PlSk.dat'),v=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.deepEqual(r.rows.map(x=>x.stateCount),[5,1,1,0]);
+  assert.deepEqual(r.extraRows.map(x=>[x.slot,x.nodes]),[[4,2],[5,2]]);
+  assert.equal(v.getUint32(1408,true),20);assert.equal(r.attachments.length,2);
+  for(const root of [4200,4400]){assert.equal(v.getUint32(root+8,true),root+64);assert.equal(v.getFloat32(root+64+20,true),.375);assert(r.pointerSlots.has(root+8));}
+  assert.throws(()=>convertFighterArticles(formFixture('Sk',({d,relocs})=>{d.setUint32(148,0);relocs.delete(148);}), 'PlSk.dat'),/Missing Sheik chain pose/);
+});
+test('Zelda converts guided fire and explosion attributes and original serialized states',()=>{
+  const input=formFixture('Zd'),before=input.slice(),r=convertFighterArticles(input,'PlZd.dat'),v=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.deepEqual(r.rows.map(x=>[x.stateCount,x.specialWords]),[[2,12],[1,5]]);
+  assert.equal(v.getFloat32(1068,true),1.25);assert.equal(v.getFloat32(1168,true),1.25);
+});

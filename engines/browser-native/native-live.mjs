@@ -29,7 +29,7 @@ export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1
 // Interactive development fixture, not complete competitive match startup.
 // Input samples enter the existing normalized HSD boundary; no game-state
 // positions, action states, damage or velocities are assigned here.
-export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null}={}) {
+export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,resolveObjects=null}={}) {
   // The first callback can carry a timestamp from before lengthy startup work.
   // Discard such timestamps, then anchor to the first valid display callback.
   // A quarter millisecond of repaid tolerance covers observed display jitter.
@@ -38,7 +38,8 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   const stateChanges=[],inputChanges=[],keys=new Set(),clock=createNativeFrameClock(performance.now(),60,{align:true,toleranceMs:.25}),stepTimes=[],drawTimes=[],intervals=[];
   let raf=0,stopped=false,frames=0,draws=0,started=performance.now(),lastDraw=null,lastCallback=null,lastRender=null;
   const cadence={callbacks:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
-  const initial=objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
+  const readState=()=>{const current=resolveObjects?resolveObjects():objects;if(current.length!==objects.length||current.some(o=>!o))throw Error('Native player ownership changed unexpectedly');return current.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));};
+  const initial=readState();
   const buttons=new Map([['KeyZ',0x100],['KeyS',0x200],['KeyX',0x400],['KeyC',0x120],['ShiftLeft',0x20],['ShiftRight',0x40]]);
   const handled=new Set([...buttons.keys(),'ArrowLeft','ArrowRight','ArrowUp','ArrowDown']);
   let movement=false,jump=false,attack=false,final=null;
@@ -66,7 +67,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         const samples=inputProvider?inputProvider(frames,previous):objects.map((_,i)=>i?[0,0,0]:[held,Number(keys.has('ArrowRight'))-Number(keys.has('ArrowLeft')),Number(keys.has('ArrowUp'))-Number(keys.has('ArrowDown'))]);
         for(let i=0;i<objects.length;i++)module._portStageProbePad(i,...samples[i]);
         const before=performance.now();step();sample(stepTimes,performance.now()-before);frames++;
-        final=objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
+        final=readState();
         if(!final.flat().every(Number.isFinite))throw Error('Nonfinite interactive fighter state');
         if(final.some(isNormalAttackState))workload.framesWithAttack++;
         if(final.some(s=>s[14]>0))workload.framesWithHitlag++;

@@ -90,7 +90,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         modelProbe=createNativeModelProbe(module,model,actor.bytes,nodes,skin,actor.object);
         }
         materialGpu=materialRenderer?.upload(model,actor.bytes,nodes,actor.object);
-        resources.push({itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessory:actor.accessory,name:actor.name,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
+        resources.push({itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessory:actor.accessory,name:actor.name,active:actor.active,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
   let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
@@ -178,7 +178,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           if(!materialRenderer)throw Error('Original callbacks require native materials');
           syncStage();syncEffects();syncItems();const accessories=syncAccessories();
           const snapshot=camera.snapshot();checkNativeCamera(snapshot,cameraValidation);materialRenderer.begin(snapshot);
-          const rows=resources.map(r=>({name:r.name,passes:[],draws:0}));
+          const rows=resources.map(r=>({name:r.name,active:r.active?.()??true,passes:[],draws:0}));
           let particlePasses=0;
           if(stage){
             module._portStageRenderBegin();
@@ -250,7 +250,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
             maxScaledVertexError=Math.max(maxScaledVertexError,error);
           }
           if(show)r.finish?.();
-          rows.push({name:r.name,joints:model.tree.nodes.length,meshes:model.meshes.length,draws,vertices:positions.length/3,maxScaledVertexError,textureBindings,texgenTypes:[...texgenTypes],modelMatrixChecks});
+          rows.push({name:r.name,active:r.active?.()??true,joints:model.tree.nodes.length,meshes:model.meshes.length,draws,vertices:positions.length/3,maxScaledVertexError,textureBindings,texgenTypes:[...texgenTypes],modelMatrixChecks});
         }
         const materialDraws=materialRenderer?.flush();
         if(gl.getError()!==gl.NO_ERROR)throw Error('Native match preview GPU failure');

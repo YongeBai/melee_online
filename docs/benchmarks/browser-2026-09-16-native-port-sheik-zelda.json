@@ -1,0 +1,1434 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "697557b",
+  "scope": "Default Sheik/Zelda move imports, original two-form ownership and swaps, selected mixed contacts, and one close-combat timing sample. Not complete competitive acceptance.",
+  "wasmSha256": "e375274df95c84a90c4b4048947d67b0c4735ea73064c0aa10cf5702da7a295b",
+  "portableRecipeSha256": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "0eb39fb32cfe969eff2418037e1544555d0c2592e3af15c672800b0f2e1f4db5",
+    "engines/browser-native/effect-assets.mjs": "2bccecf1d7345de144d1db4170cfcd013d8081bad6f69281548ba137dc3696cf",
+    "engines/browser-native/fighter-package.mjs": "8002793d4b691a9df696bd247f3cc0e95d5b8f48e7c95ad621db78d38294cb8b",
+    "engines/browser-native/constructor.html": "fd5601bc2abdf02ca0598322345f0d199ba6ff72a9ead2cc02732b25966b0766",
+    "engines/browser-native/item-runtime.c": "eed8624aadd3ed3752c0ef2cc61f6dccf75fac5395818a90e401051f8889c6d7",
+    "engines/browser-native/native-live.mjs": "be0e22d1509a88faf1719db6bacc85fc3aa54ea5c4e80025afcf5412587a09d6",
+    "engines/browser-native/native-match-preview.mjs": "7b86fc2e531d6379958a0c86962aae58c3866598fe75647e4610f6d3cd9b987d",
+    "engines/browser-native/verify-transform.mjs": "9dc0106779300d36b038a78f409d6113f6755fcb286030ef18c76d1aadf110f4",
+    "engines/browser-native/verify-seak-zelda.mjs": "4dcf7ad9c722c8283eb8e73145186c3bc6ba39888ed0b3407f5cd0a41ffb6155",
+    "scripts/native-port/probe-constructor.mjs": "5824078e6f1c66aaa517ceb7641775e3decc1d21d4389d7935f04009a91336a0"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "integration": {
+    "sheikArticles": 4,
+    "sheikArticleStates": [
+      5,
+      1,
+      1,
+      0
+    ],
+    "sheikChainReferenceSkeletons": [
+      {
+        "slot": 4,
+        "joints": 58
+      },
+      {
+        "slot": 5,
+        "joints": 58
+      }
+    ],
+    "sheikNativeChainLinks": 20,
+    "zeldaArticles": 2,
+    "zeldaArticleStates": [
+      2,
+      1
+    ],
+    "sharedEffectBank": 17,
+    "effectModels": 7,
+    "particleCommands": 10,
+    "textureGroups": 5,
+    "untypedEffectRelocations": 0,
+    "originalGameplayFunctionsUnchanged": true,
+    "controllerInputsOnly": true,
+    "automaticHostedAssets": true
+  },
+  "correction": {
+    "failure": "Sheik chain blend read two omitted x48 reference skeletons beyond the four Article slots.",
+    "change": "Import all six slots: four Articles plus two typed original joint graphs. Add synthetic missing-pose regression."
+  },
+  "validation": {
+    "unitTests": 187,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "moves": [
+      {
+        "artifact": "form-moves-Sk-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Sk",
+        "completed": true,
+        "renderedFrames": 2170,
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "owner": 1563808,
+            "code": "Sk"
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "owner": 1646400,
+            "code": "Zd"
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "owner": 14555776,
+            "code": "Sk"
+          },
+          {
+            "slot": 1,
+            "index": 1,
+            "owner": 14739104,
+            "code": "Zd"
+          }
+        ],
+        "phases": [
+          {
+            "name": "charged ground needles",
+            "frames": 360,
+            "states": [
+              341,
+              342,
+              344,
+              14
+            ],
+            "itemKinds": [
+              80,
+              79
+            ],
+            "peakItems": 6,
+            "peakLinks": 0
+          },
+          {
+            "name": "air needles",
+            "frames": 283,
+            "states": [
+              24,
+              25,
+              345,
+              346,
+              348,
+              42,
+              14
+            ],
+            "itemKinds": [
+              80,
+              79
+            ],
+            "peakItems": 2,
+            "peakLinks": 0
+          },
+          {
+            "name": "ground chain",
+            "frames": 281,
+            "states": [
+              349,
+              350,
+              351,
+              14
+            ],
+            "itemKinds": [
+              97
+            ],
+            "peakItems": 1,
+            "peakLinks": 20
+          },
+          {
+            "name": "air chain",
+            "frames": 284,
+            "states": [
+              24,
+              25,
+              352,
+              353,
+              351,
+              14
+            ],
+            "itemKinds": [
+              97
+            ],
+            "peakItems": 1,
+            "peakLinks": 20
+          },
+          {
+            "name": "ground Vanish",
+            "frames": 401,
+            "states": [
+              355,
+              359,
+              360,
+              43,
+              14
+            ],
+            "itemKinds": [
+              85
+            ],
+            "peakItems": 1,
+            "peakLinks": 0
+          },
+          {
+            "name": "air Vanish",
+            "frames": 419,
+            "states": [
+              24,
+              25,
+              358,
+              359,
+              360,
+              35,
+              43,
+              14
+            ],
+            "itemKinds": [
+              85
+            ],
+            "peakItems": 1,
+            "peakLinks": 0
+          }
+        ],
+        "projectionChecks": {
+          "passed": true,
+          "cases": 4,
+          "components": 12
+        },
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "form-moves-Zd-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Zd",
+        "completed": true,
+        "renderedFrames": 1972,
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "owner": 1563808,
+            "code": "Zd"
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "owner": 13275808,
+            "code": "Sk"
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "owner": 14554688,
+            "code": "Zd"
+          },
+          {
+            "slot": 1,
+            "index": 1,
+            "owner": 14778208,
+            "code": "Sk"
+          }
+        ],
+        "phases": [
+          {
+            "name": "ground Nayru",
+            "frames": 161,
+            "states": [
+              341,
+              14
+            ],
+            "itemKinds": [],
+            "peakItems": 0,
+            "peakLinks": 0
+          },
+          {
+            "name": "air Nayru",
+            "frames": 239,
+            "states": [
+              24,
+              25,
+              342,
+              341,
+              14
+            ],
+            "itemKinds": [],
+            "peakItems": 0,
+            "peakLinks": 0
+          },
+          {
+            "name": "guided ground Din Fire",
+            "frames": 271,
+            "states": [
+              343,
+              344,
+              345,
+              14
+            ],
+            "itemKinds": [
+              108,
+              109
+            ],
+            "peakItems": 1,
+            "peakLinks": 0
+          },
+          {
+            "name": "air Din Fire",
+            "frames": 339,
+            "states": [
+              24,
+              25,
+              346,
+              347,
+              348,
+              345,
+              14
+            ],
+            "itemKinds": [
+              108,
+              109
+            ],
+            "peakItems": 1,
+            "peakLinks": 0
+          },
+          {
+            "name": "ground Farore",
+            "frames": 401,
+            "states": [
+              349,
+              353,
+              354,
+              43,
+              14
+            ],
+            "itemKinds": [],
+            "peakItems": 0,
+            "peakLinks": 0
+          },
+          {
+            "name": "air Farore",
+            "frames": 419,
+            "states": [
+              24,
+              25,
+              352,
+              353,
+              354,
+              35,
+              43,
+              14
+            ],
+            "itemKinds": [],
+            "peakItems": 0,
+            "peakLinks": 0
+          }
+        ],
+        "projectionChecks": {
+          "passed": true,
+          "cases": 4,
+          "components": 12
+        },
+        "finalGpuErrorCheck": true
+      }
+    ],
+    "contacts": [
+      {
+        "artifact": "form-contact-attack-Sk-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Sk",
+        "mode": "attack",
+        "completed": true,
+        "renderedFrames": 952,
+        "frames": 810,
+        "damage": 18,
+        "blockedFrames": 0,
+        "reflectedFrames": 0,
+        "itemKinds": [
+          80,
+          79
+        ],
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            341,
+            342,
+            344
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            79
+          ]
+        ],
+        "finalDamage": [
+          0,
+          18
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "form-contact-shield-Sk-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Sk",
+        "mode": "shield",
+        "completed": true,
+        "renderedFrames": 952,
+        "frames": 810,
+        "damage": 0,
+        "blockedFrames": 19,
+        "reflectedFrames": 0,
+        "itemKinds": [
+          80,
+          79
+        ],
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            341,
+            342,
+            344
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            182,
+            179,
+            181,
+            205,
+            208,
+            210,
+            211
+          ]
+        ],
+        "finalDamage": [
+          0,
+          0
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "form-contact-control-Sk-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Sk",
+        "mode": "control",
+        "completed": true,
+        "renderedFrames": 952,
+        "frames": 810,
+        "damage": 0,
+        "blockedFrames": 0,
+        "reflectedFrames": 0,
+        "itemKinds": [],
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15
+          ]
+        ],
+        "finalDamage": [
+          0,
+          0
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "form-contact-attack-Zd-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Zd",
+        "mode": "attack",
+        "completed": true,
+        "renderedFrames": 992,
+        "frames": 850,
+        "damage": 9,
+        "blockedFrames": 0,
+        "reflectedFrames": 0,
+        "itemKinds": [
+          108,
+          109
+        ],
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            343,
+            344,
+            345
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            80
+          ]
+        ],
+        "finalDamage": [
+          0,
+          9
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "form-contact-shield-Zd-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Zd",
+        "mode": "shield",
+        "completed": true,
+        "renderedFrames": 992,
+        "frames": 850,
+        "damage": 0,
+        "blockedFrames": 6,
+        "reflectedFrames": 0,
+        "itemKinds": [
+          108
+        ],
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            343,
+            344,
+            345
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            182,
+            179,
+            181,
+            205,
+            208,
+            210,
+            211
+          ]
+        ],
+        "finalDamage": [
+          0,
+          0
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "form-contact-control-Zd-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Zd",
+        "mode": "control",
+        "completed": true,
+        "renderedFrames": 992,
+        "frames": 850,
+        "damage": 0,
+        "blockedFrames": 0,
+        "reflectedFrames": 0,
+        "itemKinds": [],
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15
+          ]
+        ],
+        "finalDamage": [
+          0,
+          0
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "form-contact-reflect-Zd-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Zd",
+        "mode": "reflect",
+        "completed": true,
+        "renderedFrames": 992,
+        "frames": 850,
+        "damage": 9,
+        "blockedFrames": 0,
+        "reflectedFrames": 25,
+        "itemKinds": [
+          48
+        ],
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            341
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            343,
+            81
+          ]
+        ],
+        "finalDamage": [
+          0,
+          9
+        ],
+        "finalGpuErrorCheck": true
+      }
+    ],
+    "transforms": [
+      {
+        "artifact": "transform-Sk-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Sk",
+        "completed": true,
+        "renderedFrames": 1856,
+        "initialDamage": 6,
+        "inactiveBodiesHidden": null,
+        "roundTrips": [
+          {
+            "name": "ground transform to 19",
+            "frames": 301,
+            "swapAfterFrames": 37,
+            "before": [
+              14,
+              3,
+              40,
+              0,
+              45.68074035644531,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "atSwap": [
+              356,
+              308,
+              0,
+              0,
+              45.68074035644531,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13636192,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              108,
+              0,
+              45.68074035644531,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13636192,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "ground transform to 7",
+            "frames": 301,
+            "swapAfterFrames": 44,
+            "before": [
+              14,
+              2,
+              108,
+              0,
+              45.68074035644531,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13636192,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "atSwap": [
+              362,
+              314,
+              0,
+              0,
+              45.68074035644531,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              3,
+              83,
+              0,
+              45.68074035644531,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "air transform to 19",
+            "frames": 301,
+            "swapAfterFrames": 37,
+            "before": [
+              27,
+              18,
+              4,
+              1,
+              64.43792724609375,
+              43.0001106262207,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "atSwap": [
+              358,
+              310,
+              0,
+              1,
+              64.43792724609375,
+              60.76012420654297,
+              0,
+              1465996,
+              13636192,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              3,
+              42,
+              0,
+              64.43792724609375,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13636192,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "air transform to 7",
+            "frames": 301,
+            "swapAfterFrames": 44,
+            "before": [
+              27,
+              18,
+              4,
+              1,
+              64.43792724609375,
+              28.31710433959961,
+              0,
+              1465996,
+              13636192,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "atSwap": [
+              364,
+              316,
+              0,
+              1,
+              64.43792724609375,
+              21.6151065826416,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              32,
+              0,
+              64.43792724609375,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          }
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "transform-Zd-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "code": "Zd",
+        "completed": true,
+        "renderedFrames": 1921,
+        "initialDamage": 6,
+        "inactiveBodiesHidden": true,
+        "roundTrips": [
+          {
+            "name": "ground transform to 7",
+            "frames": 301,
+            "swapAfterFrames": 44,
+            "before": [
+              14,
+              2,
+              113,
+              0,
+              42.6327018737793,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "atSwap": [
+              362,
+              314,
+              0,
+              0,
+              42.6327018737793,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13760032,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              67,
+              0,
+              42.6327018737793,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13760032,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "ground transform to 19",
+            "frames": 301,
+            "swapAfterFrames": 37,
+            "before": [
+              14,
+              2,
+              67,
+              0,
+              42.6327018737793,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13760032,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "atSwap": [
+              356,
+              308,
+              0,
+              0,
+              42.6327018737793,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              5,
+              108,
+              0,
+              42.6327018737793,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "air transform to 7",
+            "frames": 301,
+            "swapAfterFrames": 44,
+            "before": [
+              27,
+              18,
+              4,
+              1,
+              62.50767135620117,
+              28.31710433959961,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "atSwap": [
+              364,
+              316,
+              0,
+              1,
+              62.50767135620117,
+              21.6151065826416,
+              0,
+              1465996,
+              13760032,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              32,
+              0,
+              62.50767135620117,
+              0.00009999999747378752,
+              0,
+              1465996,
+              13760032,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "air transform to 19",
+            "frames": 301,
+            "swapAfterFrames": 37,
+            "before": [
+              27,
+              18,
+              4,
+              1,
+              62.50767135620117,
+              43.0001106262207,
+              0,
+              1465996,
+              13760032,
+              15,
+              1,
+              7,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "atSwap": [
+              358,
+              310,
+              0,
+              1,
+              62.50767135620117,
+              60.76012420654297,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              5,
+              42,
+              0,
+              62.50767135620117,
+              0.00009999999747378752,
+              0,
+              1465888,
+              12402592,
+              15,
+              1,
+              19,
+              0,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          }
+        ],
+        "finalGpuErrorCheck": true
+      }
+    ],
+    "chainGpu": {
+      "artifact": "form-moves-chain-Sk-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 423,
+      "allRenderedFramesVertexChecked": true,
+      "finalGpuErrorCheck": true
+    },
+    "interactiveTransform": {
+      "artifact": "live-transform-Sk-vs-Zd-hardware-stage-callbacks-intro-damage-tournament-constructor-live-probe.json",
+      "completed": true,
+      "controllerEvents": true,
+      "swaps": [
+        {
+          "frame": 120,
+          "state": [
+            356,
+            308,
+            1,
+            0,
+            22.95999526977539,
+            0.00009999999747378752,
+            0,
+            1465868,
+            13162624,
+            15,
+            1,
+            19,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "frame": 190,
+          "state": [
+            362,
+            314,
+            1,
+            0,
+            22.95999526977539,
+            0.00009999999747378752,
+            0,
+            1465760,
+            11929024,
+            15,
+            1,
+            7,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        }
+      ],
+      "simulationFrames": 900,
+      "performanceSample": false,
+      "reason": "Controller-event correctness run; a build overlapped this run, so its timing is excluded."
+    },
+    "nessMirrorRegression": {
+      "artifact": "Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "constructorVerified": true,
+      "inputCompleted": true,
+      "renderedFrames": 142,
+      "finalGpuErrorCheck": true
+    }
+  },
+  "performance": {
+    "artifact": "deferred-errors-Sk-vs-Zd-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+    "frames": 3600,
+    "draws": 3600,
+    "elapsedMs": 60025.69999998808,
+    "stepCpu": {
+      "samples": 3600,
+      "meanMs": 0.4859166668355465,
+      "p50Ms": 0.5,
+      "p95Ms": 0.800000011920929,
+      "maxMs": 1.7999999821186066
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 7.424611110745205,
+      "p50Ms": 7.199999988079071,
+      "p95Ms": 10,
+      "maxMs": 17.900000005960464
+    },
+    "rafDrawIntervals": {
+      "samples": 3599,
+      "meanMs": 16.67065851625374,
+      "p50Ms": 16.69999999999709,
+      "p95Ms": 16.700000000004366,
+      "maxMs": 33.400000000001455
+    },
+    "cadence": {
+      "callbacks": 3603,
+      "zeroStepCallbacks": 3,
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1
+    },
+    "workload": {
+      "framesWithAttack": 1341,
+      "framesWithHitlag": 283,
+      "framesWithDamage": 3509,
+      "stockChanges": [
+        {
+          "frame": 910,
+          "slot": 0,
+          "stocks": 3
+        }
+      ],
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 64,
+          "attack": 315
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 42,
+          "attack": 175
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 69,
+          "attack": 226
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 192
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 32,
+          "attack": 157
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 16,
+          "attack": 276
+        }
+      ]
+    },
+    "shaderCompilations": [
+      {
+        "frame": 93,
+        "program": 30,
+        "origin": "model",
+        "cpuMs": 4.5
+      },
+      {
+        "frame": 93,
+        "program": 31,
+        "origin": "particles",
+        "cpuMs": 1.899999976158142
+      },
+      {
+        "frame": 93,
+        "program": 32,
+        "origin": "particles",
+        "cpuMs": 1.7999999821186066
+      },
+      {
+        "frame": 386,
+        "program": 33,
+        "origin": "model",
+        "cpuMs": 3.2000000178813934
+      },
+      {
+        "frame": 392,
+        "program": 34,
+        "origin": "model",
+        "cpuMs": 4.5999999940395355
+      },
+      {
+        "frame": 785,
+        "program": 35,
+        "origin": "model",
+        "cpuMs": 2.600000023841858
+      },
+      {
+        "frame": 826,
+        "program": 36,
+        "origin": "model",
+        "cpuMs": 1.300000011920929
+      },
+      {
+        "frame": 910,
+        "program": 37,
+        "origin": "model",
+        "cpuMs": 2.699999988079071
+      },
+      {
+        "frame": 982,
+        "program": 38,
+        "origin": "model",
+        "cpuMs": 5.800000011920929
+      },
+      {
+        "frame": 982,
+        "program": 39,
+        "origin": "model",
+        "cpuMs": 3.300000011920929
+      },
+      {
+        "frame": 1640,
+        "program": 40,
+        "origin": "model",
+        "cpuMs": 2.4000000059604645
+      },
+      {
+        "frame": 2277,
+        "program": 41,
+        "origin": "model",
+        "cpuMs": 2.300000011920929
+      },
+      {
+        "frame": 2677,
+        "program": 42,
+        "origin": "model",
+        "cpuMs": 2.4000000059604645
+      }
+    ],
+    "finalGpuErrorCheck": true,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "performanceCertified": false
+  },
+  "limitations": [
+    "Selected integration checks, not all moves, costumes, matchups or retail parity.",
+    "One close-combat timing sample, not sustained special-move or transformation stress.",
+    "No distinct displayed-FPS or input-to-photon measurement.",
+    "23 components have constructor/input integration. Kirby, Peach, Popo and Nana, full scenes/menus/audio, networking, parity and deployment remain unfinished."
+  ],
+  "competitiveAcceptanceAchieved": false
+}

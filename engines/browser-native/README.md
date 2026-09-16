@@ -32,6 +32,23 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Sheik and Zelda load both original player-owned forms and their shared Zelda
+effect bank. Chain animation also imports the two original reference skeletons
+following Sheik’s four Articles. The renderer follows all twenty native links.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Sk --input --form-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Zd --input --form-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Sk --opponent=Mr --input --transform --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Sk --live --live-transform --frames=900 --stage-callbacks --hardware
+```
+
+`--form-contact=attack|shield|control` checks needles or Din’s Fire; Zelda also
+supports `--form-contact=reflect --opponent=Mr` for Nayru’s Love. Use
+`--form-move=chain` or `--form-move=din` to isolate those rendering paths.
+Transformation diagnostics follow the original active entity; they never
+assign a fighter kind, copy damage, or replace the game’s swap callback.
+
 Mixed fixtures accept `--opponent=CODE` with a two-player input or live scene.
 Each selected fighter owns its base, motion and costume package; shared effect
 archives are installed once. The same-kind default is unchanged.

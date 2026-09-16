@@ -15,6 +15,8 @@ import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
+import {verifySeakZeldaMoves,verifySeakZeldaContact} from './verify-seak-zelda.mjs';
+import {verifyTransform} from './verify-transform.mjs';
 import {verifyAbsorption} from './verify-absorption.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
 import {verifyNessMoves,verifyNessContact} from './verify-ness.mjs';
@@ -78,7 +80,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(c))||stageKey==='story') {
+  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd'].includes(c))||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -87,8 +89,9 @@ try {
   }
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
   const effectFiles=new Map(),packageOptions={asset,models,motionSpec,attributeSpec,effectFiles};
-  const primary=await loadFighterPackage(module,code,packageOptions),secondary=opponentCode===code?primary:await loadFighterPackage(module,opponentCode,packageOptions);
-  const packages=[primary,...(secondary===primary?[]:[secondary])],baseBytes=primary.baseBytes;
+  const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
+  for(const selected of packageCodes)packages.push(await loadFighterPackage(module,selected,packageOptions));
+  const primary=packages.find(p=>p.code===code),secondary=packages.find(p=>p.code===opponentCode),baseBytes=primary.baseBytes;
   report.baseArchive=primary.baseArchive;report.opponentBaseArchive=secondary.baseArchive;
   report.residentFighters=packages.map(p=>({code:p.code,kind:p.kind,effectName:p.effectName}));
   module._portMatchCameraInitialize();module._portEffectsInitialize();
@@ -172,7 +175,7 @@ try {
   }
   report.constructorAttempted=true;
   console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
-  const object=module._portFighterConstruct(kind,0);
+  let object=module._portFighterConstruct(kind,0);
   if(!object)throw Error('Original constructor returned no fighter');
   report.constructorCompleted=true;report.object=object;
   report.fighterEffects=primary.effect?verifyResidentEffectBank(module,primary.effect.source,module._portEffectsBankData(primary.effect.source.bank)):{commonOnly:true};
@@ -194,6 +197,8 @@ try {
     report.opponentEffects=secondary.effect?verifyResidentEffectBank(module,secondary.effect.source,module._portEffectsBankData(secondary.effect.source.bank)):{commonOnly:true};
     report.combat={completed:false,initial:[a,b],frames:0};
   }
+  const fighterOwners=[0,...(combat?[1]:[])].flatMap(slot=>[0,1].flatMap(index=>{const owner=module._Player_GetEntityAtIndex(slot,index);if(!owner)return [];const pkg=packages.find(p=>p.kind===combatState(owner)[11]);if(!pkg)throw Error('Missing native fighter form package');return [{slot,index,owner,pkg}];}));
+  report.fighterForms=fighterOwners.map(({slot,index,owner,pkg})=>({slot,index,owner,code:pkg.code}));
   if(render||new URLSearchParams(location.search).has('camera')){module._portStageCameraStart();report.cameraStarted=true;}
   if(tournament||live||params.has('step')){
     report.schedulerContext=tournament?'Original VS rules/controller: four stocks, eight minutes, no items, '+character+' versus '+opponentCharacter+' and partial '+stageSpec.name+' startup. Audio, menus and full scene ownership remain incomplete.':combat?stageSpec.name+' geometry/collision, default rules, two player-owned fighters and scripted normalized combat input.':withStage?stageSpec.name+' geometry/collision and source spawn without complete match startup.':'Isolated constructor without a match.';
@@ -204,7 +209,7 @@ try {
     if(withStage&&!intro&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on '+stageSpec.name);
     if(damageHud){module._portTournamentDamageInitialize();report.hud.damage=true;}
     if(tournament&&!intro){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
-    const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
+    const step=()=>{tournament?module._portTournamentStep():module._portRuntimeStep();if([code,opponentCode].some(c=>c==='Sk'||c==='Zd')){object=module._Player_GetEntity(0);if(opponent)opponent=module._Player_GetEntity(1);}};
     let preview,canvas;
     const saveShaders=()=>{report.shaderCoverage=preview?.shaderCoverage();if(params.has('recordshaders'))globalThis.nativeShaderSources=preview.shaderSources();};
     function recordHud(drawn){
@@ -251,9 +256,8 @@ try {
         }
         if(byDescriptor.size!==1)throw Error('Unexpected Link attachment parts');
       }
-      for(const [i,owner] of [object,opponent].entries())if(owner){
-        const pkg=i?secondary:primary;
-        previewActors.push({name:(pkg.code==='Ca'?'Falcon':pkg.character)+' P'+(i+1),object:owner,collectNodes:['Lk','Cl'].includes(pkg.code)?(target,nodes)=>collectFighterCostume(owner,pkg,target,nodes):undefined,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:pkg.modelBytes});
+      for(const {slot:i,owner,pkg} of fighterOwners){
+        previewActors.push({name:(pkg.code==='Ca'?'Falcon':pkg.character)+' P'+(i+1),object:owner,active:()=>!['Sk','Zd'].includes(pkg.code)||module._Player_GetEntity(i)===owner,collectNodes:['Lk','Cl'].includes(pkg.code)?(target,nodes)=>collectFighterCostume(owner,pkg,target,nodes):undefined,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:pkg.modelBytes});
       }
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       const effectModels=new Map();
@@ -263,8 +267,8 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(pkg.code)){
-        const {baseBytes,baseName,character,source}=pkg,owner=pkg===primary?object:opponent;
+      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd'].includes(pkg.code)){
+        const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg===pkg)?.owner;
         if(!owner)throw Error('Loaded opponent requires two-fighter scene');
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=combatState(owner)[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
@@ -394,7 +398,7 @@ try {
       const controls=document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Effects, HUD, audio and full match rules are incomplete.';canvas.before(controls);
       const limit=Number(params.get('liveframes')??0);if(!Number.isInteger(limit)||limit<0||limit>36000)throw Error('Invalid live frame limit');
       await new Promise((resolve,reject)=>{
-        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
+        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
           onProgress:s=>{report.live=s;document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
           onComplete:s=>{report.live=s;resolve();},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();reject(error);}});
         document.documentElement.dataset.live='ready';
@@ -416,6 +420,25 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('formcontact')){
+        report.formContact={};verifySeakZeldaContact(module,[object,opponent],report.formContact,{step,mode:params.get('formcontact'),onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});
+      }
+      if(params.has('formmoves')){
+        report.formMoves={};verifySeakZeldaMoves(module,object,report.formMoves,{step,only:params.get('formmove'),onStep:renderSteps?phase=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          const name=phase.name==='ground chain'&&phase.peakLinks===20&&phase.frames>=55?'chain':phase.name==='guided ground Din Fire'&&phase.itemKinds.includes(109)?'dinfire':null;
+          if(name&&!report.preview[name]){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
+      if(params.has('transform')){
+        report.transform={};verifyTransform(module,report.transform,{step,onStep:renderSteps?phase=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          if(drawn.actors.some(a=>a.active===false&&a.draws))throw Error('Inactive transformation body was drawn');
+          report.transform.inactiveBodiesHidden=true;
+          const current=module._portFighterConstructRead(module._Player_GetEntity(0),11),name=current===7?'sheik':'zelda';
+          if(phase.before&&current!==phase.before.values[11]&&!report.preview[name]&&drawn.actors.some(a=>a.name===(current===7?'Seak':'Zelda')+' P1'&&a.draws)){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
       if(params.has('absorption')){
         report.absorption={};verifyAbsorption(module,[object,opponent],report.absorption,{step,mode:params.get('absorption'),onStep:renderSteps?phase=>{
           const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
