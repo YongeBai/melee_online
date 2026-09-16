@@ -19,6 +19,9 @@ import {convertStatusModels,verifyHudIconSelector} from './status-assets.mjs';
 import {verifyResidentEffectBank} from './verify-effects.mjs';
 import {verifyStartup} from './verify-startup.mjs';
 import {convertFighterBase} from './fighter-base-assets.mjs';
+import {convertItemRuntime} from './item-runtime-assets.mjs';
+import {verifyColors} from './verify-colors.mjs';
+import {convertFighterArticles} from './article-assets.mjs';
 import {fighterArchives} from './fighter-assets.mjs';
 import {readFighterMotions} from './motion-assets.mjs';
 import {convertMotionAnimations} from './motion-animations.mjs';
@@ -33,7 +36,7 @@ const diagnostics=[],report={constructorAttempted:false,constructorCompleted:fal
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
 const code=params.get('character')??'Ca',character=fighterArchives[code],kind=motionSpec.codes.indexOf(code);
 if(!character||kind<0)throw Error('Unknown fighter component');
-const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat',effectName='Ef'+code+'Data.dat';
+const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat',effectName='Ef'+(code==='Fc'?'Fx':code)+'Data.dat';
 report.character={code,name:character,kind};
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
 const stageCallbacks=params.has('stagecallbacks');let dynamicStage=null;
@@ -48,6 +51,13 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
+  if(code==='Fc') {
+    const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
+    const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
+    const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
+    module._portItemsInitialize(...items.addresses,colors.addresses[0]);report.items={initialized:true,colorCommands:data.scripts.commands.size};
+    report.items.colors=verifyColors(module,{archive:data.archive,colors:{tables:[data.colorTable],scripts:data.scripts}},()=>colors.addresses[0]);
+  }
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
   const partCount=ptr(ptr(module._portSharedGlobal(4)+kind*4)+8),costumes=module._portCostumeCount(kind);
   const source=convertFighterBase(baseBytes,baseName,{motionSpec,attributeSpec,partCount,costumes});
@@ -87,7 +97,7 @@ try {
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
-  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat');
+  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const stageBytes=await asset('GrNBa.dat'),map=convertBattlefieldMap(stageBytes,{callbacks:stageCallbacks});
@@ -186,7 +196,12 @@ try {
         const archive=inspectArchive(bytes),base=data-source.root-8;
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
-      preview=createNativeMatchPreview(module,canvas,previewActors,{effects:stageCallbacks?effectModels:null,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
+      let itemModels=null;
+      if(code==='Fc'){
+        itemModels=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(baseBytes),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
+        for(const row of articles.rows)itemModels.set(base+row.joint,{name:'Falco item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
+      }
+      preview=createNativeMatchPreview(module,canvas,previewActors,{items:itemModels,effects:stageCallbacks?effectModels:null,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(intro){
@@ -218,7 +233,7 @@ try {
       if(report.stage.transitions.length<3||report.stage.transitions.at(-1).groups.length!==4)throw Error('Original Battlefield background did not create and retire a transition');
       report.stage.callbackFrames=4500;report.stage.callbacksVerified=true;
     }
-    if(combat&&!live&&!params.has('workloadsteps'))await verifyCombat(module,[object,opponent],report.combat,{
+    if(combat&&!live&&!params.has('workloadsteps')&&!params.has('projectilecombat'))await verifyCombat(module,[object,opponent],report.combat,{
       step,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
       onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
@@ -253,6 +268,43 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('projectiles')) {
+        if(code!=='Fc')throw Error('Projectile input fixture currently requires Falco');
+        const projectileControl=params.has('projectilecontrol'),projectileShield=params.has('projectileshield');
+        const archive=inspectArchive(baseBytes),root=archive.publics.get('ftDataFalco'),attrs=archive.data.getUint32(root+4),laserKind=archive.data.getUint32(attrs+28);
+        if(opponent){
+          module._Player_80031848(1);
+          for(let frame=0;frame<90;frame++){module._portStageProbePad(0,0,0,0);module._portStageProbePad(1,0,0,frame<5?-1:0);step();}
+          // Place the defender using walking input, never a position/state write.
+          for(let frame=0;combatState(opponent)[4]<state()[4]+35&&frame<120;frame++){module._portStageProbePad(1,0,.5,0);step();}
+          for(let frame=0;frame<12;frame++){module._portStageProbePad(1,projectileShield?0x20:0,0,0);step();}
+        }
+        const before=opponent?combatState(opponent):null,buffer=module._malloc(128),traces=new Map(),defenderStates=new Set();let laserFrames=0,peakItems=0,peakHitlag=0,peakKnockback=0;
+        try {
+          for(let frame=0;frame<180;frame++) {
+            module._portStageProbePad(0,!projectileControl&&frame<2?0x200:0,0,0);step();
+            if(opponent){const s=combatState(opponent);peakHitlag=Math.max(peakHitlag,s[14]);peakKnockback=Math.max(peakKnockback,s[15]);defenderStates.add(s[0]);}
+            const count=module._portItemsList(buffer,32);if(count>32)throw Error('Projectile fixture item capacity');peakItems=Math.max(peakItems,count);
+            for(const item of new Uint32Array(module.HEAPU8.buffer,buffer,count)) {
+              const values=Array.from({length:8},(_,field)=>module._portItemRead(item,field));
+              if(!values.every(Number.isFinite))throw Error('Nonfinite live item state');
+              if(values[0]===laserKind){laserFrames++;const trace=traces.get(item)??[];trace.push({frame,state:values});traces.set(item,trace);if(values[5]!==object)throw Error('Projectile owner mismatch');}
+            }
+            if(renderSteps){const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+              if(!report.preview.projectile&&drawn.actors.some(a=>a.name==='Falco item 0'&&a.draws)){report.preview.projectile=drawn;const img=document.createElement('img');img.id='native-preview-projectile';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+            }
+          }
+          const rows=[...traces.values()];
+          if(projectileControl?(laserFrames||peakItems):(!laserFrames||!rows.some(t=>t.length>2&&Math.abs(t.at(-1).state[2]-t[0].state[2])>10)||module._portItemsList(buffer,32)))throw Error('Laser spawn/travel/retirement disagrees with input');
+          const after=opponent?combatState(opponent):null;
+          report.projectiles={completed:false,mode:projectileControl?'control':projectileShield?'shield':'hit',frames:180,laserKind,laserFrames,peakItems,traces:rows,contact:opponent?{before,after,peakHitlag,peakKnockback,defenderStates:[...defenderStates]}:null};
+          if(opponent){
+            const correct=projectileControl?(after[13]===before[13]&&peakHitlag===0&&peakKnockback===0):projectileShield?(after[13]===before[13]&&after[17]<before[17]&&defenderStates.has(181)&&peakHitlag>0):(after[13]>before[13]&&peakHitlag>0&&peakKnockback>0);
+            if(!correct)throw Error('Projectile contact disagrees with hit/control/shield input');
+          }
+          report.projectiles.completed=true;
+        } finally {module._free(buffer);}
+      }
       if(preview)report.preview.final=preview.draw();
     }
     if(params.has('workloadsteps')){const count=Number(params.get('workloadsteps'));if(!tournament||live||!Number.isInteger(count)||count<180||count>36000)throw Error('Invalid unpaced workload');report.simulationWorkload={};verifyCombatWorkload(module,[object,opponent],report.simulationWorkload,count);}

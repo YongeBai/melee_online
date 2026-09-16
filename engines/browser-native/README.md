@@ -32,7 +32,33 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
-The article subsystem check imports Fox/Falco laser, blaster and illusion data
+Falco now runs through the complete fighter archive assembler, original OnLoad
+article registration, item constructor and item scheduler. The original neutral
+special creates its blaster and laser; the live renderer tracks their original
+model owners, retires resources when they disappear, and refreshes bindings on
+reused object addresses. The shared Fox effect bank supplies Falco's own effects.
+
+The item residency boundary currently accepts imported character Articles only.
+Unsupported kinds fail before their descriptors are read; common/Pokémon/stage
+article graphs remain to be loaded. Original item logic and update callbacks are
+unchanged. The seven shared item color descriptors and their 55 script commands
+are imported with their packed priorities; original color state passes the same
+independent reference used for fighter colors.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Fc --input --projectiles --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Fc --input --projectile-combat --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Fc --input --projectile-control
+node scripts/native-port/probe-constructor.mjs --character=Fc --input --projectile-shield
+```
+
+The contact fixture moves the second fighter with normalized walking input.
+It requires damage, hitlag and knockback for a hit; no projectile or damage for
+the no-fire control; and shield stun with protected damage for shielding.
+These are limited move/interaction checks, not full Falco competitive parity.
+Fox still needs its extra x48 graph before complete construction is enabled.
+
+The earlier article subsystem check imports Fox/Falco laser, blaster and illusion data
 into original item model owners, then executes the original hitbox command
 handlers. It compares script cursors, timers, hitbox state, damage, size,
 offsets and knockback fields for 64 frames of each of 28 state descriptors.
@@ -54,10 +80,10 @@ node scripts/native-port/verify-articles.mjs --browser
 ```
 
 The disc argument above is a development fixture, never a player requirement.
-`articles.html` fetches hosted assets automatically. These are subsystem probes,
-not Fox/Falco match support: full item registries, color tables, spawning,
-movement, fighter ownership and collision scheduling remain to be integrated.
-The full fighter archive assembler continues rejecting unconverted x48 graphs.
+`articles.html` fetches hosted assets automatically. These remain isolated
+subsystem probes; the Falco input/contact probes above cover the newer spawning,
+movement, ownership and collision integration. The full fighter archive assembler
+continues rejecting unconverted x48 graphs for the other characters.
 
 The optional native VS lifecycle probe uses hosted `PdPm.dat` and `IfAll.usd`
 alongside the existing prepared fixtures. Re-run the development fixture tool

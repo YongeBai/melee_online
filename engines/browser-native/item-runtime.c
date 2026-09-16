@@ -1,0 +1,46 @@
+/* Browser asset residency boundary. Load only converted Articles and reject
+ * unsupported kinds before the original constructor reads any descriptor.
+ * Original registration, construction, scheduling and gameplay remain intact. */
+#include <melee/it/item.h>
+#include <melee/it/it_3F14.h>
+#include <melee/it/it_26B1.h>
+#include <melee/it/types.h>
+#include <sysdolphin/baselib/gobj.h>
+#include <sysdolphin/baselib/gobjplink.h>
+#include <stdio.h>
+#include <stdlib.h>
+static Article* character_articles[118];
+_Static_assert(It_PKind_Start-It_Kind_Kuriboh==118,"Character article table ABI");
+static int initialized;
+extern void port_unlinked_Item_80267978(HSD_GObj*);
+extern void port_unlinked_it_8026B3F8(Article*,s32);
+void portItemsInitialize(ItemCommonData* common,it_804D6D40_t* parameters,Fighter_804D653C_t* colors)
+{
+    if(initialized||!common||!parameters||!colors||it_804D6D28)abort();
+    initialized=1;it_804D6D28=common;it_804D6D40=parameters;it_804D6D04=colors;
+    it_804D6D38=character_articles;Item_80266FCC();
+}
+void it_8026B3F8(Article* article,s32 kind)
+{
+    if(!initialized||!article||kind<It_Kind_Kuriboh||kind>=It_PKind_Start)abort();
+    port_unlinked_it_8026B3F8(article,kind);
+}
+void Item_80267978(HSD_GObj* object)
+{
+    Item* item=object->user_data;int kind=item->kind;
+    if(!initialized||kind<It_Kind_Kuriboh||kind>=It_PKind_Start||!character_articles[kind-It_Kind_Kuriboh]) {
+        fprintf(stderr,"Native item asset not resident: kind %d\n",kind);abort();
+    }
+    port_unlinked_Item_80267978(object);
+}
+unsigned portItemsList(unsigned* result,unsigned capacity)
+{
+    unsigned n=0;for(HSD_GObj* object=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];object;object=object->next){if(n<capacity)result[n]=(unsigned)object;n++;}return n;
+}
+double portItemRead(HSD_GObj* object,unsigned field)
+{
+    if(!object||object->classifier!=HSD_GOBJ_CLASS_ITEM)abort();Item* item=object->user_data;
+    switch(field){case 0:return item->kind;case 1:return item->msid;case 2:return item->pos.x;case 3:return item->pos.y;
+    case 4:return item->pos.z;case 5:return (unsigned)item->owner;case 6:return item->x5D4_hitboxes[0].hit.state;
+    case 7:return item->x5D4_hitboxes[0].hit.damage;case 8:return (unsigned)item->xC8_joint;default:abort();}
+}

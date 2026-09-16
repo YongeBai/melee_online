@@ -15,7 +15,7 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. The native-material path is still missing full draw callbacks.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
@@ -24,7 +24,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
   if(hud&&(!hudList||!callbacks))throw Error('HUD requires original callbacks and object buffer');
   function releaseResource(r){r.accessoryGpu?.dispose();if(r.accessoryNodes)module._free(r.accessoryNodes);r.materialGpu?.dispose();r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}
-  function dispose(){delete module.onNativeObject;if(effectList)module._free(effectList);for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources)releaseResource(r);materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
+  function dispose(){delete module.onNativeObject;if(itemList)module._free(itemList);if(effectList)module._free(effectList);for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources)releaseResource(r);materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
   function drawHud(){
     if(!hud)return null;
     const count=module._portHudObjects(hudList,32),objects=Array.from(new Uint32Array(module.HEAPU8.buffer,hudList,count*3)),active=new Set();
@@ -89,12 +89,31 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         modelProbe=createNativeModelProbe(module,model,actor.bytes,nodes,skin,actor.object);
         }
         materialGpu=materialRenderer?.upload(model,actor.bytes,nodes,actor.object);
-        resources.push({stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessory:actor.accessory,name:actor.name,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
+        resources.push({itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessory:actor.accessory,name:actor.name,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
-  let stageOwners=new Set(),effectOwners=new Set();
+  let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
   const particleStats={draws:0,vertices:0,frames:0,peakDraws:0},afterimageStats={draws:0,vertices:0,frames:0,peakDraws:0};
-  const resourceStats={stageCreated:0,stageRetired:0,effectCreated:0,effectRetired:0,peakEffectModels:0};
+  const resourceStats={stageCreated:0,stageRetired:0,effectCreated:0,effectRetired:0,peakEffectModels:0,itemCreated:0,itemRetired:0,peakItemModels:0};
+  const itemList=items?module._malloc(512*4):0;
+  if(items&&!itemList)throw Error('Item owner allocation');
+  function syncItems(){
+    if(!items)return;
+    const count=module._portItemsList(itemList,512);if(count>512)throw Error('Item renderer capacity');
+    const current=Array.from(new Uint32Array(module.HEAPU8.buffer,itemList,count),object=>{
+      const descriptor=module._portItemRead(object,8),source=items.get(descriptor);
+      if(!source)throw Error('Unregistered item model descriptor '+descriptor);
+      return {...source,object,itemKey:object+':'+module._portSceneObjectRoot(object)+':'+descriptor};
+    });
+    itemOwners=new Set(current.map(a=>a.object));const keys=new Set(current.map(a=>a.itemKey));
+    for(let i=resources.length-1;i>=0;i--)if(resources[i].itemKey&&!keys.has(resources[i].itemKey)){releaseResource(resources[i]);resources.splice(i,1);resourceStats.itemRetired++;}
+    resourceStats.peakItemModels=Math.max(resourceStats.peakItemModels,current.length);
+    for(const actor of current){
+      const old=resources.find(r=>r.itemKey===actor.itemKey);
+      if(!old){addActor(actor);if(resources.some(r=>r.itemKey===actor.itemKey))resourceStats.itemCreated++;}
+      else {if(module._portSceneCollect(module._portSceneObjectRoot(actor.object),old.nodes,old.model.tree.nodes.length)!==old.model.tree.nodes.length)throw Error('Reused item hierarchy mismatch');old.materialGpu.refreshBindings();}
+    }
+  }
   const effectList=effects?module._malloc(512*12):0;
   if(effects&&!effectList)throw Error('Effect owner allocation');
   function syncEffects(){
@@ -131,7 +150,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       draw(){
         if(callbacks){
           if(!materialRenderer)throw Error('Original callbacks require native materials');
-          syncStage();syncEffects();const accessories=syncAccessories();
+          syncStage();syncEffects();syncItems();const accessories=syncAccessories();
           const snapshot=camera.snapshot();checkNativeCamera(snapshot);materialRenderer.begin(snapshot);
           const rows=resources.map(r=>({name:r.name,passes:[],draws:0}));
           let particlePasses=0;
@@ -142,7 +161,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
               // Unsupported primitives and unknown models still fail explicitly.
               if(particles){module._portNativeDrawParticles(owner,pass);particlePasses++;return;}
               const i=resources.findIndex(r=>r.owner===owner),r=resources[i];
-              if(!r&&!stageOwners.has(owner)&&!effectOwners.has(owner))throw Error('Unregistered native render object '+owner+' link '+link+' class '+classifier);
+              if(!r&&!stageOwners.has(owner)&&!effectOwners.has(owner)&&!itemOwners.has(owner))throw Error('Unregistered native render object '+owner+' link '+link+' class '+classifier);
               const count=r?.prepare?module._portFighterNativeDraw(owner,pass):module._portNativeDrawObject(owner,pass,1);
               if(r){rows[i].passes.push(count);rows[i].draws+=count;}
             };

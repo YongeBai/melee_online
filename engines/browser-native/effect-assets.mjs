@@ -11,6 +11,8 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Fx:{name:'effFoxDataTable',bank:3,first:3000,count:11,groups:8,models:6},
+    Fc:{name:'effFoxDataTable',bank:3,first:3000,count:11,groups:8,models:6},
     Ca:{name:'effCaptainDataTable',bank:4,first:4000,count:17,groups:7,models:6},
     Dk:{name:'effDonkeyDataTable',bank:8,first:null,count:0,groups:0,models:7},
     Ms:{name:'effMarsDataTable',bank:16,first:16000,count:4,groups:3,models:2},

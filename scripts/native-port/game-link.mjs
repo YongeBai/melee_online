@@ -16,6 +16,8 @@ export function renameBoundaryDefinitions(text,names) {
 }
 export function gameLinkInputs(root,upstream,output) {
   const replacements={
+    'src/melee/it/item.c':['Item_80267978'],
+    'src/melee/it/it_26B1.c':['it_8026B3F8'],
     'src/melee/ft/ftafterimage.c':['ftCo_800C2600'],
     'src/melee/lb/lbfile.c':['lbFileGetSize','lbFile_8001668C','lbFile_800168A0'],
     'src/melee/lb/lbheap.c':['lbHeap_80015BD0','lbHeap_80015CA8'],

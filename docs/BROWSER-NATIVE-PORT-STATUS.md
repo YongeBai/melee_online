@@ -5,6 +5,36 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Falco is now the sixth constructor-capable fighter. Its original neutral special
+spawns the blaster and laser through Melee's item constructor and scheduler;
+the renderer tracks and retires the original item model owners. The contact
+fixture deals 3% with three frames of peak hitlag and native knockback. A no-fire
+control produces neither projectile nor damage; shielding preserves damage and
+enters native shield stun. Movement and defender placement use controller input,
+not position or action-state writes. GPU vertex checks pass, and the inspected
+960×720 image shows the original blaster/laser. Camera code is unchanged.
+
+Seven item color descriptors and their 55 commands pass 1,465 original color
+interpreter frames. The item residency boundary explicitly rejects unconverted
+kinds before original descriptor reads. Fox's extra x48 table and other item
+graphs remain incomplete; these checks do not establish full Falco move parity.
+
+A normal-driver-cache two-Falco Battlefield sample completes 3,600 simulation
+steps and 3,600 draw submissions in 60.020 seconds, with no catch-up callbacks.
+Simulation averages 0.580 ms (p95 0.9 ms); draw submission averages 5.619 ms
+(p95 7.6 ms, maximum 13.7 ms). The original stage callbacks, HUD, combat,
+particles and stock changes run in this sample. Its controller workload uses
+ordinary attacks/shielding; projectile contact is checked separately above.
+This measures submissions, not distinct presentations or input-to-photon latency,
+and it does not resolve the previously measured cold-cache shader stalls.
+
+All 145 targeted tests pass. The final binary retains the unchanged Falcon
+combat trace, 124-frame Ready/Go, 4,500 stage-callback frames and rendered
+stock-loss/respawn lifecycle. The existing article browser regression also passes.
+[Falco projectile and timing evidence](benchmarks/browser-2026-09-16-native-port-falco-projectiles.json).
+
+Previous article checkpoint:
+
 Fox/Falco's laser, blaster and Illusion/Phantasm Article subgraphs now import
 their original models, attributes, state descriptors and hitbox scripts. Original
 WASM item handlers pass 1,792 script frames across 28 state descriptors, with
