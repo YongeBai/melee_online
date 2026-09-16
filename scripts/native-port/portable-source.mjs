@@ -55,6 +55,23 @@ export function preparePortableSource(source,output) {
       const marker='/* 479D30 */ static struct stateMachine state_machine;';
       replace(marker,marker+'\nvoid portInitializeVsRouting(void) { state_machine = (struct stateMachine){0}; state_machine.routing.curr_mode = GM_VS; }\n');
     }
+    if(file==='src/melee/gr/stage.c') {
+      // Resident typed assets replace disc IO during browser bring-up. Keep the
+      // original selection state used by the subsequent on-load/on-start calls.
+      const selection='    selected_stage.stkind = stkind;\n    selected_stage.entry = &stage_id_map[stkind];';
+      replace(selection,'    portStageSelectResident(stkind);');
+      const marker='void Stage_802251E8(StKind stkind, s32* _)';
+      replace(marker,'void portStageSelectResident(StKind stkind)\n{\n'+selection+'\n}\n\n'+marker);
+    }
+    if(file==='src/melee/gm/gmvs.c') {
+      // Status animation completion supplies an int argument. PPC tolerates
+      // passing it to a void(void) function; WASM call_indirect requires a
+      // matching signature. Adapt only that ABI boundary, retaining the body.
+      const marker='void fn_8016B784(void)';
+      replace(marker,'static void portReadyGoComplete(int status) { fn_8016B784(); }\nstatic void portReadyComplete(int status) { fn_8016B7F8(); }\n\n'+marker);
+      text=text.replaceAll(', fn_8016B784);',', (Event) portReadyGoComplete);')
+        .replaceAll(', fn_8016B7F8);',', (Event) portReadyComplete);');
+    }
     if(file==='src/melee/if/ifall.c') {
       // Expose the unchanged layout/camera/light prefix for incremental HUD
       // bring-up. Full original initialization still invokes the same prefix.

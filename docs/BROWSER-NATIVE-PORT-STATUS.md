@@ -1,9 +1,37 @@
-# Native browser port — September 15, 2026
+# Native browser port — September 16, 2026
 
 The direct port is now an implemented, reproducible development target:
 [build and architecture](../engines/browser-native/README.md). It links original
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
+
+The new `--intro` fixture removes the 120-frame startup skip. Both Falcons run
+original Entry/EntryStart/EntryEnd states with their original trophy-platform
+models. Native Ready completes at frame 85, releasing fighter input and invoking
+the stage's on-start callback. Go completes at frame 124; the match clock stays
+at 8:00 until the next scene step. Original status animations and completion
+callbacks control those transitions. Typed callback adapters fix the mismatch
+between the original no-argument functions and the status system's int argument
+at the WASM indirect-call boundary. No gameplay camera offset was added.
+
+The rendered test covers all 124 intro frames, 683 combat steps, 1,020 lifecycle
+steps, four KOs and three respawns. The eight-minute timeout still reaches frame
+28,800 and exits through the original 112-frame end sequence. Keyboard movement,
+jump and attack pass, along with all 131 targeted tests. The earlier no-intro
+combat trace is unchanged. Ready, Go and entrance-platform screenshots were
+visually inspected at 960×720.
+
+After the unpaced intro prelude, the 60.037-second combat sample completed 3,600
+simulation steps and 3,600 draw submissions. Mean simulation cost was 0.520 ms;
+mean submission cost was 8.707 ms (p95 10.5 ms). There were no multi-step callbacks;
+one clock correction produced a 33.3 ms draw interval. This does not certify
+distinct presented FPS or input-to-photon latency, and the introductory sequence
+is not included in that performance sample. Full stage on-init/background
+transitions, effects rendering, audio, menus/pause/results, scene lifecycle,
+networking and all-character/all-stage gameplay remain incomplete.
+[Ready/Go and entrance checkpoint](benchmarks/browser-2026-09-16-native-port-intro.json).
+
+Previous checkpoints below describe their state at the time.
 
 The `--damage-hud` fixture now includes original damage percentages, character
 emblems and stock icons alongside the timer/status graphics. The settled combat

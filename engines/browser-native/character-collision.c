@@ -608,3 +608,14 @@ unsigned portFighterRespawnPlatform(HSD_GObj* object)
     if(joint&&(!Fighter_804D6534||joint->id!=(unsigned)((HSD_Joint**)Fighter_804D6534)[0]))abort();
     return (unsigned)joint;
 }
+unsigned portFighterAccessory(HSD_GObj* object,unsigned field)
+{
+    if(!object||object->classifier!=HSD_GOBJ_CLASS_FIGHTER||!object->user_data||field>1)abort();
+    HSD_JObj* joint=((Fighter*)object->user_data)->x20A0_accessory;
+    if(!joint)return 0;
+    unsigned kind=0;
+    if(Fighter_804D6534&&joint->id==(unsigned)((HSD_Joint**)Fighter_804D6534)[0])kind=1;
+    else if(Fighter_804D6514&&joint->id==(unsigned)Fighter_804D6514)kind=2;
+    else abort();
+    return field?kind:(unsigned)joint;
+}

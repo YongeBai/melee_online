@@ -49,15 +49,17 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     let count=0;
     for(const r of resources){
       if(!r.accessory)continue;
-      const root=r.accessory.root();
-      if(root!==(r.accessoryRoot??0)){
+      const root=r.accessory.root(),kind=root?(r.accessory.kind?.()??1):0;
+      if(root!==(r.accessoryRoot??0)||kind!==(r.accessoryKind??0)){
         r.accessoryGpu?.dispose();r.accessoryGpu=null;
-        if(r.accessoryNodes)module._free(r.accessoryNodes);r.accessoryNodes=0;r.accessoryRoot=root;
+        if(r.accessoryNodes)module._free(r.accessoryNodes);r.accessoryNodes=0;r.accessoryRoot=root;r.accessoryKind=kind;
         if(root){
-          const model=readModelMeshes(r.accessory.bytes),n=model.tree.nodes.length;
+          const bytes=r.accessory.models?r.accessory.models.get(kind):r.accessory.bytes;
+          if(!bytes)throw Error('Unregistered fighter accessory '+kind);
+          const model=readModelMeshes(bytes),n=model.tree.nodes.length;
           r.accessoryNodes=module._malloc(n*4);if(!r.accessoryNodes)throw Error('Accessory node allocation');
           if(module._portSceneCollect(root,r.accessoryNodes,n)!==n)throw Error('Accessory hierarchy mismatch');
-          r.accessoryGpu=materialRenderer.upload(model,r.accessory.bytes,r.accessoryNodes,r.owner);
+          r.accessoryGpu=materialRenderer.upload(model,bytes,r.accessoryNodes,r.owner);
         }
       }
       if(root)count++;

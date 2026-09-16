@@ -41,6 +41,11 @@ automatically; no player ISO or file picker is involved.
 and match-end status graphics. `--damage-hud` also adds native damage percentages,
 character emblems and stock icons. Both use the original HUD camera independently
 of the gameplay camera.
+`--intro` includes that HUD and removes the fixture's 120-frame startup skip.
+It exercises the original Ready/Go animations and completion callbacks, fighter
+entrance states and trophy platforms, input gating, and the stage's on-start
+callback. It verifies the clock remains stopped until Go completes. The stage's
+full on-init path remains separate work; this is not a complete scene boot.
 Use `--hud --timeout --render-steps --hardware` to render the final six seconds
 and timeout animation after advancing the real eight-minute clock. Use
 `--hud --live --workload --hardware --frames=3600` for the sustained input-driven
@@ -62,6 +67,8 @@ the first callbacks and a bounded list of zero/multi-step callbacks for diagnosi
 
 ```sh
 node scripts/native-port/probe-constructor.mjs --tournament
+node scripts/native-port/probe-constructor.mjs --intro --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --intro --live --workload --hardware --frames=3600
 node scripts/native-port/probe-constructor.mjs --timeout
 node scripts/native-port/probe-constructor.mjs --workload-steps
 node scripts/native-port/probe-constructor.mjs --tournament --render-steps --hardware
@@ -74,9 +81,9 @@ player initialization. Original controller/frame callbacks handle combat,
 stock loss, respawn, elimination, timeout and end-sequence freezing. Tests cause
 KOs through controller input and advance the full timer; they never edit a live
 fighter's stocks, position, damage or match time. The respawn platform is rendered
-through the original fighter callback and original model/animation. Status models
-are initialized for end-sequence logic but are not yet drawn by the HUD camera.
-The scene still uses partial Battlefield startup and two Falcons; intro, HUD,
+through the original fighter callback and original model/animation. Optional HUD
+and intro flags draw original status models through the original HUD camera.
+The scene still uses partial Battlefield startup and two Falcons; complete
 effects rendering, audio, menus/pause/results and the complete roster are pending.
 The optional workload drives both fighters toward each other with repeated attacks
 and intermittent shields. It reports attack/hitlag/damage frames separately from

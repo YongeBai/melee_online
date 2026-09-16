@@ -12,6 +12,7 @@ import {combatWorkload,verifyCombatWorkload} from './combat-workload.mjs';
 import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
+import {verifyIntro} from './verify-intro.mjs';
 import {verifyCombat} from './verify-combat.mjs';
 import {convertPlayerParameters} from './player-parameters.mjs';
 import {convertStatusModels,verifyHudIconSelector} from './status-assets.mjs';
@@ -29,7 +30,8 @@ import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
-const damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
+const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
+if(intro&&!withHud)throw Error('Intro requires native HUD');
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
@@ -121,12 +123,12 @@ try {
   if(tournament||live||params.has('step')){
     report.schedulerContext=tournament?'Original VS rules/controller with four stocks, eight minutes, no items, two Falcons and partial Battlefield startup. HUD drawing, audio, menus and full scene ownership remain incomplete.':combat?'Battlefield geometry/collision, default rules, two player-owned Falcons and scripted normalized combat input. Full match startup and rendering remain incomplete.':withStage?'Battlefield geometry/collision and source spawn, without complete Stage startup, match rules, input or rendering.':'Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
     report.schedulerSteps=0;console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
-    for(let i=0;i<120;i++){module._portRuntimeStep();report.schedulerSteps++;}
+    for(let i=0;i<(intro?0:120);i++){module._portRuntimeStep();report.schedulerSteps++;}
     report.afterSteps=state();
     if(!report.afterSteps.every(Number.isFinite)||report.afterSteps[9]!==15||report.afterSteps[10]!==1)throw Error('Scheduled fighter state/ownership invariant');
-    if(withStage&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on Battlefield');
+    if(withStage&&!intro&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on Battlefield');
     if(damageHud){module._portTournamentDamageInitialize();report.hud.damage=true;}
-    if(tournament){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
+    if(tournament&&!intro){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
     const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
     let preview,canvas;
     function recordHud(drawn){
@@ -146,11 +148,21 @@ try {
       }
     }
     if(render) {
-      const sharedArchive=inspectArchive(common),respawnRoot=sharedArchive.data.getUint32(sharedArchive.data.getUint32(sharedArchive.publics.get('ftLoadCommonData')+8*4)),respawnBytes=archiveRootView(sharedArchive,'respawn_Share_joint',respawnRoot);
-      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,accessory:{root:()=>module._portFighterRespawnPlatform(owner),bytes:respawnBytes},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
+      const sharedArchive=inspectArchive(common),sharedRoot=sharedArchive.publics.get('ftLoadCommonData');
+      const accessoryModels=new Map([[1,sharedArchive.data.getUint32(sharedArchive.data.getUint32(sharedRoot+8*4))],[2,sharedArchive.data.getUint32(sharedRoot+16*4)]].map(([kind,root])=>[kind,archiveRootView(sharedArchive,'accessory_Share_joint',root)]));
+      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       preview=createNativeMatchPreview(module,canvas,previewActors,{hud:hudPreview,verify:!live&&!renderSteps,callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
+    }
+    if(intro){
+      report.intro={};verifyIntro(module,report.intro,{onStep:({frame,mask})=>{
+        if(!preview)return;const drawn=preview.draw();report.intro.renderedFrames=(report.intro.renderedFrames??0)+1;
+        const name=mask&8?'ready':mask&16?'go':null;
+        if(name&&!report.intro[name]&&frame%15===0){
+          const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.intro[name]=drawn;
+        }
+      }});report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
     }
     if(combat&&!live&&!params.has('workloadsteps'))await verifyCombat(module,[object,opponent],report.combat,{
       step,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,

@@ -17,6 +17,7 @@
 #include <melee/if/ifstock.h>
 #include <melee/if/types.h>
 #include <melee/sc/types.h>
+#include <melee/ft/types.h>
 #include <sysdolphin/baselib/gobj.h>
 #include <sysdolphin/baselib/cobj.h>
 #include <sysdolphin/baselib/jobj.h>
@@ -27,6 +28,7 @@ static int hud_initialized;
 static int damage_initialized;
 extern unsigned portRuntimeStep(void);
 extern void portInitializeVsRouting(void);
+extern void portStageSelectResident(StKind);
 extern void portHudInitializeBase(SceneDesc*);
 extern HSD_LObj* portHudLights(void);
 extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
@@ -95,6 +97,14 @@ void portTournamentBegin(void)
      * ready/go completion callback; intro graphics and full startup are pending. */
     fn_8016B784();started=1;
 }
+static void ready_complete(int status) { fn_8016B7F8(); }
+void portTournamentIntroBegin(void)
+{
+    if(!initialized||started||!hud_initialized||!Player_GetEntity(0)||!Player_GetEntity(1))abort();
+    portStageSelectResident(St_Kind_Battle);
+    ifStatus_802F6EA4(3,-1,-1,0,(Event)fn_8016B7B4,(Event)ready_complete);
+    started=1;
+}
 unsigned portTournamentStep(void)
 {
     if(!started)abort();
@@ -120,6 +130,8 @@ double portTournamentRead(unsigned field,unsigned slot)
     case 18:return Player_GetFallsByIndex(slot,0);case 19:return (unsigned)Player_GetEntity(slot);
     case 20:return s->unk_0;case 21:return Player_GetControllerIndex(slot);
     case 22:return gm_GetCurrentGameMode();
+    case 23:{unsigned mask=0;for(unsigned i=0;i<8;i++)if(ifStatus_803F9628[i].x0)mask|=1u<<i;return mask;}
+    case 24:{HSD_GObj* g=Player_GetEntity(slot);if(!g)abort();return ((Fighter*)g->user_data)->x221D_b4;}
     default:abort();
     }
 }
