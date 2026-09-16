@@ -32,6 +32,38 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Ice Climbers load Popo and Nana through the original player-owned constructor.
+Both fighter roots import their three Articles; Nana uses Popo's registered item
+kinds. The shared Ice Climbers bank has one model, seventeen particle commands
+and five texture groups. The Belay renderer follows forty original ItemLink
+objects, preserving their scheduling, lifetime and poses.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Pp --input --climbers-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Pp --input --climbers-move=belay --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-roster.mjs
+```
+
+The move suite drives walking, jumping, ground/air Ice Shot, Blizzard, linked
+Squall Hammer and Belay using one controller. Nana receives the original delayed
+input/AI pipeline. Normal movement and platform-drop inputs reposition the pair
+between moves; the test does not assign positions, action states or velocities.
+The full four-fighter per-vertex run exceeded its ten-minute verification limit;
+the commands above separate full move rendering from focused rope verification.
+
+This integration exposed two shared portability faults. MotionState's numeric
+word initializer needs explicit native bit positions for its move ID and flags;
+the old byte overlay read them incorrectly on WASM. The corrected view preserves
+the 32-byte descriptor and all original table initializers. The partner stick
+history also needs float-to-signed-integer conversion before narrowing to a byte.
+The development executable's ftCo_800B0918 uses fctiwz followed by stb, confirming
+that order. Negative half-stick input now remains -64 in Nana's history instead
+of becoming zero. These fixes affect gameplay correctness, including move IDs
+used for staling; earlier fixture results do not certify the corrected build.
+The roster regression checks live move IDs and copy flags against the numeric
+state word on every input frame. It excludes unintegrated Kirby and does not
+establish retail parity or displayed FPS.
+
 Peach imports five move Articles, her model-only effect bank, and the shared
 Bob-omb, Mr. Saturn and Beam Sword Articles used by her original rare-pull logic.
 The browser residency table registers these three kinds without changing item

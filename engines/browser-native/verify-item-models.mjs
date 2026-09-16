@@ -1,3 +1,4 @@
+import {initializeFighterArticleArchive} from './article-assets.mjs';
 import {convertItemModels} from './item-model-assets.mjs';
 import {installResidentFile,openResidentArchive} from './resident-files.mjs';
 export function verifyItemModels(module,fighters) {
@@ -9,7 +10,7 @@ export function verifyItemModels(module,fighters) {
   const baseline={live:module._portSceneLiveObjects(),objects:module._portRuntimeObjectsUsed(),files:module._portFileAllocations()};
   check(module._portOriginalItemModelLive()===0,'clean item model pool');
   for(const {name,bytes} of fighters) {
-    const source=convertItemModels(bytes,name);if(!source.rows.length){rows.push({name,articles:[]});continue;}
+    const source=convertItemModels(name==='PlNn.dat'?initializeFighterArticleArchive(bytes,'Nn'):bytes,name);if(!source.rows.length){rows.push({name,articles:[]});continue;}
     const filename=name.replace('.dat','Items.dat');installResidentFile(module,filename,source.image);const file=openResidentArchive(module,filename,['native_item_models']);
     const root=file.addresses[0],base=root-source.root,table=ptr(root+4),articles=[];
     try {

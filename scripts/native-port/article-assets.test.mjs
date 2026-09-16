@@ -231,12 +231,13 @@ function formFixture(code,mutate=()=>{}){
     if(words){ptr(article+4,special);for(let i=0;i<words;i++)d.setFloat32(special+i*4,1.25);}
     if(states){ptr(article+12,state);for(let i=0;i<states;i++)ptr(state+i*16+12,6000);}
   }
+  if(code==='Pp'){joint(4000);ptr(1280+36,4000);ptr(1280+40,4000);}
   if(code==='Sk'){
     d.setInt32(1408,20);for(const [off,at]of [[100,4000],[104,4100]]){ptr(1408+off,at);joint(at);}
     for(const [slot,at]of [[4,4200],[5,4400]]){ptr(128+slot*4,at);joint(at);ptr(at+8,at+64);joint(at+64);d.setFloat32(at+64+20,.375);}
   }
   mutate({d,relocs,ptr});
-  const name=new TextEncoder().encode('ftData'+({Sk:'Seak',Zd:'Zelda',Pe:'Peach'}[code])+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
+  const name=new TextEncoder().encode('ftData'+({Sk:'Seak',Zd:'Zelda',Pe:'Peach',Pp:'Popo',Nn:'Nana'}[code])+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((r,i)=>v.setUint32(32+body.length+i*4,r));bytes.set(name,pub+8);return bytes;
 }
 test('Sheik imports both chain reference skeletons independently of the four Articles',()=>{
@@ -260,4 +261,14 @@ test('Peach preserves integer turnip odds/damage and placeholder words while val
   assert.equal(v.getFloat32(1152,true),1.25);for(let i=1;i<18;i++)assert.equal(v.getInt32(1152+i*4,true),-i);
   assert.equal(v.getInt32(1280,true),-1);assert.equal(v.getInt32(1408,true),-2);
   assert.throws(()=>convertFighterArticles(formFixture('Pe',({d})=>d.setFloat32(1536,NaN)),'PlPe.dat'),/Nonfinite/);
+});
+
+test('Climbers import shared rope models and preserve numeric integer fields; Nana keeps null external graphs',()=>{
+  for(const code of ['Pp','Nn']){
+    const input=formFixture(code,({d})=>{for(const at of [1024+44,1024+48,1280,1284,1304,1308,1312])d.setInt32(at,-1);}),before=input.slice(),r=convertFighterArticles(input,'Pl'+code+'.dat'),v=new DataView(r.image.buffer,32);
+    assert.deepEqual(input,before);assert.deepEqual(r.rows.map(x=>[x.stateCount,x.specialWords]),[[1,13],[1,5],[0,9]]);
+    for(const at of [1024+44,1024+48,1280,1284,1304,1308,1312])assert.equal(v.getInt32(at,true),-1);
+    assert.equal(v.getFloat32(1296,true),1.25);assert.equal(r.attachments.length,code==='Pp'?2:0);
+  }
+  assert.throws(()=>convertFighterArticles(formFixture('Pp',({d,relocs})=>{d.setUint32(1316,0);relocs.delete(1316);}), 'PlPp.dat'),/Missing Popo rope/);
 });

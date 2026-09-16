@@ -24,6 +24,8 @@ export const fighterArticleProfiles=Object.freeze({
   Kp:{slots:1,articles:{0:[1,6]}},
   Ys:{slots:4,articles:{0:[2,2],1:[1,2],2:[0,0]}},
   Sk:{slots:6,articles:{0:[5,3],1:[1,1],2:[1,0],3:[0,25]}},
+  Pp:{slots:3,articles:{0:[1,13],1:[1,5],2:[0,9]}},
+  Nn:{slots:3,articles:{0:[1,13],1:[1,5],2:[0,9]}},
   Pe:{slots:5,articles:{0:[2,0],1:[3,18],2:[2,1],3:[2,1],4:[1,4]}},
   Zd:{slots:2,articles:{0:[2,12],1:[1,5]}},
   Ns:{slots:11,articles:{0:[1,2],1:[1,3],2:[3,11],3:[1,5],4:[1,1],5:[1,1],6:[1,1],7:[1,1],8:[1,5],9:[1,1],10:[0,20]}},
@@ -35,6 +37,8 @@ export const fighterArticleProfiles=Object.freeze({
   Ss:{slots:5,articles:{0:[2,7],1:[9,8],2:[4,16],3:[0,25]}},
 });
 export function initializeFighterArticleArchive(input,code){
+  if(code==='Pp')return initializeArchiveExternals(input,['ItmIceclimberGumStrings_TopN_joint']);
+  if(code==='Nn')return initializeArchiveExternals(input,['ItmIceclimberGumStrings_TopN_joint','ItmIceclimberGum_TopN_joint','ItmIceclimberIceShot_TopN_animjoint','ItmIceclimberIceShot_TopN_joint']);
   if(code==='Gw')return initializeArchiveExternals(input,['ItmGamewatchBreath_TopN_ACTION_LandingAirHi_animjoint','ItmGamewatchRescue_TopN_ACTION_SpecialHiAir_animjoint']);
   if(['Lk','Cl'].includes(code))return initializeArchiveExternals(input,['ItmLinkHShot_TopN_ACTION_Out_matanim_joint','ItmLinkHShot_TopN_ACTION_Out_shapeanim_joint']);
   return code==='Ss'?initializeArchiveExternals(input,[
@@ -91,7 +95,8 @@ export function convertFighterArticles(input,name) {
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
-    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Pe'&&(model.slot===1&&j>0||[2,3].includes(model.slot))||code==='Sk'&&model.slot===3&&j===0||code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(['Pp','Nn'].includes(code)&&(model.slot===0&&j>=11||model.slot===2&&[0,1,6,7,8].includes(j))||code==='Pe'&&(model.slot===1&&j>0||[2,3].includes(model.slot))||code==='Sk'&&model.slot===3&&j===0||code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    if(['Pp','Nn'].includes(code)&&model.slot===2)for(const off of [0x24,0x28]){const joint=pointer(special+off);if(joint!==null)attachment(joint,'climbers rope '+off);else if(code==='Pp')throw Error('Missing Popo rope model');}
     if(code==='Sk'&&model.slot===3)for(const off of [0x64,0x68])attachment(pointer(special+off),'chain '+off);
     if(code==='Ns'&&model.slot===10){
       // itYoyoAttributes: twenty scalar words, two joints, material animation,

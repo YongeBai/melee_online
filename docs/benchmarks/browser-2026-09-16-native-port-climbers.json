@@ -1,0 +1,1421 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "8da4570",
+  "scope": "Ice Climbers constructor, partner input and selected moves; shared motion-state word and stick-conversion portability fixes; selected native 720p timing. Not complete competitive acceptance.",
+  "wasmSha256": "0c9be41d9f45dd5828372b3c57afda9ccbd537741501e4eff8726c7d54d36674",
+  "portableRecipeSha256": "3330877929ab5015ecd8c32ef76f8c334a79de21cb4bef402cba9e18bdf4f7a0",
+  "sourceCommit": "a75407433c85ac15fab45f92ff79c1481f1fa82f",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "d662cb13c01b2e728f5a953843bae7507d77afd022c8005975cea2a0d40c14a9",
+    "engines/browser-native/constructor.html": "11a531efeda3cf91623db4aa540311c15e0bfab7e9d12ce22d6495674dfd2c89",
+    "engines/browser-native/character-collision.c": "3cd86ff6ef722f22f2dde0696c88683b3b6bed8d20ca5799614fc2e29526b541",
+    "engines/browser-native/effect-assets.mjs": "db275de1550b01cca660ead922bf0f24e1a9b4f1f34acbbdb537b94068cf9508",
+    "engines/browser-native/fighter-package.mjs": "a3d249bafd705c7b9187df6b49e5b38d545b7c476884628a07272adb0f8212bc",
+    "engines/browser-native/item-model-assets.mjs": "95a898d2d0394f55b7d268f63a1994b1f8272c4688ed39feb4a3d4dcacc4f362",
+    "engines/browser-native/item-runtime.c": "92ecaf498f7b93bc42ec429e77cf9c933c98e7837d26850e499e1b449ee9276b",
+    "engines/browser-native/verify-climbers.mjs": "75dcb27d055bd9fb19c4297fd52c11dbea3b12a3a83bf694c4b00c5f3013e6e4",
+    "engines/browser-native/verify-commands.mjs": "58af48a638e54b64c9946c71cce6f1f658cc06085eb79aa7170fba0989e2c51a",
+    "scripts/native-port/portable-source.mjs": "3330877929ab5015ecd8c32ef76f8c334a79de21cb4bef402cba9e18bdf4f7a0",
+    "scripts/native-port/probe-constructor.mjs": "75eb2cb238bf1e159bb9e33820386c051406da4a8d08c705bd1c558bb0e5e33c",
+    "scripts/native-port/probe-roster.mjs": "b69120fa77bfeef8bece64efd16bbfbdf462bda9d1f2b3b40071dbbfd4c0c925"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "artifacts": {
+    "moves": "climbers-moves-Pp-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+    "gpu": "climbers-belay-gpu-verified.json",
+    "extended": "climbers-belay-extended-render.json",
+    "battlefield": "deferred-errors-Pp-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+    "fountain": "fountain-bg-off-deferred-errors-fountain-Pp-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json"
+  },
+  "portability": {
+    "motionState": {
+      "sizeBytes": 32,
+      "wordOffsetBytes": 8,
+      "moveIdShift": 24,
+      "partnerCopyFlagShift": 23,
+      "tableInitializersUnchanged": true,
+      "consumers": [
+        "move identification/staling",
+        "grounded action flag",
+        "Nana input-copy eligibility"
+      ]
+    },
+    "partnerStick": {
+      "conversion": "f32 product -> signed i32 -> low byte",
+      "retailEvidence": {
+        "function": "ftCo_800B0918",
+        "address": "0x800B0918",
+        "sequence": [
+          "fmuls",
+          "fctiwz",
+          "stfd",
+          "lwz",
+          "stb"
+        ],
+        "source": "Local USA 1.02 development executable; extracted bytes remain ignored"
+      },
+      "before": {
+        "copyModes": [
+          0
+        ],
+        "negativeHalfStickNewQueue": [
+          0
+        ]
+      },
+      "after": {
+        "copyModes": [
+          1,
+          0
+        ],
+        "negativeHalfStickNewQueue": [
+          0,
+          -64
+        ]
+      }
+    },
+    "historicalResults": "Earlier fixture results predate the corrected move IDs and partner flags; they do not certify this build."
+  },
+  "integration": {
+    "components": [
+      "Pp",
+      "Nn"
+    ],
+    "articleStatesPerComponent": [
+      1,
+      1,
+      0
+    ],
+    "effectBank": 14,
+    "effectModels": 1,
+    "particleCommands": 17,
+    "textureGroups": 5,
+    "controllerInputsOnly": true,
+    "automaticHostedAssets": true,
+    "cameraAndGameplayParametersUnchanged": true,
+    "partnerInputAndAi": "Original delayed input and AI pipeline; no controller writes to Nana"
+  },
+  "validation": {
+    "unitTests": 194,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "commandFields": {
+      "passed": true,
+      "fields": 277,
+      "reads": 70912,
+      "writes": 869,
+      "unitReads": 10752,
+      "failingFields": [],
+      "representation": "native numeric command words retaining PPC MSB-first fields",
+      "gameplayParity": false
+    },
+    "roster": {
+      "passed": true,
+      "selections": 25,
+      "components": 26,
+      "excluded": [
+        "Kb"
+      ],
+      "frames": 3550,
+      "motionWordChecks": 3550,
+      "rows": [
+        {
+          "code": "Ca",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Dk",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Ms",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Gn",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Fe",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Fx",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Fc",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Pr",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Mr",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Lg",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Dr",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Pk",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Pc",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Ss",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Kp",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Lk",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Cl",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Ys",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Mt",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Gw",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Ns",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Sk",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Zd",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Pe",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        },
+        {
+          "code": "Pp",
+          "passed": true,
+          "frames": 142,
+          "moveIds": [
+            1,
+            13
+          ],
+          "motionWordChecks": 142
+        }
+      ]
+    },
+    "moves": {
+      "completed": true,
+      "simulationFrames": 4125,
+      "renderedFrames": 4267,
+      "phases": [
+        {
+          "name": "partner walk and jump",
+          "frames": 388,
+          "states": [
+            [
+              14,
+              18,
+              15,
+              24,
+              25,
+              29,
+              42
+            ],
+            [
+              14,
+              18,
+              15,
+              24,
+              25,
+              29,
+              42
+            ]
+          ],
+          "itemKinds": [],
+          "peakLinks": 0,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "ground Ice Shot",
+          "frames": 241,
+          "states": [
+            [
+              341,
+              14
+            ],
+            [
+              14,
+              341
+            ]
+          ],
+          "itemKinds": [
+            106
+          ],
+          "peakLinks": 0,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "air Ice Shot",
+          "frames": 299,
+          "states": [
+            [
+              24,
+              25,
+              342,
+              43,
+              14
+            ],
+            [
+              14,
+              24,
+              25,
+              342,
+              43
+            ]
+          ],
+          "itemKinds": [
+            106
+          ],
+          "peakLinks": 0,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "ground Blizzard",
+          "frames": 320,
+          "states": [
+            [
+              357,
+              39,
+              41,
+              14
+            ],
+            [
+              14,
+              357,
+              39,
+              41
+            ]
+          ],
+          "itemKinds": [
+            107
+          ],
+          "peakLinks": 0,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "air Blizzard",
+          "frames": 358,
+          "states": [
+            [
+              24,
+              25,
+              358,
+              357,
+              14
+            ],
+            [
+              14,
+              24,
+              25,
+              358,
+              357
+            ]
+          ],
+          "itemKinds": [
+            107
+          ],
+          "peakLinks": 0,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "ground Squall Hammer",
+          "frames": 341,
+          "states": [
+            [
+              344,
+              346,
+              14
+            ],
+            [
+              359,
+              360,
+              14
+            ]
+          ],
+          "itemKinds": [],
+          "peakLinks": 0,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "air Squall Hammer",
+          "frames": 399,
+          "states": [
+            [
+              24,
+              25,
+              346,
+              35,
+              43,
+              15,
+              16,
+              17,
+              14
+            ],
+            [
+              14,
+              24,
+              25,
+              360,
+              35,
+              43,
+              20,
+              18,
+              29,
+              27,
+              32,
+              42,
+              16
+            ]
+          ],
+          "itemKinds": [],
+          "peakLinks": 0,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "ground Belay",
+          "frames": 865,
+          "states": [
+            [
+              39,
+              244,
+              29,
+              42,
+              14,
+              347,
+              348,
+              354,
+              35,
+              43
+            ],
+            [
+              14,
+              39,
+              244,
+              29,
+              42,
+              361,
+              365,
+              35,
+              43,
+              15
+            ]
+          ],
+          "itemKinds": [
+            113
+          ],
+          "peakLinks": 40,
+          "finalStocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "name": "air Belay",
+          "frames": 914,
+          "states": [
+            [
+              39,
+              244,
+              42,
+              14,
+              18,
+              15,
+              16,
+              24,
+              25,
+              352,
+              353,
+              354,
+              43
+            ],
+            [
+              14,
+              39,
+              244,
+              42,
+              18,
+              15,
+              16,
+              24,
+              25,
+              361,
+              365,
+              35,
+              43,
+              29,
+              27,
+              32
+            ]
+          ],
+          "itemKinds": [
+            113
+          ],
+          "peakLinks": 40,
+          "finalStocks": [
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    "gpu": {
+      "completed": true,
+      "renderedFrames": 953,
+      "frames": 811,
+      "peakLinks": 40,
+      "snapshotVertices": 17453,
+      "maxScaledPositionError": 0.0000037345073777281743,
+      "maxNormalError": 1.1946859701517099e-7,
+      "scope": "Every draw in an isolated grounded Belay sequence; not a timing run"
+    },
+    "visual": {
+      "extendedRopeScreenshotReviewed": true,
+      "framing": "Original camera, 960x720 4:3 game image",
+      "captureOnlyRerun": "The later screenshot capture waits until partner separation exceeds 20 game units; gameplay and rendering code are unchanged."
+    },
+    "regressions": {
+      "peachCounter": {
+        "passed": true,
+        "frames": 803,
+        "damageToMario": 6
+      },
+      "damagedSheikTransformation": {
+        "passed": true,
+        "frames": 1714,
+        "initialDamage": 6
+      }
+    },
+    "incompleteRuns": [
+      {
+        "artifact": "climbers-full-vertex-timeout.json",
+        "reason": "Full four-fighter per-vertex move suite reached its 600-second verification timeout inside verifyDrawVertices; not a successful test or timing measurement"
+      },
+      {
+        "artifact": "climbers-fountain-full-render-unsupported.json",
+        "reason": "Unreduced Fountain graphics stopped at the known unimplemented GX point geometry before timing; approved cosmetic profile used for the timed run"
+      }
+    ]
+  },
+  "timing": {
+    "battlefield": {
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60040,
+      "resolution": [
+        960,
+        720
+      ],
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.630083333262139,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 1,
+        "maxMs": 2.9000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.5175555553370055,
+        "p50Ms": 6.0999999940395355,
+        "p95Ms": 9.900000005960464,
+        "maxMs": 23.599999994039536
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757726,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000018
+      },
+      "workload": {
+        "framesWithAttack": 1696,
+        "framesWithHitlag": 540,
+        "framesWithDamage": 3507,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 93,
+            "attack": 296
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 102,
+            "attack": 323
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 105,
+            "attack": 287
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 78,
+            "attack": 248
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 78,
+            "attack": 264
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 84,
+            "attack": 278
+          }
+        ]
+      },
+      "forms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "code": "Pp"
+        },
+        {
+          "slot": 0,
+          "index": 1,
+          "code": "Nn"
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "code": "Pp"
+        },
+        {
+          "slot": 1,
+          "index": 1,
+          "code": "Nn"
+        }
+      ],
+      "fountainCosmeticsOff": false,
+      "fountainSceneryOff": false,
+      "finalGpuCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    },
+    "fountain": {
+      "frames": 3600,
+      "draws": 3595,
+      "elapsedMs": 60030.09999999404,
+      "resolution": [
+        960,
+        720
+      ],
+      "cadence": {
+        "callbacks": 3599,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 5,
+        "rafGapsOver25Ms": 6
+      },
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.777916667006082,
+        "p50Ms": 0.7999999821186066,
+        "p95Ms": 1.2000000178813934,
+        "maxMs": 1.800000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3595,
+        "meanMs": 8.836912378100925,
+        "p50Ms": 8,
+        "p95Ms": 14.199999988079071,
+        "maxMs": 25.19999998807907
+      },
+      "rafDrawIntervals": {
+        "samples": 3594,
+        "meanMs": 16.693823038396513,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.400000000001455
+      },
+      "workload": {
+        "framesWithAttack": 1547,
+        "framesWithHitlag": 479,
+        "framesWithDamage": 3432,
+        "stockChanges": [
+          {
+            "frame": 2616,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 78,
+            "attack": 255
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 109,
+            "attack": 324
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 83,
+            "attack": 293
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 78,
+            "attack": 154
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 41,
+            "attack": 184
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 90,
+            "attack": 337
+          }
+        ]
+      },
+      "forms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "code": "Pp"
+        },
+        {
+          "slot": 0,
+          "index": 1,
+          "code": "Nn"
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "code": "Pp"
+        },
+        {
+          "slot": 1,
+          "index": 1,
+          "code": "Nn"
+        }
+      ],
+      "fountainCosmeticsOff": true,
+      "fountainSceneryOff": true,
+      "finalGpuCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    }
+  },
+  "limitations": [
+    "Selected scripted integration fixtures, not retail frame-by-frame parity",
+    "One minute per measured scene, with intro/preparation excluded",
+    "Draw submissions and simulation steps do not establish distinct displayed FPS or input-to-photon latency",
+    "Fountain uses the existing stars/reflection/background cosmetic reductions; original moving platforms continue",
+    "Kirby, additional costumes, full scenes/menus/audio, networking and native-port deployment remain",
+    "720p60 competitive acceptance is not achieved"
+  ],
+  "fountainTailDiagnosis": {
+    "catchUpAfterFrames": [
+      178,
+      3130,
+      3143,
+      3186,
+      3274
+    ],
+    "shaderCompileFrames": [
+      197,
+      205,
+      205,
+      2042,
+      2616,
+      2700,
+      2700
+    ],
+    "finding": "None of the five catch-up callbacks coincide with recorded shader compilation. Slow submissions also occur with no compilation; graphics-submission profiling is the next experiment."
+  },
+  "renderSubmissionProfile": {
+    "artifact": "climbers-fountain-cpu-profile-summary.json",
+    "window": {
+      "firstFrame": 302,
+      "lastFrame": 1207,
+      "intervalMicroseconds": 1000,
+      "performanceSampleInstrumented": true
+    },
+    "totalMs": 15048.378,
+    "idleMs": 5485.538,
+    "gcMs": 704.535,
+    "activeMs": 9562.84,
+    "topSelf": [
+      {
+        "function": "(anonymous)",
+        "url": "http://127.0.0.1:44227/native-tev.mjs",
+        "line": 11,
+        "selfUs": 737225,
+        "inclusiveUs": 737225,
+        "selfMs": 737.225,
+        "inclusiveMs": 737.225,
+        "activeSelfPercent": 7.709268376340082
+      },
+      {
+        "function": "(garbage collector)",
+        "url": "",
+        "line": 0,
+        "selfUs": 704535,
+        "inclusiveUs": 704535,
+        "selfMs": 704.535,
+        "inclusiveMs": 704.535,
+        "activeSelfPercent": 7.367424321645035
+      },
+      {
+        "function": "apply",
+        "url": "http://127.0.0.1:44227/material-gpu.mjs",
+        "line": 64,
+        "selfUs": 675422,
+        "inclusiveUs": 1549178,
+        "selfMs": 675.422,
+        "inclusiveMs": 1549.178,
+        "activeSelfPercent": 7.062985472934819
+      },
+      {
+        "function": "floats",
+        "url": "http://127.0.0.1:44227/native-render-context.mjs",
+        "line": 8,
+        "selfUs": 628097,
+        "inclusiveUs": 628097,
+        "selfMs": 628.097,
+        "inclusiveMs": 628.097,
+        "activeSelfPercent": 6.568101108039034
+      },
+      {
+        "function": "packRows",
+        "url": "http://127.0.0.1:44227/material-gpu.mjs",
+        "line": 30,
+        "selfUs": 408913,
+        "inclusiveUs": 408913,
+        "selfMs": 408.913,
+        "inclusiveMs": 408.913,
+        "activeSelfPercent": 4.276062341312832
+      },
+      {
+        "function": "(program)",
+        "url": "",
+        "line": 0,
+        "selfUs": 339253,
+        "inclusiveUs": 339253,
+        "selfMs": 339.253,
+        "inclusiveMs": 339.253,
+        "activeSelfPercent": 3.54761765333311
+      },
+      {
+        "function": "readNativePixel",
+        "url": "http://127.0.0.1:44227/native-pixel.mjs",
+        "line": 2,
+        "selfUs": 322698,
+        "inclusiveUs": 630696,
+        "selfMs": 322.698,
+        "inclusiveMs": 630.696,
+        "activeSelfPercent": 3.374499625634226
+      },
+      {
+        "function": "readNativeTevState",
+        "url": "http://127.0.0.1:44227/native-tev.mjs",
+        "line": 7,
+        "selfUs": 314462,
+        "inclusiveUs": 1284416,
+        "selfMs": 314.462,
+        "inclusiveMs": 1284.416,
+        "activeSelfPercent": 3.28837458328279
+      },
+      {
+        "function": "capture",
+        "url": "http://127.0.0.1:44227/constructor.html?step=1&stage=1&combat=1&camera=1&render=1&callbacks=1&tournament=1&hud=1&damagehud=1&intro=1&stagecallbacks=1&live=1&liveframes=1800&workload=1&stageframes=4500&gpuerrors=deferred&fountainscenery=off&fountaincosmetics=off&map=fountain&character=Pp&opponent=Pp",
+        "line": 77,
+        "selfUs": 304628,
+        "inclusiveUs": 304628,
+        "selfMs": 304.628,
+        "inclusiveMs": 304.628,
+        "activeSelfPercent": 3.185539023971958
+      },
+      {
+        "function": "materialShaderKey",
+        "url": "http://127.0.0.1:44227/material-shader.mjs",
+        "line": 45,
+        "selfUs": 247780,
+        "inclusiveUs": 264620,
+        "selfMs": 247.78,
+        "inclusiveMs": 264.62,
+        "activeSelfPercent": 2.5910712717142603
+      },
+      {
+        "function": "readNativeTextures",
+        "url": "http://127.0.0.1:44227/native-texture.mjs",
+        "line": 11,
+        "selfUs": 211806,
+        "inclusiveUs": 282396,
+        "selfMs": 211.806,
+        "inclusiveMs": 282.396,
+        "activeSelfPercent": 2.2148859543817525
+      },
+      {
+        "function": "matrices",
+        "url": "http://127.0.0.1:44227/native-model.mjs",
+        "line": 7,
+        "selfUs": 208686,
+        "inclusiveUs": 412068,
+        "selfMs": 208.686,
+        "inclusiveMs": 412.068,
+        "activeSelfPercent": 2.1822596634472604
+      },
+      {
+        "function": "inspectArchive",
+        "url": "http://127.0.0.1:44227/archive.mjs",
+        "line": 3,
+        "selfUs": 205706,
+        "inclusiveUs": 223646,
+        "selfMs": 205.706,
+        "inclusiveMs": 223.646,
+        "activeSelfPercent": 2.1510973727470084
+      },
+      {
+        "function": "(anonymous)",
+        "url": "http://127.0.0.1:44227/native-model.mjs",
+        "line": 7,
+        "selfUs": 203382,
+        "inclusiveUs": 203382,
+        "selfMs": 203.382,
+        "inclusiveMs": 203.382,
+        "activeSelfPercent": 2.1267949688586234
+      },
+      {
+        "function": "rows",
+        "url": "http://127.0.0.1:44227/native-tev.mjs",
+        "line": 11,
+        "selfUs": 202180,
+        "inclusiveUs": 939405,
+        "selfMs": 202.18,
+        "inclusiveMs": 939.405,
+        "activeSelfPercent": 2.1142254811332197
+      },
+      {
+        "function": "bindVertexArray",
+        "url": "",
+        "line": 0,
+        "selfUs": 185466,
+        "inclusiveUs": 185466,
+        "selfMs": 185.466,
+        "inclusiveMs": 185.466,
+        "activeSelfPercent": 1.93944476745402
+      },
+      {
+        "function": "(anonymous)",
+        "url": "http://127.0.0.1:44227/native-pixel.mjs",
+        "line": 14,
+        "selfUs": 174054,
+        "inclusiveUs": 174054,
+        "selfMs": 174.054,
+        "inclusiveMs": 174.054,
+        "activeSelfPercent": 1.8201078340743964
+      },
+      {
+        "function": "readNativeRenderContext",
+        "url": "http://127.0.0.1:44227/native-render-context.mjs",
+        "line": 3,
+        "selfUs": 150799,
+        "inclusiveUs": 891521,
+        "selfMs": 150.799,
+        "inclusiveMs": 891.521,
+        "activeSelfPercent": 1.5769269380225956
+      },
+      {
+        "function": "image",
+        "url": "http://127.0.0.1:44227/material-gpu.mjs",
+        "line": 49,
+        "selfUs": 145435,
+        "inclusiveUs": 149671,
+        "selfMs": 145.435,
+        "inclusiveMs": 149.671,
+        "activeSelfPercent": 1.5208348147621418
+      },
+      {
+        "function": "module.onNativeDraw",
+        "url": "http://127.0.0.1:44227/material-gpu.mjs",
+        "line": 127,
+        "selfUs": 141168,
+        "inclusiveUs": 2951516,
+        "selfMs": 141.168,
+        "inclusiveMs": 2951.516,
+        "activeSelfPercent": 1.4762141790514116
+      },
+      {
+        "function": "bufferData",
+        "url": "",
+        "line": 0,
+        "selfUs": 129548,
+        "inclusiveUs": 129548,
+        "selfMs": 129.548,
+        "inclusiveMs": 129.548,
+        "activeSelfPercent": 1.3547021596094884
+      },
+      {
+        "function": "flush",
+        "url": "http://127.0.0.1:44227/material-gpu.mjs",
+        "line": 206,
+        "selfUs": 121317,
+        "inclusiveUs": 1921298,
+        "selfMs": 121.317,
+        "inclusiveMs": 1921.298,
+        "activeSelfPercent": 1.2686294029807044
+      },
+      {
+        "function": "module.onNativeImmediate",
+        "url": "http://127.0.0.1:44227/material-gpu.mjs",
+        "line": 135,
+        "selfUs": 119140,
+        "inclusiveUs": 1346173,
+        "selfMs": 119.14,
+        "inclusiveMs": 1346.173,
+        "activeSelfPercent": 1.245864199338272
+      },
+      {
+        "function": "(anonymous)",
+        "url": "http://127.0.0.1:44227/native-render-context.mjs",
+        "line": 9,
+        "selfUs": 103137,
+        "inclusiveUs": 559494,
+        "selfMs": 103.137,
+        "inclusiveMs": 559.494,
+        "activeSelfPercent": 1.0785185154201054
+      },
+      {
+        "function": "PSMTXConcat",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 90653,
+        "inclusiveUs": 169716,
+        "selfMs": 90.653,
+        "inclusiveMs": 169.716,
+        "activeSelfPercent": 0.9479715231040152
+      }
+    ],
+    "topInclusive": [
+      {
+        "function": "draw",
+        "url": "http://127.0.0.1:44227/native-match-preview.mjs",
+        "line": 176,
+        "selfUs": 28552,
+        "inclusiveUs": 7896186,
+        "selfMs": 28.552,
+        "inclusiveMs": 7896.186,
+        "activeSelfPercent": 0.29857239062872537
+      },
+      {
+        "function": "(anonymous)",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.mjs",
+        "line": 1,
+        "selfUs": 48496,
+        "inclusiveUs": 5998558,
+        "selfMs": 48.496,
+        "inclusiveMs": 5998.558,
+        "activeSelfPercent": 0.507129681140749
+      },
+      {
+        "function": "wasm-to-js",
+        "url": "",
+        "line": 1,
+        "selfUs": 7356,
+        "inclusiveUs": 5360020,
+        "selfMs": 7.356,
+        "inclusiveMs": 5360.02,
+        "activeSelfPercent": 0.07692275516478368
+      },
+      {
+        "function": "js-to-wasm::",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 3164,
+        "inclusiveUs": 5154577,
+        "selfMs": 3.164,
+        "inclusiveMs": 5154.577,
+        "activeSelfPercent": 0.033086405293824846
+      },
+      {
+        "function": "portCameraDrawPasses",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 0,
+        "inclusiveUs": 5142977,
+        "selfMs": 0,
+        "inclusiveMs": 5142.977,
+        "activeSelfPercent": 0
+      },
+      {
+        "function": "portStageDrawPasses",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 0,
+        "inclusiveUs": 5142977,
+        "selfMs": 0,
+        "inclusiveMs": 5142.977,
+        "activeSelfPercent": 0
+      },
+      {
+        "function": "HSD_GObj_80390ED0",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 1055,
+        "inclusiveUs": 5141948,
+        "selfMs": 1.055,
+        "inclusiveMs": 5141.948,
+        "activeSelfPercent": 0.011032287479451711
+      },
+      {
+        "function": "dispatch_object",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 1057,
+        "inclusiveUs": 5140893,
+        "selfMs": 1.057,
+        "inclusiveMs": 5140.893,
+        "activeSelfPercent": 0.011053201768512284
+      },
+      {
+        "function": "portDispatchObject",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.mjs",
+        "line": 1,
+        "selfUs": 2109,
+        "inclusiveUs": 5129315,
+        "selfMs": 2.109,
+        "inclusiveMs": 5129.315,
+        "activeSelfPercent": 0.022054117814373136
+      },
+      {
+        "function": "module.onNativeObject",
+        "url": "http://127.0.0.1:44227/native-match-preview.mjs",
+        "line": 185,
+        "selfUs": 2108,
+        "inclusiveUs": 5127206,
+        "selfMs": 2.108,
+        "inclusiveMs": 5127.206,
+        "activeSelfPercent": 0.022043660669842847
+      },
+      {
+        "function": "portNativeDrawObjectExtra",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 3185,
+        "inclusiveUs": 3967375,
+        "selfMs": 3.185,
+        "inclusiveMs": 3967.375,
+        "activeSelfPercent": 0.03330600532896086
+      },
+      {
+        "function": "HSD_JObjDisp",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 3123,
+        "inclusiveUs": 3532028,
+        "selfMs": 3.123,
+        "inclusiveMs": 3532.028,
+        "activeSelfPercent": 0.032657662368083124
+      },
+      {
+        "function": "HSD_JObjDispSub",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 11603,
+        "inclusiveUs": 3511067,
+        "selfMs": 11.603,
+        "inclusiveMs": 3511.067,
+        "activeSelfPercent": 0.12133424798490824
+      },
+      {
+        "function": "native_display",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 12643,
+        "inclusiveUs": 3496298,
+        "selfMs": 12.643,
+        "inclusiveMs": 3496.298,
+        "activeSelfPercent": 0.13220967829640567
+      },
+      {
+        "function": "HSD_DObjDisp",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 22121,
+        "inclusiveUs": 3466816,
+        "selfMs": 22.121,
+        "inclusiveMs": 3466.816,
+        "activeSelfPercent": 0.2313224941544562
+      },
+      {
+        "function": "native_polygon",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 9506,
+        "inclusiveUs": 3206656,
+        "selfMs": 9.506,
+        "inclusiveMs": 3206.656,
+        "activeSelfPercent": 0.09940561590489855
+      },
+      {
+        "function": "portEmitDraw",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.mjs",
+        "line": 1,
+        "selfUs": 1054,
+        "inclusiveUs": 2952570,
+        "selfMs": 1.054,
+        "inclusiveMs": 2952.57,
+        "activeSelfPercent": 0.011021830334921424
+      },
+      {
+        "function": "module.onNativeDraw",
+        "url": "http://127.0.0.1:44227/material-gpu.mjs",
+        "line": 127,
+        "selfUs": 141168,
+        "inclusiveUs": 2951516,
+        "selfMs": 141.168,
+        "inclusiveMs": 2951.516,
+        "activeSelfPercent": 1.4762141790514116
+      },
+      {
+        "function": "js-to-wasm:iii:i",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 4221,
+        "inclusiveUs": 2274861,
+        "selfMs": 4.221,
+        "inclusiveMs": 2274.861,
+        "activeSelfPercent": 0.044139607062337126
+      },
+      {
+        "function": "portNativeDrawObject",
+        "url": "http://127.0.0.1:44227/melee-fighter-init.wasm",
+        "line": 1,
+        "selfUs": 0,
+        "inclusiveUs": 2267482,
+        "selfMs": 0,
+        "inclusiveMs": 2267.482,
+        "activeSelfPercent": 0
+      }
+    ],
+    "timingExcluded": true,
+    "nextExperiment": "Remove intermediate typed-array copies and per-element Array.from callbacks while retaining independently owned snapshots. Validate retained data and GPU outputs; measure A/B/A separately."
+  }
+}

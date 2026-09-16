@@ -8,7 +8,7 @@ import {convertSceneAsset} from './scene-assets.mjs';
 export const characterArticleSlots=Object.freeze(Object.fromEntries(Object.entries({
   Mr:[0,2],Dr:[1,3],Fx:[0,1,2],Fc:[0,1,3],Pp:[0,1,2],Kb:[0,1,2,3],Kp:[0],Lk:[0,1,2,3,4],Cl:[0,1,2,3,4,5],
   Ns:[0,1,2,3,4,5,6,7,8,9,10],Sk:[0,1,2,3],Pe:[0,1,2,3,4],Pk:[0,1,2],Pc:[0,1,2],Ys:[0,1,2],Zd:[0,1],Mt:[0,1],
-  Gw:[0,1,2,3,4,5,6,7,8,9],Ss:[0,1,2,3],Lg:[0],Ca:[],Dk:[],Gn:[],Ms:[],Fe:[],Nn:[],Pr:[],
+  Gw:[0,1,2,3,4,5,6,7,8,9],Ss:[0,1,2,3],Lg:[0],Ca:[],Dk:[],Gn:[],Ms:[],Fe:[],Nn:[0,1,2],Pr:[],
 }).map(([code,slots])=>[code,Object.freeze(slots)])));
 
 // Publish only complete model/common-attribute/hurtbox subgraphs, not an Article

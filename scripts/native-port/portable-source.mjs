@@ -5,6 +5,26 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 const digest=text=>createHash('sha256').update(text).digest('hex');
+export function adaptMotionStateWord(text) {
+  const record=/struct MotionState \{([\s\S]*?)\n\};/.exec(text);
+  if(!record||!record[1].includes('u8 move_id : 8;')||!record[1].includes('u8 x9_b7 : 1;'))throw Error('Motion state word layout changed');
+  const start=record[0].indexOf('        struct {'),end=record[0].indexOf('        };',start);
+  // The first closing anonymous struct ends the inner flag byte; the second
+  // ends its numeric-word view. All table initializers remain unchanged.
+  const finish=record[0].indexOf('        };',end+10);
+  if(start<0||finish<0||!record[0].slice(start,finish).includes('u8 xB;'))throw Error('Motion state word shape changed');
+  const fields=[{field:'xB',width:8,shift:0},{field:'xA',width:8,shift:8},...Array.from({length:8},(_,i)=>({field:'x9_b'+(7-i),width:1,shift:16+i})),{field:'move_id',width:8,shift:24}];
+  const view='        struct {\n'+fields.map(f=>'            u32 '+f.field+' : '+f.width+';').join('\n')+'\n        };';
+  const converted=record[0].slice(0,start)+view+record[0].slice(finish+10);
+  return {text:text.replace(record[0],converted),fields:fields.map(f=>({...f,signed:false,view:'motionState',member:null,path:f.field,word:2}))};
+}
+export function adaptPartnerStickConversion(text) {
+  const marker=/static inline u8 inlineM0\(float x\)\n\{([\s\S]*?)\n\}/.exec(text);
+  if(!marker||!marker[1].includes('return 127.0F * x;')||!marker[1].includes('return 128.0F * x;'))throw Error('Partner stick conversion changed');
+  // Retail converts to a signed word, then stores its low byte. A negative
+  // float-to-u8 conversion has no defined C result and saturates on WASM.
+  return text.replace(marker[0],marker[0].replace('return 127.0F * x;','return (u8) (s32) (127.0F * x);').replace('return 128.0F * x;','return (u8) (s32) (128.0F * x);'));
+}
 export function adaptYoshiAttributes(text) {
   // Both retail views describe the same buffer. The loader's view calls the
   // Egg Throw fields padding, but SpecialHi reads them as floats through the
@@ -51,6 +71,7 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/ft/kinds/ftCommon/ftCo_0A01.c')text=adaptPartnerStickConversion(text);
     if(file==='src/melee/it/kinds/itlinkarrow.c')text=adaptLinkArrowTable(text);
     if(file==='src/melee/ft/kinds/ftYoshi/types.h')text=adaptYoshiAttributes(text);
     if(file==='libs/dolphin/include/dolphin/gx/GXVert.h') {
@@ -291,6 +312,7 @@ unsigned portStageAnimationProbe(float rate,unsigned flags)
       text=text.replaceAll(from,'fp->ft_data->x20->x0->child');
     }
     if(file==='src/melee/ft/types.h') {
+      const stateWord=adaptMotionStateWord(text);text=stateWord.text;extraCommandFields.push(...stateWord.fields);
       // x20 points directly to HSD_Joint. The old pointer-array indexing at
       // element two accessed its child at +8; retain that access explicitly.
       replace('typedef struct ftData_x20 {\n    /* +0 */ HSD_Joint** x0;',

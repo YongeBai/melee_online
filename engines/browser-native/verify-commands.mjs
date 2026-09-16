@@ -53,6 +53,8 @@ export function verifyCommandFields(module,{diagnose=false}={}) {
       for(const [i,name] of ['r','g','b','a'].entries())test('light_color.'+name,0x12345678,[0x12,0x34,0x56,0x78][i],'color');
       test('x594_b4',0x08000009,1,'fighterAnim');test('x597_bits',0x08000009,9,'fighterAnim');
       test('x594_bits',0x003ffe00,8191,'fighterAnim');test('x596_bits.x7',0x1c0,7,'fighterAnim');
+      test('move_id',0x35c01234,0x35,'motionState',2);test('x9_b0',0x35c01234,1,'motionState',2);test('x9_b1',0x35c01234,1,'motionState',2);
+      test('xA',0x35c01234,0x12,'motionState',2);test('xB',0x35c01234,0x34,'motionState',2);
       test('xF_b4',8,1,'skip',3);test('xF_b4',0,0,'skip',3);
     }
   } finally {module._free(pointer);}

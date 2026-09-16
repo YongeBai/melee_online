@@ -5,6 +5,56 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Ice Climbers now load both original player-owned fighters and their move assets.
+The full rendered controller suite passes 4,267 frames across walking/jumping,
+ground/air Ice Shot, Blizzard, linked Squall Hammer and Belay. Popo retains four
+stocks throughout. Both Belay phases create forty original rope links and retire
+them normally. A focused grounded Belay run GPU-verifies all 953 rendered frames;
+an extended-rope screenshot was visually reviewed. The full four-fighter
+per-vertex suite exceeded its 600-second verification limit, so it is explicitly
+recorded as incomplete, not as a successful or timed run.
+
+This exposed two shared portability bugs. MotionState's numeric word was being
+read through a PowerPC byte layout on little-endian WASM, corrupting move IDs and
+Nana's input-copy flag. The corrected native bit positions preserve the original
+table initializers and descriptor size. Negative partner stick samples also
+need a signed-integer intermediate before narrowing to a byte. The development
+executable confirms fctiwz followed by stb. Nana now retains -64 for negative
+half-stick and uses the original delayed input/AI path. Earlier fixture results
+predate these corrections and do not certify the current build.
+
+All 25 integrated character selections pass 3,550 live state-word/input checks,
+covering 26 components including Nana. The browser passes 70,912 field reads,
+869 writes and 10,752 byte/halfword checks; all 194 unit tests pass. Peach's Toad
+counter still deals six to Mario, and Sheik's transformation preserves six actual
+damage through its ground/air round trips. Core hash: `0c9be41d…`.
+
+Two separate 960×720 Ice Climbers mirror samples each simulate 3,600 frames:
+
+- Battlefield: 3,600 draw submissions in 60.040 seconds, no catch-up callbacks;
+  mean simulation/submission 0.630/6.518 ms, submission p95 9.9 ms, max 23.6 ms.
+- Fountain: 3,595 draw submissions in 60.030 seconds, five catch-up callbacks;
+  mean simulation/submission 0.778/8.837 ms, submission p95 14.2 ms, max 25.2 ms.
+  This uses the existing star/reflection/background cosmetic profile. Original
+  moving platforms and camera remain active. The unreduced graphics path still
+  stops at unsupported star point geometry before timing begins.
+
+The Fountain misses do not coincide with recorded shader compilations. Rendering
+submission, including its long-frame spikes, is the next profiling target; the
+original game simulation is comfortably below the per-frame budget in these
+samples. A separate instrumented 15-second profile attributes about 7.4% of
+active sampled CPU time to garbage collection, with state-array copying also
+prominent. Removing temporary state-copy allocations is the next experiment.
+These are submission/simulation measurements, not distinct displayed
+FPS or input-to-photon latency. Intro/preparation time is excluded.
+
+Kirby is the remaining component awaiting constructor/input integration. Other
+costumes, full scenes/menus/audio, retail parity, networking and native-port
+deployment also remain. The overall 720p60 competitive acceptance criterion is
+**not achieved**. [Ice Climbers evidence](benchmarks/browser-2026-09-16-native-port-climbers.json).
+
+Previous Peach checkpoint (before the shared motion-word correction):
+
 Peach now has original constructor/input integration, five typed move Articles,
 and her one-model effect bank. The common item residency boundary now loads
 Bob-omb, Mr. Saturn and Beam Sword for her original rare-pull logic. All three

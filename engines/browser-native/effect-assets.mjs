@@ -12,6 +12,8 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Pp:{name:'effIceclimberDataTable',bank:14,first:14000,count:17,groups:5,models:1},
+    Nn:{name:'effIceclimberDataTable',bank:14,first:14000,count:17,groups:5,models:1},
     Pe:{name:'effPeachDataTable',bank:15,first:null,count:0,groups:0,models:1},
     Sk:{name:'effZeldaDataTable',bank:17,first:17000,count:10,groups:5,models:7},
     Zd:{name:'effZeldaDataTable',bank:17,first:17000,count:10,groups:5,models:7},

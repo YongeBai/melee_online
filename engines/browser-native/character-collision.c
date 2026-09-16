@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stddef.h>
 
+_Static_assert(sizeof(MotionState)==32 && offsetof(MotionState,_)==8,"Motion state numeric word ABI");
 _Static_assert(sizeof(ftHurtboxInit)==40,"Hurtbox descriptor ABI");
 unsigned portPackedFlagBits(unsigned value)
 {
@@ -178,6 +179,15 @@ double portFighterConstructRead(HSD_GObj* object,unsigned field)
     case 15:return fp->dmg.x18A4_knockbackMagnitude;case 16:return fp->facing_dir;
     case 17:return fp->shield_health;case 18:return Player_GetStocks(fp->player_id);
     case 19:return (uintptr_t)fp->x20A4.shadow;
+    /* Read-only original partner input history diagnostics. */
+    case 20:return fp->input.held_buttons[0];case 21:return fp->input.lstick[0].x;case 22:return fp->input.lstick[0].y;
+    case 23:return fp->cpu.xFA_b7;case 24:return fp->cpu.kind;case 25:return fp->cpu.buttons;
+    case 26:return fp->cpu.lstick.x;case 27:return fp->cpu.lstick.y;
+    case 28:return fp->cpu.x448?fp->cpu.x448->x0:-1;case 29:return fp->cpu.x444?fp->cpu.x444->x0:-1;
+    case 30:return fp->x2225_b3;case 31:return fp->cpu.x444?fp->cpu.x444->lstick.x:0;
+    case 32:return fp->cpu.x448?fp->cpu.x448->lstick.x:0;
+    case 33:return fp->x2068_attackID;
+    case 34:{if(fp->motion_id<0)abort();MotionState* ms=fp->motion_id>=fp->x18?&fp->x20_actionStateList[fp->motion_id-fp->x18]:&fp->x1C_actionStateList[fp->motion_id];return ms->_;}
     default:abort();
     }
 }

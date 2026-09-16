@@ -7,6 +7,7 @@
 <script type="module">
 import {convertPeachCommonItems} from './common-item-assets.mjs';
 import {verifyPeachMoves,verifyPeachPulls,verifyPeachContact} from './verify-peach.mjs';
+import {verifyClimberMoves} from './verify-climbers.mjs';
 import create from './melee-fighter-init.mjs';
 import {shaderIdentityFiles,validateShaderCatalog} from './shader-catalog.mjs';
 import {archiveRootView,inspectArchive} from './archive.mjs';
@@ -83,7 +84,7 @@ try {
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
   let peachCommon=null;
-  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe'].includes(c))||stageKey==='story') {
+  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe','Pp','Nn'].includes(c))||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -99,7 +100,7 @@ try {
   }
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
   const effectFiles=new Map(),packageOptions={asset,models,motionSpec,attributeSpec,effectFiles};
-  const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
+  const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Pp'?['Nn']:c==='Nn'?['Pp']:c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
   for(const selected of packageCodes)packages.push(await loadFighterPackage(module,selected,packageOptions));
   const primary=packages.find(p=>p.code===code),secondary=packages.find(p=>p.code===opponentCode),baseBytes=primary.baseBytes;
   report.baseArchive=primary.baseArchive;report.opponentBaseArchive=secondary.baseArchive;
@@ -278,7 +279,7 @@ try {
       }
       let itemModels=stageItemModels;
       if(peachCommon){itemModels??=new Map();const {source,base}=peachCommon,a=inspectArchive(source.source);for(const row of source.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:'Common item '+row.kind,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
-      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe'].includes(pkg.code)){
+      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe','Pp','Nn'].includes(pkg.code)){
         const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg===pkg)?.owner;
         if(!owner)throw Error('Loaded opponent requires two-fighter scene');
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=combatState(owner)[8]+source.imports.find(i=>i.label==='articles').at;
@@ -418,11 +419,15 @@ try {
       report.finalGpuErrorCheck=preview.validateGpu();saveShaders();preview.dispose();
     }else if(preview){report.preview.final=preview.draw();}
     if(new URLSearchParams(location.search).has('input')){
-      report.input={completed:false,frames:0,states:[]};
+      report.input={completed:false,frames:0,states:[],motionWordChecks:0,moveIds:[]};
       module._Player_80031848(0);
       console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
       for(const [name,frames,buttons,x,y] of [['walk',12,0,0.5,0],['release',12,0,0,0],['jump',4,0x400,0,0],['air',20,0,0,0],['attack',4,0x100,0,0],['recover',90,0,0,0]]){
-        for(let i=0;i<frames;i++){module._portStageProbePad(0,buttons,x,y);step();report.input.frames++;if(renderSteps){recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}}
+        for(let i=0;i<frames;i++){module._portStageProbePad(0,buttons,x,y);step();report.input.frames++;
+          const word=module._portFighterConstructRead(object,34)>>>0,moveId=module._portFighterConstructRead(object,33),copyFlag=module._portFighterConstructRead(object,30);
+          if(moveId!==(word>>>24)||copyFlag!==((word>>>23)&1))throw Error('Action-state word differs from live move ID/partner flag');
+          report.input.motionWordChecks++;if(!report.input.moveIds.includes(moveId))report.input.moveIds.push(moveId);
+          if(renderSteps){recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}}
         report.input.states.push({name,state:state()});
         const latest=report.input.states.at(-1).state;
         if(name==='walk'&&(!(latest[4]>report.afterSteps[4])||![15,16,17].includes(latest[0])))throw Error('Scripted walking input did not produce walking movement');
@@ -431,6 +436,7 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('climbersmoves')){report.climbersMoves={};verifyClimberMoves(module,object,report.climbersMoves,{step,only:params.get('climbersmove'),onStep:renderSteps?phase=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;if(phase.trace.at(-1).links===40&&Math.hypot(phase.final[0][4]-phase.final[1][4],phase.final[0][5]-phase.final[1][5])>20&&!report.preview.belay){report.preview.belay=drawn;const img=document.createElement('img');img.id='native-preview-belay';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}}:undefined});}
       if(params.has('peachcontact')){report.peachContact={};verifyPeachContact(module,[object,opponent],report.peachContact,{step,mode:params.get('peachcontact'),onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});}
       if(params.has('peachpulls')){report.peachPulls={};verifyPeachPulls(module,object,report.peachPulls,{step,onStep:renderSteps?phase=>{if(phase.kind!==99){
           const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {adaptStageCallbacks,adaptLinkArrowTable,adaptYoshiAttributes} from './portable-source.mjs';
+import {adaptStageCallbacks,adaptLinkArrowTable,adaptYoshiAttributes,adaptMotionStateWord,adaptPartnerStickConversion} from './portable-source.mjs';
 import fs from 'node:fs';
 
 test('Yoshi loader view exposes the actual Egg Throw floats rather than byte padding',()=>{
@@ -52,4 +52,30 @@ test('arrow wobble references its actual float table without relying on unrelate
     assert.equal(0x803F6A28+(counter+31)*4,0x803F6A84+(counter+8)*4);
   }
   assert.throws(()=>adaptLinkArrowTable(block),/changed/);
+});
+
+
+test('action-state numeric word keeps move ID and partner-copy flags in retail positions',()=>{
+  const original=fs.readFileSync(new URL('../../engines/melee-decomp/src/melee/ft/types.h',import.meta.url),'utf8');
+  const result=adaptMotionStateWord(original);
+  const layout=Object.fromEntries(result.fields.map(f=>[f.field,[f.word,f.shift,f.width]]));
+  assert.deepEqual(layout.move_id,[2,24,8]);
+  assert.deepEqual(layout.x9_b0,[2,23,1]);
+  assert.deepEqual(layout.x9_b1,[2,22,1]);
+  assert.deepEqual(layout.x9_b7,[2,16,1]);
+  assert.deepEqual(layout.xA,[2,8,8]);assert.deepEqual(layout.xB,[2,0,8]);
+  assert.equal(result.fields.reduce((n,f)=>n+f.width,0),32);
+  const strip=s=>s.replace(/struct MotionState \{[\s\S]*?\n\};/,'');
+  assert.equal(strip(result.text),strip(original));
+  assert.throws(()=>adaptMotionStateWord(result.text),/layout changed/);
+  assert.throws(()=>adaptMotionStateWord(original.replace('u8 xB;','u16 xB;')),/shape changed/);
+});
+
+test('partner input conversion goes through signed integer before keeping the low byte',()=>{
+  const original=fs.readFileSync(new URL('../../engines/melee-decomp/src/melee/ft/kinds/ftCommon/ftCo_0A01.c',import.meta.url),'utf8');
+  const result=adaptPartnerStickConversion(original);
+  assert.match(result,/return \(u8\) \(s32\) \(127\.0F \* x\);/);
+  assert.match(result,/return \(u8\) \(s32\) \(128\.0F \* x\);/);
+  assert.equal(result.replaceAll('(u8) (s32) (127.0F * x)','127.0F * x').replaceAll('(u8) (s32) (128.0F * x)','128.0F * x'),original);
+  assert.throws(()=>adaptPartnerStickConversion(result),/conversion changed/);
 });
