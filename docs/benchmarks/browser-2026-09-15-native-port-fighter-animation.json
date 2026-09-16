@@ -1,0 +1,1264 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2808721,
+    "wasmSha256": "c4701c32df8a540293b474a43b00ca1305526325f674c456983aa7a750d4a5f6",
+    "portableRecipe": "9be14bbcd4f3095eb08309e44b41a1c982857b5608ba80960bfcfaba2c2b4b6a"
+  },
+  "originalFunctions": [
+    "ftAnim_8007077C",
+    "ftAnim_8006FE48",
+    "ftParts_8007482C",
+    "ftParts_8007462C",
+    "Fighter_UnkUpdateVecFromBones_8006876C",
+    "ftCo_8009E7B4",
+    "ftAnim_8006EBE8",
+    "ftAnim_8006E9B4",
+    "ftCo_8009E0A8"
+  ],
+  "retailFlagEvidence": [
+    {
+      "function": "Fighter_ChangeMotionState",
+      "address": "0x80069C48",
+      "operation": "lhz from fighter+0x596; rlwinm rotate 26, mask 29..31",
+      "conclusion": "Transition bone is numeric bits 6..8"
+    },
+    {
+      "function": "ftAnim_8006F4C8",
+      "address": "0x8006F4F4",
+      "operation": "lwz from fighter+0x594; rlwinm rotate 23, mask 19..31",
+      "conclusion": "Animation part mask is numeric bits 9..21"
+    },
+    {
+      "function": "ftAnim_8006FE08",
+      "address": "0x8006FE14",
+      "operation": "lbz from fighter+0x597; rlwinm rotate 0, mask 26..31",
+      "conclusion": "Animation source kind is numeric bits 0..5"
+    }
+  ],
+  "commandFields": {
+    "passed": true,
+    "fields": 266,
+    "reads": 68096,
+    "writes": 836,
+    "unitReads": 10496,
+    "failingFields": [],
+    "representation": "native numeric command words retaining PPC MSB-first fields",
+    "gameplayParity": false
+  },
+  "animation": {
+    "passed": true,
+    "components": 27,
+    "clips": 81,
+    "frames": 5184,
+    "checks": 2238474,
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "passed": true,
+        "checks": 72982,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyMario5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlMr.dat",
+            "flags": 0,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyMario5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlMr.dat",
+            "flags": 1073741824,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyMario5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlMr.dat",
+            "flags": 2147483648,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 62064,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlFx.dat",
+        "passed": true,
+        "checks": 86842,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyFox5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlFx.dat",
+            "flags": 268435457,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyFox5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlFx.dat",
+            "flags": 1073741825,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyFox5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlFx.dat",
+            "flags": 2147483649,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 75232,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlCa.dat",
+        "passed": true,
+        "checks": 75292,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyCaptain5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlCa.dat",
+            "flags": 2,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyCaptain5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlCa.dat",
+            "flags": 1073741826,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyCaptain5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlCa.dat",
+            "flags": 2147483650,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 64134,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlDk.dat",
+        "passed": true,
+        "checks": 89152,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyDonkey5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlDk.dat",
+            "flags": 1207959555,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyDonkey5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlDk.dat",
+            "flags": 2281701379,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 31
+          },
+          {
+            "index": 0,
+            "name": "PlyDonkey5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlDk.dat",
+            "flags": 134217731,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 76466,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlKb.dat",
+        "passed": true,
+        "checks": 55657,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyKirby5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlKb.dat",
+            "flags": 4,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyKirby5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlKb.dat",
+            "flags": 1073741828,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyKirby5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlKb.dat",
+            "flags": 2147483652,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 41802,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlKp.dat",
+        "passed": true,
+        "checks": 90307,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyKoopa5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlKp.dat",
+            "flags": 5,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyKoopa5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlKp.dat",
+            "flags": 1073741829,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyKoopa5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlKp.dat",
+            "flags": 2147483653,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 77623,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlLk.dat",
+        "passed": true,
+        "checks": 89152,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyLink5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlLk.dat",
+            "flags": 1073741830,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyLink5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlLk.dat",
+            "flags": 2147483654,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 31
+          },
+          {
+            "index": 0,
+            "name": "PlyLink5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlLk.dat",
+            "flags": 6,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 78259,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlSk.dat",
+        "passed": true,
+        "checks": 69517,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlySeak5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlSk.dat",
+            "flags": 1073741831,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlySeak5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlSk.dat",
+            "flags": 2147483655,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 22
+          },
+          {
+            "index": 0,
+            "name": "PlySeak5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlSk.dat",
+            "flags": 7,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 53189,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlNs.dat",
+        "passed": true,
+        "checks": 75292,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyNess5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlNs.dat",
+            "flags": 1073741832,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyNess5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlNs.dat",
+            "flags": 2147483656,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 26
+          },
+          {
+            "index": 0,
+            "name": "PlyNess5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlNs.dat",
+            "flags": 8,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 59357,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlPe.dat",
+        "passed": true,
+        "checks": 134197,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyPeach5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlPe.dat",
+            "flags": 134217737,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyPeach5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlPe.dat",
+            "flags": 1207959561,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyPeach5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlPe.dat",
+            "flags": 2281701385,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 120965,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlPp.dat",
+        "passed": true,
+        "checks": 59122,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyPopo5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlPp.dat",
+            "flags": 1073741834,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyPopo5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlPp.dat",
+            "flags": 2147483658,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 22
+          },
+          {
+            "index": 0,
+            "name": "PlyPopo5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlPp.dat",
+            "flags": 10,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 42818,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlNn.dat",
+        "passed": true,
+        "checks": 59122,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyPopo5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlPp.dat",
+            "flags": 1073741835,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyPopo5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlPp.dat",
+            "flags": 2147483659,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 22
+          },
+          {
+            "index": 0,
+            "name": "PlyPopo5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlPp.dat",
+            "flags": 11,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 42818,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlPk.dat",
+        "passed": true,
+        "checks": 63742,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyPikachu5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlPk.dat",
+            "flags": 1073741836,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyPikachu5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlPk.dat",
+            "flags": 2147483660,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 23
+          },
+          {
+            "index": 0,
+            "name": "PlyPikachu5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlPk.dat",
+            "flags": 12,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 48189,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlPr.dat",
+        "passed": true,
+        "checks": 60277,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyPurin5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlPr.dat",
+            "flags": 1073741839,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyPurin5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlPr.dat",
+            "flags": 2147483663,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 24
+          },
+          {
+            "index": 0,
+            "name": "PlyPurin5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlPr.dat",
+            "flags": 15,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 44222,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlSs.dat",
+        "passed": true,
+        "checks": 71827,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlySamus5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlSs.dat",
+            "flags": 1073741837,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlySamus5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlSs.dat",
+            "flags": 2147483661,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 23
+          },
+          {
+            "index": 0,
+            "name": "PlySamus5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlSs.dat",
+            "flags": 13,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 55140,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlYs.dat",
+        "passed": true,
+        "checks": 83377,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyYoshi5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlYs.dat",
+            "flags": 1073741838,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyYoshi5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlYs.dat",
+            "flags": 2147483662,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 27
+          },
+          {
+            "index": 0,
+            "name": "PlyYoshi5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlYs.dat",
+            "flags": 14,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 62044,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlZd.dat",
+        "passed": true,
+        "checks": 138817,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyZelda5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlZd.dat",
+            "flags": 134217747,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyZelda5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlZd.dat",
+            "flags": 1207959571,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyZelda5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlZd.dat",
+            "flags": 2281701395,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 124933,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlLg.dat",
+        "passed": true,
+        "checks": 72982,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyLuigi5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlLg.dat",
+            "flags": 17,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyMario5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlLg.dat",
+            "flags": 1073741841,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyMario5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlLg.dat",
+            "flags": 2147483665,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 62064,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlMt.dat",
+        "passed": true,
+        "checks": 81067,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyMewtwo5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlMt.dat",
+            "flags": 268435472,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyMewtwo5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlMt.dat",
+            "flags": 1073741840,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyMewtwo5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlMt.dat",
+            "flags": 2147483664,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 68915,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlMs.dat",
+        "passed": true,
+        "checks": 106477,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyMars5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlMs.dat",
+            "flags": 18,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyMars5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlMs.dat",
+            "flags": 1073741842,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyMars5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlMs.dat",
+            "flags": 2147483666,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 93952,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlGw.dat",
+        "passed": true,
+        "checks": 63742,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyGamewatch5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlGw.dat",
+            "flags": 24,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyGamewatch5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlGw.dat",
+            "flags": 1073741848,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyGamewatch5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlGw.dat",
+            "flags": 2147483672,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 10280,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlDr.dat",
+        "passed": true,
+        "checks": 101857,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyDrmario5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlDr.dat",
+            "flags": 21,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyDrmario5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlDr.dat",
+            "flags": 1073741845,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyDrmario5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlDr.dat",
+            "flags": 2147483669,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 89964,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlCl.dat",
+        "passed": true,
+        "checks": 93772,
+        "clips": [
+          {
+            "index": 7,
+            "name": "PlyClink5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlCl.dat",
+            "flags": 1073741844,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyClink5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlCl.dat",
+            "flags": 2147483668,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 31
+          },
+          {
+            "index": 0,
+            "name": "PlyClink5K_Share_ACTION_WallDamage_figatree",
+            "sourceArchive": "PlCl.dat",
+            "flags": 20,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 82738,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlPc.dat",
+        "passed": true,
+        "checks": 55657,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyPichu5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlPc.dat",
+            "flags": 23,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyPichu5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlPc.dat",
+            "flags": 1073741847,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 2
+          },
+          {
+            "index": 12,
+            "name": "PlyPichu5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlPc.dat",
+            "flags": 2147483671,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 45680,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlFe.dat",
+        "passed": true,
+        "checks": 108787,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyEmblem5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlFe.dat",
+            "flags": 26,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyEmblem5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlFe.dat",
+            "flags": 1073741850,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyEmblem5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlFe.dat",
+            "flags": 2147483674,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 96223,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlGn.dat",
+        "passed": true,
+        "checks": 99547,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyGanon5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlGn.dat",
+            "flags": 25,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyGanon5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlGn.dat",
+            "flags": 1073741849,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyGanon5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlGn.dat",
+            "flags": 2147483673,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 87595,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      },
+      {
+        "name": "PlFc.dat",
+        "passed": true,
+        "checks": 79912,
+        "clips": [
+          {
+            "index": 2,
+            "name": "PlyFalco5K_Share_ACTION_Wait1_figatree",
+            "sourceArchive": "PlFc.dat",
+            "flags": 268435478,
+            "speed": 1,
+            "blend": 0,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 7,
+            "name": "PlyFalco5K_Share_ACTION_WalkSlow_figatree",
+            "sourceArchive": "PlFc.dat",
+            "flags": 1073741846,
+            "speed": 1,
+            "blend": 4,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 32
+          },
+          {
+            "index": 12,
+            "name": "PlyFalco5K_Share_ACTION_Dash_figatree",
+            "sourceArchive": "PlFc.dat",
+            "flags": 2147483670,
+            "speed": 0.5,
+            "blend": 8,
+            "frames": 32,
+            "firstFrame": 0,
+            "lastFrame": 16
+          }
+        ],
+        "instances": 2,
+        "frames": 192,
+        "changedValues": 68212,
+        "limitation": "Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified."
+      }
+    ]
+  },
+  "regression": {
+    "targetedTests": 74,
+    "startupPassed": true,
+    "scenePassed": true,
+    "dynamicsChecks": 363071,
+    "perFighterChecks": 69876,
+    "baseBrowserPassed": true
+  },
+  "originalFighterCreateExecuted": false,
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "acceptanceCriteriaMet": false
+}

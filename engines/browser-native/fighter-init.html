@@ -6,17 +6,19 @@
 <pre id="result">Loading hosted assets…</pre>
 <script type="module">
 import create from './melee-fighter-init.mjs';
+import {verifyCommandFields} from './verify-commands.mjs';
 import {verifyStartup,verifyStartupOrder} from './verify-startup.mjs';
 import {verifyDynamics} from './verify-dynamics.mjs';
 import {verifyFighterInitialization} from './verify-fighter-init.mjs';
 try {
   async function asset(name){const response=await fetch('./fixtures/'+name);if(!response.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await response.arrayBuffer());}
   async function load(manifest){const response=await fetch('./'+manifest);if(!response.ok)throw Error('Hosted manifest unavailable');const names=await response.json();if(names.some(n=>!/^Pl[A-Za-z0-9]+\.(dat|usd)$/.test(n)))throw Error('Invalid hosted filename');return Promise.all(names.map(async name=>({name,bytes:await asset(name)})));}
-  const [module,common,models,fighters]=await Promise.all([create(),asset('PlCo.dat'),load('model-fixtures.json'),load('fighter-fixtures.json')]);
+  const [module,common,models,fighters,animations]=await Promise.all([create(),asset('PlCo.dat'),load('model-fixtures.json'),load('fighter-fixtures.json'),load('animation-fixtures.json')]);
   const report=verifyStartup(module,common,models);
   report.startupOrder=verifyStartupOrder(await create(),common);
   report.perFighter=verifyFighterInitialization(module,fighters,models);
-  report.dynamics=verifyDynamics(module,fighters,models);
+  report.commandFields=verifyCommandFields(module);
+  report.dynamics=verifyDynamics(module,fighters,models,animations);
   document.querySelector('#result').textContent=JSON.stringify(report,null,2);document.documentElement.dataset.result='passed';
 } catch(error){document.querySelector('#result').textContent=String(error.stack||error);document.documentElement.dataset.result='failed';}
 </script>

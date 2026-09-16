@@ -369,3 +369,22 @@ returns dynamic nodes before releasing the fighter owner. It does not run a
 match, drive the normal fighter animation pipeline, test Kirby copy hats or
 establish retail per-frame parity, FPS or latency. The full constructor remains
 linked but unexecuted.
+
+## Original fighter animation integration
+
+The wider fighter target now creates the original interpolation skeleton with
+`ftAnim_8006FE48`, attaches real motion clips through `ftAnim_8006EBE8`, and advances
+`ftAnim_8006E9B4` followed by the original dynamics update. It uses the same owner
+as field/model/collider initialization. The interpolation skeleton is released
+with the owner and included in live-object accounting.
+
+`verify-fighter-animation.mjs` covers 81 clips across 27 components, two live
+instances each, 0/4/8-frame blends, normal/half speed and independent progression.
+The fixture receives preloaded animation trees and preserves the source motion
+flags/mapping; it does not replace or execute `Fighter_ChangeMotionState`, action
+scripts or physics. The full constructor and match loop remain pending.
+
+The portable Fighter animation union retains numeric PowerPC bit positions on
+WASM. Its twelve fields are checked through the actual C members by the existing
+command-layout verifier. Retail instruction inspection independently confirms
+the source-kind, part-mask and transition-bone positions.

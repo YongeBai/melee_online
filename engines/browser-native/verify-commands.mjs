@@ -49,6 +49,8 @@ export function verifyCommandFields(module,{diagnose=false}={}) {
         test('create_hitbox_0.'+name,hit,value);
       test('create_hitbox_1.z_offset',0x0100ff80,-128);test('create_hitbox_1.size',0x0100ff80,256);
       for(const [i,name] of ['r','g','b','a'].entries())test('light_color.'+name,0x12345678,[0x12,0x34,0x56,0x78][i],'color');
+      test('x594_b4',0x08000009,1,'fighterAnim');test('x597_bits',0x08000009,9,'fighterAnim');
+      test('x594_bits',0x003ffe00,8191,'fighterAnim');test('x596_bits.x7',0x1c0,7,'fighterAnim');
       test('xF_b4',8,1,'skip',3);test('xF_b4',0,0,'skip',3);
     }
   } finally {module._free(pointer);}

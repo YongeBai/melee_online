@@ -59,6 +59,20 @@ export function preparePortableSource(source,output) {
       // array so native C indexing stays within its declared object.
       replace('    /* fp+1670 */ Fighter_x1670_t x1670[1]; ///< @todo figure out proper size\n    /* fp+1674 */ u8 filler_x1674[0x1828 - 0x1670 - 0x28];',
         '    /* fp+1670 */ Fighter_x1670_t x1670[11];');
+      // The animation flag word is loaded numerically from motion rows. All
+      // overlays must retain PPC bit numbers on the little-endian WASM ABI.
+      const animationStart='    /*  fp+594 */ union {';
+      const animationEnd='    /*  fp+598 */ FigaTree* x598;';
+      const from=text.indexOf(animationStart),to=text.indexOf(animationEnd,from);
+      if(from<0||to<from||!text.slice(from,to).includes('u32 x594_bits : 13;'))throw Error('Fighter animation flag declaration changed');
+      const names=['x594_b0','x594_b1_loop','x594_b2','x594_b3','x594_b4','x594_b5','x594_b6','x594_b7'];
+      const replacement='    /*  fp+594 */ union {\n        struct { u32 : 24; '+names.slice().reverse().map(n=>'u32 '+n+' : 1;').join(' ')+' };\n'+
+        '        struct { u32 : 6; u32 x7 : 3; u32 x0 : 7; u32 : 16; } x596_bits;\n'+
+        '        struct { u32 x597_bits : 6; u32 x594_pad2 : 3; u32 x594_bits : 13; u32 x594_pad : 10; };\n'+
+        '        s32 x594_s32;\n    };\n';
+      text=text.slice(0,from)+replacement+text.slice(to);
+      extraCommandFields.push(...names.map((name,i)=>({field:name,width:1,signed:false,shift:31-i,view:'fighterAnim',member:null,path:name,word:0})),
+        ...[['x596_bits.x7',3,6],['x596_bits.x0',7,9],['x594_bits',13,9],['x597_bits',6,0]].map(([name,width,shift])=>({field:name,width,signed:false,shift,view:'fighterAnim',member:null,path:name,word:0})));
       const match=/struct gmScriptEventDefault \{([^{}]*)\};/.exec(text);
       if(!match)throw Error('Missing fighter command dispatch view');
       const converted=reverseCommandBits(match[1]);

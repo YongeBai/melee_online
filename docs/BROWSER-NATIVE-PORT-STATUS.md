@@ -5,6 +5,27 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original fighter animation attachment, interpolation-skeleton construction,
+blending, frame progression and dynamics now execute on the same initialized
+fighter objects. All 27 components pass 81 real clips and 5,184 updates across
+two simultaneous instances. The corpus includes four/eight-frame blends,
+looping and half-speed playback; stepping one instance leaves its peer's frame
+unchanged. Interpolation joints are distinct from visible joints and from the
+other fighter, and teardown returns the original pools to baseline.
+
+This integration exposed a required ABI correction: the numeric animation flag
+word overlaid PowerPC-ordered bitfields. The WASM representation now preserves
+those bit positions. Inspection of the development disc's original instructions
+confirms the part mask at bits 9–21, source kind at bits 0–5 and transition bone
+at bits 6–8. The actual C fields pass 68,096 arithmetic extraction checks across
+266 total command/flag views, plus write/isolation checks.
+
+The wider module is 2,808,721 bytes. All 74 targeted tests and startup/scene
+browser regressions pass. Animation trees are still preloaded by the diagnostic;
+full motion-state transitions, action scripts, combat physics and stage/render
+integration remain incomplete. This is not a playable match or a FPS result.
+[Fighter animation checkpoint](benchmarks/browser-2026-09-15-native-port-fighter-animation.json).
+
 Original dynamic-bone construction, selector updates, rest-pose simulation and
 teardown now run in the wider fighter target. The 27 components contain 40 base
 sets / 168 nodes. Two simultaneous default-costume instances per component pass

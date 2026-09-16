@@ -1,3 +1,4 @@
+import {verifyFighterAnimation} from './verify-fighter-animation.mjs';
 import {convertDynamics} from './dynamics-assets.mjs';
 import {convertCharacterCollision} from './character-collision-assets.mjs';
 import {convertFighterInitialization} from './fighter-init-assets.mjs';
@@ -5,7 +6,7 @@ import {motionSpec} from './motion-spec.mjs';
 import {installResidentFile,openResidentArchive} from './resident-files.mjs';
 import {loadCostume} from './costume-assets.mjs';
 
-export function verifyDynamics(module,fighters,models) {
+export function verifyDynamics(module,fighters,models,animations) {
   const rows=[];let checks=0,frames=0,changed=0;
   const check=(ok,message)=>{checks++;if(!ok)throw Error(message);};
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true),f32=at=>view().getFloat32(at,true);
@@ -15,7 +16,7 @@ export function verifyDynamics(module,fighters,models) {
     const kind=motionSpec.codes.indexOf(name.slice(2,4)),partCount=ptr(ptr(module._portSharedGlobal(4)+kind*4)+8);
     const source=convertDynamics(bytes,name,partCount,motionSpec),collision=convertCharacterCollision(bytes,name,partCount),init=convertFighterInitialization(bytes,name,motionSpec);
     const model=models.find(m=>m.name===name.replace('.dat','Nr.dat')),asset=loadCostume(module,model.bytes,model.name,kind);
-    const files=[],objects=[],parts=module._malloc(partCount*4),nodeSet=new Set();
+    const cleanup=[],files=[],objects=[],parts=module._malloc(partCount*4),nodeSet=new Set();
     const n=asset.model.tree.nodes.length,nodes=module._malloc(n*4),matrices=module._malloc(n*48);
     const group=ptr(module._portSharedGlobal(5)+kind*4),skip=new Set();
     if(group){const start=ptr(group),count=ptr(group+4);for(let i=0;i<count;i++)skip.add(module.HEAPU8[start+i*4]);}
@@ -84,9 +85,11 @@ export function verifyDynamics(module,fighters,models) {
         for(let i=0;i<a.length;i++){check(Number.isFinite(a[i])&&Object.is(a[i],b[i]),name+' deterministic finite dynamics '+frame+'/'+i);if(a[i]!==initial[i])localChanged++;}
         frames+=2;
       }
-      changed+=localChanged;rows.push({name,sets:source.count,nodes:expectedNodes,importedDescriptors:source.rows.length,selectorRows:source.selectors.length,instances:2,frames:120,changedValues:localChanged});
+      const animation=verifyFighterAnimation(module,{name,bytes,kind,objects,asset,open,fighters,animations,cleanup});
+      changed+=localChanged;rows.push({animation,name,sets:source.count,nodes:expectedNodes,importedDescriptors:source.rows.length,selectorRows:source.selectors.length,instances:2,frames:120,changedValues:localChanged});
     } finally {
       for(const object of objects)module._portSceneObjectFree(object);
+      for(const dispose of cleanup.reverse())dispose();
       for(const file of files.reverse())file.dispose();asset.dispose();module._portFileClear();module._free(parts);module._free(nodes);module._free(matrices);
     }
     check(module._portDynamicsPoolFree()===320,'Original dynamics unload returned all nodes');

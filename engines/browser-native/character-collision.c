@@ -36,6 +36,7 @@ static CollisionFixture* context(HSD_GObj* object){if(!object||!object->user_dat
 extern int portSceneInitialize(void);
 extern int portFighterStartupComplete(void);
 extern HSD_JObjInfo ftJObj;
+extern HSD_JObjInfo ftIntpJObj;
 extern HSD_PObjInfo ftPObj;
 static void initialize_part_pools(void)
 {
@@ -51,6 +52,7 @@ static void release_fixture(void* data)
 {
     CollisionFixture* c=data;
     if(c->release_dynamics)c->release_dynamics(&c->fighter);
+    if(c->fighter.x8AC_animSkeleton)HSD_JObjRemoveAll(c->fighter.x8AC_animSkeleton);
     if(c->fighter.parts)HSD_ObjFree(&fighter_parts_alloc_data,c->fighter.parts);
     if(c->fighter.dobj_list.data)HSD_ObjFree(&fighter_dobj_list_alloc_data,c->fighter.dobj_list.data);
     if(c->fighter.x203C.data)HSD_ObjFree(&fighter_x2040_alloc_data,c->fighter.x203C.data);
@@ -59,7 +61,7 @@ static void release_fixture(void* data)
 unsigned portFighterModelLive(void)
 {
     return fighter_parts_alloc_data.used+fighter_dobj_list_alloc_data.used+fighter_x2040_alloc_data.used+
-        HSD_CLASS_INFO(&ftJObj)->head.nb_exist+HSD_CLASS_INFO(&ftPObj)->head.nb_exist+HSD_CLASS_INFO(&ftMObj)->head.nb_exist;
+        HSD_CLASS_INFO(&ftJObj)->head.nb_exist+HSD_CLASS_INFO(&ftIntpJObj)->head.nb_exist+HSD_CLASS_INFO(&ftPObj)->head.nb_exist+HSD_CLASS_INFO(&ftMObj)->head.nb_exist;
 }
 typedef struct {ftCo_DatAttrs* attributes;itPickup* pickup;Vec2* offset;Fighter_WaitAnimData* motions;u8 (*mapping)[2];} FighterInitBinding;
 _Static_assert(sizeof(FighterInitBinding)==20,"Fighter initialization binding");
@@ -325,4 +327,41 @@ void portDynamicsSelect(HSD_GObj* object,unsigned selector,unsigned mode)
     u8 mapping[1][2]={{0,selector}};s32 previous=fp->anim_id;unsigned b4=fp->x594_b4,b3=fp->x594_b3;
     fp->anim_id=0;fp->x594_b4=mode==1;fp->x594_b3=mode==2;
     ftCo_8009E7B4(fp,mapping);fp->anim_id=previous;fp->x594_b4=b4;fp->x594_b3=b3;
+}
+
+_Static_assert(offsetof(Fighter,x594_s32)==0x594&&offsetof(Fighter,x598)==0x598,"Numeric animation flag ABI");
+int portFighterAnimationInitialize(HSD_GObj* object,struct ftData_x8* parts)
+{
+    CollisionFixture* c=context(object);Fighter* fp=&c->fighter;
+    if(!c->release_dynamics||!parts||fp->x8AC_animSkeleton)return -1;
+    c->data.x8=parts;ftAnim_8007077C(object);ftAnim_8006FE48(object);
+    Fighter_UnkUpdateVecFromBones_8006876C(fp);return fp->x8AC_animSkeleton!=NULL;
+}
+int portFighterAnimationStart(HSD_GObj* object,unsigned index,FigaTree* tree,float speed,float blend)
+{
+    Fighter* fp=&context(object)->fighter;
+    if(!fp->x8AC_animSkeleton||!tree||index>=(unsigned)ftData_Table_Unk0[fp->kind].count||speed<=0||blend<0)return -1;
+    // Exercise original animation attachment/selection with a preloaded tree.
+    // Motion-state changes, scripts and physics remain the full constructor's
+    // integration work; this fixture does not replace Fighter_ChangeMotionState.
+    fp->anim_id=index;fp->frame_speed_mul=speed;fp->cur_anim_frame=-speed;fp->x898_unk=0;
+    fp->x594_s32=fp->x24[index].x10_animCurrFlags;fp->x590=tree;
+    ftCo_8009E7B4(fp,&fp->x28[index]);ftAnim_8006EBE8(object,0,speed,blend);
+    ftAnim_8006E9B4(object);return 0;
+}
+void portFighterAnimationStep(HSD_GObj* object)
+{
+    if(!context(object)->fighter.x8AC_animSkeleton)abort();ftAnim_8006E9B4(object);ftCo_8009E0A8(object);
+}
+double portFighterAnimationRead(HSD_GObj* object,unsigned field,unsigned index)
+{
+    Fighter* fp=&context(object)->fighter;
+    switch(field){
+    case 0:return (u32)fp->x594_s32;case 1:return fp->cur_anim_frame;case 2:return fp->x8A4_animBlendFrames;case 3:return fp->x8A8_anim_frame;
+    case 4:return (uintptr_t)fp->x8AC_animSkeleton;
+    case 5:if(index>=140)abort();return (uintptr_t)fp->parts[index].x4_jobj2;
+    case 6:if(index>=3)abort();return ((float*)&fp->x68C_transNPos)[index];
+    case 7:if(index>=3)abort();return ((float*)&fp->x6A4_transNOffset)[index];
+    case 8:return fp->x1A6C;case 9:if(index>=3)abort();return ((float*)&fp->x1A70)[index];
+    default:abort();}
 }
