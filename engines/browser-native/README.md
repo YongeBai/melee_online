@@ -380,9 +380,19 @@ with the owner and included in live-object accounting.
 
 `verify-fighter-animation.mjs` covers 81 clips across 27 components, two live
 instances each, 0/4/8-frame blends, normal/half speed and independent progression.
-The fixture receives preloaded animation trees and preserves the source motion
-flags/mapping; it does not replace or execute `Fighter_ChangeMotionState`, action
-scripts or physics. The full constructor and match loop remain pending.
+The fixture now binds resident native animation bundles, executes original
+`ftData_80085A14`/`ftData_80085B10` and loads trees into each Fighter's owned
+primary/secondary buffers through `ftData_80085CD8`/`ftData_80085E50`. It preserves
+source motion flags/mapping and checks tree descriptors and track bytes against
+independently decoded source archives. Secondary loads during active playback
+must leave the primary buffer unchanged. Two fighters have four separate buffers;
+shared bundle pins remain until the last owner is gone. Nana resolves empty rows
+through a registered Popo archive. This fixture does not exercise a live paired
+Popo/Nana gameplay update; the separate motion-loader suite covers peer relocation.
+
+Kind-level registration still uses a limited ftData binding, not the complete
+base archive. The fixture does not replace or execute `Fighter_ChangeMotionState`,
+action scripts or physics. The full constructor and match loop remain pending.
 
 The portable Fighter animation union retains numeric PowerPC bit positions on
 WASM. Its twelve fields are checked through the actual C members by the existing

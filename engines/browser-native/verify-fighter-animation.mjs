@@ -1,14 +1,15 @@
+import {readFigaTree} from './animation-assets.mjs';
+import {checkTree} from './verify-motions.mjs';
 import {verifySecondaryAnimation} from './verify-secondary-animation.mjs';
 import {prepareGameplayChecks} from './verify-gameplay.mjs';
 import {readFighterMotions} from './motion-assets.mjs';
 import {motionSpec} from './motion-spec.mjs';
 import {convertVisibility} from './visibility-assets.mjs';
-import {loadSceneAnimation} from './scene-assets.mjs';
 
 // The original animation and dynamics paths operate on the same initialized
 // fighters. This is not the action-state/script/physics update loop yet.
 export function verifyFighterAnimation(module,{name,bytes,kind,objects,asset,open,fighters,animations,cleanup}) {
-  let checks=0,changed=0;const check=(ok,label)=>{checks++;if(!ok)throw Error(name+' animation: '+label);};
+  let checks=0,changed=0,loaderChecks=0,liveBufferChecks=0;const check=(ok,label)=>{checks++;if(!ok)throw Error(name+' animation: '+label);};
   const read=(object,field,index=0)=>module._portFighterAnimationRead(object,field,index);
   const v=()=>new DataView(module.HEAPU8.buffer),ptr=at=>v().getUint32(at,true);
   const visibility=convertVisibility(bytes,name,module._portCostumeCount(kind));
@@ -16,12 +17,18 @@ export function verifyFighterAnimation(module,{name,bytes,kind,objects,asset,ope
   const n=asset.model.tree.nodes.length,nodes=objects.map(()=>module._malloc(n*4)),blendNodes=objects.map(()=>module._malloc(n*4)),matrices=objects.map(()=>module._malloc(n*48));
   cleanup.push(()=>{for(const p of [...nodes,...blendNodes,...matrices])module._free(p);});
   for(let instance=0;instance<objects.length;instance++) {
-    const object=objects[instance];check(module._portFighterAnimationInitialize(object,partsRoot)===1,'original blend skeleton initialization');
+    const object=objects[instance];check(module._portFighterMotionAttach(object)===0,'original motion buffers on initialized fighter');
+    check(module._portFighterMotionAttach(object)===-1,'duplicate motion owner rejected');
+    check(module._portFighterAnimationInitialize(object,partsRoot)===1,'original blend skeleton initialization');
     check(module._portSceneCollect(module._portSceneObjectRoot(object),nodes[instance],n)===n,'primary skeleton');
     check(module._portSceneCollect(read(object,4),blendNodes[instance],n)===n,'blend skeleton');
     for(let i=0;i<n;i++)check(ptr(nodes[instance]+i*4)!==ptr(blendNodes[instance]+i*4),'blend joints alias visible joints');
     for(let field=8;field<=9;field++)for(let i=0;i<(field===9?3:1);i++)check(Number.isFinite(read(object,field,i)),'original bone-derived offsets');
   }
+  const buffers=objects.flatMap(o=>[0,1].map(f=>module._portFighterMotionRead(o,f)));
+  check(new Set(buffers).size===4&&buffers.every(Boolean)&&module._portMotionBuffers()===4,'four independent owned motion buffers');
+  check(module._portFighterMotionUnregister(kind)===-1,'live fighter prevents motion archive unregister');
+  if(kind===11)check(module._portFighterMotionUnregister(10)===-1,'live Nana retains the Popo fallback archive');
   for(let i=0;i<n;i++)check(ptr(blendNodes[0]+i*4)!==ptr(blendNodes[1]+i*4),'independent blending skeletons');
   const partCount=ptr(ptr(module._portSharedGlobal(4)+kind*4)+8),group=ptr(module._portSharedGlobal(5)+kind*4),skip=new Set();
   if(group){const start=ptr(group),count=ptr(group+4);for(let i=0;i<count;i++)skip.add(module.HEAPU8[start+i*4]);}
@@ -38,13 +45,28 @@ export function verifyFighterAnimation(module,{name,bytes,kind,objects,asset,ope
   for(const [sequence,{row,source,archive}] of chosen.entries()) {
     const animation=animations.find(a=>a.name===archive.replace('.dat','AJ.dat'));
     check(animation,'hosted animation archive');
-    const clip=loadSceneAnimation(module,animation.bytes.subarray(source.animationOffset,source.animationOffset+source.animationSize));cleanup.push(()=>clip.dispose());
+    const expectedTree=readFigaTree(animation.bytes.subarray(source.animationOffset,source.animationOffset+source.animationSize));
     const blend=sequence===0?0:sequence===1?4:8,speed=sequence===2?0.5:1;
-    for(const object of objects)check(module._portFighterAnimationStart(object,row.index,clip.tree,speed,blend)===0,'original animation attachment');
+    for(const object of objects) {
+      const tree=module._portFighterMotionLoad(object,row.index,0);checkTree(module,tree,expectedTree);
+      check(module._portFighterMotionLoad(object,row.index,0)===tree,'primary loader cache');
+      const secondary=module._portFighterMotionLoad(object,row.index,1);checkTree(module,secondary,expectedTree);
+      check(module._portFighterMotionLoad(object,row.index,1)===secondary,'secondary loader cache');
+      check(tree!==secondary&&tree>=module._portFighterMotionRead(object,0)&&tree<module._portFighterMotionRead(object,0)+source.animationSize,'owned primary tree');
+      check(secondary>=module._portFighterMotionRead(object,1)&&secondary<module._portFighterMotionRead(object,1)+source.animationSize,'owned secondary tree');loaderChecks+=2;
+      check(module._portFighterAnimationStart(object,row.index,speed,blend)===0,'original loader to animation attachment');
+    }
     const first=read(objects[0],1);let previous=null;
     for(let frame=0;frame<32;frame++) {
       for(let instance=0;instance<objects.length;instance++) {
         const object=objects[instance],peerFrame=read(objects[1-instance],1);module._portFighterAnimationStep(object);
+        if(frame===8) {
+          const other=chosen[(sequence+1)%chosen.length],otherBundle=animations.find(a=>a.name===other.archive.replace('.dat','AJ.dat'));
+          const otherTree=readFigaTree(otherBundle.bytes.subarray(other.source.animationOffset,other.source.animationOffset+other.source.animationSize));
+          const primary=module._portFighterMotionRead(object,0),before=module.HEAPU8.slice(primary,primary+0x8000),active=module._portFighterMotionRead(object,2);
+          checkTree(module,module._portFighterMotionLoad(object,other.row.index,1),otherTree);loaderChecks++;
+          check(module._portFighterMotionRead(object,2)===active&&before.every((byte,i)=>byte===module.HEAPU8[primary+i]),'secondary loading preserves live primary animation bytes');liveBufferChecks++;
+        }
         check(read(objects[1-instance],1)===peerFrame,'stepping one fighter does not advance its peer');
         module._portSceneMatrices(n,nodes[instance],matrices[instance]);
         gameplay.sample(object,new Float32Array(module.HEAPU8.buffer,matrices[instance],n*12),partNodes,frame);
@@ -61,6 +83,6 @@ export function verifyFighterAnimation(module,{name,bytes,kind,objects,asset,ope
   }
   check(changed>0,'visible skeleton motion');
   const secondary=verifySecondaryAnimation(module,{name,bytes,objects,open,partNodes,motions,visibility});
-  return {passed:true,secondary,gameplay:gameplay.report(),checks,clips,instances:objects.length,frames:clips.length*32*objects.length,changedValues:changed,
-    limitation:'Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified.'};
+  return {passed:true,originalMotionLoader:true,loaderTreeChecks:loaderChecks,liveBufferChecks,secondary,gameplay:gameplay.report(),checks,clips,instances:objects.length,frames:clips.length*32*objects.length,changedValues:changed,
+    limitation:'Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Original motion loader with owned buffers; full motion-state changes, scripts, physics and retail parity remain unverified.'};
 }

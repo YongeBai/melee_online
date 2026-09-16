@@ -31,7 +31,7 @@ _Static_assert(offsetof(Fighter,x1670)==0x1670,"Dynamics collider array offset")
 _Static_assert(offsetof(Fighter,x1828)==0x1828,"Dynamics collider array extent");
 _Static_assert(sizeof(((Fighter*)0)->x1670)/sizeof(Fighter_x1670_t)==11,"Dynamics collider capacity");
 typedef struct { ftData_x30 hurt; int count; ftData_x38* dynamics; } CollisionData;
-typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; void (*release_dynamics)(Fighter*); unsigned part_channels,part_variants[5],part_count; } CollisionFixture;
+typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; void (*release_dynamics)(Fighter*); void (*release_motions)(Fighter*); unsigned part_channels,part_variants[5],part_count; } CollisionFixture;
 static CollisionFixture* context(HSD_GObj* object){if(!object||!object->user_data)abort();return object->user_data;}
 extern int portSceneInitialize(void);
 extern int portFighterStartupComplete(void);
@@ -53,6 +53,7 @@ static void release_fixture(void* data)
     CollisionFixture* c=data;
     if(c->release_dynamics)c->release_dynamics(&c->fighter);
     if(c->fighter.x8AC_animSkeleton)HSD_JObjRemoveAll(c->fighter.x8AC_animSkeleton);
+    if(c->release_motions)c->release_motions(&c->fighter);
     if(c->fighter.parts)HSD_ObjFree(&fighter_parts_alloc_data,c->fighter.parts);
     if(c->fighter.dobj_list.data)HSD_ObjFree(&fighter_dobj_list_alloc_data,c->fighter.dobj_list.data);
     if(c->fighter.x203C.data)HSD_ObjFree(&fighter_x2040_alloc_data,c->fighter.x203C.data);
@@ -337,15 +338,17 @@ int portFighterAnimationInitialize(HSD_GObj* object,struct ftData_x8* parts)
     c->data.x8=parts;ftAnim_8007077C(object);ftAnim_8006FE48(object);
     Fighter_UnkUpdateVecFromBones_8006876C(fp);return fp->x8AC_animSkeleton!=NULL;
 }
-int portFighterAnimationStart(HSD_GObj* object,unsigned index,FigaTree* tree,float speed,float blend)
+int portFighterAnimationStart(HSD_GObj* object,unsigned index,float speed,float blend)
 {
     Fighter* fp=&context(object)->fighter;
-    if(!fp->x8AC_animSkeleton||!tree||index>=(unsigned)ftData_Table_Unk0[fp->kind].count||speed<=0||blend<0)return -1;
-    // Exercise original animation attachment/selection with a preloaded tree.
+    if(!fp->x8AC_animSkeleton||!context(object)->release_motions||index>=(unsigned)ftData_Table_Unk0[fp->kind].count||speed<=0||blend<0)return -1;
+    // Use the original loader and this fighter's owned buffers.
     // Motion-state changes, scripts and physics remain the full constructor's
     // integration work; this fixture does not replace Fighter_ChangeMotionState.
     fp->anim_id=index;fp->frame_speed_mul=speed;fp->cur_anim_frame=-speed;fp->x898_unk=0;
-    fp->x594_s32=fp->x24[index].x10_animCurrFlags;fp->x590=tree;
+    fp->x594_s32=fp->x24[index].x10_animCurrFlags;
+    ftData_80085CD8(fp,fp,index);
+    if(!fp->x590)return -2;
     ftCo_8009E7B4(fp,&fp->x28[index]);ftAnim_8006EBE8(object,0,speed,blend);
     ftAnim_8006E9B4(object);return 0;
 }
@@ -462,4 +465,49 @@ double portSecondaryJointRead(HSD_GObj* object,unsigned part,unsigned blend,unsi
     HSD_JObj* joint=blend?bone->x4_jobj2:bone->joint;if(!joint)abort();
     if(field<4)return ((float*)&joint->rotate)[field];if(field<7)return ((float*)&joint->scale)[field-4];if(field<10)return ((float*)&joint->translate)[field-7];
     switch(field){case 10:return joint->flags;case 11:return bone->flags_b0;case 12:return bone->flags_b4;case 13:return bone->flags_b5;default:abort();}
+}
+
+/* The shared archive belongs to the kind; the two load buffers belong to each
+ * initialized Fighter. This fixture binding will be replaced by full ftData
+ * loading at Fighter_Create integration, not by a new motion loader. */
+static struct { ftData data; unsigned owners; } fighter_motion_bindings[27];
+extern char* ftData_803C23E4[];
+extern void portFileRelease(const char*);
+int portFighterMotionRegister(unsigned kind,Fighter_WaitAnimData* table,unsigned count)
+{
+    if(kind>=27||!portFighterStartupComplete()||!table||count!=ftData_Table_Unk0[kind].count||gFtDataList[kind]||ftData_Table_Unk0[kind].data)return -1;
+    fighter_motion_bindings[kind].data.xC=table;gFtDataList[kind]=&fighter_motion_bindings[kind].data;
+    ftData_80085A14(kind);return 0;
+}
+int portFighterMotionUnregister(unsigned kind)
+{
+    if(kind>=27||gFtDataList[kind]!=&fighter_motion_bindings[kind].data||fighter_motion_bindings[kind].owners)return -1;
+    if(kind==Ft_Kind_Popo&&fighter_motion_bindings[Ft_Kind_Nana].owners)return -1;
+    for(unsigned i=0;i<ftData_Table_Unk0[kind].count;i++)fighter_motion_bindings[kind].data.xC[i].x14=0;
+    gFtDataList[kind]=NULL;ftData_Table_Unk0[kind].data=NULL;memset(&fighter_motion_bindings[kind],0,sizeof(fighter_motion_bindings[kind]));
+    portFileRelease(ftData_803C23E4[kind]);return 0;
+}
+static void release_fighter_motions(Fighter* fp)
+{
+    if(!fighter_motion_bindings[fp->kind].owners)abort();
+    HSD_ObjFree(&fighter_x59C_alloc_data,fp->x59C);HSD_ObjFree(&fighter_x59C_alloc_data,fp->x5A0);
+    fp->x59C=fp->x5A0=NULL;fp->x590=fp->x598=NULL;fighter_motion_bindings[fp->kind].owners--;
+}
+int portFighterMotionAttach(HSD_GObj* object)
+{
+    CollisionFixture* c=context(object);Fighter* fp=&c->fighter;
+    if(c->release_motions||gFtDataList[fp->kind]!=&fighter_motion_bindings[fp->kind].data||fp->x24!=gFtDataList[fp->kind]->xC)return -1;
+    if(fp->kind==Ft_Kind_Nana&&gFtDataList[Ft_Kind_Popo]!=&fighter_motion_bindings[Ft_Kind_Popo].data)return -2;
+    ftData_80085B10(fp);fighter_motion_bindings[fp->kind].owners++;c->release_motions=release_fighter_motions;return 0;
+}
+FigaTree* portFighterMotionLoad(HSD_GObj* object,unsigned index,unsigned secondary)
+{
+    CollisionFixture* c=context(object);Fighter* fp=&c->fighter;
+    if(!c->release_motions||index>=fp->x58C||secondary>1)abort();
+    if(secondary)return ftData_80085E50(fp,index);ftData_80085CD8(fp,fp,index);return fp->x590;
+}
+uintptr_t portFighterMotionRead(HSD_GObj* object,unsigned field)
+{
+    CollisionFixture* c=context(object);Fighter* fp=&c->fighter;if(!c->release_motions)abort();
+    switch(field){case 0:return (uintptr_t)fp->x59C;case 1:return (uintptr_t)fp->x5A0;case 2:return (uintptr_t)fp->x590;case 3:return (uintptr_t)fp->x598;case 4:return fp->x58C;case 5:return (uintptr_t)fp->x5A4;case 6:return (uintptr_t)fp->x5A8;default:abort();}
 }

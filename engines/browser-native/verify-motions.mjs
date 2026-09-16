@@ -6,7 +6,7 @@ import {installResidentFile,installResidentBytes,openResidentArchive} from './re
 
 // Compare the original loader's relocated result to independently decoded BE
 // descriptors and byte-coded tracks, including every byte of every stream.
-function checkTree(module,pointer,tree) {
+export function checkTree(module,pointer,tree) {
   const d=new DataView(module.HEAPU8.buffer),u=module.HEAPU8;
   if(!pointer)throw Error('Original motion loader returned no tree');
   if(d.getUint32(pointer,true)!==tree.type||d.getUint32(pointer+4,true)!==tree.flags||d.getFloat32(pointer+8,true)!==tree.frames)

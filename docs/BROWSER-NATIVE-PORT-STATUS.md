@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+The initialized fighter animation path now uses Melee's original motion loader
+and per-fighter load buffers instead of receiving preloaded trees. All 27
+components pass 81 selected clips / 5,184 animation updates through this combined
+path. There are 486 source-to-loaded-tree checks and 162 checks that loading a
+secondary clip preserves all 32 KiB of the active primary buffer. Nana's missing
+rows resolve through Popo's actual archive.
+
+Two simultaneous fighters have four distinct buffers. Shared files are pinned
+once per registered kind; live owners prevent release. Removing one owner leaves
+the other able to animate, and final teardown returns every buffer and file pin.
+The isolated shield-pose test must reattach an ordinary motion before playback;
+otherwise its quaternion pose is incorrectly reused under the previous blend.
+No gameplay code was changed to bypass that assertion.
+
+All 79 targeted tests and the wider/scene browser suites pass. The wider module
+is 2,812,474 bytes. Full Fighter_Create, action-state transitions, scripts, stage
+simulation and gameplay rendering are still incomplete. This is integration
+progress, not a native match, latency measurement or 720p60 result.
+[Owned-motion-loader checkpoint](benchmarks/browser-2026-09-15-native-port-owned-motions.json).
+
 Per-part animations and ordinary shield-pose skeletons now load through typed
 native archives. All 27 components pass 307 variants across 83 channels, with
 1,228 original animation attachments, 2,448 blend updates and 156 shield-pose
@@ -65,7 +85,7 @@ at bits 6–8. The actual C fields pass 68,096 arithmetic extraction checks acro
 266 total command/flag views, plus write/isolation checks.
 
 The wider module is 2,808,721 bytes. All 74 targeted tests and startup/scene
-browser regressions pass. Animation trees are still preloaded by the diagnostic;
+browser regressions passed. At that checkpoint animation trees were still preloaded;
 full motion-state transitions, action scripts, combat physics and stage/render
 integration remain incomplete. This is not a playable match or a FPS result.
 [Fighter animation checkpoint](benchmarks/browser-2026-09-15-native-port-fighter-animation.json).
