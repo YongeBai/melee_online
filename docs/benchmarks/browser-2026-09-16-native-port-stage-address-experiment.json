@@ -1,0 +1,163 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "850fb16",
+  "scope": "Controlled Peach mirror on Fountain with original dynamic-bone initialization, 960x720 4:3 rendering and cosmetic reflection/scenery reductions.",
+  "hypothesis": "Replace the GameCube high-bit stage-camera diagnostic with WASM alignment/bounds validation to eliminate false per-draw OSReport calls.",
+  "outcome": "Rejected as a performance optimization and reverted. Both candidate runs were slower than the two controls. This does not establish why; no FPS gain is claimed.",
+  "command": "node scripts/native-port/probe-constructor.mjs --map=fountain --character=Pe --stage-callbacks --live --workload --frames=3600 --hardware --fountain-cosmetics-off --fountain-scenery-off --defer-gpu-errors",
+  "note": "These runs recorded the bounded diagnostic ring size, not total messages. Subsequent probe code records the total string diagnostic count separately from an eight-message tail.",
+  "rows": [
+    {
+      "id": "a1",
+      "artifact": "dist/native-port/experiment-stage-camera-address/a1.json",
+      "artifactSha256": "68ce861e1fd716e4b8fef3bcb29dd1a71dd9e0765461386b52ba24fa93784cf0",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3592,
+      "elapsedMs": 60024.40000000596,
+      "simulationPerSecond": 59.975609918627136,
+      "drawSubmissionsPerSecond": 59.84233078547463,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.8472222222305007,
+        "p50Ms": 0.7999999821186066,
+        "p95Ms": 1.399999976158142,
+        "maxMs": 2.800000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3592,
+        "meanMs": 8.488251670381938,
+        "p50Ms": 7.5,
+        "p95Ms": 14.200000017881393,
+        "maxMs": 27.5
+      },
+      "multiStepCallbacks": 8,
+      "diagnosticRetainedCount": null,
+      "diagnosticTail": null
+    },
+    {
+      "id": "b1",
+      "artifact": "dist/native-port/experiment-stage-camera-address/b1.json",
+      "artifactSha256": "61c444b8831dd6ae4cfeb8bb95050228e2e553cffe222c78c4b8b847aa3a7ad2",
+      "wasmSha256": "8b4de1545fa04c3e98621f599fa4ba777dc54ffefd07d2358f8c0c1d07654fe8",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3430,
+      "elapsedMs": 60028.69999998808,
+      "simulationPerSecond": 59.971313721615076,
+      "drawSubmissionsPerSecond": 57.139335018094364,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.0540000000016556,
+        "p50Ms": 1,
+        "p95Ms": 1.7999999821186066,
+        "maxMs": 5.699999988079071
+      },
+      "drawSubmissionCpu": {
+        "samples": 3430,
+        "meanMs": 10.804169095970103,
+        "p50Ms": 9.600000023841858,
+        "p95Ms": 17.400000005960464,
+        "maxMs": 62.900000005960464
+      },
+      "multiStepCallbacks": 123,
+      "diagnosticRetainedCount": 0,
+      "diagnosticTail": []
+    },
+    {
+      "id": "a2",
+      "artifact": "dist/native-port/experiment-stage-camera-address/a2.json",
+      "artifactSha256": "46c5a8c83fc12f4a46a7d69313214c51863e3db5a7f8ba3f05c456395d043823",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3593,
+      "elapsedMs": 60029.39999997616,
+      "simulationPerSecond": 59.97061439896834,
+      "drawSubmissionsPerSecond": 59.85400487097034,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.8023888889865742,
+        "p50Ms": 0.7000000178813934,
+        "p95Ms": 1.300000011920929,
+        "maxMs": 1.9000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3593,
+        "meanMs": 8.363512385067354,
+        "p50Ms": 7.5,
+        "p95Ms": 13.900000005960464,
+        "maxMs": 29
+      },
+      "multiStepCallbacks": 7,
+      "diagnosticRetainedCount": 64,
+      "diagnosticTail": [
+        "oioi... 00191500",
+        "oioi... 00191500",
+        "oioi... 00191500",
+        "oioi... 00191500",
+        "oioi... 00191500",
+        "oioi... 00191500",
+        "oioi... 00191500",
+        "oioi... 00191500"
+      ]
+    },
+    {
+      "id": "b2",
+      "artifact": "dist/native-port/experiment-stage-camera-address/b2.json",
+      "artifactSha256": "ccd72b0d833099afbe716aa0d18a0252c4d79c7daf0360888e27852c944f49ce",
+      "wasmSha256": "8b4de1545fa04c3e98621f599fa4ba777dc54ffefd07d2358f8c0c1d07654fe8",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3576,
+      "elapsedMs": 60033.90000000596,
+      "simulationPerSecond": 59.96611914267843,
+      "drawSubmissionsPerSecond": 59.56634501506058,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.8990277779102326,
+        "p50Ms": 0.8999999761581421,
+        "p95Ms": 1.4000000059604645,
+        "maxMs": 2.399999976158142
+      },
+      "drawSubmissionCpu": {
+        "samples": 3576,
+        "meanMs": 9.162164429831892,
+        "p50Ms": 8.5,
+        "p95Ms": 14.599999994039536,
+        "maxMs": 28.80000001192093
+      },
+      "multiStepCallbacks": 23,
+      "diagnosticRetainedCount": 0,
+      "diagnosticTail": []
+    }
+  ],
+  "presentationFpsMeasured": false,
+  "inputToPhotonMeasured": false,
+  "competitiveAcceptance": false
+}

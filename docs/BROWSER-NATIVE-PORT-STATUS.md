@@ -5,6 +5,28 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The renderer now reuses identical consecutive pixel/channel snapshots instead
+of repeatedly decoding and allocating them. Changed snapshots retain independent
+data for queued draws. In the corrected-dynamics Peach/Fountain workload, control
+draw-submission means were 12.37 and 12.63 ms; candidate means were 11.44 and
+10.73 ms (about 11.3% lower across the run means). The better candidate submitted
+3,494 draws for 3,600 simulation steps in roughly 60 seconds. Cadence remains
+below target, and variation in simulation timing limits the performance claim.
+This is CPU submission evidence, not displayed FPS or latency certification.
+All 212 unit tests pass. The focused GPU probe passes both renderer variants;
+its Ready, Go, settled and final PNGs are byte-identical. The settled/final
+snapshots check 9,156 and 23,340 vertices respectively. This comparison establishes
+equivalence to the port control for these samples, not retail visual parity.
+[Pixel-cache evidence](benchmarks/browser-2026-09-16-native-port-pixel-cache.json).
+
+Two other candidates were reverted: a WASM-specific stage-camera diagnostic
+guard did not improve timing, and skipping inactive uniform packing did not
+show a reliable gain against variable controls. Their
+[address-check results](benchmarks/browser-2026-09-16-native-port-stage-address-experiment.json)
+and [uniform results](benchmarks/browser-2026-09-16-native-port-active-uniform-experiment.json)
+are retained. The next larger renderer experiment is batching adjacent particle
+primitives only when their complete render state matches, preserving draw order.
+
 A new runtime check exposed missing dynamic-bone pool initialization in the
 match harness: a Pikachu copy hat declared three chains but had zero live nodes.
 The harness now calls the original initializer before stage/fighter setup. All

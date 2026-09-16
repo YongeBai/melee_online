@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gxAlphaTest,gxAlphaTestRejectsAny,readNativePixel} from '../../engines/browser-native/native-pixel.mjs';
+import {gxAlphaTest,gxAlphaTestRejectsAny,readNativePixel,createNativePixelReader} from '../../engines/browser-native/native-pixel.mjs';
 import {verifyNativePixel} from '../../engines/browser-native/verify-material-state.mjs';
 function fixture() {
   const heap=new Uint8Array(512),w=new Uint32Array(heap.buffer,64,80);
@@ -18,6 +18,27 @@ test('custom original pixel descriptor is checked field-for-field',()=>{
   const descriptor=Uint8Array.from([95,100,200,99,3,1,0,6,5,2,2,6]);
   verifyNativePixel({renderMode:0,pixelEngine:descriptor},readNativePixel(f.module));
   descriptor[6]=1;assert.throws(()=>verifyNativePixel({renderMode:0,pixelEngine:descriptor},readNativePixel(f.module)),/blend/);
+});
+test('renderer pixel reader reuses equal state without aliasing queued native writes',()=>{
+  const f=fixture(),read=createNativePixelReader(f.module),first=read();
+  assert.equal(read(),first);
+  f.w[68]=123;const second=read();assert.notEqual(second,first);
+  assert.equal(first.colors[0].material[0],255);assert.equal(second.colors[0].material[0],123);
+  assert.deepEqual(second,readNativePixel(f.module));assert.equal(read(),second);
+  // A relocated or grown WASM memory must be read anew, even at the same offset.
+  const grown=new Uint8Array(1024);grown.set(f.module.HEAPU8);f.module.HEAPU8=grown;
+  assert.equal(read(),second);new Uint32Array(grown.buffer,64,80)[68]=42;
+  const third=read();assert.equal(third.colors[0].material[0],42);assert.equal(second.colors[0].material[0],123);
+  // One renderer's cache and the uncached public snapshots remain independent.
+  const independent=createNativePixelReader(f.module)();assert.notEqual(independent,third);
+  const publicSnapshot=readNativePixel(f.module);publicSnapshot.colors[0].material[0]=0;
+  assert.equal(read().colors[0].material[0],42);
+});
+test('renderer pixel reader validates changed data and does not cache a failure',()=>{
+  const f=fixture(),read=createNativePixelReader(f.module),valid=read();
+  f.w[68]=256;assert.throws(read,/color/);assert.throws(read,/color/);
+  f.w[68]=255;assert.equal(read(),valid);
+  f.module._portMaterialPixelState=()=>0;assert.throws(read,/bounds/);
 });
 test('GX alpha functions and logical combinations preserve exact thresholds',()=>{
   const expected=[[],[0,127],[128],[0,127,128],[129,255],[0,127,129,255],[128,129,255],[0,127,128,129,255]];

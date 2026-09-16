@@ -1,0 +1,1284 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "850fb16",
+  "scope": "Reuse identical consecutive native pixel/channel snapshots within one renderer. Changed snapshots own their decoded data; the public reader remains uncached.",
+  "command": "node scripts/native-port/probe-constructor.mjs --map=fountain --character=Pe --stage-callbacks --live --workload --frames=3600 --hardware --fountain-cosmetics-off --fountain-scenery-off --defer-gpu-errors",
+  "ordering": "A1 reuses active-uniform experiment A2 (unchanged control source); B1, A2, B2 follow. Intervening uniform experiment used the same control core. Raw hashes identify each runtime.",
+  "comparison": {
+    "controlMeanOfRunMeansMs": 12.497732150051062,
+    "candidateMeanOfRunMeansMs": 11.085002661015373,
+    "drawSubmissionReductionPercent": 11.303886753805305,
+    "interpretation": "Both candidates reduced mean draw-submission CPU time against the controls. Cadence remains below the target and host variation is visible in simulation time. This is not a demonstrated presentation-FPS improvement."
+  },
+  "rows": [
+    {
+      "id": "a1",
+      "artifact": "dist/native-port/experiment-pixel-cache/a1.json",
+      "artifactSha256": "b64a0c64d12dcc914b47fd3a35244849f5c11c7af7084e7193946812ddfadfd7",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3448,
+      "elapsedMs": 60034.89999997616,
+      "simulationPerSecond": 59.965120288389414,
+      "drawSubmissionsPerSecond": 57.43325965399075,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.0955555553320382,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 1.7999999821186066,
+        "maxMs": 6.700000017881393
+      },
+      "drawSubmissionCpu": {
+        "samples": 3448,
+        "meanMs": 12.369373549787184,
+        "p50Ms": 11.700000017881393,
+        "p95Ms": 19.19999998807907,
+        "maxMs": 64.30000001192093
+      },
+      "multiStepCallbacks": 140,
+      "rafGapsOver25Ms": 141,
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "dynamics": {
+        "initialPool": 320,
+        "fighters": [
+          {
+            "code": "Pe",
+            "owner": 16803296,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          },
+          {
+            "code": "Pe",
+            "owner": 18779008,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          }
+        ],
+        "freeAfterFighters": 230
+      }
+    },
+    {
+      "id": "b1",
+      "artifact": "dist/native-port/experiment-pixel-cache/b1.json",
+      "artifactSha256": "be89fafca61393dbe878620eb9dd635e02565431d02ab9392d691a93dbe398fd",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "056ff21c524dd500070382a25303a2070f8a93fe04ea7e02db93dfb56279d90d",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3415,
+      "elapsedMs": 60050.59999999404,
+      "simulationPerSecond": 59.94944263671566,
+      "drawSubmissionsPerSecond": 56.86870739010666,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.1735000004536575,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 2,
+        "maxMs": 5.799999982118607
+      },
+      "drawSubmissionCpu": {
+        "samples": 3415,
+        "meanMs": 11.436691068739004,
+        "p50Ms": 10.599999994039536,
+        "p95Ms": 18.599999994039536,
+        "maxMs": 63.30000001192093
+      },
+      "multiStepCallbacks": 136,
+      "rafGapsOver25Ms": 138,
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "dynamics": {
+        "initialPool": 320,
+        "fighters": [
+          {
+            "code": "Pe",
+            "owner": 16803296,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          },
+          {
+            "code": "Pe",
+            "owner": 18779008,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          }
+        ],
+        "freeAfterFighters": 230
+      }
+    },
+    {
+      "id": "a2",
+      "artifact": "dist/native-port/experiment-pixel-cache/a2.json",
+      "artifactSha256": "3533c386d69f5c824ab5fb20f774213291e3cc156b48eb5b5e60f0a966136898",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3438,
+      "elapsedMs": 60031.40000000596,
+      "simulationPerSecond": 59.968616424065445,
+      "drawSubmissionsPerSecond": 57.270028684982506,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.1306388895627526,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 1.800000011920929,
+        "maxMs": 9.599999994039536
+      },
+      "drawSubmissionCpu": {
+        "samples": 3438,
+        "meanMs": 12.62609075031494,
+        "p50Ms": 12,
+        "p95Ms": 19.19999998807907,
+        "maxMs": 71.2000000178814
+      },
+      "multiStepCallbacks": 148,
+      "rafGapsOver25Ms": 150,
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "dynamics": {
+        "initialPool": 320,
+        "fighters": [
+          {
+            "code": "Pe",
+            "owner": 16803296,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          },
+          {
+            "code": "Pe",
+            "owner": 18779008,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          }
+        ],
+        "freeAfterFighters": 230
+      }
+    },
+    {
+      "id": "b2",
+      "artifact": "dist/native-port/experiment-pixel-cache/b2.json",
+      "artifactSha256": "442105ccf3b72717c95653543aad491ed8ba570967a8000092e192644e9db0ba",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "056ff21c524dd500070382a25303a2070f8a93fe04ea7e02db93dfb56279d90d",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3494,
+      "elapsedMs": 60034.30000001192,
+      "simulationPerSecond": 59.96571959695183,
+      "drawSubmissionsPerSecond": 58.20006229770825,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.0929722221361267,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 1.7999999821186066,
+        "maxMs": 4.199999988079071
+      },
+      "drawSubmissionCpu": {
+        "samples": 3494,
+        "meanMs": 10.733314253291745,
+        "p50Ms": 10.099999994039536,
+        "p95Ms": 17.30000001192093,
+        "maxMs": 57.5
+      },
+      "multiStepCallbacks": 95,
+      "rafGapsOver25Ms": 97,
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "dynamics": {
+        "initialPool": 320,
+        "fighters": [
+          {
+            "code": "Pe",
+            "owner": 16803296,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          },
+          {
+            "code": "Pe",
+            "owner": 18779008,
+            "chains": 9,
+            "nodes": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ]
+          }
+        ],
+        "freeAfterFighters": 230
+      }
+    }
+  ],
+  "verification": {
+    "unitTestsPassed": 212,
+    "gpu": {
+      "command": "node scripts/native-port/probe-constructor.mjs --map=fountain --character=Pe --input --stage-callbacks --render --hardware --fountain-cosmetics-off --fountain-scenery-off --probe-seconds=180",
+      "rows": [
+        {
+          "id": "control",
+          "artifact": "dist/native-port/experiment-pixel-cache/gpu-control.json",
+          "artifactSha256": "20a39b4e2cf4bc36ce09a3199fdc6312dd076b78b4002ad477efb34e095f2614",
+          "rendererSources": {
+            "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+            "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+            "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+            "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+          },
+          "completedWithoutProbeError": true,
+          "inputFrames": 142,
+          "preview": {
+            "settled": {
+              "materialShaderChecks": {
+                "passed": true,
+                "cases": [
+                  "unlit material",
+                  "diffuse toward light",
+                  "clamped diffuse away",
+                  "signed diffuse subtraction",
+                  "diffuse accumulator clamp",
+                  "SDK specular forces diffuse NONE",
+                  "vertex material RGBA",
+                  "alpha rejection",
+                  "UV texgen and nearest sampling",
+                  "normal reflection texgen",
+                  "bump texture coordinates",
+                  "vertex matrix texture coordinates",
+                  "SRTG texture coordinates"
+                ],
+                "pixelChannelChecks": 52
+              },
+              "vertexChecks": {
+                "vertices": 9156,
+                "positionComponents": 27468,
+                "normalComponents": 27468,
+                "maxScaledPositionError": 8.910370771120052e-7,
+                "maxNormalError": 9.361237274241319e-8,
+                "roundoffPositionComponents": 0,
+                "maxPositionRoundoffAllowance": 0.00011465334127442409,
+                "byOwner": {
+                  "1528800": {
+                    "vertices": 40,
+                    "ndcMin": [
+                      -0.4571677727001794,
+                      0.6735738062567096,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.3060570192123063,
+                      0.7807559800284086,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "1620864": {
+                    "vertices": 9022,
+                    "ndcMin": [
+                      -1.1854506769135953,
+                      -5.38182899392691,
+                      -0.0009225945002096155
+                    ],
+                    "ndcMax": [
+                      1.1854506769135953,
+                      1.084625480864715,
+                      -0.000414063612488414
+                    ]
+                  },
+                  "1656736": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      -0.6786238309675571,
+                      -0.6757381310538592,
+                      -0.0005949251242325098
+                    ],
+                    "ndcMax": [
+                      -0.6179540176977651,
+                      -0.38588257606607496,
+                      -0.0005889109374662277
+                    ]
+                  },
+                  "16798944": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      0.6162411852553885,
+                      -0.6757381310538592,
+                      -0.0005973649457304668
+                    ],
+                    "ndcMax": [
+                      0.6848011788569394,
+                      -0.268293000219948,
+                      -0.0005889109374662277
+                    ]
+                  },
+                  "19004640": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      -0.48961227399501855,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      -0.17018715104029894,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19005024": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      -0.34167154423888596,
+                      -1.300993759972106,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.11001941764100844,
+                      -1.13305696311488,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19010880": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      -0.5485511042156275,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.22350276107797776,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19029856": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      0.1871050870840508,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      0.5065302100387704,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19031168": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      0.33557451038974423,
+                      -1.300993759972106,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.5672266289142189,
+                      -1.13305696311488,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19036704": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      0.12869494233959988,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.45374326125704095,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  }
+                }
+              },
+              "draws": 134
+            },
+            "final": {
+              "materialShaderChecks": {
+                "passed": true,
+                "cases": [
+                  "unlit material",
+                  "diffuse toward light",
+                  "clamped diffuse away",
+                  "signed diffuse subtraction",
+                  "diffuse accumulator clamp",
+                  "SDK specular forces diffuse NONE",
+                  "vertex material RGBA",
+                  "alpha rejection",
+                  "UV texgen and nearest sampling",
+                  "normal reflection texgen",
+                  "bump texture coordinates",
+                  "vertex matrix texture coordinates",
+                  "SRTG texture coordinates"
+                ],
+                "pixelChannelChecks": 52
+              },
+              "vertexChecks": {
+                "vertices": 23340,
+                "positionComponents": 70020,
+                "normalComponents": 70020,
+                "maxScaledPositionError": 8.816080214253565e-7,
+                "maxNormalError": 1.2222556611263258e-7,
+                "roundoffPositionComponents": 0,
+                "maxPositionRoundoffAllowance": 0.00011510284702170505,
+                "byOwner": {
+                  "1528800": {
+                    "vertices": 28,
+                    "ndcMin": [
+                      -0.2404488175600763,
+                      0.6735738062567096,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.3060570192123063,
+                      0.7807559800284086,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "1620864": {
+                    "vertices": 9022,
+                    "ndcMin": [
+                      -1.3101749137362426,
+                      -5.764560570497064,
+                      -0.0010002320933665627
+                    ],
+                    "ndcMax": [
+                      1.2038524988115402,
+                      1.094854423322943,
+                      -0.0004288982196691527
+                    ]
+                  },
+                  "1656736": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      -0.7594943536162613,
+                      -0.7296449314012068,
+                      -0.0006258689465541997
+                    ],
+                    "ndcMax": [
+                      -0.6956941930532058,
+                      -0.4237929118104485,
+                      -0.0006200930375348533
+                    ]
+                  },
+                  "16798944": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      0.6008324575229346,
+                      -0.7275995228235452,
+                      -0.0006270570994854266
+                    ],
+                    "ndcMax": [
+                      0.6726325561832653,
+                      -0.298575200518756,
+                      -0.0006189701396108963
+                    ]
+                  },
+                  "16803296": {
+                    "vertices": 6904,
+                    "ndcMin": [
+                      -0.8325622772025534,
+                      -0.3220609340993116,
+                      -0.000647129614075625
+                    ],
+                    "ndcMax": [
+                      -0.6969783528702131,
+                      0.1409283705012188,
+                      -0.0006145798382486701
+                    ]
+                  },
+                  "18779008": {
+                    "vertices": 6904,
+                    "ndcMin": [
+                      0.6514900389777202,
+                      -0.17123506670793243,
+                      -0.0006462727728073189
+                    ],
+                    "ndcMax": [
+                      0.8399528386688505,
+                      0.2826688900462218,
+                      -0.0006167269705516987
+                    ]
+                  },
+                  "19004640": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      -0.48961227399501855,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      -0.17018715104029894,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19005024": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      -0.34167154423888596,
+                      -0.8548822858936544,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.11001941764100844,
+                      -0.6900856703647958,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19010880": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      -0.5485511042156275,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.22350276107797776,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19029856": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      0.1871050870840508,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      0.5065302100387704,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19031168": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      0.33557451038974423,
+                      -0.8548822858936544,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.5672266289142189,
+                      -0.6900856703647958,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19036704": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      0.12869494233959988,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.45374326125704095,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "particles": {
+                    "vertices": 388,
+                    "ndcMin": [
+                      -1.2062086524381883,
+                      -1.6606113485101586,
+                      -0.000689934413704478
+                    ],
+                    "ndcMax": [
+                      1.0477452595506027,
+                      2.135824882833299,
+                      -0.0003780087358939431
+                    ]
+                  }
+                }
+              },
+              "draws": 336
+            }
+          }
+        },
+        {
+          "id": "candidate",
+          "artifact": "dist/native-port/experiment-pixel-cache/gpu-candidate.json",
+          "artifactSha256": "5564e8a6679c9cd297f9c9970ef2d840bfbd132f3db14f58c8c8a052a142843f",
+          "rendererSources": {
+            "material-gpu.mjs": "056ff21c524dd500070382a25303a2070f8a93fe04ea7e02db93dfb56279d90d",
+            "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+            "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+            "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+          },
+          "completedWithoutProbeError": true,
+          "inputFrames": 142,
+          "preview": {
+            "settled": {
+              "materialShaderChecks": {
+                "passed": true,
+                "cases": [
+                  "unlit material",
+                  "diffuse toward light",
+                  "clamped diffuse away",
+                  "signed diffuse subtraction",
+                  "diffuse accumulator clamp",
+                  "SDK specular forces diffuse NONE",
+                  "vertex material RGBA",
+                  "alpha rejection",
+                  "UV texgen and nearest sampling",
+                  "normal reflection texgen",
+                  "bump texture coordinates",
+                  "vertex matrix texture coordinates",
+                  "SRTG texture coordinates"
+                ],
+                "pixelChannelChecks": 52
+              },
+              "vertexChecks": {
+                "vertices": 9156,
+                "positionComponents": 27468,
+                "normalComponents": 27468,
+                "maxScaledPositionError": 8.910370771120052e-7,
+                "maxNormalError": 9.361237274241319e-8,
+                "roundoffPositionComponents": 0,
+                "maxPositionRoundoffAllowance": 0.00011465334127442409,
+                "byOwner": {
+                  "1528800": {
+                    "vertices": 40,
+                    "ndcMin": [
+                      -0.4571677727001794,
+                      0.6735738062567096,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.3060570192123063,
+                      0.7807559800284086,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "1620864": {
+                    "vertices": 9022,
+                    "ndcMin": [
+                      -1.1854506769135953,
+                      -5.38182899392691,
+                      -0.0009225945002096155
+                    ],
+                    "ndcMax": [
+                      1.1854506769135953,
+                      1.084625480864715,
+                      -0.000414063612488414
+                    ]
+                  },
+                  "1656736": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      -0.6786238309675571,
+                      -0.6757381310538592,
+                      -0.0005949251242325098
+                    ],
+                    "ndcMax": [
+                      -0.6179540176977651,
+                      -0.38588257606607496,
+                      -0.0005889109374662277
+                    ]
+                  },
+                  "16798944": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      0.6162411852553885,
+                      -0.6757381310538592,
+                      -0.0005973649457304668
+                    ],
+                    "ndcMax": [
+                      0.6848011788569394,
+                      -0.268293000219948,
+                      -0.0005889109374662277
+                    ]
+                  },
+                  "19004640": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      -0.48961227399501855,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      -0.17018715104029894,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19005024": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      -0.34167154423888596,
+                      -1.300993759972106,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.11001941764100844,
+                      -1.13305696311488,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19010880": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      -0.5485511042156275,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.22350276107797776,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19029856": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      0.1871050870840508,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      0.5065302100387704,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19031168": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      0.33557451038974423,
+                      -1.300993759972106,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.5672266289142189,
+                      -1.13305696311488,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19036704": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      0.12869494233959988,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.45374326125704095,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  }
+                }
+              },
+              "draws": 134
+            },
+            "final": {
+              "materialShaderChecks": {
+                "passed": true,
+                "cases": [
+                  "unlit material",
+                  "diffuse toward light",
+                  "clamped diffuse away",
+                  "signed diffuse subtraction",
+                  "diffuse accumulator clamp",
+                  "SDK specular forces diffuse NONE",
+                  "vertex material RGBA",
+                  "alpha rejection",
+                  "UV texgen and nearest sampling",
+                  "normal reflection texgen",
+                  "bump texture coordinates",
+                  "vertex matrix texture coordinates",
+                  "SRTG texture coordinates"
+                ],
+                "pixelChannelChecks": 52
+              },
+              "vertexChecks": {
+                "vertices": 23340,
+                "positionComponents": 70020,
+                "normalComponents": 70020,
+                "maxScaledPositionError": 8.816080214253565e-7,
+                "maxNormalError": 1.2222556611263258e-7,
+                "roundoffPositionComponents": 0,
+                "maxPositionRoundoffAllowance": 0.00011510284702170505,
+                "byOwner": {
+                  "1528800": {
+                    "vertices": 28,
+                    "ndcMin": [
+                      -0.2404488175600763,
+                      0.6735738062567096,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.3060570192123063,
+                      0.7807559800284086,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "1620864": {
+                    "vertices": 9022,
+                    "ndcMin": [
+                      -1.3101749137362426,
+                      -5.764560570497064,
+                      -0.0010002320933665627
+                    ],
+                    "ndcMax": [
+                      1.2038524988115402,
+                      1.094854423322943,
+                      -0.0004288982196691527
+                    ]
+                  },
+                  "1656736": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      -0.7594943536162613,
+                      -0.7296449314012068,
+                      -0.0006258689465541997
+                    ],
+                    "ndcMax": [
+                      -0.6956941930532058,
+                      -0.4237929118104485,
+                      -0.0006200930375348533
+                    ]
+                  },
+                  "16798944": {
+                    "vertices": 19,
+                    "ndcMin": [
+                      0.6008324575229346,
+                      -0.7275995228235452,
+                      -0.0006270570994854266
+                    ],
+                    "ndcMax": [
+                      0.6726325561832653,
+                      -0.298575200518756,
+                      -0.0006189701396108963
+                    ]
+                  },
+                  "16803296": {
+                    "vertices": 6904,
+                    "ndcMin": [
+                      -0.8325622772025534,
+                      -0.3220609340993116,
+                      -0.000647129614075625
+                    ],
+                    "ndcMax": [
+                      -0.6969783528702131,
+                      0.1409283705012188,
+                      -0.0006145798382486701
+                    ]
+                  },
+                  "18779008": {
+                    "vertices": 6904,
+                    "ndcMin": [
+                      0.6514900389777202,
+                      -0.17123506670793243,
+                      -0.0006462727728073189
+                    ],
+                    "ndcMax": [
+                      0.8399528386688505,
+                      0.2826688900462218,
+                      -0.0006167269705516987
+                    ]
+                  },
+                  "19004640": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      -0.48961227399501855,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      -0.17018715104029894,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19005024": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      -0.34167154423888596,
+                      -0.8548822858936544,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.11001941764100844,
+                      -0.6900856703647958,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19010880": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      -0.5485511042156275,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      -0.22350276107797776,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19029856": {
+                    "vertices": 4,
+                    "ndcMin": [
+                      0.1871050870840508,
+                      -0.8964472900161822,
+                      -0.015331470802450542
+                    ],
+                    "ndcMax": [
+                      0.5065302100387704,
+                      -0.5855641708536594,
+                      -0.015331470802450542
+                    ]
+                  },
+                  "19031168": {
+                    "vertices": 8,
+                    "ndcMin": [
+                      0.33557451038974423,
+                      -0.8548822858936544,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.5672266289142189,
+                      -0.6900856703647958,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "19036704": {
+                    "vertices": 16,
+                    "ndcMin": [
+                      0.12869494233959988,
+                      -0.6056153741322168,
+                      -0.01534367160665423
+                    ],
+                    "ndcMax": [
+                      0.45374326125704095,
+                      -0.5067615449441295,
+                      -0.01534367160665423
+                    ]
+                  },
+                  "particles": {
+                    "vertices": 388,
+                    "ndcMin": [
+                      -1.2062086524381883,
+                      -1.6606113485101586,
+                      -0.000689934413704478
+                    ],
+                    "ndcMax": [
+                      1.0477452595506027,
+                      2.135824882833299,
+                      -0.0003780087358939431
+                    ]
+                  }
+                }
+              },
+              "draws": 336
+            }
+          }
+        }
+      ],
+      "images": [
+        {
+          "file": "native-match-ready.png",
+          "identicalPng": true,
+          "sha256": "008cfd79c4103c261c83ee9353e1a01aa09a1e3dd378b5465cdfd25d4b1e1365"
+        },
+        {
+          "file": "native-match-go.png",
+          "identicalPng": true,
+          "sha256": "0948da199673270979887870ec0593c1a7b9f0d3b8d406f9b04cf20adfc359ba"
+        },
+        {
+          "file": "native-match-settled.png",
+          "identicalPng": true,
+          "sha256": "38c626cf70bbf83d7d13545e18d48b73193dd7b1cfc1871270568ccb7cec2ca1"
+        },
+        {
+          "file": "native-match-final.png",
+          "identicalPng": true,
+          "sha256": "d31cf4ed21441f8e6dd09b0979ecf4daf603526ce973ebfff081ca7d9dc43b6e"
+        }
+      ],
+      "visualInspection": "Final Fountain frame inspected: original 960x720 framing, fighters, platforms and HUD preserved. Pixel equality compares to this port control, not to retail."
+    },
+    "rebuild": {
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "unchangedCore": true,
+      "sharedBrowserChecksPassed": true
+    }
+  },
+  "presentationFpsMeasured": false,
+  "inputToPhotonMeasured": false,
+  "competitiveAcceptance": false,
+  "sourceHashes": {
+    "engines/browser-native/material-gpu.mjs": "056ff21c524dd500070382a25303a2070f8a93fe04ea7e02db93dfb56279d90d",
+    "engines/browser-native/native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+    "scripts/native-port/native-pixel.test.mjs": "8fac8e16c101aa8938374a81ae023bba584c2e1e1d0a8b97b48d4cbf69644c81",
+    "scripts/native-port/probe-constructor.mjs": "795531b19c9e86b59ade7ec6f0a3e0569167e9ebde5b910e3e0a3df9978934c6"
+  }
+}

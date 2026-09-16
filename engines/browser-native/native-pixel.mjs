@@ -1,8 +1,28 @@
 // Full original HSD material setup, recorded independently of the TEV buffer.
 export function readNativePixel(module) {
+  return decodeNativePixel(pixelWords(module));
+}
+
+function pixelWords(module) {
   const p=module._portMaterialPixelState();
   if(!p||p%4||p+320>module.HEAPU8.length)throw Error('Native pixel snapshot bounds');
-  const w=Uint32Array.from(new Uint32Array(module.HEAPU8.buffer,p,80));
+  return new Uint32Array(module.HEAPU8.buffer,p,80);
+}
+
+// Renderer-local reader. Identical consecutive snapshots may share the decoded
+// object; callers must treat it as read-only. Changed snapshots own their data,
+// so draws already queued never observe later native register writes.
+export function createNativePixelReader(module) {
+  const previous=new Uint32Array(80);let snapshot;
+  return ()=>{
+    const words=pixelWords(module);let same=snapshot!==undefined;
+    if(same)for(let i=0;i<80;i++)if(words[i]!==previous[i]){same=false;break;}
+    if(same)return snapshot;
+    const next=decodeNativePixel(words);previous.set(words);snapshot=next;return next;
+  };
+}
+
+function decodeNativePixel(w) {
   if(w[0]!==511||w[1]>2||w[20]>15||w[21]>15||w[22]>15)throw Error('Incomplete native pixel state');
   for(const i of [6,8,9,10,11,12,14])if(w[i]>1)throw Error('Native pixel boolean');
   if(w[2]>3||w[3]>7||w[4]>7||w[5]>15||w[7]>7||w[13]>255||w[15]>7||w[16]>255||w[17]>3||w[18]>7||w[19]>255)throw Error('Native pixel configuration');

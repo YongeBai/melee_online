@@ -2,7 +2,7 @@ import {immediateTriangles} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture} from './native-texture.mjs';
-import {readNativePixel,gxAlphaTestRejectsAny} from './native-pixel.mjs';
+import {createNativePixelReader,gxAlphaTestRejectsAny} from './native-pixel.mjs';
 import {readNativeModelMatrices} from './native-model.mjs';
 import {readNativeRenderContext,checkNativeRenderContext} from './native-render-context.mjs';
 import {inspectArchive} from './archive.mjs';
@@ -28,6 +28,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     registers:new Int32Array(16),konst:new Int32Array(16),ambient:new Int32Array(8),material:new Int32Array(8),lightColor:new Int32Array(32),
     lightPosition:new Float32Array(24),lightDirection:new Float32Array(24),lightAngular:new Float32Array(24),lightDistance:new Float32Array(24),bias:new Float32Array(8)};
   function packRows(target,rows,stride){target.fill(0);for(let i=0;i<rows.length;i++)if(rows[i])target.set(rows[i],i*stride);return target;}
+  const readPixel=createNativePixelReader(module);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
@@ -127,7 +128,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   module.onNativeDraw=(owner,joint,display,polygon,ptr)=>{
     const plan=nativePlans.get(owner+':'+joint+':'+polygon);
     if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
-    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
     queue.push({owner,plan,state,camera:snapshot,program:program(state,plan.mesh.attrs,'model')});
   };
@@ -148,7 +149,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,plan.indices);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,triangles,gl.DYNAMIC_DRAW);
     const attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
     plan.mesh={triangles,flags:cull<<14,attrs,vertices:verifyVertices?Array.from({length:count},(_,i)=>({9:[...data.slice(i*9,i*9+3)],11:[...data.slice(i*9+3,i*9+7)],13:[...data.slice(i*9+7,i*9+9)]})):[]};
-    const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+    const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
     const selectedProgram=program(state,attrs,kind===0?'particles':'afterimage');
     queue.push({owner:kind===0?'particles':'afterimage',plan,state,camera:snapshot,program:selectedProgram});
@@ -185,7 +186,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           const {mesh}=plan;if((flags[mesh.joint]&16)||!visibility[i])continue;
           const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[mesh.joint];
           const ptr=module._portMaterialDrawState(joint,plan.display,plan.polygon,view,owner);
-          const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readNativePixel(module),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+          const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
           checkNativeRenderContext(state.context,snapshot,state.pixel);
           queue.push({owner,plan,state,camera:snapshot,program:program(state,mesh.attrs)});count++;
         }

@@ -1,0 +1,137 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "850fb16",
+  "scope": "Peach mirror on Fountain with original dynamic-bone initialization and cosmetic reflection/scenery reductions.",
+  "hypothesis": "Skip packing/uploading uniforms whose linked WebGL location is null.",
+  "outcome": "Inconclusive and reverted. Original A1/A2 draw means varied from 8.36 to 12.37 ms; B1/B2 were 12.42 and 11.77 ms. No reliable improvement established.",
+  "note": "A1 reuses the preceding address-experiment A2 control; A2 was repeated between the two uniform candidates. The executable is identical across all four runs. Unrelated simulation CPU also varied.",
+  "rows": [
+    {
+      "id": "a1",
+      "artifact": "dist/native-port/experiment-active-uniforms/a1.json",
+      "artifactSha256": "46c5a8c83fc12f4a46a7d69313214c51863e3db5a7f8ba3f05c456395d043823",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3593,
+      "elapsedMs": 60029.39999997616,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.8023888889865742,
+        "p50Ms": 0.7000000178813934,
+        "p95Ms": 1.300000011920929,
+        "maxMs": 1.9000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3593,
+        "meanMs": 8.363512385067354,
+        "p50Ms": 7.5,
+        "p95Ms": 13.900000005960464,
+        "maxMs": 29
+      },
+      "multiStepCallbacks": 7
+    },
+    {
+      "id": "b1",
+      "artifact": "dist/native-port/experiment-active-uniforms/b1.json",
+      "artifactSha256": "a3747d74329073db999e33faf28c34ebc8b21f9e1118e1a2409292cbda3e2a62",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "fee251548a77bbde0111b24c9138a35e44ad021fa0ea8a6754f0bd56dc27c456",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3452,
+      "elapsedMs": 60034.09999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.1418611111574704,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 1.800000011920929,
+        "maxMs": 2.7999999821186066
+      },
+      "drawSubmissionCpu": {
+        "samples": 3452,
+        "meanMs": 12.41523754320443,
+        "p50Ms": 11.700000017881393,
+        "p95Ms": 19.200000017881393,
+        "maxMs": 33.599999994039536
+      },
+      "multiStepCallbacks": 142
+    },
+    {
+      "id": "a2",
+      "artifact": "dist/native-port/experiment-active-uniforms/a2.json",
+      "artifactSha256": "b64a0c64d12dcc914b47fd3a35244849f5c11c7af7084e7193946812ddfadfd7",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "a1be61d6f623469477e49c60c5ff8adde095383b5f6741b09250d01c08afdb54",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3448,
+      "elapsedMs": 60034.89999997616,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.0955555553320382,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 1.7999999821186066,
+        "maxMs": 6.700000017881393
+      },
+      "drawSubmissionCpu": {
+        "samples": 3448,
+        "meanMs": 12.369373549787184,
+        "p50Ms": 11.700000017881393,
+        "p95Ms": 19.19999998807907,
+        "maxMs": 64.30000001192093
+      },
+      "multiStepCallbacks": 140
+    },
+    {
+      "id": "b2",
+      "artifact": "dist/native-port/experiment-active-uniforms/b2.json",
+      "artifactSha256": "5b298ea781796bd232d6b1ab6ef31aa12f0f10c2a633704d4da69657e86b91ed",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "fee251548a77bbde0111b24c9138a35e44ad021fa0ea8a6754f0bd56dc27c456",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "774cb8cf66855938ad7c29f8806b168a038a0c5c582c056edb15b7348e4258bf",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "completedWithoutProbeError": true,
+      "frames": 3600,
+      "draws": 3487,
+      "elapsedMs": 60043.5,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.0797499997665485,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 1.7000000178813934,
+        "maxMs": 3.4000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3487,
+        "meanMs": 11.77160883330157,
+        "p50Ms": 11.200000017881393,
+        "p95Ms": 18.100000023841858,
+        "maxMs": 39
+      },
+      "multiStepCallbacks": 109
+    }
+  ],
+  "presentationFpsMeasured": false,
+  "inputToPhotonMeasured": false,
+  "competitiveAcceptance": false
+}
