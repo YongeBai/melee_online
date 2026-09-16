@@ -746,6 +746,33 @@ matching the live run's post-intro starting point. Workload source hashes are
 included in probe reports; do not compare revision-2 timings as if they used
 the older input workload.
 
+## Fountain of Dreams simulation bring-up
+
+The `fountain` fixture imports the five original map groups, one spline, six
+shadow-light entries, platform parameters, empty shape-animation topology,
+star model and mutable reflection-image descriptor. Original stage initialization
+creates two distinct platform owners with map ID 4. The star owner uses the
+retail -1 sentinel; its descriptor and callback are checked before assigning a
+browser resource slot. Clang's unsigned enum representation must not hide that
+sentinel. Native on-load light animation flags are applied too.
+
+`node scripts/native-port/probe-constructor.mjs --map=fountain --stage-callbacks --stage-only --stage-frames=9000`
+
+This simulation-only check executes the unchanged platform state machines and
+checks both platforms' collision vertices against their registered joint
+matrices on every frame. Both platforms must rise and fall; the check also
+records their hide/return phases and verifies distinct ownership. It does not
+freeze, teleport or rewrite platform state. Source collision vertices are
+validated before callbacks move the platforms.
+
+This is not a rendered or performance-qualified fourth stage. The current
+`--render --hardware` attempt fails explicitly at unsupported point geometry:
+the star mesh contains 24,630 GX point vertices. Point rasterization and the
+water reflection camera / mutable-image capture still need integration. The
+reflection allocation is created by original code during startup, but it must
+not be mistaken for a completed rendered reflection. Fighter carrying, landing,
+drop-through and broader native visual/gameplay parity remain separate gates.
+
 ## Battlefield integration probe
 
 `stage-map-assets.mjs` imports the Battlefield map head, all seven models and

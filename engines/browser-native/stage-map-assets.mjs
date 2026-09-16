@@ -10,6 +10,7 @@ import {colorCommandWords} from './color-assets.mjs';
 // the remaining stage roots (scripts, particle banks and collision) are assembled.
 export function convertBattlefieldMap(input,options={}) {return convertStageMap(input,{...options,stage:'battlefield'});}
 export const nativeStages=Object.freeze({
+  fountain:Object.freeze({name:'Fountain of Dreams',file:'GrIz.dat',kind:2,count:5,overrideRows:17,specialCount:4,shadowCount:6,splineCount:1,callbackScripts:0,initial:[0,1,2,3,4],mandatory:[0,1,2,3,4]}),
   battlefield:Object.freeze({name:'Battlefield',file:'GrNBa.dat',kind:31,count:7,overrideRows:17,specialCount:4,callbackScripts:2,initial:[0,3,1,6],mandatory:[0,3,6]}),
   dreamland:Object.freeze({name:'Dream Land',file:'GrOp.dat',kind:28,count:8,overrideRows:19,specialCount:8,shadowCount:10,callbackScripts:0,initial:[0,3,7,5,4,6,1],mandatory:[0,1,3,4,5,6,7]}),
   destination:Object.freeze({name:'Final Destination',file:'GrNLa.dat',kind:32,count:10,overrideRows:16,specialCount:1,callbackScripts:4,initial:[0,1,2,3,4,5,6,7,8],mandatory:[0,1,2,3]}),
@@ -30,6 +31,8 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
   function tree(t){for(const at of t.words instanceof Map?t.words.keys():t.words)t.pointers.has(at)?ptr(at):word(at);for(const at of t.halves||[])word(at,2);for(const at of t.packed||[])raw(at,1);}
   function aobj(at){once('aobj',at,p=>{const object=ptr(p+12);if(object!==null&&!ownedObjects.has(object))model(object);tree(readAnimationObject(a,p,0,ownedObjects));});}
   function jointAnim(at){once('jointanim',at,p=>{const t=readJointAnimation(a,p);tree(t);for(const n of t.nodes)if(n.animation)tree(n.animation);});}
+  function shapeAnimObject(at){once('shapeobject',at,p=>{shapeAnimObject(ptr(p));empty(p+4);});}
+  function shapeAnimJoint(at){once('shapejoint',at,p=>{shapeAnimJoint(ptr(p));shapeAnimJoint(ptr(p+4));shapeAnimObject(ptr(p+8));});}
   function materialAnim(at){once('matanim',at,p=>tree(convertMaterialAnimation(archiveRootView(a,'stage_Share_matanim_joint',p))));}
   function model(at){once('model',at,p=>{const s=convertSceneAsset(archiveRootView(a,'stage_Share_joint',p));for(const n of s.model.tree.nodes)ownedObjects.add(n.offset);for(const q of s.pointerSlots)ptr(q);for(const [q,size] of s.writes)word(q,size);rows.push({root:p,nodes:s.model.tree.nodes.length,meshes:s.model.meshes.length,metrics:s.metrics});});}
   function list(at,fn){if(at===null)return;for(let i=0;i<4096;i++){const p=ptr(at+i*4);if(p===null)return i;fn(p);}throw Error('Unterminated stage pointer list');}
@@ -52,10 +55,10 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
   for(let i=0;i<bindingCount;i++){const p=binding+i*12;model(ptr(p));const pairs=ptr(p+4),n=word(p+8);if(n>261||pairs===null)throw Error('Invalid stage joint binding');for(let j=0;j<n*2;j++)word(pairs+j*2,2);}
   const animations=[];
   for(let i=0;i<count;i++){
-    const p=table+i*52;model(ptr(p));const ja=list(ptr(p+4),jointAnim)||0,ma=list(ptr(p+8),materialAnim)||0;empty(p+12);camera(ptr(p+16));list(ptr(p+20),cameraAnim);lightList(ptr(p+24));fog(ptr(p+28));empty(p+32);if(word(p+36)!==0)throw Error('Unsupported GrJoint count');const flags=ptr(p+40);if(flags!==null)raw(flags,Math.max(ja,ma));const indices=ptr(p+44),n=word(p+48);if(n>4096||(n&&indices===null))throw Error('Invalid stage update joints');if(indices!==null)for(let j=0;j<n;j++)word(indices+j*2,2);animations.push({joint:ja,material:ma});
+    const p=table+i*52;model(ptr(p));const ja=list(ptr(p+4),jointAnim)||0,ma=list(ptr(p+8),materialAnim)||0,sa=list(ptr(p+12),shapeAnimJoint)||0;camera(ptr(p+16));list(ptr(p+20),cameraAnim);lightList(ptr(p+24));fog(ptr(p+28));empty(p+32);if(word(p+36)!==0)throw Error('Unsupported GrJoint count');const flags=ptr(p+40);if(flags!==null)raw(flags,Math.max(ja,ma,sa));const indices=ptr(p+44),n=word(p+48);if(n>4096||(n&&indices===null))throw Error('Invalid stage update joints');if(indices!==null)for(let j=0;j<n;j++)word(indices+j*2,2);animations.push({joint:ja,material:ma,shape:sa});
   }
   const splines=ptr(root+16),splineCount=word(root+20);
-  if(splineCount!==(stage==='destination'?2:0)||(splineCount>0)!==(splines!==null))throw Error('Unexpected stage spline table');
+  if(splineCount!==(spec.splineCount??(stage==='destination'?2:0))||(splineCount>0)!==(splines!==null))throw Error('Unexpected stage spline table');
   for(let i=0;i<splineCount;i++){const p=ptr(splines+i*4);if(p===null)throw Error('Missing stage spline');spline(p);}
   const overrides=ptr(root+24),declaredOverrides=word(root+28),shadow=ptr(root+32),shadowCount=word(root+36),special=ptr(root+40),specialCount=word(root+44);
   if(shadowCount!==(spec.shadowCount??(stage==='destination'?3:0))||(shadowCount>0)!==(shadow!==null))throw Error('Unexpected stage shadow table');
@@ -83,10 +86,23 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
       for(let i=0;i<8;i+=2)word(yakumono+i,2);
       for(let i=8;i<52;i+=4){word(yakumono+i);if(i>=16&&!Number.isFinite(d.getFloat32(yakumono+i)))throw Error('Nonfinite Dream Land parameter');}
     }
+    if(stage==='fountain'){
+      // grIzumi_YakumonoParam: 21 four-byte fields; x4 is an unused integer
+      // field. Preserve its bits; all other fields are platform float parameters.
+      for(let i=0;i<84;i+=4){word(yakumono+i);if(i!==4&&!Number.isFinite(d.getFloat32(yakumono+i)))throw Error('Nonfinite Fountain parameter');}
+    }
     const starts=Array.from({length:spec.callbackScripts},(_,i)=>ptr(yakumono+i*4));if(starts.includes(null))throw Error('Missing stage color script');
     const scripts=readMotionScripts(a,starts,colorCommandWords,{terminalOpcodes:[0,6,7,10]});
     tree(scripts);publics.set('native_stage_callbacks',yakumono);
   }
-  return {stage,root,param,table,count,models:rows,animations,cameras,lights,fogs,splineCount,shadowCount,declaredOverrides,typedOverrideRows:spec.overrideRows,pointerSlots:pointers,writes,packed,yakumono,
+  const extraModels=[];
+  if(stage==='fountain'){
+    const name='GrdIzumiStar_TopN_joint',at=a.publics.get(name);
+    if(at===undefined)throw Error('Missing Fountain star model');model(at);publics.set(name,at);extraModels.push({name,root:at});
+    const imageName='GrdIzumi_cd_wt_GrdIzumiDummy1_1_image_desc',image=a.publics.get(imageName);
+    if(image===undefined||!pointers.has(image)||!writes.has(image+4)||writes.get(image+4)!==2||writes.get(image+8)!==4)throw Error('Untyped Fountain reflection image');
+    publics.set(imageName,image);
+  }
+  return {extraModels,stage,root,param,table,count,models:rows,animations,cameras,lights,fogs,splineCount,shadowCount,declaredOverrides,typedOverrideRows:spec.overrideRows,pointerSlots:pointers,writes,packed,yakumono,
     image:nativeSubgraphImage(body,pointers,publics)};
 }

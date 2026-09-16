@@ -7,7 +7,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const stageKey=process.argv.find(x=>x.startsWith('--map='))?.slice(6)??'battlefield';
-if(!['battlefield','destination','dreamland'].includes(stageKey))throw Error('Unknown native map');
+if(!['battlefield','destination','dreamland','fountain'].includes(stageKey))throw Error('Unknown native map');
 const stageOnly=process.argv.includes('--stage-only'),stageFrames=Number(process.argv.find(x=>x.startsWith('--stage-frames='))?.slice(15)??4500);
 if(!Number.isInteger(stageFrames)||stageFrames<4500||stageFrames>27000||stageOnly&&(!process.argv.includes('--stage-callbacks')||process.argv.includes('--live')))throw Error('Stage-only requires --stage-callbacks without --live, 4500..27000 frames');
 const deferredGpuErrors=process.argv.includes('--defer-gpu-errors');

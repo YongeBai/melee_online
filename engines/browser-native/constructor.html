@@ -121,21 +121,29 @@ try {
     installResidentFile(module,'NativeStageCollision.dat',collision.image);
     const collisionFile=openResidentArchive(module,'NativeStageCollision.dat',['coll_data']);
     module._portStageMapCollisionLoad(collisionFile.addresses[0]);
-    if(stageCallbacks){const callbacks=openResidentArchive(module,'NativeStageMap.dat',['native_stage_callbacks']);module._portStageCallbacksInitialize(callbacks.addresses[0]);}
     const cd=new DataView(collision.image.buffer,32),verts=cd.getUint32(0,true),count=cd.getUint32(4,true),scale=view().getFloat32(stageFile.addresses[1],true);
     if(module._portStageMapCollisionRead(0,0)!==count)throw Error('Stage collision vertex count');
     for(let i=0;i<count;i++)for(let axis=0;axis<2;axis++)if(module._portStageMapCollisionRead(1+axis,i)!==Math.fround(cd.getFloat32(verts+i*8+axis*4,true)*scale))throw Error('Stage collision world vertex');
+    if(stageCallbacks){const callbacks=openResidentArchive(module,'NativeStageMap.dat',['native_stage_callbacks']);module._portStageCallbacksInitialize(callbacks.addresses[0]);}
     for(const id of stageSpec.initial) {
       const object=stageCallbacks?module._portStageObject(id):module._portStageMapCreate(id);
       if(render&&!stageCallbacks)previewActors.push({name:stageSpec.name+' group '+id,object,extraRoot:1,bytes:archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true))});
     }
     if(stageCallbacks&&render){
       const sources=Array.from({length:stageSpec.count},(_,id)=>archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true)));
+      for(const extra of map.extraModels)sources.push(archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',extra.root));
       const stageObjects=module._malloc(512*8);if(!stageObjects)throw Error('Stage object list allocation');
       dynamicStage=()=>{
         const count=module._portStageObjects(stageObjects,512),rows=new Uint32Array(module.HEAPU8.buffer,stageObjects,count*2);
         return Array.from({length:count},(_,i)=>{const object=rows[i*2],id=rows[i*2+1];return {name:stageSpec.name+' group '+id,object,extraRoot:1,bytes:sources[id],emptyStageObject:id>=sources.length};});
       };
+    }
+    if(stageCallbacks&&stageKey==='fountain'){
+      const list=module._malloc(512*8);if(!list)throw Error('Stage owner allocation');
+      try{const count=module._portStageObjects(list,512),rows=new Uint32Array(module.HEAPU8.buffer,list,count*2);const groups=Array.from({length:count},(_,i)=>rows[i*2+1]);
+        if(count!==7||groups.filter(x=>x===4).length!==2||groups.filter(x=>x===5).length!==1)throw Error('Fountain original platform/star ownership');
+        report.fountainOwners=groups;
+      }finally{module._free(list);}
     }
     module._portStageMapBounds();module._portStageMapSpawn(0);
     if(render)module._portStageRenderInitialize();
@@ -245,6 +253,8 @@ try {
       report.stage.transitions=[];report.stage.peakStageParticles=0;let previous='';
       const wind=stageKey==='dreamland'?{directions:[],activeFrames:0,displacementChecks:0,windTransitionFrames:0,maxError:0,strength:module._portDreamlandWindRead(4,0)}:null;
       if(wind)report.stage.wind=wind;
+      const platforms=stageKey==='fountain'?Array.from({length:2},(_,i)=>({initial:module._portFountainPlatformRead(0,i),min:Infinity,max:-Infinity,upFrames:0,downFrames:0,phases:[],collisionChecks:0,maxCollisionError:0})):null;
+      const lastHeights=platforms?.map(p=>p.initial);if(platforms)report.stage.platforms=platforms;
       for(let frame=0;frame<stageFrames;frame++){
         for(let slot=0;slot<2;slot++)module._portStageProbePad(slot,0,0,0);
         const beforeWind=wind?[object,opponent].map((o,slot)=>({state:combatState(o),offset:module._portDreamlandWindRead(3,slot)})):null;
@@ -260,6 +270,12 @@ try {
             const error=Math.abs(after[4]-before.state[4]-before.offset);wind.maxError=Math.max(wind.maxError,error);wind.displacementChecks++;
             if(error>.0001)throw Error('Original Dream Land wind displacement mismatch '+JSON.stringify({frame,slot,error,before,after}));
           }
+        }
+        if(platforms)for(let i=0;i<2;i++){
+          const p=platforms[i],height=module._portFountainPlatformRead(0,i),phase=module._portFountainPlatformRead(1,i),error=module._portFountainPlatformRead(3,i);
+          if(!Number.isFinite(height)||height< -1.001||height>35.001||!Number.isFinite(error)||error>.0001)throw Error('Fountain platform/collision invariant '+JSON.stringify({frame,i,height,phase,error}));
+          p.min=Math.min(p.min,height);p.max=Math.max(p.max,height);p.upFrames+=height>lastHeights[i]?1:0;p.downFrames+=height<lastHeights[i]?1:0;lastHeights[i]=height;
+          if(!p.phases.includes(phase))p.phases.push(phase);p.collisionChecks++;p.maxCollisionError=Math.max(p.maxCollisionError,error);
         }
         report.stage.peakStageParticles=Math.max(report.stage.peakStageParticles,module._portEffectsRead(9,30));
         const groups=Array.from({length:stageSpec.count},(_,i)=>module._portStageObject(i)?i:-1).filter(i=>i>=0),key=groups.join(',');
@@ -277,6 +293,7 @@ try {
       if(stageKey==='battlefield'&&(report.stage.transitions.length<3||report.stage.transitions.at(-1).groups.length!==4))throw Error('Original Battlefield background did not create and retire a transition');
       if(stageKey==='destination'&&stageFrames>=27000&&(report.stage.transitions.length<5||!report.stage.transitions.some(t=>t.groups.includes(9))||report.stage.transitions.at(-1).groups.join(',')!==stageSpec.initial.join(',')))throw Error('Original Final Destination background did not complete two ownership cycles');
       if(wind&&(!wind.activeFrames||!wind.displacementChecks||(stageFrames>=9000&&wind.directions.length!==2)))throw Error('Dream Land original wind was not exercised');
+      if(platforms&&platforms.some(p=>!p.upFrames||!p.downFrames||p.max-p.min<1))throw Error('Both Fountain platforms must move up and down');
       report.stage.callbackFrames=stageFrames;report.stage.callbacksVerified=true;
     }
     if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat'))await verifyCombat(module,[object,opponent],report.combat,{

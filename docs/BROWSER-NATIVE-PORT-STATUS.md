@@ -5,6 +5,24 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Fountain of Dreams now has a simulation fixture with the original two moving
+platforms. Across 9,000 steps, both rise, fall, disappear and return. Each passes
+9,000 checks against its collision joint transform; maximum error is below
+0.000001 game units. Seven stage owners are preserved, including two separate
+platforms and the extra star model. Typed import covers the map, spline, light,
+platform parameters and empty shape-animation topology. All 155 unit tests pass.
+A 3,600-step combat workload also passes with contact in every ten-second window
+and two stock losses. Battlefield's gameplay trace and rendered image are
+unchanged from the stage-particle checkpoint, with GPU verification passing.
+
+Fountain rendering is still incomplete: its 24,630 point vertices trigger the
+renderer’s explicit unsupported-primitive guard, and its reflection camera and
+mutable texture capture are pending. This is not a fourth 720p60 result. The
+platform movement was preserved without freezing or gameplay substitutions.
+[Fountain simulation evidence](benchmarks/browser-2026-09-16-native-port-fountain-simulation.json).
+
+Previous stage-particle checkpoint:
+
 The three live stage fixtures now load their original stage particle banks.
 The missing bank allowed stage callbacks to request effects without spawning
 them. Typed conversion and original HSD registration restore the scripts,

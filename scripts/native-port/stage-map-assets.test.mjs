@@ -32,7 +32,7 @@ test('stage callbacks import typed color scripts and reject unsafe script roots'
 test('stage map refuses unsupported graphs and unsafe descriptor interpretation',()=>{
   for(const change of [
     a=>a.d.setUint32(12,8),a=>a.d.setUint32(28,17),a=>a.d.setUint16(a.camera+6,9),
-    a=>a.ptr(a.camera,1300),a=>a.ptr(64+12,1300),a=>a.ptr(64+32,1300),
+    a=>a.ptr(a.camera,1300),a=>a.ptr(64+12,1600),a=>a.ptr(64+32,1300),
     a=>a.d.setUint32(64+36,1),a=>a.ptr(a.param+176,1788),
     a=>a.relocs.delete(64),a=>a.ptr(a.light+16,1790),
     a=>a.ptr(a.light+4,a.light),a=>a.d.setUint32(1100,32),
@@ -96,4 +96,47 @@ test('Dream Land imports signed timer halves and exact float wind parameters, wi
   assert.equal(d.getInt16(1600,true),-4);assert.equal(d.getInt16(1602,true),12);assert.equal(d.getInt32(1608,true),600);
   assert.equal(d.getFloat32(1616,true),Math.fround(.2));assert.equal(d.getFloat32(1620,true),-17);assert.equal(map.pointerSlots.has(1600),false);
   for(const change of [a=>a.d.setUint32(12,9),a=>a.d.setUint32(36,9),a=>a.d.setUint32(28,19),a=>a.d.setFloat32(1616,NaN),a=>a.ptr(1608,1300)])assert.throws(()=>convertStageMap(dreamland(change),{stage:'dreamland',callbacks:true}));
+});
+
+test('stage imports empty shape-animation topology and refuses morph tracks or cycles',()=>{
+  const make=change=>fixture(a=>{a.ptr(64+12,1640);a.ptr(1640,1656);a.ptr(1656,1668);a.ptr(1664,1680);change?.(a);});
+  const source=make(),before=source.slice(),map=convertBattlefieldMap(source),d=new DataView(map.image.buffer,32);
+  assert.deepEqual(source,before);assert.equal(map.animations[0].shape,1);assert.equal(d.getUint32(1656,true),1668);assert.equal(d.getUint32(1664,true),1680);
+  for(const change of [a=>a.ptr(1656,1656),a=>a.ptr(1680,1680),a=>a.ptr(1684,1700)])assert.throws(()=>convertBattlefieldMap(make(change)));
+});
+
+function fountain(change=()=>{}) {
+  const bytes=destination(a=>{
+    const {d,body,ptr,light,joint,relocs}=a;
+    for(let at=2400;at<3000;at+=4){d.setUint32(at,0);relocs.delete(at);}
+    d.setUint32(12,5);ptr(24,2400);d.setUint32(28,34);
+    for(let i=0;i<17;i++){ptr(2400+i*8,light);body[2404+i*8]=0xe0;}
+    ptr(32,2536);d.setUint32(36,6);ptr(40,2584);d.setUint32(44,4);
+    for(let i=0;i<6;i++)body[2540+i*8]=0x80;
+    for(let i=0;i<4;i++)ptr(2584+i*4,joint);
+    ptr(16,2640);d.setUint32(20,1);ptr(2640,2680);
+    d.setUint16(2682,2);d.setFloat32(2692,1);ptr(2688,2736);ptr(2696,2760);
+    for(let at=1600;at<1684;at+=4){relocs.delete(at);d.setFloat32(at,at===1600?20:at===1608?28:.25);}
+    d.setUint32(1604,0xdeadbeef);d.setUint32(1100,2);
+    // Empty valid geometry still references a real typed material/texture graph.
+    ptr(joint+16,3000);ptr(3008,3216);ptr(3012,3040);ptr(3048,3100);
+    d.setUint16(3054,1);ptr(3056,3168);
+    [9,1,1,4].forEach((v,i)=>d.setUint32(3100+i*4,v));d.setUint32(3124,255);
+    ptr(3224,3296);ptr(3228,3256);d.setFloat32(3268,1);
+    for(let i=0;i<3;i++)d.setFloat32(3324+i*4,1);body[3356]=body[3357]=1;ptr(3372,3400);
+    ptr(3400,3456);d.setUint16(3404,8);d.setUint16(3406,8);
+    change(a);
+  });
+  const v=new DataView(bytes.buffer),size=v.getUint32(4),count=v.getUint32(8),pub=32+size+count*4;
+  const names=['map_head','grGroundParam','yakumono_param','GrdIzumiStar_TopN_joint','GrdIzumi_cd_wt_GrdIzumiDummy1_1_image_desc'];
+  const encoded=names.map(n=>new TextEncoder().encode(n+'\0')),image=new Uint8Array(pub+names.length*8+encoded.reduce((n,b)=>n+b.length,0)),out=new DataView(image.buffer);
+  image.set(bytes.subarray(0,pub));out.setUint32(0,image.length);out.setUint32(12,names.length);
+  let text=0;[0,800,1600,1300,3400].forEach((offset,i)=>{out.setUint32(pub+i*8,offset);out.setUint32(pub+i*8+4,text);image.set(encoded[i],pub+names.length*8+text);text+=encoded[i].length;});return image;
+}
+test('Fountain imports platform float parameters, unused integer bits and typed extra public roots',()=>{
+  const source=fountain(),before=source.slice(),map=convertStageMap(source,{stage:'fountain',callbacks:true}),d=new DataView(map.image.buffer,32);
+  assert.deepEqual(source,before);assert.equal(map.count,5);assert.equal(map.shadowCount,6);assert.equal(map.splineCount,1);
+  assert.equal(d.getFloat32(1600,true),20);assert.equal(d.getFloat32(1608,true),28);assert.equal(d.getUint32(1604,true),0xdeadbeef);
+  assert.deepEqual(map.extraModels,[{name:'GrdIzumiStar_TopN_joint',root:1300}]);assert.equal(d.getUint16(3404,true),8);assert.equal(d.getUint32(3400,true),3456);
+  for(const change of [a=>a.d.setFloat32(1608,NaN),a=>a.ptr(1608,1300),a=>a.d.setUint32(36,5),a=>a.d.setUint32(20,2),a=>a.d.setUint16(3404,0)])assert.throws(()=>convertStageMap(fountain(change),{stage:'fountain',callbacks:true}));
 });

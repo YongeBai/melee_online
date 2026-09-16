@@ -4,6 +4,7 @@
 #include <melee/gr/granime.h>
 #include <melee/gr/grbattle.h>
 #include <melee/gr/grlast.h>
+#include <melee/gr/grizumi.h>
 #include <melee/gr/groldpupupu.h>
 #include <melee/gr/types.h>
 #include <melee/sc/types.h>
@@ -84,6 +85,7 @@ void portStageRenderBegin(void)
 void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam* param,unsigned kind)
 {
     switch(kind){
+    case St_Kind_Izumi:model_count=5;stage_callbacks=&grIz_StageData;break;
     case St_Kind_Battle:model_count=7;stage_callbacks=&grNBa_StageData;break;
     case St_Kind_Last:model_count=10;stage_callbacks=&grNLa_StageData;break;
     case St_Kind_OldPupupu:model_count=8;stage_callbacks=&grOp_StageData;break;
@@ -132,8 +134,10 @@ void portStageCallbacksInitialize(void* parameters)
     for(unsigned i=0;i<model_count;i++)owners[i]=Ground_GetMapGObj(i);
     if(!owners[0]||!owners[1]||!owners[3])abort();
     if(stage_kind==St_Kind_Battle&&!owners[6])abort();
-    if(stage_kind==St_Kind_Last&&!owners[2])abort();
+    if((stage_kind==St_Kind_Last||stage_kind==St_Kind_Izumi)&&!owners[2])abort();
+    if(stage_kind==St_Kind_Izumi&&!owners[4])abort();
     if(stage_kind==St_Kind_OldPupupu&&(!owners[4]||!owners[5]||!owners[6]||!owners[7]||!Ground_GetMapGObj(8)))abort();
+    if(stage_kind==St_Kind_Izumi)stage_callbacks->on_load();
     callbacks_initialized=1;
 }
 void portBattlefieldCallbacksInitialize(void* parameters){portStageCallbacksInitialize(parameters);}
@@ -155,12 +159,53 @@ unsigned portStageObjects(unsigned* output,unsigned capacity)
     if(!callbacks_initialized||!output)abort();unsigned count=0;
     for(HSD_GObj* object=HSD_GObjPLinkHead[5];object;object=object->next){
         if(object->classifier!=HSD_GOBJ_CLASS_STAGE||!object->render_cb)continue;
-        Ground* ground=object->user_data;if(!ground||ground->map_id<0||count>=capacity)abort();
-        unsigned id=ground->map_id;
-        if(id>=model_count){if(stage_kind!=St_Kind_OldPupupu||id!=8)abort();check_empty_stage_joint(object->hsd_obj);}
+        Ground* ground=object->user_data;if(!ground||count>=capacity)abort();
+        /* GrKind may be unsigned in Clang; the retail custom-owner sentinel is -1. */
+        int map_id=(s32)ground->map_id;unsigned id=map_id;
+        if(map_id<0){
+            if(stage_kind!=St_Kind_Izumi||map_id!=-1||object->render_cb!=grIzumi_801CCB90)abort();
+            HSD_Joint* descriptor=HSD_ArchiveGetPublicAddress(grDatFiles_GetArchive()->unk0,"GrdIzumiStar_TopN_joint");
+            HSD_JObj* root=object->hsd_obj;
+            if(!descriptor||!root||!root->child||root->child->id!=(unsigned)descriptor)abort();
+            id=model_count;
+        }else if(id>=model_count){if(stage_kind!=St_Kind_OldPupupu||id!=8)abort();check_empty_stage_joint(object->hsd_obj);}
         output[count*2]=(unsigned)object;output[count*2+1]=id;count++;
     }
     return count;
+}
+
+/* Observe the two distinct original platform owners and their registered
+ * collision transforms. This does not step, freeze or reposition a platform. */
+double portFountainPlatformRead(unsigned field,unsigned index)
+{
+    if(stage_kind!=St_Kind_Izumi||!callbacks_initialized||index>=2)abort();
+    Ground* selected=NULL;unsigned count=0;
+    for(HSD_GObj* object=HSD_GObjPLinkHead[5];object;object=object->next){
+        if(object->classifier!=HSD_GOBJ_CLASS_STAGE||!object->render_cb)continue;
+        Ground* ground=object->user_data;if(!ground||ground->map_id!=4)continue;
+        if(ground->u.izumi3.xC8<0||ground->u.izumi3.xC8>=2)abort();count++;
+        if(ground->u.izumi3.xC8==index){if(selected)abort();selected=ground;}
+    }
+    if(count!=2||!selected)abort();
+    CollJoint* joint=&mpGetGroundCollJoint()[index];
+    if(joint->x20!=selected->u.izumi3.xCC||!joint->inner||joint->inner->vtx_count<2)abort();
+    if(field==0)return selected->u.izumi3.xD0;
+    if(field==1)return selected->u.izumi3.xC4;
+    if(field==2)return joint->x20->translate.y;
+    if(field==3){
+        double maximum=0;MtxPtr matrix=joint->x20->mtx;
+        for(int i=0;i<joint->inner->vtx_count;i++){
+            CollVtx* vertex=&mpGetGroundCollVtx()[joint->inner->vtx_start+i];
+            double x=(double)vertex->x0*matrix[0][0]+(double)vertex->x4*matrix[0][1]+matrix[0][3];
+            double y=(double)vertex->x0*matrix[1][0]+(double)vertex->x4*matrix[1][1]+matrix[1][3];
+            if(!isfinite(x)||!isfinite(y)||!isfinite(vertex->pos.x)||!isfinite(vertex->pos.y))abort();
+            maximum=fmax(maximum,fmax(fabs(vertex->pos.x-x),fabs(vertex->pos.y-y)));
+        }
+        return maximum;
+    }
+    if(field==4)return mpGetGroundCollVtx()[joint->inner->vtx_start].pos.y;
+    if(field==5)return selected->u.izumi3.xC6;
+    abort();
 }
 
 /* Read-only observations of the original wind state and collision query. */
