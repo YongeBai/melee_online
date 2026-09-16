@@ -28,18 +28,23 @@ import {convertMotionAnimations} from './motion-animations.mjs';
 import {motionSpec} from './motion-spec.mjs';
 import {attributeSpec} from './attribute-spec.mjs';
 import {convertFighterEffects,convertCommonEffects} from './effect-assets.mjs';
-import {convertBattlefieldMap} from './stage-map-assets.mjs';
+import {convertStageMap,nativeStages} from './stage-map-assets.mjs';
 import {convertStageCollision} from './stage-collision.mjs';
 import {loadCostume} from './costume-assets.mjs';
 import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
+const stageKey=params.get('map')??'battlefield',stageSpec=nativeStages[stageKey];
+if(!stageSpec)throw Error('Unknown native stage');
 const code=params.get('character')??'Ca',character=fighterArchives[code],kind=motionSpec.codes.indexOf(code);
 if(!character||kind<0)throw Error('Unknown fighter component');
 const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat',effectName='Ef'+(code==='Fc'?'Fx':code)+'Data.dat';
 report.character={code,name:character,kind};
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
-const stageCallbacks=params.has('stagecallbacks');let dynamicStage=null;
+const stageCallbacks=params.has('stagecallbacks'),stageOnly=params.has('stageonly');
+const stageFrames=Number(params.get('stageframes')??4500);
+if(!Number.isInteger(stageFrames)||stageFrames<4500||stageFrames>27000||stageOnly&&!stageCallbacks)throw Error('Invalid stage callback probe');
+const cameraValidation=stageCallbacks&&stageKey==='destination'?{clipPlanes:[1,30000]}:{};let dynamicStage=null;
 if(intro&&!withHud)throw Error('Intro requires native HUD');
 if(stageCallbacks&&!intro)throw Error('Stage callback integration requires the intro probe');
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
@@ -87,7 +92,7 @@ try {
     installResidentFile(module,'NativeStatus.dat',status.image);
     const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models',...(withHud?['ScInfDmg_scene_data']:[])]);
     module._portTournamentStatusInstall(statusFile.archive);report.statusModels=status.models;
-    module._portTournamentInitializeKinds(kind,kind);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
+    module._portTournamentInitializeStage(kind,kind,stageSpec.kind);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
     if(withHud){
       report.iconSelectorChecks=verifyHudIconSelector(module);
       module._portTournamentHudInitialize(statusFile.addresses[1]);
@@ -100,29 +105,31 @@ try {
   const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
-    const stageBytes=await asset('GrNBa.dat'),map=convertBattlefieldMap(stageBytes,{callbacks:stageCallbacks});
-    installResidentFile(module,'NativeBattlefieldMap.dat',map.image);
-    const stageFile=openResidentArchive(module,'NativeBattlefieldMap.dat',['native_stage_map','native_stage_parameters']);
-    module._portStageMapInstall(stageFile.archive,...stageFile.addresses);
+    const stageBytes=await asset(stageSpec.file),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
+    for(let byte=0;byte<256;byte++)if(module._portStageShadowBits(byte)!==(byte>>>7))throw Error('Stage shadow MSB layout');
+    for(const rate of [0,0.25,1,2])for(const flags of [0,0x20000000,0x40000000,0xffffffff])if(module._portStageAnimationProbe(rate,flags)!==1)throw Error('Stage animation callback ABI');
+    installResidentFile(module,'NativeStageMap.dat',map.image);
+    const stageFile=openResidentArchive(module,'NativeStageMap.dat',['native_stage_map','native_stage_parameters']);
+    module._portStageMapInstallKind(stageFile.archive,...stageFile.addresses,stageSpec.kind);
     const collision=convertStageCollision(stageBytes);
-    installResidentFile(module,'NativeBattlefieldCollision.dat',collision.image);
-    const collisionFile=openResidentArchive(module,'NativeBattlefieldCollision.dat',['coll_data']);
+    installResidentFile(module,'NativeStageCollision.dat',collision.image);
+    const collisionFile=openResidentArchive(module,'NativeStageCollision.dat',['coll_data']);
     module._portStageMapCollisionLoad(collisionFile.addresses[0]);
-    if(stageCallbacks){const callbacks=openResidentArchive(module,'NativeBattlefieldMap.dat',['native_stage_callbacks']);module._portBattlefieldCallbacksInitialize(callbacks.addresses[0]);}
+    if(stageCallbacks){const callbacks=openResidentArchive(module,'NativeStageMap.dat',['native_stage_callbacks']);module._portStageCallbacksInitialize(callbacks.addresses[0]);}
     const cd=new DataView(collision.image.buffer,32),verts=cd.getUint32(0,true),count=cd.getUint32(4,true),scale=view().getFloat32(stageFile.addresses[1],true);
     if(module._portStageMapCollisionRead(0,0)!==count)throw Error('Stage collision vertex count');
     for(let i=0;i<count;i++)for(let axis=0;axis<2;axis++)if(module._portStageMapCollisionRead(1+axis,i)!==Math.fround(cd.getFloat32(verts+i*8+axis*4,true)*scale))throw Error('Stage collision world vertex');
-    for(const id of [0,3,1,6]) {
-      const object=stageCallbacks?module._portBattlefieldObject(id):module._portStageMapCreate(id);
-      if(render&&!stageCallbacks)previewActors.push({name:'Battlefield group '+id,object,extraRoot:1,bytes:archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true))});
+    for(const id of stageSpec.initial) {
+      const object=stageCallbacks?module._portStageObject(id):module._portStageMapCreate(id);
+      if(render&&!stageCallbacks)previewActors.push({name:stageSpec.name+' group '+id,object,extraRoot:1,bytes:archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true))});
     }
     if(stageCallbacks&&render){
-      const sources=Array.from({length:7},(_,id)=>archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true)));
-      dynamicStage=()=>sources.map((bytes,id)=>({name:'Battlefield group '+id,object:module._portBattlefieldObject(id),extraRoot:1,bytes})).filter(a=>a.object);
+      const sources=Array.from({length:stageSpec.count},(_,id)=>archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true)));
+      dynamicStage=()=>sources.map((bytes,id)=>({name:stageSpec.name+' group '+id,object:module._portStageObject(id),extraRoot:1,bytes})).filter(a=>a.object);
     }
     module._portStageMapBounds();module._portStageMapSpawn(0);
     if(render)module._portStageRenderInitialize();
-    report.stage={name:'Battlefield',collisionLoaded:true,vertexChecks:count*2,modelGroups:[0,3,1,6],completeStageStartup:false};
+    report.stage={name:stageSpec.name,kind:stageSpec.kind,collisionLoaded:true,vertexChecks:count*2,modelGroups:stageSpec.initial,splineCount:map.splineCount,shadowCount:map.shadowCount,shadowFlagCases:256,animationCallbackCases:16,completeStageStartup:false};
     if(stageCallbacks)report.stage.originalCallbacks=true;
   }
   report.constructorAttempted=true;
@@ -150,12 +157,12 @@ try {
   }
   if(render||new URLSearchParams(location.search).has('camera')){module._portStageCameraStart();report.cameraStarted=true;}
   if(tournament||live||params.has('step')){
-    report.schedulerContext=tournament?'Original VS rules/controller with four stocks, eight minutes, no items, two Falcons and partial Battlefield startup. HUD drawing, audio, menus and full scene ownership remain incomplete.':combat?'Battlefield geometry/collision, default rules, two player-owned Falcons and scripted normalized combat input. Full match startup and rendering remain incomplete.':withStage?'Battlefield geometry/collision and source spawn, without complete Stage startup, match rules, input or rendering.':'Isolated bring-up without stage, match rules, input or rendering. Empty bounds cause death/rebirth; this is not gameplay validation.';
+    report.schedulerContext=tournament?'Original VS rules/controller: four stocks, eight minutes, no items, two '+character+' fighters and partial '+stageSpec.name+' startup. Audio, menus and full scene ownership remain incomplete.':combat?stageSpec.name+' geometry/collision, default rules, two player-owned fighters and scripted normalized combat input.':withStage?stageSpec.name+' geometry/collision and source spawn without complete match startup.':'Isolated constructor without a match.';
     report.schedulerSteps=0;console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
     for(let i=0;i<(intro?0:120);i++){module._portRuntimeStep();report.schedulerSteps++;}
     report.afterSteps=state();
     if(!report.afterSteps.every(Number.isFinite)||report.afterSteps[9]!==15||report.afterSteps[10]!==1)throw Error('Scheduled fighter state/ownership invariant');
-    if(withStage&&!intro&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on Battlefield');
+    if(withStage&&!intro&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on '+stageSpec.name);
     if(damageHud){module._portTournamentDamageInitialize();report.hud.damage=true;}
     if(tournament&&!intro){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
     const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
@@ -201,7 +208,7 @@ try {
         itemModels=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(baseBytes),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
       }
-      preview=createNativeMatchPreview(module,canvas,previewActors,{items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
+      preview=createNativeMatchPreview(module,canvas,previewActors,{cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(intro){
@@ -215,10 +222,10 @@ try {
     }
     if(stageCallbacks&&!live){
       report.stage.transitions=[];let previous='';
-      for(let frame=0;frame<4500;frame++){
+      for(let frame=0;frame<stageFrames;frame++){
         for(let slot=0;slot<2;slot++)module._portStageProbePad(slot,0,0,0);
         step();
-        const groups=Array.from({length:7},(_,i)=>module._portBattlefieldObject(i)?i:-1).filter(i=>i>=0),key=groups.join(',');
+        const groups=Array.from({length:stageSpec.count},(_,i)=>module._portStageObject(i)?i:-1).filter(i=>i>=0),key=groups.join(',');
         if(key!==previous){report.stage.transitions.push({frame:frame+1,groups});previous=key;}
         if(preview&&(renderSteps||frame%120===0)){
           const drawn=preview.draw();report.stage.renderedFrames=(report.stage.renderedFrames??0)+1;
@@ -227,18 +234,19 @@ try {
             const img=document.createElement('img');img.id='native-stage-transition-'+frame;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
           }
         }
-        if(![0,3,6].every(i=>groups.includes(i)))throw Error('Original stage lost mandatory map groups');
+        if(!stageSpec.mandatory.every(i=>groups.includes(i)))throw Error('Original stage lost mandatory map groups');
         if([0,1].some(slot=>module._portTournamentRead(10,slot)!==4))throw Error('Idle stage callback test lost stocks');
       }
-      if(report.stage.transitions.length<3||report.stage.transitions.at(-1).groups.length!==4)throw Error('Original Battlefield background did not create and retire a transition');
-      report.stage.callbackFrames=4500;report.stage.callbacksVerified=true;
+      if(stageKey==='battlefield'&&(report.stage.transitions.length<3||report.stage.transitions.at(-1).groups.length!==4))throw Error('Original Battlefield background did not create and retire a transition');
+      if(stageKey==='destination'&&stageFrames>=27000&&(report.stage.transitions.length<5||!report.stage.transitions.some(t=>t.groups.includes(9))||report.stage.transitions.at(-1).groups.join(',')!==stageSpec.initial.join(',')))throw Error('Original Final Destination background did not complete two ownership cycles');
+      report.stage.callbackFrames=stageFrames;report.stage.callbacksVerified=true;
     }
-    if(combat&&!live&&!params.has('workloadsteps')&&!params.has('projectilecombat'))await verifyCombat(module,[object,opponent],report.combat,{
-      step,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
+    if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat'))await verifyCombat(module,[object,opponent],report.combat,{
+      step,cameraValidation,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
       onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
     });
-    if(damageHud&&!live&&!params.has('workloadsteps')){
+    if(damageHud&&!live&&!stageOnly&&!params.has('workloadsteps')){
       report.hud.afterCombat=[object,opponent].map((object,slot)=>({damage:combatState(object)[13],display:module._portHudPlayerRead(slot,0)}));
       if(report.hud.afterCombat.some(p=>p.display!==Math.min(999,Math.floor(p.damage))))throw Error('HUD damage differs from settled fighter damage');
     }
@@ -311,7 +319,7 @@ try {
     }
     if(params.has('workloadsteps')){const count=Number(params.get('workloadsteps'));if(!tournament||live||!Number.isInteger(count)||count<180||count>36000)throw Error('Invalid unpaced workload');report.simulationWorkload={};verifyCombatWorkload(module,[object,opponent],report.simulationWorkload,count);}
     else if(tournament&&!live&&params.has('timeout')){report.timeout={};verifyTimeout(module,report.timeout,{onStep:renderSteps?()=>{recordHud(preview.draw());report.timeoutRenderedSteps=(report.timeoutRenderedSteps??0)+1;}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
-    else if(tournament&&!live){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
+    else if(tournament&&!live&&!stageOnly){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
     if(damageHud)report.hud.finalPlayers=[0,1].map(slot=>Array.from({length:4},(_,field)=>module._portHudPlayerRead(slot,field)));
     if(preview&&!live)preview.dispose();
   }

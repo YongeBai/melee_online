@@ -1,7 +1,7 @@
 import {createNativeCamera,checkNativeCamera} from './native-camera.mjs';
 // Integration probe over original Fighter callbacks. Inputs are normalized HSD
 // samples; no fighter positions, damage, motion states or physics are assigned.
-export async function verifyCombat(module,objects,report,{control=false,camera=false,progress=()=>{},onStep=()=>{},step=()=>module._portRuntimeStep()}={}) {
+export async function verifyCombat(module,objects,report,{control=false,camera=false,cameraValidation={},progress=()=>{},onStep=()=>{},step=()=>module._portRuntimeStep()}={}) {
   const state=o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i));
   const snapshot=()=>objects.map(state),trace=[],cameraTrace=[],nativeCamera=camera?createNativeCamera(module):null;
   try {
@@ -15,7 +15,7 @@ export async function verifyCombat(module,objects,report,{control=false,camera=f
     report.effects.peakParticles=Math.max(report.effects.peakParticles,module._portEffectsRead(8,0));
     report.effects.peakGenerators=Math.max(report.effects.peakGenerators,module._portEffectsRead(6,0));
     report.effects.peakModels=Math.max(report.effects.peakModels,module._portEffectsRead(5,0));
-    if(nativeCamera){const s=nativeCamera.snapshot();checkNativeCamera(s);cameraTrace.push(Array.from(s.raw));}
+    if(nativeCamera){const s=nativeCamera.snapshot();checkNativeCamera(s,cameraValidation);cameraTrace.push(Array.from(s.raw));}
     onStep();
     return current;
   }

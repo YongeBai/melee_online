@@ -674,6 +674,42 @@ synchronously on one browser thread. Any future threading or asynchronous C
 suspension needs a corresponding synchronization implementation. Original audio
 calls beyond integrated functionality still fail explicitly.
 
+## Final Destination and stage callback coverage
+
+The constructor fixture accepts `--map=destination` (default: Battlefield).
+The typed map importer supports Final Destination's ten model groups, referenced
+spline joints, two spline entries, three shadow-light entries and four color
+scripts. Its light override table has the same declared-double-count quirk as
+Battlefield: 32 declared entries, 16 typed eight-byte rows. Packed shadow flags
+retain their source MSB position in the generated C header.
+
+Stage selection now reaches the original VS rules and intro route. Original
+`grNLa_StageData.on_init` and subsequent stage processes own background changes.
+The stage animation ABI boundary reuses HSD's original typed callback dispatcher
+instead of the PPC decomp's extra-argument calls. No camera pose is rewritten:
+Final Destination's original startup selects near/far 1/30000; Battlefield keeps
+0.1/16384. Camera validation accepts the selected stage's expected planes.
+
+Run a long callback check or a separate timed combat workload:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --map=destination --stage-callbacks --stage-only --stage-frames=27000 --render --hardware
+node scripts/native-port/probe-constructor.mjs --map=destination --stage-callbacks --live --workload --frames=3600 --hardware
+```
+
+The long check runs 27,000 idle simulation steps with original callbacks,
+stock-retention checks and sampled rendered/GPU-verified frames. It is not a
+performance measurement. Match timing remains separate from draw submissions,
+distinct presentations and input-to-photon latency. Full scene loading, remaining
+stage roots, stage-particle parity, audio, other stages and full roster parity
+remain incomplete.
+
+The GPU position oracle accounts for cancellation using the standard float32
+forward-error bound for four products and three additions, in addition to its
+existing relative tolerance. The shader itself is unchanged by this verifier
+correction; normal verification remains independent. Reports count components
+that require the rounding allowance.
+
 ## Battlefield integration probe
 
 `stage-map-assets.mjs` imports the Battlefield map head, all seven models and

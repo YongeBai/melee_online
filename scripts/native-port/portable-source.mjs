@@ -129,8 +129,36 @@ export function preparePortableSource(source,output) {
       text+='\nbool portCObjSetCurrentOffscreen(HSD_CObj* cobj) { if(!cobj)return false; _HSD_ZListClear(); current=cobj; if(!setupOffscreenCamera(cobj))return false; HSD_CObjSetupViewingMtx(cobj); return true; }\n';
     }
     if(file==='src/melee/gr/types.h') {
+      replace('    u8 flag : 1;','    u8 : 7; u8 flag : 1;'); // GroundShadowEntry archive MSB.
       const fields=Array.from({length:8},(_,i)=>`            /* +10:${i} */ u8 flags_b${i} : 1;`).join('\n');
       replace(fields,'            u32 : 24;\n'+Array.from({length:8},(_,i)=>`            u32 flags_b${7-i} : 1;`).join('\n'));
+    }
+    if(file==='src/sysdolphin/baselib/aobj.c') {
+      // Reuse HSD's original typed dispatcher at the stage-animation boundary.
+      text+='\nvoid portAObjDispatch(HSD_AObj* a, void* o, HSD_Type t, void* f, AObj_Arg_Type k, callbackArg* p) { callbackForeachFunc(a,o,t,f,k,p); }\n';
+    }
+    if(file==='src/melee/gr/granime.c') {
+      // The matching PPC decomp dispatch passes unused register arguments for
+      // several callback forms. WASM requires the actual signature; HSD's own
+      // dispatcher implements the same AOBJ_ARG enum with exact prototypes.
+      const start=text.indexOf('\nvoid grAnime_801C6F50('),end=text.indexOf('\nvoid grAnime_801C706C(',start);
+      if(start<0||end<=start)throw Error('Stage animation dispatch boundary changed');
+      text=text.slice(0,start)+`\nextern void portAObjDispatch(HSD_AObj*,void*,HSD_Type,void*,AObj_Arg_Type,callbackArg*);
+void grAnime_801C6F50(HSD_AObj* aobj,void* obj,u32 flags,void* func,u32 type,void* param)
+{ portAObjDispatch(aobj,obj,flags,func,type,param); }
+unsigned portStageAnimationProbe(float rate,unsigned flags)
+{
+    HSD_AObj a={0};callbackArg p;p.f=rate;
+    grAnime_801C6F50(&a,NULL,0,HSD_AObjSetRate,AOBJ_ARG_AF,&p);
+    if(a.framerate!=rate)return 0;
+    p.d=flags;grAnime_801C6F50(&a,NULL,0,HSD_AObjSetFlags,AOBJ_ARG_AU,&p);
+    if(a.flags!=(flags&(AOBJ_LOOP|AOBJ_NO_UPDATE)))return 0;
+    grAnime_801C6F50(&a,NULL,0,HSD_AObjClearFlags,AOBJ_ARG_AU,&p);
+    if(a.flags)return 0;
+    grAnime_801C6F50(&a,NULL,0,fn_801C6F2C,AOBJ_ARG_A,NULL);
+    return (a.flags&AOBJ_LOOP)!=0;
+}
+`+text.slice(end);
     }
     if(file==='src/sysdolphin/baselib/texp.c') {
       // The original compiler initializes only referenced constant channels.
@@ -170,6 +198,7 @@ export function preparePortableSource(source,output) {
       text+='LightList** portStageSelectLights(UnkArchiveStruct* archive, LightList** list) { return Ground_801C20E0(archive,list); }\n';
       text+='void portStageCreateGlobalLights(void) { Ground_801C466C(); }\n';
       text+='unsigned portStageCallbackBits(unsigned bits) { StageCallbacks v={0}; v.flags=bits; return (v.flags_b0<<7)|(v.flags_b1<<6)|(v.flags_b2<<5)|(v.flags_b3<<4)|(v.flags_b4<<3)|(v.flags_b5<<2)|(v.flags_b6<<1)|v.flags_b7; }\n';
+      text+='unsigned portStageShadowBits(unsigned bits) { struct GroundShadowEntry v={0}; ((u8*)&v)[4]=bits; return v.flag; }\n';
     }
     if(file==='src/sysdolphin/baselib/particle.c') {
       // Particle teardown likewise aliases several independent retail globals

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {convertBattlefieldMap} from '../../engines/browser-native/stage-map-assets.mjs';
-function fixture(change=()=>{}) {
-  const body=new Uint8Array(1792),d=new DataView(body.buffer),relocs=new Set(),root=0,param=800,joint=1300,camera=1400,light=1500;
+import {convertBattlefieldMap,convertStageMap} from '../../engines/browser-native/stage-map-assets.mjs';
+function fixture(change=()=>{},size=1792) {
+  const body=new Uint8Array(size),d=new DataView(body.buffer),relocs=new Set(),root=0,param=800,joint=1300,camera=1400,light=1500;
   const ptr=(p,q)=>{relocs.add(p);d.setUint32(p,q);};
   ptr(0,48);d.setUint32(4,1);ptr(8,64);d.setUint32(12,7);ptr(24,500);d.setUint32(28,34);ptr(40,636);d.setUint32(44,4);
   ptr(48,joint);ptr(52,1560);d.setUint32(56,1);
@@ -37,4 +37,38 @@ test('stage map refuses unsupported graphs and unsafe descriptor interpretation'
     a=>a.relocs.delete(64),a=>a.ptr(a.light+16,1790),
     a=>a.ptr(a.light+4,a.light),a=>a.d.setUint32(1100,32),
   ])assert.throws(()=>convertBattlefieldMap(fixture(change)));
+});
+
+function destination(change=()=>{}) {
+  return fixture(a=>{
+    const {d,body,ptr,light,joint}=a;
+    ptr(8,1800);d.setUint32(12,10);
+    for(let i=0;i<10;i++)for(let j=0;j<52;j+=4){const from=64+j,to=1800+i*52+j;d.setUint32(to,d.getUint32(from));if(a.relocs.has(from))a.relocs.add(to);}
+    ptr(24,2400);d.setUint32(28,32);
+    for(let i=0;i<16;i++){ptr(2400+i*8,light);body[2404+i*8]=0xe0;}
+    ptr(32,2528);d.setUint32(36,3);ptr(40,2552);d.setUint32(44,1);ptr(2552,joint);
+    for(let i=0;i<3;i++){ptr(2528+i*8,2800);body[2532+i*8]=i?0x80:0;}
+    ptr(16,2560);d.setUint32(20,2);ptr(2560,2600);ptr(2564,2600);
+    d.setUint16(2602,2);d.setFloat32(2612,1);ptr(2608,2700);ptr(2616,2724);
+    ptr(1608,1620);ptr(1612,1632);d.setUint32(1100,32);
+    change(a);
+  },4096);
+}
+test('Final Destination imports spline arrays, shadow flags and four original callback scripts',()=>{
+  const source=destination(),copy=source.slice(),map=convertStageMap(source,{stage:'destination',callbacks:true}),d=new DataView(map.image.buffer,32);
+  assert.deepEqual(source,copy);assert.equal(map.count,10);assert.equal(map.splineCount,2);assert.equal(map.shadowCount,3);assert.equal(map.typedOverrideRows,16);
+  assert.equal(d.getUint16(2602,true),2);assert.equal(d.getUint32(2608,true),2700);assert.equal(d.getUint8(2540),0x80);assert.equal(d.getUint32(1612,true),1632);
+  for(const change of [a=>a.d.setUint16(2602,1),a=>a.d.setFloat32(2700,NaN),a=>a.d.setUint32(20,3),a=>a.d.setUint32(36,4),a=>a.d.setUint32(28,34),a=>a.relocs.delete(1612)])assert.throws(()=>convertStageMap(destination(change),{stage:'destination',callbacks:true}));
+  assert.throws(()=>convertBattlefieldMap(source));assert.throws(()=>convertStageMap(source,{stage:'unknown'}));
+});
+test('stage light animation imports its referenced spline joint with explicit ownership',()=>{
+  const source=destination(a=>{a.ptr(2804,2850);a.ptr(2862,2900);});
+  // An unaligned object-pointer slot must never be treated as a valid AObj.
+  assert.throws(()=>convertStageMap(source,{stage:'destination'}));
+  const valid=destination(a=>{
+    a.ptr(2804,2852);a.ptr(2864,2900);a.d.setUint32(2904,0x4000);a.ptr(2916,2600);
+    for(let i=0;i<3;i++)a.d.setFloat32(2932+i*4,1);
+  });
+  const map=convertStageMap(valid,{stage:'destination'});
+  assert.ok(map.models.some(m=>m.root===2900&&m.nodes===1));assert.ok(map.pointerSlots.has(2864));
 });

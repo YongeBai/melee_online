@@ -1,0 +1,530 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "e3f1fab",
+  "scope": "Final Destination typed map and original callbacks in the direct WASM port; incomplete competitive-play acceptance",
+  "wasmSha256": "d5cecbb8779fc97744d1c11ea23729e3044f3b4cfbd304c3edfc6eb6297eb522",
+  "portableRecipeSha256": "a3c4fe2db173b40b23642d30b72c8c97a41047c81cc8bf412fa34e0b9413f335",
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "sourceHashes": {
+    "stage-map-assets.mjs": "259f73102d5c55bfc29cee6c60ba7f8530b0c711e933c68a99ca111dced5a58b",
+    "stage-map.c": "55f2b0dc54b0d5aa6db78442e0c2c0a123e98e74a17813d04d0b8c13819dadb6",
+    "match.c": "7ce78cb8c42b4c41d84881e7b0376adb91cfa1319c3650f2474058fcd44a6573",
+    "constructor.html": "a0778349eea4e22a6226f78906f4afcb5562b063a3d4e551085a7c1a94da6e70",
+    "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+    "native-match-preview.mjs": "44f5ac6ab8aede14f983a21589cc3202f40c17c09c29a02b07078b1a1d8451f0",
+    "material-gpu.mjs": "fe708a2676ab621f17801826e8c28a02a36f9f805bdebd0ec7b55a86a75557b1"
+  },
+  "validation": {
+    "unitTests": 148,
+    "failedTests": 0,
+    "compileAudit": {
+      "total": 1130,
+      "compiled": 1047,
+      "failed": 83,
+      "limitation": "The 83 failures are unresolved SDK/PPC compilation coverage, not a complete build pass. The separate fighter integration target builds successfully."
+    },
+    "fighterBuild": true,
+    "shadowFlagCases": 256,
+    "originalAnimationCallbackCases": 16
+  },
+  "stageCycle": {
+    "name": "Final Destination",
+    "kind": 32,
+    "collisionLoaded": true,
+    "vertexChecks": 32,
+    "modelGroups": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "splineCount": 2,
+    "shadowCount": 3,
+    "shadowFlagCases": 256,
+    "animationCallbackCases": 16,
+    "completeStageStartup": false,
+    "originalCallbacks": true,
+    "transitions": [
+      {
+        "frame": 1,
+        "groups": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      },
+      {
+        "frame": 10909,
+        "groups": [
+          0,
+          1,
+          2,
+          3,
+          9
+        ]
+      },
+      {
+        "frame": 12890,
+        "groups": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      },
+      {
+        "frame": 23924,
+        "groups": [
+          0,
+          1,
+          2,
+          3,
+          9
+        ]
+      },
+      {
+        "frame": 25905,
+        "groups": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      }
+    ],
+    "renderedFrames": 225,
+    "callbackFrames": 27000,
+    "callbacksVerified": true,
+    "introFrames": 124,
+    "resourceStats": {
+      "stageCreated": 20,
+      "stageRetired": 12,
+      "effectCreated": 4,
+      "effectRetired": 4,
+      "peakEffectModels": 2,
+      "itemCreated": 0,
+      "itemRetired": 0,
+      "peakItemModels": 0
+    },
+    "finalVertexChecks": {
+      "vertices": 24424,
+      "positionComponents": 73272,
+      "normalComponents": 73272,
+      "maxScaledPositionError": 0.000017852187361960464,
+      "maxNormalError": 1.103287182724344e-7,
+      "roundoffPositionComponents": 0,
+      "maxPositionRoundoffAllowance": 0.0022463487283418716
+    },
+    "camera": {
+      "eye": [
+        0,
+        27.49822425842285,
+        238.57740783691406
+      ],
+      "interest": [
+        0,
+        7.14419412612915,
+        0
+      ],
+      "fov": 30,
+      "aspect": 1.2173333168029785,
+      "near": 1,
+      "far": 30000
+    },
+    "visualInspection": "Original foreground, background, fighters and HUD inspected at 960x720; no equivalent-scene Dolphin screenshot comparison in this checkpoint."
+  },
+  "timing": [
+    {
+      "label": "First successful normal-driver-cache workload",
+      "wasmSha256": "d5cecbb8779fc97744d1c11ea23729e3044f3b4cfbd304c3edfc6eb6297eb522",
+      "rendererSources": {
+        "material-gpu.mjs": "a79aafbed32eb2901fea1bb1d5414e791b7e129108aec94149917befdcf0190e",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "44f5ac6ab8aede14f983a21589cc3202f40c17c09c29a02b07078b1a1d8451f0"
+      },
+      "driverShaderCacheDisabled": false,
+      "introFramesExcluded": 124,
+      "frames": 3600,
+      "drawSubmissions": 3599,
+      "elapsedMs": 60032.10000000894,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5153333334045278,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 6.7392331200586355,
+        "p50Ms": 6.5,
+        "p95Ms": 8.700000002980232,
+        "maxMs": 38.599999994039536
+      },
+      "rafDrawIntervals": {
+        "samples": 3598,
+        "meanMs": 16.675264035574518,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.399999999999636
+      },
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 1,
+        "rafGapsOver25Ms": 2
+      },
+      "workload": {
+        "framesWithAttack": 1787,
+        "framesWithHitlag": 303,
+        "framesWithDamage": 3343,
+        "stockChanges": [
+          {
+            "frame": 2648,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 33,
+            "attack": 193
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 204
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          }
+        ]
+      },
+      "particleStats": {
+        "draws": 11641,
+        "vertices": 46564,
+        "frames": 1689,
+        "peakDraws": 38
+      },
+      "slowDraws": [
+        {
+          "frame": 1762,
+          "costMs": 38.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "particleDraws": 0,
+            "particleVertices": 0,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 31,
+                "origin": "model",
+                "cpuMs": 16.600000008940697
+              },
+              {
+                "program": 32,
+                "origin": "model",
+                "cpuMs": 13.299999997019768
+              }
+            ],
+            "draws": 223,
+            "programs": 32,
+            "images": 148,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 8,
+            "stageRetired": 0,
+            "effectCreated": 41,
+            "effectRetired": 41,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ]
+    },
+    {
+      "label": "Later normal-driver-cache repeat after callback-cycle and regression validation",
+      "wasmSha256": "d5cecbb8779fc97744d1c11ea23729e3044f3b4cfbd304c3edfc6eb6297eb522",
+      "rendererSources": {
+        "material-gpu.mjs": "fe708a2676ab621f17801826e8c28a02a36f9f805bdebd0ec7b55a86a75557b1",
+        "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9",
+        "native-match-preview.mjs": "44f5ac6ab8aede14f983a21589cc3202f40c17c09c29a02b07078b1a1d8451f0"
+      },
+      "driverShaderCacheDisabled": false,
+      "introFramesExcluded": 124,
+      "frames": 3600,
+      "drawSubmissions": 3600,
+      "elapsedMs": 60028.70000000298,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5904444445338514,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 1.699999988079071
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.811361110876832,
+        "p50Ms": 6.5,
+        "p95Ms": 8.899999991059303,
+        "maxMs": 19.19999998807907
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.6706585162537,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000018
+      },
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 3,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 1787,
+        "framesWithHitlag": 303,
+        "framesWithDamage": 3343,
+        "stockChanges": [
+          {
+            "frame": 2648,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 33,
+            "attack": 193
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 204
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          }
+        ]
+      },
+      "particleStats": {
+        "draws": 11641,
+        "vertices": 46564,
+        "frames": 1689,
+        "peakDraws": 38
+      },
+      "slowDraws": [
+        {
+          "frame": 2648,
+          "costMs": 17.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 9,
+            "immediateVertices": 36,
+            "particleDraws": 9,
+            "particleVertices": 36,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 33,
+                "origin": "model",
+                "cpuMs": 3.800000011920929
+              }
+            ],
+            "draws": 152,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 8,
+            "stageRetired": 0,
+            "effectCreated": 65,
+            "effectRetired": 64,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2715,
+          "costMs": 19.19999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "particleDraws": 0,
+            "particleVertices": 0,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 34,
+                "origin": "model",
+                "cpuMs": 5.699999988079071
+              },
+              {
+                "program": 35,
+                "origin": "model",
+                "cpuMs": 3.9000000059604645
+              }
+            ],
+            "draws": 208,
+            "programs": 35,
+            "images": 162,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 8,
+            "stageRetired": 0,
+            "effectCreated": 65,
+            "effectRetired": 65,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ]
+    }
+  ],
+  "battlefieldRegression": {
+    "callbackFrames": 4500,
+    "introFrames": 124,
+    "combatFrames": 683,
+    "combatCompleted": true,
+    "combatTraceSha256": "5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0",
+    "traceUnchanged": true,
+    "lifecycleCompleted": true,
+    "stockChanges": [
+      {
+        "frame": 75,
+        "stocks": 3,
+        "falls": 1,
+        "outcome": 0
+      },
+      {
+        "frame": 319,
+        "stocks": 2,
+        "falls": 2,
+        "outcome": 0
+      },
+      {
+        "frame": 563,
+        "stocks": 1,
+        "falls": 3,
+        "outcome": 0
+      },
+      {
+        "frame": 807,
+        "stocks": 0,
+        "falls": 4,
+        "outcome": 2
+      }
+    ],
+    "lifecycleRenderedSteps": 1020,
+    "respawnPlatformDrawFrames": 180
+  },
+  "limitations": [
+    "Draw submissions are not distinct displayed frames or measured input-to-photon latency.",
+    "These are normal-driver-cache samples, not cold-cache certification or a controlled speedup comparison.",
+    "The first timed run has a 38.6ms draw including 29.9ms of new shader compilation. The later run has 17.6ms and 19.2ms draws involving new shader compilation.",
+    "The 27000-step idle callback check renders 225 stage samples plus intro/final draws; it does not validate every frame or every stage particle.",
+    "Complete scene loading, audio, remaining stages, full roster and move parity, public deployment and network/device integration remain incomplete.",
+    "No player ISO flow, source camera behavior, collision and original stage animation scheduling remain unchanged."
+  ],
+  "nextExperiment": "Build and validate a broader pre-play material/effect shader preparation path; compare fresh-driver-cache workloads while keeping simulation untouched."
+}

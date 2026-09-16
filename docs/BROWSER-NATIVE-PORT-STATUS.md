@@ -5,6 +5,35 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Final Destination is now the second live stage fixture. The importer handles
+its ten model groups, spline references, shadow-light flags and callback scripts.
+Original startup exposed and fixed a PPC-to-WASM callback ABI mismatch by routing
+stage animation through HSD's existing typed dispatcher. Camera validation now
+recognizes Final Destination's source-selected clip planes (1/30000), without
+changing its eye, interest, pitch, projection or gameplay camera code.
+
+A 27,000-step idle callback check passes, including two complete observed
+background ownership cycles, 225 sampled stage draws with GPU vertex checks,
+and preserved stocks. The GPU position oracle now bounds float32 cancellation
+using operand magnitudes; this fixes a false failure on distant background
+geometry without changing the shader. All 148 unit tests pass. Battlefield's
+rendered callback/combat/KO/respawn regression retains the prior combat trace
+hash `5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0`.
+
+The first successful 960×720 two-Falcon Final Destination timed workload runs
+3,600 simulation steps and 3,599 draw submissions in 60.032 seconds. A 38.6 ms
+draw includes 29.9 ms compiling two new shaders and produces one catch-up
+callback. A later normal-driver-cache repeat submits all 3,600 frames in
+60.029 seconds with no catch-up callbacks: simulation averages 0.590 ms
+(p95 0.9 ms), draw submission 6.811 ms (p95 8.9 ms). It still has 17.6 ms and
+19.2 ms draw spikes involving new shader compilation. Shader preparation before
+play is the next performance experiment; these samples do not certify smooth
+cold-cache presentation or input-to-photon latency. Complete scene loading,
+audio, other stages and full roster/move parity remain incomplete.
+[Final Destination evidence](benchmarks/browser-2026-09-16-native-port-final-destination.json).
+
+Previous Fox checkpoint:
+
 Fox is now the seventh constructor-capable fighter. Its blocking x48 extra
 was a small relocation-free integer record rather than another model/article;
 the importer preserves the source values and validates the terminated layout.

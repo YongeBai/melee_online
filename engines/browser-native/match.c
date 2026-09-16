@@ -76,22 +76,23 @@ void portTournamentStatusInstall(HSD_Archive* archive)
     if(!archive||started||*ifAll_GetArchive())abort();
     *ifAll_GetArchive()=archive;ifStatus_802F7134();
 }
-void portTournamentInitializeKinds(unsigned left,unsigned right)
+void portTournamentInitializeStage(unsigned left,unsigned right,unsigned stage)
 {
     extern int portFighterCharacterKind(unsigned);
     int characters[2]={portFighterCharacterKind(left),portFighterCharacterKind(right)};
-    if(initialized||characters[0]<0||characters[1]<0)abort();StartMeleeData data={0};
+    if(initialized||characters[0]<0||characters[1]<0||(stage!=St_Kind_Battle&&stage!=St_Kind_Last))abort();StartMeleeData data={0};
     portInitializeVsRouting();Player_80036DD8();gm_801A3E88();
     gm_SetupRulesDefaults(&data.rules);
     data.rules.match_kind=MatchKind_Stock;data.rules.is_stock=true;data.rules.is_vs=true;
     data.rules.timer_enabled=true;data.rules.timer_counts_up=false;data.rules.time_limit=8*60;
-    data.rules.item_freq=-1;data.rules.x20=0;data.rules.is_teams=false;data.rules.stkind=St_Kind_Battle;
+    data.rules.item_freq=-1;data.rules.x20=0;data.rules.is_teams=false;data.rules.stkind=stage;
     for(unsigned i=0;i<GM_MAX_PLAYERS;i++){
         gm_SetupPlayerDefaults(&data.players[i]);
         if(i<2){data.players[i].slot_type=Gm_PKind_Human;data.players[i].ckind=characters[i];data.players[i].stocks=4;data.players[i].team=i;}
     }
     gm_SetupSubColors(&data);fn_8016DCC0(&data);initialized=1;
 }
+void portTournamentInitializeKinds(unsigned left,unsigned right){portTournamentInitializeStage(left,right,St_Kind_Battle);}
 void portTournamentInitialize(void){portTournamentInitializeKinds(Ft_Kind_Captain,Ft_Kind_Captain);}
 void portTournamentBegin(void)
 {
@@ -104,7 +105,7 @@ static void ready_complete(int status) { fn_8016B7F8(); }
 void portTournamentIntroBegin(void)
 {
     if(!initialized||started||!hud_initialized||!Player_GetEntity(0)||!Player_GetEntity(1))abort();
-    portStageSelectResident(St_Kind_Battle);
+    portStageSelectResident(gm_GetStartMeleeRules()->stkind);
     ifStatus_802F6EA4(3,-1,-1,0,(Event)fn_8016B7B4,(Event)ready_complete);
     started=1;
 }

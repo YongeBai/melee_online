@@ -7,6 +7,14 @@ import {readNativeModelMatrices} from './native-model.mjs';
 import {readNativeRenderContext,checkNativeRenderContext} from './native-render-context.mjs';
 import {inspectArchive} from './archive.mjs';
 
+// Forward error for four float32 products and three additions. This remains
+// valid when the GPU fuses operations. Scaling only by the result incorrectly
+// rejects nearly cancelling terms in large background geometry.
+export function nativePositionRoundoffBound(matrix,row,point) {
+  const unit=2**-24,gamma=7*unit/(1-7*unit),p=[point[0],point[1],point[2]??0,1];
+  return gamma*p.reduce((sum,x,i)=>sum+Math.abs(matrix[row*4+i]*x),0);
+}
+
 // First integration of original native material state with actual GPU draws.
 // Resource/program caches are persistent; draw-state capture is still a debug
 // oracle. Original fighter callbacks now select draws; complete camera/GX-link
@@ -102,7 +110,11 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
         for(let c=0;c<3;c++) {
           const expected=dot(position,c,v[9],1),error=Math.abs(values[i*17+c]-expected)/(1+Math.abs(expected));
           const ne=Math.abs(values[i*17+3+c]-(length?n[c]/length:0));
-          if(error>0.00004||ne>0.00004)throw Error('Native material position/normal GPU mismatch '+error+'/'+ne);
+          const roundoff=nativePositionRoundoffBound(position,c,v[9]);
+          const absoluteError=Math.abs(values[i*17+c]-expected);
+          if(error>0.00004&&absoluteError<=roundoff)vertexChecks.roundoffPositionComponents++;
+          vertexChecks.maxPositionRoundoffAllowance=Math.max(vertexChecks.maxPositionRoundoffAllowance,roundoff);
+          if((error>0.00004&&absoluteError>roundoff)||ne>0.00004)throw Error('Native material position/normal GPU mismatch '+JSON.stringify({error,normalError:ne,owner:draw.owner,vertex:i,axis:c,expected,actual:values[i*17+c],position,input:v[9]}));
           vertexChecks.maxScaledPositionError=Math.max(vertexChecks.maxScaledPositionError,error);vertexChecks.maxNormalError=Math.max(vertexChecks.maxNormalError,ne);
         }
       }
@@ -180,7 +192,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
     }catch(error){dispose();throw error;}
   }
   function selectCamera(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);}
-  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,byOwner:{}};},
+  return {upload,selectCamera,begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
     flush({ordered=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep

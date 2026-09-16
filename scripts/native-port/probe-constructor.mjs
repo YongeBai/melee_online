@@ -5,6 +5,10 @@ import {createHash} from 'node:crypto';
 import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
+const stageKey=process.argv.find(x=>x.startsWith('--map='))?.slice(6)??'battlefield';
+if(!['battlefield','destination'].includes(stageKey))throw Error('Unknown native map');
+const stageOnly=process.argv.includes('--stage-only'),stageFrames=Number(process.argv.find(x=>x.startsWith('--stage-frames='))?.slice(15)??4500);
+if(!Number.isInteger(stageFrames)||stageFrames<4500||stageFrames>27000||stageOnly&&(!process.argv.includes('--stage-callbacks')||process.argv.includes('--live')))throw Error('Stage-only requires --stage-callbacks without --live, 4500..27000 frames');
 const cpuProfile=process.argv.includes('--cpu-profile');
 const character=process.argv.find(x=>x.startsWith('--character='))?.slice(12)??'Ca';
 if(!/^[A-Z][a-z]$/.test(character))throw Error('Character must be a two-letter fighter archive code');
@@ -39,7 +43,7 @@ try {
     if(m.method==='Runtime.consoleAPICalled')for(const arg of m.params.args){const value=arg.value;if(typeof value!=='string')continue;if(value.startsWith('NATIVE_CONSTRUCTOR_RESULT '))probe=JSON.parse(value.slice(26));else if(value.startsWith('NATIVE_CONSTRUCTOR_START '))partial=JSON.parse(value.slice(25));else {diagnostics.push(value);if(diagnostics.length>64)diagnostics.shift();}}
   });
   await command('Runtime.enable');await command('Debugger.enable');await command('Page.enable');
-  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/constructor.html'+(combat?'?step=1&stage=1&combat=1'+(control?'&control=1':'')+(camera?'&camera=1':'')+(render?'&render=1':'')+(callbacks?'&callbacks=1':'&callbacks=0')+(tournament?'&tournament=1':'')+(hud?'&hud=1':'')+(damageHud?'&damagehud=1':'')+(intro?'&intro=1':'')+(stageCallbacks?'&stagecallbacks=1':'')+(process.argv.includes('--timeout')?'&timeout=1':'')+(live?'&live=1&liveframes='+liveFrames:'')+(workload?'&workload=1':'')+(workloadSteps?'&workloadsteps='+liveFrames:'')+(renderSteps?'&rendersteps=1':''):input?'?step=1&stage=1&input=1'+(render?'&render=1':'')+(renderSteps?'&rendersteps=1':''):stage?'?step=1&stage=1':step?'?step=1':'?probe=1')+(projectiles?'&projectiles=1':'')+(projectileCombat?'&projectilecombat=1':'')+(projectileControl?'&projectilecontrol=1':'')+(projectileShield?'&projectileshield=1':'')+(projectileReflect?'&projectilereflect=1':'')+'&character='+character+(process.argv.includes('--verify-vertices')?'&verifyvertices=1':'')});
+  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/constructor.html'+(combat?'?step=1&stage=1&combat=1'+(control?'&control=1':'')+(camera?'&camera=1':'')+(render?'&render=1':'')+(callbacks?'&callbacks=1':'&callbacks=0')+(tournament?'&tournament=1':'')+(hud?'&hud=1':'')+(damageHud?'&damagehud=1':'')+(intro?'&intro=1':'')+(stageCallbacks?'&stagecallbacks=1':'')+(process.argv.includes('--timeout')?'&timeout=1':'')+(live?'&live=1&liveframes='+liveFrames:'')+(workload?'&workload=1':'')+(workloadSteps?'&workloadsteps='+liveFrames:'')+(renderSteps?'&rendersteps=1':''):input?'?step=1&stage=1&input=1'+(render?'&render=1':'')+(renderSteps?'&rendersteps=1':''):stage?'?step=1&stage=1':step?'?step=1':'?probe=1')+(projectiles?'&projectiles=1':'')+(projectileCombat?'&projectilecombat=1':'')+(projectileControl?'&projectilecontrol=1':'')+(projectileShield?'&projectileshield=1':'')+(projectileReflect?'&projectilereflect=1':'')+(stageOnly?'&stageonly=1':'')+'&stageframes='+stageFrames+'&map='+stageKey+'&character='+character+(process.argv.includes('--verify-vertices')?'&verifyvertices=1':'')});
   if(cpuProfile){
     let first;
     for(let i=0;i<120;i++){
@@ -71,9 +75,9 @@ try {
     await waitFor('globalThis.nativeLive?.snapshot().movement');
     await key('ArrowRight','ArrowRight','keyUp');
   }
-  for(let i=0;i<(live||renderSteps?900:200)&&!probe&&!crashed&&browser.exitCode===null;i++)await delay(100);
+  for(let i=0;i<(live||renderSteps||stageOnly?900:200)&&!probe&&!crashed&&browser.exitCode===null;i++)await delay(100);
   if(!probe){if(!crashed){try{await command('Debugger.pause');for(let i=0;i<20&&!frames;i++)await delay(100);}catch(error){diagnostics.push(String(error));}}
-    probe={...(partial||{}),constructorCompleted:partial?.constructorCompleted===true,error:crashed?'Browser renderer crashed':'Constructor did not finish within '+(live||renderSteps?90:20)+' seconds',diagnostics,pausedFrames:frames,playable:false,performanceMeasured:false};}
+    probe={...(partial||{}),constructorCompleted:partial?.constructorCompleted===true,error:crashed?'Browser renderer crashed':'Constructor did not finish within '+(live||renderSteps||stageOnly?90:20)+' seconds',diagnostics,pausedFrames:frames,playable:false,performanceMeasured:false};}
   if(probe.error)probe.error=probe.error.replace(/wasm-function\[(\d+)\]/g,(text,id)=>text+' '+(symbols.get(Number(id))||'unknown'));
   fs.writeFileSync(path.join(output,'last-constructor-probe.json'),JSON.stringify(probe,null,2)+'\n');
   if(intro&&!probe.error){
@@ -111,14 +115,14 @@ try {
     if(!shot.result.value?.startsWith('data:image/png;base64,'))throw Error('Missing particle screenshot');
     fs.writeFileSync(path.join(output,'native-match-particles.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
   }
-  if(tournament&&renderSteps&&!probe.error&&!process.argv.includes('--timeout')){
+  if(tournament&&renderSteps&&!stageOnly&&!probe.error&&!process.argv.includes('--timeout')){
     if(!probe.preview?.respawn||!probe.respawnPlatformDrawFrames)throw Error('No rendered respawn platform evidence');
     if(damageHud&&[1,2,3,4].some(n=>!probe.hud.stockDrawCounts.includes(n)))throw Error('Stock icons did not decrement through native respawns');
     const evaluated=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-respawn').src",returnByValue:true});
     if(!evaluated.result.value.startsWith('data:image/png;base64,'))throw Error('Missing respawn screenshot');
     fs.writeFileSync(path.join(output,'native-match-respawn.png'),Buffer.from(evaluated.result.value.split(',')[1],'base64'));
   }
-  if(hud&&renderSteps&&!probe.error){
+  if(hud&&renderSteps&&!stageOnly&&!probe.error){
     if(!probe.preview.status||!probe.hud.statusFrames)throw Error('No original HUD match-end draw evidence');
     const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-status').src",returnByValue:true});
     if(!shot.result.value.startsWith('data:image/png;base64,'))throw Error('Missing status screenshot');
@@ -131,9 +135,9 @@ try {
     }
   }
   const rendererSources=Object.fromEntries(['material-gpu.mjs','native-pixel.mjs','native-match-preview.mjs'].map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(output,name))).digest('hex')]));
-  const report={character,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};
-  fs.writeFileSync(path.join(output,(character==='Ca'?'':character+'-')+(projectiles?(projectileControl?'projectile-control-':projectileShield?'projectile-shield-':projectileReflect?'projectile-reflect-':projectileCombat?'projectile-contact-':'projectile-'):'')+(cpuProfile?'profiled-':'')+(hardware?'hardware-':'')+(stageCallbacks?'stage-callbacks-':'')+(intro?'intro-':'')+(damageHud?'damage-':hud?'hud-':'')+(workload?'workload-':workloadSteps?'workload-steps-':'')+(tournament?(process.argv.includes('--timeout')?'tournament-timeout-':'tournament-'):'')+(renderSteps?(input?'constructor-input-render-probe.json':'constructor-render-steps-probe.json'):live?'constructor-live-probe.json':render?'constructor-render-probe.json':camera?'constructor-camera-probe.json':control?'constructor-combat-control-probe.json':combat?'constructor-combat-probe.json':input?'constructor-input-probe.json':stage?'constructor-stage-probe.json':step?'constructor-step-probe.json':'constructor-probe.json')),JSON.stringify(report,null,2)+'\n');fs.writeFileSync(path.join(output,'constructor-chrome.log'),stderr);
-  console.log(JSON.stringify(probe,null,2));if(!probe.constructorVerified||probe.error||(step&&probe.schedulerSteps!==(intro?0:120))||(input&&!probe.input?.completed)||(combat&&!live&&!workloadSteps&&!probe.combat?.completed)||(tournament&&!live&&!(probe.lifecycle?.completed||probe.timeout?.completed||probe.simulationWorkload?.completed))||(live&&(probe.live?.frames!==liveFrames||(workload?!(probe.live?.workload.framesWithAttack>100&&probe.live?.workload.framesWithHitlag>30&&probe.live.workload.windows.every(w=>w.hitlag>0)):(!probe.live?.movement||!probe.live?.jump||!probe.live?.attack||probe.live.stateChanges.some(s=>s.state<14))))))process.exitCode=2;
+  const report={stage:stageKey,character,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};
+  fs.writeFileSync(path.join(output,(stageKey==='battlefield'?'':stageKey+'-')+(character==='Ca'?'':character+'-')+(projectiles?(projectileControl?'projectile-control-':projectileShield?'projectile-shield-':projectileReflect?'projectile-reflect-':projectileCombat?'projectile-contact-':'projectile-'):'')+(cpuProfile?'profiled-':'')+(hardware?'hardware-':'')+(stageCallbacks?'stage-callbacks-':'')+(stageOnly?'stage-only-':'')+(intro?'intro-':'')+(damageHud?'damage-':hud?'hud-':'')+(workload?'workload-':workloadSteps?'workload-steps-':'')+(tournament?(process.argv.includes('--timeout')?'tournament-timeout-':'tournament-'):'')+(renderSteps?(input?'constructor-input-render-probe.json':'constructor-render-steps-probe.json'):live?'constructor-live-probe.json':render?'constructor-render-probe.json':camera?'constructor-camera-probe.json':control?'constructor-combat-control-probe.json':combat?'constructor-combat-probe.json':input?'constructor-input-probe.json':stage?'constructor-stage-probe.json':step?'constructor-step-probe.json':'constructor-probe.json')),JSON.stringify(report,null,2)+'\n');fs.writeFileSync(path.join(output,'constructor-chrome.log'),stderr);
+  console.log(JSON.stringify(probe,null,2));if(!probe.constructorVerified||probe.error||(stageOnly&&probe.stage?.callbackFrames!==stageFrames)||(step&&probe.schedulerSteps!==(intro?0:120))||(input&&!probe.input?.completed)||(combat&&!live&&!stageOnly&&!workloadSteps&&!probe.combat?.completed)||(tournament&&!live&&!stageOnly&&!(probe.lifecycle?.completed||probe.timeout?.completed||probe.simulationWorkload?.completed))||(live&&(probe.live?.frames!==liveFrames||(workload?!(probe.live?.workload.framesWithAttack>100&&probe.live?.workload.framesWithHitlag>30&&probe.live.workload.windows.every(w=>w.hitlag>0)):(!probe.live?.movement||!probe.live?.jump||!probe.live?.attack||probe.live.stateChanges.some(s=>s.state<14))))))process.exitCode=2;
 } finally {
   socket?.close();for(const p of pending.values())p.reject(Error('Probe closed'));pending.clear();
   if(browser&&browser.exitCode===null){browser.kill('SIGTERM');await Promise.race([new Promise(resolve=>browser.once('exit',resolve)),delay(2000)]);if(browser.exitCode===null)browser.kill('SIGKILL');}

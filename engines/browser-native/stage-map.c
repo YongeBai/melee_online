@@ -3,6 +3,7 @@
 #include <melee/gr/grdatfiles.h>
 #include <melee/gr/granime.h>
 #include <melee/gr/grbattle.h>
+#include <melee/gr/grlast.h>
 #include <melee/gr/types.h>
 #include <melee/sc/types.h>
 #include <melee/mp/mplib.h>
@@ -42,7 +43,10 @@ static int dispatch_object(HSD_GObj* object,int pass)
     }else portDispatchObject((unsigned)object,pass,object->gx_link,object->classifier,object->render_cb==efLib_render_callback);
     return 1;
 }
-static HSD_GObj* owners[7];
+static HSD_GObj* owners[10];
+static unsigned model_count;
+static StKind stage_kind;
+static StageData* stage_callbacks;
 static HSD_GObj* render_lights;
 static int installed;
 static int collision_installed;
@@ -73,41 +77,48 @@ void portStageRenderBegin(void)
     if(!render_lights||!camera||!camera->hsd_obj)abort();
     portRenderContextBegin(camera->hsd_obj,render_lights->hsd_obj);
 }
-void portStageMapInstall(HSD_Archive* archive,UnkStageDat* data,GroundParam* param)
+void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam* param,unsigned kind)
 {
-    if(installed||!archive||!data||!param||data->unkC!=7||portSceneInitialize()<0)abort();
+    if(kind!=St_Kind_Battle&&kind!=St_Kind_Last)abort();
+    model_count=kind==St_Kind_Battle?7:10;stage_kind=kind;
+    stage_callbacks=kind==St_Kind_Battle?&grNBa_StageData:&grNLa_StageData;
+    if(installed||!archive||!data||!param||data->unkC!=model_count||portSceneInitialize()<0)abort();
     portRuntimeSetSceneDestructors(destroy_lights);
     Ground_801BFFB0();
     UnkArchiveStruct* entry=grDatFiles_GetArchive();entry->unk0=archive;entry->unk4=data;entry->unk8=0;
-    stage_info.grkind=Gr_Kind_Battle;stage_info.param=param;installed=1;
+    stage_info.grkind=kind==St_Kind_Battle?Gr_Kind_Battle:Gr_Kind_Last;stage_info.param=param;installed=1;
 }
+void portStageMapInstall(HSD_Archive* archive,UnkStageDat* data,GroundParam* param)
+{portStageMapInstallKind(archive,data,param,St_Kind_Battle);}
 HSD_GObj* portStageMapCreate(unsigned index)
 {
-    if(!installed||callbacks_initialized||index>=7||owners[index])abort();
+    if(!installed||callbacks_initialized||index>=model_count||owners[index])abort();
     owners[index]=Ground_GetStageGObj(index);
     if(!owners[index])abort();
     if(collision_installed)Ground_InitMapColl(owners[index]->hsd_obj,index);
     grAnime_801C8138(owners[index],index,0);
     return owners[index];
 }
-void portBattlefieldCallbacksInitialize(void* parameters)
+void portStageCallbacksInitialize(void* parameters)
 {
     if(!installed||!collision_installed||callbacks_initialized||!parameters)abort();
-    for(unsigned i=0;i<7;i++)if(owners[i])abort();
-    portStageSelectResident(St_Kind_Battle);
+    for(unsigned i=0;i<model_count;i++)if(owners[i])abort();
+    portStageSelectResident(stage_kind);
     stage_info.yakumono_param=parameters;
-    stage_info.on_touch_line=grNBa_StageData.on_touch_line;
-    stage_info.on_check_shadow_render=grNBa_StageData.on_check_shadow_render;
-    grNBa_StageData.on_init();
-    for(unsigned i=0;i<7;i++)owners[i]=Ground_GetMapGObj(i);
-    if(!owners[0]||!owners[1]||!owners[3]||!owners[6])abort();
+    stage_info.on_touch_line=stage_callbacks->on_touch_line;
+    stage_info.on_check_shadow_render=stage_callbacks->on_check_shadow_render;
+    stage_callbacks->on_init();
+    for(unsigned i=0;i<model_count;i++)owners[i]=Ground_GetMapGObj(i);
+    if(!owners[0]||!owners[1]||!owners[3]||!(stage_kind==St_Kind_Battle?owners[6]:owners[2]))abort();
     callbacks_initialized=1;
 }
-unsigned portBattlefieldObject(unsigned index)
+void portBattlefieldCallbacksInitialize(void* parameters){portStageCallbacksInitialize(parameters);}
+unsigned portStageObject(unsigned index)
 {
-    if(!callbacks_initialized||index>=7)abort();
+    if(!callbacks_initialized||index>=model_count)abort();
     return (unsigned)Ground_GetMapGObj(index);
 }
+unsigned portBattlefieldObject(unsigned index){return portStageObject(index);}
 void portStageMapBounds(void){if(!owners[0])abort();Ground_801C39C0();Ground_801C3BB4();}
 /* Camera-related calls from Ground_801C0800 and fn_8016E730. Full Stage startup
  * still owns other dependencies that this bring-up target has not integrated. */
@@ -177,7 +188,7 @@ double portStageMapRead(unsigned field,unsigned index)
     if(!installed)abort();
     if(field==0){if(index>=8)abort();return index<4?((float*)&stage_info.cam_info.cam_bounds)[index]:((float*)&stage_info.blast_zone)[index-4];}
     if(field==1){if(index>=261)abort();return (uintptr_t)stage_info.x280[index];}
-    if(field==2){if(index>=7)abort();HSD_GObj* g=callbacks_initialized?Ground_GetMapGObj(index):owners[index];if(!g)abort();return (uintptr_t)((Ground*)g->user_data)->x18;}
+    if(field==2){if(index>=model_count)abort();HSD_GObj* g=callbacks_initialized?Ground_GetMapGObj(index):owners[index];if(!g)abort();return (uintptr_t)((Ground*)g->user_data)->x18;}
     if(field==3){if(index>=261||!stage_info.x280[index])abort();Vec3 position;Ground_801C2D24(index,&position);return position.x;}
     if(field==4){if(index>=261||!stage_info.x280[index])abort();Vec3 position;Ground_801C2D24(index,&position);return position.y;}
     abort();
@@ -185,13 +196,13 @@ double portStageMapRead(unsigned field,unsigned index)
 unsigned portStageMapLights(unsigned index)
 {
     UnkArchiveStruct* entry=grDatFiles_GetArchive();
-    if(!installed||index>=7)abort();LightList** lights=entry->unk4->unk8[index].x18;
+    if(!installed||index>=model_count)abort();LightList** lights=entry->unk4->unk8[index].x18;
     lights=portStageSelectLights(entry,lights);unsigned n=0;while(lights[n]){if(++n>32)abort();}return n;
 }
 void portStageMapClear(void)
 {
     if(!installed||collision_installed)abort();
     if(render_lights){HSD_LObj_803668EC(NULL);HSD_GObjFree(render_lights);render_lights=NULL;}
-    for(unsigned i=0;i<7;i++)if(owners[i]){Ground* ground=owners[i]->user_data;if(ground->x18)HSD_GObjFree(ground->x18);HSD_GObjFree(owners[i]);owners[i]=NULL;}
+    for(unsigned i=0;i<model_count;i++)if(owners[i]){Ground* ground=owners[i]->user_data;if(ground->x18)HSD_GObjFree(ground->x18);HSD_GObjFree(owners[i]);owners[i]=NULL;}
     Ground_801BFFB0();stage_info.param=NULL;installed=0;
 }

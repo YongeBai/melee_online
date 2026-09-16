@@ -14,10 +14,10 @@ export function createNativeCamera(module,{read=pointer=>module._portStageCamera
     dispose(){if(!disposed){module._free(pointer);disposed=true;}},
   };
 }
-export function checkNativeCamera(s,{hud=false}={}) {
+export function checkNativeCamera(s,{hud=false,clipPlanes=[0.1,16384]}={}) {
   const check=(ok,message)=>{if(!ok)throw Error('Native camera: '+message);};
   check(s.fov>0&&s.fov<180&&s.near>0&&s.far>s.near,'perspective range');
-  check(hud?s.near===1&&s.far===3500:s.near===Math.fround(0.1)&&s.far===16384,'native clip planes');
+  check(hud?s.near===1&&s.far===3500:s.near===Math.fround(clipPlanes[0])&&s.far===Math.fround(clipPlanes[1]),'native clip planes');
   check(s.aspect===Math.fround(hud?1.2166670560836792:1.2173333),'original Melee projection aspect');
   const rows=[s.raw.slice(0,3),s.raw.slice(4,7),s.raw.slice(8,11)],dot=(a,b)=>a.reduce((n,x,i)=>n+x*b[i],0);
   for(let i=0;i<3;i++)for(let j=0;j<3;j++)check(Math.abs(dot(rows[i],rows[j])-(i===j?1:0))<0.00002,'orthonormal native view');

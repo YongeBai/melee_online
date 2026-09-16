@@ -37,3 +37,13 @@ test('HUD camera keeps its own original projection without changing a queued gam
   assert.throws(()=>checkNativeCamera(s),/clip planes/);assert.deepEqual(before.raw,f.raw);assert.deepEqual(game.snapshot().raw,before.raw);
   assert.notDeepEqual(s.projection,before.projection);game.dispose();hud.dispose();
 });
+test('Final Destination validation preserves its source-selected near and far planes',()=>{
+  const f=fixture(),near=1,far=30000;
+  f.raw[22]=-near/(far-near);f.raw[23]=-far*near/(far-near);f.raw[36]=near;f.raw[37]=far;
+  const camera=createNativeCamera(f.module),snapshot=camera.snapshot();
+  assert.throws(()=>checkNativeCamera(snapshot),/clip planes/);
+  checkNativeCamera(snapshot,{clipPlanes:[near,far]});
+  assert.deepEqual(camera.snapshot().raw,f.raw);
+  assert.throws(()=>checkNativeCamera(snapshot,{clipPlanes:[0.1,far]}),/clip planes/);
+  camera.dispose();
+});
