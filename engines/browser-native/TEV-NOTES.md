@@ -14,7 +14,7 @@ a specific polygon section. `model-state.c` records position/normal loads while
 `texture-state.c` records normal-projection loads. The independent shared skin
 palette, camera concatenation and original inverse-transpose helper agree
 exactly with those loads across 81 default-model poses and both live match
-snapshots. This is a CPU setup cross-check; GPU lighting remains unimplemented.
+snapshots. This is a CPU setup cross-check, separate from GPU checks below.
 Capture also runs original `HSD_TObjSetup` and coordinate-generator setup.
 `texture-state.c` records image and palette selections, filters, LOD arguments,
 texgen selectors and texture matrices. Its temporary GX handles are scoped to
@@ -66,7 +66,25 @@ retains loaded light registers across materials. Snapshot readers verify that
 enabled channels reference loaded lights and that the captured projection is
 exactly the gameplay camera projection. The live sample now uses diffuse and
 specular masks; its 20 programs and nine distinct light states per snapshot
-remain setup evidence, not lit GPU pixels. Applying per-joint normal matrices,
-texgen, lighting and material state to actual draws remains pending.
-The pixel-state reader and scalar alpha-test oracle do not apply blend,
-depth or alpha tests to actual material draws yet.
+are now applied to actual GPU draws by `material-gpu.mjs`.
+
+`material-shader.mjs` adapts lighting and texgen arithmetic from Dolphin's
+`LightingShaderGen.cpp` and `VertexShaderGen.cpp` at the same pinned commit and
+under GPL-2.0-or-later. It uses original position/normal/texture/post matrices,
+integer material/ambient/light colors, diffuse/specular attenuation, vertex
+colors, UV/reflection/bump/SRTG texgen and per-vertex texture matrices. The GX SDK
+forces diffuse NONE for specular attenuation; captured API arguments must be
+normalized to that effective behavior. Sampled textures and raster colors feed
+the integer combiner, followed by alpha rejection and ordinary depth/blend state.
+The live fixture also calls original fighter-light activation and overlay cleanup
+and sets original normal-pass flags before per-material capture.
+
+`verify-material-shader.mjs` checks 13 controlled full-shader cases (52 pixel
+channels). Diagnostic transform feedback verifies every live drawn position and
+normal against captured original matrices. It is optional in the GPU renderer
+and enabled in the snapshot probe; it must not be mistaken for game performance.
+
+Still pending: complete original callback/Z-sort ordering, mutable image/palette
+cache invalidation, exact texture filtering/LOD parity, non-fullscreen viewport
+and scissor scaling, fog, indirect textures, effects and HUD. Unsupported pixel
+paths reject explicitly. Native visual parity and 720p60 are not established.

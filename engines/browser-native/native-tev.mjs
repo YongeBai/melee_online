@@ -2,6 +2,9 @@
 // the next material reuses the capture buffer. Not an emulated command stream.
 export function readNativeTev(module,joint,displayIndex,owner=0) {
   const p=module._portMaterialTev(joint,displayIndex,owner);
+  return readNativeTevState(module,p);
+}
+export function readNativeTevState(module,p) {
   if(!p||p%4||p+2192>module.HEAPU8.length)throw Error('Native TEV snapshot bounds');
   const words=Int32Array.from(new Int32Array(module.HEAPU8.buffer,p,548)),n=words[0];
   if(n<1||n>16)throw Error('Native TEV stage capacity');

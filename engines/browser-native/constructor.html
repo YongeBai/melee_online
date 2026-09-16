@@ -105,7 +105,7 @@ try {
     if(withStage&&(report.afterSteps[0]!==14||report.afterSteps[3]!==0))throw Error('Fighter did not land into Wait on Battlefield');
     let preview,canvas;
     if(render) {
-      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,prepare:()=>module._portFighterPreviewPrepare(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
+      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       preview=createNativeMatchPreview(module,canvas,previewActors);report.preview={settled:preview.draw()};
       const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);

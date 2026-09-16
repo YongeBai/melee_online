@@ -1,0 +1,132 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2919377,
+    "wasmSha256": "8427c8905bb4b8bc71bb328485b208ae4f795339ef6279c7426509740c22be1b"
+  },
+  "softwareGpu": true,
+  "combatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+  "unchangedCombatTrace": true,
+  "liveSnapshots": {
+    "settled": {
+      "resolution": [
+        960,
+        720
+      ],
+      "materialDraws": {
+        "vertexChecks": {
+          "vertices": 25020,
+          "positionComponents": 75060,
+          "normalComponents": 75060,
+          "maxScaledPositionError": 0.000006559333990524794,
+          "maxNormalError": 1.4021964345189986e-7
+        },
+        "draws": 184,
+        "programs": 25,
+        "images": 71,
+        "originalMaterialState": true,
+        "visualParity": false,
+        "performanceMeasured": false
+      },
+      "materialShaderChecks": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      }
+    },
+    "final": {
+      "resolution": [
+        960,
+        720
+      ],
+      "materialDraws": {
+        "vertexChecks": {
+          "vertices": 23610,
+          "positionComponents": 70830,
+          "normalComponents": 70830,
+          "maxScaledPositionError": 0.000001988536994878627,
+          "maxNormalError": 1.5256513063999222e-7
+        },
+        "draws": 174,
+        "programs": 25,
+        "images": 71,
+        "originalMaterialState": true,
+        "visualParity": false,
+        "performanceMeasured": false
+      },
+      "materialShaderChecks": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      }
+    }
+  },
+  "combiner": {
+    "passed": true,
+    "programs": 227,
+    "capturedPrograms": 40,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 14528,
+    "softwareGpu": true,
+    "playable": false,
+    "performanceMeasured": false
+  },
+  "regressions": {
+    "targetedTests": 111,
+    "fighterBrowser": true,
+    "stageMapBrowser": true,
+    "sceneBrowser": true,
+    "animatedGpuModels": 27,
+    "maxVertexError": 0.000003814697265625
+  },
+  "commands": [
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --render",
+    "node scripts/native-port/verify-gpu.mjs --tev",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/verify-browser.mjs --stage-map",
+    "node scripts/native-port/build.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --scene",
+    "node scripts/native-port/verify-browser.mjs --scene",
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs"
+  ],
+  "visualInspection": "Native framing retained. Native material rendering resolves previous white surfaces and black fighter silhouette. No equivalent native-scene visual parity claim.",
+  "playable": false,
+  "visualParity": false,
+  "performanceMeasured": false,
+  "acceptanceMet": false,
+  "remaining": "Continuous native drawing and live input, full original draw callbacks/order, mutable texture invalidation, match lifecycle, effects, HUD, audio, roster/stage gameplay, then sustained hardware-browser performance and latency validation."
+}

@@ -13,6 +13,8 @@ typedef struct {u32 mask,loads,projection_type,camera_mask;float viewport[6];u32
 _Static_assert(sizeof(PortRenderContext)==632,"Render context ABI");
 static PortRenderContext state;
 static int setting_context;
+void portRenderContextEnter(void){if(setting_context||portMaterialCaptureActive())abort();setting_context=1;}
+void portRenderContextLeave(void){if(!setting_context||portMaterialCaptureActive())abort();setting_context=0;}
 static void require(int value){if(!value||(!setting_context&&!portMaterialCaptureActive()))abort();}
 const PortRenderContext* portRenderContextState(void){return &state;}
 void GXSetViewport(f32 x,f32 y,f32 width,f32 height,f32 near,f32 far)

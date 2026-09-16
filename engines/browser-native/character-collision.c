@@ -15,6 +15,7 @@
 #include <melee/ft/ftparts.h>
 #include <melee/ft/ftmaterial.h>
 #include <melee/ft/kinds/ftCommon/types.h>
+#include <melee/ft/kinds/ftCommon/ftCo_09F4.h>
 #include <melee/lb/lbcollision.h>
 #include <sysdolphin/baselib/gobj.h>
 #include <sysdolphin/baselib/gobjproc.h>
@@ -46,7 +47,25 @@ int portFighterPreviewPrepare(HSD_GObj* object)
     if(fp->is_metal||fp->x2226_b5||fp->x2227_b3)abort();
     ftParts_800750C8(fp,1,0);ftParts_800750C8(fp,4,0);
     ftParts_800750C8(fp,2,0);ftParts_800750C8(fp,0,1);
+    /* Normal camera branch of ftDrawCommon_80080E18/800805C8. Constructors
+     * do not initialize every render-pass bit; skipping this can select the
+     * depth-only silhouette pass while drawing the normal body. */
+    fp->x2223_b3=false;fp->x2223_b2=false;
+    fp->x2227_b7=true;fp->x2228_b0=false;
+    extern void portRenderContextEnter(void),portRenderContextLeave(void);
+    portRenderContextEnter();
+    HSD_GObj* lights=HSD_GObjPLinkHead[3];
+    while(lights&&lights->classifier!=12)lights=lights->next;
+    if(!lights||!lights->hsd_obj||!lights->render_cb)abort();
+    lights->render_cb(lights,0);ftCo_8009F5AC(fp);
+    portRenderContextLeave();
     return 1;
+}
+void portFighterPreviewFinish(HSD_GObj* object)
+{
+    if(!object||!object->user_data)abort();
+    extern void portRenderContextEnter(void),portRenderContextLeave(void);
+    portRenderContextEnter();ftCo_8009F7F8(object->user_data);portRenderContextLeave();
 }
 _Static_assert(sizeof(ftData_x38)==20,"Dynamics collider descriptor ABI");
 _Static_assert(offsetof(Fighter,x1670)==0x1670,"Dynamics collider array offset");

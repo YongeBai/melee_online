@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+The live diagnostic now draws the two Falcon/Battlefield snapshots with original
+material state: native matrix palettes, lighting channels, texture generation,
+integer TEV combiners, alpha tests, depth and blending. The final snapshot draws
+174 material sections using 25 compiled programs and 71 cached images. All
+23,610 transformed vertices pass position/normal checks. Thirteen controlled
+full-shader cases pass 52 pixel-channel checks, including specular, bump and
+vertex-selected texture coordinates. The combat trace is unchanged.
+
+Two integration errors were resolved from original code: SDK specular lighting
+forces diffuse attenuation off, and the fighter's normal render pass must set
+its original visibility/color-write flags and activate fighter-owned lights.
+The white surfaces and black fighter silhouette are resolved in these snapshots.
+This does not establish visual parity: original full draw callbacks/order,
+effects, HUD and the complete match lifecycle remain. Validation uses SwiftShader
+and synchronous GPU readbacks; it is not an FPS measurement.
+[Material draw checkpoint](benchmarks/browser-2026-09-15-native-port-material-draw.json).
+
+Earlier checkpoints below describe their state at the time.
+
 The live diagnostic now activates the original offscreen camera and original
 Ground stage-light constructor/animation process. Material capture includes
 diffuse/specular light registers and original per-joint specular updates. This

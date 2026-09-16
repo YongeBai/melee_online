@@ -19,9 +19,11 @@ original player-owned constructor; the final section describes its limited probe
 Original HSD material setup can now be captured at its GX TEV boundary. The
 straight-line WebGL combiner passes signed-integer readback checks for the 33
 programs used by 1,753 default-fighter material instances, plus synthetic cases.
-See [TEV scope and provenance](TEV-NOTES.md). This combiner is not yet connected
-to the diagnostic model draws; texture generation, lighting and pixel-engine
-integration remain. After a fighter build and `probe-constructor.mjs --render`,
+See [TEV scope and provenance](TEV-NOTES.md). The live match-object diagnostic
+now connects original matrix palettes, texture generation, lighting, combiners
+and ordinary pixel-engine state to actual draws. Complete native draw callbacks,
+effects, HUD and match startup remain. After a fighter build and
+`probe-constructor.mjs --render`,
 run `node scripts/native-port/verify-gpu.mjs --tev` for live captured programs.
 The scene GPU regression also checks all 27 components' material programs.
 
@@ -624,7 +626,16 @@ functions; unsupported special render forms reject rather than silently changing
 appearance. The shared `UnkFlagStruct` retains retail byte/bit correspondence.
 Every GPU-transformed vertex is checked against the native CPU skinning result.
 
-This remains the unlit first-UV diagnostic shader. White stage surfaces expose
-missing TEV/alpha/material handling; no camera adjustment masks them. Lighting,
-full original draw callbacks, accessories, effects and HUD are not integrated.
-It is not a playable game or a benchmark.
+The live preview uses `material-gpu.mjs` and `material-shader.mjs` for native
+matrix palettes, GX lighting, texgen, integer TEV, alpha tests, depth and blending.
+Thirteen controlled full-shader cases check 52 pixel channels; diagnostic
+transform feedback checks every drawn position and normal. Native normal-pass
+fighter flags and fighter-owned lighting are prepared and cleaned up around
+capture. SDK specular channels use the SDK's effective diffuse-NONE behavior.
+These resolve the preceding white surfaces and black silhouette without changing
+the camera. The independent all-model GPU preview still uses its diagnostic shader.
+
+Complete original draw callbacks/order, image/palette mutation invalidation,
+exact filtering/LOD parity, accessories, effects and HUD remain incomplete.
+Unsupported pixel paths explicitly reject. This is not a playable game or a
+benchmark: the two snapshots use synchronous GPU verification readbacks.

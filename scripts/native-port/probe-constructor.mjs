@@ -29,6 +29,7 @@ try {
     probe={...(partial||{}),constructorCompleted:partial?.constructorCompleted===true,error:crashed?'Browser renderer crashed':'Constructor did not finish within 20 seconds',diagnostics,pausedFrames:frames,playable:false,performanceMeasured:false};}
   if(probe.error)probe.error=probe.error.replace(/wasm-function\[(\d+)\]/g,(text,id)=>text+' '+(symbols.get(Number(id))||'unknown'));
   if(render&&probe.preview&&!probe.error) {
+    for(const [name,snapshot] of Object.entries(probe.preview))if(!snapshot.materialShaderChecks?.passed||!snapshot.materialDraws?.draws||!snapshot.materialDraws?.vertexChecks?.vertices)throw Error('Incomplete native material draw verification: '+name);
     for(const [id,name] of [['native-preview-settled','settled'],['native-preview','final']]) {
       const evaluated=await command('Runtime.evaluate',{expression:'(()=>{const r=document.getElementById('+JSON.stringify(id)+').getBoundingClientRect();return {x:r.x,y:r.y+scrollY,width:r.width,height:r.height,scale:1};})()',returnByValue:true});
       const shot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:evaluated.result.value});
