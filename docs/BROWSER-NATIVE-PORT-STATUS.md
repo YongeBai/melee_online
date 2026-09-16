@@ -5,6 +5,44 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The match fixture now supports different fighters through `--opponent=CODE`.
+Each selected fighter has its own base, animation and costume package. Shared
+effect archives load once, while both fighters' items and cross-fighter
+accessories are available to the renderer. The C core and original gameplay
+functions are unchanged.
+
+Ness/Mario and Game & Watch/Mario absorption checks use normal controller
+movement and inputs. Ness takes six damage from an unblocked fireball, then
+heals to zero through PSI Magnet; the unblocked control ends at eighteen.
+Game & Watch catches three fireballs without damage, releases Oil Panic for
+32 damage to Mario, then opens an empty bucket. Its control ends at eighteen.
+The full-scene sequences render 903 and 1,427 frames respectively. No damage,
+charge or position values are assigned by the harness.
+
+Mixed constructor/input rendering also passes for Fox/Falco, Link/Young Link
+and Captain Falcon/Samus. This covers shared effect banks, distinct Link
+skeletons, and a P2-only item-runtime requirement. Yoshi's Egg Lay against
+Captain Falcon passes all 882 rendered frames' vertex checks; the shell remains
+attached for 199 frames before native escape. The Ness mirror regression and
+all 185 tests pass, as does the fighter build. Core hash remains `5ecac750…`.
+
+Two 960×720 Ness/Mario Battlefield samples each simulate 3,600 frames in about
+60 seconds. They submit 3,600/3,597 draws with zero/three catch-up callbacks.
+Simulation averages 0.440/0.441 ms; draw submission averages 6.260/6.773 ms.
+Preparing 41 shaders with the driver cache disabled eliminates five live
+compilations, but the repeat is slower and peaks at 22.3 ms. Selected gameplay
+traces match. This is not evidence of a speedup, perfect cadence, distinct
+displayed FPS or input-to-photon latency. It samples close combat rather than
+sustained special-move stress.
+
+The roster remains at 21 components with constructor/input integration; six components,
+other costumes, full scenes/menus/audio, retail parity, networking and native-port
+deployment remain unfinished. The overall 720p60 competitive acceptance criterion
+is **not achieved**.
+[Mixed-fighter evidence](benchmarks/browser-2026-09-16-native-port-mixed-fighters.json).
+
+Previous Ness checkpoint:
+
 Ness now passes the original default-costume constructor and basic input,
 twelve selected move phases and six rendered contact checks. Eleven move Articles,
 three effect models, yo-yo attachment geometry and material animation are

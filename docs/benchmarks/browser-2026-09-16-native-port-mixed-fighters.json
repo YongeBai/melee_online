@@ -1,0 +1,1127 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "29ee782",
+  "scope": "Mixed default-costume fighter packages, selected absorption and capture interactions, and Ness/Mario close-combat timing. Not complete competitive acceptance.",
+  "wasmSha256": "5ecac7503f0b6db05f06274049c21626d0a21a07348a23b004a2e49f9325cd90",
+  "portableRecipeSha256": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+  "coreUnchanged": true,
+  "sourceHashes": {
+    "engines/browser-native/fighter-package.mjs": "f12d763bbc1bc59d829c04dbf68714ad5f12741c81916672d8d431f98524a22b",
+    "engines/browser-native/constructor.html": "e00d8a45fa57c550dfdba44ecb068c64a63356beccaabf20cff2b3e8aa7ec1fc",
+    "engines/browser-native/verify-absorption.mjs": "4ba628141e1b76b70292d2f4f12a26ee2a59ebc8734b22a7dc24f94838b98626",
+    "scripts/native-port/probe-constructor.mjs": "5d07ea54ee4ba44e644e45410820fa90d8a8ffc7816e790de0cc78e4bfe1fcaa",
+    "scripts/native-port/build.mjs": "cf3a5d492ff13475a0bd16ef05a206379fe57303bece1c9039462fc9821ed901",
+    "scripts/native-port/serve.mjs": "e2fa6eb4aa34731a55e3f22622af9d33c4fb542203b96cc703afa29c638e8bae"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "integration": {
+    "distinctFighterArchives": true,
+    "sharedEffectArchivesDeduplicated": true,
+    "perFighterCostumeSkeletons": true,
+    "perFighterItemModels": true,
+    "sharedCrossFighterAccessories": true,
+    "originalGameplayFunctionsUnchanged": true,
+    "controllerInputOnly": true,
+    "hostedAutomaticAssets": true
+  },
+  "validation": {
+    "unitTests": 185,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "fixtures": [
+      {
+        "artifact": "Ns-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": {
+          "code": "Ns",
+          "name": "Ness",
+          "kind": 8
+        },
+        "opponent": {
+          "code": "Ns",
+          "name": "Ness",
+          "kind": 8
+        },
+        "constructorVerified": true,
+        "inputCompleted": true,
+        "renderedFrames": 142,
+        "residentFighters": [
+          {
+            "code": "Ns",
+            "kind": 8,
+            "effectName": "EfNsData.dat"
+          }
+        ],
+        "baseArchivesVerified": [
+          true,
+          true
+        ],
+        "effects": [
+          {
+            "passed": true
+          },
+          {
+            "passed": true
+          }
+        ],
+        "projectionChecks": {
+          "passed": true,
+          "cases": 4,
+          "components": 12
+        },
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "Gw-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": {
+          "code": "Gw",
+          "name": "Gamewatch",
+          "kind": 24
+        },
+        "opponent": {
+          "code": "Mr",
+          "name": "Mario",
+          "kind": 0
+        },
+        "constructorVerified": true,
+        "inputCompleted": true,
+        "renderedFrames": 142,
+        "residentFighters": [
+          {
+            "code": "Gw",
+            "kind": 24,
+            "effectName": null
+          },
+          {
+            "code": "Mr",
+            "kind": 0,
+            "effectName": "EfMrData.dat"
+          }
+        ],
+        "baseArchivesVerified": [
+          true,
+          true
+        ],
+        "effects": [
+          {
+            "commonOnly": true
+          },
+          {
+            "passed": true
+          }
+        ],
+        "projectionChecks": {
+          "passed": true,
+          "cases": 4,
+          "components": 12
+        },
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "Fx-vs-Fc-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": {
+          "code": "Fx",
+          "name": "Fox",
+          "kind": 1
+        },
+        "opponent": {
+          "code": "Fc",
+          "name": "Falco",
+          "kind": 22
+        },
+        "constructorVerified": true,
+        "inputCompleted": true,
+        "renderedFrames": 142,
+        "residentFighters": [
+          {
+            "code": "Fx",
+            "kind": 1,
+            "effectName": "EfFxData.dat"
+          },
+          {
+            "code": "Fc",
+            "kind": 22,
+            "effectName": "EfFxData.dat"
+          }
+        ],
+        "baseArchivesVerified": [
+          true,
+          true
+        ],
+        "effects": [
+          {
+            "passed": true
+          },
+          {
+            "passed": true
+          }
+        ],
+        "projectionChecks": {
+          "passed": true,
+          "cases": 4,
+          "components": 12
+        },
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "Lk-vs-Cl-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": {
+          "code": "Lk",
+          "name": "Link",
+          "kind": 6
+        },
+        "opponent": {
+          "code": "Cl",
+          "name": "Clink",
+          "kind": 20
+        },
+        "constructorVerified": true,
+        "inputCompleted": true,
+        "renderedFrames": 142,
+        "residentFighters": [
+          {
+            "code": "Lk",
+            "kind": 6,
+            "effectName": "EfLkData.dat"
+          },
+          {
+            "code": "Cl",
+            "kind": 20,
+            "effectName": "EfLkData.dat"
+          }
+        ],
+        "baseArchivesVerified": [
+          true,
+          true
+        ],
+        "effects": [
+          {
+            "passed": true
+          },
+          {
+            "passed": true
+          }
+        ],
+        "projectionChecks": {
+          "passed": true,
+          "cases": 4,
+          "components": 12
+        },
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "Ca-vs-Ss-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": {
+          "code": "Ca",
+          "name": "Captain",
+          "kind": 2
+        },
+        "opponent": {
+          "code": "Ss",
+          "name": "Samus",
+          "kind": 13
+        },
+        "constructorVerified": true,
+        "inputCompleted": true,
+        "renderedFrames": 142,
+        "residentFighters": [
+          {
+            "code": "Ca",
+            "kind": 2,
+            "effectName": "EfCaData.dat"
+          },
+          {
+            "code": "Ss",
+            "kind": 13,
+            "effectName": "EfSsData.dat"
+          }
+        ],
+        "baseArchivesVerified": [
+          true,
+          true
+        ],
+        "effects": [
+          {
+            "passed": true
+          },
+          {
+            "passed": true
+          }
+        ],
+        "projectionChecks": {
+          "passed": true,
+          "cases": 4,
+          "components": 12
+        },
+        "finalGpuErrorCheck": true
+      }
+    ],
+    "absorption": [
+      {
+        "artifact": "absorption-absorb-Gw-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": "Gw",
+        "opponent": "Mr",
+        "mode": "absorb",
+        "completed": true,
+        "frames": 1285,
+        "renderedFrames": 1427,
+        "catches": 3,
+        "phases": [
+          {
+            "name": "controller setup",
+            "frames": 216,
+            "states": [
+              [
+                14,
+                15,
+                16,
+                18
+              ],
+              [
+                39,
+                244,
+                29,
+                42,
+                14,
+                15
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "absorb fireballs",
+            "frames": 360,
+            "states": [
+              [
+                375,
+                376,
+                39,
+                40
+              ],
+              [
+                14,
+                343
+              ]
+            ],
+            "itemKinds": [
+              48
+            ],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "approach with charged bucket",
+            "frames": 163,
+            "states": [
+              [
+                41,
+                14,
+                15,
+                16
+              ],
+              [
+                14,
+                15
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "release Oil Panic",
+            "frames": 201,
+            "states": [
+              [
+                377,
+                14
+              ],
+              [
+                14,
+                88,
+                38,
+                183,
+                184
+              ]
+            ],
+            "itemKinds": [
+              121
+            ],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              32
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "empty bucket after release",
+            "frames": 165,
+            "states": [
+              [
+                375,
+                14
+              ],
+              [
+                184,
+                186,
+                14
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              32
+            ],
+            "finalDamage": [
+              0,
+              32
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "retire items",
+            "frames": 180,
+            "states": [
+              [
+                14
+              ],
+              [
+                14
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              32
+            ],
+            "finalDamage": [
+              0,
+              32
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          }
+        ],
+        "renderedAbsorption": true,
+        "renderedRelease": true,
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "absorption-control-Gw-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": "Gw",
+        "opponent": "Mr",
+        "mode": "control",
+        "completed": true,
+        "frames": 756,
+        "renderedFrames": 898,
+        "phases": [
+          {
+            "name": "controller setup",
+            "frames": 216,
+            "states": [
+              [
+                14,
+                15,
+                16,
+                18
+              ],
+              [
+                39,
+                244,
+                29,
+                42,
+                14,
+                15
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "unblocked control",
+            "frames": 360,
+            "states": [
+              [
+                14,
+                78
+              ],
+              [
+                14,
+                343
+              ]
+            ],
+            "itemKinds": [
+              48
+            ],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              18,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "retire items",
+            "frames": 180,
+            "states": [
+              [
+                14
+              ],
+              [
+                14
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              18,
+              0
+            ],
+            "finalDamage": [
+              18,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          }
+        ],
+        "renderedAbsorption": false,
+        "renderedRelease": false,
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "absorption-absorb-Ns-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": "Ns",
+        "opponent": "Mr",
+        "mode": "absorb",
+        "completed": true,
+        "frames": 761,
+        "renderedFrames": 903,
+        "healed": 6,
+        "phases": [
+          {
+            "name": "controller setup",
+            "frames": 235,
+            "states": [
+              [
+                14,
+                15,
+                16,
+                18
+              ],
+              [
+                39,
+                244,
+                29,
+                42,
+                14,
+                15
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "unblocked fireball",
+            "frames": 141,
+            "states": [
+              [
+                14,
+                78
+              ],
+              [
+                343,
+                14
+              ]
+            ],
+            "itemKinds": [
+              48
+            ],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              6,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "realign after hit",
+            "frames": 25,
+            "states": [
+              [
+                15,
+                14
+              ],
+              [
+                15,
+                14
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              6,
+              0
+            ],
+            "finalDamage": [
+              6,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "absorb fireballs",
+            "frames": 180,
+            "states": [
+              [
+                367,
+                368,
+                369
+              ],
+              [
+                14,
+                343
+              ]
+            ],
+            "itemKinds": [
+              48
+            ],
+            "initialDamage": [
+              6,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "retire items",
+            "frames": 180,
+            "states": [
+              [
+                368,
+                370,
+                14
+              ],
+              [
+                14
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          }
+        ],
+        "renderedAbsorption": true,
+        "renderedRelease": false,
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "absorption-control-Ns-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "character": "Ns",
+        "opponent": "Mr",
+        "mode": "control",
+        "completed": true,
+        "frames": 761,
+        "renderedFrames": 903,
+        "phases": [
+          {
+            "name": "controller setup",
+            "frames": 235,
+            "states": [
+              [
+                14,
+                15,
+                16,
+                18
+              ],
+              [
+                39,
+                244,
+                29,
+                42,
+                14,
+                15
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              0,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "unblocked fireball",
+            "frames": 141,
+            "states": [
+              [
+                14,
+                78
+              ],
+              [
+                343,
+                14
+              ]
+            ],
+            "itemKinds": [
+              48
+            ],
+            "initialDamage": [
+              0,
+              0
+            ],
+            "finalDamage": [
+              6,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "realign after hit",
+            "frames": 25,
+            "states": [
+              [
+                15,
+                14
+              ],
+              [
+                15,
+                14
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              6,
+              0
+            ],
+            "finalDamage": [
+              6,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "unblocked control",
+            "frames": 180,
+            "states": [
+              [
+                14,
+                78
+              ],
+              [
+                14,
+                343
+              ]
+            ],
+            "itemKinds": [
+              48
+            ],
+            "initialDamage": [
+              6,
+              0
+            ],
+            "finalDamage": [
+              18,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          },
+          {
+            "name": "retire items",
+            "frames": 180,
+            "states": [
+              [
+                14
+              ],
+              [
+                14
+              ]
+            ],
+            "itemKinds": [],
+            "initialDamage": [
+              18,
+              0
+            ],
+            "finalDamage": [
+              18,
+              0
+            ],
+            "finalStocks": [
+              4,
+              4
+            ]
+          }
+        ],
+        "renderedAbsorption": false,
+        "renderedRelease": false,
+        "finalGpuErrorCheck": true
+      }
+    ],
+    "capturedEgg": {
+      "artifact": "yoshi-egg-lay-Ys-vs-Ca-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 882,
+      "eggAccessoryFrames": 199,
+      "damage": 7,
+      "defenderStates": [
+        14,
+        276,
+        277,
+        29,
+        42
+      ],
+      "allRenderedFramesVertexChecked": true,
+      "projectionChecks": {
+        "passed": true,
+        "cases": 4,
+        "components": 12
+      },
+      "finalGpuErrorCheck": true
+    },
+    "selectedTimingTracesIdentical": true
+  },
+  "performance": [
+    {
+      "artifact": "deferred-errors-Ns-vs-Mr-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": false,
+      "driverShaderCacheDisabled": false,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60036.80000001192,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.43969444451232753,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7000000178813934,
+        "maxMs": 2.199999988079071
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.2603055554214455,
+        "p50Ms": 5.9000000059604645,
+        "p95Ms": 8.899999976158142,
+        "maxMs": 16.30000001192093
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757733,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.20000000000073
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 1850,
+        "framesWithHitlag": 370,
+        "framesWithDamage": 3508,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 64,
+            "attack": 333
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 374
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 335
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 64,
+            "attack": 319
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 54,
+            "attack": 255
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 52,
+            "attack": 234
+          }
+        ]
+      },
+      "shaderCompilations": [
+        {
+          "frame": 196,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 4.199999988079071
+        },
+        {
+          "frame": 204,
+          "program": 31,
+          "origin": "model",
+          "cpuMs": 3.5999999940395355
+        },
+        {
+          "frame": 2277,
+          "program": 32,
+          "origin": "model",
+          "cpuMs": 2.2999999821186066
+        },
+        {
+          "frame": 2523,
+          "program": 33,
+          "origin": "model",
+          "cpuMs": 2.100000023841858
+        },
+        {
+          "frame": 2677,
+          "program": 34,
+          "origin": "model",
+          "cpuMs": 2.2000000178813934
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    },
+    {
+      "artifact": "deferred-errors-prepared-Ns-vs-Mr-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3597,
+      "elapsedMs": 60032.5,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.44072222236957814,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7999999821186066,
+        "maxMs": 1.5
+      },
+      "drawSubmissionCpu": {
+        "samples": 3597,
+        "meanMs": 6.773283291698198,
+        "p50Ms": 6,
+        "p95Ms": 11.100000023841858,
+        "maxMs": 22.299999982118607
+      },
+      "rafDrawIntervals": {
+        "samples": 3596,
+        "meanMs": 16.684538375972537,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.400000000001455
+      },
+      "cadence": {
+        "callbacks": 3601,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 3,
+        "rafGapsOver25Ms": 4
+      },
+      "workload": {
+        "framesWithAttack": 1850,
+        "framesWithHitlag": 370,
+        "framesWithDamage": 3508,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 64,
+            "attack": 333
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 374
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 335
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 64,
+            "attack": 319
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 54,
+            "attack": 255
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 52,
+            "attack": 234
+          }
+        ]
+      },
+      "shaderCompilations": [],
+      "shaderCoverage": {
+        "programs": 41,
+        "prepared": 41,
+        "preparedUsed": 34,
+        "unpreparedUsed": 0
+      },
+      "shaderPreparation": {
+        "requested": 41,
+        "compiled": 41,
+        "cpuMs": 510.30000001192093,
+        "fighterStateUnchanged": true
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    }
+  ],
+  "limitations": [
+    "Selected mixed integration checks, not all matchups or retail parity.",
+    "No distinct displayed-FPS or input-to-photon measurement.",
+    "Live workload is close combat, not sustained projectile/absorption stress.",
+    "21 components have constructor/input integration; six components, alternate costumes, complete scenes/menus/audio, networking, parity and deployment remain unfinished."
+  ],
+  "competitiveAcceptanceAchieved": false
+}

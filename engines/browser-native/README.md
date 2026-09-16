@@ -32,6 +32,20 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Mixed fixtures accept `--opponent=CODE` with a two-player input or live scene.
+Each selected fighter owns its base, motion and costume package; shared effect
+archives are installed once. The same-kind default is unchanged.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Gw --opponent=Mr --input --absorption=absorb --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ns --opponent=Mr --input --absorption=absorb --stage-callbacks --render-steps --hardware
+```
+
+Use `--absorption=control` for the unblocked fireball control. These sequences
+use controller movement, normal attacks and down-B, without setting damage,
+bucket charge or fighter positions. They test selected integration paths, not
+retail parity.
+
 Ness imports eleven original move Articles, the yo-yo's two model attachments
 and material animation, and three effect models. The renderer enumerates the
 original twenty-link yo-yo chain without replacing its physics. Fighter startup
@@ -45,12 +59,14 @@ node scripts/native-port/probe-constructor.mjs --character=Ns --input --ness-con
 
 Ness contact modes are `fire`, `fire-shield`, `bat`, `yoyo`, `grab` and
 `control`. The move sequence includes controller-steered PK Thunder self-hit.
-PSI Magnet absorption and bat reflection are separate, unfinished parity checks.
+PSI Magnet absorption/healing has a mixed Mario fireball check above; bat
+reflection and retail parity remain unverified.
 
 Mr. Game & Watch imports ten move Articles and separate item/fighter outline
 visibility lists. He uses the common effect bank, matching the original game.
-Empty Oil Panic uses fighter parts; full release requires a separate absorption
-check. Selected Judge results are covered, not every random outcome.
+Empty Oil Panic uses fighter parts; the mixed Mario sequence checks three
+catches, full release and the emptied bucket. Selected Judge results are covered,
+not every random outcome.
 
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Gw --input --gamewatch-moves --stage-callbacks --render-steps --hardware

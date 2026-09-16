@@ -15,6 +15,7 @@ import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
+import {verifyAbsorption} from './verify-absorption.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
 import {verifyNessMoves,verifyNessContact} from './verify-ness.mjs';
 import {verifyGamewatchMoves,verifyGamewatchContact} from './verify-gamewatch.mjs';
@@ -30,21 +31,18 @@ import {convertPlayerParameters} from './player-parameters.mjs';
 import {convertStatusModels,verifyHudIconSelector} from './status-assets.mjs';
 import {verifyResidentEffectBank} from './verify-effects.mjs';
 import {verifyStartup} from './verify-startup.mjs';
-import {convertFighterBase} from './fighter-base-assets.mjs';
 import {convertStoryItem} from './stage-item-assets.mjs';
 import {convertItemRuntime} from './item-runtime-assets.mjs';
 import {verifyColors} from './verify-colors.mjs';
 import {convertFighterArticles} from './article-assets.mjs';
+import {loadFighterPackage} from './fighter-package.mjs';
 import {fighterArchives} from './fighter-assets.mjs';
-import {readFighterMotions} from './motion-assets.mjs';
-import {convertMotionAnimations} from './motion-animations.mjs';
 import {motionSpec} from './motion-spec.mjs';
 import {attributeSpec} from './attribute-spec.mjs';
-import {convertFighterEffects,convertCommonEffects,convertStageParticles} from './effect-assets.mjs';
+import {convertCommonEffects,convertStageParticles} from './effect-assets.mjs';
 import {convertStageMap,nativeStages} from './stage-map-assets.mjs';
 import {convertStageCollision} from './stage-collision.mjs';
-import {loadCostume} from './costume-assets.mjs';
-import {installResidentFile,installResidentBytes,openResidentArchive} from './resident-files.mjs';
+import {installResidentFile,openResidentArchive} from './resident-files.mjs';
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
 const stageKey=params.get('map')??'battlefield',stageSpec=nativeStages[stageKey];
@@ -58,7 +56,11 @@ if(fountainCosmeticsOff&&stageKey!=='fountain')throw Error('Fountain cosmetic pr
 if(fountainCosmeticsOff)report.stageCosmetics={stars:false,scenery:!fountainSceneryOff,reflection:'constant black',originalSimulation:true};
 const code=params.get('character')??'Ca',character=fighterArchives[code],kind=motionSpec.codes.indexOf(code);
 if(!character||kind<0)throw Error('Unknown fighter component');
-const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat',effectName='Ef'+(code==='Fc'?'Fx':code==='Dr'?'Mr':code==='Pc'?'Pk':code==='Cl'?'Lk':code)+'Data.dat';
+const opponentCode=params.get('opponent')??code,opponentCharacter=fighterArchives[opponentCode],opponentKind=motionSpec.codes.indexOf(opponentCode);
+if(!opponentCharacter||opponentKind<0)throw Error('Unknown opponent component');
+const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact')||params.has('koopacontact')||params.has('linkcontact')||params.has('yoshicontact')||params.has('mewtwocontact');
+if(opponentCode!==code&&!combat)throw Error('Mixed fighters require a two-fighter scene');
+report.opponentCharacter={code:opponentCode,name:opponentCharacter,kind:opponentKind};
 report.character={code,name:character,kind};
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
 const stageCallbacks=params.has('stagecallbacks'),stageOnly=params.has('stageonly');
@@ -71,12 +73,12 @@ const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)dia
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
   const modelNames=await (await fetch('./model-fixtures.json')).json();
-  const [module,common,baseBytes,animationBytes,models]=await Promise.all([create({print:capture,printErr:capture}),asset('PlCo.dat'),asset(baseName),asset(motionName),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
+  const [module,common,models]=await Promise.all([create({print:capture,printErr:capture}),asset('PlCo.dat'),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
   if(render)report.projectionChecks=verifyNativeProjection(module);
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(code)||stageKey==='story') {
+  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(c))||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -84,36 +86,24 @@ try {
     report.items.colors=verifyColors(module,{archive:data.archive,colors:{tables:[data.colorTable],scripts:data.scripts}},()=>colors.addresses[0]);
   }
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
-  const partCount=ptr(ptr(module._portSharedGlobal(4)+kind*4)+8),costumes=module._portCostumeCount(kind);
-  const source=convertFighterBase(baseBytes,baseName,{motionSpec,attributeSpec,partCount,costumes});
-  installResidentFile(module,baseName,source.image);
-  const file=openResidentArchive(module,baseName,['ftData'+character]),root=file.addresses[0],image=new DataView(source.image.buffer),bodySize=image.getUint32(4,true),relocations=new Set();
-  for(let i=0;i<image.getUint32(8,true);i++)relocations.add(image.getUint32(32+bodySize+i*4,true));
-  let checks=0;
-  for(let i=0;i<24;i++){checks++;if(ptr(root+i*4)!==(source.fields[i]===null?0:root+source.fields[i]))throw Error('Complete base root relocation '+i);}
-  for(let at=0;at<bodySize;){checks++;if(relocations.has(at)){if(ptr(root+at)!==root+image.getUint32(32+at,true))throw Error('Base subgraph relocation '+at);at+=4;}else {if(module.HEAPU8[root+at]!==source.image[32+at])throw Error('Base subgraph payload '+at);at++;}}
-  file.dispose();
-  report.baseArchive={passed:true,checks,bytes:source.image.length,partCount,costumes,motionRows:source.motionCount,demoRows:source.demoCount,imports:source.imports,relocations:relocations.size};
-  const motions=readFighterMotions(baseBytes,baseName,motionSpec),bundle=convertMotionAnimations(animationBytes,motions.motions);
-  installResidentBytes(module,motionName,bundle.image);
-  const costume=loadCostume(module,models.find(m=>m.name===modelName).bytes,modelName,kind);
-  module._portMatchCameraInitialize();
-  module._portEffectsInitialize();
-  // ftData_UnkBytePerCharacter[GameWatch] is -1: only the common bank loads.
-  const commonEffectBytes=await asset('EfCoData.dat'),fighterEffectBytes=code==='Gw'?null:await asset(effectName);
-  const effects=convertCommonEffects(commonEffectBytes),fighterEffects=fighterEffectBytes?convertFighterEffects(fighterEffectBytes,code):null;
+  const effectFiles=new Map(),packageOptions={asset,models,motionSpec,attributeSpec,effectFiles};
+  const primary=await loadFighterPackage(module,code,packageOptions),secondary=opponentCode===code?primary:await loadFighterPackage(module,opponentCode,packageOptions);
+  const packages=[primary,...(secondary===primary?[]:[secondary])],baseBytes=primary.baseBytes;
+  report.baseArchive=primary.baseArchive;report.opponentBaseArchive=secondary.baseArchive;
+  report.residentFighters=packages.map(p=>({code:p.code,kind:p.kind,effectName:p.effectName}));
+  module._portMatchCameraInitialize();module._portEffectsInitialize();
+  const commonEffectBytes=await asset('EfCoData.dat'),effects=convertCommonEffects(commonEffectBytes);
   installResidentFile(module,'EfCoData.dat',effects.image);
   const effectData=module._portCommonEffectsLoad();
   if(!effectData)throw Error('Original common effect-bank loader failed');
   report.commonEffects=verifyResidentEffectBank(module,effects,effectData);
-  if(fighterEffects)installResidentFile(module,effectName,fighterEffects.image);
   if(tournament){
     installResidentFile(module,'PdPm.dat',convertPlayerParameters(await asset('PdPm.dat')).image);
     const hudBytes=await asset('IfAll.usd'),status=convertStatusModels(hudBytes,{hud:withHud,damage:damageHud});
     installResidentFile(module,'NativeStatus.dat',status.image);
     const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models',...(withHud?['ScInfDmg_scene_data']:[])]);
     module._portTournamentStatusInstall(statusFile.archive);report.statusModels=status.models;
-    module._portTournamentInitializeStage(kind,kind,stageSpec.kind);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
+    module._portTournamentInitializeStage(kind,opponentKind,stageSpec.kind);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
     if(withHud){
       report.iconSelectorChecks=verifyHudIconSelector(module);
       module._portTournamentHudInitialize(statusFile.addresses[1]);
@@ -123,7 +113,7 @@ try {
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
-  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact')||params.has('koopacontact')||params.has('linkcontact')||params.has('yoshicontact')||params.has('mewtwocontact');
+
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const rawStageBytes=await asset(stageSpec.file),stageBytes=initializeStageArchive(rawStageBytes,stageKey),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
@@ -185,7 +175,7 @@ try {
   const object=module._portFighterConstruct(kind,0);
   if(!object)throw Error('Original constructor returned no fighter');
   report.constructorCompleted=true;report.object=object;
-  report.fighterEffects=fighterEffects?verifyResidentEffectBank(module,fighterEffects,module._portEffectsBankData(fighterEffects.bank)):{commonOnly:true};
+  report.fighterEffects=primary.effect?verifyResidentEffectBank(module,primary.effect.source,module._portEffectsBankData(primary.effect.source.bank)):{commonOnly:true};
   const state=()=>Array.from({length:13},(_,i)=>module._portFighterConstructRead(object,i));
   report.state=state();
   if(!report.state.every(Number.isFinite)||!report.state[7]||!report.state[8]||report.state[9]!==15||report.state[10]!==1||report.state[11]!==kind||report.state[12]!==0)throw Error('Constructed fighter state/ownership invariant');
@@ -195,17 +185,18 @@ try {
   let opponent=0;
   const combatState=o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i));
   if(combat){
-    module._portStageMapSpawn(1);opponent=module._portFighterConstruct(kind,1);
+    module._portStageMapSpawn(1);opponent=module._portFighterConstruct(opponentKind,1);
     if(!opponent||opponent===object)throw Error('Second original constructor failed');
     report.fighterShadows.push(module._portFighterConstructRead(opponent,19));
     if(!report.fighterShadows[1]||report.fighterShadows[1]===report.fighterShadows[0])throw Error('Independent fighter shadow ownership');
     const a=combatState(object),b=combatState(opponent);
-    if(b[9]!==15||b[10]!==1||b[11]!==kind||b[12]!==1||a[8]!==b[8]||a[7]===b[7])throw Error('Shared kind / independent fighter ownership');
+    if(b[9]!==15||b[10]!==1||b[11]!==opponentKind||b[12]!==1||(a[8]===b[8])!==(kind===opponentKind)||a[7]===b[7])throw Error('Fighter kind/archive/independent ownership');
+    report.opponentEffects=secondary.effect?verifyResidentEffectBank(module,secondary.effect.source,module._portEffectsBankData(secondary.effect.source.bank)):{commonOnly:true};
     report.combat={completed:false,initial:[a,b],frames:0};
   }
   if(render||new URLSearchParams(location.search).has('camera')){module._portStageCameraStart();report.cameraStarted=true;}
   if(tournament||live||params.has('step')){
-    report.schedulerContext=tournament?'Original VS rules/controller: four stocks, eight minutes, no items, two '+character+' fighters and partial '+stageSpec.name+' startup. Audio, menus and full scene ownership remain incomplete.':combat?stageSpec.name+' geometry/collision, default rules, two player-owned fighters and scripted normalized combat input.':withStage?stageSpec.name+' geometry/collision and source spawn without complete match startup.':'Isolated constructor without a match.';
+    report.schedulerContext=tournament?'Original VS rules/controller: four stocks, eight minutes, no items, '+character+' versus '+opponentCharacter+' and partial '+stageSpec.name+' startup. Audio, menus and full scene ownership remain incomplete.':combat?stageSpec.name+' geometry/collision, default rules, two player-owned fighters and scripted normalized combat input.':withStage?stageSpec.name+' geometry/collision and source spawn without complete match startup.':'Isolated constructor without a match.';
     report.schedulerSteps=0;console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report));
     for(let i=0;i<(intro?0:120);i++){module._portRuntimeStep();report.schedulerSteps++;}
     report.afterSteps=state();
@@ -240,11 +231,11 @@ try {
         if(report.hud.statusFrames===30){const img=document.createElement('img');img.id='native-preview-status';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.status=drawn;}
       }
     }
-    if(code!=='Ca')report.schedulerContext=report.schedulerContext.replaceAll('Falcons',character+' fighters').replaceAll('Falcon',character);
     if(render) {
       const sharedArchive=inspectArchive(common),sharedRoot=sharedArchive.publics.get('ftLoadCommonData');
       const accessoryModels=new Map([[1,sharedArchive.data.getUint32(sharedArchive.data.getUint32(sharedRoot+8*4))],[2,sharedArchive.data.getUint32(sharedRoot+16*4)]].map(([kind,root])=>[kind,archiveRootView(sharedArchive,'accessory_Share_joint',root)]));
-      function collectFighterCostume(owner,target,nodes){
+      function collectFighterCostume(owner,pkg,target,nodes){
+        const {partCount,costume}=pkg;
         // Original OnLoad inserts an extra nonvisual part into Link's skeleton.
         // Bone-array indices therefore differ from costume traversal indices.
         const byDescriptor=new Map();
@@ -260,17 +251,22 @@ try {
         }
         if(byDescriptor.size!==1)throw Error('Unexpected Link attachment parts');
       }
-      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:(code==='Ca'?'Falcon':character)+' P'+(i+1),object:owner,collectNodes:['Lk','Cl'].includes(code)?(target,nodes)=>collectFighterCostume(owner,target,nodes):undefined,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name===modelName).bytes});
+      for(const [i,owner] of [object,opponent].entries())if(owner){
+        const pkg=i?secondary:primary;
+        previewActors.push({name:(pkg.code==='Ca'?'Falcon':pkg.character)+' P'+(i+1),object:owner,collectNodes:['Lk','Cl'].includes(pkg.code)?(target,nodes)=>collectFighterCostume(owner,pkg,target,nodes):undefined,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:pkg.modelBytes});
+      }
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       const effectModels=new Map();
-      for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],...(fighterEffects?[[fighterEffectBytes,fighterEffects,module._portEffectsBankData(fighterEffects.bank)]]:[])]){
+      for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],...[...effectFiles.values()].map(e=>[e.bytes,e.source,module._portEffectsBankData(e.source.bank)])]){
         if(!data)throw Error('Missing loaded render effect bank');
         const archive=inspectArchive(bytes),base=data-source.root-8;
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(code)){
-        itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
+      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns'].includes(pkg.code)){
+        const {baseBytes,baseName,character,source}=pkg,owner=pkg===primary?object:opponent;
+        if(!owner)throw Error('Loaded opponent requires two-fighter scene');
+        itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=combatState(owner)[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
         for(const row of articles.attachments){
           const bytes=archiveRootView(archive,'item_Share_joint',row.joint);
@@ -420,6 +416,13 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('absorption')){
+        report.absorption={};verifyAbsorption(module,[object,opponent],report.absorption,{step,mode:params.get('absorption'),onStep:renderSteps?phase=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          const capture=phase.name==='release Oil Panic'&&drawn.actors.some(a=>a.name.includes(' item ')&&a.draws)?'oilpanic':phase.name==='absorb fireballs'&&[376,369].includes(combatState(object)[0])?'absorption':null;
+          if(capture&&!report.preview[capture]){report.preview[capture]=drawn;const img=document.createElement('img');img.id='native-preview-'+capture;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
       if(params.has('purincontact')){
         if(code!=='Pr'||!opponent)throw Error('Purin contact requires two Purin fighters');
         report.purinContact={};verifyPurinContact(module,[object,opponent],report.purinContact,{step,mode:params.get('purincontact'),onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
