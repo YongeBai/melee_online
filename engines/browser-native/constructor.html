@@ -15,6 +15,7 @@ import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
+import {verifyPurinMoves,verifyPurinContact} from './verify-purin.mjs';
 import {verifyCombat} from './verify-combat.mjs';
 import {convertPlayerParameters} from './player-parameters.mjs';
 import {convertStatusModels,verifyHudIconSelector} from './status-assets.mjs';
@@ -112,7 +113,7 @@ try {
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
-  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat');
+  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const rawStageBytes=await asset(stageSpec.file),stageBytes=initializeStageArchive(rawStageBytes,stageKey),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
@@ -352,7 +353,7 @@ try {
       if(stadium){stadium.transformCallbacks=module._portStadiumRead(3);if(stadium.transformCallbacks<stageFrames)throw Error('Frozen Stadium scheduler was not exercised');stadium.enabledJointMask=module._portStadiumRead(4);}
       report.stage.callbackFrames=stageFrames;report.stage.callbacksVerified=true;
     }
-    if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat'))await verifyCombat(module,[object,opponent],report.combat,{
+    if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat')&&!params.has('purincontact'))await verifyCombat(module,[object,opponent],report.combat,{
       step,cameraValidation,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
       onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
@@ -387,6 +388,16 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('purincontact')){
+        if(code!=='Pr'||!opponent)throw Error('Purin contact requires two Purin fighters');
+        report.purinContact={};verifyPurinContact(module,[object,opponent],report.purinContact,{step,mode:params.get('purincontact'),onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          if(!report.preview.sing&&report.purinContact.frames>=240&&drawn.actors.some(a=>a.name==='Effect 11:0'&&a.draws)){report.preview.sing=drawn;const img=document.createElement('img');img.id='native-preview-sing';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
+      if(params.has('purinmoves')){
+        if(code!=='Pr'||opponent)throw Error('Purin move probe requires one Purin fighter');
+        report.purinMoves={};verifyPurinMoves(module,object,report.purinMoves,{step,onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});
+      }
       if(params.has('projectiles')) {
         if(!['Fx','Fc'].includes(code))throw Error('Projectile input fixture requires Fox or Falco');
         const projectileControl=params.has('projectilecontrol'),projectileShield=params.has('projectileshield'),projectileReflect=params.has('projectilereflect');

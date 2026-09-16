@@ -5,6 +5,31 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Jigglypuff now completes the original native constructor and input/render path.
+Its extra costume-attachment table is imported with the correct visibility type;
+the original effect bank and animated Sing model are loaded. Controller-only
+checks exercise all five aerial jumps, Rest, Sing, grounded/aerial Pound, and
+Rollout charge/release. In two-fighter contact probes, Rest reaches 28 damage,
+3 hitlag frames and 187.8 knockback; Sing enters the original sleep states with
+no damage. The no-button control has no hit. These are integration checks,
+not a frame-by-frame retail comparison or complete character certification.
+
+The two-Jigglypuff Battlefield workload submits all 3,600 draws in about 60 seconds
+in both samples, with no catch-up callbacks. The prepared cold-driver-cache run
+uses 26 programs with no live compilation: mean simulation 0.486 ms, mean draw
+submission 4.715 ms, p95 6.4 ms, maximum 27.9 ms. Recorded gameplay traces match;
+both runs retain contact in every ten-second window and two stock losses. These
+measure draw submissions, not distinct display presentations or physical latency.
+Default-costume coverage is tested; the four separate hat costumes and additional
+move/matchup parity remain incomplete, along with other roster and scene systems.
+[Purin evidence](benchmarks/browser-2026-09-16-native-port-purin.json).
+
+Build inputs are now sorted before assembling native link archives. Two consecutive
+builds produce the same core hash on the recorded toolchain, fixing a source-order
+variation that had invalidated shader catalogs across otherwise identical builds.
+
+Previous frozen Stadium checkpoint:
+
 Frozen Pokémon Stadium now runs in the native fixture, with the original main
 floor, platforms, collision and camera setup. Its approved frozen profile keeps
 the base terrain and a static background screen. The transformation scheduler and

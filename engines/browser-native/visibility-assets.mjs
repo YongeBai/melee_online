@@ -4,14 +4,23 @@ import {fighterArchives} from './fighter-assets.mjs';
 // Import ftData.x8: visibility, costume texture indices and five bone IDs.
 // Texture animation objects themselves live in the corresponding model archive.
 export function convertVisibility(input,name,costumes) {
+  return convertVisibilityData(input,name,costumes,null);
+}
+// The same FtPartsDesc is embedded in costume attachments, without the
+// fighter-only texture-selection table and bone IDs that follow ftData.x8.
+export function convertPartsVisibility(input,descriptor,costumes) {
+  if(!Number.isInteger(descriptor)||descriptor<0)throw Error('Invalid part visibility descriptor');
+  return convertVisibilityData(input,null,costumes,descriptor);
+}
+function convertVisibilityData(input,name,costumes,descriptor) {
   if(!Number.isInteger(costumes)||costumes<1||costumes>6)throw Error('Invalid costume count');
-  const a=inspectArchive(input),d=a.data,root=a.publics.get('ftData'+fighterArchives[name.slice(2,4)]);
+  const a=inspectArchive(input),d=a.data,root=name?a.publics.get('ftData'+fighterArchives[name.slice(2,4)]):null;
   const bytes=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),out=new DataView(bytes.buffer),pointers=new Set(),words=new Set(),packed=new Set(),halves=new Set();
   const bounds=(at,n,align=4)=>{if(!Number.isInteger(at)||at<0||at%align||at+n>d.byteLength)throw Error('Visibility descriptor out of bounds');};
   function word(at){bounds(at,4);if(a.relocations.has(at))throw Error('Visibility scalar is a pointer');words.add(at);out.setUint32(at,d.getUint32(at),true);return d.getUint32(at);}
   function pointer(at){bounds(at,4);const value=d.getUint32(at);if(!a.relocations.has(at)){if(value)throw Error('Unresolved visibility pointer');return null;}bounds(value,1,1);pointers.add(at);out.setUint32(at,value,true);return value;}
   if(root===undefined)throw Error('Missing fighter visibility root');
-  const desc=pointer(root+8);if(desc===null)throw Error('Missing fighter part descriptor');bounds(desc,24);
+  const desc=descriptor??pointer(root+8);if(desc===null)throw Error('Missing fighter part descriptor');bounds(desc,descriptor===null?24:8);
   const models=word(desc),table=pointer(desc+4);if(models<1||models>11||table===null)throw Error('Invalid visibility group count');
   bounds(table,costumes*16);const rows=[];
   for(let costume=0;costume<costumes;costume++) {
@@ -35,6 +44,11 @@ export function convertVisibility(input,name,costumes) {
       channels.push(groups);
     }
     rows.push(channels);
+  }
+  if(descriptor!==null){
+    for(const at of packed)if(words.has(at&~3)||a.relocations.has(at&~3))throw Error('Visibility indices overlap typed descriptors');
+    const typedBytes=new Set([...packed,...[...words,...pointers].flatMap(p=>[p,p+1,p+2,p+3])]);
+    return {image:nativeSubgraphImage(bytes,pointers,new Map([['native_visibility',desc]])),models,rows,typedBytes};
   }
   const textureCount=word(desc+8),textureTable=pointer(desc+12),textureRows=[];
   if(textureCount>5||textureTable===null)throw Error('Invalid costume texture selection table');

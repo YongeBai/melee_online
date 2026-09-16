@@ -12,6 +12,7 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Pr:{name:'effPurinDataTable',bank:11,first:11000,count:5,groups:2,models:1},
     Fx:{name:'effFoxDataTable',bank:3,first:3000,count:11,groups:8,models:6},
     Fc:{name:'effFoxDataTable',bank:3,first:3000,count:11,groups:8,models:6},
     Ca:{name:'effCaptainDataTable',bank:4,first:4000,count:17,groups:7,models:6},

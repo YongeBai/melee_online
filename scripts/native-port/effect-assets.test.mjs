@@ -88,11 +88,11 @@ test('stage particle conversion exposes only typed banks and preserves original 
   assert.throws(()=>convertStageParticles(bytes,'unknown'));
 });
 test('fighter effect banks preserve bank identity, model count and model-only null banks',()=>{
-  for(const [code,spec] of Object.entries({Fx:{symbol:'effFoxDataTable',bank:3,count:11,groups:8,models:6},Fc:{symbol:'effFoxDataTable',bank:3,count:11,groups:8,models:6},Dk:{symbol:'effDonkeyDataTable',bank:8,count:0,groups:0,models:7},Ms:{symbol:'effMarsDataTable',bank:16,count:4,groups:3,models:2},Gn:{symbol:'effGanonDataTable',bank:19,count:17,groups:7,models:6},Fe:{symbol:'effEmblemDataTable',bank:49,count:4,groups:3,models:2}})){
+  for(const [code,spec] of Object.entries({Pr:{symbol:'effPurinDataTable',bank:11,count:5,groups:2,models:1},Fx:{symbol:'effFoxDataTable',bank:3,count:11,groups:8,models:6},Fc:{symbol:'effFoxDataTable',bank:3,count:11,groups:8,models:6},Dk:{symbol:'effDonkeyDataTable',bank:8,count:0,groups:0,models:7},Ms:{symbol:'effMarsDataTable',bank:16,count:4,groups:3,models:2},Gn:{symbol:'effGanonDataTable',bank:19,count:17,groups:7,models:6},Fe:{symbol:'effEmblemDataTable',bank:49,count:4,groups:3,models:2}})){
     const input=fighterBankFixture(spec),before=input.slice(),result=convertFighterEffects(input,code);
     assert.equal(result.bank,spec.bank);assert.equal(result.effects.length,spec.models);assert.equal(result.commands.length,spec.count);assert.equal(result.textures.length,spec.groups);assert.deepEqual(input,before);
     if(!spec.count){assert.equal(result.cmd,null);assert.equal(result.tex,null);assert.throws(()=>convertFighterEffects(fighterBankFixture(spec,a=>a.ptr(0,a.cmd)),code));}
     else assert.throws(()=>convertFighterEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,4)),code));
   }
-  assert.throws(()=>convertFighterEffects(new Uint8Array(),'Pr'),/pending/);
+  assert.throws(()=>convertFighterEffects(new Uint8Array(),'Mr'),/pending/);
 });

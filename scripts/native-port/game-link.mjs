@@ -26,7 +26,7 @@ export function gameLinkInputs(root,upstream,output) {
   };
   const audit=path.join(output,'audit'),portable=path.join(output,'portable');
   const report=JSON.parse(fs.readFileSync(path.join(audit,'report.json'))),failed=new Set(report.failures.map(f=>f.file));
-  const files=execFileSync('rg',['--files','src/melee','src/sysdolphin','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n');
+  const files=execFileSync('rg',['--files','src/melee','src/sysdolphin','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort();
   const objects=files.filter(f=>!failed.has(f)&&!replacements[f]).map(f=>path.join(audit,f.replaceAll('/','_')+'.o'));
   const library=path.join(audit,'game-runtime.a');fs.rmSync(library,{force:true});
   execFileSync(path.join(root,'.browser-tools/emsdk/upstream/emscripten/emar'),['rcs',library,...objects]);
@@ -38,7 +38,7 @@ export function gameLinkInputs(root,upstream,output) {
     return result;
   });
   const names=JSON.parse(fs.readFileSync(new URL('./game-unimplemented.json',import.meta.url))).functions.filter(name=>!['GXSetTevClampMode','GXSetFog','GXGetTexBufferSize','GXGetProjectionv','GXEnableTexOffsets','GXSetPointSize','GXSetLineWidth'].includes(name));
-  const headers=execFileSync('rg',['--files','libs/dolphin/include','-g','*.h'],{cwd:upstream,encoding:'utf8'}).trim().split('\n')
+  const headers=execFileSync('rg',['--files','libs/dolphin/include','-g','*.h'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort()
     .map(file=>fs.readFileSync(path.join(upstream,file),'utf8')).join('\n');
   const definitions=names.map(name=>{
     const pattern=new RegExp('(?:^|\\n)(?:extern\\s+)?([A-Za-z_][A-Za-z_0-9\\s*]*?\\b'+name+'\\s*\\([^;{}]*\\)\\s*;)','g');

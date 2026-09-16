@@ -1194,3 +1194,35 @@ effects remain visible; point batches stop before consuming excluded particles.
 The exclusion resets on stage installation, and other stages reject the flag.
 Use the same core and prepared shader catalog for fireworks-on/off comparisons;
 do not infer a performance gain just from the reduced draw count.
+
+## Jigglypuff integration
+
+`--character=Pr` now imports the original complete fighter root, including its
+extra costume-attachment visibility table. That table is a `FtPartsDesc`, not an
+Article. The importer retains all five rows and their shared packed index lists;
+unknown slots, missing relocations, bounds errors and overlapping records fail.
+The default costume is exercised; loading/rendering the four separate hat
+costumes still requires integration. The Purin effect bank imports all five
+particle definitions, two texture groups and the original Sing model/animation.
+
+`--purin-moves` drives normal controller input through all five aerial jumps,
+Rest, Sing, grounded and aerial Pound, and Rollout startup/charge/release. It does
+not write positions, motion states, damage or velocity. Rollout can leave the
+stage and run original death/respawn callbacks. `--purin-contact=rest|sing|control`
+uses two original constructors and ordinary approach input. The Rest probe records
+peak damage before KO/respawn can reset it; the Sing probe requires the original
+DamageSong state, and the no-button control must have no hit. These are integration
+checks, not a retail per-frame parity certification.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-moves --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-contact=rest
+node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-contact=control
+node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-contact=sing --render-steps --verify-vertices --hardware --record-shaders
+node scripts/native-port/probe-constructor.mjs --character=Pr --stage-callbacks --live --workload --frames=3600 --hardware --record-shaders --defer-gpu-errors
+```
+
+Native link archives and source/header inventories are sorted before construction.
+Previously, unordered `rg --files` traversal changed core layout and hashes across
+identical rebuilds. Two consecutive builds now produce the same WASM hash on the
+recorded toolchain. Shader identities remain strict; re-record when code changes.

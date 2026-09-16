@@ -1,0 +1,796 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "a6faf68",
+  "scope": "Original Jigglypuff constructor, default costume, selected moves/contact and native Battlefield fixture; competitive acceptance remains incomplete",
+  "wasmSha256": "ec053ec9508d5e9898d49050efc6e596f135aec2d4e2607d4afbddfebbcd5537",
+  "portableRecipeSha256": "272b977aebb5466656c582eb0520c1fee065720bd1a055397d55d02c91712f6a",
+  "sourceHashes": {
+    "engines/browser-native/purin-extra-assets.mjs": "2bdabb26cbf1403a20b6fe4e82c7950df79789233c7b5b15ca85fcedecd3a177",
+    "engines/browser-native/visibility-assets.mjs": "6dd829cb250b2bad19fffe1ad565571ac513bef57e0a6d209d51cfe463ca16cf",
+    "engines/browser-native/fighter-base-assets.mjs": "f047ff6738e444826669119af6afaa311070ef8285917fc48e0a06ec786b4e05",
+    "engines/browser-native/effect-assets.mjs": "6e13d36d4c8587848af8f674ba9f9881109aba31aa39799ecff1c1b67f02394e",
+    "engines/browser-native/verify-purin.mjs": "211a049cdec0929bb85506b22c0cea356de2c67ef1f6cbfda2afad9fda159bf6",
+    "engines/browser-native/constructor.html": "39ae739aa6fcf57a95c50cb9cd464eaaa6f3779cb1754551f86ee367c4f5181b",
+    "scripts/native-port/game-link.mjs": "4347e23e2b9b3394b11c9b05e5b087a12dcb49b2a64d3563a00995f96a119834",
+    "scripts/native-port/scene-link.mjs": "a1919dcd25be43ed61e5824b20bffdba386ffe1913dea0293a8746b428909f5e",
+    "scripts/native-port/attribute-spec.mjs": "f38ddc90a2c41c9953461460d57c6d118d01c8f719b5fc92af5802eb12a47844",
+    "scripts/native-port/probe-constructor.mjs": "04f8279799a1d5e3779316b7c9a0b0216ba75c53b2e9394de1670b00fe4d554e"
+  },
+  "reproducibility": {
+    "consecutiveBuilds": 2,
+    "hashesMatch": true,
+    "fix": "Sort native archive object lists and source/header inventories before linking",
+    "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)"
+  },
+  "validation": {
+    "unitTests": 164,
+    "failedTests": 0,
+    "build": true,
+    "baseArchive": {
+      "passed": true,
+      "checks": 749788,
+      "bytes": 760708,
+      "partCount": 50,
+      "costumes": 5,
+      "motionRows": 327,
+      "demoRows": 14,
+      "relocations": 1556
+    },
+    "effectBank": {
+      "passed": true,
+      "checks": 852,
+      "models": 1,
+      "commands": 5,
+      "textures": 2,
+      "relocations": 180,
+      "unreferencedRelocations": 0
+    },
+    "moves": {
+      "completed": true,
+      "frames": 1714,
+      "renderedSteps": 1856,
+      "phases": [
+        {
+          "name": "five aerial jumps",
+          "frames": 517,
+          "states": [
+            24,
+            25,
+            341,
+            342,
+            343,
+            344,
+            345,
+            32,
+            42,
+            14
+          ],
+          "peakParticles": 0,
+          "peakModels": 1,
+          "final": [
+            14,
+            2,
+            246,
+            0,
+            4.048170566558838,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "name": "Rest",
+          "frames": 301,
+          "states": [
+            371,
+            14
+          ],
+          "peakParticles": 0,
+          "peakModels": 0,
+          "final": [
+            14,
+            2,
+            51,
+            0,
+            4.048170566558838,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "name": "Sing",
+          "frames": 301,
+          "states": [
+            367,
+            14
+          ],
+          "peakParticles": 0,
+          "peakModels": 1,
+          "final": [
+            14,
+            2,
+            121,
+            0,
+            4.048170566558838,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "name": "Pound",
+          "frames": 101,
+          "states": [
+            363,
+            14
+          ],
+          "peakParticles": 0,
+          "peakModels": 0,
+          "final": [
+            14,
+            2,
+            55,
+            0,
+            18.135196685791016,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "name": "air Pound",
+          "frames": 213,
+          "states": [
+            24,
+            25,
+            364,
+            29,
+            42,
+            14
+          ],
+          "peakParticles": 0,
+          "peakModels": 1,
+          "final": [
+            14,
+            2,
+            115,
+            0,
+            41.33732604980469,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "name": "Rollout",
+          "frames": 281,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349,
+            350,
+            358,
+            1,
+            12,
+            13
+          ],
+          "peakParticles": 0,
+          "peakModels": 8,
+          "final": [
+            13,
+            2,
+            15,
+            1,
+            12.800000190734863,
+            80,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ]
+        }
+      ],
+      "gpuPassed": true
+    },
+    "contact": {
+      "rest": {
+        "completed": true,
+        "frames": 540,
+        "mode": "rest",
+        "attackerStates": [
+          369,
+          14
+        ],
+        "defenderStates": [
+          87,
+          38,
+          1,
+          12,
+          13
+        ],
+        "peakDamage": 28,
+        "peakHitlag": 3,
+        "peakKnockback": 187.79998779296875,
+        "firstHitFrame": 1,
+        "before": [
+          [
+            16,
+            8,
+            20.623214721679688,
+            0,
+            -7.940712928771973,
+            0.00009999999747378752,
+            1.3000001907348633,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            131,
+            0,
+            -15.000006675720215,
+            0.00009999999747378752,
+            -1.3000001907348633,
+            15,
+            1,
+            15,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "after": [
+          [
+            14,
+            2,
+            78,
+            0,
+            -8.450713157653809,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            13,
+            2,
+            123,
+            1,
+            12.800000190734863,
+            80,
+            0,
+            15,
+            1,
+            15,
+            1,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ]
+        ]
+      },
+      "control": {
+        "completed": true,
+        "frames": 540,
+        "mode": "control",
+        "attackerStates": [
+          39,
+          41,
+          14
+        ],
+        "defenderStates": [
+          14
+        ],
+        "peakDamage": 0,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "firstHitFrame": null,
+        "before": [
+          [
+            16,
+            8,
+            20.623214721679688,
+            0,
+            -7.940712928771973,
+            0.00009999999747378752,
+            1.3000001907348633,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            131,
+            0,
+            -15.000006675720215,
+            0.00009999999747378752,
+            -1.3000001907348633,
+            15,
+            1,
+            15,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "after": [
+          [
+            14,
+            2,
+            312,
+            0,
+            -8.150712966918945,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            461,
+            0,
+            -15.300006866455078,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ]
+      },
+      "sing": {
+        "completed": true,
+        "frames": 540,
+        "mode": "sing",
+        "attackerStates": [
+          365,
+          14
+        ],
+        "defenderStates": [
+          14,
+          297,
+          298,
+          299
+        ],
+        "peakDamage": 0,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "firstHitFrame": null,
+        "before": [
+          [
+            16,
+            8,
+            20.623214721679688,
+            0,
+            -7.940712928771973,
+            0.00009999999747378752,
+            1.3000001907348633,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            131,
+            0,
+            -15.000006675720215,
+            0.00009999999747378752,
+            -1.3000001907348633,
+            15,
+            1,
+            15,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "after": [
+          [
+            14,
+            2,
+            150,
+            0,
+            -8.150712966918945,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            131,
+            0,
+            -15.300006866455078,
+            0.00009999999747378752,
+            0,
+            15,
+            1,
+            15,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ]
+      },
+      "restAndControlInitialStateIdentical": true,
+      "singRenderedSteps": 682,
+      "singOriginalEffectDraws": 5,
+      "singGpuVertices": {
+        "vertices": 18719,
+        "positionComponents": 56157,
+        "normalComponents": 56157,
+        "maxScaledPositionError": 0.0000043019498365533965,
+        "maxNormalError": 1.054221545615519e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.00042369826528822517,
+        "byOwner": {
+          "1553952": {
+            "vertices": 458,
+            "ndcMin": [
+              -217.7337929383407,
+              -197.70315070584437,
+              -0.014728980832272111
+            ],
+            "ndcMax": [
+              1257.0452050291146,
+              138.1522895021569,
+              0.07483952240692178
+            ]
+          },
+          "1555840": {
+            "vertices": 8608,
+            "ndcMin": [
+              -0.9748756761127393,
+              -0.9365793528806053,
+              -0.0006131684229284608
+            ],
+            "ndcMax": [
+              1.3725078893025624,
+              0.9363650534402014,
+              -0.0004471243821071898
+            ]
+          },
+          "1560288": {
+            "vertices": 4805,
+            "ndcMin": [
+              -0.06794756596063499,
+              -0.18363766428213724,
+              -0.0005357249562726437
+            ],
+            "ndcMax": [
+              0.11728762452493663,
+              0.03932344649518669,
+              -0.0005052419444275811
+            ]
+          },
+          "1644640": {
+            "vertices": 4805,
+            "ndcMin": [
+              -0.149491110627991,
+              -0.18655527207438216,
+              -0.0005363080231534644
+            ],
+            "ndcMax": [
+              0.01508371819215884,
+              0.02307273898871358,
+              -0.0005061879067130928
+            ]
+          },
+          "5447872": {
+            "vertices": 43,
+            "ndcMin": [
+              -0.19877004335244577,
+              -0.36083610268006316,
+              -0.0005517623011266067
+            ],
+            "ndcMax": [
+              0.2680861401704859,
+              0.20748347158326336,
+              -0.0005454965865367925
+            ]
+          }
+        }
+      },
+      "singGpuPassed": true,
+      "singScreenshotSha256": "d0d9d2dc879948e86d9c5f0d6ea8b84bf7142ca38aca56b423d5e390ccac1d1d",
+      "visualReview": "Original Jigglypuff model, animated colored Sing rings/notes, sleeping opponent, stage and original camera framing inspected."
+    },
+    "battlefieldRegression": {
+      "combatFrames": 683,
+      "traceSha256": "cdc288ae093576c0051e8655cee2a9260ac65b51d00b5142c453c51c331888ca",
+      "unchanged": true,
+      "lifecycleCompleted": true
+    }
+  },
+  "performance": {
+    "browser": "Google Chrome 151.0.7922.137",
+    "gpu": {
+      "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+      "vendor": "Google Inc. (AMD)",
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+    },
+    "resolution": [
+      960,
+      720
+    ],
+    "samples": [
+      {
+        "prepared": false,
+        "wasm": "ec053ec9508d5e9898d49050efc6e596f135aec2d4e2607d4afbddfebbcd5537",
+        "frames": 3600,
+        "draws": 3600,
+        "elapsedMs": 60029.09999999404,
+        "step": {
+          "samples": 3600,
+          "meanMs": 0.543111111248533,
+          "p50Ms": 0.5,
+          "p95Ms": 0.800000011920929,
+          "maxMs": 1.7000000178813934
+        },
+        "draw": {
+          "samples": 3600,
+          "meanMs": 4.89775000008444,
+          "p50Ms": 4.5999999940395355,
+          "p95Ms": 6.899999976158142,
+          "maxMs": 19
+        },
+        "catchups": 0,
+        "shaders": {
+          "programs": 26,
+          "prepared": 0,
+          "preparedUsed": 0,
+          "unpreparedUsed": 26
+        },
+        "compiles": 7,
+        "traceSha256": "7bcc0067476d04be4287838d24cf2ffd5424778933e0385e6e641c813f7572f8"
+      },
+      {
+        "prepared": true,
+        "wasm": "ec053ec9508d5e9898d49050efc6e596f135aec2d4e2607d4afbddfebbcd5537",
+        "frames": 3600,
+        "draws": 3600,
+        "elapsedMs": 60023.60000002384,
+        "step": {
+          "samples": 3600,
+          "meanMs": 0.4860000004536576,
+          "p50Ms": 0.5,
+          "p95Ms": 0.7000000178813934,
+          "maxMs": 1.699999988079071
+        },
+        "draw": {
+          "samples": 3600,
+          "meanMs": 4.7150000001076195,
+          "p50Ms": 4.5,
+          "p95Ms": 6.4000000059604645,
+          "maxMs": 27.900000005960464
+        },
+        "catchups": 0,
+        "shaders": {
+          "programs": 26,
+          "prepared": 26,
+          "preparedUsed": 26,
+          "unpreparedUsed": 0
+        },
+        "compiles": 0,
+        "traceSha256": "7bcc0067476d04be4287838d24cf2ffd5424778933e0385e6e641c813f7572f8"
+      }
+    ],
+    "preparedDriverShaderCacheDisabled": true,
+    "shaderPreparation": {
+      "requested": 26,
+      "compiled": 26,
+      "cpuMs": 230.80000001192093,
+      "fighterStateUnchanged": true
+    },
+    "workload": {
+      "framesWithAttack": 1825,
+      "framesWithHitlag": 285,
+      "framesWithDamage": 3506,
+      "stockChanges": [
+        {
+          "frame": 1307,
+          "slot": 1,
+          "stocks": 3
+        },
+        {
+          "frame": 3228,
+          "slot": 1,
+          "stocks": 2
+        }
+      ],
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 54,
+          "attack": 302
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 57,
+          "attack": 323
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 36,
+          "attack": 278
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 340
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 51,
+          "attack": 291
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 27,
+          "attack": 291
+        }
+      ]
+    },
+    "gameplayTraceDefinition": "JSON SHA256 of stateChanges, workload and final fighter values excluding resident pointers at indices 7/8.",
+    "sameRecordedGameplayTrace": true,
+    "measurement": "CPU simulation and draw-submission timing; distinct display presentations and physical input latency are not measured."
+  },
+  "limitations": [
+    "Four separate hat costumes are not loaded or rendered by this default-costume fixture; all five extra visibility rows are imported.",
+    "Only the listed moves and contact scenarios are checked. Air Rest/Sing, additional move/edge cases and cross-character matchups remain.",
+    "Rest/Sing contact probes use original default rules without complete VS lifecycle; the sustained workload separately uses tournament rules, HUD and stage callbacks.",
+    "No frame-by-frame retail gameplay parity or full roster/menus/audio/network/deployment acceptance is claimed.",
+    "An observed 27.9 ms draw spike remains in the prepared sample; zero catch-ups does not prove distinct displayed 60 FPS."
+  ],
+  "acceptanceMet": false,
+  "commands": [
+    "node --test scripts/native-port/*.test.mjs",
+    "node scripts/native-port/build.mjs --fighter-init (twice; compare WASM hashes)",
+    "node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-moves --render-steps --verify-vertices --hardware",
+    "node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-contact=rest",
+    "node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-contact=control",
+    "node scripts/native-port/probe-constructor.mjs --character=Pr --input --purin-contact=sing --render-steps --verify-vertices --hardware --record-shaders",
+    "node scripts/native-port/probe-constructor.mjs --character=Pr --stage-callbacks --live --workload --frames=3600 --hardware --record-shaders --defer-gpu-errors",
+    "node scripts/native-port/merge-shader-catalogs.mjs shader-record-battlefield-Pr-live.json shader-record-battlefield-Pr-input.json",
+    "MESA_SHADER_CACHE_DISABLE=true node scripts/native-port/probe-constructor.mjs --character=Pr --stage-callbacks --live --workload --frames=3600 --hardware --prewarm-shaders --defer-gpu-errors",
+    "node scripts/native-port/probe-constructor.mjs --stage-callbacks --render --hardware"
+  ]
+}

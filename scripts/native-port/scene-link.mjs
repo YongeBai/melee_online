@@ -17,7 +17,7 @@ export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
   const missing=[...new Set([...report.results.find(x=>x.entry==='HSD_JObjLoadJoint').missing,...materialDrawing])].filter(name=>!memoryLightFunctions.has(name)&&!tevFunctions.has(name));
   if(missing.some(name=>!name.startsWith('GX')))throw Error('Scene loader has unresolved non-GX dependencies');
   const headers=execFileSync('rg',['--files','libs/dolphin/include/dolphin/gx','-g','*.h'],{cwd:upstream,encoding:'utf8'})
-    .trim().split('\n').map(file=>fs.readFileSync(path.join(upstream,file),'utf8')).join('\n');
+    .trim().split('\n').sort().map(file=>fs.readFileSync(path.join(upstream,file),'utf8')).join('\n');
   const definitions=missing.map(name=>{
     const declarations=[...new Set([...headers.matchAll(new RegExp('\\bvoid\\s+'+name+'\\s*\\([^;{}]*\\)\\s*;','g'))]
       .map(m=>m[0].replace(/\s+/g,' ').trim()))];
@@ -27,7 +27,7 @@ export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
   const guards=path.join(output,'scene-gx-guards.c');
   fs.writeFileSync(guards,'#include <dolphin/gx.h>\n#include <stdio.h>\n#include <stdlib.h>\n'+definitions.join('\n')+'\n');
   const failed=new Set(JSON.parse(fs.readFileSync(path.join(auditDir,'report.json'))).failures.map(f=>f.file));
-  const objects=execFileSync('rg',['--files','src/sysdolphin','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n')
+  const objects=execFileSync('rg',['--files','src/sysdolphin','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort()
     .filter(file=>!failed.has(file)).map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
   const library=path.join(auditDir,'scene-hsd.a');fs.rmSync(library,{force:true});
   execFileSync(path.join(root,'.browser-tools/emsdk/upstream/emscripten/emar'),['rcs',library,...objects]);

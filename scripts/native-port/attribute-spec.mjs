@@ -10,7 +10,7 @@ export function readAttributeSpec(upstream,output,compiler) {
   const match=/ftKindCalcIndiviParamTable\[Ft_Kind_Max\]\s*=\s*\{([^}]+)\}/.exec(table);
   if(!match)throw Error('Missing character attribute loader table');
   const callbacks=match[1].split(',').map(s=>s.trim()).filter(Boolean).slice(0,27),functions=new Map();
-  const files=execFileSync('rg',['--files','src/melee/ft/kinds','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n');
+  const files=execFileSync('rg',['--files','src/melee/ft/kinds','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort();
   for(const file of files) {
     const source=fs.readFileSync(path.join(upstream,file),'utf8');
     for(const m of source.matchAll(/void (\w+_Init_LoadSpecialAttrs)\([^)]*\)\s*\{/g)) {
