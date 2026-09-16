@@ -13,7 +13,7 @@ export function readNativeTextures(module) {
   if(!p||p%4||p+2896>heap.length)throw Error('Native texture snapshot bounds');
   const view=new DataView(heap.buffer,p,2896),u=at=>view.getUint32(at*4,true),f=at=>view.getFloat32(at*4,true);
   const [textureMask,texgenMask,matrixMask,texgens]=[0,1,2,3].map(u);
-  if(textureMask>255||texgenMask>255||matrixMask>=2**30||texgens>8||texgenMask!==2**texgens-1)throw Error('Native texture resource masks');
+  if(textureMask>255||texgenMask>255||matrixMask>=2**30||texgens>8||(texgenMask&(2**texgens-1))!==2**texgens-1)throw Error('Native texture resource masks');
   const textures=[],generators=[],matrices=[];
   for(let id=0;id<8;id++) {
     if(textureMask&(1<<id)) {
@@ -27,7 +27,7 @@ export function readNativeTextures(module) {
       if([8,9,10].includes(t.format)&&(!t.paletteAddress||t.paletteFormat>2||!t.paletteEntries||t.paletteEntries>16384))throw Error('Native texture palette');
       textures.push(t);
     }
-    if(texgenMask&(1<<id)) {
+    if(id<texgens&&(texgenMask&(1<<id))) {
       const b=196+id*6,g={id,type:u(b),source:u(b+1),matrix:u(b+2),normalize:u(b+3),postMatrix:u(b+4)};
       if(g.type>10||g.source>20||g.normalize>1)throw Error('Native texture generator');generators.push(g);
     }

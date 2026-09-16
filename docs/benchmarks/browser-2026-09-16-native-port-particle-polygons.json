@@ -1,0 +1,2406 @@
+{
+  "date": "2026-09-16",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "wasm": {
+    "bytes": 2990277,
+    "sha256": "2d6867ea4eb322931c8b9d40064a076e0b489350de1c41d809493a08c085af03"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "scope": "Original particle polygon rendering inside two-Falcon Battlefield fixture, direct C-to-WASM, 960x720",
+  "changes": [
+    "Original particle manager callbacks and sorting/billboard/trail geometry",
+    "Typed immediate GX vertex writes preserve packed byte order and validate descriptors/array bounds",
+    "Quad/triangle/strip/fan GPU submission with persistent buffers and original material state",
+    "Texture-generator activation retains previously initialized registers",
+    "Frame-specific slow-draw diagnostics and timed particle counters"
+  ],
+  "validation": {
+    "targetedTests": 135,
+    "failedTests": 0,
+    "rendered": {
+      "introFrames": 124,
+      "stageFrames": 4500,
+      "combatFrames": 683,
+      "lifecycleFrames": 1020,
+      "particlesAtEndOfCombat": {
+        "draws": 3614,
+        "vertices": 14456,
+        "frames": 354,
+        "peakDraws": 40
+      },
+      "stockChanges": [
+        {
+          "frame": 75,
+          "stocks": 3,
+          "falls": 1,
+          "outcome": 0
+        },
+        {
+          "frame": 319,
+          "stocks": 2,
+          "falls": 2,
+          "outcome": 0
+        },
+        {
+          "frame": 563,
+          "stocks": 1,
+          "falls": 3,
+          "outcome": 0
+        },
+        {
+          "frame": 807,
+          "stocks": 0,
+          "falls": 4,
+          "outcome": 2
+        }
+      ],
+      "endFrames": 112,
+      "combatTraceSha256": "5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0",
+      "combatTraceUnchanged": true
+    },
+    "gpuVertexChecks": {
+      "ready": {
+        "vertices": 26702,
+        "positionComponents": 80106,
+        "normalComponents": 80106,
+        "maxScaledPositionError": 9.539850679529585e-7,
+        "maxNormalError": 1.4013283994307457e-7,
+        "byOwner": {
+          "1458336": {
+            "vertices": 28,
+            "ndcMin": [
+              -0.2404488175600763,
+              0.6735738062567096,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.3060570192123063,
+              0.7807559800284086,
+              -0.01534367160665423
+            ]
+          },
+          "1538528": {
+            "vertices": 458,
+            "ndcMin": [
+              -225.04439859964208,
+              -650.2864441956297,
+              -0.014862443467755072
+            ],
+            "ndcMax": [
+              42.10791769045468,
+              111.093576788516,
+              0.04346282418058119
+            ]
+          },
+          "1539712": {
+            "vertices": 8608,
+            "ndcMin": [
+              -0.8562302109712533,
+              -1.2556664607602355,
+              -0.00047267689516333565
+            ],
+            "ndcMax": [
+              1.0009206545330114,
+              0.1864079079977123,
+              -0.00036793119639534616
+            ]
+          },
+          "1545472": {
+            "vertices": 8225,
+            "ndcMin": [
+              -0.031640018653288846,
+              -0.6027124786938212,
+              -0.0004318729337518844
+            ],
+            "ndcMax": [
+              0.16769264191750613,
+              -0.45244625533865007,
+              -0.0004048164163263629
+            ]
+          },
+          "1628064": {
+            "vertices": 8225,
+            "ndcMin": [
+              -0.033135159794215545,
+              0.28246299745411785,
+              -0.00045329268396699035
+            ],
+            "ndcMax": [
+              0.17562327761803206,
+              0.3567081622441983,
+              -0.00042361465575425846
+            ]
+          },
+          "6919840": {
+            "vertices": 4,
+            "ndcMin": [
+              -0.48961227399501855,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              -0.17018715104029894,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "6920224": {
+            "vertices": 8,
+            "ndcMin": [
+              -0.34167154423888596,
+              -0.9474750833878649,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.11001941764100844,
+              -0.7826784678590063,
+              -0.01534367160665423
+            ]
+          },
+          "6926080": {
+            "vertices": 16,
+            "ndcMin": [
+              -0.5485511042156275,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.22350276107797776,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "6945056": {
+            "vertices": 4,
+            "ndcMin": [
+              0.1871050870840508,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              0.5065302100387704,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "6946368": {
+            "vertices": 8,
+            "ndcMin": [
+              0.33557451038974423,
+              -0.9474750833878649,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.5672266289142189,
+              -0.7826784678590063,
+              -0.01534367160665423
+            ]
+          },
+          "6951904": {
+            "vertices": 16,
+            "ndcMin": [
+              0.12869494233959988,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.45374326125704095,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "6972128": {
+            "vertices": 24,
+            "ndcMin": [
+              -0.6032026809214189,
+              -0.09677905108911859,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.7143235771365004,
+              0.37983782180631986,
+              -0.01534367160665423
+            ]
+          },
+          "6992352": {
+            "vertices": 501,
+            "ndcMin": [
+              -0.1745149634382729,
+              -0.6521418571331017,
+              -0.00043870846807995755
+            ],
+            "ndcMax": [
+              0.31265183588133244,
+              -0.17507716351411876,
+              -0.00040599568452647785
+            ]
+          },
+          "7024320": {
+            "vertices": 501,
+            "ndcMin": [
+              -0.18273142077630625,
+              0.1926147850137287,
+              -0.00046286997878469346
+            ],
+            "ndcMax": [
+              0.32737200898606106,
+              0.618314491827725,
+              -0.00041729407044457993
+            ]
+          },
+          "particles": {
+            "vertices": 76,
+            "ndcMin": [
+              -0.0922460852824886,
+              -0.7178174211237502,
+              -0.00048362171252829537
+            ],
+            "ndcMax": [
+              0.4338989436991506,
+              0.5513627359259927,
+              -0.0003731452556702366
+            ]
+          }
+        }
+      },
+      "go": {
+        "vertices": 23843,
+        "positionComponents": 71529,
+        "normalComponents": 71529,
+        "maxScaledPositionError": 0.0000017693908623958594,
+        "maxNormalError": 1.1069883265601987e-7,
+        "byOwner": {
+          "1458336": {
+            "vertices": 28,
+            "ndcMin": [
+              -0.2404488175600763,
+              0.6735738062567096,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.3060570192123063,
+              0.7807559800284086,
+              -0.01534367160665423
+            ]
+          },
+          "1538528": {
+            "vertices": 458,
+            "ndcMin": [
+              -78.27222186366464,
+              -206.2804971266094,
+              -0.0043874259503164925
+            ],
+            "ndcMax": [
+              150.9671475916334,
+              51.7200036941012,
+              0.013961010082110537
+            ]
+          },
+          "1539712": {
+            "vertices": 8608,
+            "ndcMin": [
+              -1.252397272215141,
+              -1.1857586826765456,
+              -0.0004771349611338282
+            ],
+            "ndcMax": [
+              0.6226725075870668,
+              0.2774839012647589,
+              -0.00036998875482014104
+            ]
+          },
+          "1545472": {
+            "vertices": 7272,
+            "ndcMin": [
+              -0.3895541487366956,
+              -0.6158506054612061,
+              -0.00042787398187620377
+            ],
+            "ndcMax": [
+              -0.23386890098768973,
+              -0.44502749860215945,
+              -0.0004099075018367669
+            ]
+          },
+          "1628064": {
+            "vertices": 7272,
+            "ndcMin": [
+              -0.40856022559806743,
+              0.2509747363257713,
+              -0.000447131089765797
+            ],
+            "ndcMax": [
+              -0.24369490240971362,
+              0.442956618617924,
+              -0.00042549030822074937
+            ]
+          },
+          "6919840": {
+            "vertices": 4,
+            "ndcMin": [
+              -0.48961227399501855,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              -0.17018715104029894,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "6920224": {
+            "vertices": 8,
+            "ndcMin": [
+              -0.34167154423888596,
+              -0.8548822858936544,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.11001941764100844,
+              -0.6900856703647958,
+              -0.01534367160665423
+            ]
+          },
+          "6926080": {
+            "vertices": 16,
+            "ndcMin": [
+              -0.5485511042156275,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.22350276107797776,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "6945056": {
+            "vertices": 4,
+            "ndcMin": [
+              0.1871050870840508,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              0.5065302100387704,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "6946368": {
+            "vertices": 8,
+            "ndcMin": [
+              0.33557451038974423,
+              -0.8548822858936544,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.5672266289142189,
+              -0.6900856703647958,
+              -0.01534367160665423
+            ]
+          },
+          "6951904": {
+            "vertices": 16,
+            "ndcMin": [
+              0.12869494233959988,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.45374326125704095,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "6992352": {
+            "vertices": 65,
+            "ndcMin": [
+              -0.6985107280338719,
+              0.21476215148414549,
+              -0.0004982581482722451
+            ],
+            "ndcMax": [
+              0.07661062644418318,
+              0.397844885176143,
+              -0.00038700394384873037
+            ]
+          },
+          "7056576": {
+            "vertices": 4,
+            "ndcMin": [
+              -0.683806249892624,
+              -0.3730844312854136,
+              -0.015344148594736333
+            ],
+            "ndcMax": [
+              0.789232349471545,
+              0.541683233201487,
+              -0.015344148594736333
+            ]
+          },
+          "particles": {
+            "vertices": 80,
+            "ndcMin": [
+              -0.5046664025687088,
+              -0.6446994911404188,
+              -0.00045543616414135695
+            ],
+            "ndcMax": [
+              -0.10378253295943862,
+              0.42130535112770123,
+              -0.0004052530314353172
+            ]
+          }
+        }
+      }
+    },
+    "timeout": {
+      "completed": true,
+      "before": 5184,
+      "frames": 23616,
+      "after": {
+        "frame": 28800,
+        "seconds": 0,
+        "fraction": 59,
+        "outcome": 1
+      },
+      "transition": {
+        "phase": 1,
+        "outcome": 1
+      },
+      "endFrames": 112
+    },
+    "timeoutRenderedSteps": 474,
+    "keyboard": {
+      "frames": 180,
+      "movement": true,
+      "jump": true,
+      "attack": true
+    },
+    "visuallyInspected": [
+      "Ready entrance sparkles/streaks at native framing",
+      "First combat landing dust at 960x720"
+    ],
+    "visualParityProven": false,
+    "wasmSha256": "cc3f7f6ab0a99f3bf0e1d465969ad1807426202d23a98d609fc52d5681ac41e1",
+    "finalBuild": {
+      "wasmSha256": "2d6867ea4eb322931c8b9d40064a076e0b489350de1c41d809493a08c085af03",
+      "change": "Unsigned bounds checks reject negative graphics enums; no valid-input behavior change intended",
+      "gpuVertexProbePassed": true,
+      "legacyCombatProbePassed": true,
+      "legacyCombatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332"
+    }
+  },
+  "sustained": [
+    {
+      "frames": 3600,
+      "draws": 3599,
+      "elapsedMs": 60026,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.49408333321412407,
+        "p50Ms": 0.5,
+        "p95Ms": 0.7999999970197678,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 8.98535704361826,
+        "p50Ms": 8.700000002980232,
+        "p95Ms": 10.700000002980232,
+        "maxMs": 26.600000008940697
+      },
+      "rafDrawIntervals": {
+        "samples": 3598,
+        "meanMs": 16.675264035574493,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000291
+      },
+      "cadence": {
+        "callbacks": 3602,
+        "zeroStepCallbacks": 3,
+        "multiStepCallbacks": 1,
+        "rafGapsOver25Ms": 2,
+        "timingSamples": [
+          {
+            "callback": 1,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -1565,
+            "callbackTime": 2,
+            "interval": null,
+            "debt": 0
+          },
+          {
+            "callback": 2,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": 1.599999999999909,
+            "callbackTime": 4.799999997019768,
+            "interval": 1566.6,
+            "debt": 0
+          },
+          {
+            "callback": 3,
+            "frame": 0,
+            "steps": 1,
+            "timestamp": 18.300000000000182,
+            "callbackTime": 18.400000005960464,
+            "interval": 16.700000000000273,
+            "debt": 0.033333333333605
+          },
+          {
+            "callback": 4,
+            "frame": 1,
+            "steps": 1,
+            "timestamp": 34.90000000000009,
+            "callbackTime": 35.099999994039536,
+            "interval": 16.59999999999991,
+            "debt": -0.0333333333331538
+          },
+          {
+            "callback": 5,
+            "frame": 2,
+            "steps": 1,
+            "timestamp": 51.59999999999991,
+            "callbackTime": 51.79999999701977,
+            "interval": 16.699999999999818,
+            "debt": -3.552713678800501e-15
+          },
+          {
+            "callback": 6,
+            "frame": 3,
+            "steps": 1,
+            "timestamp": 68.30000000000018,
+            "callbackTime": 68.5,
+            "interval": 16.700000000000273,
+            "debt": 0.033333333333601445
+          },
+          {
+            "callback": 7,
+            "frame": 4,
+            "steps": 1,
+            "timestamp": 84.90000000000009,
+            "callbackTime": 85.09999999403954,
+            "interval": 16.59999999999991,
+            "debt": -0.033333333333157356
+          },
+          {
+            "callback": 8,
+            "frame": 5,
+            "steps": 1,
+            "timestamp": 101.59999999999991,
+            "callbackTime": 101.79999999701977,
+            "interval": 16.699999999999818,
+            "debt": -7.105427357601002e-15
+          },
+          {
+            "callback": 288,
+            "frame": 285,
+            "steps": 0,
+            "timestamp": 4768,
+            "callbackTime": 4768.20000000298,
+            "interval": 16.600000000000364,
+            "debt": 16.399999999999753
+          },
+          {
+            "callback": 1885,
+            "frame": 1881,
+            "steps": 2,
+            "timestamp": 31400.4,
+            "callbackTime": 31401.29999999702,
+            "interval": 33.30000000000291,
+            "debt": 15.466666666660323
+          }
+        ]
+      },
+      "maxDebtMs": 48.79999999999366,
+      "resolution": [
+        960,
+        720
+      ],
+      "workload": {
+        "framesWithAttack": 1915,
+        "framesWithHitlag": 321,
+        "framesWithDamage": 3346,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 182
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "particleStats": {
+        "draws": 14620,
+        "vertices": 58480,
+        "frames": 1910,
+        "peakDraws": 40
+      },
+      "particleCounterScope": "Cumulative particle counters include 124-frame intro; timing excludes intro",
+      "wasmSha256": "cc3f7f6ab0a99f3bf0e1d465969ad1807426202d23a98d609fc52d5681ac41e1"
+    },
+    {
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60033.40000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.46466666671964857,
+        "p50Ms": 0.5,
+        "p95Ms": 0.7999999970197678,
+        "maxMs": 1.4000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 8.926333333299391,
+        "p50Ms": 8.700000002980232,
+        "p95Ms": 10.700000002980232,
+        "maxMs": 19.299999997019768
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757708,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.20000000000073
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1,
+        "timingSamples": [
+          {
+            "callback": 1,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -1559.1999999970199,
+            "callbackTime": 1.9000000059604645,
+            "interval": null,
+            "debt": 0
+          },
+          {
+            "callback": 2,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -9.299999997019768,
+            "callbackTime": 4.9000000059604645,
+            "interval": 1549.9,
+            "debt": 0
+          },
+          {
+            "callback": 3,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": 7.300000002980141,
+            "callbackTime": 7.5999999940395355,
+            "interval": 16.59999999999991,
+            "debt": 0
+          },
+          {
+            "callback": 4,
+            "frame": 0,
+            "steps": 1,
+            "timestamp": 24.000000002980414,
+            "callbackTime": 24.200000002980232,
+            "interval": 16.700000000000273,
+            "debt": 0.033333333333605
+          },
+          {
+            "callback": 5,
+            "frame": 1,
+            "steps": 1,
+            "timestamp": 40.70000000298023,
+            "callbackTime": 40.900000005960464,
+            "interval": 16.699999999999818,
+            "debt": 0.06666666666675525
+          },
+          {
+            "callback": 6,
+            "frame": 2,
+            "steps": 1,
+            "timestamp": 57.30000000298014,
+            "callbackTime": 57.70000000298023,
+            "interval": 16.59999999999991,
+            "debt": -3.552713678800501e-15
+          },
+          {
+            "callback": 7,
+            "frame": 3,
+            "steps": 1,
+            "timestamp": 74.00000000298041,
+            "callbackTime": 74.20000000298023,
+            "interval": 16.700000000000273,
+            "debt": 0.033333333333601445
+          },
+          {
+            "callback": 8,
+            "frame": 4,
+            "steps": 1,
+            "timestamp": 90.70000000298023,
+            "callbackTime": 91.09999999403954,
+            "interval": 16.699999999999818,
+            "debt": 0.0666666666667517
+          },
+          {
+            "callback": 343,
+            "frame": 339,
+            "steps": 0,
+            "timestamp": 5673.70000000298,
+            "callbackTime": 5674.0999999940395,
+            "interval": 16.5,
+            "debt": 16.39999999999969
+          }
+        ]
+      },
+      "maxDebtMs": 33.23333333333298,
+      "resolution": [
+        960,
+        720
+      ],
+      "workload": {
+        "framesWithAttack": 1915,
+        "framesWithHitlag": 321,
+        "framesWithDamage": 3346,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 182
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "particleStats": {
+        "draws": 12776,
+        "vertices": 51104,
+        "frames": 1820,
+        "peakDraws": 39
+      },
+      "slowDraws": [
+        {
+          "frame": 200,
+          "costMs": 17,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 32,
+            "images": 136,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 6,
+            "effectRetired": 5,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 515,
+          "costMs": 19.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 226,
+            "programs": 33,
+            "images": 150,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 14,
+            "effectRetired": 14,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 516,
+          "costMs": 19,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 226,
+            "programs": 33,
+            "images": 150,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 14,
+            "effectRetired": 14,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1637,
+          "costMs": 16.799999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 197,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 43,
+            "effectRetired": 43,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1863,
+          "costMs": 17.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 12,
+            "immediateVertices": 48,
+            "draws": 217,
+            "programs": 33,
+            "images": 154,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 51,
+            "effectRetired": 51,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1886,
+          "costMs": 16.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 197,
+            "programs": 33,
+            "images": 154,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 51,
+            "effectRetired": 51,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1897,
+          "costMs": 18.200000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 17,
+            "immediateVertices": 68,
+            "draws": 214,
+            "programs": 33,
+            "images": 154,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 51,
+            "effectRetired": 51,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3168,
+          "costMs": 18.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 204,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 74,
+            "effectRetired": 74,
+            "peakEffectModels": 2
+          }
+        }
+      ],
+      "particleCounterScope": "Particle counters reset before timing; both exclude 124-frame intro",
+      "wasmSha256": "cc3f7f6ab0a99f3bf0e1d465969ad1807426202d23a98d609fc52d5681ac41e1"
+    },
+    {
+      "frames": 3600,
+      "draws": 3595,
+      "elapsedMs": 60025.10000000894,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.46730555548850033,
+        "p50Ms": 0.5,
+        "p95Ms": 0.7999999970197678,
+        "maxMs": 1.5999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3595,
+        "meanMs": 9.100890125278307,
+        "p50Ms": 8.799999997019768,
+        "p95Ms": 10.900000005960464,
+        "maxMs": 24.299999997019768
+      },
+      "rafDrawIntervals": {
+        "samples": 3594,
+        "meanMs": 16.69382303839652,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.400000000001455
+      },
+      "cadence": {
+        "callbacks": 3598,
+        "zeroStepCallbacks": 3,
+        "multiStepCallbacks": 5,
+        "rafGapsOver25Ms": 6,
+        "timingSamples": [
+          {
+            "callback": 1,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -1548.2,
+            "callbackTime": 1.7999999970197678,
+            "interval": null,
+            "debt": 0
+          },
+          {
+            "callback": 2,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": 1.699999999999818,
+            "callbackTime": 4.700000002980232,
+            "interval": 1549.8999999999999,
+            "debt": 0
+          },
+          {
+            "callback": 3,
+            "frame": 0,
+            "steps": 1,
+            "timestamp": 18.300000000000182,
+            "callbackTime": 18.600000008940697,
+            "interval": 16.600000000000364,
+            "debt": -0.06666666666630405
+          },
+          {
+            "callback": 4,
+            "frame": 1,
+            "steps": 1,
+            "timestamp": 35,
+            "callbackTime": 35.20000000298023,
+            "interval": 16.699999999999818,
+            "debt": -0.0333333333331538
+          },
+          {
+            "callback": 5,
+            "frame": 2,
+            "steps": 1,
+            "timestamp": 51.59999999999991,
+            "callbackTime": 51.900000005960464,
+            "interval": 16.59999999999991,
+            "debt": -0.0999999999999126
+          },
+          {
+            "callback": 6,
+            "frame": 3,
+            "steps": 1,
+            "timestamp": 68.30000000000018,
+            "callbackTime": 68.5,
+            "interval": 16.700000000000273,
+            "debt": -0.0666666666663076
+          },
+          {
+            "callback": 7,
+            "frame": 4,
+            "steps": 1,
+            "timestamp": 85,
+            "callbackTime": 85.20000000298023,
+            "interval": 16.699999999999818,
+            "debt": -0.033333333333157356
+          },
+          {
+            "callback": 8,
+            "frame": 5,
+            "steps": 1,
+            "timestamp": 101.59999999999991,
+            "callbackTime": 101.79999999701977,
+            "interval": 16.59999999999991,
+            "debt": -0.09999999999991616
+          },
+          {
+            "callback": 189,
+            "frame": 186,
+            "steps": 0,
+            "timestamp": 3118.1000000000004,
+            "callbackTime": 3118.5,
+            "interval": 16.600000000000364,
+            "debt": 16.400000000000325
+          },
+          {
+            "callback": 1563,
+            "frame": 1559,
+            "steps": 2,
+            "timestamp": 26033.9,
+            "callbackTime": 26034.60000000894,
+            "interval": 33.20000000000073,
+            "debt": 15.533333333328251
+          },
+          {
+            "callback": 2648,
+            "frame": 2645,
+            "steps": 2,
+            "timestamp": 44133.3,
+            "callbackTime": 44134.20000000298,
+            "interval": 33.400000000001455,
+            "debt": 14.933333333327539
+          },
+          {
+            "callback": 2677,
+            "frame": 2675,
+            "steps": 2,
+            "timestamp": 44633.2,
+            "callbackTime": 44634.60000000894,
+            "interval": 33.299999999995634,
+            "debt": 14.833333333321683
+          },
+          {
+            "callback": 2681,
+            "frame": 2680,
+            "steps": 2,
+            "timestamp": 44716.5,
+            "callbackTime": 44717.10000000894,
+            "interval": 33.30000000000291,
+            "debt": 14.79999999999125
+          },
+          {
+            "callback": 3451,
+            "frame": 3451,
+            "steps": 2,
+            "timestamp": 57566,
+            "callbackTime": 57567.79999999702,
+            "interval": 33.30000000000291,
+            "debt": 14.29999999999034
+          }
+        ]
+      },
+      "maxDebtMs": 48.86666666666159,
+      "resolution": [
+        960,
+        720
+      ],
+      "workload": {
+        "framesWithAttack": 1915,
+        "framesWithHitlag": 321,
+        "framesWithDamage": 3346,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 182
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "particleStats": {
+        "draws": 12731,
+        "vertices": 50924,
+        "frames": 1817,
+        "peakDraws": 39
+      },
+      "slowDraws": [
+        {
+          "frame": 452,
+          "costMs": 18,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 204,
+            "programs": 33,
+            "images": 146,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 13,
+            "effectRetired": 13,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 464,
+          "costMs": 16.69999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 33,
+            "images": 146,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 13,
+            "effectRetired": 13,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 648,
+          "costMs": 17.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 33,
+            "images": 151,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 18,
+            "effectRetired": 18,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 856,
+          "costMs": 16.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 33,
+            "images": 151,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 23,
+            "effectRetired": 23,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 858,
+          "costMs": 17.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 197,
+            "programs": 33,
+            "images": 151,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 23,
+            "effectRetired": 23,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 875,
+          "costMs": 18.900000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 226,
+            "programs": 33,
+            "images": 151,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 23,
+            "effectRetired": 23,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1556,
+          "costMs": 19.5,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 204,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 43,
+            "effectRetired": 43,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1557,
+          "costMs": 19.100000008940697,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 196,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 43,
+            "effectRetired": 43,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1558,
+          "costMs": 23.899999991059303,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 196,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 43,
+            "effectRetired": 43,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1559,
+          "costMs": 17.69999998807907,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 204,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 43,
+            "effectRetired": 43,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1563,
+          "costMs": 19.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 12,
+            "immediateVertices": 48,
+            "draws": 216,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 43,
+            "effectRetired": 43,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1564,
+          "costMs": 19.200000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 226,
+            "programs": 33,
+            "images": 153,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 43,
+            "effectRetired": 43,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1749,
+          "costMs": 16.799999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 7,
+            "immediateVertices": 28,
+            "draws": 203,
+            "programs": 33,
+            "images": 154,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 47,
+            "effectRetired": 47,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1897,
+          "costMs": 17.799999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 17,
+            "immediateVertices": 68,
+            "draws": 214,
+            "programs": 33,
+            "images": 154,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 51,
+            "effectRetired": 51,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1898,
+          "costMs": 17.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 12,
+            "immediateVertices": 48,
+            "draws": 209,
+            "programs": 33,
+            "images": 154,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 51,
+            "effectRetired": 51,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 1899,
+          "costMs": 18.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 7,
+            "immediateVertices": 28,
+            "draws": 212,
+            "programs": 33,
+            "images": 154,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 51,
+            "effectRetired": 51,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2503,
+          "costMs": 17.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 58,
+            "effectRetired": 58,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2504,
+          "costMs": 16.799999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 58,
+            "effectRetired": 58,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2619,
+          "costMs": 17.799999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 7,
+            "immediateVertices": 28,
+            "draws": 212,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2643,
+          "costMs": 19.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 12,
+            "immediateVertices": 48,
+            "draws": 217,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2644,
+          "costMs": 18.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 227,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2645,
+          "costMs": 18.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 219,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2673,
+          "costMs": 18.30000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 12,
+            "immediateVertices": 48,
+            "draws": 209,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2674,
+          "costMs": 18.799999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 219,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2675,
+          "costMs": 20.200000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 22,
+            "immediateVertices": 88,
+            "draws": 227,
+            "programs": 37,
+            "images": 169,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2677,
+          "costMs": 24.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 17,
+            "immediateVertices": 68,
+            "draws": 213,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2678,
+          "costMs": 17.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 12,
+            "immediateVertices": 48,
+            "draws": 208,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2679,
+          "costMs": 18.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 7,
+            "immediateVertices": 28,
+            "draws": 211,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2680,
+          "costMs": 18.600000008940697,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 2,
+            "immediateVertices": 8,
+            "draws": 206,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2700,
+          "costMs": 17.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 204,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2702,
+          "costMs": 17.600000008940697,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 196,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2703,
+          "costMs": 17.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 12,
+            "immediateVertices": 48,
+            "draws": 216,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 62,
+            "effectRetired": 62,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2733,
+          "costMs": 19.900000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 199,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 65,
+            "effectRetired": 64,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3433,
+          "costMs": 17.899999991059303,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 196,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 78,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3435,
+          "costMs": 19.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 204,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 78,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3437,
+          "costMs": 17.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 196,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 78,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3443,
+          "costMs": 17.799999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 79,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3444,
+          "costMs": 18.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 79,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3445,
+          "costMs": 16.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 197,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 79,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3446,
+          "costMs": 17.100000008940697,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 197,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 79,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3447,
+          "costMs": 17.299999997019768,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 205,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 79,
+            "effectRetired": 78,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3448,
+          "costMs": 20.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 205,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 80,
+            "effectRetired": 79,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3450,
+          "costMs": 17.200000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 197,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 80,
+            "effectRetired": 79,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3451,
+          "costMs": 17.600000008940697,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 206,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 80,
+            "effectRetired": 79,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3453,
+          "costMs": 21.899999991059303,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 198,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 81,
+            "effectRetired": 80,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3457,
+          "costMs": 16.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 198,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 81,
+            "effectRetired": 80,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3458,
+          "costMs": 19.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 198,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 82,
+            "effectRetired": 81,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3459,
+          "costMs": 17.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 1,
+            "immediateVertices": 4,
+            "draws": 206,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 82,
+            "effectRetired": 81,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3500,
+          "costMs": 16.700000002980232,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 203,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 82,
+            "effectRetired": 82,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3536,
+          "costMs": 16.900000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "draws": 203,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 82,
+            "effectRetired": 82,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 3549,
+          "costMs": 17.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 7,
+            "immediateVertices": 28,
+            "draws": 202,
+            "programs": 38,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 82,
+            "effectRetired": 82,
+            "peakEffectModels": 2
+          }
+        }
+      ],
+      "wasmSha256": "2d6867ea4eb322931c8b9d40064a076e0b489350de1c41d809493a08c085af03",
+      "particleCounterScope": "Particle counters reset before timing; both exclude 124-frame intro"
+    }
+  ],
+  "analysis": "First run has one catch-up callback. Repeat has none, but slow calls also occur at stable program/resource counts. These runs do not isolate shader compilation or prove distinct presentation.",
+  "remaining": [
+    "Point and line particles require screen-size/texture-offset implementation and currently abort",
+    "Shape animation, shadow captures and refraction",
+    "Full stage startup, all-character/all-stage gameplay, audio and native scene lifecycle",
+    "Gamepads, networking, deployment and distinct presentation/input-to-photon validation"
+  ],
+  "presentationFpsMeasured": false,
+  "inputToPhotonMeasured": false,
+  "acceptanceMet": false
+}

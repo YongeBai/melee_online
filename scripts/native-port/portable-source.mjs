@@ -34,6 +34,19 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='libs/dolphin/include/dolphin/gx/GXVert.h') {
+      const declarations=['u8','s8','u16','s16','u32','s32','u64','s64','f32','f64'].map(t=>'void portGXWrite_'+t+'('+t+' value);').join('\n');
+      replace('#define GXFIFO_ADDR 0xCC008000',declarations+'\n#define GXFIFO_ADDR 0xCC008000');
+      text=text.replace(/GXWGFifo\.T = (\w+);/g,'portGXWrite_##T($1);').replace(/GXWGFifo\.(u8|u16) = (\w+);/g,'portGXWrite_$1($2);');
+    }
+    if(file==='libs/dolphin/include/dolphin/gx/GXGeometry.h') {
+      replace('    GXSetArray((attr), (data), (stride))','    portGXSetArraySized((attr), (data), (size), (stride))');
+      replace('void GXSetArray(GXAttr attr, const void* base_ptr, u8 stride);','void GXSetArray(GXAttr attr, const void* base_ptr, u8 stride);\nvoid portGXSetArraySized(GXAttr, const void*, unsigned, u8);');
+    }
+    if(file==='src/sysdolphin/baselib/psdisp.c') {
+      text=text.replace(/GXWGFifo\.(\w+)\s*=\s*([^;]+);/g,'portGXWrite_$1($2);');
+      if(text.includes('GXWGFifo.'))throw Error('Unconverted particle FIFO access');
+    }
     if(file==='src/sysdolphin/baselib/objalloc.c') {
       // WASM's address-zero page is mapped. An omitted pool initializer must
       // fail before a zero-size allocation can silently corrupt that page.

@@ -145,6 +145,10 @@ try {
     const step=()=>tournament?module._portTournamentStep():module._portRuntimeStep();
     let preview,canvas;
     function recordHud(drawn){
+      if(drawn.materialDraws?.immediateDraws&&!report.preview.particles){
+        report.preview.particles=drawn;
+        const img=document.createElement('img');img.id='native-preview-particles';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
+      }
       if(!drawn.hud)return;
       report.hud.drawnFrames=(report.hud.drawnFrames??0)+1;
       if(damageHud){

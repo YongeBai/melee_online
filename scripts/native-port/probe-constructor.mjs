@@ -25,6 +25,7 @@ try {
   const port=fs.readFileSync(portFile,'utf8').split('\n')[0],tabs=await(await fetch('http://127.0.0.1:'+port+'/json/list')).json();
   socket=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
   socket.addEventListener('message',event=>{const m=JSON.parse(event.data),wait=pending.get(m.id);if(wait){pending.delete(m.id);m.error?wait.reject(Error(JSON.stringify(m.error))):wait.resolve(m.result);}
+    if(m.method==='Runtime.exceptionThrown'){const e=m.params.exceptionDetails;probe={...(partial??{}),error:e.exception?.description??e.text,diagnostics};}
     if(m.method==='Inspector.targetCrashed')crashed=true;
     if(m.method==='Debugger.paused')frames=m.params.callFrames.map(f=>({function:symbols.get(Number(/^\$func(\d+)$/.exec(f.functionName)?.[1]))||f.functionName,url:f.url,location:f.location}));
     if(m.method==='Runtime.consoleAPICalled')for(const arg of m.params.args){const value=arg.value;if(typeof value!=='string')continue;if(value.startsWith('NATIVE_CONSTRUCTOR_RESULT '))probe=JSON.parse(value.slice(26));else if(value.startsWith('NATIVE_CONSTRUCTOR_START '))partial=JSON.parse(value.slice(25));else {diagnostics.push(value);if(diagnostics.length>64)diagnostics.shift();}}
@@ -50,6 +51,7 @@ try {
   if(!probe){if(!crashed){try{await command('Debugger.pause');for(let i=0;i<20&&!frames;i++)await delay(100);}catch(error){diagnostics.push(String(error));}}
     probe={...(partial||{}),constructorCompleted:partial?.constructorCompleted===true,error:crashed?'Browser renderer crashed':'Constructor did not finish within '+(live||renderSteps?90:20)+' seconds',diagnostics,pausedFrames:frames,playable:false,performanceMeasured:false};}
   if(probe.error)probe.error=probe.error.replace(/wasm-function\[(\d+)\]/g,(text,id)=>text+' '+(symbols.get(Number(id))||'unknown'));
+  fs.writeFileSync(path.join(output,'last-constructor-probe.json'),JSON.stringify(probe,null,2)+'\n');
   if(intro&&!probe.error){
     if(!probe.intro?.completed)throw Error('Original Ready/Go sequence did not complete');
     if(render)for(const [name,index] of [['ready',3],['go',4]]){
@@ -60,12 +62,17 @@ try {
     }
   }
   if(render&&!live&&!renderSteps&&probe.preview&&!probe.error) {
-    for(const [name,snapshot] of Object.entries(probe.preview))if(!snapshot.materialShaderChecks?.passed||!snapshot.materialDraws?.draws||!snapshot.materialDraws?.vertexChecks?.vertices||(callbacks&&snapshot.actors.filter(a=>a.name.startsWith('Falcon')).some(a=>!a.draws)))throw Error('Incomplete native material draw verification: '+name);
+    for(const [name,snapshot] of Object.entries(probe.preview))if(!snapshot.materialShaderChecks?.passed||!snapshot.materialDraws?.draws||!snapshot.materialDraws?.vertexChecks?.vertices||(callbacks&&(!intro||name!=='settled')&&snapshot.actors.filter(a=>a.name.startsWith('Falcon')).some(a=>!a.draws)))throw Error('Incomplete native material draw verification: '+name);
     for(const [id,name] of [['native-preview-settled','settled'],['native-preview','final']]) {
       const evaluated=await command('Runtime.evaluate',{expression:'(()=>{const r=document.getElementById('+JSON.stringify(id)+').getBoundingClientRect();return {x:r.x,y:r.y+scrollY,width:r.width,height:r.height,scale:1};})()',returnByValue:true});
       const shot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:evaluated.result.value});
       fs.writeFileSync(path.join(output,'native-match-'+name+'.png'),Buffer.from(shot.data,'base64'));
     }
+  }
+  if(probe.preview?.particles&&!probe.error){
+    const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-particles').src",returnByValue:true});
+    if(!shot.result.value?.startsWith('data:image/png;base64,'))throw Error('Missing particle screenshot');
+    fs.writeFileSync(path.join(output,'native-match-particles.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
   }
   if(tournament&&renderSteps&&!probe.error&&!process.argv.includes('--timeout')){
     if(!probe.preview?.respawn||!probe.respawnPlatformDrawFrames)throw Error('No rendered respawn platform evidence');

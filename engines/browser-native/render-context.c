@@ -49,3 +49,6 @@ void portRenderContextBegin(HSD_CObj* camera,HSD_LObj* lights)
     HSD_LObj_803668EC(lights);HSD_LObjSetupInit(camera);
     if(state.camera_mask!=7)abort();setting_context=0;
 }
+
+void GXGetProjectionv(f32* p)
+{require(p&&state.camera_mask==7);p[0]=state.projection_type;unsigned column=state.projection_type==GX_PERSPECTIVE?2:3;p[1]=state.projection[0][0];p[2]=state.projection[0][column];p[3]=state.projection[1][1];p[4]=state.projection[1][column];p[5]=state.projection[2][2];p[6]=state.projection[2][3];}

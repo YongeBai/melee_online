@@ -38,3 +38,9 @@ test('native texture boundary rejects malformed masks, missing matrices and imag
   }
   const f=fixture(),t=readNativeTextures(f.module).textures[0];t.address=8190;assert.throws(()=>decodeNativeTexture(f.module,t),/memory bounds/);
 });
+test('texgen enable count preserves initialized registers across particle mode changes',()=>{
+  const f=fixture();f.words[3]=0;
+  assert.deepEqual(readNativeTextures(f.module).generators,[]);
+  f.words[3]=1;assert.equal(readNativeTextures(f.module).generators.length,1);
+  f.words[1]=0;assert.throws(()=>readNativeTextures(f.module),/resource masks/);
+});

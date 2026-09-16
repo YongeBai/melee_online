@@ -95,8 +95,22 @@ const PortTevState* portMaterialDrawState(HSD_JObj* joint,unsigned index,unsigne
 static int drawing;
 /* Geometry is decoded into explicit WebGL VAOs; the host binds a complete VAO
  * for every polygon. Clearing GX's FIFO descriptor cannot leave stale host
- * attributes. Immediate-mode vertex submission remains an unsupported path. */
-void GXClearVtxDesc(void){if(!drawing||capturing)abort();}
+ * attributes. Scoped particle callbacks use the immediate descriptor instead. */
+extern int portImmediateActive(void);
+extern void portImmediateClear(void),portImmediateBegin(void),portImmediateEnd(void);
+void GXClearVtxDesc(void){if(portImmediateActive()){portImmediateClear();return;}if(!drawing||capturing)abort();}
+const void* portImmediateTevState(void){require(portImmediateActive());return &state;}
+void portNativeDrawParticles(HSD_GObj* owner,unsigned pass)
+{
+    extern void efLib_render_callback(HSD_GObj*,int);
+    extern void portRenderContextEnter(void),portRenderContextLeave(void);
+    if(drawing||capturing||!owner||owner->render_cb!=efLib_render_callback||pass>2)abort();
+    portRenderContextEnter();drawing=capturing=1;memset(&state,0,sizeof(state));
+    portTextureCaptureReset();portModelCaptureReset();portImmediateBegin();
+    HSD_GObj* previous=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
+    owner->render_cb(owner,pass);
+    HSD_GObj_804D7814=previous;portImmediateEnd();drawing=capturing=0;portRenderContextLeave();
+}
 static HSD_DObj* drawing_display;
 static unsigned emitted;
 EM_JS(void,portEmitDraw,(unsigned owner,unsigned joint,unsigned display,unsigned polygon,unsigned tev),{

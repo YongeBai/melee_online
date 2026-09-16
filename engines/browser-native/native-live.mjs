@@ -31,8 +31,10 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   // The first callback can carry a timestamp from before lengthy startup work.
   // Discard such timestamps, then anchor to the first valid display callback.
   // A quarter millisecond of repaid tolerance covers observed display jitter.
+  preview.resetParticleStats?.();
+  const slowDraws=[];
   const stateChanges=[],inputChanges=[],keys=new Set(),clock=createNativeFrameClock(performance.now(),60,{align:true,toleranceMs:.25}),stepTimes=[],drawTimes=[],intervals=[];
-  let raf=0,stopped=false,frames=0,draws=0,started=performance.now(),lastDraw=null,lastCallback=null;
+  let raf=0,stopped=false,frames=0,draws=0,started=performance.now(),lastDraw=null,lastCallback=null,lastRender=null;
   const cadence={callbacks:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
   const initial=objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
   const buttons=new Map([['KeyZ',0x100],['KeyS',0x200],['KeyX',0x400],['KeyC',0x120],['ShiftLeft',0x20],['ShiftRight',0x40]]);
@@ -44,7 +46,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   const cursors=new Map();
   function sample(values,value){const index=cursors.get(values)??0;if(values.length<3600)values.push(value);else values[index%3600]=value;cursors.set(values,index+1);}
   function distribution(values){const v=[...values].sort((a,b)=>a-b);return {samples:v.length,meanMs:v.reduce((a,b)=>a+b,0)/(v.length||1),p50Ms:v[Math.floor((v.length-1)*.5)]??0,p95Ms:v[Math.floor((v.length-1)*.95)]??0,maxMs:v.at(-1)??0};}
-  function snapshot(){return {frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard events',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false};}
+  function snapshot(){return {frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard events',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,particleStats:lastRender?.particleStats??null,slowDraws};}
   function stop(){if(stopped)return;stopped=true;cancelAnimationFrame(raf);removeEventListener('keydown',input);removeEventListener('keyup',input);removeEventListener('blur',reset);document.removeEventListener('visibilitychange',reset);keys.clear();for(let i=0;i<objects.length;i++)module._portStageProbePad(i,0,0,0);}
   function frame(now){
     if(stopped)return;
@@ -78,7 +80,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         jump ||= final[0][3]===1&&final[0][5]>initial[0][5]+1;
         attack ||= final[0][0]>=44&&final[0][0]<=69;
       }
-      if(steps){const before=performance.now();preview.draw();sample(drawTimes,performance.now()-before);draws++;if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
+      if(steps){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
       if(frameLimit&&frames>=frameLimit){stop();onComplete(snapshot());return;}
       raf=requestAnimationFrame(frame);
     }catch(error){stop();onError(error,snapshot());}

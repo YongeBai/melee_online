@@ -93,6 +93,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
   let stageOwners=new Set(),effectOwners=new Set();
+  const particleStats={draws:0,vertices:0,frames:0,peakDraws:0};
   const resourceStats={stageCreated:0,stageRetired:0,effectCreated:0,effectRetired:0,peakEffectModels:0};
   const effectList=effects?module._malloc(512*12):0;
   if(effects&&!effectList)throw Error('Effect owner allocation');
@@ -126,20 +127,20 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     materialShaderChecks=materials&&verify?verifyGpuMaterialShader(gl):null;
     for(const actor of actors)addActor(actor);
     return {
+      resetParticleStats(){for(const key of Object.keys(particleStats))particleStats[key]=0;},
       draw(){
         if(callbacks){
           if(!materialRenderer)throw Error('Original callbacks require native materials');
           syncStage();syncEffects();const accessories=syncAccessories();
           const snapshot=camera.snapshot();checkNativeCamera(snapshot);materialRenderer.begin(snapshot);
           const rows=resources.map(r=>({name:r.name,passes:[],draws:0}));
-          let pendingParticlePasses=0;
+          let particlePasses=0;
           if(stage){
             module._portStageRenderBegin();
             module.onNativeObject=(owner,pass,link,classifier,particles)=>{
-              // The current fixture has never drawn particle billboards. Keep
-              // this known gap explicit while restoring stage/model ordering.
-              // Unknown models/items still fail instead of being discarded.
-              if(particles){pendingParticlePasses++;return;}
+              // Execute the original particle callback in the original camera pass.
+              // Unsupported primitives and unknown models still fail explicitly.
+              if(particles){module._portNativeDrawParticles(owner,pass);particlePasses++;return;}
               const i=resources.findIndex(r=>r.owner===owner),r=resources[i];
               if(!r&&!stageOwners.has(owner)&&!effectOwners.has(owner))throw Error('Unregistered native render object '+owner+' link '+link+' class '+classifier);
               const count=r?.prepare?module._portFighterNativeDraw(owner,pass):module._portNativeDrawObject(owner,pass,1);
@@ -156,7 +157,8 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           }
           }
           const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),materialDraws=materialRenderer.flush({ordered:true});
-          return {gpuInfo,materialShaderChecks,materialDraws,accessories,pendingParticlePasses,originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera pass sequence and dynamic stage/model effects; particle GPU rendering, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
+          particleStats.draws+=materialDraws.immediateDraws;particleStats.vertices+=materialDraws.immediateVertices;if(materialDraws.immediateDraws)particleStats.frames++;particleStats.peakDraws=Math.max(particleStats.peakDraws,materialDraws.immediateDraws);
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,particleStats:{...particleStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot);
         module._portStageRenderBegin();

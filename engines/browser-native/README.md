@@ -51,8 +51,9 @@ callbacks. It imports typed background color scripts and checks 4,500 frames
 including background creation/fade/destruction, then exercises combat and stock
 loss. With rendering enabled it uses the original main camera's pass sequence,
 original stage draw callbacks, and live ownership of stage groups and model
-effects. Rootless particle managers are counted as a known missing GPU path;
-unknown model owners fail explicitly. Live probes run the same callbacks during
+effects. Rootless particle managers now execute original particle draw callbacks; their
+quad/triangle primitives enter the same material renderer. Unsupported point/line
+particles and unknown model owners fail explicitly. Live probes run the same callbacks during
 the paced workload instead of the separate 4,500-frame idle prelude. Shadow-map
 capture, refraction and full scene startup are still incomplete.
 Use `--hud --timeout --render-steps --hardware` to render the final six seconds
@@ -759,9 +760,9 @@ custom primitive methods and shape-animation submission reject explicitly.
 Original fighter callbacks perform body selection, visibility projection, light
 overlays and cleanup. The legacy fixture keeps the generic stage joint callback;
 `--stage-callbacks` runs the original camera/GX-link pass sequence and stage
-callbacks, including dynamic background and model-effect ownership. Its pending
-particle draw passes remain explicit in the report; neither mode includes full
-shadow-map capture or refraction. Preserve that distinction when reporting coverage.
+callbacks, including dynamic background and model-effect ownership. Particle
+polygons retain their original callback ordering and material state;
+point/line particles, shadow-map capture and refraction are still incomplete. Preserve that distinction when reporting coverage.
 
 The SDK's unchanged `GXProject` C routine is compiled from the pinned source.
 The portable recipe corrects `lbVector_WorldToScreen`'s local projection matrix
@@ -799,3 +800,26 @@ that each fighter owns a distinct non-null shadow. GXGetTexBufferSize uses the
 pinned SDK's complete CPU implementation for tile and mip-chain sizing. HSD object
 pools now reject use before initialization, avoiding silent writes through WASM's
 mapped address-zero page. Actual shadow texture capture remains separate work.
+
+## Original particle polygon submission
+
+The particle manager now runs efLib_render_callback and psDispParticles in the
+original camera pass. The original code still sorts particles and computes their
+corners, trails, colors, texture selection and matrices. The portable GXVert
+header routes typed immediate writes into immediate.c; explicit psdisp FIFO
+assignments use the same boundary. The adapter checks vertex descriptors, packed
+byte lengths and indexed texture-coordinate array bounds, retaining console byte
+order. Quads, triangles, strips and fans become indexed triangles without changing
+winding. GPU buffers are reused across frames. The existing native TEV, texture,
+lighting and pixel-state renderer consumes each primitive's captured state.
+
+Point and line particles deliberately abort pending their screen-size and texture
+offset implementation; they are not silently dropped. Shape-animation geometry,
+full shadow captures and refraction are also still unsupported. Passing the
+current two-Falcon workload is not all-effect or all-character coverage.
+
+The rendered probe reports cumulative particle primitive/vertex counts and saves
+a first combat particle image when drawing every step. Live timing resets particle
+counters after the introductory prelude. Slow draw calls are recorded with frame,
+material/program counts and resource counts to distinguish compilation/allocation
+from general frame pacing. Draw submission is not distinct presentation.

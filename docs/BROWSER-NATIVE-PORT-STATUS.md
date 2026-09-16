@@ -5,6 +5,39 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Original particle polygons now render through efLib_render_callback and
+psDispParticles. The game still performs sorting, billboard/trail geometry,
+colors and texture selection; a scoped GX immediate-vertex boundary submits its
+quads/triangles/strips/fans to the existing WebGL material backend. The rendered
+intro/background/combat/lifecycle probe submits 3,614 particle primitives (14,456
+vertices) over 354 frames, peaking at 40 primitives in one frame. The combat trace
+is unchanged. GPU transform feedback checks the particle vertices along with
+stage/fighter/HUD geometry; Ready's maximum scaled position error is below 1e-6.
+The inspected Ready image now includes the original entrance sparkles and streaks.
+All 135 targeted tests pass.
+
+Three 60-second 960×720 combat samples are retained. The first completes 3,600
+simulation steps / 3,599 draw submissions in 60.026 seconds, with one catch-up
+callback and a 26.6 ms maximum draw call. The repeat completes 3,600 / 3,600 in
+60.033 seconds, no catch-up callback, 8.926 ms mean submission, 10.7 ms p95 and
+19.3 ms maximum. It includes 12,776 particle primitives across 1,820 timed frames;
+the 124-frame intro prelude is excluded. Slow draws also occur without new shader
+or resource counts, so these samples do not isolate compilation as the cause.
+The final binary, with hardened graphics-enum bounds checks, completes 3,600
+simulation steps / 3,595 draws in 60.025 seconds, with five catch-up callbacks,
+9.101 ms mean submission, 10.9 ms p95 and 24.3 ms maximum. Its GPU vertex and
+legacy combat checks pass. The report attributes validation to each binary.
+These samples do not measure distinct presentation or input-to-photon latency.
+[Particle polygon checkpoint](benchmarks/browser-2026-09-16-native-port-particle-polygons.json).
+
+Point/line particles, shape-animation geometry, shadow capture and refraction
+still fail explicitly or remain outside this fixture's integrated path. Full
+stage startup, audio, native scenes, all-character/all-stage gameplay, device and
+network integration, deployment and presentation/latency validation remain.
+The full acceptance criteria have not been met.
+
+Previous checkpoints below describe their state at the time.
+
 The `--stage-callbacks` fixture now renders through the original gameplay camera's
 pass sequence and HSD GX-link traversal. It calls the real Battlefield draw
 callbacks and tracks GPU resources for native background objects and model
