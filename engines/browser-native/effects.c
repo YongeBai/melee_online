@@ -19,6 +19,19 @@ extern HSD_Particle* hsd_804D0908[16];
 _Static_assert(sizeof(EF_EffectDesc)==20&&sizeof(StaticModelDesc)==16,"Effect descriptor ABI");
 _Static_assert(offsetof(HSD_PSCmdList,cmdList)==60&&offsetof(HSD_PSTexGroup,texTable)==24,"Particle bank ABI");
 void portEffectsInitialize(void) { static int ready;if(!ready){if(portSceneInitialize()<0)abort();efLib_Init();ready=1;} }
+/* Enumerate original model-effect owners. Particle managers have no joint and
+ * remain a separate rendering boundary; never classify them as model effects. */
+unsigned portEffectModels(unsigned* output,unsigned capacity)
+{
+    unsigned count=0;
+    for(unsigned link=11;link<=12;link++)for(HSD_GObj* g=HSD_GObjPLinkHead[link];g;g=g->next){
+        if(g->render_cb!=HSD_GObj_JObjCallback)continue;
+        if(g->classifier!=HSD_GOBJ_CLASS_EFFECT||g->obj_kind!=HSD_GObj_JObjKind||!g->hsd_obj||count>=capacity)abort();
+        HSD_JObj* joint=g->hsd_obj;
+        output[count*3]=(unsigned)g;output[count*3+1]=(unsigned)joint;output[count*3+2]=joint->id;count++;
+    }
+    return count;
+}
 // Match startup uses 70 original camera subjects. No projection/camera offsets.
 void portMatchCameraInitialize(void) { static int ready;if(!ready){Camera_Init(70);Camera_Create();ready=1;} }
 void* portEffectsLoad(void) { efAsync_LoadSync(4);return efAsync_DatEntries[4].data; }

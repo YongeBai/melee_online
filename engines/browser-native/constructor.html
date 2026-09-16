@@ -31,9 +31,9 @@ import {installResidentFile,installResidentBytes,openResidentArchive} from './re
 const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
 const params=new URLSearchParams(location.search),tournament=params.has('tournament')||params.has('hud')||params.has('damagehud'),live=params.has('live'),renderSteps=params.has('rendersteps'),render=live||params.has('render'),previewActors=[];
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
-const stageCallbacks=params.has('stagecallbacks');
+const stageCallbacks=params.has('stagecallbacks');let dynamicStage=null;
 if(intro&&!withHud)throw Error('Intro requires native HUD');
-if(stageCallbacks&&(!intro||render))throw Error('Stage callback integration currently requires a simulation-only intro probe');
+if(stageCallbacks&&!intro)throw Error('Stage callback integration requires the intro probe');
 const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)diagnostics.shift();console.log(String(line));};
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
@@ -59,12 +59,13 @@ try {
   loadCostume(module,models.find(m=>m.name==='PlCaNr.dat').bytes,'PlCaNr.dat',kind);
   module._portMatchCameraInitialize();
   module._portEffectsInitialize();
-  const effects=convertCommonEffects(await asset('EfCoData.dat'));
+  const commonEffectBytes=await asset('EfCoData.dat'),captainEffectBytes=await asset('EfCaData.dat');
+  const effects=convertCommonEffects(commonEffectBytes),captainEffects=convertCaptainEffects(captainEffectBytes);
   installResidentFile(module,'EfCoData.dat',effects.image);
   const effectData=module._portCommonEffectsLoad();
   if(!effectData)throw Error('Original common effect-bank loader failed');
   report.commonEffects=verifyResidentEffectBank(module,effects,effectData);
-  installResidentFile(module,'EfCaData.dat',convertCaptainEffects(await asset('EfCaData.dat')).image);
+  installResidentFile(module,'EfCaData.dat',captainEffects.image);
   if(tournament){
     installResidentFile(module,'PdPm.dat',convertPlayerParameters(await asset('PdPm.dat')).image);
     const hudBytes=await asset('IfAll.usd'),status=convertStatusModels(hudBytes,{hud:withHud,damage:damageHud});
@@ -98,7 +99,11 @@ try {
     for(let i=0;i<count;i++)for(let axis=0;axis<2;axis++)if(module._portStageMapCollisionRead(1+axis,i)!==Math.fround(cd.getFloat32(verts+i*8+axis*4,true)*scale))throw Error('Stage collision world vertex');
     for(const id of [0,3,1,6]) {
       const object=stageCallbacks?module._portBattlefieldObject(id):module._portStageMapCreate(id);
-      if(render)previewActors.push({name:'Battlefield group '+id,object,extraRoot:1,bytes:archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true))});
+      if(render&&!stageCallbacks)previewActors.push({name:'Battlefield group '+id,object,extraRoot:1,bytes:archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true))});
+    }
+    if(stageCallbacks&&render){
+      const sources=Array.from({length:7},(_,id)=>archiveRootView(inspectArchive(stageBytes),'stage_Share_joint',new DataView(map.image.buffer,32).getUint32(map.table+id*52,true)));
+      dynamicStage=()=>sources.map((bytes,id)=>({name:'Battlefield group '+id,object:module._portBattlefieldObject(id),extraRoot:1,bytes})).filter(a=>a.object);
     }
     module._portStageMapBounds();module._portStageMapSpawn(0);
     if(render)module._portStageRenderInitialize();
@@ -113,12 +118,16 @@ try {
   const state=()=>Array.from({length:13},(_,i)=>module._portFighterConstructRead(object,i));
   report.state=state();
   if(!report.state.every(Number.isFinite)||!report.state[7]||!report.state[8]||report.state[9]!==15||report.state[10]!==1||report.state[11]!==kind||report.state[12]!==0)throw Error('Constructed fighter state/ownership invariant');
+  report.fighterShadows=[module._portFighterConstructRead(object,19)];
+  if(!report.fighterShadows[0])throw Error('Original fighter shadow allocation failed');
   report.constructorVerified=true;
   let opponent=0;
   const combatState=o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i));
   if(combat){
     module._portStageMapSpawn(1);opponent=module._portFighterConstruct(kind,1);
     if(!opponent||opponent===object)throw Error('Second original constructor failed');
+    report.fighterShadows.push(module._portFighterConstructRead(opponent,19));
+    if(!report.fighterShadows[1]||report.fighterShadows[1]===report.fighterShadows[0])throw Error('Independent fighter shadow ownership');
     const a=combatState(object),b=combatState(opponent);
     if(b[9]!==15||b[10]!==1||b[11]!==kind||b[12]!==1||a[8]!==b[8]||a[7]===b[7])throw Error('Shared kind / independent fighter ownership');
     report.combat={completed:false,initial:[a,b],frames:0};
@@ -156,7 +165,13 @@ try {
       const accessoryModels=new Map([[1,sharedArchive.data.getUint32(sharedArchive.data.getUint32(sharedRoot+8*4))],[2,sharedArchive.data.getUint32(sharedRoot+16*4)]].map(([kind,root])=>[kind,archiveRootView(sharedArchive,'accessory_Share_joint',root)]));
       for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:'Falcon P'+(i+1),object:owner,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name==='PlCaNr.dat').bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
-      preview=createNativeMatchPreview(module,canvas,previewActors,{hud:hudPreview,verify:!live&&!renderSteps,callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
+      const effectModels=new Map();
+      for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],[captainEffectBytes,captainEffects,module._portEffectsRead(0,0)]]){
+        if(!data)throw Error('Missing loaded render effect bank');
+        const archive=inspectArchive(bytes),base=data-source.root-8;
+        for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
+      }
+      preview=createNativeMatchPreview(module,canvas,previewActors,{effects:stageCallbacks?effectModels:null,stage:dynamicStage,hud:hudPreview,verify:!live&&!renderSteps,callbacks:params.get('callbacks')!=='0'});report.preview={settled:preview.draw()};
       if(!live){const initial=document.createElement('img');initial.id='native-preview-settled';initial.width=960;initial.height=720;initial.src=canvas.toDataURL();canvas.before(initial);}
     }
     if(intro){
@@ -168,13 +183,20 @@ try {
         }
       }});report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
     }
-    if(stageCallbacks){
+    if(stageCallbacks&&!live){
       report.stage.transitions=[];let previous='';
       for(let frame=0;frame<4500;frame++){
         for(let slot=0;slot<2;slot++)module._portStageProbePad(slot,0,0,0);
         step();
         const groups=Array.from({length:7},(_,i)=>module._portBattlefieldObject(i)?i:-1).filter(i=>i>=0),key=groups.join(',');
         if(key!==previous){report.stage.transitions.push({frame:frame+1,groups});previous=key;}
+        if(preview&&(renderSteps||frame%120===0)){
+          const drawn=preview.draw();report.stage.renderedFrames=(report.stage.renderedFrames??0)+1;
+          if(frame===2676||frame===2876){
+            (report.stage.drawTransitions??=[]).push({frame:frame+1,actors:drawn.actors,resources:drawn.resourceStats});
+            const img=document.createElement('img');img.id='native-stage-transition-'+frame;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
+          }
+        }
         if(![0,3,6].every(i=>groups.includes(i)))throw Error('Original stage lost mandatory map groups');
         if([0,1].some(slot=>module._portTournamentRead(10,slot)!==4))throw Error('Idle stage callback test lost stocks');
       }

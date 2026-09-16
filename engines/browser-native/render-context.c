@@ -17,6 +17,10 @@ void portRenderContextEnter(void){if(setting_context||portMaterialCaptureActive(
 void portRenderContextLeave(void){if(!setting_context||portMaterialCaptureActive())abort();setting_context=0;}
 static void require(int value){if(!value||(!setting_context&&!portMaterialCaptureActive()))abort();}
 const PortRenderContext* portRenderContextState(void){return &state;}
+/* This target has no active stage fog yet. Preserve explicit disabling and
+ * fail closed if a stage requests a fog equation the shader cannot reproduce. */
+void GXSetFog(GXFogType type,f32 start,f32 end,f32 near,f32 far,GXColor color)
+{if(type!=GX_FOG_NONE||!isfinite(start)||!isfinite(end)||!isfinite(near)||!isfinite(far))abort();}
 void GXSetViewport(f32 x,f32 y,f32 width,f32 height,f32 near,f32 far)
 {require(setting_context&&isfinite(x)&&isfinite(y)&&width>0&&height>0&&near>=0&&far<=1);float v[6]={x,y,width,height,near,far};memcpy(state.viewport,v,sizeof(v));state.camera_mask|=1;}
 void GXSetScissor(u32 x,u32 y,u32 width,u32 height)

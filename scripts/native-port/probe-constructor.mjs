@@ -8,7 +8,6 @@ const workload=process.argv.includes('--workload'),workloadSteps=process.argv.in
 const stageCallbacks=process.argv.includes('--stage-callbacks'),intro=stageCallbacks||process.argv.includes('--intro'),damageHud=intro||process.argv.includes('--damage-hud'),hud=damageHud||process.argv.includes('--hud');
 const tournament=hud||workloadSteps||process.argv.includes('--tournament')||process.argv.includes('--timeout'),hardware=process.argv.includes('--hardware'),callbacks=!process.argv.includes('--manual-draw'),input=process.argv.includes('--input'),renderSteps=process.argv.includes('--render-steps'),live=process.argv.includes('--live'),render=renderSteps||live||process.argv.includes('--render'),camera=render||process.argv.includes('--camera'),control=process.argv.includes('--combat-control'),combat=tournament||(camera&&!input)||control||process.argv.includes('--combat'),stage=combat||input||process.argv.includes('--stage'),step=stage||process.argv.includes('--step');
 if(tournament&&input)throw Error('Tournament probe requires two fighters; use --tournament alone for lifecycle checks');
-if(stageCallbacks&&render)throw Error('Stage callback integration currently supports simulation only; native camera-pass ordering is pending');
 if(workload&&(!live||!tournament))throw Error('Use --workload with --tournament --live');
 if(live&&input)throw Error('Use --live for browser input or --input for scripted input, not both');
 const liveFrames=Number(process.argv.find(x=>x.startsWith('--frames='))?.slice(9)??(workloadSteps?3600:180));

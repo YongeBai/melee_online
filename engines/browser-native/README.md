@@ -47,10 +47,14 @@ entrance states and trophy platforms, input gating, and the stage's on-start
 callback. It verifies the clock remains stopped until Go completes. The stage's
 full on-init path remains separate work; this is not a complete scene boot.
 `--stage-callbacks` additionally runs the original Battlefield on-init and per-frame
-callbacks in a simulation-only probe. It imports typed background color scripts,
-checks 4,500 frames including background creation/fade/destruction, then exercises
-combat and stock loss. It rejects rendering until native camera-pass ordering and
-dynamic stage GPU ownership are integrated. No FPS claim applies to this probe.
+callbacks. It imports typed background color scripts and checks 4,500 frames
+including background creation/fade/destruction, then exercises combat and stock
+loss. With rendering enabled it uses the original main camera's pass sequence,
+original stage draw callbacks, and live ownership of stage groups and model
+effects. Rootless particle managers are counted as a known missing GPU path;
+unknown model owners fail explicitly. Live probes run the same callbacks during
+the paced workload instead of the separate 4,500-frame idle prelude. Shadow-map
+capture, refraction and full scene startup are still incomplete.
 Use `--hud --timeout --render-steps --hardware` to render the final six seconds
 and timeout animation after advancing the real eight-minute clock. Use
 `--hud --live --workload --hardware --frames=3600` for the sustained input-driven
@@ -74,6 +78,8 @@ the first callbacks and a bounded list of zero/multi-step callbacks for diagnosi
 node scripts/native-port/probe-constructor.mjs --tournament
 node scripts/native-port/probe-constructor.mjs --intro --render-steps --hardware
 node scripts/native-port/probe-constructor.mjs --stage-callbacks
+node scripts/native-port/probe-constructor.mjs --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --stage-callbacks --live --workload --hardware --frames=3600
 node scripts/native-port/probe-constructor.mjs --intro --live --workload --hardware --frames=3600
 node scripts/native-port/probe-constructor.mjs --timeout
 node scripts/native-port/probe-constructor.mjs --workload-steps
@@ -751,9 +757,11 @@ setup and original matrix setup, and submits each selected runtime polygon to
 `material-gpu.mjs`. Class methods are restored before returning. Unknown geometry,
 custom primitive methods and shape-animation submission reject explicitly.
 Original fighter callbacks perform body selection, visibility projection, light
-overlays and cleanup. Stage objects currently use the generic original joint
-callback; full stage/camera GX-link traversal and dynamic effects/accessories
-are not yet integrated. Preserve that distinction when reporting coverage.
+overlays and cleanup. The legacy fixture keeps the generic stage joint callback;
+`--stage-callbacks` runs the original camera/GX-link pass sequence and stage
+callbacks, including dynamic background and model-effect ownership. Its pending
+particle draw passes remain explicit in the report; neither mode includes full
+shadow-map capture or refraction. Preserve that distinction when reporting coverage.
 
 The SDK's unchanged `GXProject` C routine is compiled from the pinned source.
 The portable recipe corrects `lbVector_WorldToScreen`'s local projection matrix
@@ -774,3 +782,20 @@ driver. Hardware reports use a separate `hardware-` filename prefix. The observe
 Radeon 890M baseline had 1,799 draw submissions / 1,800 simulation steps over
 30.011 seconds, with mean simulation 0.41 ms and draw submission 8.68 ms. This is
 partial-scene submission timing, not competitive presentation or latency proof.
+
+## Stage drawing and native allocation boundaries
+
+The stage-callback fixture extracts the unchanged gameplay draw-pass sequence
+from the original camera callback. An observer at HSD's object submission boundary
+retains link priority, camera pass and opaque/translucent traversal while routing
+polygons to the WebGL backend. Stage backgrounds and model effects obtain GPU
+resources from their original live GObj/root/descriptor identities; retired owners
+release those resources. Reused effect addresses refresh live polygon bindings.
+This does not replace or adjust the gameplay camera's pitch, tracking or projection.
+
+Original stage drawing exposed an omitted shadow allocator initialization. The
+scene bootstrap now calls HSD_ShadowInitAllocData, and the constructor probe checks
+that each fighter owns a distinct non-null shadow. GXGetTexBufferSize uses the
+pinned SDK's complete CPU implementation for tile and mip-chain sizing. HSD object
+pools now reject use before initialization, avoiding silent writes through WASM's
+mapped address-zero page. Actual shadow texture capture remains separate work.

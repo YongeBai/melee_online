@@ -93,6 +93,10 @@ const PortTevState* portMaterialDrawState(HSD_JObj* joint,unsigned index,unsigne
  * billboards, fighter flags and owner callbacks remain original C. */
 #include <emscripten.h>
 static int drawing;
+/* Geometry is decoded into explicit WebGL VAOs; the host binds a complete VAO
+ * for every polygon. Clearing GX's FIFO descriptor cannot leave stale host
+ * attributes. Immediate-mode vertex submission remains an unsupported path. */
+void GXClearVtxDesc(void){if(!drawing||capturing)abort();}
 static HSD_DObj* drawing_display;
 static unsigned emitted;
 EM_JS(void,portEmitDraw,(unsigned owner,unsigned joint,unsigned display,unsigned polygon,unsigned tev),{

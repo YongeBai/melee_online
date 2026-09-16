@@ -1,0 +1,603 @@
+{
+  "date": "2026-09-16",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "wasm": {
+    "bytes": 2989160,
+    "sha256": "7d363e21feb47790bcd1f3bc33100984f54fe03866aa8d70914c462e4ec36edb"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "scope": "Original Battlefield draw callbacks/camera pass sequence and dynamic model effects; two Falcons, 960x720; direct C-to-WASM",
+  "changes": [
+    "Preserve original gameplay camera draw-pass sequence and HSD GX-link order",
+    "Bind and release native stage/model-effect GPU resources by live owner/root/descriptor identity",
+    "Initialize original shadow allocation pool and compile SDK texture storage sizing",
+    "Reject uninitialized object pools before WASM address-zero corruption"
+  ],
+  "validation": {
+    "targetedTests": 132,
+    "failedTests": 0,
+    "independentFighterShadows": [
+      1378336,
+      1389088
+    ],
+    "stage": {
+      "name": "Battlefield",
+      "collisionLoaded": true,
+      "vertexChecks": 52,
+      "modelGroups": [
+        0,
+        3,
+        1,
+        6
+      ],
+      "completeStageStartup": false,
+      "originalCallbacks": true,
+      "transitions": [
+        {
+          "frame": 1,
+          "groups": [
+            0,
+            1,
+            3,
+            6
+          ]
+        },
+        {
+          "frame": 2677,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            6
+          ]
+        },
+        {
+          "frame": 2877,
+          "groups": [
+            0,
+            2,
+            3,
+            6
+          ]
+        }
+      ],
+      "renderedFrames": 4500,
+      "drawTransitions": [
+        {
+          "frame": 2677,
+          "actors": [
+            {
+              "name": "Falcon P1",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Falcon P2",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Battlefield group 1",
+              "passes": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 1
+            },
+            {
+              "name": "Battlefield group 3",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 0
+            },
+            {
+              "name": "Battlefield group 6",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                29,
+                0,
+                18,
+                0,
+                0,
+                0
+              ],
+              "draws": 47
+            },
+            {
+              "name": "Battlefield group 2",
+              "passes": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 1
+            }
+          ],
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 4,
+            "effectRetired": 4,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2877,
+          "actors": [
+            {
+              "name": "Falcon P1",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Falcon P2",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Battlefield group 3",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 0
+            },
+            {
+              "name": "Battlefield group 6",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                29,
+                0,
+                18,
+                0,
+                0,
+                0
+              ],
+              "draws": 47
+            },
+            {
+              "name": "Battlefield group 2",
+              "passes": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 1
+            }
+          ],
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 4,
+            "effectRetired": 4,
+            "peakEffectModels": 2
+          }
+        }
+      ],
+      "callbackFrames": 4500,
+      "callbacksVerified": true
+    },
+    "intro": {
+      "completed": true,
+      "frames": 124,
+      "renderedFrames": 124,
+      "transitions": [
+        {
+          "frame": 0,
+          "mask": 8,
+          "gate": 0,
+          "blocked": [
+            1,
+            1
+          ],
+          "clock": 0
+        },
+        {
+          "frame": 85,
+          "mask": 16,
+          "gate": 0,
+          "blocked": [
+            0,
+            0
+          ],
+          "clock": 0
+        },
+        {
+          "frame": 124,
+          "mask": 0,
+          "gate": 1,
+          "blocked": [
+            0,
+            0
+          ],
+          "clock": 0
+        }
+      ],
+      "fighterStates": [
+        [
+          322,
+          323,
+          324,
+          29,
+          42,
+          14
+        ],
+        [
+          322,
+          323,
+          324,
+          29,
+          42,
+          14
+        ]
+      ],
+      "readyEffects": [
+        {
+          "name": "Effect 0:36",
+          "passes": [
+            0,
+            0,
+            7
+          ],
+          "draws": 7
+        },
+        {
+          "name": "Effect 0:36",
+          "passes": [
+            0,
+            0,
+            7
+          ],
+          "draws": 7
+        }
+      ]
+    },
+    "combat": {
+      "completed": true,
+      "frames": 683,
+      "renderedFrames": 683,
+      "traceSha256": "5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0",
+      "peakEffects": {
+        "peakParticles": 22,
+        "peakGenerators": 5,
+        "peakModels": 3
+      }
+    },
+    "lifecycle": {
+      "completed": true,
+      "renderedSteps": 1020,
+      "stockChanges": [
+        {
+          "frame": 75,
+          "stocks": 3,
+          "falls": 1,
+          "outcome": 0
+        },
+        {
+          "frame": 319,
+          "stocks": 2,
+          "falls": 2,
+          "outcome": 0
+        },
+        {
+          "frame": 563,
+          "stocks": 1,
+          "falls": 3,
+          "outcome": 0
+        },
+        {
+          "frame": 807,
+          "stocks": 0,
+          "falls": 4,
+          "outcome": 2
+        }
+      ],
+      "respawnPlatformDrawFrames": 180,
+      "endFrames": 112
+    },
+    "timeout": {
+      "completed": true,
+      "before": 5184,
+      "frames": 23616,
+      "after": {
+        "frame": 28800,
+        "seconds": 0,
+        "fraction": 59,
+        "outcome": 1
+      },
+      "transition": {
+        "phase": 1,
+        "outcome": 1
+      },
+      "endFrames": 112
+    },
+    "timeoutRenderedSteps": 474,
+    "keyboard": {
+      "frames": 180,
+      "movement": true,
+      "jump": true,
+      "attack": true
+    },
+    "legacyCombatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+    "legacyCombatTraceUnchanged": true,
+    "visualInspection": [
+      "Original Ready entrance model effects, native HUD and stage framing at 960x720",
+      "Combat frame with both fighters, stage and native damage/stock HUD; not full native pixel-parity proof"
+    ]
+  },
+  "sustained": {
+    "frames": 3600,
+    "draws": 3600,
+    "elapsedMs": 60027.10000000894,
+    "stepCpu": {
+      "samples": 3600,
+      "meanMs": 0.5245555556772483,
+      "p50Ms": 0.5,
+      "p95Ms": 0.7999999970197678,
+      "maxMs": 2.0999999940395355
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 8.963638888874815,
+      "p50Ms": 8.699999988079071,
+      "p95Ms": 10.899999991059303,
+      "maxMs": 19
+    },
+    "rafDrawIntervals": {
+      "samples": 3599,
+      "meanMs": 16.67063073075772,
+      "p50Ms": 16.69999999999709,
+      "p95Ms": 16.799999999995634,
+      "maxMs": 33.29999999999927
+    },
+    "cadence": {
+      "callbacks": 3603,
+      "zeroStepCallbacks": 3,
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1,
+      "timingSamples": [
+        {
+          "callback": 1,
+          "frame": 0,
+          "steps": 0,
+          "timestamp": -1498.6339999940396,
+          "callbackTime": 2,
+          "interval": null,
+          "debt": 0
+        },
+        {
+          "callback": 2,
+          "frame": 0,
+          "steps": 0,
+          "timestamp": 1.2000000059606464,
+          "callbackTime": 4.299999997019768,
+          "interval": 1499.8340000000003,
+          "debt": 0
+        },
+        {
+          "callback": 3,
+          "frame": 0,
+          "steps": 1,
+          "timestamp": 17.900000005960464,
+          "callbackTime": 18.200000002980232,
+          "interval": 16.699999999999818,
+          "debt": 0.03333333333315025
+        },
+        {
+          "callback": 4,
+          "frame": 1,
+          "steps": 1,
+          "timestamp": 34.60000000596028,
+          "callbackTime": 34.70000000298023,
+          "interval": 16.699999999999818,
+          "debt": 0.0666666666663005
+        },
+        {
+          "callback": 5,
+          "frame": 2,
+          "steps": 1,
+          "timestamp": 51.300000005960555,
+          "callbackTime": 51.400000005960464,
+          "interval": 16.700000000000273,
+          "debt": 0.0999999999999055
+        },
+        {
+          "callback": 6,
+          "frame": 3,
+          "steps": 1,
+          "timestamp": 67.90000000596046,
+          "callbackTime": 68.1000000089407,
+          "interval": 16.59999999999991,
+          "debt": 0.0333333333331467
+        },
+        {
+          "callback": 7,
+          "frame": 4,
+          "steps": 1,
+          "timestamp": 84.60000000596028,
+          "callbackTime": 84.70000000298023,
+          "interval": 16.699999999999818,
+          "debt": 0.06666666666629695
+        },
+        {
+          "callback": 8,
+          "frame": 5,
+          "steps": 1,
+          "timestamp": 101.30000000596056,
+          "callbackTime": 101.40000000596046,
+          "interval": 16.700000000000273,
+          "debt": 0.09999999999990195
+        },
+        {
+          "callback": 363,
+          "frame": 360,
+          "steps": 0,
+          "timestamp": 6017.600000005961,
+          "callbackTime": 6017.79999999702,
+          "interval": 16.600000000000364,
+          "debt": 16.40000000000012
+        }
+      ]
+    },
+    "maxDebtMs": 33.19999999999935,
+    "resolution": [
+      960,
+      720
+    ],
+    "workload": {
+      "framesWithAttack": 1915,
+      "framesWithHitlag": 321,
+      "framesWithDamage": 3346,
+      "stockChanges": [
+        {
+          "frame": 2046,
+          "slot": 1,
+          "stocks": 3
+        }
+      ],
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 51,
+          "attack": 325
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 358
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 340
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 30,
+          "attack": 182
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 358
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 60,
+          "attack": 352
+        }
+      ]
+    },
+    "prelude": "124 unpaced Ready/Go frames excluded from measurement; no separate 4500-frame idle prelude in live mode"
+  },
+  "remaining": [
+    "GPU particle billboards; particle simulation remains original",
+    "Shadow texture capture and refraction",
+    "Full stage startup, all-character/all-stage gameplay and scene lifecycle",
+    "Audio, native menus/pause/results, gamepads, networking and deployment",
+    "Distinct presented-frame and input-to-photon measurements"
+  ],
+  "presentationFpsMeasured": false,
+  "inputToPhotonMeasured": false,
+  "acceptanceMet": false
+}

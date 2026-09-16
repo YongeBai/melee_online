@@ -32,7 +32,7 @@ export function gameLinkInputs(root,upstream,output) {
     fs.writeFileSync(result,renameBoundaryDefinitions(text,names).replace(/^#include "([^"]+)"/gm,(_,name)=>'#include '+JSON.stringify(path.join(portable,path.dirname(file),name))));
     return result;
   });
-  const names=JSON.parse(fs.readFileSync(new URL('./game-unimplemented.json',import.meta.url))).functions;
+  const names=JSON.parse(fs.readFileSync(new URL('./game-unimplemented.json',import.meta.url))).functions.filter(name=>!['GXSetFog','GXGetTexBufferSize'].includes(name));
   const headers=execFileSync('rg',['--files','libs/dolphin/include','-g','*.h'],{cwd:upstream,encoding:'utf8'}).trim().split('\n')
     .map(file=>fs.readFileSync(path.join(upstream,file),'utf8')).join('\n');
   const definitions=names.map(name=>{

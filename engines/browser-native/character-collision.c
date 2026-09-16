@@ -169,6 +169,7 @@ double portFighterConstructRead(HSD_GObj* object,unsigned field)
     case 13:return fp->dmg.x1830_percent;case 14:return fp->dmg.x195c_hitlag_frames;
     case 15:return fp->dmg.x18A4_knockbackMagnitude;case 16:return fp->facing_dir;
     case 17:return fp->shield_health;case 18:return Player_GetStocks(fp->player_id);
+    case 19:return (uintptr_t)fp->x20A4.shadow;
     default:abort();
     }
 }

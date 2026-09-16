@@ -34,6 +34,12 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/sysdolphin/baselib/objalloc.c') {
+      // WASM's address-zero page is mapped. An omitted pool initializer must
+      // fail before a zero-size allocation can silently corrupt that page.
+      const marker='void* HSD_ObjAlloc(HSD_ObjAllocData* data)\n{';
+      replace(marker,marker+'\n    HSD_ASSERTREPORT(0, data && data->size >= sizeof(void*), "Native object pool was not initialized\\n");');
+    }
     if(file==='src/melee/lb/lbvector.c') {
       // MTXPerspective/MTXOrtho write 16 floats. Retail stack padding cannot
       // make a 12-float C object safe on the WASM stack.
@@ -62,6 +68,20 @@ export function preparePortableSource(source,output) {
       replace(selection,'    portStageSelectResident(stkind);');
       const marker='void Stage_802251E8(StKind stkind, s32* _)';
       replace(marker,'void portStageSelectResident(StKind stkind)\n{\n'+selection+'\n}\n\n'+marker);
+    }
+    if(file==='src/melee/cm/camera.c') {
+      // Expose the unchanged gameplay pass sequence for the browser framebuffer
+      // backend. The original camera callback uses this same sequence.
+      const marker='static void fn_800301D0(HSD_GObj* gobj, int arg1)\n{';
+      const start=text.indexOf(marker),a=text.indexOf('        Camera_800310A0(2);',start),b=text.indexOf('        if (Camera_80030AC4() != 0)',a);
+      if(start<0||a<0||b<0)throw Error('Gameplay camera pass sequence changed');
+      const body=text.slice(a,b);
+      replace(body,'        portCameraDrawPasses(gobj);\n\n');
+      replace(marker,'void portCameraDrawPasses(HSD_GObj* gobj)\n{\n    s64 prio8_a, prio1_a;\n'+body+'}\n\n'+marker);
+    }
+    if(file==='src/sysdolphin/baselib/gobj.c') {
+      const marker='static inline void render_gobj(HSD_GObj* cur, int i)\n{';
+      replace(marker,'static int (*portGXObserver)(HSD_GObj*, int);\nvoid portSetGXObserver(int (*observer)(HSD_GObj*, int)) { portGXObserver=observer; }\n\n'+marker+'\n    if (portGXObserver && portGXObserver(cur, i)) return;');
     }
     if(file==='src/melee/gm/gmvs.c') {
       // Status animation completion supplies an int argument. PPC tolerates

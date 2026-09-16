@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <emscripten.h>
 _Static_assert(sizeof(UnkStageDat)==48&&sizeof(struct UnkStageDat_x8_t)==52,"Stage map ABI");
 _Static_assert(sizeof(GroundParam)==220&&sizeof(StageParam)==100,"Stage parameter ABI");
 extern int portSceneInitialize(void);
@@ -26,12 +27,34 @@ extern void portRuntimeSetSceneDestructors(GObjFunc);
 extern LightList** portStageSelectLights(UnkArchiveStruct*,LightList**);
 extern void portStageCreateGlobalLights(void);
 extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
+extern void portRenderContextEnter(void),portRenderContextLeave(void);
+extern void portSetGXObserver(int (*)(HSD_GObj*,int));
+extern void portCameraDrawPasses(HSD_GObj*);
+extern void efLib_render_callback(HSD_GObj*,int);
+EM_JS(void,portDispatchObject,(unsigned owner,unsigned pass,unsigned link,unsigned classifier,unsigned particles),{
+    if(typeof Module.onNativeObject!=='function')throw Error('Native object receiver is absent');
+    Module.onNativeObject(owner,pass,link,classifier,particles);
+});
+static int dispatch_object(HSD_GObj* object,int pass)
+{
+    if(object->obj_kind==HSD_GObj_LightKind){
+        portRenderContextEnter();object->render_cb(object,pass);portRenderContextLeave();
+    }else portDispatchObject((unsigned)object,pass,object->gx_link,object->classifier,object->render_cb==efLib_render_callback);
+    return 1;
+}
 static HSD_GObj* owners[7];
 static HSD_GObj* render_lights;
 static int installed;
 static int collision_installed;
 static int callbacks_initialized;
 extern void portStageSelectResident(StKind);
+void portStageDrawPasses(void)
+{
+    if(!callbacks_initialized||!render_lights)abort();
+    HSD_GObj* old=HSD_GObj_804D7818;HSD_GObj_804D7818=Camera_80030A50();
+    portSetGXObserver(dispatch_object);portCameraDrawPasses(HSD_GObj_804D7818);portSetGXObserver(NULL);
+    HSD_GObj_804D7818=old;
+}
 static void destroy_lights(HSD_Obj* object){HSD_LObjRemoveAll((HSD_LObj*)object);}
 void portStageRenderInitialize(void)
 {

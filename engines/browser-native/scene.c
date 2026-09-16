@@ -11,6 +11,7 @@
 #include <sysdolphin/baselib/list.h>
 #include <sysdolphin/baselib/aobj.h>
 #include <sysdolphin/baselib/fobj.h>
+#include <sysdolphin/baselib/shadow.h>
 #include <melee/lb/lbanim.h>
 #include <melee/ft/forward.h>
 #include <sysdolphin/baselib/gobjproc.h>
@@ -47,7 +48,7 @@ int portSceneInitialize(void)
         if(portRuntimeInit()<0)return -1;
         HSD_ListInitAllocData();HSD_IDInitAllocData();HSD_IDSetup();
         HSD_VecInitAllocData();HSD_MtxInitAllocData();HSD_RObjInitAllocData();
-        HSD_AObjInitAllocData();portAnimationInit();
+        HSD_AObjInitAllocData();HSD_ShadowInitAllocData();portAnimationInit();
         portRuntimeSetJointDestructor(destroy_joint_object);
         initialized=1;
     }
