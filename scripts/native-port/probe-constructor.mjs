@@ -178,8 +178,8 @@ try {
       fs.writeFileSync(path.join(output,'native-match-'+name+'.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
     }
   }
-  if(render&&!live&&!renderSteps&&probe.preview&&!probe.error) {
-    for(const [name,snapshot] of Object.entries(probe.preview))if(!snapshot.materialShaderChecks?.passed||!snapshot.materialDraws?.draws||!snapshot.materialDraws?.vertexChecks?.vertices||(callbacks&&(!intro||name!=='settled')&&snapshot.actors.filter(a=>/ P[12]$/.test(a.name)&&a.active!==false).some(a=>!a.draws)))throw Error('Incomplete native material draw verification: '+name);
+  if(render&&!live&&probe.preview&&!probe.error) {
+    if(!renderSteps)for(const [name,snapshot] of Object.entries(probe.preview))if(!snapshot.materialShaderChecks?.passed||!snapshot.materialDraws?.draws||!snapshot.materialDraws?.vertexChecks?.vertices||(callbacks&&(!intro||name!=='settled')&&snapshot.actors.filter(a=>/ P[12]$/.test(a.name)&&a.active!==false).some(a=>!a.draws)))throw Error('Incomplete native material draw verification: '+name);
     for(const [id,name] of [['native-preview-settled','settled'],['native-preview','final']]) {
       const evaluated=await command('Runtime.evaluate',{expression:'(()=>{const r=document.getElementById('+JSON.stringify(id)+').getBoundingClientRect();return {x:r.x,y:r.y+scrollY,width:r.width,height:r.height,scale:1};})()',returnByValue:true});
       const shot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:evaluated.result.value});

@@ -5,6 +5,20 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The live-shader experiment was rejected and reverted. Removing validation-only
+transform-feedback outputs and skipping inactive uniform preparation produced
+draw-submission means of 9.27 and 7.77 ms against 8.86 and 7.93 ms controls in
+A/B/A/B order. Candidates submitted 3,575 and 3,596 frames; controls submitted
+3,589 and 3,600, each from 3,600 simulation steps in about a minute. First-use
+candidate shader compilation was slower, and simulation timing also varied.
+There is no consistent sustained improvement. Recorded fighter state, workload
+and action traces match. Four candidate images differ from control in only
+2–6 pixels each, by one RGB level; skipping uniform preparation adds no further
+image changes. These observations do not establish retail parity or presented
+FPS. All 216 unit tests pass after restoring the retained renderer. The probe
+now saves settled/final images for render-steps checks as well.
+[Experiment evidence](benchmarks/browser-2026-09-16-native-port-live-uniform-experiment.json).
+
 Immediate particle/trail drawing now batches adjacent compatible primitives,
 carrying each primitive's TEV registers as flat integer vertex data. Full state
 matching alone merged only about 3% of primitives: a captured frame showed 58
@@ -24,10 +38,8 @@ initial/final fighter values, workload counts and action-state traces. Full
 competitive gameplay, presentation and latency acceptance remain incomplete.
 [Batching evidence](benchmarks/browser-2026-09-16-native-port-immediate-batching.json).
 The follow-up profile puts uniform preparation/upload at 11.5% of sampled wall
-time and the batch-state matcher at 1.5% self time. Shader linking still retains
-vertex outputs used only by validation even in live runs. The next experiment
-will allow live shaders to discard those outputs and avoid preparing unused
-uniforms, while keeping the verification path available.
+time and the batch-state matcher at 1.5% self time. This motivated the rejected
+live-shader experiment above; the profile alone did not predict a useful gain.
 
 The renderer now reuses identical consecutive pixel/channel snapshots instead
 of repeatedly decoding and allocating them. Changed snapshots retain independent

@@ -1,0 +1,784 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "f7fa810",
+  "scope": "Disable transform-feedback output registration in live shaders and skip packing inactive uniforms. Verification-mode shaders retain feedback registration.",
+  "decision": "Rejected and fully reverted: alternating timing does not show a consistent CPU or cadence improvement. Retain only the probe ability to save final/settled screenshots in render-steps mode.",
+  "command": "node scripts/native-port/probe-constructor.mjs --map=fountain --character=Pe --stage-callbacks --live --workload --frames=3600 --hardware --fountain-cosmetics-off --fountain-scenery-off --defer-gpu-errors",
+  "order": [
+    "A1 control",
+    "B1 combined candidate",
+    "A2 control",
+    "B2 combined candidate"
+  ],
+  "controls": "Same native core and other runtime modules; material-gpu.mjs alternates. Fresh Chrome profile per run; system shader cache not disabled. No concurrent benchmark/build was launched.",
+  "hypothesis": "Previous profile attributed 11.5% inclusive sampled wall time to uniform preparation/upload; retaining debug-only vertex outputs might keep unused uniforms active.",
+  "comparison": {
+    "controlMeanOfRunMeansMs": 8.392758656945487,
+    "candidateMeanOfRunMeansMs": 8.520186438816875,
+    "candidateChangePercent": 1.5183062814028814,
+    "interpretation": "B1 slower and B2 slightly faster than paired controls. Simulation CPU also varies. B1 shader compiles take 12–37 ms versus 2–6 ms in other runs, consistent with first-use compilation/cache effects, not established causal proof. No sustained advantage."
+  },
+  "rows": [
+    {
+      "id": "a1",
+      "artifact": "dist/native-port/experiment-live-uniforms/a1.json",
+      "artifactSha256": "148a2b7b22c733df6ee8eb8582c21e835783397e4c3baca3ce48f674df5dc349",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "267973e79d75d9f47295307ba0a46897549c4435e9881570b96e4db93532a0af",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3589,
+      "elapsedMs": 60030,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.006888888867365,
+        "p50Ms": 1,
+        "p95Ms": 1.5999999940395355,
+        "maxMs": 4
+      },
+      "drawSubmissionCpu": {
+        "samples": 3589,
+        "meanMs": 8.860211758717883,
+        "p50Ms": 8.099999994039536,
+        "p95Ms": 13.700000017881393,
+        "maxMs": 25.200000017881393
+      },
+      "rafDrawIntervals": {
+        "samples": 3588,
+        "meanMs": 16.721767001114113,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.400000000001455
+      },
+      "multiStepCallbacks": 11,
+      "rafGapsOver25Ms": 12,
+      "shaderCompilations": [
+        {
+          "frame": 205,
+          "program": 36,
+          "origin": "model",
+          "cpuMs": 3.699999988079071
+        },
+        {
+          "frame": 212,
+          "program": 37,
+          "origin": "model",
+          "cpuMs": 2.899999976158142
+        },
+        {
+          "frame": 217,
+          "program": 38,
+          "origin": "model",
+          "cpuMs": 2.5
+        },
+        {
+          "frame": 1599,
+          "program": 39,
+          "origin": "model",
+          "cpuMs": 3.899999976158142
+        }
+      ],
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "b1",
+      "artifact": "dist/native-port/experiment-live-uniforms/b1.json",
+      "artifactSha256": "56666ceb1759dc8751ae68ffe6042cb36c179a054f4b21c0fde975c473eb4fd3",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "22fcba68565ddffa5a0b64ce20e6bb605b12a1db0ec4f7456a3c9b9479727e47",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3575,
+      "elapsedMs": 60034.09999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 1.1475833333366448,
+        "p50Ms": 1.0999999940395355,
+        "p95Ms": 1.7000000178813934,
+        "maxMs": 3.7000000178813934
+      },
+      "drawSubmissionCpu": {
+        "samples": 3575,
+        "meanMs": 9.270517482690877,
+        "p50Ms": 8.400000005960464,
+        "p95Ms": 14.699999988079071,
+        "maxMs": 74.2000000178814
+      },
+      "rafDrawIntervals": {
+        "samples": 3574,
+        "meanMs": 16.78724118634508,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 66.59999999999854
+      },
+      "multiStepCallbacks": 21,
+      "rafGapsOver25Ms": 22,
+      "shaderCompilations": [
+        {
+          "frame": 205,
+          "program": 36,
+          "origin": "model",
+          "cpuMs": 37.30000001192093
+        },
+        {
+          "frame": 212,
+          "program": 37,
+          "origin": "model",
+          "cpuMs": 25.5
+        },
+        {
+          "frame": 217,
+          "program": 38,
+          "origin": "model",
+          "cpuMs": 23.299999982118607
+        },
+        {
+          "frame": 1599,
+          "program": 39,
+          "origin": "model",
+          "cpuMs": 12.199999988079071
+        }
+      ],
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "a2",
+      "artifact": "dist/native-port/experiment-live-uniforms/a2.json",
+      "artifactSha256": "7895f5949c9ea050afe51384a25dd3ec4d98275b3d2312e403032f2f23357e0a",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "267973e79d75d9f47295307ba0a46897549c4435e9881570b96e4db93532a0af",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60033.79999998212,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.9036666669365433,
+        "p50Ms": 0.8999999761581421,
+        "p95Ms": 1.399999976158142,
+        "maxMs": 2.7999999821186066
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.925305555173092,
+        "p50Ms": 7.199999988079071,
+        "p95Ms": 12,
+        "maxMs": 19.400000005960464
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.67063073075775,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.399999999999636
+      },
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1,
+      "shaderCompilations": [
+        {
+          "frame": 205,
+          "program": 36,
+          "origin": "model",
+          "cpuMs": 4.300000011920929
+        },
+        {
+          "frame": 212,
+          "program": 37,
+          "origin": "model",
+          "cpuMs": 3.7999999821186066
+        },
+        {
+          "frame": 217,
+          "program": 38,
+          "origin": "model",
+          "cpuMs": 3.300000011920929
+        },
+        {
+          "frame": 1599,
+          "program": 39,
+          "origin": "model",
+          "cpuMs": 2.0999999940395355
+        }
+      ],
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "b2",
+      "artifact": "dist/native-port/experiment-live-uniforms/b2.json",
+      "artifactSha256": "9c26f4d68db2c4af009bb5a899ff1a0a41eaaa853094a0cbc0641f21fb0439cb",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "22fcba68565ddffa5a0b64ce20e6bb605b12a1db0ec4f7456a3c9b9479727e47",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3596,
+      "elapsedMs": 60035.29999998212,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.934222222359644,
+        "p50Ms": 0.9000000059604645,
+        "p95Ms": 1.4000000059604645,
+        "maxMs": 3.4000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3596,
+        "meanMs": 7.769855394942875,
+        "p50Ms": 6.9000000059604645,
+        "p95Ms": 12.5,
+        "maxMs": 41
+      },
+      "rafDrawIntervals": {
+        "samples": 3595,
+        "meanMs": 16.689179415854582,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.400000000001455
+      },
+      "multiStepCallbacks": 4,
+      "rafGapsOver25Ms": 6,
+      "shaderCompilations": [
+        {
+          "frame": 205,
+          "program": 36,
+          "origin": "model",
+          "cpuMs": 5.4000000059604645
+        },
+        {
+          "frame": 212,
+          "program": 37,
+          "origin": "model",
+          "cpuMs": 3.5999999940395355
+        },
+        {
+          "frame": 217,
+          "program": 38,
+          "origin": "model",
+          "cpuMs": 6.399999976158142
+        },
+        {
+          "frame": 1599,
+          "program": 39,
+          "origin": "model",
+          "cpuMs": 3.199999988079071
+        }
+      ],
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      },
+      "finalGpuErrorCheck": true
+    }
+  ],
+  "correctness": {
+    "recordedSimulationFieldsEqual": [
+      "initial",
+      "final",
+      "workload",
+      "stateChanges"
+    ],
+    "renderProbeCommand": "node scripts/native-port/probe-constructor.mjs --map=fountain --character=Pe --input --stage-callbacks --render-steps --hardware --fountain-cosmetics-off --fountain-scenery-off",
+    "controlArtifact": "dist/native-port/experiment-live-uniforms/control-render.json",
+    "feedbackOnlyArtifact": "dist/native-port/experiment-live-uniforms/feedback-render.json",
+    "combinedArtifact": "dist/native-port/experiment-live-uniforms/combined-render.json",
+    "images": [
+      {
+        "name": "ready",
+        "w": 960,
+        "h": 720,
+        "changed": 2,
+        "channels": 2,
+        "max": 1,
+        "over1": 0,
+        "alpha": 0,
+        "sum": 2,
+        "box": [
+          248,
+          450,
+          713,
+          491
+        ],
+        "examples": [
+          {
+            "x": 713,
+            "y": 450,
+            "a": [
+              175,
+              187,
+              176,
+              255
+            ],
+            "b": [
+              174,
+              187,
+              176,
+              255
+            ]
+          },
+          {
+            "x": 248,
+            "y": 491,
+            "a": [
+              192,
+              178,
+              214,
+              255
+            ],
+            "b": [
+              191,
+              178,
+              214,
+              255
+            ]
+          }
+        ]
+      },
+      {
+        "name": "go",
+        "w": 960,
+        "h": 720,
+        "changed": 2,
+        "channels": 2,
+        "max": 1,
+        "over1": 0,
+        "alpha": 0,
+        "sum": 2,
+        "box": [
+          677,
+          509,
+          730,
+          520
+        ],
+        "examples": [
+          {
+            "x": 677,
+            "y": 509,
+            "a": [
+              181,
+              150,
+              110,
+              255
+            ],
+            "b": [
+              180,
+              150,
+              110,
+              255
+            ]
+          },
+          {
+            "x": 730,
+            "y": 520,
+            "a": [
+              203,
+              170,
+              255,
+              255
+            ],
+            "b": [
+              203,
+              169,
+              255,
+              255
+            ]
+          }
+        ]
+      },
+      {
+        "name": "settled",
+        "w": 960,
+        "h": 720,
+        "changed": 6,
+        "channels": 6,
+        "max": 1,
+        "over1": 0,
+        "alpha": 0,
+        "sum": 6,
+        "box": [
+          153,
+          151,
+          854,
+          536
+        ],
+        "examples": [
+          {
+            "x": 854,
+            "y": 151,
+            "a": [
+              115,
+              78,
+              152,
+              255
+            ],
+            "b": [
+              114,
+              78,
+              152,
+              255
+            ]
+          },
+          {
+            "x": 824,
+            "y": 161,
+            "a": [
+              125,
+              83,
+              170,
+              255
+            ],
+            "b": [
+              124,
+              83,
+              170,
+              255
+            ]
+          },
+          {
+            "x": 780,
+            "y": 216,
+            "a": [
+              173,
+              154,
+              149,
+              255
+            ],
+            "b": [
+              173,
+              154,
+              148,
+              255
+            ]
+          },
+          {
+            "x": 567,
+            "y": 436,
+            "a": [
+              144,
+              118,
+              175,
+              255
+            ],
+            "b": [
+              144,
+              118,
+              174,
+              255
+            ]
+          },
+          {
+            "x": 185,
+            "y": 500,
+            "a": [
+              102,
+              79,
+              182,
+              255
+            ],
+            "b": [
+              101,
+              79,
+              182,
+              255
+            ]
+          },
+          {
+            "x": 153,
+            "y": 536,
+            "a": [
+              19,
+              182,
+              64,
+              255
+            ],
+            "b": [
+              19,
+              182,
+              63,
+              255
+            ]
+          }
+        ]
+      },
+      {
+        "name": "final",
+        "w": 960,
+        "h": 720,
+        "changed": 3,
+        "channels": 3,
+        "max": 1,
+        "over1": 0,
+        "alpha": 0,
+        "sum": 3,
+        "box": [
+          614,
+          290,
+          807,
+          461
+        ],
+        "examples": [
+          {
+            "x": 807,
+            "y": 290,
+            "a": [
+              131,
+              103,
+              151,
+              255
+            ],
+            "b": [
+              131,
+              103,
+              150,
+              255
+            ]
+          },
+          {
+            "x": 614,
+            "y": 399,
+            "a": [
+              166,
+              95,
+              76,
+              255
+            ],
+            "b": [
+              166,
+              95,
+              75,
+              255
+            ]
+          },
+          {
+            "x": 696,
+            "y": 461,
+            "a": [
+              245,
+              164,
+              108,
+              255
+            ],
+            "b": [
+              244,
+              164,
+              108,
+              255
+            ]
+          }
+        ]
+      }
+    ],
+    "interpretation": "Feedback-only output differs from control in 2–6 pixels per 960x720 image, each one RGB level with no alpha changes. Combined candidate PNGs exactly match feedback-only PNGs. Camera and final draw count match. Shader rounding is a plausible inference, not a confirmed cause. GPU transform-feedback verification was not run for the rejected candidate; this production-path check had GPU error checks and no vertex readbacks."
+  },
+  "limitations": [
+    "Development fixture only; not complete playable Melee.",
+    "Draw submissions do not prove displayed frames or input-to-photon latency.",
+    "No retail gameplay/visual parity certification.",
+    "Host load and shader-cache variation limit performance inference."
+  ]
+}
