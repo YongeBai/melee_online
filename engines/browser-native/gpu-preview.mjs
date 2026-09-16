@@ -12,6 +12,8 @@ import {inspectArchive} from './archive.mjs';
 import {readNativeTev} from './native-tev.mjs';
 import {verifyGpuTev} from './verify-tev.mjs';
 import {readNativeTextures,decodeNativeTexture,gxTextureLod} from './native-texture.mjs';
+import {readNativePixel} from './native-pixel.mjs';
+import {verifyNativePixel} from './verify-material-state.mjs';
 const canvas=document.querySelector('canvas'),status=document.querySelector('#status'),result=document.querySelector('#result');
 const parameters=new URL(location.href).searchParams;
 const fullScene=parameters.get('scene')==='1';
@@ -35,7 +37,7 @@ try {
   const view=columnMajor([...module.HEAPF32.slice((scratch+36)/4,(scratch+84)/4),0,0,0,1]);
   module._MTXPerspective(scratch,45,4/3,1,500);
   const projection=columnMajor(module.HEAPF32.slice(scratch/4,scratch/4+16));module._free(scratch);
-  const manifest=await (await fetch('./model-fixtures.json')).json(),rows=[],tevPrograms=new Map();
+  const manifest=await (await fetch('./model-fixtures.json')).json(),rows=[],tevPrograms=new Map(),pixelStates=new Map();
   const selected=parameters.get('model')||'PlMrNr.dat';if(!manifest.includes(selected))throw Error('Model not in hosted manifest');
   const names=parameters.get('verify')==='1'?manifest:[selected],residentModels=new Map();
   async function load(name,referenceVertices) {
@@ -72,6 +74,8 @@ try {
           const joint=new Uint32Array(module.HEAPU8.buffer,nodes,n)[mesh.joint],program=readNativeTev(module,joint,index);
           const key=JSON.stringify(program.stages);if(!tevPrograms.has(key))tevPrograms.set(key,program);materialCount++;
           const native=readNativeTextures(module),source=assets.materials.get(mesh.material);
+          const pixel=readNativePixel(module);verifyNativePixel(source,pixel);
+          const pixelKey=JSON.stringify(pixel);if(!pixelStates.has(pixelKey))pixelStates.set(pixelKey,{state:pixel,materials:0});pixelStates.get(pixelKey).materials++;
           const descriptors=[];for(let t=source.texture;t;t=t.next)descriptors.push(t);
           if(native.textures.length!==descriptors.length)throw Error('Native/source texture count: '+name);
           for(const [ti,t] of native.textures.entries()) {
@@ -138,7 +142,7 @@ try {
   if(fullScene&&(module._portFileAllocations()||module._portRuntimeObjectsUsed()||module._portSceneLiveObjects()))
     throw Error('Native scene benchmark leaked archive or object ownership');
   const tev=fullScene?verifyGpuTev(gl,[...tevPrograms.values()]):null;
-  const report={passed:true,originalGameArchiveLoader:fullScene,originalGObjOwnership:fullScene,originalHsdObjects:fullScene,resolution:[960,720],conventions,tev,models:rows,emulator:false,playable:false,gameplayParity:false,
+  const report={passed:true,originalGameArchiveLoader:fullScene,originalGObjOwnership:fullScene,originalHsdObjects:fullScene,resolution:[960,720],conventions,tev,pixelStates:[...pixelStates.values()].map(({state,materials})=>({state,materials})),models:rows,emulator:false,playable:false,gameplayParity:false,
     performanceMeasured:false,renderer:gl.getParameter(gl.RENDERER),
     limitations:'Diagnostic unlit first-UV image; no native lighting, TEV, material animation, part selection, gameplay camera or match simulation'};
   const actor=await load(selected,false);actor.step();actor.draw();

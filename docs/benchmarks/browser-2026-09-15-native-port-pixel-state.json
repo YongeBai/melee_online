@@ -1,0 +1,738 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2915364,
+    "wasmSha256": "caef1265678c2de6f130ee81898284d6a09db512c333b775d00cc4acea4157bf"
+  },
+  "softwareGpu": true,
+  "defaultRoster": {
+    "states": [
+      {
+        "state": {
+          "channelCount": 1,
+          "channels": [
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 1
+            },
+            null,
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 0,
+              "attenuation": 2
+            },
+            null
+          ],
+          "colors": [
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                255
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            },
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                0,
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "ambientMask": 5,
+          "materialMask": 5,
+          "blend": {
+            "type": 0,
+            "source": 4,
+            "destination": 5,
+            "logic": 15
+          },
+          "depth": {
+            "enabled": 1,
+            "compare": 3,
+            "update": 1,
+            "beforeTexture": 1
+          },
+          "colorUpdate": 1,
+          "alphaUpdate": 0,
+          "destinationAlpha": {
+            "enabled": 0,
+            "alpha": 0
+          },
+          "dither": 0,
+          "alphaTest": {
+            "compare0": 7,
+            "reference0": 0,
+            "operation": 0,
+            "compare1": 7,
+            "reference1": 0
+          }
+        },
+        "materials": 1001
+      },
+      {
+        "state": {
+          "channelCount": 2,
+          "channels": [
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 1
+            },
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 0
+            },
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 0,
+              "attenuation": 2
+            },
+            null
+          ],
+          "colors": [
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                255
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            },
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            }
+          ],
+          "ambientMask": 15,
+          "materialMask": 15,
+          "blend": {
+            "type": 0,
+            "source": 4,
+            "destination": 5,
+            "logic": 15
+          },
+          "depth": {
+            "enabled": 1,
+            "compare": 3,
+            "update": 1,
+            "beforeTexture": 1
+          },
+          "colorUpdate": 1,
+          "alphaUpdate": 0,
+          "destinationAlpha": {
+            "enabled": 0,
+            "alpha": 0
+          },
+          "dither": 0,
+          "alphaTest": {
+            "compare0": 7,
+            "reference0": 0,
+            "operation": 0,
+            "compare1": 7,
+            "reference1": 0
+          }
+        },
+        "materials": 609
+      },
+      {
+        "state": {
+          "channelCount": 1,
+          "channels": [
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 1,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 2
+            },
+            null,
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 1,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 2
+            },
+            null
+          ],
+          "colors": [
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                0,
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                0,
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "ambientMask": 0,
+          "materialMask": 0,
+          "blend": {
+            "type": 0,
+            "source": 4,
+            "destination": 5,
+            "logic": 15
+          },
+          "depth": {
+            "enabled": 1,
+            "compare": 3,
+            "update": 1,
+            "beforeTexture": 1
+          },
+          "colorUpdate": 1,
+          "alphaUpdate": 0,
+          "destinationAlpha": {
+            "enabled": 0,
+            "alpha": 0
+          },
+          "dither": 0,
+          "alphaTest": {
+            "compare0": 7,
+            "reference0": 0,
+            "operation": 0,
+            "compare1": 7,
+            "reference1": 0
+          }
+        },
+        "materials": 1
+      },
+      {
+        "state": {
+          "channelCount": 1,
+          "channels": [
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 1
+            },
+            null,
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 0,
+              "attenuation": 2
+            },
+            null
+          ],
+          "colors": [
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                255
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            },
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                0,
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "ambientMask": 5,
+          "materialMask": 5,
+          "blend": {
+            "type": 1,
+            "source": 4,
+            "destination": 5,
+            "logic": 15
+          },
+          "depth": {
+            "enabled": 1,
+            "compare": 3,
+            "update": 0,
+            "beforeTexture": 1
+          },
+          "colorUpdate": 1,
+          "alphaUpdate": 0,
+          "destinationAlpha": {
+            "enabled": 0,
+            "alpha": 0
+          },
+          "dither": 0,
+          "alphaTest": {
+            "compare0": 7,
+            "reference0": 0,
+            "operation": 0,
+            "compare1": 7,
+            "reference1": 0
+          }
+        },
+        "materials": 6
+      },
+      {
+        "state": {
+          "channelCount": 1,
+          "channels": [
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 2
+            },
+            null,
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 2
+            },
+            null
+          ],
+          "colors": [
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            },
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                0,
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "ambientMask": 0,
+          "materialMask": 5,
+          "blend": {
+            "type": 0,
+            "source": 4,
+            "destination": 5,
+            "logic": 15
+          },
+          "depth": {
+            "enabled": 1,
+            "compare": 3,
+            "update": 1,
+            "beforeTexture": 1
+          },
+          "colorUpdate": 1,
+          "alphaUpdate": 0,
+          "destinationAlpha": {
+            "enabled": 0,
+            "alpha": 0
+          },
+          "dither": 0,
+          "alphaTest": {
+            "compare0": 7,
+            "reference0": 0,
+            "operation": 0,
+            "compare1": 7,
+            "reference1": 0
+          }
+        },
+        "materials": 122
+      },
+      {
+        "state": {
+          "channelCount": 2,
+          "channels": [
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 1
+            },
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 0
+            },
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 0,
+              "attenuation": 2
+            },
+            null
+          ],
+          "colors": [
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                255
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            },
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            }
+          ],
+          "ambientMask": 15,
+          "materialMask": 15,
+          "blend": {
+            "type": 1,
+            "source": 4,
+            "destination": 5,
+            "logic": 15
+          },
+          "depth": {
+            "enabled": 1,
+            "compare": 3,
+            "update": 1,
+            "beforeTexture": 0
+          },
+          "colorUpdate": 1,
+          "alphaUpdate": 0,
+          "destinationAlpha": {
+            "enabled": 0,
+            "alpha": 0
+          },
+          "dither": 0,
+          "alphaTest": {
+            "compare0": 4,
+            "reference0": 0,
+            "operation": 0,
+            "compare1": 4,
+            "reference1": 0
+          }
+        },
+        "materials": 10
+      },
+      {
+        "state": {
+          "channelCount": 2,
+          "channels": [
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 1
+            },
+            {
+              "enabled": 1,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 2,
+              "attenuation": 0
+            },
+            {
+              "enabled": 0,
+              "ambientSource": 0,
+              "materialSource": 0,
+              "lights": 0,
+              "diffuse": 0,
+              "attenuation": 2
+            },
+            null
+          ],
+          "colors": [
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                255
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            },
+            {
+              "ambient": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "material": [
+                255,
+                255,
+                255,
+                255
+              ]
+            }
+          ],
+          "ambientMask": 15,
+          "materialMask": 15,
+          "blend": {
+            "type": 1,
+            "source": 4,
+            "destination": 5,
+            "logic": 15
+          },
+          "depth": {
+            "enabled": 1,
+            "compare": 3,
+            "update": 0,
+            "beforeTexture": 1
+          },
+          "colorUpdate": 1,
+          "alphaUpdate": 0,
+          "destinationAlpha": {
+            "enabled": 0,
+            "alpha": 0
+          },
+          "dither": 0,
+          "alphaTest": {
+            "compare0": 7,
+            "reference0": 0,
+            "operation": 0,
+            "compare1": 7,
+            "reference1": 0
+          }
+        },
+        "materials": 4
+      }
+    ],
+    "materials": 1753,
+    "blendModes": [
+      {
+        "type": 0,
+        "source": 4,
+        "destination": 5,
+        "logic": 15
+      },
+      {
+        "type": 1,
+        "source": 4,
+        "destination": 5,
+        "logic": 15
+      }
+    ],
+    "models": 27,
+    "descriptorAndDefaultStateChecks": 1753
+  },
+  "liveSnapshots": {
+    "settled": {
+      "states": 8,
+      "materials": 215,
+      "blendModes": [
+        {
+          "type": 1,
+          "source": 4,
+          "destination": 5,
+          "logic": 15
+        },
+        {
+          "type": 1,
+          "source": 4,
+          "destination": 1,
+          "logic": 5
+        },
+        {
+          "type": 0,
+          "source": 4,
+          "destination": 5,
+          "logic": 15
+        }
+      ]
+    },
+    "final": {
+      "states": 8,
+      "materials": 215,
+      "blendModes": [
+        {
+          "type": 1,
+          "source": 4,
+          "destination": 5,
+          "logic": 15
+        },
+        {
+          "type": 1,
+          "source": 4,
+          "destination": 1,
+          "logic": 5
+        },
+        {
+          "type": 0,
+          "source": 4,
+          "destination": 5,
+          "logic": 15
+        }
+      ]
+    }
+  },
+  "combatTraceSha256": "3a41335f2c29cb3af6a09a54afbb91768327a62de7f4aa6c3825a411141bd332",
+  "unchangedCombatTrace": true,
+  "combiner": {
+    "passed": true,
+    "programs": 215,
+    "capturedPrograms": 28,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 13760
+  },
+  "defaultRosterCombiner": {
+    "passed": true,
+    "programs": 220,
+    "capturedPrograms": 33,
+    "samplesPerProgram": 16,
+    "integerChannelChecks": 14080
+  },
+  "regressions": {
+    "targetedTests": 107,
+    "fighterBrowser": true,
+    "stageMapBrowser": true,
+    "sceneBrowser": true,
+    "animatedGpuModels": 27,
+    "maxVertexError": 0.000003814697265625
+  },
+  "commands": [
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-constructor.mjs --render",
+    "node scripts/native-port/verify-gpu.mjs --tev",
+    "node scripts/native-port/build.mjs --scene",
+    "node scripts/native-port/verify-gpu.mjs --scene",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/verify-browser.mjs --stage-map",
+    "node scripts/native-port/verify-browser.mjs --scene",
+    "node --test scripts/native-port/*.test.mjs scripts/engine/melee-hosted-startup.test.mjs"
+  ],
+  "playable": false,
+  "visualParity": false,
+  "performanceMeasured": false,
+  "limitations": [
+    "Original HSD material setup runs, but captured texture, TEV, pixel and channel settings are not yet applied to actual model draws.",
+    "Native light selection/activation and specular updates remain pending; channel light masks have no active lights in these checks.",
+    "Global shadow/toon texture additions take the original MObj path but are not present in tested fixtures.",
+    "Per-joint normal matrices, effects, HUD, audio, match lifecycle and complete roster gameplay remain incomplete.",
+    "No 720p60 or input-to-photon result."
+  ]
+}

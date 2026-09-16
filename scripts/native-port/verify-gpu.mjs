@@ -62,6 +62,7 @@ try {
     if(!verification.passed||verification.models.length!==27||verification.resolution.join(',')!=='960,720')throw Error('Incomplete GPU coverage');
     if(verification.models.some(m=>!m.distinctImages))throw Error('Animated output did not change: '+verification.models.filter(m=>!m.distinctImages).map(m=>m.name).join(', '));
     if(verification.originalHsdObjects!==scene)throw Error('Wrong native object path tested');
+    if(scene&&verification.pixelStates.reduce((n,s)=>n+s.materials,0)!==verification.models.reduce((n,m)=>n+m.materialCount,0))throw Error('Material pixel coverage count mismatch');
   }
   const report={browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),
     build:JSON.parse(fs.readFileSync(path.join(output,tev?'fighter-init-build.json':scene?'scene-build.json':'build.json'))),softwareGpu:true,verification};

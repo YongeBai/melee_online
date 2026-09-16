@@ -5,6 +5,17 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Full original `HSD_MObjSetup` now runs through the material capture boundary,
+including pixel-engine and color-channel setup. All 1,753 default-fighter
+material instances match their original depth/blending/alpha-test descriptors
+or HSD defaults. The sample uses seven distinct captured state combinations;
+its blend modes are opaque and source-alpha. The live Falcon/Battlefield capture
+also passes and retains the same combat trace. All 107 targeted tests pass.
+This is setup validation: original light activation, specular updates, normal
+matrices and applying the captured state to draws remain. The visible diagnostic
+still uses its simplified shader and no native-port match FPS is claimed.
+[Full material setup checkpoint](benchmarks/browser-2026-09-15-native-port-pixel-state.json).
+
 Original HSD texture setup now runs at the material boundary too. All 1,730
 runtime texture bindings across the 27 default fighter components match their
 source dimensions, formats, wrapping, filtering, mip levels and 17,744,214

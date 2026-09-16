@@ -1,7 +1,7 @@
 # Native material combiners
 
-`tev-state.c` calls Melee's original HSD compiled-material setup and records
-its GX TEV setters. Capture is explicitly scoped; GX calls outside it still
+`tev-state.c` calls Melee's full original `HSD_MObjSetup`/`HSD_MObjUnset` and
+records its GX material setters. Capture is explicitly scoped; GX calls outside it still
 abort. This is a boundary for the direct port, not CPU emulation or a FIFO.
 Capture also runs original `HSD_TObjSetup` and coordinate-generator setup.
 `texture-state.c` records image and palette selections, filters, LOD arguments,
@@ -35,5 +35,12 @@ the original descriptors: 1,730 bindings, filtering state, 17,744,214 decoded
 texels and UV matrices. Reflection/highlight matrices are captured and checked
 for finite values; their visual accuracy still needs the original camera/light
 and per-joint normal matrices. Samus also uses a bump texgen stage. Global
-shadow/toon additions from full `HSD_MObjSetup`, lighting channels and pixel
-engine setup are not yet captured by this material-TObj-only boundary.
+shadow/toon additions now use full `HSD_MObjSetup`, but those global resources
+are not present in the tested fixtures. Lighting channels and pixel-engine
+settings are captured by `pixel-state.c`. The scene test checks those settings
+against source custom PE descriptors or explicit HSD defaults for every material.
+Snapshots invalidate HSD's previous-draw caches to record all required state.
+Live light selection/activation, specular light updates and per-joint normal
+matrices are still pending; captured channel masks currently have no active
+lights. The pixel-state reader and scalar alpha-test oracle do not apply blend,
+depth or alpha tests to actual material draws yet.
