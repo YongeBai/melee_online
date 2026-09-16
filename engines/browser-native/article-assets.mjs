@@ -24,11 +24,14 @@ export const fighterArticleProfiles=Object.freeze({
   Kp:{slots:1,articles:{0:[1,6]}},
   Ys:{slots:4,articles:{0:[2,2],1:[1,2],2:[0,0]}},
   Mt:{slots:2,articles:{0:[1,2],1:[10,16]}},
+  // Ten move Articles and a fighter outline visibility lookup in slot 10.
+  Gw:{slots:11,articles:{0:[4,1],1:[1,1],2:[1,1],3:[2,1],4:[2,1],5:[2,1],6:[1,1],7:[2,1],8:[2,29],9:[2,1]}},
   Lk:{slots:7,articles:{0:[3,16],1:[3,17],2:[0,21],3:[1,9],4:[6,1]}},
   Cl:{slots:7,articles:{0:[3,16],1:[3,17],2:[0,21],3:[1,9],4:[6,1],5:[2,1]}},
   Ss:{slots:5,articles:{0:[2,7],1:[9,8],2:[4,16],3:[0,25]}},
 });
 export function initializeFighterArticleArchive(input,code){
+  if(code==='Gw')return initializeArchiveExternals(input,['ItmGamewatchBreath_TopN_ACTION_LandingAirHi_animjoint','ItmGamewatchRescue_TopN_ACTION_SpecialHiAir_animjoint']);
   if(['Lk','Cl'].includes(code))return initializeArchiveExternals(input,['ItmLinkHShot_TopN_ACTION_Out_matanim_joint','ItmLinkHShot_TopN_ACTION_Out_shapeanim_joint']);
   return code==='Ss'?initializeArchiveExternals(input,[
     'ItmSamusGBeamChainA_TopN_shapeanim_joint','ItmSamusGBeamChainB_TopN_shapeanim_joint','ItmSamusGBeamChainC_TopN_shapeanim_joint',
@@ -84,7 +87,18 @@ export function convertFighterArticles(input,name) {
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
-    for(let j=0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    if(code==='Gw'){
+      // it_266F_ItemVars: two u16 counts plus packed joint-index arrays.
+      // Chef's remaining 28 floats are three common fields and five entries.
+      const outline=pointer(special);if(outline===null)throw Error('Missing Game & Watch item outline');
+      bounds(outline,16);
+      for(const offset of [0,8]){
+        scalar(outline+offset,2);const count=d.getUint16(outline+offset),indices=pointer(outline+offset+4);
+        if(count>model.boneCount||count&&indices===null)throw Error('Invalid item outline count');
+        for(let i=0;i<count;i++){raw(indices+i);if(d.getUint8(indices+i)>=model.boneCount)throw Error('Invalid item outline bone');}
+      }
+    }
     if(code==='Ss'&&model.slot===3){
       for(let off=0x64;off<=0x70;off+=4)attachment(pointer(special+off),'grapple '+((off-0x64)/4));
       for(let off=0x74;off<=0xAC;off+=12){
@@ -115,6 +129,23 @@ export function convertFighterArticles(input,name) {
   if(code==='Ys'){
     const root=a.publics.get('ftDataYoshi'),table=pointer(root+0x48),joint=pointer(table+12);
     attachment(joint,'captured egg');extraRows.push({slot:3,source:joint,joint});
+  }
+  if(code==='Gw'){
+    // FtPartsVisLookup uses DObj indices, distinct from the item joint lists.
+    const root=a.publics.get('ftDataGamewatch'),table=pointer(root+0x48),lookup=pointer(table+40),parts=d.getUint32(root+8);
+    bounds(parts,4);const count=d.getUint32(parts);
+    if(!a.relocations.has(root+8)||lookup===null||count<1||count>11)throw Error('Invalid Game & Watch fighter outline');
+    bounds(lookup,count*8);
+    for(let i=0;i<count;i++){
+      const row=lookup+i*8;scalar(row);const variants=d.getUint32(row),entries=pointer(row+4);
+      if(variants>128||variants&&entries===null)throw Error('Invalid fighter outline variants');
+      for(let j=0;j<variants;j++){
+        const at=entries+j*8;scalar(at);const n=d.getUint32(at),indices=pointer(at+4);
+        if(n>124||n&&indices===null)throw Error('Invalid fighter outline indices');
+        for(let k=0;k<n;k++){raw(indices+k);if(d.getUint8(indices+k)>=124)throw Error('Invalid fighter outline display index');}
+      }
+    }
+    extraRows.push({slot:10,source:lookup,models:count});
   }
   if(code==='Ss'){
     const root=a.publics.get('ftDataSamus'),table=pointer(root+0x48),extra=pointer(table+16);

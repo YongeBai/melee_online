@@ -1,0 +1,1122 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "a80498b",
+  "scope": "Default-costume Game & Watch native constructor, typed move items and outline visibility, selected moves and contacts; two-Game & Watch Battlefield timing. Not complete competitive acceptance.",
+  "wasmSha256": "b4ee4a0c31a6836bffd42527a3132451c560531e6f9810f5c1c2b1d645843494",
+  "portableRecipeSha256": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "32cf2810a17b05ac0d14d35708fdbc81ec0a2772bd0283356d4f2ced502f03cb",
+    "engines/browser-native/constructor.html": "aef601d0979b34b617f32fb29c42f398f02704c80c30605c4395fa8740e986bb",
+    "engines/browser-native/verify-gamewatch.mjs": "7814f1d302a398a4fa4b9822ddb38573b0ea549783c77f49e6ad601ab84e0b20",
+    "engines/browser-native/combat-workload.mjs": "70b0733a6f98108b67f53db77a47a3b978ed96fcef4dd788b451df39d5328ef5",
+    "engines/browser-native/native-live.mjs": "4b8740b229c0dcebb931e3bb53ae84f345b9c40071adbcf6129157691135aa05",
+    "scripts/native-port/probe-constructor.mjs": "aa41341a38df7b328df149a4a4704a1c507a9d11357952e72401e1ebb0fde058"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "assetIntegration": {
+    "articles": [
+      "Greenhouse",
+      "Manhole",
+      "Fire",
+      "Parachute",
+      "Turtle",
+      "Breath",
+      "Judge",
+      "Panic",
+      "Chef",
+      "Rescue"
+    ],
+    "serializedStates": [
+      4,
+      1,
+      1,
+      2,
+      2,
+      2,
+      1,
+      2,
+      2,
+      2
+    ],
+    "specialWords": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      29,
+      1
+    ],
+    "outlineItemCounts": "two u16 plus packed joint-index arrays",
+    "fighterOutlineModels": 11,
+    "fighterOutlineSlot": 10,
+    "externalAnimationLinksInitializedToNull": [
+      "ItmGamewatchBreath_TopN_ACTION_LandingAirHi_animjoint",
+      "ItmGamewatchRescue_TopN_ACTION_SpecialHiAir_animjoint"
+    ],
+    "effectBank": "common only, matching original -1 fighter bank selector",
+    "gameplayFunctionBodiesUnchanged": true
+  },
+  "validation": {
+    "unitTests": 182,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "moves": {
+      "artifact": "gamewatch-moves-Gw-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "completed": true,
+      "frames": 3144,
+      "renderedFrames": 3286,
+      "phases": [
+        {
+          "name": "jab",
+          "frames": 101,
+          "states": [
+            341,
+            14
+          ],
+          "itemKinds": [
+            114
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "down tilt",
+          "frames": 122,
+          "states": [
+            14,
+            345,
+            41
+          ],
+          "itemKinds": [
+            115
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "forward smash",
+          "frames": 151,
+          "states": [
+            346,
+            14
+          ],
+          "itemKinds": [
+            116
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "neutral air",
+          "frames": 239,
+          "states": [
+            24,
+            25,
+            347,
+            350,
+            14
+          ],
+          "itemKinds": [
+            117
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "back air",
+          "frames": 239,
+          "states": [
+            24,
+            25,
+            348,
+            351,
+            14
+          ],
+          "itemKinds": [
+            118
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "up air",
+          "frames": 239,
+          "states": [
+            24,
+            25,
+            349,
+            352,
+            14
+          ],
+          "itemKinds": [
+            119
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "ground Chef",
+          "frames": 221,
+          "states": [
+            353,
+            14
+          ],
+          "itemKinds": [
+            122
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "air Chef",
+          "frames": 259,
+          "states": [
+            24,
+            25,
+            354,
+            353,
+            14
+          ],
+          "itemKinds": [
+            122
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "ground Judge",
+          "frames": 181,
+          "states": [
+            360,
+            14
+          ],
+          "itemKinds": [
+            120
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "air Judge",
+          "frames": 259,
+          "states": [
+            24,
+            25,
+            370,
+            361,
+            14
+          ],
+          "itemKinds": [
+            120
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "ground Oil Panic",
+          "frames": 225,
+          "states": [
+            375,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air Oil Panic",
+          "frames": 288,
+          "states": [
+            24,
+            25,
+            378,
+            375,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "ground Fire Rescue",
+          "frames": 301,
+          "states": [
+            373,
+            35,
+            43,
+            14
+          ],
+          "itemKinds": [
+            124
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "air Fire Rescue",
+          "frames": 319,
+          "states": [
+            24,
+            25,
+            374,
+            35,
+            43,
+            14
+          ],
+          "itemKinds": [
+            124
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        }
+      ]
+    },
+    "contacts": [
+      {
+        "mode": "chef",
+        "artifact": "gamewatch-chef-Gw-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 21,
+        "hitlag": 4,
+        "knockback": 67.05374908447266,
+        "blockedFrames": 0,
+        "attackerStates": [
+          353,
+          14
+        ],
+        "defenderStates": [
+          14,
+          80,
+          42,
+          76,
+          85,
+          79
+        ]
+      },
+      {
+        "mode": "judge",
+        "artifact": "gamewatch-judge-Gw-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 8,
+        "hitlag": 5,
+        "knockback": 60,
+        "blockedFrames": 0,
+        "attackerStates": [
+          358,
+          14
+        ],
+        "defenderStates": [
+          14,
+          77,
+          42
+        ]
+      },
+      {
+        "mode": "grab",
+        "artifact": "gamewatch-grab-Gw-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 8,
+        "hitlag": 0,
+        "knockback": 109.44000244140625,
+        "blockedFrames": 0,
+        "attackerStates": [
+          212,
+          213,
+          216,
+          219,
+          14
+        ],
+        "defenderStates": [
+          14,
+          226,
+          227,
+          239,
+          88,
+          38,
+          183,
+          184,
+          186
+        ]
+      },
+      {
+        "mode": "shield",
+        "artifact": "gamewatch-shield-Gw-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 0,
+        "hitlag": 4,
+        "knockback": 0,
+        "blockedFrames": 12,
+        "attackerStates": [
+          14,
+          341
+        ],
+        "defenderStates": [
+          182,
+          179,
+          181,
+          180,
+          14
+        ]
+      },
+      {
+        "mode": "control",
+        "artifact": "gamewatch-control-Gw-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 0,
+        "hitlag": 0,
+        "knockback": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          14
+        ],
+        "defenderStates": [
+          14
+        ]
+      }
+    ],
+    "gpuJudge": {
+      "artifact": "gamewatch-judge-Gw-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 882,
+      "allRenderedFramesVertexChecked": true,
+      "projectionChecks": {
+        "passed": true,
+        "cases": 4,
+        "components": 12
+      },
+      "finalGpuErrorCheck": true
+    },
+    "selectedTimingTracesIdentical": true
+  },
+  "performance": [
+    {
+      "artifact": "deferred-errors-Gw-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": false,
+      "driverShaderCacheDisabled": false,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60038.79999998212,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5689722220102946,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.983944444465968,
+        "p50Ms": 7.4000000059604645,
+        "p95Ms": 12.299999982118607,
+        "maxMs": 21.099999994039536
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757736,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.30000000000018
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 1926,
+        "framesWithHitlag": 426,
+        "framesWithDamage": 3507,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 314
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 364
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 69,
+            "attack": 301
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 72,
+            "attack": 331
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 61,
+            "attack": 273
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 76,
+            "attack": 343
+          }
+        ]
+      },
+      "slowestCapturedDraws": [
+        {
+          "frame": 2221,
+          "costMs": 21.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 80,
+            "immediateVertices": 320,
+            "particleDraws": 80,
+            "particleVertices": 320,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 268,
+            "programs": 23,
+            "images": 121,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 52,
+            "effectRetired": 52,
+            "peakEffectModels": 2,
+            "itemCreated": 67,
+            "itemRetired": 66,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 1951,
+          "costMs": 19.900000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 272,
+            "programs": 23,
+            "images": 121,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 46,
+            "effectRetired": 46,
+            "peakEffectModels": 2,
+            "itemCreated": 58,
+            "itemRetired": 57,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 1231,
+          "costMs": 19.399999976158142,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 273,
+            "programs": 22,
+            "images": 105,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 31,
+            "effectRetired": 31,
+            "peakEffectModels": 2,
+            "itemCreated": 39,
+            "itemRetired": 38,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 2101,
+          "costMs": 18.5,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 266,
+            "programs": 23,
+            "images": 121,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 49,
+            "effectRetired": 49,
+            "peakEffectModels": 2,
+            "itemCreated": 63,
+            "itemRetired": 62,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 2605,
+          "costMs": 17.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 83,
+            "immediateVertices": 332,
+            "particleDraws": 83,
+            "particleVertices": 332,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 268,
+            "programs": 24,
+            "images": 123,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 58,
+            "effectRetired": 57,
+            "peakEffectModels": 2,
+            "itemCreated": 76,
+            "itemRetired": 76,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 841,
+          "costMs": 17.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 265,
+            "programs": 22,
+            "images": 105,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 21,
+            "effectRetired": 21,
+            "peakEffectModels": 2,
+            "itemCreated": 26,
+            "itemRetired": 25,
+            "peakItemModels": 1
+          }
+        }
+      ],
+      "shaderCompilations": [
+        {
+          "frame": 206,
+          "program": 21,
+          "origin": "model",
+          "cpuMs": 6.199999988079071
+        },
+        {
+          "frame": 214,
+          "program": 22,
+          "origin": "model",
+          "cpuMs": 4.5999999940395355
+        },
+        {
+          "frame": 1790,
+          "program": 23,
+          "origin": "model",
+          "cpuMs": 3.7000000178813934
+        },
+        {
+          "frame": 2277,
+          "program": 24,
+          "origin": "model",
+          "cpuMs": 3.5999999940395355
+        },
+        {
+          "frame": 2677,
+          "program": 25,
+          "origin": "model",
+          "cpuMs": 2.7000000178813934
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 25,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 25
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    },
+    {
+      "artifact": "deferred-errors-prepared-Gw-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3598,
+      "elapsedMs": 60032.09999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.6107777780046065,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 3.2999999821186066
+      },
+      "drawSubmissionCpu": {
+        "samples": 3598,
+        "meanMs": 8.071817676455462,
+        "p50Ms": 7.5,
+        "p95Ms": 12.5,
+        "maxMs": 26.900000005960464
+      },
+      "rafDrawIntervals": {
+        "samples": 3597,
+        "meanMs": 16.679899916596366,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.30000000000291
+      },
+      "cadence": {
+        "callbacks": 3602,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 2,
+        "rafGapsOver25Ms": 3
+      },
+      "workload": {
+        "framesWithAttack": 1926,
+        "framesWithHitlag": 426,
+        "framesWithDamage": 3507,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 68,
+            "attack": 314
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 80,
+            "attack": 364
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 69,
+            "attack": 301
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 72,
+            "attack": 331
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 61,
+            "attack": 273
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 76,
+            "attack": 343
+          }
+        ]
+      },
+      "slowestCapturedDraws": [
+        {
+          "frame": 1,
+          "costMs": 26.900000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 44,
+            "immediateVertices": 176,
+            "particleDraws": 44,
+            "particleVertices": 176,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 221,
+            "programs": 25,
+            "images": 65,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 4,
+            "effectRetired": 4,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2911,
+          "costMs": 22.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 145,
+            "immediateVertices": 580,
+            "particleDraws": 145,
+            "particleVertices": 580,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 343,
+            "programs": 25,
+            "images": 124,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 64,
+            "effectRetired": 63,
+            "peakEffectModels": 2,
+            "itemCreated": 85,
+            "itemRetired": 84,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 1891,
+          "costMs": 22.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 272,
+            "programs": 25,
+            "images": 121,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 46,
+            "effectRetired": 46,
+            "peakEffectModels": 2,
+            "itemCreated": 56,
+            "itemRetired": 55,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 1949,
+          "costMs": 22.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 255,
+            "programs": 25,
+            "images": 121,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 46,
+            "effectRetired": 46,
+            "peakEffectModels": 2,
+            "itemCreated": 57,
+            "itemRetired": 57,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 2914,
+          "costMs": 20.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 145,
+            "immediateVertices": 580,
+            "particleDraws": 145,
+            "particleVertices": 580,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 336,
+            "programs": 25,
+            "images": 124,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 65,
+            "effectRetired": 64,
+            "peakEffectModels": 2,
+            "itemCreated": 85,
+            "itemRetired": 84,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 1531,
+          "costMs": 20.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 76,
+            "immediateVertices": 304,
+            "particleDraws": 76,
+            "particleVertices": 304,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 272,
+            "programs": 25,
+            "images": 105,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 39,
+            "effectRetired": 39,
+            "peakEffectModels": 2,
+            "itemCreated": 49,
+            "itemRetired": 48,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 91,
+          "costMs": 19.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 62,
+            "immediateVertices": 248,
+            "particleDraws": 62,
+            "particleVertices": 248,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 256,
+            "programs": 25,
+            "images": 70,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 5,
+            "effectRetired": 5,
+            "peakEffectModels": 2,
+            "itemCreated": 1,
+            "itemRetired": 0,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 94,
+          "costMs": 19.099999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 74,
+            "immediateVertices": 296,
+            "particleDraws": 74,
+            "particleVertices": 296,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 260,
+            "programs": 25,
+            "images": 76,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 5,
+            "effectRetired": 5,
+            "peakEffectModels": 2,
+            "itemCreated": 1,
+            "itemRetired": 0,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 421,
+          "costMs": 18.799999982118607,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 265,
+            "programs": 25,
+            "images": 104,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 13,
+            "effectRetired": 13,
+            "peakEffectModels": 2,
+            "itemCreated": 12,
+            "itemRetired": 11,
+            "peakItemModels": 1
+          }
+        },
+        {
+          "frame": 2431,
+          "costMs": 18.5,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 78,
+            "immediateVertices": 312,
+            "particleDraws": 78,
+            "particleVertices": 312,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 276,
+            "programs": 25,
+            "images": 123,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 56,
+            "effectRetired": 56,
+            "peakEffectModels": 2,
+            "itemCreated": 74,
+            "itemRetired": 73,
+            "peakItemModels": 1
+          }
+        }
+      ],
+      "shaderCompilations": [],
+      "shaderCoverage": {
+        "programs": 25,
+        "prepared": 25,
+        "preparedUsed": 25,
+        "unpreparedUsed": 0
+      },
+      "shaderPreparation": {
+        "requested": 25,
+        "compiled": 25,
+        "cpuMs": 311.69999998807907,
+        "fighterStateUnchanged": true
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    }
+  ],
+  "limitations": [
+    "Selected integration checks, not retail parity proof.",
+    "Oil Panic absorption/full release and every Judge outcome remain unverified. Empty ground/air bucket states pass.",
+    "No presented-FPS or input-to-photon measurement.",
+    "Timing workload uses close combat, not repeated special-move stress.",
+    "20 fighter components have constructor/input integration; seven components, other costumes, complete scenes/menus/audio, networking, parity and deployment remain unfinished."
+  ],
+  "competitiveAcceptanceAchieved": false
+}

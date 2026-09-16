@@ -16,6 +16,7 @@ import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
+import {verifyGamewatchMoves,verifyGamewatchContact} from './verify-gamewatch.mjs';
 import {verifyMewtwoMoves,verifyMewtwoContact} from './verify-mewtwo.mjs';
 import {verifyYoshiMoves,verifyYoshiContact} from './verify-yoshi.mjs';
 import {verifyLinkMoves,verifyLinkContact} from './verify-link.mjs';
@@ -74,7 +75,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt'].includes(code)||stageKey==='story') {
+  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw'].includes(code)||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -97,13 +98,14 @@ try {
   const costume=loadCostume(module,models.find(m=>m.name===modelName).bytes,modelName,kind);
   module._portMatchCameraInitialize();
   module._portEffectsInitialize();
-  const commonEffectBytes=await asset('EfCoData.dat'),fighterEffectBytes=await asset(effectName);
-  const effects=convertCommonEffects(commonEffectBytes),fighterEffects=convertFighterEffects(fighterEffectBytes,code);
+  // ftData_UnkBytePerCharacter[GameWatch] is -1: only the common bank loads.
+  const commonEffectBytes=await asset('EfCoData.dat'),fighterEffectBytes=code==='Gw'?null:await asset(effectName);
+  const effects=convertCommonEffects(commonEffectBytes),fighterEffects=fighterEffectBytes?convertFighterEffects(fighterEffectBytes,code):null;
   installResidentFile(module,'EfCoData.dat',effects.image);
   const effectData=module._portCommonEffectsLoad();
   if(!effectData)throw Error('Original common effect-bank loader failed');
   report.commonEffects=verifyResidentEffectBank(module,effects,effectData);
-  installResidentFile(module,effectName,fighterEffects.image);
+  if(fighterEffects)installResidentFile(module,effectName,fighterEffects.image);
   if(tournament){
     installResidentFile(module,'PdPm.dat',convertPlayerParameters(await asset('PdPm.dat')).image);
     const hudBytes=await asset('IfAll.usd'),status=convertStatusModels(hudBytes,{hud:withHud,damage:damageHud});
@@ -182,7 +184,7 @@ try {
   const object=module._portFighterConstruct(kind,0);
   if(!object)throw Error('Original constructor returned no fighter');
   report.constructorCompleted=true;report.object=object;
-  report.fighterEffects=verifyResidentEffectBank(module,fighterEffects,module._portEffectsBankData(fighterEffects.bank));
+  report.fighterEffects=fighterEffects?verifyResidentEffectBank(module,fighterEffects,module._portEffectsBankData(fighterEffects.bank)):{commonOnly:true};
   const state=()=>Array.from({length:13},(_,i)=>module._portFighterConstructRead(object,i));
   report.state=state();
   if(!report.state.every(Number.isFinite)||!report.state[7]||!report.state[8]||report.state[9]!==15||report.state[10]!==1||report.state[11]!==kind||report.state[12]!==0)throw Error('Constructed fighter state/ownership invariant');
@@ -260,13 +262,13 @@ try {
       for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:(code==='Ca'?'Falcon':character)+' P'+(i+1),object:owner,collectNodes:['Lk','Cl'].includes(code)?(target,nodes)=>collectFighterCostume(owner,target,nodes):undefined,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name===modelName).bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       const effectModels=new Map();
-      for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],[fighterEffectBytes,fighterEffects,module._portEffectsBankData(fighterEffects.bank)]]){
+      for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],...(fighterEffects?[[fighterEffectBytes,fighterEffects,module._portEffectsBankData(fighterEffects.bank)]]:[])]){
         if(!data)throw Error('Missing loaded render effect bank');
         const archive=inspectArchive(bytes),base=data-source.root-8;
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt'].includes(code)){
+      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw'].includes(code)){
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
         for(const row of articles.attachments){
@@ -413,7 +415,7 @@ try {
         const latest=report.input.states.at(-1).state;
         if(name==='walk'&&(!(latest[4]>report.afterSteps[4])||![15,16,17].includes(latest[0])))throw Error('Scripted walking input did not produce walking movement');
         if(name==='air'&&(latest[3]!==1||latest[5]<=report.afterSteps[5]))throw Error('Scripted jump did not become airborne');
-        if(name==='attack'&&!(latest[0]>=65&&latest[0]<=69))throw Error('Scripted aerial attack did not enter an aerial attack state');
+        if(name==='attack'&&!(latest[0]>=65&&latest[0]<=69||code==='Gw'&&latest[0]>=347&&latest[0]<=349))throw Error('Scripted aerial attack did not enter an aerial attack state');
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
@@ -445,6 +447,21 @@ try {
         if(code!=='Mt'||!opponent)throw Error('Mewtwo contact requires two fighters');
         report.mewtwoContact={};verifyMewtwoContact(module,[object,opponent],report.mewtwoContact,{step,mode:params.get('mewtwocontact'),onStep:renderSteps?()=>{
           const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+        }:undefined});
+      }
+      if(params.has('gamewatchcontact')){
+        if(code!=='Gw'||!opponent)throw Error('Game & Watch contact requires two fighters');
+        report.gamewatchContact={};verifyGamewatchContact(module,[object,opponent],report.gamewatchContact,{step,mode:params.get('gamewatchcontact'),onStep:renderSteps?()=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+        }:undefined});
+      }
+      if(params.has('gamewatchmoves')){
+        if(code!=='Gw')throw Error('Game & Watch move probe fighter');
+        report.gamewatchMoves={};verifyGamewatchMoves(module,object,report.gamewatchMoves,{step,onStep:renderSteps?phase=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          for(const [name,kind]of [['gwchef',122],['gwjudge',120],['gwrescue',124],['gwturtle',118]])if(phase.trace.at(-1).items.some(i=>i[0]===kind)&&!report.preview[name]){
+            report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
+          }
         }:undefined});
       }
       if(params.has('mewtwomoves')){

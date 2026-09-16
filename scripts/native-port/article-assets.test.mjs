@@ -149,3 +149,39 @@ test('Mewtwo imports all ten shared Shadow Ball states and preserves its signed 
   assert.equal(d.getInt32(552+0x20,true),-1);
   assert.throws(()=>convertFighterArticles(fixture('Mt',a=>a.d.setFloat32(552,NaN)),'PlMt.dat'),/Nonfinite/);
 });
+
+function gamewatchFixture(mutate=()=>{}){
+  const body=new Uint8Array(8192),d=new DataView(body.buffer),relocs=new Set(),rows=[];let next=256;
+  const alloc=n=>{const at=next;next=(next+n+3)&~3;return at;};
+  const ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(72,128);
+  for(const [slotText,[stateCount,words]]of Object.entries(fighterArticleProfiles.Gw.articles)){
+    const slot=Number(slotText),article=alloc(24),attributes=alloc(132),special=alloc(words*4),model=alloc(16),joint=alloc(64),states=alloc(stateCount*16),outline=alloc(16),indices=alloc(4);
+    ptr(128+slot*4,article);ptr(article,attributes);ptr(article+4,special);ptr(article+12,states);ptr(article+16,model);ptr(model,joint);d.setUint32(model+4,1);
+    for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+    ptr(special,outline);d.setUint16(outline,1);d.setUint16(outline+2,0xa1b2);ptr(outline+4,indices);body[indices]=0;
+    for(let i=1;i<words;i++)d.setFloat32(special+i*4,i+.25);
+    rows.push({slot,special,outline,indices,states});
+  }
+  const parts=alloc(4),lookup=alloc(8),variants=alloc(8),indices=alloc(4);
+  ptr(8,parts);d.setUint32(parts,1);ptr(168,lookup);d.setUint32(lookup,1);ptr(lookup+4,variants);d.setUint32(variants,3);ptr(variants+4,indices);body.set([2,7,11],indices);
+  mutate({body,d,ptr,rows,parts,lookup,variants,indices,relocs});
+  const name=new TextEncoder().encode('ftDataGamewatch\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),h=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>h.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>h.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return {bytes,rows,lookup,variants,indices};
+}
+test('Game & Watch imports ten Articles, typed outline counts and packed display visibility indices',()=>{
+  const {bytes,rows,lookup,indices}=gamewatchFixture(),before=bytes.slice(),r=convertFighterArticles(bytes,'PlGw.dat'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(bytes,before);assert.equal(r.rows.length,10);assert.deepEqual(r.extraRows,[{slot:10,source:lookup,models:1}]);
+  for(const row of rows){assert.equal(d.getUint32(row.special,true),row.outline);assert.equal(d.getUint16(row.outline,true),1);assert.equal(d.getUint16(row.outline+2),0xa1b2);}
+  assert.deepEqual([...r.image.slice(32+indices,35+indices)],[2,7,11]);
+  assert.equal(d.getFloat32(rows[8].special+28*4,true),28.25);
+});
+test('Game & Watch rejects malformed outline graphs, invalid indices and Chef floats',()=>{
+  for(const mutate of [
+    a=>a.d.setUint16(a.rows[0].outline,2),a=>a.body[a.rows[0].indices]=1,
+    a=>a.d.setUint32(a.parts,12),a=>a.d.setUint32(a.lookup,129),
+    a=>a.d.setUint32(a.variants,125),a=>a.body[a.indices]=124,
+    a=>a.ptr(a.variants+4,a.rows[0].special),a=>a.d.setFloat32(a.rows[8].special+112,NaN),
+    a=>a.relocs.delete(a.rows[0].special),
+  ])assert.throws(()=>convertFighterArticles(gamewatchFixture(mutate).bytes,'PlGw.dat'));
+});

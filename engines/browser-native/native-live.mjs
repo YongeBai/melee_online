@@ -1,3 +1,5 @@
+import {isNormalAttackState} from './combat-workload.mjs';
+
 // Fixed simulation cadence. Retain backlog under load; pause explicitly when
 // hidden. Old rAF timestamps must not move the wall-clock origin backwards.
 export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1}={}) {
@@ -66,19 +68,19 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         const before=performance.now();step();sample(stepTimes,performance.now()-before);frames++;
         final=objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
         if(!final.flat().every(Number.isFinite))throw Error('Nonfinite interactive fighter state');
-        if(final.some(s=>s[0]>=44&&s[0]<=69))workload.framesWithAttack++;
+        if(final.some(isNormalAttackState))workload.framesWithAttack++;
         if(final.some(s=>s[14]>0))workload.framesWithHitlag++;
         if(final.some(s=>s[13]>0))workload.framesWithDamage++;
         const wi=Math.floor((frames-1)/600),slot=wi%60;
         if(workload.windows[slot]?.firstFrame!==wi*600+1)workload.windows[slot]={firstFrame:wi*600+1,frames:0,hitlag:0,attack:0};
         workload.windows[slot].frames++;
         if(final.some(s=>s[14]>0))workload.windows[slot].hitlag++;
-        if(final.some(s=>s[0]>=44&&s[0]<=69))workload.windows[slot].attack++;
+        if(final.some(isNormalAttackState))workload.windows[slot].attack++;
         final.forEach((s,i)=>{if(s[18]!==previous[i][18]&&workload.stockChanges.length<256)workload.stockChanges.push({frame:frames,slot:i,stocks:s[18]});});
         if(stateChanges.length<256&&stateChanges.at(-1)?.state!==final[0][0])stateChanges.push({frame:frames,state:final[0][0],x:final[0][4],y:final[0][5],buttons:samples[0][0]});
         movement ||= Math.abs(final[0][4]-initial[0][4])>.1;
         jump ||= final[0][3]===1&&final[0][5]>initial[0][5]+1;
-        attack ||= final[0][0]>=44&&final[0][0]<=69;
+        attack ||= isNormalAttackState(final[0]);
       }
       if(steps){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
       if(frameLimit&&frames>=frameLimit){stop();onComplete(snapshot());return;}

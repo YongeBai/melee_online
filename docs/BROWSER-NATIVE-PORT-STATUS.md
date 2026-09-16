@@ -5,6 +5,43 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Mr. Game & Watch now passes the original default-costume constructor and basic
+input checks, fourteen selected move phases and five rendered contact checks.
+The port imports all ten move Articles, typed item outline lists and the eleven
+fighter outline visibility groups. Two external animation links are initialized
+to null at the original archive-loader boundary. The fighter has no dedicated
+effect archive; it uses the common bank, matching the original selector.
+
+The move sequence renders 3,286 frames, including item-based normals and ground
+and air specials. Repeated Chef projectiles deal 21 damage in the selected
+contact sequence. The sampled Judge result and forward throw each deal eight;
+shielded jabs produce twelve blocked frames and zero body damage. The idle
+control remains at zero. An isolated Judge contact GPU-verifies all 882 rendered
+frames. Empty Oil Panic is correctly represented by fighter parts; absorption,
+full-bucket release and every Judge outcome remain unverified. Original gameplay
+function bodies and parameters were not changed to satisfy these checks.
+
+Two 960×720 two-Game & Watch Battlefield samples each simulate 3,600 frames in
+about 60 seconds. The first submits 3,600 draws with no catch-up callbacks;
+the prepared-shader repeat submits 3,598 draws with two catch-up callbacks.
+Simulation means are 0.569/0.611 ms and draw-submission means 7.984/8.072 ms.
+Preparing 25 shaders with the driver cache disabled removes five live
+compilations, and selected gameplay traces match. Prepared draw p95 is 12.5 ms
+and maximum 26.9 ms. This repeat does not demonstrate a speedup or a perfect
+frame cadence. Neither sample measures distinct displayed FPS or input-to-photon
+latency. Attack diagnostics now recognize Game & Watch's character-specific
+normal states without treating its landing states or other fighters' specials
+as normal attacks.
+
+All 182 tests and the fighter build pass. The C core remains `b4ee4a0c…`.
+Twenty fighter components now have constructor/input integration. Seven
+components, other costumes, complete scenes/menus/audio, retail parity,
+networking and native-port deployment remain unfinished. The overall 720p60
+competitive acceptance criterion is **not achieved**.
+[Game & Watch evidence](benchmarks/browser-2026-09-16-native-port-gamewatch.json).
+
+Previous Mewtwo checkpoint:
+
 Mewtwo now passes default-costume constructor/input, nine selected move phases
 and seven rendered contact checks. Its Disable and Shadow Ball Articles, ten
 serialized Shadow Ball states and four effect models are imported. The move

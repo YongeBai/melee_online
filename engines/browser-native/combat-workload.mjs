@@ -1,3 +1,9 @@
+// Attack diagnostics include Game & Watch's character-specific normal states.
+// Landing states are excluded, as are specials and every other fighter's states.
+export function isNormalAttackState(state){
+  return state[0]>=44&&state[0]<=69||state[11]===24&&state[0]>=341&&state[0]<=349;
+}
+
 // Deterministic normalized controller workload for the partial two-Falcon
 // fixture, revision 2 (turn toward the opponent before attacking).
 // This drives original gameplay; it never writes fighter state.
