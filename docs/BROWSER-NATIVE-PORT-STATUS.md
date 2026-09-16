@@ -5,6 +5,19 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Luigi and Dr. Mario copies now complete the same capture, copied
+neutral-special, loss and reacquisition simulation sequence. Their rendered
+full-scene runs pass 1,987 and 1,991 frames respectively, plus 124 intro frames.
+Luigi uses the original fireball Article and copy effect bank 37; Dr. Mario uses
+the original six-state pill Article and shared Mario copy effect bank 32. Native
+camera framing, hats and projectiles were visually inspected. All 203 unit tests
+pass. Focused GPU validation passes all 755 Luigi and 756 Dr. Mario frames.
+Separate full-scene contact tests confirm copied Mario/Luigi fireballs raise
+opponent damage from 8 to 14; Dr. Mario’s pill raises it from 8 to 16. Kirby’s
+damage and both stock counts remain unchanged. These are correctness checks,
+not performance or retail-parity certification.
+[Copy-family evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-family.json).
+
 Kirby's Mario copy now passes a 1,996-frame rendered tournament-scene test,
 plus 124 intro frames: capture, swallow, ground/air copied fireball, taunt copy
 loss, and reacquisition. A separate spit test passes 675 frames and leaves Mario

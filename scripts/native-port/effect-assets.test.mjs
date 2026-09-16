@@ -103,3 +103,10 @@ test('Kirby Mario effect bank uses its own original bank and models',()=>{
   assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,1)),'Mr'));
   assert.throws(()=>convertKirbyCopyEffects(input,'Fx'),/pending/);
 });
+
+test('Kirby Luigi uses bank 37 while Dr. Mario shares the original Mario copy bank',()=>{
+  for(const [code,symbol,bank]of [['Lg','Luigi',37],['Dr','Mario',32]]){
+    const spec={symbol:'effKirby'+symbol+'DataTable',bank,count:7,groups:3,models:1},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,code);
+    assert.deepEqual(input,before);assert.equal(r.bank,bank);assert.equal(r.first,bank*1000);assert.equal(r.effects.length,1);assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,bank+1)),code));
+  }
+});

@@ -106,10 +106,11 @@ try {
   const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Pp'?['Nn']:c==='Nn'?['Pp']:c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
   for(const selected of packageCodes)packages.push(await loadFighterPackage(module,selected,packageOptions));
   const kirbyCopies=[];
-  if(packageCodes.includes('Kb')&&packageCodes.includes('Mr')){
-    const bytes=await asset('PlKbCpMr.dat'),source=convertKirbyCopy(bytes,'Mr');installResidentFile(module,'PlKbCpMr.dat',source.image);
-    const effectBytes=await asset('EfKbMr.dat'),effectSource=convertKirbyCopyEffects(effectBytes,'Mr');installResidentFile(module,'EfKbMr.dat',effectSource.image);effectFiles.set('EfKbMr.dat',{bytes:effectBytes,source:effectSource});
-    kirbyCopies.push({code:'Mr',kind:0,bytes,source});
+  if(packageCodes.includes('Kb'))for(const selected of packages.filter(p=>['Mr','Lg','Dr'].includes(p.code))){
+    const copyName='PlKbCp'+selected.code+'.dat',bytes=await asset(copyName),source=convertKirbyCopy(bytes,selected.code);installResidentFile(module,copyName,source.image);
+    const effectName='EfKb'+(selected.code==='Dr'?'Mr':selected.code)+'.dat';
+    if(!effectFiles.has(effectName)){const effectBytes=await asset(effectName),effectSource=convertKirbyCopyEffects(effectBytes,selected.code);installResidentFile(module,effectName,effectSource.image);effectFiles.set(effectName,{bytes:effectBytes,source:effectSource});}
+    kirbyCopies.push({code:selected.code,kind:selected.kind,bytes,source});
   }
   const primary=packages.find(p=>p.code===code),secondary=packages.find(p=>p.code===opponentCode),baseBytes=primary.baseBytes;
   report.baseArchive=primary.baseArchive;report.opponentBaseArchive=secondary.baseArchive;
@@ -452,7 +453,7 @@ try {
       report.input.completed=true;
       if(params.has('kirbycopy')){report.kirbyCopy={};verifyKirbyCopy(module,[object,opponent],report.kirbyCopy,{step,mode:params.get('kirbycopy'),onStep:renderSteps?r=>{
         const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
-        const last=r.trace.at(-1),name=last.items.some(i=>i[0]===130)?'copyfire':last.items.some(i=>i[0]===52&&Math.hypot(i[2]-last.state[0][4],i[3]-last.state[0][5])>15)?'copystar':last.hat[1]&&last.state[0][0]===14?'copyhat':last.state[0][0]===359?'captured':null;
+        const last=r.trace.at(-1),name=last.items.some(i=>i[0]===r.projectileKind)?'copyfire':last.items.some(i=>i[0]===52&&Math.hypot(i[2]-last.state[0][4],i[3]-last.state[0][5])>15)?'copystar':last.hat[1]&&last.state[0][0]===14?'copyhat':last.state[0][0]===359?'captured':null;
         if(name&&!report.preview[name]){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
       }:undefined});}
       if(params.has('kirbymoves')){report.kirbyMoves={};verifyKirbyMoves(module,object,report.kirbyMoves,{step,only:params.get('kirbymove'),onStep:renderSteps?phase=>{

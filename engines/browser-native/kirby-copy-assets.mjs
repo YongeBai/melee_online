@@ -3,16 +3,21 @@ import {convertSceneAsset} from './scene-assets.mjs';
 import {convertPartsVisibility} from './visibility-assets.mjs';
 import {convertArticleEntries} from './article-assets.mjs';
 
-// ftKb_SpecialN_800EFA40 and 800F16D0 consume Mario's five-word copy
-// descriptor: hat joint, FtPartsDesc, fireball Article, and a null extra slot.
+// Original hat constructors and 800F16D0 consume these five-word copy
+// descriptors: hat joint, FtPartsDesc, projectile Article, null extra slot.
+const profiles={
+  Mr:{symbol:'Mario',states:1,special:5,wrapper:42836},
+  Lg:{symbol:'Luigi',states:1,special:4,wrapper:48148},
+  Dr:{symbol:'Drmario',states:6,special:5,wrapper:22712},
+};
 export function convertKirbyCopy(input,code){
-  if(code!=='Mr')throw Error('Kirby copy conversion pending: '+code);
-  const symbol='ftDataKirbyCopyMario',a=inspectArchive(input),d=a.data,root=a.publics.get(symbol);
+  const profile=profiles[code];if(!profile)throw Error('Kirby copy conversion pending: '+code);
+  const symbol='ftDataKirbyCopy'+profile.symbol,a=inspectArchive(input),d=a.data,root=a.publics.get(symbol);
   if(root===undefined||root+20>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
   const ptr=at=>{if(!a.relocations.has(at))throw Error('Missing Kirby copy pointer');const value=d.getUint32(at);if(value%4||value+4>a.dataSize)throw Error('Kirby copy pointer bounds');return value;};
   const joint=ptr(root),article=ptr(root+12);
-  if(a.relocations.has(root+16)||d.getUint32(root+16))throw Error('Unexpected Mario copy extra');
-  const scene=convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+4,1),articles=convertArticleEntries(input,[{slot:0,article}],{0:[1,5]});
+  if(a.relocations.has(root+16)||d.getUint32(root+16))throw Error('Unexpected projectile copy extra');
+  const scene=convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+4,1),articles=convertArticleEntries(input,[{slot:0,article}],{0:[profile.states,profile.special]});
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),pointers=new Set(),claimed=new Map();
   function merge(image,typed,slots){
     for(const at of typed){if(at<0||at>=a.dataSize)throw Error('Copy typed byte bounds');const value=image[32+at];if(claimed.has(at)&&claimed.get(at)!==value)throw Error('Conflicting Kirby copy descriptors');claimed.set(at,value);body[at]=value;}
@@ -24,9 +29,10 @@ export function convertKirbyCopy(input,code){
   merge(visibility.image,visibility.typedBytes,visPointers);merge(articles.image,articles.typedBytes,articles.pointerSlots);
   const out=new DataView(body.buffer);for(const at of [root,root+12]){if([0,1,2,3].some(i=>claimed.has(at+i)))throw Error('Copy root overlap');out.setUint32(at,d.getUint32(at),true);pointers.add(at);}
   // The exporter retained a trailing scene wrapper around the already imported
-  // fireball model/animations. No published copy descriptor points to it.
+  // projectile model/animations. No published copy descriptor points to it.
   const untyped=[...a.relocations].filter(p=>!pointers.has(p)),row=articles.rows[0],anim=row.animations[0];
-  const orphan=new Map([[42836,anim.joint],[42844,anim.material],[42852,row.joint],[42856,42836],[42860,42844],[42868,42852]]);
-  if(untyped.length!==orphan.size||untyped.some(p=>!orphan.has(p)||d.getUint32(p)!==orphan.get(p))||[...pointers].some(p=>orphan.has(d.getUint32(p))))throw Error('Unexpected Mario copy orphan scene');
+  const w=profile.wrapper;
+  const orphan=new Map([[w,anim.joint],[w+8,anim.material],[w+16,row.joint],[w+20,anim.joint===null?null:w],[w+24,anim.material===null?null:w+8],[w+32,w+16]].filter(([,to])=>to!==null));
+  if(untyped.length!==orphan.size||untyped.some(p=>!orphan.has(p)||d.getUint32(p)!==orphan.get(p))||[...pointers].some(p=>orphan.has(d.getUint32(p))))throw Error('Unexpected projectile copy orphan scene');
   return {code,symbol,root,joint,scene,visibility,articles,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(body,pointers,new Map([[symbol,root]]))};
 }

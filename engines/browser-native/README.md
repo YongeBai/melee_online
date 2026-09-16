@@ -44,10 +44,14 @@ node scripts/native-port/probe-constructor.mjs --character=Kb --input --kirby-mo
 
 This checks five aerial jumps and ground/air inhale release, Hammer, Final Cutter
 and Stone. The jump test holds the ordinary jump input through the original
-command-script eligibility gates. Mario copy additionally imports the original
-hat/visibility descriptors, fireball Article and effect bank 32. These tests use
+command-script eligibility gates. Mario, Luigi and Dr. Mario copies additionally import their original
+hat/visibility descriptors and projectile Articles. Mario and Dr. Mario share
+copy effect bank 32; Luigi uses bank 37. Dr. Mario retains all six pill states. These tests use
 ordinary controller inputs for capture, swallow/spit, copied ground/air fireball,
 taunt loss and reacquisition; they do not assign copy kind or action states.
+`--kirby-copy=contact` additionally walks both fighters into range and checks
+that the copied projectile changes the opponent’s damage without changing stocks.
+Use `--opponent=Lg` or `--opponent=Dr` for the other two imported copy packages.
 Other copied abilities remain pending.
 
 ```sh

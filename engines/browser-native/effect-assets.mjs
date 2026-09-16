@@ -46,8 +46,9 @@ export function convertCommonEffects(input) {
   return convertEffects(input,{name:'effCommonDataTable',bank:0,first:0,count:592,groups:36,models:47});
 }
 export function convertKirbyCopyEffects(input,code){
-  if(code!=='Mr')throw Error('Kirby copy effect conversion pending: '+code);
-  return convertEffects(input,{name:'effKirbyMarioDataTable',bank:32,first:32000,count:7,groups:3,models:1});
+  const profile={Mr:['Mario',32],Dr:['Mario',32],Lg:['Luigi',37]}[code];
+  if(!profile)throw Error('Kirby copy effect conversion pending: '+code);
+  return convertEffects(input,{name:'effKirby'+profile[0]+'DataTable',bank:profile[1],first:profile[1]*1000,count:7,groups:3,models:1});
 }
 export function convertStageParticles(input,stage) {
   const specs={stadium:[30,10],story:[3,2],battlefield:[6,2],destination:[5,3],dreamland:[3,3],fountain:[14,4]};

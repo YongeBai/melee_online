@@ -24,7 +24,7 @@ const opponent=process.argv.find(x=>x.startsWith('--opponent='))?.slice(11)??cha
 if(!/^[A-Z][a-z]$/.test(opponent))throw Error('Opponent must be a two-letter fighter archive code');
 const matchup=opponent===character?character:character+'-vs-'+opponent;
 const kirbyCopy=process.argv.find(x=>x.startsWith('--kirby-copy='))?.slice(13)??(process.argv.includes('--kirby-copy')?'swallow':null);
-if(kirbyCopy&&(character!=='Kb'||opponent!=='Mr'||!process.argv.includes('--input')||!['swallow','acquire','spit'].includes(kirbyCopy)))throw Error('Kirby copy requires Kb versus Mr and input');
+if(kirbyCopy&&(character!=='Kb'||!['Mr','Lg','Dr'].includes(opponent)||!process.argv.includes('--input')||!['swallow','acquire','spit','contact'].includes(kirbyCopy)))throw Error('Kirby copy requires Kb versus Mr/Lg/Dr and input');
 const kirbyMove=process.argv.find(x=>x.startsWith('--kirby-move='))?.slice(13);
 const kirbyMoves=!!kirbyMove||process.argv.includes('--kirby-moves');
 if(kirbyMoves&&(character!=='Kb'||!process.argv.includes('--input')||kirbyMove&&kirbyMove!=='cutter'))throw Error('Kirby moves require Kb and input');
@@ -198,7 +198,7 @@ try {
   if(gamewatchContact&&!probe.error&&!probe.gamewatchContact?.completed)throw Error('Incomplete Game & Watch contact');
   if(formContact&&!probe.error&&!probe.formContact?.completed)throw Error('Incomplete form contact');
   if(kirbyCopy&&!probe.error&&!probe.kirbyCopy?.completed)throw Error('Incomplete Kirby copy');
-  if(kirbyCopy&&renderSteps&&!probe.error)for(const name of kirbyCopy==='spit'?['captured']:kirbyCopy==='acquire'?['copyhat','copyfire','captured']:['copyhat','copyfire','copystar','captured']){
+  if(kirbyCopy&&renderSteps&&!probe.error)for(const name of kirbyCopy==='spit'?['captured']:['acquire','contact'].includes(kirbyCopy)?['copyhat','copyfire','captured']:['copyhat','copyfire','copystar','captured']){
     if(!probe.preview?.[name])throw Error('Missing Kirby '+name);
     const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-"+name+"').src",returnByValue:true});
     if(!shot.result.value?.startsWith('data:image/png;base64,'))throw Error('Missing Kirby copy screenshot');
