@@ -5,6 +5,19 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Falcon and Ganondorf copies now run original ground/air punch attacks,
+copy loss and reacquisition in full rendered tournament-scene tests: 1,998 and
+1,963 frames respectively, each plus 124 intro frames. Contact tests verify
+Falcon Punch raises damage from 8 to 35 and Warlock Punch from 8 to 40, with
+12 and 13 frames of native hitlag respectively. The contact test observes the
+first hit because an idle opponent can fall offstage before a long recovery
+window ends. Original gameplay is unchanged. Focused GPU verification passes
+all 741 Falcon and 762 Ganondorf frames, including the punch effects at impact.
+Mario copy contact still passes, and all 205 unit tests pass. There is no new
+performance or retail-parity claim. Remaining copies, full scenes/menus/audio,
+costumes, networking, deployment and presentation/latency acceptance remain.
+[Punch-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-punch.json).
+
 Kirby's Luigi and Dr. Mario copies now complete the same capture, copied
 neutral-special, loss and reacquisition simulation sequence. Their rendered
 full-scene runs pass 1,987 and 1,991 frames respectively, plus 124 intro frames.

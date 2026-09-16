@@ -39,9 +39,9 @@ export function verifyKirbyMoves(module,object,report,{step,onStep=()=>{},only=n
 export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='swallow'}){
   const require=(ok,message)=>{if(!ok)throw Error('Kirby copy: '+message);};
   const read=()=>objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
-  const copyKind=read()[1][11],profile={0:{item:130,ground:399,air:400},17:{item:132,ground:431,air:432},21:{item:131,ground:512,air:513}}[copyKind];
-  require(read()[0][11]===4&&profile,'Kirby versus a supported projectile copy');require(['swallow','acquire','spit','contact'].includes(mode),'mode');
-  Object.assign(report,{completed:false,copyKind,projectileKind:profile.item,frames:0,states:[[],[]],trace:[],itemKinds:[],retailParityVerified:false});
+  const copyKind=read()[1][11],profile={2:{item:null,ground:433,air:434},25:{item:null,ground:528,air:529},0:{item:130,ground:399,air:400},17:{item:132,ground:431,air:432},21:{item:131,ground:512,air:513}}[copyKind];
+  require(read()[0][11]===4&&profile,'Kirby versus a supported copy');require(['swallow','acquire','spit','contact'].includes(mode),'mode');
+  Object.assign(report,{completed:false,copyKind,projectileKind:profile.item,attackStates:[profile.ground,profile.air],frames:0,states:[[],[]],trace:[],itemKinds:[],retailParityVerified:false});
   const buffer=module._malloc(512),stocks=read().map(s=>s[18]);let phase='approach';
   function tick(a=[0,0,0],b=[0,0,0]){
     [a,b].forEach((p,i)=>module._portStageProbePad(i,...p));step();report.frames++;
@@ -68,17 +68,25 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     phase='swallow';tick([0,0,-1]);neutral(140);
     require(report.hat[0]===copyKind&&report.hat[1]&&report.hat[2],'original copy hat acquired');require(read().every(s=>s[0]===14),'both fighters recover');
     report.firstHat=report.hat.slice();
-    if(mode==='contact'){phase='projectile contact approach';approach();report.contactBefore=read();require(report.contactBefore.every(s=>s[0]===14&&s[3]===0),'grounded contact approach');}
-    phase='copied fireball';tick([0x200,0,0]);neutral(240);
-    require(report.states[0].includes(profile.ground)&&report.itemKinds.includes(profile.item),'original copied fireball state and item');
-    require(read()[0][0]===14&&report.hat[0]===copyKind,'copy retained after attack');require(!module._portItemsList(buffer,128),'fireball retirement');
-    if(mode==='contact'){report.contactAfter=read();require(report.contactAfter[1][13]>report.contactBefore[1][13],'copied projectile damages opponent');require(report.contactAfter[0][13]===report.contactBefore[0][13],'attacker damage unchanged');report.completed=true;return;}
+    if(mode==='contact'){phase='copied attack contact approach';approach();report.contactBefore=read();require(report.contactBefore.every(s=>s[0]===14&&s[3]===0),'grounded contact approach');}
+    phase='copied neutral special';tick([0x200,0,0]);
+    if(mode==='contact'&&profile.item===null){
+      // Strong punches can KO an idle opponent before the ordinary recovery
+      // window ends. Observe original collision/hitlag at first damage instead.
+      for(let i=0;i<180&&read()[1][13]===report.contactBefore[1][13];i++)tick();
+      report.contactAfter=read();require(report.states[0].includes(profile.ground)&&report.hat[0]===copyKind,'copied punch state and retained hat');
+      require(report.contactAfter[1][13]>report.contactBefore[1][13]&&report.contactAfter[1][14]>0,'copied punch damage and native hitlag');require(report.contactAfter[0][13]===report.contactBefore[0][13],'attacker damage unchanged');report.completed=true;return;
+    }
+    neutral(240);
+    require(report.states[0].includes(profile.ground)&&(profile.item===null||report.itemKinds.includes(profile.item)),'original copied attack state and any required item');
+    require(read()[0][0]===14&&report.hat[0]===copyKind,'copy retained after attack');require(!module._portItemsList(buffer,128),'projectile retirement');
+    if(mode==='contact'){report.contactAfter=read();require(report.contactAfter[1][13]>report.contactBefore[1][13],'copied attack damages opponent');require(report.contactAfter[0][13]===report.contactBefore[0][13],'attacker damage unchanged');report.completed=true;return;}
     if(mode==='acquire'){report.completed=true;return;}
-    phase='air copied fireball';for(let i=0;i<10;i++)tick([0x400,0,0]);neutral(8);tick([0x200,0,0]);neutral(300);require(report.states[0].includes(profile.air)&&read()[0][0]===14,'air copy and recovery');
+    phase='air copied neutral special';for(let i=0;i<10;i++)tick([0x400,0,0]);neutral(8);tick([0x200,0,0]);neutral(300);require(report.states[0].includes(profile.air)&&read()[0][0]===14,'air copy and recovery');
     phase='taunt copy loss';tick([8,0,0]);neutral(300);require(report.hat[0]===4&&!report.hat[1]&&report.itemKinds.includes(52),'original copy loss and star');require(read()[0][0]===14&&!module._portItemsList(buffer,128),'taunt and star retirement');
     phase='reacquire approach';approach();phase='reacquire inhale';for(let i=0;i<150&&read()[0][0]!==359;i++)tick([0x200,0,0]);require(read()[0][0]===359,'second capture');neutral(2);
     phase='reacquire swallow';tick([0,0,-1]);neutral(140);require(report.hat[0]===copyKind&&report.hat[1],'hat recreated');report.secondHat=report.hat.slice();
-    phase='reacquired fireball';tick([0x200,0,0]);neutral(240);require(report.trace.some(t=>t.phase===phase&&t.items.some(i=>i[0]===profile.item)),'reacquired projectile');require(read()[0][0]===14&&report.hat[0]===copyKind&&!module._portItemsList(buffer,128),'reacquired copy retained and item retired');
+    phase='reacquired neutral special';tick([0x200,0,0]);neutral(240);require(report.trace.some(t=>t.phase===phase&&(profile.item===null?t.state[0][0]===profile.ground:t.items.some(i=>i[0]===profile.item))),'reacquired attack');require(read()[0][0]===14&&report.hat[0]===copyKind&&!module._portItemsList(buffer,128),'reacquired copy retained and item retired');
     report.completed=true;
   }finally{module._free(buffer);}
 }

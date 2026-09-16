@@ -52,7 +52,12 @@ taunt loss and reacquisition; they do not assign copy kind or action states.
 `--kirby-copy=contact` additionally walks both fighters into range and checks
 that the copied projectile changes the opponent’s damage without changing stocks.
 Use `--opponent=Lg` or `--opponent=Dr` for the other two imported copy packages.
-Other copied abilities remain pending.
+Falcon and Ganondorf copies import their original hats and two-model punch
+effect banks (38 and 47). Use `--opponent=Ca` or `--opponent=Gn` with the same
+lifecycle command. Their `--kirby-copy=contact` test checks damage and hitlag at
+first contact: an idle target can be knocked offstage before a long recovery
+window ends. The separate full lifecycle test covers grounded/air attacks,
+recovery, copy loss and reacquisition. Other copied abilities remain pending.
 
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy --stage-callbacks --render-steps --hardware

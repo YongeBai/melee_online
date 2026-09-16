@@ -1,0 +1,782 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "71f0c29",
+  "scope": "Kirby Captain Falcon and Ganondorf copy hats, native ground/air punch callbacks/effects, copy loss and reacquisition, contact damage/hitlag. Full competitive acceptance remains pending.",
+  "wasmSha256": "20b2261e2e853a937e80c085c5b727d89f3a88344fda63b2907814edd8aaf6d9",
+  "wasmBytes": 2958062,
+  "sourceHashes": {
+    "engines/browser-native/kirby-copy-assets.mjs": "feadb5667f54f096cf67d85abf1775775275be38620021ebb3cf8ed38e36ed1c",
+    "engines/browser-native/effect-assets.mjs": "54a907a4210b5039bf727d06324a853f458cb837d9eec9aef83a44769ce1d8c2",
+    "engines/browser-native/constructor.html": "f57f4a1de77edb9c99cd0b0a67c52b8e88cda250822e9d830824dae7184a06b4",
+    "engines/browser-native/verify-kirby.mjs": "542f99c7e73d226e75031bca7669a6936ca1696afcfd863361daf81aa2125022",
+    "scripts/native-port/probe-constructor.mjs": "92278852a0da2095ce617e96ec6f1153eb20a3f5e466baa4022d4bef99c7db27"
+  },
+  "assets": {
+    "Ca": {
+      "hatJoints": 1,
+      "hatMeshes": 12,
+      "typedRelocations": 132,
+      "omittedRelocations": 0,
+      "articles": 0,
+      "effectBank": 38,
+      "particleCommands": 4,
+      "textureGroups": 3,
+      "effectModels": 2
+    },
+    "Gn": {
+      "hatJoints": 1,
+      "hatMeshes": 8,
+      "typedRelocations": 83,
+      "omittedRelocations": 0,
+      "articles": 0,
+      "effectBank": 47,
+      "particleCommands": 4,
+      "textureGroups": 3,
+      "effectModels": 2
+    }
+  },
+  "fullScene": {
+    "falcon": {
+      "completed": true,
+      "renderedFrames": 1998,
+      "copyFrames": 1856,
+      "copyKind": 2,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          433,
+          24,
+          25,
+          434,
+          265
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied neutral special",
+        "air copied neutral special",
+        "taunt copy loss",
+        "reacquire approach",
+        "reacquire inhale",
+        "reacquire swallow",
+        "reacquired neutral special"
+      ],
+      "firstHat": [
+        2,
+        14974976,
+        14680680
+      ],
+      "secondHat": [
+        2,
+        15008192,
+        14680680
+      ],
+      "finalHat": [
+        2,
+        15008192,
+        14680680
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        15.279999732971191
+      ],
+      "gpuError": true,
+      "introFrames": 124,
+      "resolution": [
+        960,
+        720
+      ]
+    },
+    "ganon": {
+      "completed": true,
+      "renderedFrames": 1963,
+      "copyFrames": 1821,
+      "copyKind": 25,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          528,
+          24,
+          25,
+          529,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied neutral special",
+        "air copied neutral special",
+        "taunt copy loss",
+        "reacquire approach",
+        "reacquire inhale",
+        "reacquire swallow",
+        "reacquired neutral special"
+      ],
+      "firstHat": [
+        25,
+        15015072,
+        14755272
+      ],
+      "secondHat": [
+        25,
+        15014752,
+        14755272
+      ],
+      "finalHat": [
+        25,
+        15014752,
+        14755272
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        15.279999732971191
+      ],
+      "gpuError": true,
+      "introFrames": 124,
+      "resolution": [
+        960,
+        720
+      ]
+    }
+  },
+  "contact": {
+    "falcon": {
+      "completed": true,
+      "renderedFrames": 742,
+      "copyFrames": 600,
+      "copyKind": 2,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          433
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18,
+          89
+        ]
+      ],
+      "itemKinds": [],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "copied neutral special"
+      ],
+      "firstHat": [
+        2,
+        14974976,
+        14680680
+      ],
+      "finalHat": [
+        2,
+        14974976,
+        14680680
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        35
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          35
+        ],
+        "hitlag": [
+          12,
+          12
+        ]
+      },
+      "gpuError": true,
+      "introFrames": 124
+    },
+    "ganon": {
+      "completed": true,
+      "renderedFrames": 762,
+      "copyFrames": 620,
+      "copyKind": 25,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          528
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          89
+        ]
+      ],
+      "itemKinds": [],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "copied neutral special"
+      ],
+      "firstHat": [
+        25,
+        15015072,
+        14755272
+      ],
+      "finalHat": [
+        25,
+        15015072,
+        14755272
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        40
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          40
+        ],
+        "hitlag": [
+          13,
+          13
+        ]
+      },
+      "gpuError": true,
+      "introFrames": 124
+    }
+  },
+  "focusedGpu": {
+    "falcon": {
+      "completed": true,
+      "renderedFrames": 741,
+      "copyFrames": 599,
+      "copyKind": 2,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          433
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18,
+          89
+        ]
+      ],
+      "itemKinds": [],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "copied neutral special"
+      ],
+      "firstHat": [
+        2,
+        13489024,
+        13341096
+      ],
+      "finalHat": [
+        2,
+        13489024,
+        13341096
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        35
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          35
+        ],
+        "hitlag": [
+          12,
+          12
+        ]
+      },
+      "gpuError": true,
+      "allRenderedFramesVertexVerified": true,
+      "impactVertexChecks": {
+        "vertices": 21825,
+        "positionComponents": 65475,
+        "normalComponents": 65475,
+        "maxScaledPositionError": 0.0000010924721236868168,
+        "maxNormalError": 1.0760086199823604e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0004162099310226249,
+        "byOwner": {
+          "1558560": {
+            "vertices": 458,
+            "ndcMin": [
+              -207.09755396415784,
+              -739.5807859247336,
+              -0.017070637406845515
+            ],
+            "ndcMax": [
+              74.2171651887481,
+              308.4916515010636,
+              0.043206252604463646
+            ]
+          },
+          "1560448": {
+            "vertices": 9348,
+            "ndcMin": [
+              -1.661502917087792,
+              -1.064433193036683,
+              -0.0007029937251104119
+            ],
+            "ndcMax": [
+              0.9921828846719662,
+              1.0369435021930835,
+              -0.0004927714150688037
+            ]
+          },
+          "1564896": {
+            "vertices": 3888,
+            "ndcMin": [
+              -0.259739605236833,
+              -0.2306451261017515,
+              -0.0005995258136955541
+            ],
+            "ndcMax": [
+              0.007495065759486981,
+              0.015713095364492932,
+              -0.0005607188357814426
+            ]
+          },
+          "1655904": {
+            "vertices": 7272,
+            "ndcMin": [
+              0.11822342807171983,
+              -0.23391690437682633,
+              -0.0005911652037780911
+            ],
+            "ndcMax": [
+              0.3587091541566732,
+              0.17095561076661958,
+              -0.0005618938296535115
+            ]
+          },
+          "13496096": {
+            "vertices": 745,
+            "ndcMin": [
+              -0.7106851836392364,
+              -0.45467400741340636,
+              -0.0006119344859316755
+            ],
+            "ndcMax": [
+              0.14688750736538744,
+              0.09607356331426853,
+              -0.0005564464109573824
+            ]
+          },
+          "13563360": {
+            "vertices": 114,
+            "ndcMin": [
+              -0.20781941052027725,
+              -0.254414001822952,
+              -0.0006235789238176684
+            ],
+            "ndcMax": [
+              0.03851570977835652,
+              -0.028435235741266586,
+              -0.0005454476573238634
+            ]
+          }
+        }
+      }
+    },
+    "ganon": {
+      "completed": true,
+      "renderedFrames": 762,
+      "copyFrames": 620,
+      "copyKind": 25,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          528
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          89
+        ]
+      ],
+      "itemKinds": [],
+      "phases": [
+        "approach",
+        "inhale",
+        "swallow",
+        "copied attack contact approach",
+        "copied neutral special"
+      ],
+      "firstHat": [
+        25,
+        13527904,
+        13416520
+      ],
+      "finalHat": [
+        25,
+        13527904,
+        13416520
+      ],
+      "stocks": [
+        4,
+        4
+      ],
+      "damage": [
+        0,
+        40
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          40
+        ],
+        "hitlag": [
+          13,
+          13
+        ]
+      },
+      "gpuError": true,
+      "allRenderedFramesVertexVerified": true,
+      "impactVertexChecks": {
+        "vertices": 21552,
+        "positionComponents": 64656,
+        "normalComponents": 64656,
+        "maxScaledPositionError": 0.0000023798883311129624,
+        "maxNormalError": 1.1898913854224702e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.00041491098289246235,
+        "byOwner": {
+          "1558560": {
+            "vertices": 458,
+            "ndcMin": [
+              -224.6657636939394,
+              -3168.19361459349,
+              -0.005410926529192835
+            ],
+            "ndcMax": [
+              2551.842664566839,
+              473.0900044493976,
+              0.231215877406663
+            ]
+          },
+          "1560448": {
+            "vertices": 9348,
+            "ndcMin": [
+              -1.6398451872016997,
+              -1.0592089921353953,
+              -0.000700855841923253
+            ],
+            "ndcMax": [
+              1.006200277827349,
+              1.0368976762729993,
+              -0.0004918206588837713
+            ]
+          },
+          "1564896": {
+            "vertices": 4087,
+            "ndcMin": [
+              -0.2628798843546313,
+              -0.23298357404933306,
+              -0.0006009400901901148
+            ],
+            "ndcMax": [
+              -0.010699159506762953,
+              0.020666399490519235,
+              -0.0005596801528345175
+            ]
+          },
+          "1655904": {
+            "vertices": 7118,
+            "ndcMin": [
+              0.0330255429557657,
+              -0.25724528231043575,
+              -0.0006044795054048699
+            ],
+            "ndcMax": [
+              0.3243590031714096,
+              0.23917010052374618,
+              -0.0005612800327545408
+            ]
+          },
+          "13534944": {
+            "vertices": 262,
+            "ndcMin": [
+              -0.4978221169723249,
+              -0.330024994034914,
+              -0.0006063579603772586
+            ],
+            "ndcMax": [
+              0.06118290073909767,
+              0.04980422064915497,
+              -0.0005574774118339281
+            ]
+          },
+          "13592288": {
+            "vertices": 279,
+            "ndcMin": [
+              -0.735471625976992,
+              -0.2451988081320916,
+              -0.0006712298369016102
+            ],
+            "ndcMax": [
+              0.14610137942273685,
+              0.47729299165491473,
+              -0.0005237059417053755
+            ]
+          }
+        }
+      }
+    }
+  },
+  "marioRegression": {
+    "completed": true,
+    "copyFrames": 788,
+    "copyKind": 0,
+    "states": [
+      [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        399
+      ],
+      [
+        39,
+        244,
+        29,
+        42,
+        14,
+        15,
+        288,
+        289,
+        291,
+        292,
+        18,
+        81
+      ]
+    ],
+    "itemKinds": [
+      130
+    ],
+    "phases": [
+      "approach",
+      "inhale",
+      "swallow",
+      "copied attack contact approach",
+      "copied neutral special"
+    ],
+    "firstHat": [
+      0,
+      13601920,
+      13528936
+    ],
+    "finalHat": [
+      0,
+      13601920,
+      13528936
+    ],
+    "stocks": [
+      4,
+      4
+    ],
+    "damage": [
+      0,
+      14
+    ],
+    "contact": {
+      "beforeDamage": [
+        0,
+        8
+      ],
+      "afterDamage": [
+        0,
+        14
+      ],
+      "hitlag": [
+        0,
+        0
+      ]
+    }
+  },
+  "correctedTestWindow": {
+    "originalObservation": "Falcon contact checked damage after 240 recovery frames. Target took 27 damage, fell offstage and respawned with zero damage, making the late comparison fail.",
+    "correction": "For melee-copy contact tests only, observe original damage and positive hitlag at first contact. Full lifecycle recovery remains a separate test. No game code, input damage, position, action state or knockback assignment changed."
+  },
+  "validation": {
+    "unitTests": 205,
+    "visualInspection": [
+      "Falcon copy helmet",
+      "Ganondorf copy hair",
+      "Falcon Punch impact",
+      "Warlock Punch impact",
+      "native camera framing"
+    ],
+    "retailParityVerified": false,
+    "performanceMeasured": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "competitiveAcceptance": false
+  }
+}

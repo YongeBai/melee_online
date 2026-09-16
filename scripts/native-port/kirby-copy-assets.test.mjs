@@ -33,3 +33,17 @@ test('Mario copy rejects malformed roots, changed exporter references, additiona
 test('Luigi and Dr. Mario copies retain their separate Article extents and null animation topology',()=>{
   for(const code of ['Lg','Dr']){const input=fixture(()=>{},code),before=input.slice(),r=convertKirbyCopy(input,code);assert.deepEqual(input,before);assert.equal(r.articles.rows[0].stateCount,code==='Dr'?6:1);assert.equal(r.articles.rows[0].specialWords,code==='Dr'?5:4);assert.equal(r.unreferencedRelocations.length,code==='Dr'?4:6);if(code==='Dr')assert.equal(r.articles.rows[0].animations[0].joint,null);assert.throws(()=>convertKirbyCopy(input,'Mr'),/Invalid Kirby copy archive/);}
 });
+
+function punchFixture(code,change=()=>{}){
+  const body=new Uint8Array(144),d=new DataView(body.buffer),relocs=new Set([0,8]);
+  d.setUint32(0,64);d.setUint32(4,1);d.setUint32(8,32);
+  for(let i=0;i<3;i++)d.setFloat32(64+32+i*4,1);
+  change({d,relocs});
+  const name=new TextEncoder().encode('ftDataKirbyCopy'+({Ca:'Captain',Gn:'Ganon'}[code])+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return bytes;
+}
+test('Falcon and Ganondorf copies import hats without inventing projectile Articles or omitted pointers',()=>{
+  for(const code of ['Ca','Gn']){const input=punchFixture(code),before=input.slice(),r=convertKirbyCopy(input,code);assert.deepEqual(input,before);assert.equal(r.articles.rows.length,0);assert.equal(r.scene.model.tree.nodes.length,1);assert.equal(r.unreferencedRelocations.length,0);assert.deepEqual([...r.pointerSlots].sort((a,b)=>a-b),[0,8]);
+    for(const change of [a=>a.d.setUint32(12,1),a=>a.relocs.add(12),a=>a.relocs.add(16),a=>a.relocs.add(140)])assert.throws(()=>convertKirbyCopy(punchFixture(code,change),code));
+  }
+});

@@ -110,3 +110,7 @@ test('Kirby Luigi uses bank 37 while Dr. Mario shares the original Mario copy ba
     assert.deepEqual(input,before);assert.equal(r.bank,bank);assert.equal(r.first,bank*1000);assert.equal(r.effects.length,1);assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,bank+1)),code));
   }
 });
+
+test('Kirby Falcon and Ganondorf effects retain their separate two-model punch banks',()=>{
+  for(const [code,symbol,bank]of [['Ca','Captain',38],['Gn','Ganon',47]]){const spec={symbol:'effKirby'+symbol+'DataTable',bank,count:4,groups:3,models:2},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,code);assert.deepEqual(input,before);assert.equal(r.bank,bank);assert.equal(r.effects.length,2);assert.equal(r.commands.length,4);assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,bank+1)),code));}
+});
