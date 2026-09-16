@@ -58,7 +58,7 @@ const missing=[...references].filter(([symbol])=>!definitions.has(symbol))
 const failed=results.filter(r=>r.code!==0).map(({file,diagnostic})=>({file,diagnostic})).sort((a,b)=>a.file.localeCompare(b.file));
 const report={sourceCommit:pin.commit,total:files.length,compiled:passed.length,failed:failed.length,
   portableSource:portable.manifest,
-  overrides:['Runtime/platform.h','placeholder.h','printf.h'].map(file=>({file,
+  overrides:['Runtime/platform.h','placeholder.h','printf.h','stdbool.h'].map(file=>({file,
     sha256:createHash('sha256').update(fs.readFileSync(path.join(include,file))).digest('hex')})),
   callbackDiagnosticSuppressed:false,linkedGame:false,missingSymbols:missing.length,missing,failures:failed};
 fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n');

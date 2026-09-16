@@ -5,6 +5,50 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Bowser is now integrated through the original constructor, controller inputs,
+Flame Breath Article, effect bank and full scene rendering. This exposed a shared
+porting bug: Melee's pinned MSL header defines `bool` as a signed 32-bit integer,
+but the browser build had selected C99 `_Bool`. Bowser's minimum breath timer is
+declared `bool` and must count to 40; it instead saturated at 1 and never allowed
+the move to end. The port now selects the original header, asserts its semantics
+at compile time, and preserves integer values through callback adapters. Original
+gameplay function bodies were not changed. The same 120-held/100-released input
+sequence now reaches the ending animation and Wait instead of remaining in the
+breath loop.
+
+The full-scene move check renders and GPU-verifies 1,453 frames, including ground
+and air Flame Breath, Whirling Fortress, Bowser Bomb and Koopa Klaw misses. Fire
+particles, native camera and HUD were visually checked. Separate rendered contact
+tests deal 18 damage with sustained fire and 15 with a Klaw throw; the no-button
+control deals zero. The shield test records 15 initial blocked-hit frames with no
+body damage, then four body damage as the shield shrinks. Its original assertion
+of permanent coverage was incorrect; no shielding mechanics were changed to make
+the test pass. These remain selected integration checks, not retail parity proof.
+
+After the shared type correction, all 14 previously integrated characters pass
+rendered input checks; seven longer special-move suites also pass. Shared startup
+checks cover all 27 components, and all 5,508 animation clips and 173 unit tests
+pass. Yoshi's Story passes 4,500 stage frames with Randall preserved. Fountain
+passes 9,000 frames with both moving platforms and matching collision geometry
+using the existing cosmetic-reduction profile. Its full decorative point-geometry
+and reflection path remains unsupported.
+
+Two Bowser fighters submit all 3,600 draws in about 60 seconds at 960×720 in both
+timing runs, with no catch-up callbacks. Initial mean simulation/draw-submission
+costs are 0.583/6.456 ms; two long submissions (27.0/25.6 ms) coincide with shader
+compilation. Preparing 51 programs before play, with the driver cache disabled,
+produces no live compilations and matching gameplay traces. That repeat averages
+0.544/6.247 ms, with draw p95 8.5 ms and maximum 14.4 ms. This is close-combat
+CPU/draw-submission evidence, not a sustained-fire stress test, distinct displayed
+FPS measurement or input-to-photon measurement.
+
+Core hash: `a55d2d4e…`. Remaining roster/costumes, complete scenes/menus/audio,
+retail parity, networking and deployment are unfinished. The overall 720p60
+competitive acceptance criterion is **not achieved**.
+[Bowser and integer-bool evidence](benchmarks/browser-2026-09-16-native-port-koopa-intbool.json).
+
+Previous Samus checkpoint:
+
 Samus now passes default-costume constructor, input, selected special-move and
 contact integration checks. The port imports all four original Articles, her
 effect bank, separately scheduled grapple links and the throw accessory. HSD

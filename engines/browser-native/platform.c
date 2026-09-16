@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+_Static_assert(sizeof(bool) == 4 && _Generic((bool)0, int:1, default:0), "Retail MSL bool must remain a signed 32-bit int");
+_Static_assert((bool)7 == 7 && (bool)-7 == -7, "Retail bool preserves integer values");
 _Static_assert(sizeof(void*) == 4, "WASM32 required");
 _Static_assert(sizeof(MapCollData) == 0x30, "Map collision layout");
 _Static_assert(sizeof(MapLine) == 0x10, "Map line layout");

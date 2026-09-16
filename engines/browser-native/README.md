@@ -32,6 +32,28 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Bowser’s original Flame Breath Article has no model; its effect-bank particles
+provide the visible fire. Scripted inputs can now run through tournament startup
+and the full original camera/particle passes using `--input --stage-callbacks`.
+This mode verifies Ready/Go and the chosen inputs; the separate stage-cycle and
+match-end lifecycle suites retain their existing tests.
+The full-scene per-vertex readback diagnostic has a 600-second deadline; ordinary
+live timing retains its 90-second deadline. Vertex readback is not a timing run.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kp --input --koopa-moves --stage-callbacks --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kp --input --koopa-contact=claw --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kp --input --koopa-contact=flame
+node scripts/native-port/probe-constructor.mjs --character=Kp --input --koopa-contact=flame-shield
+node scripts/native-port/probe-constructor.mjs --character=Kp --input --koopa-contact=control
+```
+
+The shield probe checks initial GuardSetOff/hitlag with no body damage. Sustained
+fire can later reach exposed hurtboxes as the shield shrinks; the test records
+that damage rather than assuming permanent coverage. Full-scene fire and Klaw
+screenshots, 1,453 GPU-verified move frames and the shared integer-`bool` regression
+are recorded in the [Bowser evidence](../../docs/benchmarks/browser-2026-09-16-native-port-koopa-intbool.json).
+
 Samus now imports the original bomb, charge-shot, missile and grapple Articles,
 effect bank, linked grapple objects and throw accessory. HSD instance joints retain
 reference ownership and original draw transforms without occupying duplicate
@@ -471,8 +493,12 @@ The browser GPU's 81 sampled images also match the previous diagnostic path.
 This verifies native object integration, not Dolphin gameplay parity.
 
 `portable-source.mjs` generates a pinned source mirror under ignored output.
-Explicit typed wrappers adapt boolean stage callbacks and predicate return values;
-no callback casts or suppressed diagnostics are used. It also makes two original
+The selected `stdbool.h` is the pinned MSL header: `bool` is a signed 32-bit
+integer, preserving both memory layout and noncanonical values. C99 `_Bool` is
+incorrect here: Bowser’s minimum Flame Breath counter is declared `bool` and must
+reach 40 instead of saturating at 1. Compile-time checks enforce that contract.
+Existing typed callback wrappers pass integer values through unchanged; no
+callback casts or suppressed diagnostics are used. It also makes two original
 PowerPC register dependencies explicit: `ftLib_800876B4` returns the animation
 predicate, and the multi-man menu passes `mn_802295AC()` to `gm_801677E8`.
 The supplied USA 1.02 executable confirmed both register flows. Menu declarations

@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {adaptStageCallbacks} from './portable-source.mjs';
 const descriptor=callback=>`StageData stage = { Kind, callbacks, "GrTest", init, ${callback}, load, start, predicate, touch, shadow, 1, joints, 3 };`;
-test('adapts only the bool demo slot and preserves stage callbacks and function bodies',()=>{
+test('preserves retail integer-bool values through the demo adapter and preserves stage callbacks and function bodies',()=>{
   const body='void demo(bool enabled) { state = enabled; }',source=body+'\n'+descriptor('demo');
   const result=adaptStageCallbacks(source);
   assert.ok(result.text.includes(body));
   assert.ok(result.text.includes(descriptor('port_demo_demo')));
-  assert.match(result.text,/static void port_demo_demo\(int value\) \{ demo\(value != 0\); \}/);
+  assert.match(result.text,/static void port_demo_demo\(int value\) \{ demo\(value\); \}/);
   assert.equal(result.adapters.length,1);
   assert.equal(adaptStageCallbacks(result.text).text,result.text);
 });

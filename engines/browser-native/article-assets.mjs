@@ -21,6 +21,7 @@ export const fighterArticleProfiles=Object.freeze({
   Dr:{slots:4,articles:{1:[6,5],3:[2,1]}},
   Pk:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
   Pc:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
+  Kp:{slots:1,articles:{0:[1,6]}},
   Ss:{slots:5,articles:{0:[2,7],1:[9,8],2:[4,16],3:[0,25]}},
 });
 export function initializeFighterArticleArchive(input,code){

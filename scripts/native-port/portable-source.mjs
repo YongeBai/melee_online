@@ -13,9 +13,9 @@ export function adaptStageCallbacks(text,externalBooleanCallbacks=new Set()) {
     const name=fields[4].trim();if(!/^\w+$/.test(name))throw Error('Stage callback expression changed');
     if(!externalBooleanCallbacks.has(name)&&!new RegExp('\\bvoid\\s+'+name+'\\s*\\(\\s*bool\\s+\\w+\\s*\\)\\s*\\{').test(text))return whole;
     const wrapper='port_demo_'+name;
-    adapters.push({function:name,adapter:wrapper,from:'void(bool)',to:'void(int)',conversion:'argument != 0'});
+    adapters.push({function:name,adapter:wrapper,from:'void(bool)',to:'void(int)',conversion:'identity (retail int bool)'});
     fields[4]=fields[4].replace(name,wrapper);
-    return `static void ${wrapper}(int value) { ${name}(value != 0); }\n\n`+start+fields.join(',')+end;
+    return `static void ${wrapper}(int value) { ${name}(value); }\n\n`+start+fields.join(',')+end;
   });
   return {text,adapters};
 }
@@ -397,19 +397,23 @@ unsigned portStageAnimationProbe(float rate,unsigned flags)
     }
     if(file==='src/melee/gr/gricemt.c') {
       replace('static int fn_801FA4CC(int num);','static int fn_801FA4CC(int num);\n'+
-        'static bool port_route_fn_801FA4CC(int value) { return fn_801FA4CC(value) != 0; }');
+        'static bool port_route_fn_801FA4CC(int value) { return fn_801FA4CC(value); }');
       replace('gm_801674C4(14, 2, 2, 0, fn_801FA4CC);','gm_801674C4(14, 2, 2, 0, port_route_fn_801FA4CC);');
-      adapters.push({function:'fn_801FA4CC',adapter:'port_route_fn_801FA4CC',from:'int(int)',to:'bool(int)',conversion:'result != 0'});
+      adapters.push({function:'fn_801FA4CC',adapter:'port_route_fn_801FA4CC',from:'int(int)',to:'bool(int)',conversion:'identity (retail int bool)'});
     }
     if(file==='src/melee/it/kinds/itmewtwodisable.c') {
       replace('ItemStateTable it_803F7750[1] =',
-        'static bool port_disable_collision(Item_GObj* object) { return itMewtwodisable_UnkMotion0_Coll(object) != 0; }\n\nItemStateTable it_803F7750[1] =');
+        'static bool port_disable_collision(Item_GObj* object) { return itMewtwodisable_UnkMotion0_Coll(object); }\n\nItemStateTable it_803F7750[1] =');
       replace('itMewtwodisable_UnkMotion0_Coll };','port_disable_collision };');
-      adapters.push({function:'itMewtwodisable_UnkMotion0_Coll',adapter:'port_disable_collision',from:'int(Item_GObj*)',to:'bool(Item_GObj*)',conversion:'result != 0'});
+      adapters.push({function:'itMewtwodisable_UnkMotion0_Coll',adapter:'port_disable_collision',from:'int(Item_GObj*)',to:'bool(Item_GObj*)',conversion:'identity (retail int bool)'});
     }
     const target=path.join(destination,file);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,text);
     if(text!==original)patches.push({file,originalSha256:digest(original),portableSha256:digest(text),adapters});
   }
+  // Melee's MSL bool is a signed int, not C99 _Bool. It appears in serialized
+  // layouts and is also used as a counter (e.g. Bowser's minimum breath timer).
+  // Select only this pinned header; never put all MSL headers ahead of libc.
+  fs.writeFileSync(path.join(output,'include/stdbool.h'),'#include <MSL/stdbool.h>\n');
   // Expose this one MSL declaration without putting all MSL headers ahead of
   // the host standard library (which would select incompatible FILE layouts).
   fs.writeFileSync(path.join(output,'include/printf.h'),'#include <MSL/printf.h>\n');

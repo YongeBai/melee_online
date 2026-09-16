@@ -16,6 +16,7 @@ import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
+import {verifyKoopaMoves,verifyKoopaContact} from './verify-koopa.mjs';
 import {verifySamusMoves,verifySamusContact} from './verify-samus.mjs';
 import {verifyPikachuMoves} from './verify-pikachu.mjs';
 import {verifyPurinMoves,verifyPurinContact} from './verify-purin.mjs';
@@ -70,7 +71,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss'].includes(code)||stageKey==='story') {
+  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp'].includes(code)||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -116,7 +117,7 @@ try {
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
-  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact');
+  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact')||params.has('koopacontact');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const rawStageBytes=await asset(stageSpec.file),stageBytes=initializeStageArchive(rawStageBytes,stageKey),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
@@ -246,7 +247,7 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss'].includes(code)){
+      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp'].includes(code)){
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
         for(const row of articles.attachments){
@@ -277,7 +278,7 @@ try {
         }
       }});report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
     }
-    if(stageCallbacks&&!live&&!params.has('workloadsteps')){
+    if(stageCallbacks&&!live&&!params.has('input')&&!params.has('workloadsteps')){
       report.stage.transitions=[];report.stage.peakStageParticles=0;let previous='';
       const wind=stageKey==='dreamland'?{directions:[],activeFrames:0,displacementChecks:0,windTransitionFrames:0,maxError:0,strength:module._portDreamlandWindRead(4,0)}:null;
       if(wind)report.stage.wind=wind;
@@ -361,7 +362,7 @@ try {
       if(stadium){stadium.transformCallbacks=module._portStadiumRead(3);if(stadium.transformCallbacks<stageFrames)throw Error('Frozen Stadium scheduler was not exercised');stadium.enabledJointMask=module._portStadiumRead(4);}
       report.stage.callbackFrames=stageFrames;report.stage.callbacksVerified=true;
     }
-    if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat')&&!params.has('purincontact')&&!params.has('samuscontact'))await verifyCombat(module,[object,opponent],report.combat,{
+    if(combat&&!live&&!stageOnly&&!params.has('input')&&!params.has('workloadsteps')&&!params.has('projectilecombat')&&!params.has('purincontact')&&!params.has('samuscontact')&&!params.has('koopacontact'))await verifyCombat(module,[object,opponent],report.combat,{
       step,cameraValidation,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
       onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
@@ -405,6 +406,15 @@ try {
       if(params.has('purinmoves')){
         if(code!=='Pr'||opponent)throw Error('Purin move probe requires one Purin fighter');
         report.purinMoves={};verifyPurinMoves(module,object,report.purinMoves,{step,onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});
+      }
+      if(params.has('koopamoves')||params.has('koopacontact')){
+        if(code!=='Kp'||params.has('koopacontact')&&!opponent||params.has('koopamoves')&&opponent&&!stageCallbacks)throw Error('Koopa probe fighter count');
+        const onStep=renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          if(!report.preview.flame&&(report.koopaMoves?.phases.at(-1)?.frames>=60||report.koopaContact?.frames>=210)&&drawn.materialDraws.particleDraws>0&&module._portEffectsRead(9,12)>0&&[342,345].includes(state()[0])){report.preview.flame=drawn;const img=document.createElement('img');img.id='native-preview-flame';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+          if(!report.preview.claw&&state()[0]===351){report.preview.claw=drawn;const img=document.createElement('img');img.id='native-preview-claw';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined;
+        if(params.has('koopamoves')){report.koopaMoves={};verifyKoopaMoves(module,object,report.koopaMoves,{step,onStep});}
+        else{report.koopaContact={};verifyKoopaContact(module,[object,opponent],report.koopaContact,{step,onStep,mode:params.get('koopacontact')});}
       }
       if(params.has('samuscontact')){
         if(code!=='Ss'||!opponent)throw Error('Samus contact requires two Samus fighters');
@@ -487,7 +497,7 @@ try {
     }
     if(params.has('workloadsteps')){const count=Number(params.get('workloadsteps'));if(!tournament||live||!Number.isInteger(count)||count<180||count>36000)throw Error('Invalid unpaced workload');report.simulationWorkload={};verifyCombatWorkload(module,[object,opponent],report.simulationWorkload,count);}
     else if(tournament&&!live&&params.has('timeout')){report.timeout={};verifyTimeout(module,report.timeout,{onStep:renderSteps?()=>{recordHud(preview.draw());report.timeoutRenderedSteps=(report.timeoutRenderedSteps??0)+1;}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
-    else if(tournament&&!live&&!stageOnly){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
+    else if(tournament&&!live&&!stageOnly&&!params.has('input')){report.lifecycle={};verifyMatch(module,[object,opponent],report.lifecycle,{onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.lifecycleRenderedSteps=(report.lifecycleRenderedSteps??0)+1;if(drawn.accessories){report.respawnPlatformDrawFrames=(report.respawnPlatformDrawFrames??0)+1;if(report.respawnPlatformDrawFrames===30){const img=document.createElement('img');img.id='native-preview-respawn';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.preview.respawn=drawn;}}}:undefined,progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report))});}
     if(damageHud)report.hud.finalPlayers=[0,1].map(slot=>Array.from({length:4},(_,field)=>module._portHudPlayerRead(slot,field)));
     if(preview&&!live){report.finalGpuErrorCheck=preview.validateGpu();saveShaders();preview.dispose();}
   }

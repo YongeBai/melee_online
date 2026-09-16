@@ -23,7 +23,7 @@ function fixture(code='Fx',mutate=()=>{}) {
   // Deliberately untyped extra data must not become a public Article.
   if(code==='Fx'){ptr(144,3000);body[3000]=0xe3;}
   mutate({body,d,relocs,ptr,states,scripts});
-  const text=new TextEncoder().encode('ftData'+({Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
+  const text=new TextEncoder().encode('ftData'+({Kp:'Koopa',Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(text,pub+8);return bytes;
 }
 test('Fox/Falco Articles preserve script branches, special floats and model graphs without exporting extra fighter data',()=>{
@@ -81,4 +81,13 @@ test('Pikachu/Pichu import typed Thunder/Jolt states and retain empty shape topo
     assert.equal(new DataView(r.image.buffer,32).getUint32(2200,true),2212);
     assert.throws(()=>convertFighterArticles(fixture(code,({ptr})=>{ptr(1108,2200);ptr(2200,2200);}), 'Pl'+code+'.dat'),/Cyclic/);
   }
+});
+
+test('Bowser flame imports its no-model gameplay item, six attributes and original hitbox script',()=>{
+  const input=fixture('Kp',({d,relocs})=>{d.setUint32(392,0);relocs.delete(392);d.setUint32(396,0);}),before=input.slice(),r=convertFighterArticles(input,'PlKp.dat');
+  assert.deepEqual(input,before);assert.equal(r.rows.length,1);assert.equal(r.rows[0].joint,null);assert.equal(r.rows[0].scene,null);
+  assert.equal(r.rows[0].stateCount,1);assert.equal(r.rows[0].specialWords,6);
+  assert.equal(r.rows[0].script.commands.get(1820).opcode,11);
+  assert.equal(new DataView(r.image.buffer,32).getFloat32(512,true),35);
+  assert.throws(()=>convertFighterArticles(fixture('Kp',a=>a.d.setFloat32(532,NaN)),'PlKp.dat'),/Nonfinite/);
 });

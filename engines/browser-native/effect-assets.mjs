@@ -12,6 +12,7 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Kp:{name:'effKoopaDataTable',bank:12,first:12000,count:9,groups:1,models:3},
     Ss:{name:'effSamusDataTable',bank:2,first:2000,count:22,groups:8,models:3},
     Pk:{name:'effPikachuDataTable',bank:7,first:7000,count:10,groups:3,models:5},
     Pc:{name:'effPikachuDataTable',bank:7,first:7000,count:10,groups:3,models:5},

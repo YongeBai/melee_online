@@ -1,0 +1,1104 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "2ff7407",
+  "scope": "Restore retail integer bool semantics globally; integrate Bowser default costume, Article and effects with selected full-scene move/contact checks. Two-fighter Battlefield CPU/draw-submission timing, not complete competitive acceptance.",
+  "wasmSha256": "a55d2d4e9a82de4497f36559ed134acc56ab2c00d06c2718b06480420c711b1e",
+  "portableRecipeSha256": "b32ca3ff4e6a82e6900e056e08f9acf2aba7b39c1b9df4d8af3d3f28fc26758c",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "2aebbcea4d8f899bb00c8a2181feb3c098c6b99b96a141623c86bbde3fce7126",
+    "engines/browser-native/effect-assets.mjs": "3d68f10076bc5d1f3a435f70cd8873ebd2529d3cd910571bf56fca4ff69d268d",
+    "engines/browser-native/platform.c": "7b6bd2ba04e61fe20e03261e96c4b9989ca1b6426099dac196b6899689dbd5b2",
+    "engines/browser-native/constructor.html": "b9c65d50c55864c5c3d093a3ea29203e5dbbb34d75c8151e11e1310d433794db",
+    "engines/browser-native/verify-koopa.mjs": "e8fb015a877f6fa29b66a749aedef7f8f228dc349bc99e99a4a98aaf09a4a980",
+    "scripts/native-port/portable-source.mjs": "b32ca3ff4e6a82e6900e056e08f9acf2aba7b39c1b9df4d8af3d3f28fc26758c",
+    "scripts/native-port/probe-constructor.mjs": "549cbd18e5ab8e4e8978651a0d93ee0baef49ba4794a2e9a3ef90d213e967e52"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "resolution": [
+    960,
+    720
+  ],
+  "boolFix": {
+    "header": "pinned src/MSL/stdbool.h: typedef int bool",
+    "field": "ftKoopa_MotionVars.specialn.xC",
+    "consumer": "ftKp_SpecialN_IASA and ftKp_SpecialAirN_IASA",
+    "requiredCounterLimit": 40,
+    "oldC99BoolCounterSaturatesAt": 1,
+    "before": {
+      "heldFrames": 120,
+      "releasedFrames": 100,
+      "states": [
+        341,
+        342
+      ],
+      "finalState": 342
+    },
+    "after": {
+      "heldFrames": 120,
+      "releasedFrames": 100,
+      "states": [
+        341,
+        342,
+        343,
+        14
+      ],
+      "finalState": 14
+    },
+    "callbackAdapterConversion": "identity; preserve integer argument and result values",
+    "compileTimeAssertions": [
+      "bool is signed 32-bit int",
+      "bool conversion preserves positive and negative noncanonical integer values"
+    ],
+    "originalGameplayFunctionBodiesUnchanged": true
+  },
+  "validation": {
+    "unitTests": 173,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "compileAudit": {
+      "total": 1130,
+      "compiled": 1048,
+      "failed": 82,
+      "linkedGameObjects": 972,
+      "allTranslationUnitsCompile": false
+    },
+    "sharedFighterInitialization": {
+      "passed": true,
+      "modelComponents": 27,
+      "perFighterComponents": 27,
+      "perFighterInstances": 135
+    },
+    "animationRegression": {
+      "passed": true,
+      "stages": 6,
+      "fighterComponents": 27,
+      "clips": 5508
+    },
+    "moves": {
+      "artifact": "koopa-moves-Kp-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "completed": true,
+      "moveFrames": 1311,
+      "renderedFrames": 1453,
+      "allMoveFramesGpuVertexVerified": true,
+      "projectionChecks": {
+        "passed": true,
+        "cases": 4,
+        "components": 12
+      },
+      "flameParticleDraws": 106,
+      "flameParticleVertices": 424,
+      "phases": [
+        {
+          "name": "ground Flame Breath",
+          "frames": 220,
+          "states": [
+            341,
+            342,
+            343,
+            14
+          ],
+          "peakItems": 10,
+          "itemFrames": 124
+        },
+        {
+          "name": "air Flame Breath",
+          "frames": 212,
+          "states": [
+            24,
+            25,
+            344,
+            345,
+            342,
+            343,
+            14
+          ],
+          "peakItems": 10,
+          "itemFrames": 67
+        },
+        {
+          "name": "ground Whirling Fortress",
+          "frames": 161,
+          "states": [
+            359,
+            14
+          ],
+          "peakItems": 0,
+          "itemFrames": 0
+        },
+        {
+          "name": "air Whirling Fortress",
+          "frames": 223,
+          "states": [
+            24,
+            25,
+            360,
+            35,
+            43,
+            14
+          ],
+          "peakItems": 0,
+          "itemFrames": 0
+        },
+        {
+          "name": "Bowser Bomb",
+          "frames": 201,
+          "states": [
+            361,
+            362,
+            363,
+            14
+          ],
+          "peakItems": 0,
+          "itemFrames": 0
+        },
+        {
+          "name": "ground Koopa Klaw miss",
+          "frames": 101,
+          "states": [
+            347,
+            14
+          ],
+          "peakItems": 0,
+          "itemFrames": 0
+        },
+        {
+          "name": "air Koopa Klaw miss",
+          "frames": 193,
+          "states": [
+            24,
+            25,
+            353,
+            347,
+            29,
+            42,
+            14
+          ],
+          "peakItems": 0,
+          "itemFrames": 0
+        }
+      ],
+      "gpuErrorCheck": true
+    },
+    "contacts": {
+      "flame": {
+        "artifact": "koopa-flame-Kp-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "renderedFrames": 542,
+        "completed": true,
+        "mode": "flame",
+        "frames": 400,
+        "attackerStates": [
+          341,
+          342,
+          343,
+          14
+        ],
+        "defenderStates": [
+          14,
+          78,
+          84,
+          29,
+          42
+        ],
+        "peakDamage": 18,
+        "peakHitlag": 3,
+        "peakKnockback": 23.322582244873047,
+        "minimumShield": 60,
+        "retailParityVerified": false,
+        "traceSha256": "8ef9998cf2aacf90869ff740cae5d01ef9a5e27816dcaf010544785e3056bf59",
+        "gpuErrorCheck": true
+      },
+      "flame-shield": {
+        "artifact": "koopa-flame-shield-Kp-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "renderedFrames": 547,
+        "completed": true,
+        "mode": "flame-shield",
+        "frames": 405,
+        "attackerStates": [
+          341,
+          342,
+          343,
+          14
+        ],
+        "defenderStates": [
+          182,
+          179,
+          181,
+          81,
+          178,
+          180,
+          14
+        ],
+        "peakDamage": 4,
+        "peakHitlag": 3,
+        "peakKnockback": 21.516128540039062,
+        "minimumShield": 30.8100643157959,
+        "blockedHitFrames": 15,
+        "firstBlockedHitFrame": 22,
+        "firstFighterDamageFrame": 61,
+        "retailParityVerified": false,
+        "traceSha256": "9d8bd54d47261057789cc69066da26b3729bd5e8bb9c8980b967d6ccf18879de",
+        "gpuErrorCheck": true
+      },
+      "claw": {
+        "artifact": "koopa-claw-Kp-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "renderedFrames": 542,
+        "completed": true,
+        "mode": "claw",
+        "frames": 400,
+        "attackerStates": [
+          347,
+          348,
+          351,
+          14
+        ],
+        "defenderStates": [
+          14,
+          279,
+          281,
+          90,
+          38,
+          191,
+          192
+        ],
+        "peakDamage": 15,
+        "peakHitlag": 6,
+        "peakKnockback": 114.85677337646484,
+        "minimumShield": 60,
+        "blockedHitFrames": 0,
+        "firstBlockedHitFrame": null,
+        "firstFighterDamageFrame": 33,
+        "retailParityVerified": false,
+        "traceSha256": "6b3fefd1aa672c1f49a1bed514586fecc352c14f03f6dc18fcb17e8278377d8e",
+        "gpuErrorCheck": true
+      },
+      "control": {
+        "artifact": "koopa-control-Kp-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "renderedFrames": 542,
+        "completed": true,
+        "mode": "control",
+        "frames": 400,
+        "attackerStates": [
+          14
+        ],
+        "defenderStates": [
+          14
+        ],
+        "peakDamage": 0,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "minimumShield": 60,
+        "blockedHitFrames": 0,
+        "firstBlockedHitFrame": null,
+        "firstFighterDamageFrame": null,
+        "retailParityVerified": false,
+        "traceSha256": "80262d93fa213a39590f3d3936676e0bc00702e111c07e895d03b6ef62e53cf7",
+        "gpuErrorCheck": true
+      }
+    },
+    "rosterRegression": [
+      {
+        "name": "input-Ca",
+        "args": [
+          "--character=Ca",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Dk",
+        "args": [
+          "--character=Dk",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Ms",
+        "args": [
+          "--character=Ms",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Gn",
+        "args": [
+          "--character=Gn",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Fe",
+        "args": [
+          "--character=Fe",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Fx",
+        "args": [
+          "--character=Fx",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Fc",
+        "args": [
+          "--character=Fc",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Pr",
+        "args": [
+          "--character=Pr",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Mr",
+        "args": [
+          "--character=Mr",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Lg",
+        "args": [
+          "--character=Lg",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Dr",
+        "args": [
+          "--character=Dr",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Pk",
+        "args": [
+          "--character=Pk",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Pc",
+        "args": [
+          "--character=Pc",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "input-Ss",
+        "args": [
+          "--character=Ss",
+          "--input",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 142
+      },
+      {
+        "name": "moves-Pr",
+        "args": [
+          "--character=Pr",
+          "--input",
+          "--purin-moves",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 1856,
+        "moveFrames": 1714
+      },
+      {
+        "name": "moves-Mr",
+        "args": [
+          "--character=Mr",
+          "--input",
+          "--mario-moves",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 918,
+        "moveFrames": 776
+      },
+      {
+        "name": "moves-Lg",
+        "args": [
+          "--character=Lg",
+          "--input",
+          "--mario-moves",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 935,
+        "moveFrames": 793
+      },
+      {
+        "name": "moves-Dr",
+        "args": [
+          "--character=Dr",
+          "--input",
+          "--mario-moves",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 918,
+        "moveFrames": 776
+      },
+      {
+        "name": "moves-Pk",
+        "args": [
+          "--character=Pk",
+          "--input",
+          "--pikachu-moves",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 1760,
+        "moveFrames": 1618
+      },
+      {
+        "name": "moves-Pc",
+        "args": [
+          "--character=Pc",
+          "--input",
+          "--pikachu-moves",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 1760,
+        "moveFrames": 1618
+      },
+      {
+        "name": "moves-Ss",
+        "args": [
+          "--character=Ss",
+          "--input",
+          "--samus-moves",
+          "--render-steps",
+          "--hardware"
+        ],
+        "passed": true,
+        "renderedFrames": 1857,
+        "moveFrames": 1715
+      }
+    ],
+    "storyRegression": {
+      "name": "Yoshi's Story",
+      "kind": 8,
+      "collisionLoaded": true,
+      "vertexChecks": 68,
+      "modelGroups": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "splineCount": 1,
+      "shadowCount": 0,
+      "shadowFlagCases": 256,
+      "animationCallbackCases": 16,
+      "completeStageStartup": false,
+      "originalCallbacks": true,
+      "transitions": [
+        {
+          "frame": 1,
+          "groups": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "peakStageParticles": 0,
+      "randall": {
+        "hiddenFrames": 0,
+        "minX": -97.47500610351562,
+        "maxX": 97.4749984741211,
+        "minY": -38.5,
+        "maxY": -18.899991989135742,
+        "leftFrames": 2102,
+        "rightFrames": 2095,
+        "upFrames": 353,
+        "downFrames": 363,
+        "collisionChecks": 4500,
+        "maxCollisionError": 0.000003919005393981934
+      },
+      "shyGuys": {
+        "peak": 3,
+        "spawns": 7,
+        "retirements": 4,
+        "minX": -196.25,
+        "maxX": 304
+      },
+      "renderedFrames": 38,
+      "randallVisible": {
+        "frame": 543,
+        "x": 71.68584442138672,
+        "y": -18.899995803833008,
+        "actor": {
+          "name": "Yoshi's Story group 2",
+          "passes": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "draws": 1
+        }
+      },
+      "callbackFrames": 4500,
+      "callbacksVerified": true
+    },
+    "fountainRegression": {
+      "artifact": "fountain-bg-off-fountain-hardware-stage-callbacks-stage-only-intro-damage-tournament-constructor-render-probe.json",
+      "cosmeticsOff": true,
+      "sceneryOff": true,
+      "stage": {
+        "name": "Fountain of Dreams",
+        "kind": 2,
+        "collisionLoaded": true,
+        "vertexChecks": 76,
+        "modelGroups": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "splineCount": 1,
+        "shadowCount": 6,
+        "shadowFlagCases": 256,
+        "animationCallbackCases": 16,
+        "completeStageStartup": false,
+        "originalCallbacks": true,
+        "transitions": [
+          {
+            "frame": 1,
+            "groups": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        ],
+        "peakStageParticles": 103,
+        "platforms": [
+          {
+            "initial": 20,
+            "min": -1,
+            "max": 34.26292419433594,
+            "upFrames": 320,
+            "downFrames": 335,
+            "phases": [
+              1,
+              2,
+              0,
+              3,
+              4
+            ],
+            "collisionChecks": 9000,
+            "maxCollisionError": 9.5367431640625e-7
+          },
+          {
+            "initial": 28,
+            "min": -1,
+            "max": 28,
+            "upFrames": 348,
+            "downFrames": 551,
+            "phases": [
+              1,
+              2,
+              0,
+              3,
+              4
+            ],
+            "collisionChecks": 9000,
+            "maxCollisionError": 9.5367431640625e-7
+          }
+        ],
+        "renderedFrames": 75,
+        "callbackFrames": 9000,
+        "callbacksVerified": true
+      }
+    },
+    "knownUnsupportedFountainGraphics": {
+      "attempted": true,
+      "error": "Native line/point rendering not integrated",
+      "scope": "Full decorative stars/reflection path remains unsupported. The established cosmetic profile retains native camera, stage callbacks and both moving platforms."
+    }
+  },
+  "timing": [
+    {
+      "artifact": "deferred-errors-Kp-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": false,
+      "driverShaderCacheDisabled": false,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60033.90000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5828055552310414,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.8999999761581421,
+        "maxMs": 1.5
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.455944444355038,
+        "p50Ms": 5.9000000059604645,
+        "p95Ms": 10.599999994039536,
+        "maxMs": 27
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757733,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.799999999995634,
+        "maxMs": 33.30000000000018
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 4,
+          "attack": 23
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 4,
+          "attack": 23
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 9,
+          "attack": 23
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 5,
+          "attack": 0
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 9,
+          "attack": 23
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 9,
+          "attack": 23
+        }
+      ],
+      "slowDraws": [
+        {
+          "frame": 1669,
+          "costMs": 27,
+          "draws": 224,
+          "shaderCompilations": [
+            {
+              "program": 35,
+              "origin": "model",
+              "cpuMs": 2.2999999821186066
+            },
+            {
+              "program": 36,
+              "origin": "model",
+              "cpuMs": 2
+            },
+            {
+              "program": 37,
+              "origin": "model",
+              "cpuMs": 2.199999988079071
+            },
+            {
+              "program": 38,
+              "origin": "model",
+              "cpuMs": 0.9000000059604645
+            },
+            {
+              "program": 39,
+              "origin": "model",
+              "cpuMs": 2
+            },
+            {
+              "program": 40,
+              "origin": "model",
+              "cpuMs": 1.199999988079071
+            },
+            {
+              "program": 41,
+              "origin": "model",
+              "cpuMs": 2.2999999821186066
+            }
+          ]
+        },
+        {
+          "frame": 1671,
+          "costMs": 25.599999994039536,
+          "draws": 232,
+          "shaderCompilations": [
+            {
+              "program": 42,
+              "origin": "model",
+              "cpuMs": 2.4000000059604645
+            },
+            {
+              "program": 43,
+              "origin": "model",
+              "cpuMs": 2.300000011920929
+            },
+            {
+              "program": 44,
+              "origin": "model",
+              "cpuMs": 4.800000011920929
+            },
+            {
+              "program": 45,
+              "origin": "model",
+              "cpuMs": 2.0999999940395355
+            },
+            {
+              "program": 46,
+              "origin": "model",
+              "cpuMs": 2.800000011920929
+            },
+            {
+              "program": 47,
+              "origin": "model",
+              "cpuMs": 2
+            },
+            {
+              "program": 48,
+              "origin": "model",
+              "cpuMs": 3
+            }
+          ]
+        }
+      ],
+      "shaderCompilations": [
+        {
+          "frame": 196,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 4.5999999940395355
+        },
+        {
+          "frame": 204,
+          "program": 31,
+          "origin": "model",
+          "cpuMs": 3.0999999940395355
+        },
+        {
+          "frame": 368,
+          "program": 32,
+          "origin": "model",
+          "cpuMs": 4.100000023841858
+        },
+        {
+          "frame": 368,
+          "program": 33,
+          "origin": "particles",
+          "cpuMs": 1.5999999940395355
+        },
+        {
+          "frame": 368,
+          "program": 34,
+          "origin": "particles",
+          "cpuMs": 1.600000023841858
+        },
+        {
+          "frame": 1669,
+          "program": 35,
+          "origin": "model",
+          "cpuMs": 2.2999999821186066
+        },
+        {
+          "frame": 1669,
+          "program": 36,
+          "origin": "model",
+          "cpuMs": 2
+        },
+        {
+          "frame": 1669,
+          "program": 37,
+          "origin": "model",
+          "cpuMs": 2.199999988079071
+        },
+        {
+          "frame": 1669,
+          "program": 38,
+          "origin": "model",
+          "cpuMs": 0.9000000059604645
+        },
+        {
+          "frame": 1669,
+          "program": 39,
+          "origin": "model",
+          "cpuMs": 2
+        },
+        {
+          "frame": 1669,
+          "program": 40,
+          "origin": "model",
+          "cpuMs": 1.199999988079071
+        },
+        {
+          "frame": 1669,
+          "program": 41,
+          "origin": "model",
+          "cpuMs": 2.2999999821186066
+        },
+        {
+          "frame": 1671,
+          "program": 42,
+          "origin": "model",
+          "cpuMs": 2.4000000059604645
+        },
+        {
+          "frame": 1671,
+          "program": 43,
+          "origin": "model",
+          "cpuMs": 2.300000011920929
+        },
+        {
+          "frame": 1671,
+          "program": 44,
+          "origin": "model",
+          "cpuMs": 4.800000011920929
+        },
+        {
+          "frame": 1671,
+          "program": 45,
+          "origin": "model",
+          "cpuMs": 2.0999999940395355
+        },
+        {
+          "frame": 1671,
+          "program": 46,
+          "origin": "model",
+          "cpuMs": 2.800000011920929
+        },
+        {
+          "frame": 1671,
+          "program": 47,
+          "origin": "model",
+          "cpuMs": 2
+        },
+        {
+          "frame": 1671,
+          "program": 48,
+          "origin": "model",
+          "cpuMs": 3
+        },
+        {
+          "frame": 2277,
+          "program": 49,
+          "origin": "model",
+          "cpuMs": 2.300000011920929
+        },
+        {
+          "frame": 2677,
+          "program": 50,
+          "origin": "model",
+          "cpuMs": 2.7000000178813934
+        }
+      ],
+      "shaderPreparation": null,
+      "shaderCoverage": {
+        "programs": 50,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 50
+      },
+      "traceSha256": "55b752228ab4c2ca400481f3e61c73f321b22c085c6fa78666389406e1050cc6",
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    },
+    {
+      "artifact": "deferred-errors-prepared-Kp-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60024.5,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5438611112452215,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 1.7000000178813934
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.24719444476068,
+        "p50Ms": 5.800000011920929,
+        "p95Ms": 8.5,
+        "maxMs": 14.399999976158142
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757747,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000018
+      },
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 3,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 4,
+          "attack": 23
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 4,
+          "attack": 23
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 9,
+          "attack": 23
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 5,
+          "attack": 0
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 9,
+          "attack": 23
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 9,
+          "attack": 23
+        }
+      ],
+      "slowDraws": [],
+      "shaderCompilations": [],
+      "shaderPreparation": {
+        "requested": 51,
+        "compiled": 51,
+        "cpuMs": 518.5999999940395,
+        "fighterStateUnchanged": true
+      },
+      "shaderCoverage": {
+        "programs": 51,
+        "prepared": 51,
+        "preparedUsed": 50,
+        "unpreparedUsed": 0
+      },
+      "traceSha256": "55b752228ab4c2ca400481f3e61c73f321b22c085c6fa78666389406e1050cc6",
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    }
+  ],
+  "repeat": {
+    "sameStateChanges": true,
+    "sameFinal": true
+  },
+  "limits": [
+    "Selected default-costume moves and contacts; no complete moveset, matchup or per-frame retail parity proof.",
+    "Shield sequence initially blocks with zero damage, then sustains four body damage as the shield shrinks. The test no longer assumes permanent coverage.",
+    "Timing uses a close-combat workload, not sustained Flame Breath stress; counts draw submissions, not distinct displayed frames.",
+    "The initial 300-second full-scene per-vertex validation timed out in GPU readback. It completed with the 600-second diagnostic deadline; neither run is a performance sample.",
+    "Fountain full decorative point geometry/reflection remains unsupported; moving-platform regression uses the established cosmetic profile.",
+    "Remaining roster/costumes, complete scenes/menus/audio, networking, deployment and physical input-to-photon validation remain incomplete."
+  ],
+  "goalAchieved": false
+}
