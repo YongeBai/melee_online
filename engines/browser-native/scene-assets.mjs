@@ -9,8 +9,8 @@ export function convertSceneAsset(input) {
   const archive=inspectArchive(input),d=archive.data,model=readModelMeshes(input),assets=readModelMaterials(input,model);
   readSkinBindings(input,model); // Validate every reference and weight first.
   if(archive.externs.size)throw Error('Scene extern references require explicit linking');
-  if(model.tree.nodes.some(n=>n.className!==null||n.constraints!==null||(n.flags&0x1020)))
-    throw Error('Custom, constrained, instance or particle joints require a typed importer');
+  if(model.tree.nodes.some(n=>n.className!==null||n.constraints!==null||(n.flags&0x20)))
+    throw Error('Custom, constrained or particle joints require a typed importer');
   // Hide public entry points whose payload type has not been imported.
   const publics=new Map([...archive.publics].filter(([,at])=>at===model.tree.nodes[0].offset));
   const image=nativeArchiveImage(archive,publics);

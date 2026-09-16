@@ -33,3 +33,28 @@ test('requires pointer relocation metadata',()=>{
   const f=fixture();f.v.setUint32(224,16);
   assert.throws(()=>readJointTree(f.bytes),/Unrelocated/);
 });
+
+function instanceFixture(target=64){
+  const body=new Uint8Array(256),d=new DataView(body.buffer),relocs=[8,76,136];
+  d.setUint32(8,64);d.setUint32(76,128);d.setUint32(132,0x1000);d.setUint32(136,target);
+  for(const at of [0,64,128,192])for(let i=0;i<3;i++)d.setFloat32(at+32+i*4,1);
+  const name=new TextEncoder().encode('Instance_Share_joint\0'),pub=32+body.length+relocs.length*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.length,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);relocs.forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);
+  return bytes;
+}
+test('joint instances retain reference identity without duplicating ownership or animation slots',()=>{
+  const input=instanceFixture(),before=input.slice(),tree=readJointTree(input);
+  assert.equal(tree.nodes.length,3);assert.deepEqual(tree.nodes.map(n=>n.parent),[-1,0,0]);
+  assert.equal(tree.nodes[2].child,-1);assert.equal(tree.nodes[2].instanceTarget,1);
+  assert.deepEqual(input,before);
+});
+test('joint instances reject external targets and recursive display graphs',()=>{
+  assert.throws(()=>readJointTree(instanceFixture(192)),/owning tree/);
+  for(const target of [0,128])assert.throws(()=>readJointTree(instanceFixture(target)),/Cyclic joint instance/);
+});
+test('scene conversion relocates instance references to the same owned descriptor',async()=>{
+  const {loadSceneAsset}=await import('../../engines/browser-native/scene-assets.mjs');
+  const module={HEAPU8:new Uint8Array(2048),_malloc:()=>256,_free:()=>{}},asset=loadSceneAsset(module,instanceFixture());
+  assert.equal(asset.model.tree.nodes.length,3);
+  assert.equal(new DataView(module.HEAPU8.buffer).getUint32(256+136,true),256+64);
+});

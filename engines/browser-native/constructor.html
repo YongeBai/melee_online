@@ -16,6 +16,7 @@ import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
+import {verifySamusMoves,verifySamusContact} from './verify-samus.mjs';
 import {verifyPikachuMoves} from './verify-pikachu.mjs';
 import {verifyPurinMoves,verifyPurinContact} from './verify-purin.mjs';
 import {verifyCombat} from './verify-combat.mjs';
@@ -69,7 +70,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc'].includes(code)||stageKey==='story') {
+  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss'].includes(code)||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -115,7 +116,7 @@ try {
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
-  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact');
+  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const rawStageBytes=await asset(stageSpec.file),stageBytes=initializeStageArchive(rawStageBytes,stageKey),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
@@ -245,9 +246,14 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc'].includes(code)){
-        itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(baseBytes),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
+      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss'].includes(code)){
+        itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
+        for(const row of articles.attachments){
+          const bytes=archiveRootView(archive,'item_Share_joint',row.joint);
+          if(row.label==='throw')accessoryModels.set(3,bytes);
+          else itemModels.set(base+row.joint,{name:character+' '+row.label,bytes});
+        }
       }
       preview=createNativeMatchPreview(module,canvas,previewActors,{gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});
       if(params.has('prewarmshaders')){
@@ -355,7 +361,7 @@ try {
       if(stadium){stadium.transformCallbacks=module._portStadiumRead(3);if(stadium.transformCallbacks<stageFrames)throw Error('Frozen Stadium scheduler was not exercised');stadium.enabledJointMask=module._portStadiumRead(4);}
       report.stage.callbackFrames=stageFrames;report.stage.callbacksVerified=true;
     }
-    if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat')&&!params.has('purincontact'))await verifyCombat(module,[object,opponent],report.combat,{
+    if(combat&&!live&&!stageOnly&&!params.has('workloadsteps')&&!params.has('projectilecombat')&&!params.has('purincontact')&&!params.has('samuscontact'))await verifyCombat(module,[object,opponent],report.combat,{
       step,cameraValidation,control:new URLSearchParams(location.search).has('control'),camera:report.cameraStarted===true,
       onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined,
       progress:()=>console.log('NATIVE_CONSTRUCTOR_START '+JSON.stringify(report)),
@@ -399,6 +405,18 @@ try {
       if(params.has('purinmoves')){
         if(code!=='Pr'||opponent)throw Error('Purin move probe requires one Purin fighter');
         report.purinMoves={};verifyPurinMoves(module,object,report.purinMoves,{step,onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});
+      }
+      if(params.has('samuscontact')){
+        if(code!=='Ss'||!opponent)throw Error('Samus contact requires two Samus fighters');
+        report.samusContact={};verifySamusContact(module,[object,opponent],report.samusContact,{step,mode:params.get('samuscontact'),onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          if(!report.preview.throw&&module._portFighterAccessory(object,1)===3){report.preview.throw=drawn;const img=document.createElement('img');img.id='native-preview-throw';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
+      if(params.has('samusmoves')){
+        if(code!=='Ss'||opponent)throw Error('Samus moves require one Samus fighter');
+        report.samusMoves={};verifySamusMoves(module,object,report.samusMoves,{step,onStep:renderSteps?phase=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          for(const [name,label] of [['charge','Samus item 1'],['missile','Samus item 2'],['grapple','Samus grapple 3']])if(!report.preview[name]&&phase.frames>20&&drawn.actors.some(a=>a.name===label&&a.draws)){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
       }
       if(params.has('pikachumoves')){
         if(!['Pk','Pc'].includes(code)||opponent)throw Error('Pikachu moves require one supported fighter');

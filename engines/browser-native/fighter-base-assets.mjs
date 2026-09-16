@@ -9,7 +9,7 @@ import {convertGameplayParameters,gameplayFields} from './gameplay-assets.mjs';
 import {convertDynamics} from './dynamics-assets.mjs';
 import {convertCharacterCollision} from './character-collision-assets.mjs';
 import {convertAuxiliaryAsset} from './auxiliary-assets.mjs';
-import {convertFighterArticles,fighterArticleProfiles} from './article-assets.mjs';
+import {convertFighterArticles,fighterArticleProfiles,initializeFighterArticleArchive} from './article-assets.mjs';
 import {convertFoxExtra} from './fox-extra-assets.mjs';
 import {convertPurinExtra} from './purin-extra-assets.mjs';
 
@@ -21,6 +21,7 @@ import {convertPurinExtra} from './purin-extra-assets.mjs';
 export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCount,costumes}) {
   const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1],symbol=fighterArchives[code];
   if(!symbol)throw Error('Unknown complete fighter archive');
+  input=initializeFighterArticleArchive(input,code);
   const a=inspectArchive(input),source=a.publics.get('ftData'+symbol),d=a.data;
   if(source===undefined||source+96>a.dataSize||(!(fighterArticleProfiles[code]||code==='Pr')&&(a.relocations.has(source+0x48)||d.getUint32(source+0x48))))throw Error('Unsupported complete fighter root');
   const chunks=[],pointers=new Set(),fields=new Array(24).fill(null),imports=[];let length=96;
@@ -59,6 +60,7 @@ export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCoun
     for(let slot=0;slot<entries.length/4;slot++) {
       const row=articles.rows.find(r=>r.slot===slot),at=table+slot*4;
       if(row){if(!a.relocations.has(at)||d.getUint32(at)!==row.article)throw Error('Fighter article slot');v.setUint32(slot*4,loaded.at+row.article,true);pointers.add(start+slot*4);}
+      else if(articles.extraRows.some(r=>r.slot===slot)){const r=articles.extraRows.find(r=>r.slot===slot);if(!a.relocations.has(at)||d.getUint32(at)!==r.source)throw Error('Fighter extra source slot');v.setUint32(slot*4,loaded.at+r.source,true);pointers.add(start+slot*4);}
       else if(slot===4&&extra!==null){v.setUint32(slot*4,extra,true);pointers.add(start+slot*4);}
       else if(a.relocations.has(at)||d.getUint32(at))throw Error('Unconverted fighter extra slot');
     }

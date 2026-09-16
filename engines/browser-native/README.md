@@ -32,6 +32,26 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Samus now imports the original bomb, charge-shot, missile and grapple Articles,
+effect bank, linked grapple objects and throw accessory. HSD instance joints retain
+reference ownership and original draw transforms without occupying duplicate
+animation slots. The importer rejects dangling references and display cycles.
+The seven known absent Samus animation externs receive the original archive
+loader’s NULL initialization. Unknown externs still fail.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Ss --input --samus-moves --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ss --input --samus-contact=throw --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ss --input --samus-contact=missile
+node scripts/native-port/probe-constructor.mjs --character=Ss --input --samus-contact=charge
+node scripts/native-port/probe-constructor.mjs --character=Ss --input --samus-contact=control
+```
+
+Per-frame vertex readback is a correctness diagnostic, not a performance run;
+rendered vertex-verification probes allow up to 300 seconds. Live timing probes
+retain their previous deadline. These fixtures cover selected moves in the
+default costume, not every charge level, grapple recovery, costume or matchup.
+
 Pikachu and Pichu's three Article slots now import Thunder and ground/air Thunder
 Jolt. Their shared effect bank retains the original model/particle animations.
 Pikachu's empty shape-animation topology is preserved; real morph tracks still

@@ -95,7 +95,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
   const particleStats={draws:0,vertices:0,frames:0,peakDraws:0},afterimageStats={draws:0,vertices:0,frames:0,peakDraws:0};
   const resourceStats={stageCreated:0,stageRetired:0,effectCreated:0,effectRetired:0,peakEffectModels:0,itemCreated:0,itemRetired:0,peakItemModels:0};
-  const itemList=items?module._malloc(512*4):0;
+  const itemList=items?module._malloc(1024*8):0;
   if(items&&!itemList)throw Error('Item owner allocation');
   function syncItems(){
     if(!items)return;
@@ -110,7 +110,15 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       if(!source)throw Error('Unregistered item model descriptor '+descriptor);
       return {...source,object,itemKey:object+':'+module._portSceneObjectRoot(object)+':'+descriptor};
     }).filter(Boolean);
-    itemOwners=new Set(new Uint32Array(module.HEAPU8.buffer,itemList,count));const keys=new Set(current.map(a=>a.itemKey));
+    itemOwners=new Set(new Uint32Array(module.HEAPU8.buffer,itemList,count));
+    const links=module._portItemLinksList(itemList,1024);if(links>1024)throw Error('Linked item renderer capacity');
+    const linked=Array.from(new Uint32Array(module.HEAPU8.buffer,itemList,links*2));
+    for(let i=0;i<links;i++){
+      const [object,descriptor]=linked.slice(i*2,i*2+2),source=items.get(descriptor);
+      if(!source)throw Error('Unregistered linked item descriptor '+descriptor);
+      current.push({...source,object,itemKey:object+':'+module._portSceneObjectRoot(object)+':'+descriptor});itemOwners.add(object);
+    }
+    const keys=new Set(current.map(a=>a.itemKey));
     for(let i=resources.length-1;i>=0;i--)if(resources[i].itemKey&&!keys.has(resources[i].itemKey)){releaseResource(resources[i]);resources.splice(i,1);resourceStats.itemRetired++;}
     resourceStats.peakItemModels=Math.max(resourceStats.peakItemModels,current.length);
     for(const actor of current){

@@ -625,6 +625,10 @@ unsigned portFighterAccessory(HSD_GObj* object,unsigned field)
     unsigned kind=0;
     if(Fighter_804D6534&&joint->id==(unsigned)((HSD_Joint**)Fighter_804D6534)[0])kind=1;
     else if(Fighter_804D6514&&joint->id==(unsigned)Fighter_804D6514)kind=2;
-    else abort();
+    else {
+        Fighter* fp=object->user_data;
+        if(fp->kind==Ft_Kind_Samus&&fp->ft_data->x48_items&&fp->ft_data->x48_items[4]&&joint->id==(unsigned)*(HSD_Joint**)fp->ft_data->x48_items[4])kind=3;
+        else abort();
+    }
     return field?kind:(unsigned)joint;
 }

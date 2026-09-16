@@ -7,6 +7,7 @@
 #include <melee/it/types.h>
 #include <sysdolphin/baselib/gobj.h>
 #include <sysdolphin/baselib/gobjplink.h>
+#include <sysdolphin/baselib/jobj.h>
 #include <stdio.h>
 #include <stdlib.h>
 static Article* character_articles[118];
@@ -43,6 +44,22 @@ void Item_80267978(HSD_GObj* object)
 unsigned portItemsList(unsigned* result,unsigned capacity)
 {
     unsigned n=0;for(HSD_GObj* object=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];object;object=object->next){if(n<capacity)result[n]=(unsigned)object;n++;}return n;
+}
+/* Samus's original tether uses separately scheduled ItemLink objects, not
+ * Items. Enumerate them without changing their lifetime, collision or poses. */
+unsigned portItemLinksList(unsigned* result,unsigned capacity)
+{
+    unsigned n=0;
+    for(HSD_GObj* object=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];object;object=object->next){
+        Item* item=object->user_data;if(item->kind!=It_Kind_Samus_GBeam)continue;
+        unsigned links=0;
+        for(ItemLink* link=item->xDD4_itemVar.samusgrapple.x0;link;link=link->next){
+            if(++links>256||!link->gobj||!link->gobj->hsd_obj)abort();
+            HSD_JObj* joint=link->gobj->hsd_obj;
+            if(n<capacity){result[n*2]=(unsigned)link->gobj;result[n*2+1]=joint->id;}n++;
+        }
+    }
+    return n;
 }
 double portItemRead(HSD_GObj* object,unsigned field)
 {

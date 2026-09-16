@@ -29,5 +29,5 @@ test('auxiliary import excludes unrelated externs and rejects references inside 
   const f=fixture(),before=f.bytes.slice(),a=convertAuxiliaryAsset(f.bytes,'PlMr.dat');
   assert.equal(a.model.tree.nodes.length,1);assert.equal(new DataView(a.image.buffer).getUint32(8,true),0);
   assert.deepEqual(f.bytes,before);
-  assert.throws(()=>convertAuxiliaryAsset(fixture(100).bytes,'PlMr.dat'),/Auxiliary model requires external linking|typed importer/);
+  assert.throws(()=>convertAuxiliaryAsset(fixture(100).bytes,'PlMr.dat'),/Auxiliary model requires external linking|typed importer|instance target must belong/);
 });

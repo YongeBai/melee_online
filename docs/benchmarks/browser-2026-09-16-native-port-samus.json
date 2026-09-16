@@ -1,0 +1,1408 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "76341f9",
+  "scope": "Native Samus default-costume Articles, grapple links, instanced throw accessory and selected move/contact integration; Battlefield CPU/draw-submission timing, not full competitive acceptance",
+  "wasmSha256": "f1d9995fa7863024f54a71b3ba8add98512e0001bebd0dfcc7d600c8eb2ade29",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "dbe231046dbdd0dd4799f50731a93df12a3f984275ef405c4f0ff89b62d4d1a9",
+    "engines/browser-native/fighter-base-assets.mjs": "64cc2f4ae5ff9af016958ee1fc2b00235a5c695fdecccfc7811ec023c13fed55",
+    "engines/browser-native/effect-assets.mjs": "0128843f155fb61026514ca4469c21a2d1c281803d60fdb57bcb76bde170eb7e",
+    "engines/browser-native/joint-assets.mjs": "0cd820c5fc95c1d2ef05c04bd66e0718839e3ba3bda05a2c7fb15b9c16c20648",
+    "engines/browser-native/scene-assets.mjs": "b95a6863979c8a97465081bf33485900f497d252cff17ead2b931f36ba7765cc",
+    "engines/browser-native/scene.c": "4f1b51f21fa26c0d6a71dae9f3f2ac4e318e0dc144f2d2e00dcfc277838ae7d6",
+    "engines/browser-native/item-runtime.c": "618306c10cb86c80ac8b24feacf3719489d2e0d90ead2c80bc2cab30eb5e8a10",
+    "engines/browser-native/character-collision.c": "ff8e15c04850bad1f5d38cb17e7e9d20ed78dbb9791f5a456ef4a7cb6b305286",
+    "engines/browser-native/native-match-preview.mjs": "db7cc43c262050ff11ed8aa4fccb44972f84d20eb2f8c5f9956a162cd68c3085",
+    "engines/browser-native/constructor.html": "69618581d388de772e78f21e03c8ecc1dbd3892cc71dac11c1f3bc0d17d8ded2",
+    "engines/browser-native/verify-samus.mjs": "a1969690a7a9bf0dbbfc99d16e129848c61c58d95f212b00d600ec8daf71cc7e",
+    "scripts/native-port/probe-constructor.mjs": "9f005b0bed3fda66ae23ebf8345e357a06fa4e08c0ab1cd166db69cffe921074"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "resolution": [
+    960,
+    720
+  ],
+  "validation": {
+    "unitTests": 172,
+    "failedTests": 0,
+    "build": true,
+    "originalGameplayCUnchanged": true,
+    "baseArchive": {
+      "passed": true,
+      "checks": 2117144,
+      "bytes": 2141812,
+      "partCount": 60,
+      "costumes": 5,
+      "motionRows": 313,
+      "demoRows": 14,
+      "imports": [
+        {
+          "label": "initialization",
+          "at": 96,
+          "size": 303828,
+          "pointers": 667
+        },
+        {
+          "label": "visibility",
+          "at": 304136,
+          "size": 303808,
+          "pointers": 20
+        },
+        {
+          "label": "demo motions",
+          "at": 607944,
+          "size": 303808,
+          "pointers": 27
+        },
+        {
+          "label": "secondary animations",
+          "at": 911780,
+          "size": 303808,
+          "pointers": 435
+        },
+        {
+          "label": "gameplay parameters",
+          "at": 1215588,
+          "size": 303844,
+          "pointers": 16
+        },
+        {
+          "label": "dynamics",
+          "at": 1519432,
+          "size": 20,
+          "pointers": 0
+        },
+        {
+          "label": "hurtboxes",
+          "at": 1519452,
+          "size": 536,
+          "pointers": 1
+        },
+        {
+          "label": "auxiliary model",
+          "at": 1519988,
+          "size": 303808,
+          "pointers": 527
+        },
+        {
+          "label": "articles",
+          "at": 1823796,
+          "size": 303864,
+          "pointers": 1800
+        }
+      ],
+      "relocations": 3520
+    },
+    "projectionChecks": {
+      "passed": true,
+      "cases": 4,
+      "components": 12
+    },
+    "moveFrames": 1715,
+    "renderedFrames": 1857,
+    "allMoveFramesGpuVertexVerified": true,
+    "moves": [
+      {
+        "name": "partial Charge Shot",
+        "frames": 267,
+        "states": [
+          343,
+          344,
+          346,
+          14
+        ],
+        "itemKinds": [
+          94
+        ],
+        "peakItems": 1,
+        "peakLinks": 0,
+        "initial": [
+          14,
+          2,
+          15,
+          0,
+          6.787206172943115,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "final": [
+          14,
+          2,
+          8,
+          0,
+          6.787206172943115,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ]
+      },
+      {
+        "name": "homing Missile",
+        "frames": 251,
+        "states": [
+          15,
+          16,
+          349,
+          14
+        ],
+        "itemKinds": [
+          95
+        ],
+        "peakItems": 1,
+        "peakLinks": 0,
+        "initial": [
+          14,
+          2,
+          8,
+          0,
+          6.787206172943115,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "final": [
+          14,
+          2,
+          19,
+          0,
+          12.1759672164917,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ]
+      },
+      {
+        "name": "Super Missile",
+        "frames": 241,
+        "states": [
+          350,
+          14
+        ],
+        "itemKinds": [
+          95
+        ],
+        "peakItems": 1,
+        "peakLinks": 0,
+        "initial": [
+          14,
+          2,
+          19,
+          0,
+          12.1759672164917,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "final": [
+          14,
+          2,
+          29,
+          0,
+          12.1759672164917,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ]
+      },
+      {
+        "name": "Bomb",
+        "frames": 221,
+        "states": [
+          355,
+          356,
+          14,
+          342,
+          29,
+          42
+        ],
+        "itemKinds": [
+          93
+        ],
+        "peakItems": 1,
+        "peakLinks": 0,
+        "initial": [
+          14,
+          2,
+          29,
+          0,
+          12.1759672164917,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "final": [
+          14,
+          2,
+          54,
+          0,
+          12.1759672164917,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ]
+      },
+      {
+        "name": "Screw Attack",
+        "frames": 261,
+        "states": [
+          353,
+          35,
+          43,
+          14
+        ],
+        "itemKinds": [],
+        "peakItems": 0,
+        "peakLinks": 0,
+        "initial": [
+          14,
+          2,
+          54,
+          0,
+          12.1759672164917,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "final": [
+          14,
+          2,
+          76,
+          0,
+          18.1259708404541,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ]
+      },
+      {
+        "name": "ground grapple",
+        "frames": 221,
+        "states": [
+          212,
+          14
+        ],
+        "itemKinds": [
+          96
+        ],
+        "peakItems": 1,
+        "peakLinks": 30,
+        "initial": [
+          14,
+          2,
+          76,
+          0,
+          18.1259708404541,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "final": [
+          14,
+          2,
+          45,
+          0,
+          18.1259708404541,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ]
+      },
+      {
+        "name": "air grapple",
+        "frames": 253,
+        "states": [
+          24,
+          25,
+          357,
+          35,
+          43,
+          14
+        ],
+        "itemKinds": [
+          96
+        ],
+        "peakItems": 1,
+        "peakLinks": 45,
+        "initial": [
+          14,
+          2,
+          45,
+          0,
+          18.1259708404541,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        "final": [
+          14,
+          2,
+          67,
+          0,
+          18.1259708404541,
+          0.00009999999747378752,
+          0,
+          1465376,
+          10249088,
+          15,
+          1,
+          13,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ]
+      }
+    ],
+    "resources": {
+      "stageCreated": 0,
+      "stageRetired": 0,
+      "effectCreated": 27,
+      "effectRetired": 27,
+      "peakEffectModels": 6,
+      "itemCreated": 81,
+      "itemRetired": 81,
+      "peakItemModels": 46
+    },
+    "throwRenderedFrames": 674,
+    "throwAccessoryGpuVerified": true,
+    "contacts": {
+      "throw": {
+        "completed": true,
+        "mode": "throw",
+        "frames": 532,
+        "attackerStates": [
+          212,
+          213,
+          216,
+          219,
+          14
+        ],
+        "defenderStates": [
+          14,
+          226,
+          227,
+          239,
+          86,
+          29,
+          42
+        ],
+        "peakDamage": 9,
+        "peakHitlag": 0,
+        "peakKnockback": 61.21849822998047,
+        "accessoryFrames": 46,
+        "before": [
+          [
+            14,
+            2,
+            14,
+            0,
+            12.31564712524414,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            44,
+            0,
+            -7.810304164886475,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "after": [
+          [
+            14,
+            2,
+            20,
+            0,
+            12.31564712524414,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            70,
+            0,
+            -25.462535858154297,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            9,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "retailParityVerified": false
+      },
+      "missile": {
+        "completed": true,
+        "mode": "missile",
+        "frames": 503,
+        "attackerStates": [
+          350,
+          14
+        ],
+        "defenderStates": [
+          14,
+          80,
+          42
+        ],
+        "peakDamage": 12,
+        "peakHitlag": 3,
+        "peakKnockback": 59.20000076293945,
+        "accessoryFrames": 0,
+        "before": [
+          [
+            14,
+            2,
+            15,
+            0,
+            20.125951766967773,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            15,
+            0,
+            -7.810304164886475,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "after": [
+          [
+            14,
+            2,
+            37,
+            0,
+            20.125951766967773,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            69,
+            0,
+            -29.18157196044922,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            12,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "retailParityVerified": false
+      },
+      "charge": {
+        "completed": true,
+        "mode": "charge",
+        "frames": 503,
+        "attackerStates": [
+          343,
+          344,
+          346,
+          14
+        ],
+        "defenderStates": [
+          14,
+          82
+        ],
+        "peakDamage": 11,
+        "peakHitlag": 4,
+        "peakKnockback": 38.86800003051758,
+        "accessoryFrames": 0,
+        "before": [
+          [
+            14,
+            2,
+            15,
+            0,
+            20.125951766967773,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            15,
+            0,
+            -7.810304164886475,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "after": [
+          [
+            14,
+            2,
+            67,
+            0,
+            20.125951766967773,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            62,
+            0,
+            -16.9584903717041,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            11,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "retailParityVerified": false
+      },
+      "control": {
+        "completed": true,
+        "mode": "control",
+        "frames": 503,
+        "attackerStates": [
+          14
+        ],
+        "defenderStates": [
+          14
+        ],
+        "peakDamage": 0,
+        "peakHitlag": 0,
+        "peakKnockback": 0,
+        "accessoryFrames": 0,
+        "before": [
+          [
+            14,
+            2,
+            15,
+            0,
+            20.125951766967773,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            15,
+            0,
+            -7.810304164886475,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "after": [
+          [
+            14,
+            2,
+            21,
+            0,
+            20.125951766967773,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10249088,
+            15,
+            1,
+            13,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            21,
+            0,
+            -7.810304164886475,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10249088,
+            15,
+            1,
+            13,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "retailParityVerified": false
+      }
+    },
+    "pikachuRegression": {
+      "completed": true,
+      "damage": 7,
+      "peakHitlag": 4,
+      "peakKnockback": 14.579999923706055,
+      "peakItems": 2
+    }
+  },
+  "timing": [
+    {
+      "artifact": "deferred-errors-Ss-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": false,
+      "driverShaderCacheDisabled": false,
+      "frames": 3600,
+      "draws": 3599,
+      "elapsedMs": 60037.40000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5902777777612209,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 1.4000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 6.9334815227677336,
+        "p50Ms": 6.5,
+        "p95Ms": 8.899999976158142,
+        "maxMs": 20.400000005960464
+      },
+      "rafDrawIntervals": {
+        "samples": 3598,
+        "meanMs": 16.675291828793004,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000018
+      },
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 1,
+        "rafGapsOver25Ms": 2,
+        "timingSamples": [
+          {
+            "callback": 1,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -1518.1180000059603,
+            "callbackTime": 2.4000000059604645,
+            "interval": null,
+            "debt": 0
+          },
+          {
+            "callback": 2,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -1.6000000059602826,
+            "callbackTime": 5.0999999940395355,
+            "interval": 1516.518,
+            "debt": 0
+          },
+          {
+            "callback": 3,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": 15.099999994039536,
+            "callbackTime": 15.400000005960464,
+            "interval": 16.699999999999818,
+            "debt": 0
+          },
+          {
+            "callback": 4,
+            "frame": 0,
+            "steps": 1,
+            "timestamp": 31.699999994039445,
+            "callbackTime": 32.099999994039536,
+            "interval": 16.59999999999991,
+            "debt": -0.0666666666667588
+          },
+          {
+            "callback": 5,
+            "frame": 1,
+            "steps": 1,
+            "timestamp": 48.39999999403972,
+            "callbackTime": 48.69999998807907,
+            "interval": 16.700000000000273,
+            "debt": -0.0333333333331538
+          },
+          {
+            "callback": 6,
+            "frame": 2,
+            "steps": 1,
+            "timestamp": 65.09999999403954,
+            "callbackTime": 65.5,
+            "interval": 16.699999999999818,
+            "debt": -3.552713678800501e-15
+          },
+          {
+            "callback": 7,
+            "frame": 3,
+            "steps": 1,
+            "timestamp": 81.69999999403944,
+            "callbackTime": 82.5,
+            "interval": 16.59999999999991,
+            "debt": -0.06666666666676235
+          },
+          {
+            "callback": 8,
+            "frame": 4,
+            "steps": 1,
+            "timestamp": 98.39999999403972,
+            "callbackTime": 98.59999999403954,
+            "interval": 16.700000000000273,
+            "debt": -0.033333333333157356
+          },
+          {
+            "callback": 253,
+            "frame": 249,
+            "steps": 0,
+            "timestamp": 4181.499999994039,
+            "callbackTime": 4181.799999982119,
+            "interval": 16.599999999999454,
+            "debt": 16.39999999999934
+          },
+          {
+            "callback": 2855,
+            "frame": 2850,
+            "steps": 2,
+            "timestamp": 47563.19999999404,
+            "callbackTime": 47574.59999999404,
+            "interval": 33.299999999995634,
+            "debt": 14.766666666656043
+          }
+        ]
+      },
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 54,
+          "attack": 334
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 42,
+          "attack": 247
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 48,
+          "attack": 289
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 42,
+          "attack": 270
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 30,
+          "attack": 177
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 24,
+          "attack": 148
+        }
+      ],
+      "slowDraws": [
+        {
+          "frame": 2849,
+          "costMs": 20.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 143,
+            "immediateVertices": 572,
+            "particleDraws": 143,
+            "particleVertices": 572,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 354,
+            "programs": 33,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 84,
+            "effectRetired": 83,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 2850,
+          "costMs": 19.80000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 138,
+            "immediateVertices": 552,
+            "particleDraws": 138,
+            "particleVertices": 552,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 349,
+            "programs": 33,
+            "images": 170,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 84,
+            "effectRetired": 83,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [
+        {
+          "frame": 196,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 4.5
+        },
+        {
+          "frame": 204,
+          "program": 31,
+          "origin": "model",
+          "cpuMs": 3.300000011920929
+        },
+        {
+          "frame": 2277,
+          "program": 32,
+          "origin": "model",
+          "cpuMs": 2.5
+        },
+        {
+          "frame": 2677,
+          "program": 33,
+          "origin": "model",
+          "cpuMs": 2.600000023841858
+        }
+      ],
+      "shaderPreparation": null,
+      "shaderCoverage": {
+        "programs": 33,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 33
+      },
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    },
+    {
+      "artifact": "deferred-errors-prepared-Ss-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60044.90000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5722777780062622,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 1.9000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.891916666337186,
+        "p50Ms": 6.5,
+        "p95Ms": 8.600000023841858,
+        "maxMs": 15
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757747,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.400000000001455
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1,
+        "timingSamples": [
+          {
+            "callback": 1,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -736.1900000119208,
+            "callbackTime": 1.699999988079071,
+            "interval": null,
+            "debt": 0
+          },
+          {
+            "callback": 2,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": -2.900000011920838,
+            "callbackTime": 3.0999999940395355,
+            "interval": 733.29,
+            "debt": 0
+          },
+          {
+            "callback": 3,
+            "frame": 0,
+            "steps": 0,
+            "timestamp": 13.699999988079071,
+            "callbackTime": 14,
+            "interval": 16.59999999999991,
+            "debt": 0
+          },
+          {
+            "callback": 4,
+            "frame": 0,
+            "steps": 1,
+            "timestamp": 30.39999998807889,
+            "callbackTime": 30.599999994039536,
+            "interval": 16.699999999999818,
+            "debt": 0.03333333333315025
+          },
+          {
+            "callback": 5,
+            "frame": 1,
+            "steps": 1,
+            "timestamp": 47.09999998807916,
+            "callbackTime": 47.19999998807907,
+            "interval": 16.700000000000273,
+            "debt": 0.06666666666675525
+          },
+          {
+            "callback": 6,
+            "frame": 2,
+            "steps": 1,
+            "timestamp": 63.69999998807907,
+            "callbackTime": 63.900000005960464,
+            "interval": 16.59999999999991,
+            "debt": -3.552713678800501e-15
+          },
+          {
+            "callback": 7,
+            "frame": 3,
+            "steps": 1,
+            "timestamp": 80.39999998807889,
+            "callbackTime": 80.5,
+            "interval": 16.699999999999818,
+            "debt": 0.0333333333331467
+          },
+          {
+            "callback": 8,
+            "frame": 4,
+            "steps": 1,
+            "timestamp": 97.09999998807916,
+            "callbackTime": 97.30000001192093,
+            "interval": 16.700000000000273,
+            "debt": 0.0666666666667517
+          },
+          {
+            "callback": 358,
+            "frame": 354,
+            "steps": 0,
+            "timestamp": 5930.099999988079,
+            "callbackTime": 5930.5,
+            "interval": 16.600000000000364,
+            "debt": 16.399999999999217
+          }
+        ]
+      },
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 54,
+          "attack": 334
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 42,
+          "attack": 247
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 48,
+          "attack": 289
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 42,
+          "attack": 270
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 30,
+          "attack": 177
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 24,
+          "attack": 148
+        }
+      ],
+      "slowDraws": [],
+      "shaderCompilations": [],
+      "shaderPreparation": {
+        "requested": 38,
+        "compiled": 38,
+        "cpuMs": 393.40000000596046,
+        "fighterStateUnchanged": true
+      },
+      "shaderCoverage": {
+        "programs": 38,
+        "prepared": 38,
+        "preparedUsed": 33,
+        "unpreparedUsed": 0
+      },
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    }
+  ],
+  "repeat": {
+    "sameStateChanges": true,
+    "sameFinal": true
+  },
+  "limits": [
+    "Selected moves in the default costume; full charge levels, every throw direction, tether recovery and every matchup remain unverified.",
+    "The timing workload is two-fighter close combat, not a grapple/projectile stress test.",
+    "No retail per-frame parity proof; no distinct displayed-frame FPS or physical input-to-photon measurement.",
+    "One initial-run catch-up and two long submissions occurred without live compilation in those frames; the cleaner prepared repeat does not prove shader preparation caused their removal.",
+    "Remaining roster/costumes, complete scenes/menus/audio, networking and deployment are incomplete."
+  ],
+  "goalAchieved": false,
+  "portableRecipeSha256": "272b977aebb5466656c582eb0520c1fee065720bd1a055397d55d02c91712f6a"
+}

@@ -1,4 +1,5 @@
-import {inspectArchive,archiveRootView,nativeSubgraphImage} from './archive.mjs';
+import {inspectArchive,archiveRootView,nativeSubgraphImage,initializeArchiveExternals} from './archive.mjs';
+import {convertSceneAsset} from './scene-assets.mjs';
 import {convertItemModels} from './item-model-assets.mjs';
 import {readJointAnimation} from './joint-animation-assets.mjs';
 import {convertMaterialAnimation} from './material-animation-assets.mjs';
@@ -20,13 +21,21 @@ export const fighterArticleProfiles=Object.freeze({
   Dr:{slots:4,articles:{1:[6,5],3:[2,1]}},
   Pk:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
   Pc:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
+  Ss:{slots:5,articles:{0:[2,7],1:[9,8],2:[4,16],3:[0,25]}},
 });
+export function initializeFighterArticleArchive(input,code){
+  return code==='Ss'?initializeArchiveExternals(input,[
+    'ItmSamusGBeamChainA_TopN_shapeanim_joint','ItmSamusGBeamChainB_TopN_shapeanim_joint','ItmSamusGBeamChainC_TopN_shapeanim_joint',
+    'ItmSamusGBeamStart_TopN_matanim_joint','ItmSamusGBeamStart_TopN_shapeanim_joint','ItmSamusGBeamTop_TopN_matanim_joint','ItmSamusGBeamTop_TopN_shapeanim_joint',
+  ]):input;
+}
 export function convertFighterArticles(input,name) {
   const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1];
   if(!fighterArticleProfiles[code])throw Error('Complete article conversion pending: '+name);
+  input=initializeFighterArticleArchive(input,code);
   const a=inspectArchive(input),d=a.data,models=convertItemModels(input,name),header=new DataView(models.image.buffer);
   const size=header.getUint32(4,true),n=header.getUint32(8,true),bytes=models.image.slice(32,32+size),out=new DataView(bytes.buffer);
-  const pointers=new Set(Array.from({length:n},(_,i)=>header.getUint32(32+size+i*4,true))),claims=new Map(models.typedClaims),packed=new Set(),rows=[];
+  const pointers=new Set(Array.from({length:n},(_,i)=>header.getUint32(32+size+i*4,true))),claims=new Map(models.typedClaims),packed=new Set(),rows=[],extraRows=[],attachments=[];
   const bounds=(at,bytes)=>{if(!Number.isInteger(at)||at<0||at%4||at+bytes>a.dataSize)throw Error('Article bounds');};
   function claim(at,size,type) {
     if(!Number.isInteger(at)||at<0||at%(size<4?size:4)||at+size>a.dataSize)throw Error('Article bounds');
@@ -56,23 +65,46 @@ export function convertFighterArticles(input,name) {
     }
     visit(root,'joint');return {joints,objects};
   }
+  function jointAnimation(root){if(root!==null){const t=readJointAnimation(a,root);tree(t);for(const node of t.nodes)if(node.animation)tree(node.animation);}}
+  function materialAnimation(root){if(root!==null)tree(convertMaterialAnimation(archiveRootView(a,'item_Share_matanim_joint',root)));}
+  function attachment(joint,label){
+    if(joint===null)throw Error('Missing Samus attachment model');
+    const scene=convertSceneAsset(archiveRootView(a,'item_Share_joint',joint));
+    for(const at of scene.pointerSlots)pointer(at);for(const [at,size]of scene.writes)scalar(at,size);
+    attachments.push({joint,label,nodes:scene.model.tree.nodes.length});
+  }
   for(const model of models.rows) {
     const [stateCount,specialWords]=fighterArticleProfiles[code].articles[model.slot];
     const special=pointer(model.article+4),states=pointer(model.article+12);
-    if(special===null||states===null)throw Error('Missing complete article data');
-    bounds(special,specialWords*4);bounds(states,stateCount*16);
-    for(let j=0;j<specialWords;j++)scalar(special+j*4,4,true);
+    if(special===null||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
+    bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
+    for(let j=0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    if(code==='Ss'&&model.slot===3){
+      for(let off=0x64;off<=0x70;off+=4)attachment(pointer(special+off),'grapple '+((off-0x64)/4));
+      for(let off=0x74;off<=0xAC;off+=12){
+        const roots=[0,4,8].map(i=>{const table=pointer(special+off+i);return table===null?null:pointer(table);});
+        jointAnimation(roots[0]);materialAnimation(roots[1]);if(roots[2]!==null)shapeTopology(roots[2]);
+      }
+    }
     const scripts=[],animations=[];
     for(let j=0;j<stateCount;j++) {
       const at=states+j*16,joint=pointer(at),material=pointer(at+4),shape=pointer(at+8),script=pointer(at+12);
       const shapeTree=shape===null?null:shapeTopology(shape);
-      if(joint!==null){const t=readJointAnimation(a,joint);tree(t);for(const node of t.nodes)if(node.animation)tree(node.animation);}
-      if(material!==null)tree(convertMaterialAnimation(archiveRootView(a,'item_Share_matanim_joint',material)));
+      jointAnimation(joint);
+      materialAnimation(material);
       if(script!==null)scripts.push(script);animations.push({joint,material,shape,shapeTree,script});
     }
     const script=readMotionScripts(a,scripts,itemCommandWords);
     tree(script);
     rows.push({...model,special,specialWords,states,stateCount,animations,scripts,script});
   }
-  return {code,rows,pointerSlots:pointers,image:nativeSubgraphImage(bytes,pointers,new Map(rows.map(r=>['native_article_'+r.slot,r.article])))};
+  if(code==='Ss'){
+    const root=a.publics.get('ftDataSamus'),table=pointer(root+0x48),extra=pointer(table+16);
+    if(extra===null)throw Error('Missing Samus throw accessory');
+    const joint=pointer(extra),motions=pointer(extra+4),animation=pointer(extra+8),material=pointer(extra+12);
+    if(motions===null)throw Error('Missing Samus throw motion table');
+    attachment(joint,'throw');for(let i=0;i<4;i++)jointAnimation(pointer(motions+i*4));jointAnimation(animation);materialAnimation(material);
+    extraRows.push({slot:4,source:extra,joint,motions,animation,material});
+  }
+  return {code,source:input,rows,extraRows,attachments,pointerSlots:pointers,image:nativeSubgraphImage(bytes,pointers,new Map(rows.map(r=>['native_article_'+r.slot,r.article])))};
 }

@@ -25,12 +25,31 @@ export function readJointTree(input) {
       scale:values.slice(3,6),translation:values.slice(6),display:pointer(at+16),
       inverseBind:pointer(at+56),constraints:pointer(at+60),child:-1,next:-1};
     nodes.push(node);offsets.set(at,index);active.add(at);
-    node.child=visit(pointer(at+8),index);
+    // INSTANCE owns no child. HSD resolves this descriptor through its ID table
+    // after loading the owning tree; it must not consume an animation slot.
+    if(flags&0x1000)node.instanceOffset=pointer(at+8);
+    else node.child=visit(pointer(at+8),index);
     node.next=visit(pointer(at+12),parent);
     active.delete(at);
     return index;
   }
   visit(root,-1);
+  for(const node of nodes)if(node.flags&0x1000){
+    if(!offsets.has(node.instanceOffset))throw Error('Joint instance target must belong to the owning tree');
+    node.instanceTarget=offsets.get(node.instanceOffset);
+  }
+  // Owned links are acyclic above. References can still create a display loop;
+  // follow the same edges as HSD_JObjDispAll (an instance excludes target.next).
+  const displaying=new Set(),finished=new Set();
+  function display(index){
+    if(displaying.has(index))throw Error('Cyclic joint instance display');
+    if(finished.has(index))return;
+    displaying.add(index);const node=nodes[index];
+    if(node.flags&0x1000)display(node.instanceTarget);
+    else for(let child=node.child;child!==-1;child=nodes[child].next)display(child);
+    displaying.delete(index);finished.add(index);
+  }
+  for(let i=0;i<nodes.length;i++)display(i);
   // Keep the complete depth-first node order for FigaTree indexing. Skeleton
   // flags identify bone joints, but unflagged nodes still occupy track slots.
   const skeleton=nodes.map((node,index)=>({node,index})).filter(({node})=>node.flags&1).map(({index})=>index);

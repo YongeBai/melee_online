@@ -76,7 +76,7 @@ unsigned portSceneCollect(HSD_JObj* root,HSD_JObj** nodes,unsigned capacity)
     unsigned count=0;
     for(HSD_JObj* j=root;j;j=j->next) {
         if(count>=capacity)abort();nodes[count++]=j;
-        if(j->child)count+=portSceneCollect(j->child,nodes+count,capacity-count);
+        if(j->child&&!(j->flags&JOBJ_INSTANCE))count+=portSceneCollect(j->child,nodes+count,capacity-count);
     }
     return count;
 }

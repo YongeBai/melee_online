@@ -5,6 +5,42 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Samus now passes default-costume constructor, input, selected special-move and
+contact integration checks. The port imports all four original Articles, her
+effect bank, separately scheduled grapple links and the throw accessory. HSD
+instance joints preserve shared references and original draw transforms; they do
+not become duplicate owned joints or animation slots. Unknown references and
+cyclic display graphs still fail. Original gameplay C is unchanged; the core now
+includes adapters for joint ownership and linked-item enumeration.
+
+The move probe renders and GPU-verifies 1,857 frames: partial charge shot, homing
+and Super Missile, Bomb, Screw Attack, ground grapple and aerial grapple. The
+original chains contain 30/45 links in those grapple sequences, and all 81 item
+model resources retire by the end. A separate 674-frame rendered/vertex-verified
+contact run reaches a 9-damage forward throw, with its shared-joint accessory
+active for 46 frames. Super Missile/partial charge contacts deal 12/11 damage;
+the no-input control remains at zero. Pikachu's linked Jolt contact regression
+still passes. These are selected integration checks, not complete moveset or
+retail trace parity.
+
+Two Samus fighters complete 3,600 simulation steps at 960×720 in about 60 seconds.
+The initial run submits 3,599 draws with one catch-up; its mean simulation/draw
+submission costs are 0.590/6.933 ms and maximum draw cost is 20.4 ms. A repeat with
+38 prepared programs and the driver shader cache disabled submits all 3,600 draws
+with no catch-up callbacks or live compilations. Mean simulation/draw costs are
+0.572/6.892 ms; draw p95 is 8.6 ms and maximum 15.0 ms. Gameplay traces match.
+The initial long submissions did not coincide with shader compilation, so this
+repeat does not establish why those spikes disappeared. This is a close-combat
+workload, not a projectile/grapple stress test or distinct presentation-FPS proof.
+
+All 172 tests and the fighter build pass. Core hash: `f1d9995f…`. Full roster and
+costumes, complete scenes/menus/audio, retail parity, networking, deployment and
+physical input-to-photon measurements remain incomplete. The overall 720p60
+competitive acceptance criterion is **not achieved**.
+[Samus evidence](benchmarks/browser-2026-09-16-native-port-samus.json).
+
+Previous Pikachu/Pichu checkpoint:
+
 Pikachu and Pichu now pass default-costume constructor, input and rendered special
 integration checks. Their original linked Jolt/Thunder Articles and shared effect
 bank are loaded. The renderer now accepts native no-model controller items while
