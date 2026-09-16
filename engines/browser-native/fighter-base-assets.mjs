@@ -48,7 +48,7 @@ export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCoun
   const secondary=graph(convertSecondaryAnimations(input,name,partCount).image,'secondary animations');bind(0x1C,secondary.symbols[0]);bind(0x20,secondary.symbols[1]);
   const game=convertGameplayParameters(input,name,partCount,init.count),g=graph(game.image,'gameplay parameters');
   for(const [index,offset] of gameplayFields.entries())bind(offset,g.view.getUint32(game.root+index*4,true)||null);
-  bind(0x2C,graph(convertDynamics(input,name,partCount,motionSpec).image,'dynamics').symbols[0]);
+  const dynamics=convertDynamics(input,name,partCount,motionSpec);bind(0x2C,graph(dynamics.image,'dynamics').symbols[0]);
   bind(0x30,graph(convertCharacterCollision(input,name,partCount).image,'hurtboxes').symbols[0]);
   bind(0x5C,graph(convertAuxiliaryAsset(input,name).image,'auxiliary model').symbols[0]);
   if(code==='Pr')bind(0x48,graph(convertPurinExtra(input,costumes).image,'Purin costume attachment').symbols[0]);
@@ -69,6 +69,6 @@ export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCoun
   for(let index=0;index<24;index++)if(a.relocations.has(source+index*4)!==(fields[index]!==null)||(!a.relocations.has(source+index*4)&&d.getUint32(source+index*4)))throw Error('Incomplete fighter base field '+(index*4).toString(16));
   const bytes=new Uint8Array(length),out=new DataView(bytes.buffer);for(const c of chunks)bytes.set(c.bytes,c.at);
   fields.forEach((p,i)=>{if(p!==null){out.setUint32(i*4,p,true);pointers.add(i*4);}});
-  return {kind:init.kind,root:0,fields,imports,motionCount:init.count,demoCount:demo.count,specialBytes:special.bytes.length,
+  return {kind:init.kind,root:0,fields,imports,dynamics,motionCount:init.count,demoCount:demo.count,specialBytes:special.bytes.length,
     image:nativeSubgraphImage(bytes,pointers,new Map([['ftData'+symbol,0]]))};
 }

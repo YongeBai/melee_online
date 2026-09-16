@@ -120,3 +120,7 @@ test('Kirby Fox retains its model-only muzzle effect and no particle banks',()=>
   assert.deepEqual(input,before);assert.equal(r.bank,33);assert.equal(r.effects.length,1);assert.equal(r.cmd,null);assert.equal(r.tex,null);
   for(const slot of [0,4])assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.ptr(slot,a.cmd)),'Fx'));
 });
+
+test('Pikachu and Pichu copies share the original particle-only bank 36',()=>{
+  const spec={symbol:'effKirbyPikachuDataTable',bank:36,count:4,groups:2,models:0};for(const code of ['Pk','Pc']){const input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,code);assert.deepEqual(input,before);assert.equal(r.bank,36);assert.equal(r.effects.length,0);assert.equal(r.commands.length,4);assert.equal(r.textures.length,2);assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,7)),code));}
+});

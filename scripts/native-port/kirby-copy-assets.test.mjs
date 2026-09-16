@@ -82,3 +82,23 @@ test('Fox copy preserves separate laser and nine-state Blaster Articles with nul
   assert.deepEqual(r.articles.rows.map(a=>[a.stateCount,a.specialWords]),[[2,10],[9,10]]);assert(r.articles.rows.every(a=>a.animations.every(s=>s.joint===null&&s.material===null)));assert.equal(r.unreferencedRelocations.length,4);
   for(const change of [a=>a.ptr(75408,49320),a=>a.ptr(49324,600),a=>a.relocs.delete(1016),a=>a.ptr(600,1200)])assert.throws(()=>convertKirbyCopy(blasterFixture(change),'Fx'));
 });
+
+function joltFixture(code,change=()=>{}){
+  const body=new Uint8Array(code==='Pk'?103536:115792),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(900,2000);d.setUint32(904,1);ptr(908,1000);ptr(912,400);ptr(916,424);ptr(920,800);
+  const joints=code==='Pk'?15:13;
+  for(let i=0;i<joints;i++){const at=2000+i*64;for(let j=0;j<3;j++)d.setFloat32(at+32+j*4,1);if(i+1<joints)ptr(at+8,at+64);}
+  for(const [article,attributes,special,states,model]of [[400,0,132,600,500],[424,200,332,680,516]]){ptr(article,attributes);ptr(article+4,special);ptr(article+12,states);ptr(article+16,model);}
+  ptr(516,4096);d.setUint32(520,1);for(let i=0;i<3;i++)d.setFloat32(4096+32+i*4,1);
+  ptr(680,5000);ptr(684,5100);ptr(688,5200);
+  d.setUint32(800,3);ptr(804,6000);
+  for(let i=0;i<3;i++){const at=6000+i*24,param=code==='Pk'&&i===1?7000:7000+i*240;d.setUint32(at,[3,7,11][i]);ptr(at+4,param);d.setUint32(at+8,i===2?(code==='Pk'?4:2):3);for(let j=0;j<3;j++)d.setFloat32(at+12+j*4,[1,1,.04][j]);for(let j=0;j<d.getUint32(at+8)*15;j++)d.setFloat32(param+j*4,-1.25+j/4);}
+  const w=code==='Pk'?103488:115744;for(const [at,to]of [[w,5000],[w+8,5100],[w+16,5200],[w+24,4096],[w+28,w],[w+32,w+8],[w+36,w+16],[w+40,w+24]])ptr(at,to);
+  change({d,ptr,relocs});const name=new TextEncoder().encode('ftDataKirbyCopy'+(code==='Pk'?'Pikachu':'Pichu')+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,900);bytes.set(name,pub+8);return bytes;
+}
+test('Pikachu and Pichu copies retain dynamic hat chains, shared parameters and shape-animation wrappers',()=>{
+  for(const code of ['Pk','Pc']){const input=joltFixture(code),before=input.slice(),r=convertKirbyCopy(input,code),d=new DataView(r.image.buffer,32);assert.deepEqual(input,before);assert.deepEqual(r.dynamics.map(r=>[r.bone,r.nodes]),[[3,3],[7,3],[11,code==='Pk'?4:2]]);assert.equal(d.getFloat32(7000,true),-1.25);assert.equal(d.getUint32(920,true),800);assert.equal(r.unreferencedRelocations.length,8);assert.equal(r.articles.rows[0].joint,null);assert.equal(r.articles.rows[1].animations[0].shape,5200);if(code==='Pk')assert.equal(r.dynamics[0].parameters,r.dynamics[1].parameters);
+    for(const change of [a=>a.d.setUint32(800,10),a=>a.d.setUint32(6000,14),a=>a.d.setUint32(6008,0),a=>a.ptr(6004,2000),a=>a.d.setFloat32(7000,NaN),a=>a.relocs.add(7000),a=>a.ptr(808,6000),a=>a.ptr(804,800),a=>a.relocs.delete(920),a=>a.ptr((code==='Pk'?103488:115744)+16,2000)])assert.throws(()=>convertKirbyCopy(joltFixture(code,change),code));
+  }
+});

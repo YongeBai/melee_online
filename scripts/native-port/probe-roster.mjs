@@ -6,7 +6,7 @@ import {spawnSync} from 'node:child_process';
 
 const root=path.resolve(import.meta.dirname,'../..'),out=path.join(root,'dist/native-port');
 const codes=['Ca','Dk','Ms','Gn','Fe','Fx','Fc','Pr','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe','Pp','Kb'];
-const report={scope:'Original constructors and scripted walk/jump/aerial/recovery, with live numeric motion-word checks',
+const report={scope:'Original constructors and scripted walk/jump/aerial/recovery, with live numeric motion-word checks and original dynamic-bone pool/chain counts',
   build:JSON.parse(fs.readFileSync(path.join(out,'fighter-init-build.json'))),excluded:[],rows:[],passed:false,gameplayParity:false,performanceMeasured:false};
 for(const code of codes){
   const log=fs.openSync(path.join(out,'roster-'+code+'.log'),'w');let result;
@@ -16,8 +16,8 @@ for(const code of codes){
   if(result.status!==0)row.error=result.error?.message??'Probe exited '+result.status+'; see roster-'+code+'.log';
   else{
     const p=JSON.parse(fs.readFileSync(path.join(out,'last-constructor-probe.json')));
-    Object.assign(row,{passed:!p.error&&p.constructorVerified&&p.input?.completed&&p.input.motionWordChecks===142,
-      frames:p.input?.frames,motionWordChecks:p.input?.motionWordChecks,moveIds:p.input?.moveIds,states:p.input?.states,forms:p.fighterForms});
+    Object.assign(row,{passed:!p.error&&p.constructorVerified&&p.input?.completed&&p.input.motionWordChecks===142&&p.dynamics?.initialPool===320&&p.dynamics?.fighters?.length===p.fighterForms?.length,
+      frames:p.input?.frames,motionWordChecks:p.input?.motionWordChecks,moveIds:p.input?.moveIds,states:p.input?.states,forms:p.fighterForms,dynamics:p.dynamics});
   }
   report.rows.push(row);console.log(code+': '+(row.passed?'passed':row.error??'incomplete'));
   fs.writeFileSync(path.join(out,'roster-input-regression.json'),JSON.stringify(report,null,2)+'\n');

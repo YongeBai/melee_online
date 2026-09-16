@@ -27,7 +27,7 @@ const opponent=process.argv.find(x=>x.startsWith('--opponent='))?.slice(11)??cha
 if(!/^[A-Z][a-z]$/.test(opponent))throw Error('Opponent must be a two-letter fighter archive code');
 const matchup=opponent===character?character:character+'-vs-'+opponent;
 const kirbyCopy=process.argv.find(x=>x.startsWith('--kirby-copy='))?.slice(13)??(process.argv.includes('--kirby-copy')?'swallow':null);
-if(kirbyCopy&&(character!=='Kb'||!['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx'].includes(opponent)||!process.argv.includes('--input')||!['swallow','acquire','spit','contact'].includes(kirbyCopy)))throw Error('Kirby copy requires Kb versus Mr/Lg/Dr/Ca/Gn/Ns/Pe/Fx and input');
+if(kirbyCopy&&(character!=='Kb'||!['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx','Pk','Pc'].includes(opponent)||!process.argv.includes('--input')||!['swallow','acquire','spit','contact'].includes(kirbyCopy)))throw Error('Kirby copy requires Kb versus Mr/Lg/Dr/Ca/Gn/Ns/Pe/Fx/Pk/Pc and input');
 const kirbyMove=process.argv.find(x=>x.startsWith('--kirby-move='))?.slice(13);
 const kirbyMoves=!!kirbyMove||process.argv.includes('--kirby-moves');
 if(kirbyMoves&&(character!=='Kb'||!process.argv.includes('--input')||kirbyMove&&kirbyMove!=='cutter'))throw Error('Kirby moves require Kb and input');

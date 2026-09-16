@@ -75,6 +75,18 @@ ground/air firing, release recovery, loss and reacquisition. Contact mode uses
 40-unit separation so the laser exists for an observable frame before hitting;
 it also checks that Fox's copied laser causes damage without hitlag.
 
+Pikachu and Pichu copies (`--opponent=Pk` / `--opponent=Pc`) retain three
+dynamic hat chains, the ground controller item and visible Thunder Jolt child,
+and shared particle bank 36. The lifecycle test checks exact pool consumption
+(10 / 8 nodes), release on taunt, ground/air attacks and reacquisition. Pichu
+keeps one-point recoil for each copied neutral special. The native match harness
+initializes the original 320-node dynamics pool before stage and fighter setup;
+the roster regression compares every constructor's live chain counts with the
+imported descriptors. The corrected-core Peach/Fountain 60-second sample has
+3,600 simulation steps but only 3,513 draw submissions; it remains below the
+rendering target. Submission timing and a CPU profile are recorded in
+[the dynamics checkpoint](../../docs/benchmarks/browser-2026-09-16-native-port-kirby-copy-jolt.json).
+
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy --stage-callbacks --render-steps --hardware
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy=spit --stage-callbacks --render-steps --hardware

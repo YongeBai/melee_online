@@ -5,6 +5,29 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+A new runtime check exposed missing dynamic-bone pool initialization in the
+match harness: a Pikachu copy hat declared three chains but had zero live nodes.
+The harness now calls the original initializer before stage/fighter setup. All
+26 selected fighter starts pass a strengthened regression that checks live
+chain counts for 27 components, including Nana and both Zelda/Sheik forms.
+Examples include Fox's four nodes, Marth's twelve, Zelda's forty-four and Peach's
+forty-five. Earlier timings predate this correction and do not certify this build.
+
+Pikachu and Pichu copies now pass full rendered lifecycle tests of 1,987 and
+1,990 frames respectively, plus 124 intro frames each. Their hats allocate
+10 and 8 dynamic nodes, return them on copy loss, and reacquire correctly.
+Contact tests raise the target from 8 to 15 damage with seven frames of hitlag;
+Pichu's copy retains one-point recoil. All 210 unit tests and shared browser
+checks pass. Focused GPU verification passes all 973 Pikachu and 976 Pichu
+contact frames. A corrected-build 60-second Peach mirror on Fountain records
+3,600 simulation steps and 3,513 draw submissions: 59.97 and 58.52 per second.
+Simulation averages 0.95 ms; draw submission averages 9.22 ms with a 15.9 ms p95.
+The workload uses the documented cosmetic reductions and 90 live dynamic nodes.
+It does not meet the presentation target or prove displayed FPS/latency. A
+separate CPU profile identifies repeated GameCube-address diagnostic logging,
+material/state conversion and allocation as the next optimization targets.
+[Jolt-copy and dynamics evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-jolt.json).
+
 Kirby's Fox copy now passes the 1,993-frame full rendered lifecycle, plus 124
 intro frames: ground/air Blaster, hat loss and reacquisition. A separate
 979-frame contact test observes the laser raise Fox from 8 to 11 damage without
