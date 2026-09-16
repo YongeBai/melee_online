@@ -1,0 +1,712 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "5f4802a",
+  "scope": "Restore original bank 30 stage particles before treating native stage workloads as complete; incomplete competitive acceptance",
+  "wasmSha256": "c358c8beda6c9cd7d776af3fe29c84c03fb13494a454cce93d005552e4e0707f",
+  "portableRecipeSha256": "a3c4fe2db173b40b23642d30b72c8c97a41047c81cc8bf412fa34e0b9413f335",
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "sourceHashes": {
+    "effect-assets.mjs": "51c3e5a9c24a7c5d91ed9427eaccc3eec395ed6e3211c20dda7a8e51bfc0faf3",
+    "effects.c": "4cb78d235e4cc6a761b8e727582f792be60ea1788feba5f73ececb25a6b58ea4",
+    "stage-map.c": "87dce88cb78c2508f8f4fe8af40c7319acd4071be80ba34c0c5a412c948087bd",
+    "verify-effects.mjs": "a7b44e75a1ccb6899083030d83bb374e97ce47cce367dbae046d01ce465e49c2",
+    "constructor.html": "fbaa323c4ce04a88ac2435f8ffc487a3f4ebdee6893f8cf72cb1335ffb49345c",
+    "combat-workload.mjs": "5677d0a3b04fb2483252fe7a1fcc2f737cfd58c85f89a3fb47387ad533285755"
+  },
+  "validation": {
+    "unitTests": 153,
+    "failedTests": 0,
+    "fighterBuild": true,
+    "stages": {
+      "battlefield": {
+        "stage": {
+          "name": "Battlefield",
+          "kind": 31,
+          "collisionLoaded": true,
+          "vertexChecks": 52,
+          "modelGroups": [
+            0,
+            3,
+            1,
+            6
+          ],
+          "splineCount": 0,
+          "shadowCount": 0,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true,
+          "transitions": [
+            {
+              "frame": 1,
+              "groups": [
+                0,
+                1,
+                3,
+                6
+              ]
+            },
+            {
+              "frame": 2677,
+              "groups": [
+                0,
+                1,
+                2,
+                3,
+                6
+              ]
+            },
+            {
+              "frame": 2877,
+              "groups": [
+                0,
+                2,
+                3,
+                6
+              ]
+            }
+          ],
+          "peakStageParticles": 160,
+          "renderedFrames": 38,
+          "callbackFrames": 4500,
+          "callbacksVerified": true
+        },
+        "bank": {
+          "bank": 30,
+          "passed": true,
+          "checks": 526,
+          "models": 0,
+          "commands": 6,
+          "textures": 2,
+          "relocations": 0,
+          "unreferencedRelocations": 1279
+        },
+        "particles": {
+          "draws": 7959,
+          "vertices": 31836,
+          "frames": 158,
+          "peakDraws": 160
+        },
+        "gpuVertexChecks": {
+          "vertices": 24750,
+          "maximumPositionError": 0.000002545735399126853
+        },
+        "combatFrames": 683,
+        "combatTraceSha256": "cdc288ae093576c0051e8655cee2a9260ac65b51d00b5142c453c51c331888ca",
+        "lifecycleCompleted": true
+      },
+      "destination": {
+        "stage": {
+          "name": "Final Destination",
+          "kind": 32,
+          "collisionLoaded": true,
+          "vertexChecks": 32,
+          "modelGroups": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "splineCount": 2,
+          "shadowCount": 3,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true,
+          "transitions": [
+            {
+              "frame": 1,
+              "groups": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ]
+            },
+            {
+              "frame": 10909,
+              "groups": [
+                0,
+                1,
+                2,
+                3,
+                9
+              ]
+            },
+            {
+              "frame": 12890,
+              "groups": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ]
+            },
+            {
+              "frame": 23924,
+              "groups": [
+                0,
+                1,
+                2,
+                3,
+                9
+              ]
+            },
+            {
+              "frame": 25905,
+              "groups": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+              ]
+            }
+          ],
+          "peakStageParticles": 65,
+          "renderedFrames": 225,
+          "callbackFrames": 27000,
+          "callbacksVerified": true
+        },
+        "bank": {
+          "bank": 30,
+          "passed": true,
+          "checks": 456,
+          "models": 0,
+          "commands": 5,
+          "textures": 3,
+          "relocations": 0,
+          "unreferencedRelocations": 7999
+        },
+        "particles": {
+          "draws": 9406,
+          "vertices": 37624,
+          "frames": 227,
+          "peakDraws": 71
+        },
+        "gpuVertexChecks": {
+          "vertices": 24508,
+          "maximumPositionError": 0.000017852187361960464
+        }
+      },
+      "dreamland": {
+        "stage": {
+          "name": "Dream Land",
+          "kind": 28,
+          "collisionLoaded": true,
+          "vertexChecks": 28,
+          "modelGroups": [
+            0,
+            3,
+            7,
+            5,
+            4,
+            6,
+            1
+          ],
+          "splineCount": 0,
+          "shadowCount": 10,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true,
+          "transitions": [
+            {
+              "frame": 1,
+              "groups": [
+                0,
+                1,
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            },
+            {
+              "frame": 3658,
+              "groups": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            }
+          ],
+          "peakStageParticles": 18,
+          "wind": {
+            "directions": [
+              2,
+              1
+            ],
+            "activeFrames": 1644,
+            "displacementChecks": 461,
+            "windTransitionFrames": 6,
+            "maxError": 0.0000030547380447387695,
+            "strength": 0.20000000298023224
+          },
+          "renderedFrames": 75,
+          "callbackFrames": 9000,
+          "callbacksVerified": true
+        },
+        "bank": {
+          "bank": 30,
+          "passed": true,
+          "checks": 266,
+          "models": 0,
+          "commands": 3,
+          "textures": 3,
+          "relocations": 0,
+          "unreferencedRelocations": 2590
+        },
+        "particles": {
+          "draws": 2237,
+          "vertices": 8948,
+          "frames": 126,
+          "peakDraws": 36
+        },
+        "gpuVertexChecks": {
+          "vertices": 15134,
+          "maximumPositionError": 2.458783294091129e-7
+        }
+      }
+    },
+    "fountainBankConversion": {
+      "commands": 14,
+      "textureGroups": 4,
+      "retainedHsdRelocations": 0,
+      "liveStageIntegrated": false
+    },
+    "battlefieldImageInspected": true,
+    "battlefieldImageSha256": "ff2b7c48d323f3e460c567554f20bc2c19156c5b17df9cb36e7523d6b390cc4f"
+  },
+  "catalogDiscovery": {
+    "battlefield": {
+      "driverShaderCacheDisabled": true,
+      "resolution": [
+        960,
+        720
+      ],
+      "frames": 3600,
+      "drawSubmissions": 3599,
+      "elapsedMs": 60024.29999998212,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5201388885163598,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 1.600000023841858
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 7.132258960896977,
+        "p50Ms": 6.799999982118607,
+        "p95Ms": 9.199999988079071,
+        "maxMs": 34.80000001192093
+      },
+      "catchUpCallbacks": 1,
+      "shaderPreparation": {
+        "requested": 55,
+        "compiled": 55,
+        "cpuMs": 477.59999999403954,
+        "fighterStateUnchanged": true
+      },
+      "shaderCoverage": {
+        "programs": 60,
+        "prepared": 55,
+        "preparedUsed": 33,
+        "unpreparedUsed": 5
+      },
+      "liveShaderCompilations": [
+        {
+          "frame": 200,
+          "program": 56,
+          "origin": "model",
+          "cpuMs": 11.900000005960464
+        },
+        {
+          "frame": 208,
+          "program": 57,
+          "origin": "model",
+          "cpuMs": 10.5
+        },
+        {
+          "frame": 2046,
+          "program": 58,
+          "origin": "model",
+          "cpuMs": 8.900000005960464
+        },
+        {
+          "frame": 2119,
+          "program": 59,
+          "origin": "model",
+          "cpuMs": 12
+        },
+        {
+          "frame": 2119,
+          "program": 60,
+          "origin": "model",
+          "cpuMs": 5.699999988079071
+        }
+      ],
+      "contactFramesByWindow": [
+        51,
+        60,
+        60,
+        30,
+        60,
+        60
+      ],
+      "stockChanges": [
+        {
+          "frame": 2046,
+          "slot": 1,
+          "stocks": 3
+        }
+      ],
+      "particles": {
+        "draws": 321441,
+        "vertices": 1285764,
+        "frames": 3599,
+        "peakDraws": 182
+      },
+      "finalGpuErrorCheck": true,
+      "gameplayTraceSha256": "28f1f4f64d24186921e1c75f3642938dda94cef11dfed738653559bb7cb40464",
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "gameplayMatchesPreparedRepeat": true
+    },
+    "destination": {
+      "driverShaderCacheDisabled": true,
+      "resolution": [
+        960,
+        720
+      ],
+      "frames": 3600,
+      "drawSubmissions": 3597,
+      "elapsedMs": 60034.09999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.6118888889253139,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 1.7999999821186066
+      },
+      "drawSubmissionCpu": {
+        "samples": 3597,
+        "meanMs": 6.478593272179539,
+        "p50Ms": 6,
+        "p95Ms": 9.199999988079071,
+        "maxMs": 52.20000001788139
+      },
+      "catchUpCallbacks": 2,
+      "shaderPreparation": {
+        "requested": 55,
+        "compiled": 55,
+        "cpuMs": 620.0999999940395,
+        "fighterStateUnchanged": true
+      },
+      "shaderCoverage": {
+        "programs": 60,
+        "prepared": 55,
+        "preparedUsed": 30,
+        "unpreparedUsed": 5
+      },
+      "liveShaderCompilations": [
+        {
+          "frame": 196,
+          "program": 56,
+          "origin": "model",
+          "cpuMs": 20
+        },
+        {
+          "frame": 204,
+          "program": 57,
+          "origin": "model",
+          "cpuMs": 18
+        },
+        {
+          "frame": 2648,
+          "program": 58,
+          "origin": "model",
+          "cpuMs": 8.800000011920929
+        },
+        {
+          "frame": 2723,
+          "program": 59,
+          "origin": "model",
+          "cpuMs": 19.5
+        },
+        {
+          "frame": 2723,
+          "program": 60,
+          "origin": "model",
+          "cpuMs": 14.5
+        }
+      ],
+      "contactFramesByWindow": [
+        33,
+        60,
+        60,
+        60,
+        33,
+        60
+      ],
+      "stockChanges": [
+        {
+          "frame": 2648,
+          "slot": 1,
+          "stocks": 3
+        }
+      ],
+      "particles": {
+        "draws": 46319,
+        "vertices": 185276,
+        "frames": 2641,
+        "peakDraws": 55
+      },
+      "finalGpuErrorCheck": true,
+      "gameplayTraceSha256": "13fe6d8d41e2339a30a5de61868f663720863bb4aa34ad58275afeef495894d8",
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "gameplayMatchesPreparedRepeat": true
+    }
+  },
+  "preparedCombat": {
+    "battlefield": {
+      "driverShaderCacheDisabled": true,
+      "resolution": [
+        960,
+        720
+      ],
+      "frames": 3600,
+      "drawSubmissions": 3600,
+      "elapsedMs": 60033.80000001192,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.49738888916869956,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2.100000023841858
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.91513888856603,
+        "p50Ms": 6.5,
+        "p95Ms": 9.400000005960464,
+        "maxMs": 16.30000001192093
+      },
+      "catchUpCallbacks": 0,
+      "shaderPreparation": {
+        "requested": 60,
+        "compiled": 60,
+        "cpuMs": 928.0999999940395,
+        "fighterStateUnchanged": true
+      },
+      "shaderCoverage": {
+        "programs": 60,
+        "prepared": 60,
+        "preparedUsed": 38,
+        "unpreparedUsed": 0
+      },
+      "liveShaderCompilations": [],
+      "contactFramesByWindow": [
+        51,
+        60,
+        60,
+        30,
+        60,
+        60
+      ],
+      "stockChanges": [
+        {
+          "frame": 2046,
+          "slot": 1,
+          "stocks": 3
+        }
+      ],
+      "particles": {
+        "draws": 321519,
+        "vertices": 1286076,
+        "frames": 3600,
+        "peakDraws": 182
+      },
+      "finalGpuErrorCheck": true,
+      "gameplayTraceSha256": "28f1f4f64d24186921e1c75f3642938dda94cef11dfed738653559bb7cb40464",
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    },
+    "destination": {
+      "driverShaderCacheDisabled": true,
+      "resolution": [
+        960,
+        720
+      ],
+      "frames": 3600,
+      "drawSubmissions": 3600,
+      "elapsedMs": 60034.90000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.6368333338201047,
+        "p50Ms": 0.6000000238418579,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 1.7999999821186066
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.10025000019206,
+        "p50Ms": 5.9000000059604645,
+        "p95Ms": 7.600000023841858,
+        "maxMs": 12.800000011920929
+      },
+      "catchUpCallbacks": 0,
+      "shaderPreparation": {
+        "requested": 60,
+        "compiled": 60,
+        "cpuMs": 632.5999999940395,
+        "fighterStateUnchanged": true
+      },
+      "shaderCoverage": {
+        "programs": 60,
+        "prepared": 60,
+        "preparedUsed": 35,
+        "unpreparedUsed": 0
+      },
+      "liveShaderCompilations": [],
+      "contactFramesByWindow": [
+        33,
+        60,
+        60,
+        60,
+        33,
+        60
+      ],
+      "stockChanges": [
+        {
+          "frame": 2648,
+          "slot": 1,
+          "stocks": 3
+        }
+      ],
+      "particles": {
+        "draws": 46345,
+        "vertices": 185380,
+        "frames": 2642,
+        "peakDraws": 55
+      },
+      "finalGpuErrorCheck": true,
+      "gameplayTraceSha256": "13fe6d8d41e2339a30a5de61868f663720863bb4aa34ad58275afeef495894d8",
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    },
+    "dreamland": {
+      "driverShaderCacheDisabled": true,
+      "resolution": [
+        960,
+        720
+      ],
+      "frames": 3600,
+      "drawSubmissions": 3600,
+      "elapsedMs": 60024.69999998808,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.6102500000513262,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 1.9000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.788333333383004,
+        "p50Ms": 5.5,
+        "p95Ms": 7.700000017881393,
+        "maxMs": 14.799999982118607
+      },
+      "catchUpCallbacks": 0,
+      "shaderPreparation": {
+        "requested": 60,
+        "compiled": 60,
+        "cpuMs": 669.5,
+        "fighterStateUnchanged": true
+      },
+      "shaderCoverage": {
+        "programs": 60,
+        "prepared": 60,
+        "preparedUsed": 39,
+        "unpreparedUsed": 0
+      },
+      "liveShaderCompilations": [],
+      "contactFramesByWindow": [
+        45,
+        51,
+        45,
+        54,
+        39,
+        39
+      ],
+      "stockChanges": [
+        {
+          "frame": 1142,
+          "slot": 1,
+          "stocks": 3
+        },
+        {
+          "frame": 2418,
+          "slot": 0,
+          "stocks": 3
+        },
+        {
+          "frame": 3302,
+          "slot": 1,
+          "stocks": 2
+        }
+      ],
+      "particles": {
+        "draws": 36698,
+        "vertices": 146792,
+        "frames": 2765,
+        "peakDraws": 55
+      },
+      "finalGpuErrorCheck": true,
+      "gameplayTraceSha256": "52da2f797d71f24cbf9e3b1bbc4f86fdba86d9415a63856167ef5155b587ffc7",
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false
+    }
+  },
+  "limitations": [
+    "Older fixtures omitted the stage particle bank; their timing and random consumption are not equivalent controls.",
+    "These selected two-Captain fixtures measure simulation and draw submission, not distinct displayed frames or input-to-photon latency.",
+    "Stage particle updates execute original scripts; cosmetic simulation was not skipped.",
+    "Fountain of Dreams, Yoshi’s Story and Pokemon Stadium live integration remain incomplete.",
+    "Complete roster/moves, scene/menu lifecycle, audio, devices/network, static deployment and broader native parity remain."
+  ],
+  "acceptanceMet": false
+}

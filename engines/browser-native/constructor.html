@@ -28,7 +28,7 @@ import {readFighterMotions} from './motion-assets.mjs';
 import {convertMotionAnimations} from './motion-animations.mjs';
 import {motionSpec} from './motion-spec.mjs';
 import {attributeSpec} from './attribute-spec.mjs';
-import {convertFighterEffects,convertCommonEffects} from './effect-assets.mjs';
+import {convertFighterEffects,convertCommonEffects,convertStageParticles} from './effect-assets.mjs';
 import {convertStageMap,nativeStages} from './stage-map-assets.mjs';
 import {convertStageCollision} from './stage-collision.mjs';
 import {loadCostume} from './costume-assets.mjs';
@@ -112,6 +112,11 @@ try {
     installResidentFile(module,'NativeStageMap.dat',map.image);
     const stageFile=openResidentArchive(module,'NativeStageMap.dat',['native_stage_map','native_stage_parameters']);
     module._portStageMapInstallKind(stageFile.archive,...stageFile.addresses,stageSpec.kind);
+    const particles=convertStageParticles(stageBytes,stageKey);
+    installResidentFile(module,'NativeStageParticles.dat',particles.image);
+    const particleFile=openResidentArchive(module,'NativeStageParticles.dat',['native_stage_particles','native_stage_particle_textures']);
+    if(module._portStageParticlesInstall(...particleFile.addresses)!==particles.count)throw Error('Original stage particle bank registration');
+    report.stageParticles={bank:particles.bank,...verifyResidentEffectBank(module,particles,particleFile.addresses[0])};
     const collision=convertStageCollision(stageBytes);
     installResidentFile(module,'NativeStageCollision.dat',collision.image);
     const collisionFile=openResidentArchive(module,'NativeStageCollision.dat',['coll_data']);
@@ -237,7 +242,7 @@ try {
       }});report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
     }
     if(stageCallbacks&&!live&&!params.has('workloadsteps')){
-      report.stage.transitions=[];let previous='';
+      report.stage.transitions=[];report.stage.peakStageParticles=0;let previous='';
       const wind=stageKey==='dreamland'?{directions:[],activeFrames:0,displacementChecks:0,windTransitionFrames:0,maxError:0,strength:module._portDreamlandWindRead(4,0)}:null;
       if(wind)report.stage.wind=wind;
       for(let frame=0;frame<stageFrames;frame++){
@@ -256,6 +261,7 @@ try {
             if(error>.0001)throw Error('Original Dream Land wind displacement mismatch '+JSON.stringify({frame,slot,error,before,after}));
           }
         }
+        report.stage.peakStageParticles=Math.max(report.stage.peakStageParticles,module._portEffectsRead(9,30));
         const groups=Array.from({length:stageSpec.count},(_,i)=>module._portStageObject(i)?i:-1).filter(i=>i>=0),key=groups.join(',');
         if(key!==previous){report.stage.transitions.push({frame:frame+1,groups});previous=key;}
         if(preview&&(renderSteps||frame%120===0)){

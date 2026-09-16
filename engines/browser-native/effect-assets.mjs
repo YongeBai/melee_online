@@ -25,6 +25,11 @@ export function convertFighterEffects(input,code) {
 export function convertCommonEffects(input) {
   return convertEffects(input,{name:'effCommonDataTable',bank:0,first:0,count:592,groups:36,models:47});
 }
+export function convertStageParticles(input,stage) {
+  const specs={battlefield:[6,2],destination:[5,3],dreamland:[3,3],fountain:[14,4]};
+  const spec=specs[stage];if(!spec)throw Error('Unsupported stage particle bank '+stage);
+  return convertEffects(input,{stage:true,name:'map_ptcl',bank:30,first:30000,count:spec[0],groups:spec[1],models:0});
+}
 function convertEffects(input,spec) {
   const a=inspectArchive(input),d=a.data,root=a.publics.get(spec.name);
   if(root===undefined||a.externs.size)throw Error('Unsupported effect archive');
@@ -35,7 +40,8 @@ function convertEffects(input,spec) {
   function pointer(at){claim(at,4);const v=d.getUint32(at);if(!a.relocations.has(at)){if(v)throw Error('Unrelocated effect pointer');out.setUint32(at,0,true);return null;}bounds(v,1,1);pointers.add(at);out.setUint32(at,v,true);return v;}
   function raw(at,size){bounds(at,size,1);for(let i=at;i<at+size;i++){if(claims.has(i)||a.relocations.has(i&~3))throw Error('Effect payload overlaps descriptor');packed.add(i);}}
   function words(tree){for(const at of tree.words)tree.pointers.has(at)?pointer(at):scalar(at);if(tree.halves)for(const at of tree.halves)scalar(at,2);if(tree.packed)for(const at of tree.packed)raw(at,1);}
-  const cmd=pointer(root),tex=pointer(root+4),commands=[],textures=[];
+  const cmd=spec.stage?root:pointer(root),tex=spec.stage?a.publics.get('map_texg'):pointer(root+4),commands=[],textures=[];
+  if(spec.stage&&(tex===undefined||tex===cmd))throw Error('Missing stage particle texture root');
   let version=null,bank=spec.bank,first=spec.first,count=spec.count;
   if(spec.count){
     if(cmd===null||tex===null||tex<=cmd)throw Error('Missing effect banks');
@@ -100,7 +106,7 @@ function convertEffects(input,spec) {
   // pointers are null. Only the graph reachable through the typed table is
   // exposed to HSD; never relocate or expose those unused archive records.
   if(spec.bank===8&&untyped.length&&(untyped.length!==42||effects.some(e=>e.shape!==null)))throw Error('Unexpected Donkey orphan shape layout');
-  if(untyped.length&&![0,8].includes(spec.bank))throw Error('Untyped effect archive relocations: '+untyped.join(','));
-  return {root,cmd,tex,bank,version,first,count,commands,textures,effects,pointerSlots:pointers,unreferencedRelocations:untyped,packedBytes:packed.size,
-    image:nativeSubgraphImage(body,pointers,new Map([[spec.name,root]]))};
+  if(untyped.length&&!spec.stage&&![0,8].includes(spec.bank))throw Error('Untyped effect archive relocations: '+untyped.join(','));
+  return {stage:!!spec.stage,root,cmd,tex,bank,version,first,count,commands,textures,effects,pointerSlots:pointers,unreferencedRelocations:untyped,packedBytes:packed.size,
+    image:nativeSubgraphImage(body,pointers,new Map(spec.stage?[['native_stage_particles',cmd],['native_stage_particle_textures',tex]]:[[spec.name,root]]))};
 }

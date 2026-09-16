@@ -3,11 +3,11 @@ import {installResidentFile} from './resident-files.mjs';
 // Read back the original loader's relocated bank before any live effects can
 // mutate it. HSD archive relocations and particle-relative offsets are distinct.
 export function verifyResidentEffectBank(module,source,data) {
-  const d=new DataView(module.HEAPU8.buffer),s=new DataView(source.image.buffer,32),base=data-source.root-8;
+  const d=new DataView(module.HEAPU8.buffer),s=new DataView(source.image.buffer,32),base=source.stage?data-source.cmd:data-source.root-8;
   let checks=0;const check=(ok,message)=>{checks++;if(!ok)throw Error('Resident effects: '+message);};
   check(base>0,'loaded data base');
   for(const at of source.pointerSlots)check(d.getUint32(base+at,true)===base+s.getUint32(at,true),'HSD relocation '+at);
-  check(d.getUint32(data-8,true)===(source.cmd===null?0:base+source.cmd)&&d.getUint32(data-4,true)===(source.tex===null?0:base+source.tex),'original bank roots');
+  if(!source.stage)check(d.getUint32(data-8,true)===(source.cmd===null?0:base+source.cmd)&&d.getUint32(data-4,true)===(source.tex===null?0:base+source.tex),'original bank roots');
   for(const [i,c] of source.commands.entries()) {
     check(d.getUint32(base+source.cmd+12+i*4,true)===(c?base+c.offset:0),'command relative relocation');
     if(!c)continue;const p=base+c.offset;

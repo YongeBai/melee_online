@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {convertCaptainEffects,convertCommonEffects,convertFighterEffects} from '../../engines/browser-native/effect-assets.mjs';
+import {convertCaptainEffects,convertCommonEffects,convertFighterEffects,convertStageParticles} from '../../engines/browser-native/effect-assets.mjs';
+import {inspectArchive} from '../../engines/browser-native/archive.mjs';
 function fixture(mutate=()=>{}) {
   const body=new Uint8Array(1792),d=new DataView(body.buffer),relocs=new Set(),cmd=128,tex=1296,joint=1616;
   const ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};ptr(0,cmd);ptr(4,tex);
@@ -59,6 +60,33 @@ function fighterBankFixture({symbol,bank,count,groups,models},mutate=()=>{}) {
   const name=new TextEncoder().encode(symbol+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return bytes;
 }
+function stageBankFixture(change=()=>{}) {
+  const bytes=fighterBankFixture({symbol:'unused',bank:30,count:3,groups:3,models:0},a=>{
+    for(let i=0;i<3;i++)a.d.setUint32(a.cmd+12+i*4,48);
+    a.d.setUint32(248,0x400003);a.d.setFloat32(252,-1.25);a.d.setUint8(300,0xff);
+    a.d.setUint32(a.tex+4,20);a.d.setUint32(420,1);a.d.setUint32(432,8);a.d.setUint32(436,8);a.d.setUint32(444,112);
+    change(a);
+  });
+  const archive=inspectArchive(bytes);
+  const names=new TextEncoder().encode('map_ptcl\0map_texg\0'),pub=32+archive.dataSize+archive.relocations.size*4;
+  const image=new Uint8Array(pub+16+names.length),view=new DataView(image.buffer);
+  [image.length,archive.dataSize,archive.relocations.size,2,0].forEach((n,i)=>view.setUint32(i*4,n));
+  image.set(bytes.subarray(32,32+archive.dataSize),32);
+  [...archive.relocations].forEach((offset,i)=>view.setUint32(32+archive.dataSize+i*4,offset));
+  view.setUint32(pub,192);view.setUint32(pub+8,400);view.setUint32(pub+12,9);image.set(names,pub+16);
+  return image;
+}
+test('stage particle conversion exposes only typed banks and preserves original relative tables and scripts',()=>{
+  const bytes=stageBankFixture(),before=bytes.slice(),result=convertStageParticles(bytes,'dreamland'),header=new DataView(result.image.buffer),d=new DataView(result.image.buffer,32);
+  assert.deepEqual(bytes,before);assert.equal(result.bank,30);assert.equal(result.count,3);assert.equal(result.effects.length,0);
+  assert.equal(header.getUint32(8,true),0);assert.equal(header.getUint32(12,true),2);assert.equal(header.getUint32(16,true),0);
+  const symbols=32+header.getUint32(4,true);assert.equal(header.getUint32(symbols,true),192);assert.equal(header.getUint32(symbols+8,true),400);
+  assert.equal(new TextDecoder().decode(result.image.subarray(symbols+16)),'native_stage_particles\0native_stage_particle_textures\0');
+  assert.equal(d.getUint16(194,true),30);assert.equal(d.getUint32(196,true),30000);assert.equal(d.getUint32(204,true),48);
+  assert.equal(d.getFloat32(252,true),-1.25);assert.equal(d.getUint8(300),0xff);assert.equal(d.getUint32(404,true),20);assert.equal(d.getUint32(444,true),112);
+  for(const change of [a=>a.d.setUint16(a.cmd+2,31),a=>a.d.setUint32(a.cmd+8,4),a=>a.d.setUint32(a.tex,4),a=>a.d.setUint32(a.cmd+12,1),a=>a.ptr(a.cmd+12,240)])assert.throws(()=>convertStageParticles(stageBankFixture(change),'dreamland'));
+  assert.throws(()=>convertStageParticles(bytes,'unknown'));
+});
 test('fighter effect banks preserve bank identity, model count and model-only null banks',()=>{
   for(const [code,spec] of Object.entries({Fx:{symbol:'effFoxDataTable',bank:3,count:11,groups:8,models:6},Fc:{symbol:'effFoxDataTable',bank:3,count:11,groups:8,models:6},Dk:{symbol:'effDonkeyDataTable',bank:8,count:0,groups:0,models:7},Ms:{symbol:'effMarsDataTable',bank:16,count:4,groups:3,models:2},Gn:{symbol:'effGanonDataTable',bank:19,count:17,groups:7,models:6},Fe:{symbol:'effEmblemDataTable',bank:49,count:4,groups:3,models:2}})){
     const input=fighterBankFixture(spec),before=input.slice(),result=convertFighterEffects(input,code);

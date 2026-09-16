@@ -51,6 +51,7 @@ double portEffectsRead(unsigned field,unsigned index) {
           if(++n>65535||!isfinite(p->pos.x)||!isfinite(p->pos.y)||!isfinite(p->pos.z)||
              !isfinite(p->vel.x)||!isfinite(p->vel.y)||!isfinite(p->vel.z)||!isfinite(p->size))abort();
         }return n;}
+      case 9:{if(index>=65)abort();unsigned n=0;for(unsigned i=0;i<16;i++)for(HSD_Particle* p=hsd_804D0908[i];p;p=p->next)if(p->bank==index)n++;return n;}
       default:abort();
     }
 }

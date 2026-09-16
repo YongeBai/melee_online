@@ -5,6 +5,30 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The three live stage fixtures now load their original stage particle banks.
+The missing bank allowed stage callbacks to request effects without spawning
+them. Typed conversion and original HSD registration restore the scripts,
+textures, simulation and drawing before stage callbacks begin. Readback checks
+verify the relocated descriptors and unchanged packed script bytes.
+
+Long checks pass with peak active stage-particle counts of 160 on Battlefield,
+65 on Final Destination and 18 on Dream Land. The latter still passes both wind
+directions and 461 displacement checks. All 153 unit tests pass. Fountain of
+Dreams' particle bank also converts, but its live stage remains pending.
+
+Older stage samples without this bank omit work and may consume random values
+differently. They are historical measurements, not equivalent controls for the
+current fixture. The new cold-driver-cache combat samples each complete 3,600 simulation steps
+and draw submissions in approximately 60 seconds, without catch-up callbacks or
+live shader compilation. Mean draw submissions are 6.92 ms on Battlefield,
+6.10 ms on Final Destination and 5.79 ms on Dream Land. Final Destination's
+incomplete-catalog control had a 52.2 ms maximum and three fewer submissions;
+the prepared repeat peaks at 12.8 ms with identical recorded gameplay. These
+remain selected fixture measurements, not distinct displayed FPS or latency.
+[Stage-particle evidence](benchmarks/browser-2026-09-16-native-port-stage-particles.json).
+
+Previous Dream Land checkpoint (without the stage particle bank):
+
 Dream Land is now the third live stage fixture. Its original callbacks control
 Whispy, wind and background spawns. The importer handles its eight map model
 groups, ten shadow-light entries and typed wind/timing parameters. Rendering

@@ -945,6 +945,20 @@ mapped address-zero page. Actual shadow texture capture remains separate work.
 
 ## Original particle polygon submission
 
+Live stage fixtures now install the original map particle bank (bank 30) before
+stage callbacks run. The importer converts the typed `map_ptcl` and `map_texg`
+headers, command descriptors and relative texture tables; packed particle
+scripts and texture bytes remain unchanged. It publishes only those two bank
+roots, excluding the rest of the stage archive from HSD relocation. Original
+`psInitDataBankLocate` / `psInitDataBankLoad` perform the runtime registration,
+with a complete readback check before the first generator can spawn.
+
+Battlefield, Final Destination and Dream Land use this path. The Fountain of
+Dreams bank also has a typed conversion specification, but its live stage,
+moving platforms and rendering boundaries are not yet integrated. Older stage
+measurements without bank 30 omitted effects and may have different random
+number consumption; do not treat them as equivalent performance controls.
+
 The particle manager now runs efLib_render_callback and psDispParticles in the
 original camera pass. The original code still sorts particles and computes their
 corners, trails, colors, texture selection and matrices. The portable GXVert

@@ -19,6 +19,7 @@
 #include <sysdolphin/baselib/lobj.h>
 #include <sysdolphin/baselib/jobj.h>
 #include <sysdolphin/baselib/controller.h>
+#include <sysdolphin/baselib/particle.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -94,6 +95,19 @@ void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam*
     Ground_801BFFB0();
     UnkArchiveStruct* entry=grDatFiles_GetArchive();entry->unk0=archive;entry->unk4=data;entry->unk8=0;
     stage_info.grkind=stage_callbacks->grkind;stage_info.param=param;installed=1;
+}
+/* Original archive-location and Ground bank-install steps, before callbacks
+ * can spawn generators. The resident archive remains pinned for this scene. */
+unsigned portStageParticlesInstall(int* commands,int* textures)
+{
+    if(!installed||callbacks_initialized||stage_info.map_ptcl||!commands||!textures||
+       ((u16*)commands)[0]!=0x42||((u16*)commands)[1]!=30||commands[1]!=30000||
+       commands[2]<=0||commands[2]>4096||textures[0]<=0||textures[0]>256)abort();
+    stage_info.map_ptcl=commands;stage_info.map_texg=textures;
+    psInitDataBankLocate((HSD_Archive*)commands,(HSD_Archive*)textures,NULL);
+    psInitDataBankLoad(30,commands,textures,NULL,NULL);
+    if(psCmdListArray[30]!=30000+commands[2]||!psTexGroupArray[30]||!ptclref_804D0E5C[30])abort();
+    return commands[2];
 }
 void portStageMapInstall(HSD_Archive* archive,UnkStageDat* data,GroundParam* param)
 {portStageMapInstallKind(archive,data,param,St_Kind_Battle);}
