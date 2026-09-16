@@ -34,6 +34,11 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/sysdolphin/baselib/texp.c') {
+      // The original compiler initializes only referenced constant channels.
+      // Define the other channels rather than reading uninitialized C bytes.
+      replace('    GXColor reg[8];','    GXColor reg[8] = { 0 };');
+    }
     if(file==='src/melee/gm/types.h') {
       // This union is also read/written through its byte member. PPC b7 is
       // bit zero; retain that meaning on the little-endian WASM compiler.

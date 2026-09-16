@@ -8,6 +8,9 @@ import {loadPose} from './verify-poses.mjs';
 import {animationArchives} from './animation-assets.mjs';
 import {createMeshPipeline,uploadMesh} from './gpu-mesh.mjs';
 import {verifyGpuConventions} from './verify-gpu-conventions.mjs';
+import {inspectArchive} from './archive.mjs';
+import {readNativeTev} from './native-tev.mjs';
+import {verifyGpuTev} from './verify-tev.mjs';
 const canvas=document.querySelector('canvas'),status=document.querySelector('#status'),result=document.querySelector('#result');
 const parameters=new URL(location.href).searchParams;
 const fullScene=parameters.get('scene')==='1';
@@ -31,13 +34,13 @@ try {
   const view=columnMajor([...module.HEAPF32.slice((scratch+36)/4,(scratch+84)/4),0,0,0,1]);
   module._MTXPerspective(scratch,45,4/3,1,500);
   const projection=columnMajor(module.HEAPF32.slice(scratch/4,scratch/4+16));module._free(scratch);
-  const manifest=await (await fetch('./model-fixtures.json')).json(),rows=[];
+  const manifest=await (await fetch('./model-fixtures.json')).json(),rows=[],tevPrograms=new Map();
   const selected=parameters.get('model')||'PlMrNr.dat';if(!manifest.includes(selected))throw Error('Model not in hosted manifest');
   const names=parameters.get('verify')==='1'?manifest:[selected],residentModels=new Map();
   async function load(name,referenceVertices) {
     const [bytes,motion]=await Promise.all([fetchAsset(name),fetchAsset(name.replace('Nr','AJ'))]);
     const model=readModelMeshes(bytes),assets=readModelMaterials(bytes,model),transforms=textureMatrices(module,assets.textures);
-    let pose;
+    let pose,materialCount=0;
     if(fullScene) {
       if(!residentModels.has(name)) {
         const converted=convertSceneAsset(bytes);
@@ -60,6 +63,14 @@ try {
         if(!root||module._portSceneCollect(root,nodes,n)!==n||module._portSceneAnimation(n,nodes,clip.tree)!==0)
           throw Error('Native HSD animation attachment failed');
         module._portSceneRequest(root);
+        const archive=inspectArchive(bytes),seen=new Set();
+        for(const mesh of model.meshes) {
+          if(seen.has(mesh.dobj))continue;seen.add(mesh.dobj);
+          let at=model.tree.nodes[mesh.joint].display,index=0;
+          while(at!==mesh.dobj){if(at===null||index++>=4096)throw Error('Model TEV DObj ownership');at=archive.relocations.has(at+4)?archive.data.getUint32(at+4):null;}
+          const joint=new Uint32Array(module.HEAPU8.buffer,nodes,n)[mesh.joint],program=readNativeTev(module,joint,index);
+          const key=JSON.stringify(program.stages);if(!tevPrograms.has(key))tevPrograms.set(key,program);materialCount++;
+        }
         pose={step(world,flags){module._portSceneAnimate(root);module._portSceneMatrices(n,nodes,world);module._portSceneFlags(n,nodes,flags);},dispose};
       } catch(error){dispose();throw error;}
     } else {
@@ -70,7 +81,7 @@ try {
     try {
       skin=loadSkin(module,model,readSkinBindings(bytes,model),{referenceVertices});
       gpu=uploadMesh(gl,pipeline,model,skin,assets,transforms);flags=module._malloc(model.tree.nodes.length*4);
-      return {model,pose,skin,gpu,
+      return {model,pose,skin,gpu,materialCount,
         step(){pose.step(skin.world,flags);skin.step();
           gpu.updatePalette(module.HEAPF32.subarray(skin.matrices/4,skin.matrices/4+skin.groupCount*12));},
         draw(){gl.viewport(0,0,960,720);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -95,13 +106,14 @@ try {
         const sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels))].map(x=>x.toString(16).padStart(2,'0')).join('');
         snapshots.push({frame,draws,coloredPixels,sha256});
       }
-      rows.push({name,vertices:actor.model.totalVertices,paletteMatrices:actor.skin.groupCount,maxError,maxScaledError,
+      rows.push({name,vertices:actor.model.totalVertices,paletteMatrices:actor.skin.groupCount,materialCount:actor.materialCount,maxError,maxScaledError,
         snapshots,distinctImages:snapshots.some(s=>s.sha256!==snapshots[0].sha256)});
     } finally {actor.dispose();}
   }
   if(fullScene&&(module._portFileAllocations()||module._portRuntimeObjectsUsed()||module._portSceneLiveObjects()))
     throw Error('Native scene benchmark leaked archive or object ownership');
-  const report={passed:true,originalGameArchiveLoader:fullScene,originalGObjOwnership:fullScene,originalHsdObjects:fullScene,resolution:[960,720],conventions,models:rows,emulator:false,playable:false,gameplayParity:false,
+  const tev=fullScene?verifyGpuTev(gl,[...tevPrograms.values()]):null;
+  const report={passed:true,originalGameArchiveLoader:fullScene,originalGObjOwnership:fullScene,originalHsdObjects:fullScene,resolution:[960,720],conventions,tev,models:rows,emulator:false,playable:false,gameplayParity:false,
     performanceMeasured:false,renderer:gl.getParameter(gl.RENDERER),
     limitations:'Diagnostic unlit first-UV image; no native lighting, TEV, material animation, part selection, gameplay camera or match simulation'};
   const actor=await load(selected,false);actor.step();actor.draw();

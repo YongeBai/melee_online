@@ -5,6 +5,7 @@ import {readSkinBindings,loadSkin} from './skin-assets.mjs';
 import {textureMatrices} from './texture-matrix.mjs';
 import {createMeshPipeline,uploadMesh} from './gpu-mesh.mjs';
 import {createNativeCamera,checkNativeCamera} from './native-camera.mjs';
+import {readNativeTev} from './native-tev.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera, with the existing diagnostic first-UV shader. No simulation edits.
@@ -38,13 +39,21 @@ export function createNativeMatchPreview(module,canvas,actors) {
       draw(){
         const snapshot=camera.snapshot();checkNativeCamera(snapshot);
         gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-        const rows=[];
+        const rows=[],programs=new Map();
         for(const r of resources) {
           const {model,skin,gpu,nodes,flags,indices,visible}=r;
           const show=r.prepare?r.prepare():true;
           module._portSceneMatrices(model.tree.nodes.length,nodes,skin.world);
           module._portSceneFlags(model.tree.nodes.length,nodes,flags);
           module._portSceneMeshVisibility(model.meshes.length,nodes,indices,visible);
+          const seen=new Set();
+          for(let i=0;i<model.meshes.length;i++) {
+            const mesh=model.meshes[i];if(seen.has(mesh.dobj))continue;seen.add(mesh.dobj);
+            const specs=new Uint16Array(module.HEAPU8.buffer,indices,model.meshes.length*2);
+            const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[specs[i*2]];
+            const program=readNativeTev(module,joint,specs[i*2+1]),key=JSON.stringify(program.stages);
+            if(!programs.has(key))programs.set(key,{program,materials:0});programs.get(key).materials++;
+          }
           skin.step();gpu.updatePalette(module.HEAPF32.subarray(skin.matrices/4,skin.matrices/4+skin.groupCount*12));
           const draws=show?gpu.draw(snapshot.view,snapshot.projection,new Uint32Array(module.HEAPU8.buffer,flags,model.tree.nodes.length),new Uint32Array(module.HEAPU8.buffer,visible,model.meshes.length)):0;
           if(r.prepare&&!draws)throw Error('Native fighter preview has no visible body meshes');
@@ -58,7 +67,7 @@ export function createNativeMatchPreview(module,canvas,actors) {
           rows.push({name:r.name,joints:model.tree.nodes.length,meshes:model.meshes.length,draws,vertices:positions.length/3,maxScaledVertexError});
         }
         if(gl.getError()!==gl.NO_ERROR)throw Error('Native match preview GPU failure');
-        return {resolution:[canvas.width,canvas.height],actors:rows,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,playable:false,performanceMeasured:false,visualParity:false,limitations:'Diagnostic first-UV shader. Original lighting, TEV, transparency, material animation, effect rendering, HUD and complete stage callbacks remain incomplete.'};
+        return {resolution:[canvas.width,canvas.height],actors:rows,tevPrograms:[...programs.values()],eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,playable:false,performanceMeasured:false,visualParity:false,limitations:'Diagnostic first-UV shader; original TEV setup is captured but not yet rendered. Original lighting, transparency, material animation, effect rendering, HUD and complete stage callbacks remain incomplete.'};
       },dispose,
     };
   } catch(error){dispose();throw error;}

@@ -16,6 +16,15 @@ It drives the diagnostic GPU view, but the original GX material/draw boundary an
 complete roster creation are still incomplete. Captain Falcon now completes the
 original player-owned constructor; the final section describes its limited probe.
 
+Original HSD material setup can now be captured at its GX TEV boundary. The
+straight-line WebGL combiner passes signed-integer readback checks for the 33
+programs used by 1,753 default-fighter material instances, plus synthetic cases.
+See [TEV scope and provenance](TEV-NOTES.md). This combiner is not yet connected
+to the diagnostic model draws; texture generation, lighting and pixel-engine
+integration remain. After a fighter build and `probe-constructor.mjs --render`,
+run `node scripts/native-port/verify-gpu.mjs --tev` for live captured programs.
+The scene GPU regression also checks all 27 components' material programs.
+
 ## Reproduce
 
 From the repository root with Node 24 and the existing Emscripten toolchain:

@@ -5,6 +5,22 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+The native material compiler now feeds a tested WebGL integer combiner. Original
+HSD setup was captured for all 1,753 material instances in the 27 default fighter
+components, covering 33 distinct programs. Those programs and 187 synthetic
+programs pass 14,080 exact signed-integer GPU channel comparisons. The two live
+Falcon/Battlefield snapshots separately pass 13,760 comparisons, including 28
+captured program snapshots. Tests cover interpolation rounding, all arithmetic
+scales/biases, signed clamps, comparisons, selectors, swaps, presets and dependent
+register writes. The combat trace remains unchanged after material capture.
+
+This is combiner validation with supplied texture/raster inputs, not complete
+material rendering: original texture coordinate generation, lighting and pixel
+engine state still need integration. Match pictures still use the diagnostic
+first-UV shader. The 98 targeted tests pass; GPU checks use SwiftShader and
+establish neither native visual parity nor match FPS.
+[TEV checkpoint](benchmarks/browser-2026-09-15-native-port-tev.json).
+
 A new diagnostic now renders the live two-Falcon/Battlefield simulation through
 its original camera at 960×720. The settled and post-combat snapshots show both
 fighters after original body-part visibility selection. GPU transforms match the

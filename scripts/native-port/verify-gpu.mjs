@@ -5,7 +5,13 @@ import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const chrome=process.env.CHROME||'google-chrome',output=path.resolve(import.meta.dirname,'../../dist/native-port');
-const scene=process.argv.includes('--scene'),prefix=scene?'scene-gpu':'gpu';
+const tev=process.argv.includes('--tev'),scene=process.argv.includes('--scene'),prefix=tev?'tev-gpu':scene?'scene-gpu':'gpu';
+if(tev) {
+  const native=JSON.parse(fs.readFileSync(path.join(output,'constructor-render-probe.json')));
+  if(native.probe.error||!native.probe.preview)throw Error('Successful native material capture required');
+  const programs=Object.values(native.probe.preview).flatMap(s=>s.tevPrograms.map(p=>p.program));
+  fs.writeFileSync(path.join(output,'tev-fixtures.json'),JSON.stringify(programs));
+}
 const profile=fs.mkdtempSync(path.join(os.tmpdir(),'melee-native-port-gpu-')),server=createNativePortServer();
 let browser,socket,stderr='',sequence=0;const pending=new Map();
 function command(method,params={}) {
@@ -30,11 +36,12 @@ try {
   socket.addEventListener('message',event=>{const message=JSON.parse(event.data),waiter=pending.get(message.id);
     if(waiter){pending.delete(message.id);if(message.error)waiter.reject(Error(JSON.stringify(message.error)));else waiter.resolve(message.result);}});
   await command('Page.enable');
-  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/gpu-preview.html?verify=1'+(scene?'&scene=1':'')});
+  const pagePath=tev?'/tev-check.html':'/gpu-preview.html';
+  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+pagePath+'?verify=1'+(scene?'&scene=1':'')});
   // Wait for the new document before installing a completion promise in it.
   let ready=false;
   for(let i=0;i<100;i++) {
-    try {ready=(await command('Runtime.evaluate',{expression:"location.pathname==='/gpu-preview.html' && !!document.querySelector('#result')",returnByValue:true})).result.value;}catch{}
+    try {ready=(await command('Runtime.evaluate',{expression:'location.pathname==='+JSON.stringify(pagePath)+" && !!document.querySelector('#result')",returnByValue:true})).result.value;}catch{}
     if(ready)break;await delay(100);
   }
   if(!ready)throw Error('GPU page failed to load');
@@ -49,13 +56,17 @@ try {
   if(page.status!=='passed')throw Error('GPU verification failed: '+page.text);
   const verification=JSON.parse(page.text);
   fs.writeFileSync(path.join(output,prefix+'-check-output.json'),JSON.stringify(verification,null,2)+'\n');
-  if(!verification.passed||verification.models.length!==27||verification.resolution.join(',')!=='960,720')throw Error('Incomplete GPU coverage');
-  if(verification.models.some(m=>!m.distinctImages))throw Error('Animated output did not change: '+verification.models.filter(m=>!m.distinctImages).map(m=>m.name).join(', '));
-  if(verification.originalHsdObjects!==scene)throw Error('Wrong native object path tested');
+  if(tev) {
+    if(!verification.passed||verification.programs<100||!verification.capturedPrograms||!verification.integerChannelChecks)throw Error('Incomplete TEV coverage');
+  } else {
+    if(!verification.passed||verification.models.length!==27||verification.resolution.join(',')!=='960,720')throw Error('Incomplete GPU coverage');
+    if(verification.models.some(m=>!m.distinctImages))throw Error('Animated output did not change: '+verification.models.filter(m=>!m.distinctImages).map(m=>m.name).join(', '));
+    if(verification.originalHsdObjects!==scene)throw Error('Wrong native object path tested');
+  }
   const report={browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),
-    build:JSON.parse(fs.readFileSync(path.join(output,scene?'scene-build.json':'build.json'))),softwareGpu:true,verification};
+    build:JSON.parse(fs.readFileSync(path.join(output,tev?'fighter-init-build.json':scene?'scene-build.json':'build.json'))),softwareGpu:true,verification};
   fs.writeFileSync(path.join(output,prefix+'-verification.json'),JSON.stringify(report,null,2)+'\n');
-  console.log(JSON.stringify({passed:true,models:verification.models.length,resolution:verification.resolution,
+  console.log(JSON.stringify(tev?{...verification,softwareGpu:true,playable:false,performanceMeasured:false}:{passed:true,models:verification.models.length,resolution:verification.resolution,
     maxVertexError:Math.max(...verification.models.map(m=>m.maxError)),softwareGpu:true,playable:false,performanceMeasured:false}));
 } finally {
   for(const waiter of pending.values())waiter.reject(Error('Chrome test closed'));pending.clear();socket?.close();

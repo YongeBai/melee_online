@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Native TEV conformance</title>
+<canvas width="1" height="1"></canvas><pre id="result">Verifying native TEV integer shaders</pre>
+<script type="module">
+import {verifyGpuTev} from './verify-tev.mjs';
+try {
+  const response=await fetch('./tev-fixtures.json');if(!response.ok)throw Error('Missing captured material fixtures');
+  const captured=await response.json(),gl=document.querySelector('canvas').getContext('webgl2',{antialias:false});
+  if(!gl)throw Error('WebGL2 unavailable');
+  const result=verifyGpuTev(gl,captured);
+  document.querySelector('#result').textContent=JSON.stringify(result);
+  document.documentElement.dataset.result='passed';
+} catch(error) {
+  document.querySelector('#result').textContent=error.stack||String(error);
+  document.documentElement.dataset.result='failed';
+}
+</script>
