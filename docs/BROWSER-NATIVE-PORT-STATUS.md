@@ -5,6 +5,28 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Fox/Falco's laser, blaster and Illusion/Phantasm Article subgraphs now import
+their original models, attributes, state descriptors and hitbox scripts. Original
+WASM item handlers pass 1,792 script frames across 28 state descriptors, with
+83,990 checks against independently decoded hitbox fields and timing. The item
+sound-command secondary opcode also has a corrected endian adapter. This is an
+isolated subsystem result: neither fighter is enabled in complete matches yet.
+
+The shared item archive now supplies typed common parameters to an isolated
+original `Item_80266FCC` initialization check. All 92 numeric words and 12 packed
+bytes are preserved, and the game's pool/count/tracking initialization passes.
+Unconverted item registries, color tables and Fox's extra fighter table remain
+explicit gaps; no substitute registry is installed. Spawning, movement, ownership
+and collision scheduling are the next integration steps. Both Node and Chrome
+pass these checks using automatically loaded hosted fixtures.
+All 143 targeted tests and base/scene/fighter builds pass. The final binary
+retains the same Falcon combat trace, 124-frame Ready/Go, 4,500 stage-callback
+frames and rendered stock-loss/respawn lifecycle. No new FPS or latency result
+is claimed for this subsystem checkpoint.
+[Article and item initialization evidence](benchmarks/browser-2026-09-16-native-port-articles.json).
+
+Previous roster/rendering checkpoint:
+
 The constructor fixture now also loads Donkey Kong, Marth, Ganondorf and Roy
 through the original player/character mapping and their own hosted archives.
 Each passes 120 settling steps and 142 rendered input steps (walk, jump, aerial

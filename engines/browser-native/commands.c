@@ -46,6 +46,7 @@ int portCommandReadUnit(const void* words,unsigned type,unsigned index)
     case 8:return portCommandU8(words,index);
     case 16:return portCommandU16(words,index);
     case 17:return portCommandS16(words,index);
+    case 18:return portCommandItemSoundOpcode(words);
     case 12:return portCommandSigned12(words);
     default:abort();
     }

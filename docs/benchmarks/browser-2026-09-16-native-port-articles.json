@@ -1,0 +1,815 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "3fa4ae7",
+  "scope": "Fox/Falco Article graphs, original hitbox script execution, item command endian correction, and isolated common item initialization; not full fighter or competitive-play acceptance",
+  "browserVerification": {
+    "environment": "browser",
+    "browser": "Google Chrome 151.0.7922.137",
+    "wasmSha256": "2f9b5b7f715552d2598e09853ba81455e0da82cd87d8a5b88f0fc1f4a6ac8efb",
+    "portableRecipeSha256": "eb5cc4b6c625c81ba6f920353da200f953b5a796d0c0267d40fe6adab1e0a98f",
+    "sourceHashes": {
+      "article-assets.mjs": "8201fd9c3fcf28b7aee5cd7e2b70a73c2f63b5321098ceacbcc04cc7238d02e3",
+      "item-common-assets.mjs": "9b344b7f74d7a47fbf52780f8c5ca541bc4fb16bacf85c7e5074510dc8f6fafb",
+      "item-model-assets.mjs": "964928bb634ea626e017b9c15e66b0fac2cc27415b615dbc973f79fad3521b97",
+      "motion-assets.mjs": "1ebd99117d2c698656ac925302911d2b4bd04ba1fd5857d5066086e86b12d51a",
+      "verify-articles.mjs": "7fa9909a8870b4c6c7e02cb87fad7b682cd339c5d2fc4b0f276aff6a7c20b149"
+    },
+    "commands": {
+      "passed": true,
+      "fields": 266,
+      "reads": 68096,
+      "writes": 836,
+      "unitReads": 10752,
+      "failingFields": [],
+      "representation": "native numeric command words retaining PPC MSB-first fields",
+      "gameplayParity": false
+    },
+    "common": {
+      "passed": true,
+      "checks": 135,
+      "numericWords": 92,
+      "packedBytes": 12,
+      "originalInitialization": "Item_80266FCC",
+      "limitation": "Common parameter conversion and original pool/count initialization only. Article registries, color tables and match spawning are not installed."
+    },
+    "articles": {
+      "passed": true,
+      "checks": 83990,
+      "scriptFrames": 1792,
+      "rows": [
+        {
+          "name": "PlFx.dat",
+          "articles": [
+            {
+              "slot": 0,
+              "states": 2,
+              "commands": 14,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 14
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 14
+                }
+              ]
+            },
+            {
+              "slot": 1,
+              "states": 9,
+              "commands": 0,
+              "activeFrames": 0,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 3,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 4,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 5,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 6,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 7,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 8,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                }
+              ]
+            },
+            {
+              "slot": 2,
+              "states": 3,
+              "commands": 7,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 7
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "PlFc.dat",
+          "articles": [
+            {
+              "slot": 0,
+              "states": 2,
+              "commands": 8,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 8
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 8
+                }
+              ]
+            },
+            {
+              "slot": 1,
+              "states": 9,
+              "commands": 0,
+              "activeFrames": 0,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 3,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 4,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 5,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 6,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 7,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 8,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                }
+              ]
+            },
+            {
+              "slot": 3,
+              "states": 3,
+              "commands": 7,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 7
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "limitation": "Original article model setup and hitbox command handlers in isolated owners. Full item spawning, movement, fighter ownership, collision scheduling and match integration remain."
+    },
+    "playable": false,
+    "performanceMeasured": false
+  },
+  "nodeVerification": {
+    "environment": "node",
+    "browser": null,
+    "wasmSha256": "2f9b5b7f715552d2598e09853ba81455e0da82cd87d8a5b88f0fc1f4a6ac8efb",
+    "portableRecipeSha256": "eb5cc4b6c625c81ba6f920353da200f953b5a796d0c0267d40fe6adab1e0a98f",
+    "sourceHashes": {
+      "article-assets.mjs": "8201fd9c3fcf28b7aee5cd7e2b70a73c2f63b5321098ceacbcc04cc7238d02e3",
+      "item-common-assets.mjs": "9b344b7f74d7a47fbf52780f8c5ca541bc4fb16bacf85c7e5074510dc8f6fafb",
+      "item-model-assets.mjs": "964928bb634ea626e017b9c15e66b0fac2cc27415b615dbc973f79fad3521b97",
+      "motion-assets.mjs": "1ebd99117d2c698656ac925302911d2b4bd04ba1fd5857d5066086e86b12d51a",
+      "verify-articles.mjs": "7fa9909a8870b4c6c7e02cb87fad7b682cd339c5d2fc4b0f276aff6a7c20b149"
+    },
+    "commands": {
+      "passed": true,
+      "fields": 266,
+      "reads": 68096,
+      "writes": 836,
+      "unitReads": 10752,
+      "failingFields": [],
+      "representation": "native numeric command words retaining PPC MSB-first fields",
+      "gameplayParity": false
+    },
+    "common": {
+      "passed": true,
+      "checks": 135,
+      "numericWords": 92,
+      "packedBytes": 12,
+      "originalInitialization": "Item_80266FCC",
+      "limitation": "Common parameter conversion and original pool/count initialization only. Article registries, color tables and match spawning are not installed."
+    },
+    "articles": {
+      "passed": true,
+      "checks": 83990,
+      "scriptFrames": 1792,
+      "rows": [
+        {
+          "name": "PlFx.dat",
+          "articles": [
+            {
+              "slot": 0,
+              "states": 2,
+              "commands": 14,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 14
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 14
+                }
+              ]
+            },
+            {
+              "slot": 1,
+              "states": 9,
+              "commands": 0,
+              "activeFrames": 0,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 3,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 4,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 5,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 6,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 7,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 8,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                }
+              ]
+            },
+            {
+              "slot": 2,
+              "states": 3,
+              "commands": 7,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 7
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "PlFc.dat",
+          "articles": [
+            {
+              "slot": 0,
+              "states": 2,
+              "commands": 8,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 8
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 8
+                }
+              ]
+            },
+            {
+              "slot": 1,
+              "states": 9,
+              "commands": 0,
+              "activeFrames": 0,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 3,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 4,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 5,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 6,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 7,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                },
+                {
+                  "state": 8,
+                  "activeFrames": 0,
+                  "scriptCommands": 0
+                }
+              ]
+            },
+            {
+              "slot": 3,
+              "states": 3,
+              "commands": 7,
+              "activeFrames": 128,
+              "stateChecks": [
+                {
+                  "state": 0,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 1,
+                  "activeFrames": 64,
+                  "scriptCommands": 7
+                },
+                {
+                  "state": 2,
+                  "activeFrames": 0,
+                  "scriptCommands": 7
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "limitation": "Original article model setup and hitbox command handlers in isolated owners. Full item spawning, movement, fighter ownership, collision scheduling and match integration remain."
+    },
+    "playable": false,
+    "performanceMeasured": false
+  },
+  "regression": {
+    "wasmSha256": "2f9b5b7f715552d2598e09853ba81455e0da82cd87d8a5b88f0fc1f4a6ac8efb",
+    "browser": "Google Chrome 151.0.7922.137",
+    "rendererSources": {
+      "material-gpu.mjs": "a79aafbed32eb2901fea1bb1d5414e791b7e129108aec94149917befdcf0190e",
+      "native-pixel.mjs": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9"
+    },
+    "constructorVerified": true,
+    "introFrames": 124,
+    "stage": {
+      "name": "Battlefield",
+      "collisionLoaded": true,
+      "vertexChecks": 52,
+      "modelGroups": [
+        0,
+        3,
+        1,
+        6
+      ],
+      "completeStageStartup": false,
+      "originalCallbacks": true,
+      "transitions": [
+        {
+          "frame": 1,
+          "groups": [
+            0,
+            1,
+            3,
+            6
+          ]
+        },
+        {
+          "frame": 2677,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            6
+          ]
+        },
+        {
+          "frame": 2877,
+          "groups": [
+            0,
+            2,
+            3,
+            6
+          ]
+        }
+      ],
+      "renderedFrames": 4500,
+      "drawTransitions": [
+        {
+          "frame": 2677,
+          "actors": [
+            {
+              "name": "Falcon P1",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Falcon P2",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Battlefield group 1",
+              "passes": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 1
+            },
+            {
+              "name": "Battlefield group 3",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 0
+            },
+            {
+              "name": "Battlefield group 6",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                29,
+                0,
+                18,
+                0,
+                0,
+                0
+              ],
+              "draws": 47
+            },
+            {
+              "name": "Battlefield group 2",
+              "passes": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 1
+            }
+          ],
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 0,
+            "effectCreated": 4,
+            "effectRetired": 4,
+            "peakEffectModels": 2
+          }
+        },
+        {
+          "frame": 2877,
+          "actors": [
+            {
+              "name": "Falcon P1",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Falcon P2",
+              "passes": [
+                0,
+                0,
+                62,
+                0,
+                1
+              ],
+              "draws": 63
+            },
+            {
+              "name": "Battlefield group 3",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 0
+            },
+            {
+              "name": "Battlefield group 6",
+              "passes": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                29,
+                0,
+                18,
+                0,
+                0,
+                0
+              ],
+              "draws": 47
+            },
+            {
+              "name": "Battlefield group 2",
+              "passes": [
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "draws": 1
+            }
+          ],
+          "resources": {
+            "stageCreated": 4,
+            "stageRetired": 1,
+            "effectCreated": 4,
+            "effectRetired": 4,
+            "peakEffectModels": 2
+          }
+        }
+      ],
+      "callbackFrames": 4500,
+      "callbacksVerified": true
+    },
+    "combatFrames": 683,
+    "combatTraceSha256": "5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0",
+    "combatTraceUnchanged": true,
+    "lifecycleCompleted": true,
+    "stockChanges": [
+      {
+        "frame": 75,
+        "stocks": 3,
+        "falls": 1,
+        "outcome": 0
+      },
+      {
+        "frame": 319,
+        "stocks": 2,
+        "falls": 2,
+        "outcome": 0
+      },
+      {
+        "frame": 563,
+        "stocks": 1,
+        "falls": 3,
+        "outcome": 0
+      },
+      {
+        "frame": 807,
+        "stocks": 0,
+        "falls": 4,
+        "outcome": 2
+      }
+    ],
+    "lifecycleRenderedSteps": 1020,
+    "respawnPlatformDrawFrames": 180
+  },
+  "checks": {
+    "targetedTests": 143,
+    "failed": 0,
+    "baseBuild": true,
+    "sceneBuild": true,
+    "fighterBuild": true,
+    "baseVerificationPassed": true,
+    "commandFields": {
+      "passed": true,
+      "fields": 266,
+      "reads": 68096,
+      "writes": 836,
+      "unitReads": 10752,
+      "failingFields": [],
+      "representation": "native numeric command words retaining PPC MSB-first fields",
+      "gameplayParity": false
+    },
+    "commandControl": {
+      "passed": true,
+      "steps": 14,
+      "nested": {
+        "passed": true,
+        "steps": 22,
+        "maxDepth": 5
+      },
+      "originalFunctions": [
+        "Command_00",
+        "Command_01",
+        "Command_02",
+        "Command_03",
+        "Command_04",
+        "Command_05",
+        "Command_06",
+        "Command_07",
+        "Command_08"
+      ],
+      "limitation": "Timer/loop/subroutine/goto primitives, not the fighter action-state loop"
+    }
+  },
+  "remaining": [
+    "Typed shared article registries and item color tables",
+    "Fox extra x48 table graph and complete fighter archive assembly",
+    "Original item spawning, movement, ownership and collision scheduling",
+    "Full roster, stages, scenes, audio, input/network integration and deployment",
+    "Cold shader preparation, gameplay parity, distinct browser presentation and measured input-to-photon latency"
+  ],
+  "acceptanceMet": false,
+  "performanceMeasured": false
+}

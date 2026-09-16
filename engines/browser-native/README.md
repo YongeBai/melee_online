@@ -32,6 +32,33 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+The article subsystem check imports Fox/Falco laser, blaster and illusion data
+into original item model owners, then executes the original hitbox command
+handlers. It compares script cursors, timers, hitbox state, damage, size,
+offsets and knockback fields for 64 frames of each of 28 state descriptors.
+The independent command reference deliberately covers only the opcodes present
+in these fixtures. It does not replace gameplay execution. Numeric command words
+retain PPC field positions; the item sound sub-opcode uses an explicit adapter.
+
+An additional check imports `ItemCommonData` and `it_804D6D40_t` from `ItCo.usd`
+and calls original `Item_80266FCC` once in a fresh module. Packed fields and
+unknown padding are retained. Its generated archive exposes only these typed
+structures, not the incomplete `itPublicData` root. Unrelated external model
+graphs are excluded; references inside imported structures fail explicitly.
+
+```sh
+node scripts/native-port/prepare-fixtures.mjs 'Melee Camera Fixture.iso'
+node scripts/native-port/build.mjs --fighter-init
+node scripts/native-port/verify-articles.mjs
+node scripts/native-port/verify-articles.mjs --browser
+```
+
+The disc argument above is a development fixture, never a player requirement.
+`articles.html` fetches hosted assets automatically. These are subsystem probes,
+not Fox/Falco match support: full item registries, color tables, spawning,
+movement, fighter ownership and collision scheduling remain to be integrated.
+The full fighter archive assembler continues rejecting unconverted x48 graphs.
+
 The optional native VS lifecycle probe uses hosted `PdPm.dat` and `IfAll.usd`
 alongside the existing prepared fixtures. Re-run the development fixture tool
 after updating, then build `--fighter-init`. The browser still loads all assets

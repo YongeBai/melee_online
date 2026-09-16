@@ -38,6 +38,8 @@ export function verifyCommandFields(module,{diagnose=false}={}) {
           }
         const low=word&4095,expected=low<2048?low:low-4096;unitReads++;
         if(module._portCommandReadUnit(pointer,12,0)!==expected)throw Error('Throw angle sign extension mismatch');
+        unitReads++;
+        if(module._portCommandReadUnit(pointer,18,0)!==((word>>>18)&255))throw Error('Item sound secondary opcode mismatch');
       }
       const test=(path,word,expected,viewName='command',wordIndex=0)=>{
         const index=commandFields.findIndex(f=>f.view===viewName&&f.path===path);if(index<0)throw Error('Named command fixture missing');

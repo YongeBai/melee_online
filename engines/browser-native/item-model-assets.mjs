@@ -52,5 +52,5 @@ export function convertItemModels(input,name) {
     rows.push({slot,article,attributes,model,hurt,flags,scalars,joint,boneCount,attachId,modelFlags,hurtboxes,scene});
   }
   out.setUint32(root,rows.length,true);out.setUint32(root+4,rows.length?root+8:0,true);if(rows.length)pointers.add(root+4);
-  return {root,rows,image:nativeSubgraphImage(bytes,pointers,new Map([['native_item_models',root]]))};
+  return {root,rows,typedBytes:new Set(types.keys()),image:nativeSubgraphImage(bytes,pointers,new Map([['native_item_models',root]]))};
 }

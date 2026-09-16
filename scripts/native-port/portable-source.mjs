@@ -275,6 +275,7 @@ export function preparePortableSource(source,output) {
         count++;return 'portCommand'+type.toUpperCase()+'(cmd->u,'+index+')';
       });
       if(count!==(file.includes('ftaction')?1:18))throw Error('Command raw access count changed: '+file+' '+count);
+      if(file==='src/melee/it/itanimlist.c')replace('s32 opcode = ptr->opcode;','s32 opcode = portCommandItemSoundOpcode(cmd->u);');
       text='#include <port-command-word.h>\n'+text;
     }
     if(file==='src/melee/gr/grmaterial.c') {
@@ -382,6 +383,9 @@ static inline u8 portCommandU8(const void* words,unsigned index) {
 }
 static inline u16 portCommandU16(const void* words,unsigned index) {
     return ((const u32*)words)[index/2] >> (16-16*(index%2));
+}
+static inline unsigned portCommandItemSoundOpcode(const void* words) {
+    return (portCommandU16(words,0)>>2)&255;
 }
 static inline s16 portCommandS16(const void* words,unsigned index) {
     unsigned value=portCommandU16(words,index);return value<32768?(int)value:(int)value-65536;

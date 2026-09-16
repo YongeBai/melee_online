@@ -8,7 +8,7 @@ const root=path.resolve(import.meta.dirname,'../..');
 const filename=process.argv[2];
 if(!filename)throw Error('Pass the development USA 1.02 fixture path. This is a build tool, not player setup.');
 const fd=fs.openSync(filename,'r');
-const shared=['PlCo.dat','PdPm.dat','IfAll.usd'];
+const shared=['PlCo.dat','PdPm.dat','IfAll.usd','ItCo.usd'];
 const effects=['EfCoData.dat','EfCaData.dat','EfDkData.dat','EfMsData.dat','EfGnData.dat','EfFeData.dat'];
 const names=['GrNBa.dat','GrNLa.dat','GrOp.dat','GrSt.dat','GrIz.dat','GrPs.usd'];
 const fighters=Object.keys(fighterArchives).map(code=>'Pl'+code+'.dat');

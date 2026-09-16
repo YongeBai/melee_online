@@ -39,8 +39,8 @@ export function readMotionScripts(archive,starts,lengths,{terminalOpcodes=[0,6,7
     for(;;) {
       if(commands.has(at))break;
       if(owners.has(at))fail('script targets an argument word');
-      bounds(at,4);const opcode=d.getUint32(at)>>>26,words=lengths[opcode];
-      if(!words)fail('unknown script opcode '+opcode+' at '+at.toString(16));bounds(at,words*4);
+      bounds(at,4);const opcode=d.getUint32(at)>>>26,entry=lengths[opcode],words=typeof entry==='function'?entry(d.getUint32(at)):entry;
+      if(!Number.isInteger(words)||words<1||words>16)fail('unknown script opcode '+opcode+' at '+at.toString(16));bounds(at,words*4);
       let target=null;
       if(opcode===5||opcode===7) {
         if(archive.relocations.has(at+4)) {
