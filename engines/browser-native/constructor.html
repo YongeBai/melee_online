@@ -5,6 +5,8 @@
 <p>Development probe. This page does not run a playable match.</p>
 <pre id="result">Loading hosted assets…</pre>
 <script type="module">
+import {convertPeachCommonItems} from './common-item-assets.mjs';
+import {verifyPeachMoves,verifyPeachPulls,verifyPeachContact} from './verify-peach.mjs';
 import create from './melee-fighter-init.mjs';
 import {shaderIdentityFiles,validateShaderCatalog} from './shader-catalog.mjs';
 import {archiveRootView,inspectArchive} from './archive.mjs';
@@ -80,12 +82,20 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd'].includes(c))||stageKey==='story') {
+  let peachCommon=null;
+  if([code,opponentCode].some(c=>['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe'].includes(c))||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
     module._portItemsInitialize(...items.addresses,colors.addresses[0]);report.items={initialized:true,colorCommands:data.scripts.commands.size};
     report.items.colors=verifyColors(module,{archive:data.archive,colors:{tables:[data.colorTable],scripts:data.scripts}},()=>colors.addresses[0]);
+  }
+  if([code,opponentCode].includes('Pe')){
+    const source=convertPeachCommonItems(await asset('ItCo.usd'));installResidentFile(module,'NativePeachCommon.dat',source.image);
+    const file=openResidentArchive(module,'NativePeachCommon.dat',['native_common_article_6']),base=file.addresses[0]-source.rows[0].article;
+    source.rows.forEach(row=>module._portCommonItemInstall(base+row.article,row.kind));
+    peachCommon={source,base};
+    report.items.peachCommon=source.rows.map(r=>({kind:r.kind,stateCount:r.stateCount}));
   }
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
   const effectFiles=new Map(),packageOptions={asset,models,motionSpec,attributeSpec,effectFiles};
@@ -267,7 +277,8 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd'].includes(pkg.code)){
+      if(peachCommon){itemModels??=new Map();const {source,base}=peachCommon,a=inspectArchive(source.source);for(const row of source.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:'Common item '+row.kind,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
+      for(const pkg of packages)if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl','Ys','Mt','Gw','Ns','Sk','Zd','Pe'].includes(pkg.code)){
         const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg===pkg)?.owner;
         if(!owner)throw Error('Loaded opponent requires two-fighter scene');
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=combatState(owner)[8]+source.imports.find(i=>i.label==='articles').at;
@@ -420,6 +431,13 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('peachcontact')){report.peachContact={};verifyPeachContact(module,[object,opponent],report.peachContact,{step,mode:params.get('peachcontact'),onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});}
+      if(params.has('peachpulls')){report.peachPulls={};verifyPeachPulls(module,object,report.peachPulls,{step,onStep:renderSteps?phase=>{if(phase.kind!==99){
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          const actor=drawn.actors.find(a=>a.name==='Common item '+phase.kind),name='rare'+phase.kind;
+          if(actor?.draws&&!report.preview[name]){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }}:undefined});}
+      if(params.has('peachmoves')){report.peachMoves={};verifyPeachMoves(module,object,report.peachMoves,{step,only:params.get('peachmove'),onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});}
       if(params.has('formcontact')){
         report.formContact={};verifySeakZeldaContact(module,[object,opponent],report.formContact,{step,mode:params.get('formcontact'),onStep:renderSteps?()=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});
       }

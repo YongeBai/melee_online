@@ -43,7 +43,7 @@ test('Article import rejects malformed animated states, malformed scripts and de
     a=>a.ptr(164,256),a=>a.ptr(812,256),a=>a.ptr(1804,1804),a=>a.d.setUint32(1820,63<<26),
     a=>a.ptr(176,4092),a=>a.ptr(172,4088),
   ])assert.throws(()=>convertFighterArticles(fixture('Fx',mutate),'PlFx.dat'),undefined,String(mutate));
-  assert.throws(()=>convertFighterArticles(fixture(),'PlPe.dat'),/pending/);
+  assert.throws(()=>convertFighterArticles(fixture(),'PlKb.dat'),/pending/);
 });
 test('item sound command lengths follow their secondary dispatch, including unknown no-op cases',()=>{
   for(const sub of [0,1,2,10,11,3,255]) {
@@ -236,7 +236,7 @@ function formFixture(code,mutate=()=>{}){
     for(const [slot,at]of [[4,4200],[5,4400]]){ptr(128+slot*4,at);joint(at);ptr(at+8,at+64);joint(at+64);d.setFloat32(at+64+20,.375);}
   }
   mutate({d,relocs,ptr});
-  const name=new TextEncoder().encode('ftData'+(code==='Sk'?'Seak':'Zelda')+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
+  const name=new TextEncoder().encode('ftData'+({Sk:'Seak',Zd:'Zelda',Pe:'Peach'}[code])+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((r,i)=>v.setUint32(32+body.length+i*4,r));bytes.set(name,pub+8);return bytes;
 }
 test('Sheik imports both chain reference skeletons independently of the four Articles',()=>{
@@ -251,4 +251,13 @@ test('Zelda converts guided fire and explosion attributes and original serialize
   const input=formFixture('Zd'),before=input.slice(),r=convertFighterArticles(input,'PlZd.dat'),v=new DataView(r.image.buffer,32);
   assert.deepEqual(input,before);assert.deepEqual(r.rows.map(x=>[x.stateCount,x.specialWords]),[[2,12],[1,5]]);
   assert.equal(v.getFloat32(1068,true),1.25);assert.equal(v.getFloat32(1168,true),1.25);
+});
+
+test('Peach preserves integer turnip odds/damage and placeholder words while validating projectile floats',()=>{
+  const input=formFixture('Pe',({d})=>{for(let i=1;i<18;i++)d.setInt32(1152+i*4,-i);d.setInt32(1280,-1);d.setInt32(1408,-2);});
+  const before=input.slice(),r=convertFighterArticles(input,'PlPe.dat'),v=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.deepEqual(r.rows.map(x=>[x.stateCount,x.specialWords]),[[2,0],[3,18],[2,1],[2,1],[1,4]]);
+  assert.equal(v.getFloat32(1152,true),1.25);for(let i=1;i<18;i++)assert.equal(v.getInt32(1152+i*4,true),-i);
+  assert.equal(v.getInt32(1280,true),-1);assert.equal(v.getInt32(1408,true),-2);
+  assert.throws(()=>convertFighterArticles(formFixture('Pe',({d})=>d.setFloat32(1536,NaN)),'PlPe.dat'),/Nonfinite/);
 });

@@ -5,6 +5,46 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Peach now has original constructor/input integration, five typed move Articles,
+and her one-model effect bank. The common item residency boundary now loads
+Bob-omb, Mr. Saturn and Beam Sword for her original rare-pull logic. All three
+share one resident archive. Selection probabilities, RNG, gameplay callbacks,
+camera and competitive parameters are unchanged.
+
+The rendered move suite passes 4,399 frames: float release and expiration,
+all five float aerials, all three forward-smash weapons, ground/air Toad and
+parasol, and turnip pulling/throwing. Mixed Mario contacts verify turnip damage,
+shield blocking, Peach Bomber damage and Toad's counter. Toad keeps Peach at
+zero damage and deals six to Mario; Bomber deals eighteen. The idle control
+stays at zero. A long-held shield initially allowed the turnip to poke the
+shrinking shield; the fresh-shield control is timed shortly before impact,
+without changing shield behavior or parameters.
+
+A separate single-fighter soak performs 1,096 natural pulls over 155,869
+simulation frames, observing six Bob-ombs, four Mr. Saturns and one Beam Sword.
+The test swings the sword and throws every item through original inputs, then
+checks retirement. Its 1,050 rendered frames cover basic input and rare-item
+phases only; it is not a performance sample or an eight-minute match. GPU
+vertex validation passes those rendered frames, including the sword trail.
+The subsequent single-archive run reproduces the same pulls and selected
+fighter states, with all three rare models drawing. Screenshots were reviewed.
+
+A separate 960×720 Peach/Mario Battlefield minute completes 3,600 simulation
+steps and 3,600 draw submissions in 60.030 seconds, with no catch-up callbacks.
+Simulation averages 0.505 ms; draw submission averages 7.519 ms, with p95
+11.9 ms and maximum 15.9 ms. One rAF gap exceeds 25 ms. This is one active
+close-combat fixture, not sustained special-move stress, distinct displayed-FPS
+proof or input-to-photon latency. All 191 unit tests, the fighter build, browser initialization and the Sheik
+mirror regression pass. The core hash is `d704ae94…`.
+
+There are now 24 components with constructor/input integration. Kirby, Popo
+and Nana remain, along with other costumes, full scenes/menus/audio, retail
+parity, networking and native-port deployment. The overall 720p60 competitive
+acceptance criterion is **not achieved**.
+[Peach evidence](benchmarks/browser-2026-09-16-native-port-peach.json).
+
+Previous Sheik/Zelda checkpoint:
+
 Sheik and Zelda now have original constructor/input integration, including both
 player-owned forms. They share the Zelda effect bank (seven models, ten particle
 commands, five texture groups). Four Sheik Articles and two Zelda Articles are

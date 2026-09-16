@@ -32,6 +32,27 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Peach imports five move Articles, her model-only effect bank, and the shared
+Bob-omb, Mr. Saturn and Beam Sword Articles used by her original rare-pull logic.
+The browser residency table registers these three kinds without changing item
+selection, probabilities, physics or damage. Beam Sword's packed color fields
+remain bytes; its lifetimes and animation parameters use native numeric words.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Pe --input --peach-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Pe --opponent=Mr --input --peach-contact=toad --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Pe --input --peach-pulls --render-steps --hardware --verify-vertices
+```
+
+Other contact modes are `turnip`, `shield`, `bomber` and `control`.
+The rare-pull soak repeats ordinary down-B and item throws in an isolated
+single-fighter fixture, without the eight-minute match timer. It never forces
+an item, seed, probability or fighter state. Only the basic input sequence and
+rare-item phases are rendered; its many simulation frames are not an FPS
+measurement. The move suite checks float release/expiration, all five float
+aerials, all three forward-smash weapons, ground/air Toad and parasol, and a
+turnip throw. These are selected integration checks, not retail parity.
+
 Sheik and Zelda load both original player-owned forms and their shared Zelda
 effect bank. Chain animation also imports the two original reference skeletons
 following Sheik’s four Articles. The renderer follows all twenty native links.

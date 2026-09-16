@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 static Article* character_articles[118];
+static Article* common_articles[It_Kind_Kuriboh];
 _Static_assert(It_PKind_Start-It_Kind_Kuriboh==118,"Character article table ABI");
 static int initialized;
 extern void port_unlinked_Item_80267978(HSD_GObj*);
@@ -19,12 +20,17 @@ void portItemsInitialize(ItemCommonData* common,it_804D6D40_t* parameters,Fighte
 {
     if(initialized||!common||!parameters||!colors||it_804D6D28)abort();
     initialized=1;it_804D6D28=common;it_804D6D40=parameters;it_804D6D04=colors;
-    it_804D6D38=character_articles;Item_80266FCC();
+    it_804D6D24=common_articles;it_804D6D38=character_articles;Item_80266FCC();
 }
 void it_8026B3F8(Article* article,s32 kind)
 {
     if(!initialized||!article||kind<It_Kind_Kuriboh||kind>=It_PKind_Start)abort();
     port_unlinked_it_8026B3F8(article,kind);
+}
+void portCommonItemInstall(Article* article,int kind)
+{
+    if(!initialized||!article||(kind!=It_Kind_BombHei&&kind!=It_Kind_Dosei&&kind!=It_Kind_Sword)||common_articles[kind])abort();
+    common_articles[kind]=article;
 }
 void portStoryItemInstall(Article* article)
 {
@@ -35,6 +41,7 @@ void Item_80267978(HSD_GObj* object)
 {
     Item* item=object->user_data;int kind=item->kind;
     int resident=kind>=It_Kind_Kuriboh&&kind<It_PKind_Start&&character_articles[kind-It_Kind_Kuriboh];
+    if(kind>=0&&kind<It_Kind_Kuriboh)resident=common_articles[kind]!=NULL;
     if(kind==It_Kind_Heiho)resident=it_804A0F60[It_Kind_Heiho-It_Kind_Old_Kuri]!=NULL;
     if(!initialized||!resident) {
         fprintf(stderr,"Native item asset not resident: kind %d\n",kind);abort();

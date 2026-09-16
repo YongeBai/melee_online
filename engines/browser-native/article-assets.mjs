@@ -24,6 +24,7 @@ export const fighterArticleProfiles=Object.freeze({
   Kp:{slots:1,articles:{0:[1,6]}},
   Ys:{slots:4,articles:{0:[2,2],1:[1,2],2:[0,0]}},
   Sk:{slots:6,articles:{0:[5,3],1:[1,1],2:[1,0],3:[0,25]}},
+  Pe:{slots:5,articles:{0:[2,0],1:[3,18],2:[2,1],3:[2,1],4:[1,4]}},
   Zd:{slots:2,articles:{0:[2,12],1:[1,5]}},
   Ns:{slots:11,articles:{0:[1,2],1:[1,3],2:[3,11],3:[1,5],4:[1,1],5:[1,1],6:[1,1],7:[1,1],8:[1,5],9:[1,1],10:[0,20]}},
   Mt:{slots:2,articles:{0:[1,2],1:[10,16]}},
@@ -90,7 +91,7 @@ export function convertFighterArticles(input,name) {
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
-    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Sk'&&model.slot===3&&j===0||code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Pe'&&(model.slot===1&&j>0||[2,3].includes(model.slot))||code==='Sk'&&model.slot===3&&j===0||code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
     if(code==='Sk'&&model.slot===3)for(const off of [0x64,0x68])attachment(pointer(special+off),'chain '+off);
     if(code==='Ns'&&model.slot===10){
       // itYoyoAttributes: twenty scalar words, two joints, material animation,

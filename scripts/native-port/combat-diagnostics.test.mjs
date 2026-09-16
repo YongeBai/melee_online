@@ -12,3 +12,9 @@ test('attack diagnostics include Ness charged smash states and exclude PK Flash'
   for(const id of [341,342,343,344,345,346,347])assert.equal(isNormalAttackState(state(id)),true);
   for(const id of [348,349,350,351,358,368,14])assert.equal(isNormalAttackState(state(id)),false);
 });
+
+test('Peach float aerials and weapon smashes count as attacks, excluding float and specials',()=>{
+  const state=id=>{const s=Array(19).fill(0);s[0]=id;s[11]=9;return s;};
+  for(const id of [344,345,346,347,348,349,350,351])assert.equal(isNormalAttackState(state(id)),true);
+  for(const id of [341,342,343,352,361,365,369])assert.equal(isNormalAttackState(state(id)),false);
+});

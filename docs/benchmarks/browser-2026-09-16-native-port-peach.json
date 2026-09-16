@@ -1,0 +1,1919 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "234f772",
+  "scope": "Default Peach constructor, move and mixed-contact integration; native rare-item pull soak; one close-combat timing sample. Not complete competitive acceptance.",
+  "wasmSha256": "d704ae94ad91ecd73beb82a33f1acbbd0b2d8a5144a006d78d92bdabcb0a6d2c",
+  "portableRecipeSha256": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "7fabd038c6ff329c6e7c2a45a96da8779cf37508c4aa284bd2724b6b4623a28b",
+    "engines/browser-native/common-item-assets.mjs": "2ef719c144b0a77f95bb24996af7cb249bcf2cb2b41915ff23e60ccb4558f413",
+    "engines/browser-native/effect-assets.mjs": "59697ea685c868261e4637325db68f3556d57eadb641b0e0f2bd6625afcd0c89",
+    "engines/browser-native/constructor.html": "b4ca458850109d2e002166443e7579264ee47a00ceee32b60fbac48b890563dd",
+    "engines/browser-native/item-runtime.c": "fe91cf7d3ff724b2c4a0957d2333369d73b947fedb3d34308ee6dc8da4112394",
+    "engines/browser-native/combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+    "engines/browser-native/verify-peach.mjs": "f8372c1a7a8d7fe766e7b50880f034590470813f027e2da71b236964fba8b2b4",
+    "scripts/native-port/probe-constructor.mjs": "ff4926752a27defd12638515460e8489f1b1be22e8ed21e5b81228db4ad3bf3d"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "integration": {
+    "peachArticleStates": [
+      2,
+      3,
+      2,
+      2,
+      1
+    ],
+    "sharedArticles": [
+      {
+        "kind": 6,
+        "name": "Bob-omb",
+        "states": 7
+      },
+      {
+        "kind": 7,
+        "name": "Mr. Saturn",
+        "states": 4
+      },
+      {
+        "kind": 12,
+        "name": "Beam Sword",
+        "states": 2
+      }
+    ],
+    "effectBank": 15,
+    "effectModels": 1,
+    "particleCommands": 0,
+    "textureGroups": 0,
+    "originalGameplayFunctionsUnchanged": true,
+    "controllerInputsOnly": true,
+    "originalRngUnmodified": true,
+    "automaticHostedAssets": true
+  },
+  "validation": {
+    "unitTests": 191,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "moves": {
+      "artifact": "peach-moves-Pe-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 4399,
+      "phases": [
+        {
+          "name": "float release",
+          "frames": 270,
+          "states": [
+            24,
+            25,
+            341,
+            342,
+            32,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "float neutral aerial cancel",
+          "frames": 216,
+          "states": [
+            24,
+            25,
+            341,
+            344,
+            42,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "float forward aerial",
+          "frames": 206,
+          "states": [
+            24,
+            25,
+            341,
+            345,
+            42,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "float back aerial",
+          "frames": 206,
+          "states": [
+            24,
+            25,
+            341,
+            346,
+            29,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "float up aerial",
+          "frames": 206,
+          "states": [
+            24,
+            25,
+            341,
+            347,
+            342,
+            32,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "float down aerial",
+          "frames": 206,
+          "states": [
+            24,
+            25,
+            341,
+            348,
+            29,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "float expiry",
+          "frames": 400,
+          "states": [
+            24,
+            25,
+            341,
+            342,
+            32,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "forward smash 0",
+          "frames": 121,
+          "states": [
+            350,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "forward smash 1",
+          "frames": 121,
+          "states": [
+            349,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "forward smash 2",
+          "frames": 121,
+          "states": [
+            350,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "forward smash 3",
+          "frames": 121,
+          "states": [
+            349,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "forward smash 4",
+          "frames": 121,
+          "states": [
+            351,
+            14
+          ],
+          "itemKinds": []
+        },
+        {
+          "name": "ground Toad",
+          "frames": 221,
+          "states": [
+            365,
+            14
+          ],
+          "itemKinds": [
+            104
+          ]
+        },
+        {
+          "name": "air Toad",
+          "frames": 319,
+          "states": [
+            24,
+            25,
+            367,
+            29,
+            42,
+            14
+          ],
+          "itemKinds": [
+            104
+          ]
+        },
+        {
+          "name": "ground parasol",
+          "frames": 451,
+          "states": [
+            361,
+            369,
+            370,
+            43,
+            14
+          ],
+          "itemKinds": [
+            103
+          ]
+        },
+        {
+          "name": "air parasol",
+          "frames": 469,
+          "states": [
+            24,
+            25,
+            363,
+            369,
+            42,
+            14
+          ],
+          "itemKinds": [
+            103
+          ]
+        },
+        {
+          "name": "turnip pull and throw",
+          "frames": 482,
+          "states": [
+            352,
+            14,
+            110
+          ],
+          "itemKinds": [
+            99
+          ]
+        }
+      ],
+      "projectionChecks": {
+        "passed": true,
+        "cases": 4,
+        "components": 12
+      },
+      "finalGpuErrorCheck": true
+    },
+    "contacts": [
+      {
+        "artifact": "peach-contact-turnip-Pe-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "mode": "turnip",
+        "completed": true,
+        "renderedFrames": 975,
+        "frames": 833,
+        "peakDamage": 8.03770637512207,
+        "blockedFrames": 0,
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            352,
+            108
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            79
+          ]
+        ],
+        "itemKinds": [
+          99
+        ],
+        "finalDamage": [
+          0,
+          8.03770637512207
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "peach-contact-shield-Pe-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "mode": "shield",
+        "completed": true,
+        "renderedFrames": 975,
+        "frames": 833,
+        "peakDamage": 0,
+        "blockedFrames": 3,
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            352,
+            108
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            182,
+            179,
+            181,
+            180
+          ]
+        ],
+        "itemKinds": [
+          99
+        ],
+        "finalDamage": [
+          0,
+          0
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "peach-contact-bomber-Pe-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "mode": "bomber",
+        "completed": true,
+        "renderedFrames": 975,
+        "frames": 833,
+        "peakDamage": 18,
+        "blockedFrames": 0,
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            354,
+            360,
+            359,
+            29,
+            42
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            88,
+            38,
+            191,
+            192,
+            194
+          ]
+        ],
+        "itemKinds": [
+          98
+        ],
+        "finalDamage": [
+          0,
+          18
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "peach-contact-toad-Pe-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "mode": "toad",
+        "completed": true,
+        "renderedFrames": 945,
+        "frames": 803,
+        "peakDamage": 6,
+        "blockedFrames": 0,
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            365,
+            366
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            343,
+            90,
+            191,
+            192,
+            194
+          ]
+        ],
+        "itemKinds": [
+          104,
+          48,
+          111
+        ],
+        "finalDamage": [
+          0,
+          6
+        ],
+        "finalGpuErrorCheck": true
+      },
+      {
+        "artifact": "peach-contact-control-Pe-vs-Mr-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "mode": "control",
+        "completed": true,
+        "renderedFrames": 975,
+        "frames": 833,
+        "peakDamage": 0,
+        "blockedFrames": 0,
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15
+          ]
+        ],
+        "itemKinds": [],
+        "finalDamage": [
+          0,
+          0
+        ],
+        "finalGpuErrorCheck": true
+      }
+    ],
+    "rarePulls": {
+      "artifact": "peach-pulls-Pe-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "simulationFrames": 155869,
+      "pulls": 1096,
+      "renderedFrames": 1050,
+      "rareOutcomes": [
+        {
+          "pull": 14,
+          "kind": 6,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            45,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 52,
+          "kind": 7,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            57,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 72,
+          "kind": 6,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            45,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 158,
+          "kind": 7,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            57,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 416,
+          "kind": 6,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            45,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 478,
+          "kind": 7,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            57,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 487,
+          "kind": 7,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            57,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 913,
+          "kind": 6,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            45,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 965,
+          "kind": 6,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            45,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 1085,
+          "kind": 6,
+          "states": [
+            108,
+            14
+          ],
+          "initial": [
+            14,
+            6,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            45,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "pull": 1095,
+          "kind": 12,
+          "states": [
+            120,
+            14,
+            108
+          ],
+          "initial": [
+            14,
+            2,
+            51,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "final": [
+            14,
+            2,
+            45,
+            0,
+            4.834926128387451,
+            0.00009999999747378752,
+            0,
+            1465952,
+            13458496,
+            15,
+            1,
+            9,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        }
+      ],
+      "snapshots": {
+        "6": {
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "materialShaderChecks": null,
+          "materialDraws": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "particleDraws": 0,
+            "particleVertices": 0,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 19,
+                "origin": "model",
+                "cpuMs": 6.5
+              },
+              {
+                "program": 20,
+                "origin": "model",
+                "cpuMs": 4.100000023841858
+              },
+              {
+                "program": 21,
+                "origin": "model",
+                "cpuMs": 3.300000011920929
+              },
+              {
+                "program": 22,
+                "origin": "model",
+                "cpuMs": 1.800000011920929
+              },
+              {
+                "program": 23,
+                "origin": "model",
+                "cpuMs": 2.7000000178813934
+              },
+              {
+                "program": 24,
+                "origin": "model",
+                "cpuMs": 2.4000000059604645
+              }
+            ],
+            "draws": 120,
+            "programs": 24,
+            "images": 67,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "accessories": 0,
+          "particlePasses": 0,
+          "particleStats": {
+            "draws": 0,
+            "vertices": 0,
+            "frames": 0,
+            "peakDraws": 0
+          },
+          "afterimageStats": {
+            "draws": 0,
+            "vertices": 0,
+            "frames": 0,
+            "peakDraws": 0
+          },
+          "originalCameraPasses": false,
+          "resourceStats": {
+            "stageCreated": 0,
+            "stageRetired": 0,
+            "effectCreated": 0,
+            "effectRetired": 0,
+            "peakEffectModels": 0,
+            "itemCreated": 1,
+            "itemRetired": 0,
+            "peakItemModels": 1
+          },
+          "effectModels": 0,
+          "hud": null,
+          "resolution": [
+            960,
+            720
+          ],
+          "actors": [
+            {
+              "name": "Battlefield group 3",
+              "active": true,
+              "passes": [
+                0,
+                0,
+                0
+              ],
+              "draws": 0
+            },
+            {
+              "name": "Battlefield group 1",
+              "active": true,
+              "passes": [
+                0,
+                0,
+                1
+              ],
+              "draws": 1
+            },
+            {
+              "name": "Battlefield group 6",
+              "active": true,
+              "passes": [
+                29,
+                0,
+                26
+              ],
+              "draws": 55
+            },
+            {
+              "name": "Peach P1",
+              "active": true,
+              "passes": [
+                54,
+                0,
+                0
+              ],
+              "draws": 54
+            },
+            {
+              "name": "Common item 6",
+              "active": true,
+              "passes": [
+                8,
+                0,
+                2
+              ],
+              "draws": 10
+            }
+          ],
+          "renderContext": {
+            "lightMask": 3,
+            "lightLoads": 4,
+            "projectionType": 0,
+            "viewport": [
+              0,
+              0,
+              640,
+              480,
+              0,
+              1
+            ],
+            "scissor": [
+              0,
+              0,
+              640,
+              480
+            ],
+            "projection": [
+              3.0657594203948975,
+              0,
+              0,
+              0,
+              0,
+              3.732051134109497,
+              0,
+              0,
+              0,
+              0,
+              -0.000006103553005232243,
+              -0.10000061243772507,
+              0,
+              0,
+              -1,
+              0
+            ],
+            "lights": [
+              {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "angular": [
+                  1,
+                  0,
+                  0
+                ],
+                "distance": [
+                  1,
+                  0,
+                  0
+                ],
+                "position": [
+                  636667.5625,
+                  519198.125,
+                  629717.5625
+                ],
+                "direction": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "angular": [
+                  0,
+                  0,
+                  1
+                ],
+                "distance": [
+                  25,
+                  0,
+                  -24
+                ],
+                "position": [
+                  636667.5625,
+                  519198.125,
+                  629717.5625
+                ],
+                "direction": [
+                  0.45927080512046814,
+                  0.2730134129524231,
+                  0.8453011512756348
+                ]
+              },
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "eye": [
+            21.3552188873291,
+            32.97492599487305,
+            144.37831115722656
+          ],
+          "interest": [
+            31.1307315826416,
+            13.737162590026855,
+            0
+          ],
+          "fov": 30,
+          "aspect": 1.2173333168029785,
+          "near": 0.10000000149011612,
+          "far": 16384,
+          "originalObjectCallbacks": true,
+          "playable": false,
+          "performanceMeasured": false,
+          "visualParity": false,
+          "limitations": "Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain."
+        },
+        "7": {
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "materialShaderChecks": null,
+          "materialDraws": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "particleDraws": 0,
+            "particleVertices": 0,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 26,
+                "origin": "model",
+                "cpuMs": 3.699999988079071
+              },
+              {
+                "program": 27,
+                "origin": "model",
+                "cpuMs": 1.5
+              }
+            ],
+            "draws": 120,
+            "programs": 27,
+            "images": 73,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "accessories": 0,
+          "particlePasses": 0,
+          "particleStats": {
+            "draws": 0,
+            "vertices": 0,
+            "frames": 0,
+            "peakDraws": 0
+          },
+          "afterimageStats": {
+            "draws": 0,
+            "vertices": 0,
+            "frames": 0,
+            "peakDraws": 0
+          },
+          "originalCameraPasses": false,
+          "resourceStats": {
+            "stageCreated": 0,
+            "stageRetired": 0,
+            "effectCreated": 1,
+            "effectRetired": 1,
+            "peakEffectModels": 1,
+            "itemCreated": 2,
+            "itemRetired": 1,
+            "peakItemModels": 1
+          },
+          "effectModels": 0,
+          "hud": null,
+          "resolution": [
+            960,
+            720
+          ],
+          "actors": [
+            {
+              "name": "Battlefield group 3",
+              "active": true,
+              "passes": [
+                0,
+                0,
+                0
+              ],
+              "draws": 0
+            },
+            {
+              "name": "Battlefield group 1",
+              "active": true,
+              "passes": [
+                0,
+                0,
+                1
+              ],
+              "draws": 1
+            },
+            {
+              "name": "Battlefield group 6",
+              "active": true,
+              "passes": [
+                29,
+                0,
+                26
+              ],
+              "draws": 55
+            },
+            {
+              "name": "Peach P1",
+              "active": true,
+              "passes": [
+                54,
+                0,
+                0
+              ],
+              "draws": 54
+            },
+            {
+              "name": "Common item 7",
+              "active": true,
+              "passes": [
+                10,
+                0,
+                0
+              ],
+              "draws": 10
+            }
+          ],
+          "renderContext": {
+            "lightMask": 3,
+            "lightLoads": 4,
+            "projectionType": 0,
+            "viewport": [
+              0,
+              0,
+              640,
+              480,
+              0,
+              1
+            ],
+            "scissor": [
+              0,
+              0,
+              640,
+              480
+            ],
+            "projection": [
+              3.0657594203948975,
+              0,
+              0,
+              0,
+              0,
+              3.732051134109497,
+              0,
+              0,
+              0,
+              0,
+              -0.000006103553005232243,
+              -0.10000061243772507,
+              0,
+              0,
+              -1,
+              0
+            ],
+            "lights": [
+              {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "angular": [
+                  1,
+                  0,
+                  0
+                ],
+                "distance": [
+                  1,
+                  0,
+                  0
+                ],
+                "position": [
+                  636667.5625,
+                  519198.125,
+                  629717.5625
+                ],
+                "direction": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "angular": [
+                  0,
+                  0,
+                  1
+                ],
+                "distance": [
+                  25,
+                  0,
+                  -24
+                ],
+                "position": [
+                  636667.5625,
+                  519198.125,
+                  629717.5625
+                ],
+                "direction": [
+                  0.4598875045776367,
+                  0.2729879319667816,
+                  0.8449739813804626
+                ]
+              },
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "eye": [
+            21.3552188873291,
+            32.97492599487305,
+            144.37831115722656
+          ],
+          "interest": [
+            31.1307315826416,
+            13.737162590026855,
+            0
+          ],
+          "fov": 30,
+          "aspect": 1.2173333168029785,
+          "near": 0.10000000149011612,
+          "far": 16384,
+          "originalObjectCallbacks": true,
+          "playable": false,
+          "performanceMeasured": false,
+          "visualParity": false,
+          "limitations": "Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain."
+        },
+        "12": {
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "materialShaderChecks": null,
+          "materialDraws": {
+            "vertexChecks": null,
+            "immediateDraws": 0,
+            "immediateVertices": 0,
+            "particleDraws": 0,
+            "particleVertices": 0,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 118,
+            "programs": 27,
+            "images": 77,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "accessories": 0,
+          "particlePasses": 0,
+          "particleStats": {
+            "draws": 0,
+            "vertices": 0,
+            "frames": 0,
+            "peakDraws": 0
+          },
+          "afterimageStats": {
+            "draws": 0,
+            "vertices": 0,
+            "frames": 0,
+            "peakDraws": 0
+          },
+          "originalCameraPasses": false,
+          "resourceStats": {
+            "stageCreated": 0,
+            "stageRetired": 0,
+            "effectCreated": 10,
+            "effectRetired": 10,
+            "peakEffectModels": 1,
+            "itemCreated": 11,
+            "itemRetired": 10,
+            "peakItemModels": 1
+          },
+          "effectModels": 0,
+          "hud": null,
+          "resolution": [
+            960,
+            720
+          ],
+          "actors": [
+            {
+              "name": "Battlefield group 3",
+              "active": true,
+              "passes": [
+                0,
+                0,
+                0
+              ],
+              "draws": 0
+            },
+            {
+              "name": "Battlefield group 1",
+              "active": true,
+              "passes": [
+                0,
+                0,
+                1
+              ],
+              "draws": 1
+            },
+            {
+              "name": "Battlefield group 6",
+              "active": true,
+              "passes": [
+                29,
+                0,
+                18
+              ],
+              "draws": 47
+            },
+            {
+              "name": "Peach P1",
+              "active": true,
+              "passes": [
+                54,
+                0,
+                0
+              ],
+              "draws": 54
+            },
+            {
+              "name": "Common item 12",
+              "active": true,
+              "passes": [
+                3,
+                0,
+                13
+              ],
+              "draws": 16
+            }
+          ],
+          "renderContext": {
+            "lightMask": 3,
+            "lightLoads": 4,
+            "projectionType": 0,
+            "viewport": [
+              0,
+              0,
+              640,
+              480,
+              0,
+              1
+            ],
+            "scissor": [
+              0,
+              0,
+              640,
+              480
+            ],
+            "projection": [
+              3.0657594203948975,
+              0,
+              0,
+              0,
+              0,
+              3.732051134109497,
+              0,
+              0,
+              0,
+              0,
+              -0.000006103553005232243,
+              -0.10000061243772507,
+              0,
+              0,
+              -1,
+              0
+            ],
+            "lights": [
+              {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "angular": [
+                  1,
+                  0,
+                  0
+                ],
+                "distance": [
+                  1,
+                  0,
+                  0
+                ],
+                "position": [
+                  636667.5625,
+                  519198.125,
+                  629717.5625
+                ],
+                "direction": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "angular": [
+                  0,
+                  0,
+                  1
+                ],
+                "distance": [
+                  25,
+                  0,
+                  -24
+                ],
+                "position": [
+                  636667.5625,
+                  519198.125,
+                  629717.5625
+                ],
+                "direction": [
+                  0.4218311905860901,
+                  0.2929202616214752,
+                  0.8580538034439087
+                ]
+              },
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "eye": [
+            21.3552188873291,
+            32.97492599487305,
+            144.37831115722656
+          ],
+          "interest": [
+            31.1307315826416,
+            13.737162590026855,
+            0
+          ],
+          "fov": 30,
+          "aspect": 1.2173333168029785,
+          "near": 0.10000000149011612,
+          "far": 16384,
+          "originalObjectCallbacks": true,
+          "playable": false,
+          "performanceMeasured": false,
+          "visualParity": false,
+          "limitations": "Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain."
+        }
+      },
+      "selection": "original unmodified RNG and weighted item table",
+      "finalGpuErrorCheck": true,
+      "performanceSample": false,
+      "isolatedSingleFighterWithoutMatchTimer": true,
+      "matchesPreconsolidationPullKindsAndSelectedFighterStates": true
+    },
+    "rareGpu": {
+      "artifact": "peach-pulls-vertices-Pe-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 1050,
+      "allRenderedFramesVertexChecked": true,
+      "afterimage": {
+        "vertices": 17,
+        "ndcMin": [
+          -0.4875222040097553,
+          -0.24383636954130716,
+          -0.0006884467086066823
+        ],
+        "ndcMax": [
+          -0.41133239310300496,
+          -0.13567059898781683,
+          -0.0006565680720115149
+        ]
+      },
+      "finalGpuErrorCheck": true,
+      "allocationDifference": "GPU run used three resident views of the same converted archive. Consolidation to one resident archive subsequently passed the rendered rare-pull soak; conversion and rendering code unchanged."
+    },
+    "regression": {
+      "artifact": "Sk-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "inputCompleted": true,
+      "renderedFrames": 142,
+      "finalGpuErrorCheck": true
+    },
+    "browserFighterInitialization": {
+      "passed": true,
+      "startup": true,
+      "fighterInit": true,
+      "wasmBytes": 2952803,
+      "playable": false,
+      "performanceMeasured": false
+    },
+    "allocationNote": "Move/contact suites and vertex readback preceded consolidation from three archive views to one resident archive. The final rendered rare-pull soak and timing use the single archive. Selected pull kinds, fighter states and retirement match across allocations."
+  },
+  "performance": {
+    "artifact": "deferred-errors-Pe-vs-Mr-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+    "frames": 3600,
+    "draws": 3600,
+    "elapsedMs": 60029.69999998808,
+    "stepCpu": {
+      "samples": 3600,
+      "meanMs": 0.5047500000562932,
+      "p50Ms": 0.5,
+      "p95Ms": 0.800000011920929,
+      "maxMs": 1.7999999821186066
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 7.518722222306662,
+      "p50Ms": 7,
+      "p95Ms": 11.900000005960464,
+      "maxMs": 15.900000005960464
+    },
+    "rafDrawIntervals": {
+      "samples": 3599,
+      "meanMs": 16.670602945261763,
+      "p50Ms": 16.69999999999709,
+      "p95Ms": 16.700000000004366,
+      "maxMs": 33.30000000000109
+    },
+    "cadence": {
+      "callbacks": 3604,
+      "zeroStepCallbacks": 4,
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1
+    },
+    "workload": {
+      "framesWithAttack": 1972,
+      "framesWithHitlag": 434,
+      "framesWithDamage": 3509,
+      "stockChanges": [],
+      "windows": [
+        {
+          "firstFrame": 1,
+          "frames": 600,
+          "hitlag": 68,
+          "attack": 314
+        },
+        {
+          "firstFrame": 601,
+          "frames": 600,
+          "hitlag": 80,
+          "attack": 360
+        },
+        {
+          "firstFrame": 1201,
+          "frames": 600,
+          "hitlag": 62,
+          "attack": 271
+        },
+        {
+          "firstFrame": 1801,
+          "frames": 600,
+          "hitlag": 64,
+          "attack": 307
+        },
+        {
+          "firstFrame": 2401,
+          "frames": 600,
+          "hitlag": 80,
+          "attack": 360
+        },
+        {
+          "firstFrame": 3001,
+          "frames": 600,
+          "hitlag": 80,
+          "attack": 360
+        }
+      ]
+    },
+    "shaderCompilations": [
+      {
+        "frame": 201,
+        "program": 36,
+        "origin": "model",
+        "cpuMs": 3.199999988079071
+      },
+      {
+        "frame": 209,
+        "program": 37,
+        "origin": "model",
+        "cpuMs": 2.4000000059604645
+      },
+      {
+        "frame": 1450,
+        "program": 38,
+        "origin": "model",
+        "cpuMs": 2.4000000059604645
+      },
+      {
+        "frame": 2277,
+        "program": 39,
+        "origin": "model",
+        "cpuMs": 3.5999999940395355
+      },
+      {
+        "frame": 2677,
+        "program": 40,
+        "origin": "model",
+        "cpuMs": 2.7999999821186066
+      }
+    ],
+    "finalGpuErrorCheck": true,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "performanceCertified": false
+  },
+  "limitations": [
+    "Selected integration checks, not all moves, costumes, matchups or retail parity.",
+    "One close-combat timing sample, not sustained special-move or rare-item stress.",
+    "No distinct displayed-FPS or input-to-photon measurement.",
+    "24 components have constructor/input integration. Kirby, Popo and Nana, full scenes/menus/audio, networking, parity and deployment remain unfinished."
+  ],
+  "competitiveAcceptanceAchieved": false
+}

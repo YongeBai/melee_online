@@ -12,6 +12,7 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Pe:{name:'effPeachDataTable',bank:15,first:null,count:0,groups:0,models:1},
     Sk:{name:'effZeldaDataTable',bank:17,first:17000,count:10,groups:5,models:7},
     Zd:{name:'effZeldaDataTable',bank:17,first:17000,count:10,groups:5,models:7},
     Ns:{name:'effNessDataTable',bank:10,first:null,count:0,groups:0,models:3},

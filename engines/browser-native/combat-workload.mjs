@@ -1,7 +1,7 @@
-// Attack diagnostics include character-specific normal states for Game & Watch and Ness.
+// Attack diagnostics include character-specific normal states for Game & Watch, Ness and Peach.
 // Landing states are excluded, as are specials and every other fighter's states.
 export function isNormalAttackState(state){
-  return state[0]>=44&&state[0]<=69||state[11]===24&&state[0]>=341&&state[0]<=349||state[11]===8&&state[0]>=341&&state[0]<=347;
+  return state[0]>=44&&state[0]<=69||state[11]===24&&state[0]>=341&&state[0]<=349||state[11]===8&&state[0]>=341&&state[0]<=347||state[11]===9&&state[0]>=344&&state[0]<=351;
 }
 
 // Deterministic normalized controller workload for the partial two-Falcon
