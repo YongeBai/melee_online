@@ -1,3 +1,4 @@
+import {verifySecondaryAnimation} from './verify-secondary-animation.mjs';
 import {prepareGameplayChecks} from './verify-gameplay.mjs';
 import {readFighterMotions} from './motion-assets.mjs';
 import {motionSpec} from './motion-spec.mjs';
@@ -59,6 +60,7 @@ export function verifyFighterAnimation(module,{name,bytes,kind,objects,asset,ope
     clips.push({index:row.index,name:source.name,sourceArchive:archive,flags:row.flags,speed,blend,frames:32,firstFrame:first,lastFrame:read(objects[0],1)});
   }
   check(changed>0,'visible skeleton motion');
-  return {passed:true,gameplay:gameplay.report(),checks,clips,instances:objects.length,frames:clips.length*32*objects.length,changedValues:changed,
+  const secondary=verifySecondaryAnimation(module,{name,bytes,objects,open,partNodes,motions,visibility});
+  return {passed:true,secondary,gameplay:gameplay.report(),checks,clips,instances:objects.length,frames:clips.length*32*objects.length,changedValues:changed,
     limitation:'Original fighter animation attachment, interpolation skeleton, frame progression and dynamics on initialized fixtures. Preloaded trees; full motion-state changes, scripts, physics and retail parity remain unverified.'};
 }

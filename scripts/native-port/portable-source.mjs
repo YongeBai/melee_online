@@ -53,7 +53,16 @@ export function preparePortableSource(source,output) {
         'ftMObj.setup = port_material_setup;');
       adapters.push({function:'ftMaterial_800BF2B8',adapter:'port_material_setup',from:'void(HSD_MObj*,u32,u32)',to:'void(HSD_MObj*,u32)',conversion:'unused third parameter = 0'});
     }
+    if(file==='src/melee/ft/kinds/ftCommon/ftCo_Guard.c') {
+      const from='fp->ft_data->x20->x0[2]';
+      if(text.split(from).length!==4)throw Error('Shield pose consumers changed');
+      text=text.replaceAll(from,'fp->ft_data->x20->x0->child');
+    }
     if(file==='src/melee/ft/types.h') {
+      // x20 points directly to HSD_Joint. The old pointer-array indexing at
+      // element two accessed its child at +8; retain that access explicitly.
+      replace('typedef struct ftData_x20 {\n    /* +0 */ HSD_Joint** x0;',
+        'typedef struct ftData_x20 {\n    /* +0 */ HSD_Joint* x0;');
       // The original loops allow eleven dynamics colliders (0x1670..0x1828).
       // Replace the decomp's one-entry placeholder plus padding with that real
       // array so native C indexing stays within its declared object.

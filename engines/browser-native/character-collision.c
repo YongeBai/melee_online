@@ -31,7 +31,7 @@ _Static_assert(offsetof(Fighter,x1670)==0x1670,"Dynamics collider array offset")
 _Static_assert(offsetof(Fighter,x1828)==0x1828,"Dynamics collider array extent");
 _Static_assert(sizeof(((Fighter*)0)->x1670)/sizeof(Fighter_x1670_t)==11,"Dynamics collider capacity");
 typedef struct { ftData_x30 hurt; int count; ftData_x38* dynamics; } CollisionData;
-typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; void (*release_dynamics)(Fighter*); } CollisionFixture;
+typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; void (*release_dynamics)(Fighter*); unsigned part_channels,part_variants[5],part_count; } CollisionFixture;
 static CollisionFixture* context(HSD_GObj* object){if(!object||!object->user_data)abort();return object->user_data;}
 extern int portSceneInitialize(void);
 extern int portFighterStartupComplete(void);
@@ -418,4 +418,48 @@ double portGameplayRead(HSD_GObj* object,unsigned field,unsigned index)
     case 27:if(index>=6)abort();return ((float*)&fp->x1614[index/3].x8)[index%3];
     default:abort();
     }
+}
+
+_Static_assert(sizeof(ftData_x1C)==12&&sizeof(ftData_x20)==8&&offsetof(HSD_Joint,child)==8,"Secondary animation ABI");
+int portSecondaryAttach(HSD_GObj* object,ftData_x1C** channels,ftData_x20* shield,unsigned count,unsigned* variants,unsigned parts)
+{
+    CollisionFixture* c=context(object);Fighter* fp=&c->fighter;
+    if(!fp->x8AC_animSkeleton||!channels||!shield||!count||count>5||!variants||parts>140)return -1;
+    for(unsigned i=0;i<count;i++) {
+        ftData_x1C* row=channels[i];if(!row||row->x0>=parts||!row->x2||!row->x4||!row->x8||!variants[i]||variants[i]>6)return -2;
+        for(unsigned j=0;j<row->x2;j++)if(row->x4[j]>=parts||!fp->parts[row->x4[j]].joint)return -3;
+        c->part_variants[i]=variants[i];
+    }
+    c->part_channels=count;c->part_count=parts;c->data.x1C=channels;c->data.x20=shield;return 0;
+}
+int portPartAnimationApply(HSD_GObj* object,unsigned channel,unsigned variant,float duration)
+{
+    CollisionFixture* c=context(object);if(channel>=c->part_channels||variant>=c->part_variants[channel]||duration<0)return -1;
+    ftAnim_ApplyPartAnim(object,channel,variant,duration);return 0;
+}
+void portPartAnimationStep(HSD_GObj* object){context(object);ftAnim_800707B0(object);}
+void portPartAnimationClear(HSD_GObj* object,unsigned channel)
+{
+    if(channel>=context(object)->part_channels)abort();ftAnim_80070CC4(object,channel);
+}
+double portPartAnimationRead(HSD_GObj* object,unsigned channel,unsigned field)
+{
+    CollisionFixture* c=context(object);if(channel>=c->part_channels)abort();struct Fighter_x8B0_t* state=&c->fighter.x8B0[channel];
+    switch(field){case 0:return state->x11;case 1:return state->x10;case 2:return state->x4;case 3:return state->x8;case 4:return state->xC;default:abort();}
+}
+int portShieldPoseApply(HSD_GObj* object,unsigned mode,float weight)
+{
+    Fighter* fp=&context(object)->fighter;if(!fp->ft_data->x20||weight<0||weight>1||mode>2)return -1;
+    HSD_Joint* root=fp->ft_data->x20->x0;if(!root)return 0;
+    if(mode==0)ftAnim_8006FA58(fp,FtPart_TransN,root->child);
+    if(mode==1)ftAnim_80070010(fp,FtPart_TransN,weight,1-weight,root->child);
+    if(mode==2)ftAnim_80070108(fp,FtPart_TransN,weight,1-weight,root->child);
+    return 1;
+}
+double portSecondaryJointRead(HSD_GObj* object,unsigned part,unsigned blend,unsigned field)
+{
+    CollisionFixture* c=context(object);if(part>=c->part_count||blend>1)abort();FighterBone* bone=&c->fighter.parts[part];
+    HSD_JObj* joint=blend?bone->x4_jobj2:bone->joint;if(!joint)abort();
+    if(field<4)return ((float*)&joint->rotate)[field];if(field<7)return ((float*)&joint->scale)[field-4];if(field<10)return ((float*)&joint->translate)[field-7];
+    switch(field){case 10:return joint->flags;case 11:return bone->flags_b0;case 12:return bone->flags_b4;case 13:return bone->flags_b5;default:abort();}
 }

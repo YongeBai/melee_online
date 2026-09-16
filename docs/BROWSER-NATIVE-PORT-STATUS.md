@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Per-part animations and ordinary shield-pose skeletons now load through typed
+native archives. All 27 components pass 307 variants across 83 channels, with
+1,228 original animation attachments, 2,448 blend updates and 156 shield-pose
+applications. The browser suite checks independent fighter ownership, override
+masks, blend completion/reset, source translations/scales and deterministic
+finite poses. This adds 1,167,074 checks; it does not execute shield gameplay.
+
+The original archive loader deliberately nulls unresolved externs. The two Kirby
+hand entries retain that behavior rather than being synthesized. The portable
+shield descriptor now uses a direct HSD_Joint pointer; its three original Guard
+consumers access the child at offset eight explicitly, replacing a misleading
+pointer-array declaration without changing the original access.
+
+All 79 targeted tests and the wider/scene browser suites pass. The compile audit
+remains 1,047 of 1,130 units, with the same 83 failures. The wider module is
+2,811,552 bytes. Demo motions, character items, full construction, match execution
+and gameplay rendering remain incomplete. No playable native match, native FPS,
+or input-to-photon result exists yet.
+[Secondary-animation checkpoint](benchmarks/browser-2026-09-15-native-port-secondary-animations.json).
+
 Nine additional character-data fields are now imported with explicit layouts:
 idle/crouch choices, thrown-hitbox and body-contact descriptors, camera extents,
 environment-collision/ledge parameters, sound IDs, effect bones and foot-placement
@@ -24,8 +44,9 @@ All 76 targeted tests and the wider browser suite pass. The smaller scene binary
 is byte-identical to its verified predecessor. The wider module is 2,811,093
 bytes. Stage-line traversal, landing, ledge grabs, action scripts and combat are
 still unexecuted, and the native port still has no playable match or FPS result.
-Remaining base-data graph families include demo motions, per-part animations,
-shield poses and character items.
+At that checkpoint, remaining base-data graph families included demo motions,
+per-part animations, shield poses and character items; the latter two animation
+graphs are now covered by the checkpoint above.
 [Gameplay-data/collision checkpoint](benchmarks/browser-2026-09-15-native-port-gameplay-parameters.json).
 
 Original fighter animation attachment, interpolation-skeleton construction,

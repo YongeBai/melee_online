@@ -403,3 +403,29 @@ transforms. `verify-gameplay.mjs` checks these over the same animated sequences
 as the fighter-animation fixture. Camera, sound, idle and foot-placement data
 are imported; their complete gameplay consumers remain unverified. Stage-line
 traversal, landing/ledge interactions, combat and full match execution are pending.
+
+## Per-part animations and shield poses
+
+`secondary-animation-assets.mjs` converts `ftData.x1C` and `x20` into two
+dedicated public roots. Per-channel variant extents are pinned USA 1.02 layout
+metadata: there is no count in the source descriptor. Do not infer these extents
+from consecutive relocation slots or the next relocation target; adjacent item
+objects and interior aliases make both approaches incorrect. Primary motion
+script references are checked against the imported extents. Demo scripts remain
+a separate pending integration. Packed FObj streams retain their byte coding.
+
+The two external Kirby hand-animation slots become NULL, matching
+`lbArchive_InitializeDAT` and `HSD_ArchiveLocateExtern(..., NULL)`. Other
+externs touching this graph are rejected. The shield descriptor holds a direct
+`HSD_Joint*`; the original decomp's `x0[2]` accessed that joint's child at +8.
+The portable declaration and all three Guard consumers now express that access
+with `x0->child`, with layout assertions and no archive-offset change. Yoshi's
+ordinary shield-pose root remains null; this does not implement his shield.
+
+`verify-secondary-animation.mjs` runs original part attachment, blending and
+restoration for every variant on two initialized fighters, including disabled
+Kirby slots. It checks node/part correspondence, override flags, progress, final
+SRT copies, resets and independent ownership. The three original shield-pose
+consumers pass source-translation/scale and finite deterministic pose checks.
+These calls exercise pose handling, not Guard state transitions, shield health,
+tilt, effects, input, combat, retail parity or performance.
