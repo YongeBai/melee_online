@@ -32,6 +32,33 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Link and Young Link import their original bomb, boomerang, hookshot, arrow and bow
+Articles, plus Young Link's milk. The original OnLoad callback inserts an extra
+nonvisual part; the preview binds costume joints by their descriptor identities
+instead of assuming bone-array indices still match costume traversal order.
+Hookshot ItemLinks retain their original owners and callbacks. Arrow/boomerang
+attachments retain the parent item's owner; the preview registers their separate
+joint roots and dispatches each owner only once per pass.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Lk --input --link-moves --stage-callbacks --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Cl --input --link-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Lk --input --link-contact=hookshot --stage-callbacks --render-steps --hardware
+```
+
+Contact modes are `arrow`, `arrow-shield`, `boomerang`, `bomb`, `hookshot` and
+`control`. The arrow-shield case preserves the original idle physical shield;
+the damage case faces the defender away using controller input.
+The long Link move sequence allows 1,800 seconds for full-scene per-vertex GPU
+readback, or 900 seconds for an isolated fighter. These are diagnostics, never
+performance runs; the live timing deadline is unchanged.
+
+The portable source replaces two arrow-wobble reads through an unrelated global
+with direct reads of `it_803F6A84`. The USA 1.02 symbols and development executable
+place that float table 92 bytes after `it_803F6A28`; WASM need not retain this
+adjacency. The replacement preserves the original indices, random calls and
+arithmetic. It does not substitute new animation parameters.
+
 Bowser’s original Flame Breath Article has no model; its effect-bank particles
 provide the visible fire. Scripted inputs can now run through tournament startup
 and the full original camera/particle passes using `--input --stage-callbacks`.

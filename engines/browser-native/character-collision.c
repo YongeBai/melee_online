@@ -234,6 +234,7 @@ unsigned portCollisionPartRead(HSD_GObj* object,unsigned part,unsigned field)
     case 5:{unsigned count=0;for(unsigned i=0;i<fp->dobj_list.count;i++)if(fp->dobj_list.data[i]->mobj&&HSD_MOBJ_METHOD(fp->dobj_list.data[i]->mobj)==&ftMObj)count++;return count;}
     case 6:{FighterBone* b=&fp->parts[part];return b->flags_b7|(b->flags2_b0<<1)|(b->flags2_b1<<2)|(b->flags2_b2<<3)|(b->flags2_b3<<4)|(b->flags2_b4<<5);}
     case 7:return fp->parts[part].flags2_b6;
+    case 11:if(!fp->parts[part].joint)abort();return fp->parts[part].joint->id;
     case 10:return fp->parts[part].flags_b3|(fp->parts[part].flags_b4<<1);
     case 8:return HSD_JOBJ_METHOD((HSD_JObj*)object->hsd_obj)==&ftJObj;
     case 9:{unsigned count=0;for(unsigned i=0;i<fp->dobj_list.count;i++)for(HSD_PObj* p=fp->dobj_list.data[i]->pobj;p;p=p->next)if(HSD_POBJ_METHOD(p)==&ftPObj)count++;return count;}

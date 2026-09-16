@@ -91,3 +91,45 @@ test('Bowser flame imports its no-model gameplay item, six attributes and origin
   assert.equal(new DataView(r.image.buffer,32).getFloat32(512,true),35);
   assert.throws(()=>convertFighterArticles(fixture('Kp',a=>a.d.setFloat32(532,NaN)),'PlKp.dat'),/Nonfinite/);
 });
+
+function linkFixture(code,mutate=()=>{}){
+  const body=new Uint8Array(8192),d=new DataView(body.buffer),relocs=new Set(),rows=[];let next=256;
+  const alloc=n=>{const at=next;next=(next+n+3)&~3;return at;};
+  const ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  const joint=()=>{const at=alloc(64);for(let i=0;i<3;i++)d.setFloat32(at+32+i*4,1);return at;};
+  ptr(72,128);
+  for(const [slotText,[stateCount,words]]of Object.entries(fighterArticleProfiles[code].articles)){
+    const slot=Number(slotText),article=alloc(24),attributes=alloc(132),special=alloc(112),model=alloc(16),root=joint(),states=stateCount?alloc(stateCount*16):null;
+    ptr(128+slot*4,article);ptr(article,attributes);ptr(article+4,special);ptr(article+16,model);ptr(model,root);d.setUint32(model+4,1);
+    if(states!==null)ptr(article+12,states);
+    for(let i=0;i<words;i++)d.setFloat32(special+i*4,i+0.25);
+    const attachments=[];
+    if(slot===1)for(const off of [0x44,0x48]){const root=joint();ptr(special+off,root);attachments.push(root);}
+    if(slot===2)for(const off of [0x54,0x58,0x5C]){const root=joint();ptr(special+off,root);attachments.push(root);}
+    if(slot===3){for(const off of [0x24,0x28]){const root=joint();ptr(special+off,root);attachments.push(root);}d.setFloat32(special+0x2C,7.5);}
+    rows.push({slot,article,special,states,attachments});
+  }
+  const part=joint();ptr(128+24,part);
+  mutate({d,ptr,rows,part,alloc,joint});
+  const name=new TextEncoder().encode('ftData'+(code==='Lk'?'Link':'Clink')+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),h=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>h.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>h.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return {bytes,rows,part};
+}
+test('Link-family Articles import independent hookshot, arrow and boomerang attachments and the extra fighter part',()=>{
+  for(const code of ['Lk','Cl']){
+    const {bytes,rows,part}=linkFixture(code),before=bytes.slice(),r=convertFighterArticles(bytes,'Pl'+code+'.dat'),d=new DataView(r.image.buffer,32);
+    assert.deepEqual(bytes,before);assert.equal(r.rows.length,code==='Lk'?5:6);assert.equal(r.attachments.length,8);
+    assert.deepEqual(r.extraRows,[{slot:6,source:part,joint:part}]);
+    assert.equal(r.rows[2].stateCount,0);assert.equal(r.rows[2].states,null);
+    for(const row of rows){assert.equal(d.getFloat32(row.special,true),.25);for(const root of row.attachments)assert.ok(r.attachments.some(a=>a.joint===root));}
+    assert.equal(d.getFloat32(rows[3].special+0x2C,true),7.5);
+    assert.equal(r.rows[4].stateCount,6);
+  }
+});
+test('Link-family attachment imports reject cycles, scalar overlap and unsupported morph data',()=>{
+  for(const mutate of [
+    a=>a.ptr(a.rows[1].attachments[0]+8,a.rows[1].attachments[0]),
+    a=>a.ptr(a.rows[3].special+0x24,a.rows[0].special),
+    a=>a.d.setFloat32(a.rows[3].special+0x2C,NaN),
+    a=>{const shape=a.alloc(12),object=a.alloc(8),animation=a.alloc(16);a.ptr(a.rows[1].special+0x54,shape);a.ptr(shape+8,object);a.ptr(object+4,animation);},
+  ])assert.throws(()=>convertFighterArticles(linkFixture('Lk',mutate).bytes,'PlLk.dat'));
+});

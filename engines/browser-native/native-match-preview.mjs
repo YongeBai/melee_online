@@ -75,7 +75,8 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       let skin,gpu,modelProbe,materialGpu;
       try {
         const collected=alloc((n+extra)*4),nodes=collected+extra*4,flags=alloc(n*4),indices=alloc(model.meshes.length*4),visible=alloc(model.meshes.length*4);
-        if(module._portSceneCollect(module._portSceneObjectRoot(actor.object),collected,n+extra)!==n+extra)throw Error('Live preview hierarchy mismatch');
+        if(actor.collectNodes){if(extra)throw Error('Explicit actor nodes with extra root');actor.collectNodes(nodes,model.tree.nodes);}
+        else if(module._portSceneCollect(actor.root??module._portSceneObjectRoot(actor.object),collected,n+extra)!==n+extra)throw Error('Live preview hierarchy mismatch');
         const specs=new Uint16Array(module.HEAPU8.buffer,indices,model.meshes.length*2);
         model.meshes.forEach((mesh,i)=>{
           let at=model.tree.nodes[mesh.joint].display,index=0;
@@ -95,7 +96,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
   const particleStats={draws:0,vertices:0,frames:0,peakDraws:0},afterimageStats={draws:0,vertices:0,frames:0,peakDraws:0};
   const resourceStats={stageCreated:0,stageRetired:0,effectCreated:0,effectRetired:0,peakEffectModels:0,itemCreated:0,itemRetired:0,peakItemModels:0};
-  const itemList=items?module._malloc(1024*8):0;
+  const itemList=items?module._malloc(1024*12):0;
   if(items&&!itemList)throw Error('Item owner allocation');
   function syncItems(){
     if(!items)return;
@@ -118,13 +119,20 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       if(!source)throw Error('Unregistered linked item descriptor '+descriptor);
       current.push({...source,object,itemKey:object+':'+module._portSceneObjectRoot(object)+':'+descriptor});itemOwners.add(object);
     }
+    const attachments=module._portItemAttachmentsList(itemList,1024);if(attachments>1024)throw Error('Item attachment renderer capacity');
+    const attached=Array.from(new Uint32Array(module.HEAPU8.buffer,itemList,attachments*3));
+    for(let i=0;i<attachments;i++){
+      const [object,root,descriptor]=attached.slice(i*3,i*3+3),source=items.get(descriptor);
+      if(!source)throw Error('Unregistered item attachment descriptor '+descriptor);
+      current.push({...source,object,root,itemKey:object+':'+root+':'+descriptor});
+    }
     const keys=new Set(current.map(a=>a.itemKey));
     for(let i=resources.length-1;i>=0;i--)if(resources[i].itemKey&&!keys.has(resources[i].itemKey)){releaseResource(resources[i]);resources.splice(i,1);resourceStats.itemRetired++;}
     resourceStats.peakItemModels=Math.max(resourceStats.peakItemModels,current.length);
     for(const actor of current){
       const old=resources.find(r=>r.itemKey===actor.itemKey);
       if(!old){addActor(actor);if(resources.some(r=>r.itemKey===actor.itemKey))resourceStats.itemCreated++;}
-      else {if(module._portSceneCollect(module._portSceneObjectRoot(actor.object),old.nodes,old.model.tree.nodes.length)!==old.model.tree.nodes.length)throw Error('Reused item hierarchy mismatch');old.materialGpu.refreshBindings();}
+      else {if(module._portSceneCollect(actor.root??module._portSceneObjectRoot(actor.object),old.nodes,old.model.tree.nodes.length)!==old.model.tree.nodes.length)throw Error('Reused item hierarchy mismatch');old.materialGpu.refreshBindings();}
     }
   }
   const effectList=effects?module._malloc(512*12):0;
@@ -188,7 +196,9 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           }else{
           for(let pass=0;pass<3;pass++){
             module._portStageRenderBegin();
+            const drawnOwners=new Set();
             for(const [i,r] of resources.entries()){
+              if(drawnOwners.has(r.owner))continue;drawnOwners.add(r.owner);
               const count=r.prepare?module._portFighterNativeDraw(r.owner,pass):module._portNativeDrawObject(r.owner,pass,0);
               rows[i].passes.push(count);rows[i].draws+=count;
             }

@@ -5,6 +5,14 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 const digest=text=>createHash('sha256').update(text).digest('hex');
+export function adaptLinkArrowTable(text) {
+  // USA 1.02 places it_803F6A84 exactly 23 float words after it_803F6A28.
+  // WASM does not preserve adjacency between unrelated C global objects.
+  const from='temp_r3 = (f32*) &it_803F6A28 + ip->xDD4_itemVar.linkarrow.x9C;',
+    expression='(temp_r3[31] * rand) + temp_r3[23]';
+  if(text.split(from).length!==3||text.split(expression).length!==3)throw Error('Link arrow table layout patch changed');
+  return text.replaceAll(from,'temp_r3 = &it_803F6A84[ip->xDD4_itemVar.linkarrow.x9C];').replaceAll(expression,'(temp_r3[8] * rand) + temp_r3[0]');
+}
 export function adaptStageCallbacks(text,externalBooleanCallbacks=new Set()) {
   const adapters=[];
   text=text.replace(/\b((?:struct\s+)?StageData\s+\w+\s*=\s*\{)([\s\S]*?)(\};)/g,(whole,start,body,end)=>{
@@ -34,6 +42,7 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/it/kinds/itlinkarrow.c')text=adaptLinkArrowTable(text);
     if(file==='libs/dolphin/include/dolphin/gx/GXVert.h') {
       const declarations=['u8','s8','u16','s16','u32','s32','u64','s64','f32','f64'].map(t=>'void portGXWrite_'+t+'('+t+' value);').join('\n');
       replace('#define GXFIFO_ADDR 0xCC008000',declarations+'\n#define GXFIFO_ADDR 0xCC008000');

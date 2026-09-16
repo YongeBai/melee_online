@@ -16,6 +16,7 @@ import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
 import {verifyMarioFamilyMoves} from './verify-mario-family.mjs';
+import {verifyLinkMoves,verifyLinkContact} from './verify-link.mjs';
 import {verifyKoopaMoves,verifyKoopaContact} from './verify-koopa.mjs';
 import {verifySamusMoves,verifySamusContact} from './verify-samus.mjs';
 import {verifyPikachuMoves} from './verify-pikachu.mjs';
@@ -53,7 +54,7 @@ if(fountainCosmeticsOff&&stageKey!=='fountain')throw Error('Fountain cosmetic pr
 if(fountainCosmeticsOff)report.stageCosmetics={stars:false,scenery:!fountainSceneryOff,reflection:'constant black',originalSimulation:true};
 const code=params.get('character')??'Ca',character=fighterArchives[code],kind=motionSpec.codes.indexOf(code);
 if(!character||kind<0)throw Error('Unknown fighter component');
-const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat',effectName='Ef'+(code==='Fc'?'Fx':code==='Dr'?'Mr':code==='Pc'?'Pk':code)+'Data.dat';
+const baseName='Pl'+code+'.dat',motionName='Pl'+code+'AJ.dat',modelName='Pl'+code+'Nr.dat',effectName='Ef'+(code==='Fc'?'Fx':code==='Dr'?'Mr':code==='Pc'?'Pk':code==='Cl'?'Lk':code)+'Data.dat';
 report.character={code,name:character,kind};
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
 const stageCallbacks=params.has('stagecallbacks'),stageOnly=params.has('stageonly');
@@ -71,7 +72,7 @@ try {
   report.startupPassed=verifyStartup(module,common,models).passed;
   for(let byte=0;byte<256;byte++)if(module._portPackedFlagBits(byte)!==byte)throw Error('Packed game flag byte changed');
   report.packedFlagCases=256;
-  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp'].includes(code)||stageKey==='story') {
+  if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl'].includes(code)||stageKey==='story') {
     const data=convertItemRuntime(await asset('ItCo.usd'));installResidentFile(module,'NativeItemRuntime.dat',data.image);
     const items=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']);
     const colors=openResidentArchive(module,'NativeItemRuntime.dat',['native_item_colors']);
@@ -91,7 +92,7 @@ try {
   report.baseArchive={passed:true,checks,bytes:source.image.length,partCount,costumes,motionRows:source.motionCount,demoRows:source.demoCount,imports:source.imports,relocations:relocations.size};
   const motions=readFighterMotions(baseBytes,baseName,motionSpec),bundle=convertMotionAnimations(animationBytes,motions.motions);
   installResidentBytes(module,motionName,bundle.image);
-  loadCostume(module,models.find(m=>m.name===modelName).bytes,modelName,kind);
+  const costume=loadCostume(module,models.find(m=>m.name===modelName).bytes,modelName,kind);
   module._portMatchCameraInitialize();
   module._portEffectsInitialize();
   const commonEffectBytes=await asset('EfCoData.dat'),fighterEffectBytes=await asset(effectName);
@@ -117,7 +118,7 @@ try {
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
-  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact')||params.has('koopacontact');
+  const withStage=tournament||live||params.has('stage'),combat=tournament||live||params.has('combat')||params.has('projectilecombat')||params.has('purincontact')||params.has('samuscontact')||params.has('koopacontact')||params.has('linkcontact');
   if(combat&&!tournament){if(module._portProbeRulesInitialize()!==1)throw Error('Original default damage ratio');module._portFighterPlayerConfigure(1,1,0,1,1,1,0);}
   if(withStage){
     const rawStageBytes=await asset(stageSpec.file),stageBytes=initializeStageArchive(rawStageBytes,stageKey),map=convertStageMap(stageBytes,{stage:stageKey,callbacks:stageCallbacks});
@@ -238,7 +239,23 @@ try {
     if(render) {
       const sharedArchive=inspectArchive(common),sharedRoot=sharedArchive.publics.get('ftLoadCommonData');
       const accessoryModels=new Map([[1,sharedArchive.data.getUint32(sharedArchive.data.getUint32(sharedRoot+8*4))],[2,sharedArchive.data.getUint32(sharedRoot+16*4)]].map(([kind,root])=>[kind,archiveRootView(sharedArchive,'accessory_Share_joint',root)]));
-      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:(code==='Ca'?'Falcon':character)+' P'+(i+1),object:owner,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name===modelName).bytes});
+      function collectFighterCostume(owner,target,nodes){
+        // Original OnLoad inserts an extra nonvisual part into Link's skeleton.
+        // Bone-array indices therefore differ from costume traversal indices.
+        const byDescriptor=new Map();
+        for(let part=0;part<partCount;part++){
+          const joint=module._portCollisionPartRead(owner,part,0);if(!joint)continue;
+          const descriptor=module._portCollisionPartRead(owner,part,11);
+          if(byDescriptor.has(descriptor))throw Error('Duplicate fighter part descriptor');byDescriptor.set(descriptor,joint);
+        }
+        const pointers=new Uint32Array(module.HEAPU8.buffer,target,nodes.length),base=costume.root-costume.rootOffset;
+        for(const [i,node]of nodes.entries()){
+          const descriptor=base+node.offset,joint=byDescriptor.get(descriptor);if(!joint)throw Error('Missing fighter costume part '+i);
+          pointers[i]=joint;byDescriptor.delete(descriptor);
+        }
+        if(byDescriptor.size!==1)throw Error('Unexpected Link attachment parts');
+      }
+      for(const [i,owner] of [object,opponent].entries())if(owner)previewActors.push({name:(code==='Ca'?'Falcon':character)+' P'+(i+1),object:owner,collectNodes:['Lk','Cl'].includes(code)?(target,nodes)=>collectFighterCostume(owner,target,nodes):undefined,accessory:{root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:models.find(m=>m.name===modelName).bytes});
       canvas=document.createElement('canvas');canvas.width=960;canvas.height=720;canvas.id='native-preview';document.querySelector('#result').before(canvas);
       const effectModels=new Map();
       for(const [bytes,source,data] of [[commonEffectBytes,effects,effectData],[fighterEffectBytes,fighterEffects,module._portEffectsBankData(fighterEffects.bank)]]){
@@ -247,7 +264,7 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp'].includes(code)){
+      if(['Fx','Fc','Mr','Lg','Dr','Pk','Pc','Ss','Kp','Lk','Cl'].includes(code)){
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=report.state[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});
         for(const row of articles.attachments){
@@ -406,6 +423,22 @@ try {
       if(params.has('purinmoves')){
         if(code!=='Pr'||opponent)throw Error('Purin move probe requires one Purin fighter');
         report.purinMoves={};verifyPurinMoves(module,object,report.purinMoves,{step,onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});
+      }
+      if(params.has('linkcontact')){
+        if(!['Lk','Cl'].includes(code)||!opponent)throw Error('Link contact requires two fighters');
+        report.linkContact={};verifyLinkContact(module,[object,opponent],report.linkContact,{step,mode:params.get('linkcontact'),onStep:renderSteps?()=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          if(!report.preview.linkhit&&combatState(opponent)[13]>0){report.preview.linkhit=drawn;const img=document.createElement('img');img.id='native-preview-linkhit';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
+        }:undefined});
+      }
+      if(params.has('linkmoves')){
+        if(!['Lk','Cl'].includes(code))throw Error('Link move probe fighter');
+        report.linkMoves={};verifyLinkMoves(module,object,code,report.linkMoves,{step,onStep:renderSteps?phase=>{
+          const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
+          for(const [name,active]of [['arrow',phase.name==='charged arrow'&&phase.frames>=100&&phase.peakAttachments>0],['hookshot',phase.name==='ground hookshot'&&phase.frames>=30&&phase.peakLinks>0],['boomerang',phase.name==='boomerang'&&phase.frames>=50&&phase.peakAttachments>0]])if(active&&!report.preview[name]){
+            report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
+          }
+        }:undefined});
       }
       if(params.has('koopamoves')||params.has('koopacontact')){
         if(code!=='Kp'||params.has('koopacontact')&&!opponent||params.has('koopamoves')&&opponent&&!stageCallbacks)throw Error('Koopa probe fighter count');

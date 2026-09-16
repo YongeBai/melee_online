@@ -22,9 +22,12 @@ export const fighterArticleProfiles=Object.freeze({
   Pk:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
   Pc:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
   Kp:{slots:1,articles:{0:[1,6]}},
+  Lk:{slots:7,articles:{0:[3,16],1:[3,17],2:[0,21],3:[1,9],4:[6,1]}},
+  Cl:{slots:7,articles:{0:[3,16],1:[3,17],2:[0,21],3:[1,9],4:[6,1],5:[2,1]}},
   Ss:{slots:5,articles:{0:[2,7],1:[9,8],2:[4,16],3:[0,25]}},
 });
 export function initializeFighterArticleArchive(input,code){
+  if(['Lk','Cl'].includes(code))return initializeArchiveExternals(input,['ItmLinkHShot_TopN_ACTION_Out_matanim_joint','ItmLinkHShot_TopN_ACTION_Out_shapeanim_joint']);
   return code==='Ss'?initializeArchiveExternals(input,[
     'ItmSamusGBeamChainA_TopN_shapeanim_joint','ItmSamusGBeamChainB_TopN_shapeanim_joint','ItmSamusGBeamChainC_TopN_shapeanim_joint',
     'ItmSamusGBeamStart_TopN_matanim_joint','ItmSamusGBeamStart_TopN_shapeanim_joint','ItmSamusGBeamTop_TopN_matanim_joint','ItmSamusGBeamTop_TopN_shapeanim_joint',
@@ -69,7 +72,7 @@ export function convertFighterArticles(input,name) {
   function jointAnimation(root){if(root!==null){const t=readJointAnimation(a,root);tree(t);for(const node of t.nodes)if(node.animation)tree(node.animation);}}
   function materialAnimation(root){if(root!==null)tree(convertMaterialAnimation(archiveRootView(a,'item_Share_matanim_joint',root)));}
   function attachment(joint,label){
-    if(joint===null)throw Error('Missing Samus attachment model');
+    if(joint===null)throw Error('Missing Article attachment model');
     const scene=convertSceneAsset(archiveRootView(a,'item_Share_joint',joint));
     for(const at of scene.pointerSlots)pointer(at);for(const [at,size]of scene.writes)scalar(at,size);
     attachments.push({joint,label,nodes:scene.model.tree.nodes.length});
@@ -86,6 +89,14 @@ export function convertFighterArticles(input,name) {
         const roots=[0,4,8].map(i=>{const table=pointer(special+off+i);return table===null?null:pointer(table);});
         jointAnimation(roots[0]);materialAnimation(roots[1]);if(roots[2]!==null)shapeTopology(roots[2]);
       }
+    }
+    if(['Lk','Cl'].includes(code)){
+      if(model.slot===1){
+        for(const off of [0x44,0x48])attachment(pointer(special+off),'boomerang '+off);
+        for(const off of [0x4C,0x58]){jointAnimation(pointer(special+off));materialAnimation(pointer(special+off+4));const shape=pointer(special+off+8);if(shape!==null)shapeTopology(shape);}
+      }
+      if(model.slot===2)for(const off of [0x54,0x58,0x5C])attachment(pointer(special+off),'hookshot '+off);
+      if(model.slot===3){for(const off of [0x24,0x28])attachment(pointer(special+off),'arrow '+off);scalar(special+0x2C,4,true);}
     }
     const scripts=[],animations=[];
     for(let j=0;j<stateCount;j++) {
@@ -106,6 +117,10 @@ export function convertFighterArticles(input,name) {
     if(motions===null)throw Error('Missing Samus throw motion table');
     attachment(joint,'throw');for(let i=0;i<4;i++)jointAnimation(pointer(motions+i*4));jointAnimation(animation);materialAnimation(material);
     extraRows.push({slot:4,source:extra,joint,motions,animation,material});
+  }
+  if(['Lk','Cl'].includes(code)){
+    const root=a.publics.get(code==='Lk'?'ftDataLink':'ftDataClink'),table=pointer(root+0x48),joint=pointer(table+24);
+    attachment(joint,'fighter part');extraRows.push({slot:6,source:joint,joint});
   }
   return {code,source:input,rows,extraRows,attachments,pointerSlots:pointers,image:nativeSubgraphImage(bytes,pointers,new Map(rows.map(r=>['native_article_'+r.slot,r.article])))};
 }

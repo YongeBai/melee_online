@@ -45,18 +45,37 @@ unsigned portItemsList(unsigned* result,unsigned capacity)
 {
     unsigned n=0;for(HSD_GObj* object=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];object;object=object->next){if(n<capacity)result[n]=(unsigned)object;n++;}return n;
 }
-/* Samus's original tether uses separately scheduled ItemLink objects, not
+/* Original tethers use separately scheduled ItemLink objects, not
  * Items. Enumerate them without changing their lifetime, collision or poses. */
 unsigned portItemLinksList(unsigned* result,unsigned capacity)
 {
     unsigned n=0;
     for(HSD_GObj* object=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];object;object=object->next){
-        Item* item=object->user_data;if(item->kind!=It_Kind_Samus_GBeam)continue;
+        Item* item=object->user_data;ItemLink* first=NULL;
+        if(item->kind==It_Kind_Samus_GBeam)first=item->xDD4_itemVar.samusgrapple.x0;
+        else if(item->kind==It_Kind_Link_HShot||item->kind==It_Kind_CLink_HShot)first=item->xDD4_itemVar.linkhookshot.x0;
+        else continue;
         unsigned links=0;
-        for(ItemLink* link=item->xDD4_itemVar.samusgrapple.x0;link;link=link->next){
+        for(ItemLink* link=first;link;link=link->next){
             if(++links>256||!link->gobj||!link->gobj->hsd_obj)abort();
             HSD_JObj* joint=link->gobj->hsd_obj;
             if(n<capacity){result[n*2]=(unsigned)link->gobj;result[n*2+1]=joint->id;}n++;
+        }
+    }
+    return n;
+}
+/* These joints are drawn by the item's original callback but are not children
+ * of its primary model. Keep their native owner and lifetime. */
+unsigned portItemAttachmentsList(unsigned* result,unsigned capacity)
+{
+    unsigned n=0;
+    for(HSD_GObj* object=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];object;object=object->next){
+        Item* item=object->user_data;HSD_JObj** roots=NULL;
+        if(item->kind==It_Kind_Link_Boomerang||item->kind==It_Kind_CLink_Boomerang)roots=item->xDD4_itemVar.linkboomerang.xF90;
+        else if(item->kind==It_Kind_Link_Arrow||item->kind==It_Kind_CLink_Arrow)roots=item->xDD4_itemVar.linkarrow.xB4;
+        if(!roots)continue;
+        for(unsigned i=0;i<2;i++)if(roots[i]){
+            if(n<capacity){result[n*3]=(unsigned)object;result[n*3+1]=(unsigned)roots[i];result[n*3+2]=roots[i]->id;}n++;
         }
     }
     return n;

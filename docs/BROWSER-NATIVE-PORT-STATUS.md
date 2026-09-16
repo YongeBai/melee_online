@@ -5,6 +5,45 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Link and Young Link now pass default-costume constructor, controller, selected
+move/contact and full-scene rendering checks. The port imports their original
+bomb, boomerang, hookshot, arrow and bow Articles, plus Young Link's milk. Their
+extra fighter part is bound by descriptor identity; hookshot links and separate
+arrow/boomerang joint roots retain the original callbacks and ownership. A
+portable-source correction replaces two arrow-wobble reads that relied on
+unrelated globals being adjacent in the retail executable. All 16 float values
+and the original 92-byte offset were verified against the development disc;
+indices, random calls and arithmetic are preserved.
+
+The move sequences render 2,609 Link frames and 2,910 Young Link frames, including
+ground/air arrows, boomerangs, hookshots, Spin Attack, bombs and the milk taunt.
+Twelve rendered contact checks pass. Charged arrows deal 18/15 damage, hookshot
+forward throws deal six, and boomerangs/bombs produce damage and knockback.
+Facing an idle defender toward an arrow activates the original physical shield:
+zero damage with hitlag. No-input controls remain at zero. These are selected
+integration checks, not retail parity proof. The exhaustive full-scene Link
+GPU-vertex diagnostic timed out at 1,200 seconds during the final bomb phase;
+it is not counted as a completed pass. Normal rendered sequences and the Samus
+grapple/Bowser renderer regressions pass. All 176 tests and the fighter build pass.
+
+Four two-fighter Battlefield timing samples each submit all 3,600 draws in about
+60 seconds at 960×720, with no catch-up callbacks. Initial simulation/draw means
+are 0.527/8.157 ms for Link and 0.549/7.452 ms for Young Link. Preparing 58 programs
+with the driver cache disabled eliminates live compilation and preserves the
+recorded gameplay traces. Prepared simulation/draw means are 0.555/7.801 ms and
+0.564/7.422 ms; draw p95 is 10.8/11.6 ms and maximum 19.0/17.3 ms. Those remaining
+long submissions mean shader preparation does not guarantee a frame deadline.
+This close-combat workload is not projectile stress, distinct displayed-FPS
+measurement or input-to-photon measurement.
+
+Core hash: `06b477b2…`. Seventeen fighter components now have constructor/input
+integration; ten components, other costumes, complete scenes/menus/audio, retail
+parity, networking and native-port deployment remain unfinished. The overall
+720p60 competitive acceptance criterion is **not achieved**.
+[Link-family evidence](benchmarks/browser-2026-09-16-native-port-link-family.json).
+
+Previous Bowser checkpoint:
+
 Bowser is now integrated through the original constructor, controller inputs,
 Flame Breath Article, effect bank and full scene rendering. This exposed a shared
 porting bug: Melee's pinned MSL header defines `bool` as a signed 32-bit integer,
