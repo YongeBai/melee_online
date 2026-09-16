@@ -5,6 +5,24 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original item model setup now runs for all 77 Article slots registered by the
+playable characters. These contain 66 model graphs and 11 deliberately empty
+roots, totaling 438 runtime joints, 435 meshes and nine hurtboxes. Two concurrent
+owners per entry pass bone-table ordering, original item material class,
+independent transforms and complete object/bone/material teardown checks.
+
+The browser run covers 154 instances, 616 transform updates and 92,755 checks,
+including all 65,536 packed attribute-flag combinations. Hurtbox world coordinates
+match independent matrix multiplication exactly in this corpus. Popo's unresolved
+GumStrings model becomes NULL, as in the original archive loader.
+
+All 81 targeted tests and the wider/scene browser suites pass. The wider module
+is 2,814,145 bytes; the scene module remains 253,196 bytes. These limited item
+owners are not registered as gameplay Articles: special attributes, item states,
+scripts, spawning and item rendering remain pending. Full fighter creation and
+match execution remain incomplete; this is not a 720p60 measurement.
+[Item-model checkpoint](benchmarks/browser-2026-09-15-native-port-item-models.json).
+
 The initialized fighter animation path now uses Melee's original motion loader
 and per-fighter load buffers instead of receiving preloaded trees. All 27
 components pass 81 selected clips / 5,184 animation updates through this combined

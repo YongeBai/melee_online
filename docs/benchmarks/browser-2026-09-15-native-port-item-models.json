@@ -1,0 +1,800 @@
+{
+  "date": "2026-09-15",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "build": {
+    "wasmBytes": 2814145,
+    "wasmSha256": "d996157129f2e203d41ad3dae87334d298c94e3075e48ed6bd7881db622fab9f",
+    "portableRecipe": "9d596ac368c50d540110a5ea743777755fc03289c27d9f14371ed34e32af065a"
+  },
+  "originalFunctions": [
+    "Item_802680CC",
+    "Item_802682F0",
+    "Item_8026814C",
+    "Item_8026849C",
+    "it_8027163C",
+    "lbColl_800083C4"
+  ],
+  "integration": {
+    "passed": true,
+    "checks": 92755,
+    "packedFlagChecks": 65536,
+    "instances": 154,
+    "updates": 616,
+    "maxError": 0,
+    "rows": [
+      {
+        "name": "PlMr.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 2,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 22,
+            "hasModel": true,
+            "boneTable": 22,
+            "meshes": 18,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlFx.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 4,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 16,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlCa.dat",
+        "articles": []
+      },
+      {
+        "name": "PlDk.dat",
+        "articles": []
+      },
+      {
+        "name": "PlKb.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 2,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 3,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 3,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 3,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlKp.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlLk.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 6,
+            "hasModel": true,
+            "boneTable": 6,
+            "meshes": 6,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 1,
+            "modelNodes": 7,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 9,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 6,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 5,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 4,
+            "modelNodes": 13,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 10,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlSk.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 2,
+            "meshes": 1,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 1,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 6,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 2,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlNs.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 2,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 1,
+            "modelNodes": 9,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 8,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 2,
+            "modelNodes": 10,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 8,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 7,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 7,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 4,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 5,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 6,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 7,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 8,
+            "modelNodes": 11,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 10,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 9,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 3,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 10,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlPe.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 17,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 8,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 5,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 10,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 8,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 4,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlPp.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 2,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlNn.dat",
+        "articles": []
+      },
+      {
+        "name": "PlPk.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 8,
+            "meshes": 6,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlPr.dat",
+        "articles": []
+      },
+      {
+        "name": "PlSs.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 4,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 3,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 4,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 4,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 2,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlYs.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 3,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 1
+          }
+        ]
+      },
+      {
+        "name": "PlZd.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlLg.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 2,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlMt.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 11,
+            "hasModel": true,
+            "boneTable": 11,
+            "meshes": 8,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlMs.dat",
+        "articles": []
+      },
+      {
+        "name": "PlGw.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 11,
+            "hasModel": true,
+            "boneTable": 11,
+            "meshes": 6,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 6,
+            "hasModel": true,
+            "boneTable": 6,
+            "meshes": 2,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 16,
+            "hasModel": true,
+            "boneTable": 16,
+            "meshes": 8,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 10,
+            "hasModel": true,
+            "boneTable": 10,
+            "meshes": 4,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 4,
+            "modelNodes": 18,
+            "hasModel": true,
+            "boneTable": 18,
+            "meshes": 10,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 5,
+            "modelNodes": 5,
+            "hasModel": true,
+            "boneTable": 5,
+            "meshes": 2,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 6,
+            "modelNodes": 38,
+            "hasModel": true,
+            "boneTable": 38,
+            "meshes": 102,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 7,
+            "modelNodes": 11,
+            "hasModel": true,
+            "boneTable": 11,
+            "meshes": 6,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 8,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 8,
+            "meshes": 4,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 9,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 8,
+            "meshes": 4,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlDr.dat",
+        "articles": [
+          {
+            "slot": 1,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 3,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 22,
+            "hasModel": true,
+            "boneTable": 22,
+            "meshes": 18,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlCl.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 6,
+            "hasModel": true,
+            "boneTable": 6,
+            "meshes": 6,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 1,
+            "modelNodes": 7,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 9,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 6,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 3,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 5,
+            "hurtboxes": 1
+          },
+          {
+            "slot": 4,
+            "modelNodes": 13,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 10,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 5,
+            "modelNodes": 5,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 6,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlPc.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 1,
+            "hasModel": false,
+            "boneTable": 0,
+            "meshes": 0,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 2,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 8,
+            "meshes": 6,
+            "hurtboxes": 0
+          }
+        ]
+      },
+      {
+        "name": "PlFe.dat",
+        "articles": []
+      },
+      {
+        "name": "PlGn.dat",
+        "articles": []
+      },
+      {
+        "name": "PlFc.dat",
+        "articles": [
+          {
+            "slot": 0,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 4,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 1,
+            "modelNodes": 8,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 16,
+            "hurtboxes": 0
+          },
+          {
+            "slot": 3,
+            "modelNodes": 1,
+            "hasModel": true,
+            "boneTable": 0,
+            "meshes": 1,
+            "hurtboxes": 0
+          }
+        ]
+      }
+    ],
+    "limitation": "Original item model, material class, bone table, scale and hurtbox initialization/world transforms. No item spawn/state scripts, special attributes, projectiles in gameplay, stage collisions or GPU material submission.",
+    "entries": 77,
+    "modelGraphs": 66,
+    "emptyRoots": 11,
+    "joints": 438,
+    "meshes": 435,
+    "hurtboxes": 9
+  },
+  "regression": {
+    "targetedTests": 81,
+    "sceneBrowserPassed": true,
+    "sceneWasmBytes": 253196,
+    "auditCompiled": 1047,
+    "auditTotal": 1130
+  },
+  "limitations": [
+    "Limited item owners are not installed as gameplay Articles.",
+    "Special attributes, states, scripts, spawning, effects and item GPU rendering remain incomplete.",
+    "The 77 entries are the playable characters' registered Articles, not every game item.",
+    "Full Fighter_Create and match execution remain unverified.",
+    "No native match FPS, gameplay parity or input-to-photon measurement."
+  ],
+  "playable": false,
+  "gameplayParity": false,
+  "performanceMeasured": false,
+  "acceptanceCriteriaMet": false
+}

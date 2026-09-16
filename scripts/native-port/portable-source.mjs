@@ -34,6 +34,27 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/it/types.h') {
+      const start=text.indexOf('struct ItemAttr {'),end=text.indexOf('    u8 x3;',start);
+      if(start<0||end<start||!text.slice(start,end).includes('x1_67_cam_kind'))throw Error('Item attribute flag layout changed');
+      text=text.slice(0,start)+'struct ItemAttr {\n'+
+        '    u8 x0_hold_kind : 3; u8 x0_78 : 4; u8 x0_is_heavy : 1;\n'+
+        '    u8 x1_8 : 1; u8 x1_67_cam_kind : 2; u8 x1_5 : 1; u8 x1_4 : 1; u8 x1_3 : 1; u8 x1_1 : 2;\n'+text.slice(end);
+    }
+    if(file==='src/melee/it/itmaterial.h')replace('typedef void (*it_MObjSetupFunc)(HSD_MObj* mobj, u32 rendermode, u32 unused);',
+      'typedef void (*it_MObjSetupFunc)(HSD_MObj* mobj, u32 rendermode);');
+    if(file==='src/melee/it/itmaterial.c') {
+      replace('void it_80277D08(void)\n{','static void port_item_material_setup(HSD_MObj* mobj,u32 mode) { fn_80277D8C(mobj,mode,0); }\n\nvoid it_80277D08(void)\n{');
+      replace('it_mobj.setup = (it_MObjSetupFunc) fn_80277D8C;','it_mobj.setup = port_item_material_setup;');
+      adapters.push({function:'fn_80277D8C',adapter:'port_item_material_setup',from:'void(HSD_MObj*,u32,u32)',to:'void(HSD_MObj*,u32)',conversion:'unused third parameter = 0'});
+    }
+    if(file==='src/melee/it/item.c') {
+      text += '\nint portOriginalItemModelSetup(HSD_GObj* object) {\n'+
+        '  if(!item_dynamic_bones_alloc_data.size)HSD_ObjAllocInit(&item_dynamic_bones_alloc_data,sizeof(DynamicBoneTable),4);\n'+
+        '  Item_802680CC(object);if(!Item_802682F0(object))return 0;Item_8026814C(object);Item_8026849C(object);it_8027163C(object);return 1;\n}\n'+
+        'void portOriginalItemModelRelease(Item* item) { if(item->xBBC_dynamicBoneTable)HSD_ObjFree(&item_dynamic_bones_alloc_data,item->xBBC_dynamicBoneTable); }\n'+
+        'unsigned portOriginalItemModelLive(void) { return item_dynamic_bones_alloc_data.used+HSD_CLASS_INFO(&it_mobj)->head.nb_exist; }\n';
+    }
     if(file==='src/melee/ft/ftmaterial.c') {
       // Retail .data has ftMObj, the TEV template and the constant template in
       // sequence. C does not guarantee that placement (or retain unused data).

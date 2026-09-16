@@ -439,3 +439,25 @@ SRT copies, resets and independent ownership. The three original shield-pose
 consumers pass source-translation/scale and finite deterministic pose checks.
 These calls exercise pose handling, not Guard state transitions, shield health,
 tilt, effects, input, combat, retail parity or performance.
+
+## Character item models
+
+`item-model-assets.mjs` imports common attributes, models and hurtboxes for the
+77 Article slots registered by character OnLoad callbacks. Other entries in the
+same table can be hats or part tables and are not treated as Articles. It exposes
+only `native_item_models`; incomplete Article and full character roots remain
+unpublished. The one Popo GumStrings external model reference becomes NULL,
+matching the original archive loader. Other externs inside these graphs fail.
+
+`item-model.c` owns limited original Item objects and calls the original model,
+material-class, dynamic-bone-table, scale and hurtbox setup routines. Portable
+ItemAttr bitfields preserve packed source bytes; all 65,536 combinations pass
+through their actual C members. The original item material setup uses a typed
+two-argument adapter for HSD's callback ABI, supplying its unused third argument.
+
+`verify-item-models.mjs` tests two owners per entry, bone order, native scene
+descriptors, skin references, finite independent matrices and hurtbox world
+coordinates, followed by object/material/bone/file cleanup. Item animation states,
+special attributes, command scripts, spawning and GPU material submission are
+not exercised. These objects never enter the gameplay Article table and do not
+substitute for complete projectile or attack behavior.
