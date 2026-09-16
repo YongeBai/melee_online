@@ -1,0 +1,435 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "cc36754",
+  "scope": "Kirby Falco body-copy asset integration, original part insertion/removal, descriptor-based rendering of appended body geometry, copied laser and Blaster lifecycle/contact checks.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "5deffeeeeba717ca75a068052734c860f8737c78c2a962eed72a717f7a07588a",
+    "wasmBytes": 2958698
+  },
+  "sourceHashes": {
+    "character-collision.c": "5fdb350cd631ed577ec8712f791d79630739a0d2de6c0133a6b1bf2834873a7d",
+    "tev-state.c": "33f496945e6138e5b48d7447bd92d52b0c1b6f3993b9f274d766904363132d4f",
+    "constructor.html": "ad2800665c9315b96b43cba2d89162f675133dab277d1208ec8a27a152799487",
+    "effect-assets.mjs": "b139f38c595458dbd6502a95ec34109d152795dfd864225a0a8ede0a9041db3d",
+    "kirby-copy-assets.mjs": "45fdbe91d36f9313709876dae1a2e859cf71c8e8a617f9f2831b8af4ba219866",
+    "verify-kirby.mjs": "8d6138f25577b7a918e07c284245bef15b3d5ef5547d7a406bf180e7f7f8e963",
+    "material-gpu.mjs": "8bbc301066e85d759631426d837c7372606b6d03ddce2dc23456e81d4dec2d30",
+    "native-match-preview.mjs": "0ee1a710201fbd025a6b472a79f9bbc786b11b06c9e151bbe32772b5034ba9ed"
+  },
+  "assets": {
+    "copy": {
+      "root": 956,
+      "bodyCopy": true,
+      "extraJoint": 63828,
+      "extraNodes": 48,
+      "extraMeshes": 10,
+      "extraDisplayObjects": 5,
+      "textureRows": [
+        [
+          3,
+          1
+        ],
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "typedRelocations": 515,
+      "omittedExporterRelocations": [
+        2216,
+        2232,
+        28288,
+        28304
+      ],
+      "articles": [
+        {
+          "slot": 0,
+          "joint": 2152,
+          "stateCount": 2,
+          "specialWords": 10
+        },
+        {
+          "slot": 1,
+          "joint": 10120,
+          "stateCount": 9,
+          "specialWords": 10
+        }
+      ]
+    },
+    "costume": {
+      "root": 50740,
+      "nodes": 48,
+      "meshes": 28,
+      "displayObjects": 22,
+      "materialAnimation": true,
+      "typedRelocations": 695
+    },
+    "effects": {
+      "bank": 33,
+      "models": 1,
+      "commands": 0
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fc --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contactGpu": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fc --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "samusRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ss --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "foxRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fx --input --combat --kirby-copy=contact"
+  },
+  "validation": {
+    "unitTests": {
+      "passed": 222,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "sharedBrowser": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "31b330ad137a588d606adb8b93e1347afc12ea8cc9f7f077b85e88e899a593d6"
+    },
+    "visualInspection": "Saved 960x720 Falco copy costume and firing images inspected. Native camera and 4:3 retained; no retail image comparison.",
+    "browser": "Chrome 151.0.7922.137",
+    "gpu": {
+      "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+      "vendor": "Google Inc. (AMD)",
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+    },
+    "contactFiringVertices": 19544,
+    "shaderCases": 13,
+    "pixelChannelChecks": 52,
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-falco/full.json",
+      "sha256": "7cdeb4f8712714fbe9786f6f3b9847367e493438ee5110c40a8eabbe0207d994",
+      "completed": true,
+      "copyFrames": 2240,
+      "renderedInputFrames": 2382,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          520,
+          521,
+          522,
+          24,
+          25,
+          523,
+          524,
+          525,
+          42,
+          265
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18
+        ]
+      ],
+      "itemKinds": [
+        139,
+        137,
+        52
+      ],
+      "firstBody": [
+        15538080,
+        22,
+        5
+      ],
+      "secondBody": [
+        15538240,
+        22,
+        5
+      ],
+      "repeatedLaserLoops": 7,
+      "bodyRenderedFrames": 1461,
+      "peakBodyDraws": 17,
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Fc",
+          "root": 15043804,
+          "bodyCopy": true,
+          "costumeNodes": 48,
+          "hatNodes": 48,
+          "hatMeshes": 10,
+          "dynamicBoneChains": 0,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 212,
+            "models": 1,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 99,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "contact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-falco/contact-gpu.json",
+      "sha256": "258ac483541c053f7260f058a3be84e75d4275d833df8f252f915497fd5796da",
+      "completed": true,
+      "copyFrames": 837,
+      "renderedInputFrames": 979,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          520,
+          521,
+          522
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18,
+          81
+        ]
+      ],
+      "itemKinds": [
+        139,
+        137
+      ],
+      "firstBody": [
+        14015136,
+        22,
+        5
+      ],
+      "bodyRenderedFrames": 599,
+      "peakBodyDraws": 17,
+      "damage": [
+        8,
+        11
+      ],
+      "hitlagAtImpact": 4,
+      "copySetup": [
+        {
+          "code": "Fc",
+          "root": 13706940,
+          "bodyCopy": true,
+          "costumeNodes": 48,
+          "hatNodes": 48,
+          "hatMeshes": 10,
+          "dynamicBoneChains": 0,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 212,
+            "models": 1,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 99,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "samusRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-falco/samus-regression.json",
+      "sha256": "9b7baa8fd74107f1c782f68fce6370636eb47d8dd3e181533eee491b8bae1371",
+      "completed": true,
+      "copyFrames": 3034,
+      "renderedInputFrames": 3176,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          407,
+          408,
+          410,
+          24,
+          25,
+          411,
+          412,
+          409,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292
+        ]
+      ],
+      "itemKinds": [
+        151,
+        52
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Ss",
+          "root": 15735872,
+          "bodyCopy": false,
+          "hatNodes": 1,
+          "hatMeshes": 13,
+          "dynamicBoneChains": 0,
+          "articles": 1,
+          "effects": {
+            "passed": true,
+            "checks": 725,
+            "models": 1,
+            "commands": 11,
+            "textures": 7,
+            "relocations": 36,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "samusPixelComparison": [
+      {
+        "name": "copyhat",
+        "changedPixels": 0,
+        "maxDifference": 0
+      },
+      {
+        "name": "copyfire",
+        "changedPixels": 0,
+        "maxDifference": 0
+      },
+      {
+        "name": "copystar",
+        "changedPixels": 0,
+        "maxDifference": 0
+      },
+      {
+        "name": "captured",
+        "changedPixels": 0,
+        "maxDifference": 0
+      }
+    ],
+    "foxRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-falco/fox-contact-regression.json",
+      "sha256": "ffa90be4f6563d05cf52f969477aa52d9c4fda51dfd680e3a0a0d0e3cf0d81be",
+      "completed": true,
+      "copyFrames": 837,
+      "renderedInputFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          423,
+          424,
+          425
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18
+        ]
+      ],
+      "itemKinds": [
+        138,
+        136
+      ],
+      "damage": [
+        8,
+        11
+      ],
+      "hitlagAtImpact": 0,
+      "copySetup": [
+        {
+          "code": "Fx",
+          "root": 13990592,
+          "bodyCopy": false,
+          "hatNodes": 4,
+          "hatMeshes": 8,
+          "dynamicBoneChains": 0,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 212,
+            "models": 1,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 99,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    }
+  },
+  "binding": {
+    "originalLoader": "ftKb_SpecialN_800F130C / LOAD_HAT adds original costume DObjs through the active fighter-parts ordering, using the original 0x1800 insertion mask. ftKb_SpecialN_800EF69C removes them.",
+    "geometry": "Appended polygons retain original descriptor vertex/display buffer pointers. Binding scans only at accessory creation, requires a unique match, and preserves native callback selection and order. Ordinary model binding stays unchanged.",
+    "telemetry": "Copy probes request per-model queued draw counts and reject retained copy-body GPU resources after native removal. Ordinary live runs do not scan per-model queued draws."
+  },
+  "limits": [
+    "Default Kirby Falco-copy costume file integrated; other Kirby copy costume colors remain unfinished.",
+    "Original C integration and internal GPU oracle, not retail per-frame parity.",
+    "GPU contact sequence preceded repeated-laser and resource-removal assertions added to final lifecycle harness; same native core and renderer.",
+    "No presented-FPS or input-to-photon latency measurement; no new performance gain claimed.",
+    "Full scenes, remaining abilities/costumes, menus/audio, retail parity, networking and public static deployment remain incomplete.",
+    "Automatic hosted no-ISO startup unchanged; no game assets or binaries committed."
+  ]
+}

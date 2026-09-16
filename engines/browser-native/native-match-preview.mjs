@@ -59,8 +59,9 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           if(!bytes)throw Error('Unregistered fighter accessory '+kind);
           const model=readModelMeshes(bytes),n=model.tree.nodes.length;
           r.accessoryNodes=module._malloc(n*4);if(!r.accessoryNodes)throw Error('Accessory node allocation');
-          if(module._portSceneCollect(root,r.accessoryNodes,n)!==n)throw Error('Accessory hierarchy mismatch');
-          r.accessoryGpu=materialRenderer.upload(model,bytes,r.accessoryNodes,owner.owner);
+          const count=r.accessory.collectNodes?r.accessory.collectNodes(r.accessoryNodes,n):module._portSceneCollect(root,r.accessoryNodes,n);
+          if(count!==n)throw Error('Accessory hierarchy mismatch');
+          r.accessoryGpu=materialRenderer.upload(model,bytes,r.accessoryNodes,owner.owner,{descriptorBase:r.accessory.descriptorBase??null});
         }
       }
       if(root)count++;
@@ -204,12 +205,13 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           }
           }
           const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),materialDraws=materialRenderer.flush({ordered:true});
+          const accessoryDraws=traceAttachments?resources.flatMap(r=>r.accessories.filter(a=>a.accessoryGpu).map(a=>({name:a.accessory.name??null,draws:a.accessoryGpu.queuedDrawCount()}))):null;
           const attachmentDraws=traceAttachments?resources.filter(r=>r.itemAttachment).map(r=>({name:r.name,draws:r.materialGpu.queuedDrawCount()})):null;
           for(const [stats,draws,vertices] of [[particleStats,materialDraws.particleDraws,materialDraws.particleVertices],[afterimageStats,materialDraws.afterimageDraws,materialDraws.afterimageVertices]]){
             stats.draws+=draws;stats.vertices+=vertices;if(draws)stats.frames++;stats.peakDraws=Math.max(stats.peakDraws,draws);
           }
           immediateStats.primitives+=materialDraws.particleDraws+materialDraws.afterimageDraws;immediateStats.submittedDraws+=materialDraws.immediateDraws;immediateStats.vertices+=materialDraws.immediateVertices;immediateStats.frames++;
-          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,attachmentDraws,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,attachmentDraws,accessoryDraws,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot,cameraValidation);
         module._portStageRenderBegin();

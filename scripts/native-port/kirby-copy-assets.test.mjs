@@ -154,3 +154,18 @@ test('Samus copy initializes both original external chains to null across all ni
   assert.equal(d.getFloat32(148,true),4);assert.equal(d.getFloat32(152,true),22);
   for(const change of [a=>a.names[1]='UnexpectedExternal',a=>a.d.setUint32(476,476),a=>a.d.setUint32(480,476),a=>a.d.setUint32(476,52696),a=>a.ptr(52664,2000),a=>a.ptr(476,5000)])assert.throws(()=>convertKirbyCopy(chargeFixture(change),'Ss'));
 });
+
+function falcoBodyFixture(change=()=>{}){
+  const body=new Uint8Array(28328),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  const root=1000;d.setUint32(root,1);ptr(root+4,1100);d.setUint32(root+8,2);ptr(root+12,1200);d.setUint32(root+16,0x1800);ptr(root+20,4096);ptr(root+24,400);ptr(root+28,424);
+  ptr(1200,1248);d.setUint16(1248,3);d.setUint16(1250,1);
+  for(const [article,attributes,special,states,model,joint]of [[400,0,132,600,500,2048],[424,200,332,680,516,2304]]){ptr(article,attributes);ptr(article+4,special);ptr(article+12,states);ptr(article+16,model);ptr(model,joint);d.setUint32(model+4,1);}
+  for(const joint of [2048,2304,4096])for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  for(const [at,to]of [[2216,2048],[2232,2216],[28288,2304],[28304,28288]])ptr(at,to);
+  change({d,ptr,relocs,root});const name=new TextEncoder().encode('ftDataKirbyCopyFalco\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,root);bytes.set(name,pub+8);return bytes;
+}
+test('Falco body copy preserves costume visibility, texture indices, insertion mask and both Articles',()=>{
+  const input=falcoBodyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Fc'),d=new DataView(r.image.buffer,32);assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.equal(r.joint,4096);assert.equal(r.visibility.rows.length,6);assert.equal(d.getUint32(1016,true),0x1800);assert.deepEqual(r.textureRows,[[3,1],null,null,null,null,null]);assert.equal(d.getUint16(1248,true),3);assert.equal(d.getUint16(1250,true),1);assert.deepEqual(r.articles.rows.map(a=>[a.stateCount,a.specialWords]),[[2,10],[9,10]]);assert.equal(r.unreferencedRelocations.length,4);
+  for(const change of [a=>a.d.setUint32(1008,3),a=>a.d.setUint32(1016,0x1000),a=>a.ptr(1012,1000),a=>a.ptr(1200,1016),a=>a.ptr(1200,4128),a=>a.ptr(1200,28326),a=>a.relocs.delete(1012),a=>a.ptr(28288,2048)])assert.throws(()=>convertKirbyCopy(falcoBodyFixture(change),'Fc'),undefined,String(change));
+});

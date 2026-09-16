@@ -162,7 +162,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     immediateVertices+=count;
     if(kind===0){particleDraws++;particleVertices+=count;}else{afterimageDraws++;afterimageVertices+=count;}
   };
-  function upload(model,bytes,nodes,owner){
+  function upload(model,bytes,nodes,owner,{descriptorBase=null}={}){
     const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
     const indexOf=(first,target)=>{for(let i=0,at=first;at!==null&&i<4096;i++,at=archive.relocations.has(at+4)?d.getUint32(at+4):null)if(at===target)return i;throw Error('Native draw ownership');};
     function refreshBindings(){
@@ -170,7 +170,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       // objects. Geometry is immutable, but those live polygon identities are
       // not a lifetime token. Refresh without reallocating GPU mesh buffers.
       for(const key of nativeKeys)nativePlans.delete(key);nativeKeys.length=0;
-      for(const plan of plans){const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[plan.mesh.joint],polygon=module._portMaterialPolygon(joint,plan.display,plan.polygon),key=owner+':'+joint+':'+polygon;if(nativePlans.has(key))throw Error('Duplicate native polygon ownership');nativePlans.set(key,plan);nativeKeys.push(key);}
+      for(const plan of plans){const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[plan.mesh.joint],polygon=descriptorBase===null?module._portMaterialPolygon(joint,plan.display,plan.polygon):module._portMaterialPolygonDescriptor(joint,descriptorBase+plan.mesh.pobj),key=owner+':'+joint+':'+polygon;if(nativePlans.has(key))throw Error('Duplicate native polygon ownership');nativePlans.set(key,plan);nativeKeys.push(key);}
     }
     function dispose(){for(const key of nativeKeys)nativePlans.delete(key);for(const b of buffers)gl.deleteBuffer(b);for(const v of vaos)gl.deleteVertexArray(v);models.delete(result);}
     let result;

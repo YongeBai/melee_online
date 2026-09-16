@@ -115,9 +115,9 @@ test('Kirby Falcon and Ganondorf effects retain their separate two-model punch b
   for(const [code,symbol,bank]of [['Ca','Captain',38],['Gn','Ganon',47]]){const spec={symbol:'effKirby'+symbol+'DataTable',bank,count:4,groups:3,models:2},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,code);assert.deepEqual(input,before);assert.equal(r.bank,bank);assert.equal(r.effects.length,2);assert.equal(r.commands.length,4);assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,bank+1)),code));}
 });
 
-test('Kirby Fox retains its model-only muzzle effect and no particle banks',()=>{
+test('Kirby Fox and Falco share the model-only muzzle effect with no particle banks',()=>{
   const spec={symbol:'effKirbyFoxDataTable',bank:33,count:0,groups:0,models:1},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,'Fx');
-  assert.deepEqual(input,before);assert.equal(r.bank,33);assert.equal(r.effects.length,1);assert.equal(r.cmd,null);assert.equal(r.tex,null);
+  assert.deepEqual(input,before);assert.equal(r.bank,33);assert.equal(r.effects.length,1);assert.equal(r.cmd,null);assert.equal(r.tex,null);assert.deepEqual(convertKirbyCopyEffects(input,'Fc').image,r.image);
   for(const slot of [0,4])assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.ptr(slot,a.cmd)),'Fx'));
 });
 

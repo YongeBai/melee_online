@@ -46,7 +46,7 @@ export function convertCommonEffects(input) {
   return convertEffects(input,{name:'effCommonDataTable',bank:0,first:0,count:592,groups:36,models:47});
 }
 export function convertKirbyCopyEffects(input,code){
-  const profile={Ss:['Samus',34,11,7,1],Pk:['Pikachu',36,4,2,0],Pc:['Pikachu',36,4,2,0],Fx:['Fox',33,0,0,1],Mr:['Mario',32,7,3,1],Dr:['Mario',32,7,3,1],Lg:['Luigi',37,7,3,1],Ca:['Captain',38,4,3,2],Gn:['Ganon',47,4,3,2]}[code];
+  const profile={Fc:['Fox',33,0,0,1],Ss:['Samus',34,11,7,1],Pk:['Pikachu',36,4,2,0],Pc:['Pikachu',36,4,2,0],Fx:['Fox',33,0,0,1],Mr:['Mario',32,7,3,1],Dr:['Mario',32,7,3,1],Lg:['Luigi',37,7,3,1],Ca:['Captain',38,4,3,2],Gn:['Ganon',47,4,3,2]}[code];
   if(!profile)throw Error('Kirby copy effect conversion pending: '+code);
   return convertEffects(input,{name:'effKirby'+profile[0]+'DataTable',bank:profile[1],first:profile[1]*1000,count:profile[2],groups:profile[3],models:profile[4]});
 }

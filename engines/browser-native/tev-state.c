@@ -187,3 +187,16 @@ unsigned portMaterialPolygon(HSD_JObj* joint,unsigned display,unsigned polygon)
     while(display--&&d)d=d->next;if(!d)abort();HSD_PObj* p=d->pobj;
     while(polygon--&&p)p=p->next;if(!p)abort();return (unsigned)p;
 }
+unsigned portMaterialPolygonDescriptor(HSD_JObj* joint,HSD_PObjDesc* descriptor)
+{
+    if(!joint||!descriptor||!union_type_dobj(joint))abort();
+    HSD_PObj* found=NULL;unsigned count=0;
+    // Copy costumes append DObjs to existing fighter bones. Their display
+    // indices depend on the original body, but immutable source geometry
+    // pointers survive HSD_PObjLoad. Reject missing or ambiguous bindings.
+    for(HSD_DObj* d=joint->u.dobj;d;d=d->next)for(HSD_PObj* p=d->pobj;p;p=p->next){
+        if(++count>4096)abort();
+        if(p->verts==descriptor->verts&&p->display==descriptor->display&&p->n_display==descriptor->n_display){if(found)abort();found=p;}
+    }
+    if(!found)abort();return (unsigned)found;
+}

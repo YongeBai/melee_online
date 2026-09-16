@@ -5,6 +5,27 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Falco copy now runs the original body-costume loader, including its two
+inserted active bones, 22 costume display objects, five extra display objects,
+material animation and separate laser/Blaster Articles. Its rendered lifecycle
+passes 2,382 input frames plus 124 intro frames: ground/air fire, seven repeated
+laser loops, copy loss and reacquisition. Per-model telemetry observes copied
+body drawing in 1,461 frames; its GPU resources are removed when the original
+loader removes those parts. A 979-frame rendered contact test with GPU validation
+raises target damage from 8 to 11 and records four hitlag frames. Fox's copied
+laser regression records the same three damage with zero hitlag. The Samus-copy
+rendered lifecycle also passes; four saved images are pixel-identical to the
+previous checkpoint. All 222 unit tests and shared browser checks pass.
+
+The renderer binds these appended polygons using their original resident
+geometry descriptors, rejecting missing or ambiguous matches. It retains the
+existing binding path for ordinary models, original draw order, camera and
+visibility. Only Kirby's default Falco-copy costume file is integrated here;
+other costume colors remain part of the unfinished full-game work. This is
+another gameplay compatibility checkpoint, not a measured performance gain or
+proof of the 720p60 acceptance target.
+[Falco-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-falco.json).
+
 Kirby's Samus copy now imports the original hat, nine-state Charge Shot Article
 and effect bank 34. The rendered lifecycle passes 3,176 input frames plus 124
 intro frames, covering partial and full ground/air shots, shield cancellation,

@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <melee/ft/kinds/ftKirby/ftkirby.h>
+#include <melee/ft/kinds/ftKirby/ftKb_Init.static.h>
 
 _Static_assert(sizeof(MotionState)==32 && offsetof(MotionState,_)==8,"Motion state numeric word ABI");
 /* Read-only copy-ability ownership; startup invokes the original archive loader. */
@@ -53,8 +54,28 @@ unsigned portKirbyRead(HSD_GObj* object,unsigned field)
     case 7:return fp->u.kb.xA8;
     case 8:return (unsigned)((ftKb_DatAttrs*)fp->dat_attrs)->specialn_ss_charge_time;
     case 9:return (unsigned)fp->u.kb.xA4;
+    case 10:return (unsigned)fp->u.kb.hat.x14.data;
+    case 11:return fp->u.kb.hat.x14.count;
+    case 12:return fp->u.kb.hat.x1C.count;
     default:abort();
     }
+}
+unsigned portKirbyCostumeRoot(unsigned kind)
+{
+    if(kind>=Ft_Kind_Max||!ftKb_Init_803C9FC8[kind])abort();
+    return (unsigned)ftKb_Init_803C9FC8[kind][0].joint;
+}
+unsigned portKirbyBodyNodes(HSD_GObj* object,unsigned* nodes,unsigned capacity)
+{
+    if(!object||!object->user_data||!nodes)abort();Fighter* fp=object->user_data;
+    if(fp->kind!=Ft_Kind_Kirby||capacity>140)abort();
+    unsigned count=0;
+    // Match the original copy loader's traversal of active fighter parts,
+    // including the two parts inserted for Falco's body costume.
+    for(unsigned i=0;i<ftPartsTable[fp->kind]->parts_num;i++)if(fp->parts[i].flags_b1){
+        if(!fp->parts[i].joint||count>=capacity)abort();nodes[count++]=(unsigned)fp->parts[i].joint;
+    }
+    return count;
 }
 _Static_assert(sizeof(ftHurtboxInit)==40,"Hurtbox descriptor ABI");
 unsigned portPackedFlagBits(unsigned value)

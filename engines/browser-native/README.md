@@ -75,6 +75,22 @@ ground/air firing, release recovery, loss and reacquisition. Contact mode uses
 40-unit separation so the laser exists for an observable frame before hitting;
 it also checks that Fox's copied laser causes damage without hitlag.
 
+Falco's copy (`--opponent=Fc`) uses the original body-costume path rather than
+a separate hat JObj. The importer retains six visibility rows, texture animation
+indices, the original part-insertion mask, extra model and both Articles. The
+default Kirby costume also loads `PlKbNrCpFc.dat` and its material animation;
+other Kirby costume colors still need their corresponding files integrated.
+Original callbacks add two active bones, 22 costume DObjs and five extra DObjs,
+then remove them on copy loss. The renderer follows the active part ordering
+and binds appended polygons by their resident geometry descriptors, rejecting
+missing or ambiguous bindings. It does not change original visibility or draw
+ordering. Ordinary models keep their existing binding path.
+
+The Falco copy lifecycle covers ground/air firing, repeated laser input, copy
+loss and reacquisition. Its contact check requires native hitlag, unlike Fox's
+laser. Per-model draw telemetry is enabled only in copy probes; body resources
+must disappear when the original copy loader removes the body parts.
+
 Pikachu and Pichu copies (`--opponent=Pk` / `--opponent=Pc`) retain three
 dynamic hat chains, the ground controller item and visible Thunder Jolt child,
 and shared particle bank 36. The lifecycle test checks exact pool consumption
