@@ -23,7 +23,7 @@ function fixture(code='Fx',mutate=()=>{}) {
   // Deliberately untyped extra data must not become a public Article.
   if(code==='Fx'){ptr(144,3000);body[3000]=0xe3;}
   mutate({body,d,relocs,ptr,states,scripts});
-  const text=new TextEncoder().encode('ftData'+({Ys:'Yoshi',Kp:'Koopa',Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
+  const text=new TextEncoder().encode('ftData'+({Mt:'Mewtwo',Ys:'Yoshi',Kp:'Koopa',Fx:'Fox',Fc:'Falco',Mr:'Mario',Lg:'Luigi',Dr:'Drmario',Pk:'Pikachu',Pc:'Pichu'})[code]+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+text.length),v=new DataView(bytes.buffer);
   [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(text,pub+8);return bytes;
 }
 test('Fox/Falco Articles preserve script branches, special floats and model graphs without exporting extra fighter data',()=>{
@@ -141,4 +141,11 @@ test('Yoshi egg Articles preserve explicitly absent special attributes and anima
   assert.equal(r.rows[2].special,null);assert.equal(r.rows[2].states,null);
   assert.throws(()=>convertFighterArticles(fixture('Ys',a=>{empty(a);a.ptr(212,592);}), 'PlYs.dat'),/Missing complete/);
   assert.throws(()=>convertFighterArticles(fixture('Ys',a=>{empty(a);a.d.setUint32(164,0);a.relocs.delete(164);}), 'PlYs.dat'),/Missing complete/);
+});
+
+test('Mewtwo imports all ten shared Shadow Ball states and preserves its signed counter',()=>{
+  const input=fixture('Mt',a=>a.d.setInt32(552+0x20,-1)),before=input.slice(),r=convertFighterArticles(input,'PlMt.dat'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.deepEqual(r.rows.map(x=>[x.stateCount,x.specialWords]),[[1,2],[10,16]]);
+  assert.equal(d.getInt32(552+0x20,true),-1);
+  assert.throws(()=>convertFighterArticles(fixture('Mt',a=>a.d.setFloat32(552,NaN)),'PlMt.dat'),/Nonfinite/);
 });

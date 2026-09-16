@@ -1,0 +1,791 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "16cb096",
+  "scope": "Default-costume Mewtwo native constructor, items, effects, selected moves and contacts; two-Mewtwo Battlefield CPU/draw-submission timing. Not complete competitive acceptance.",
+  "wasmSha256": "b4ee4a0c31a6836bffd42527a3132451c560531e6f9810f5c1c2b1d645843494",
+  "portableRecipeSha256": "1ee853e7075b495b8851a7722780943d49586bceb6ee23d251c971b00137c6ca",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "32835c72777bbd0e0a34c1a73e3ce747ab494b786fb97e6414a61ac51d5ab678",
+    "engines/browser-native/effect-assets.mjs": "76b9c065d2e2feda6b75d1483355059b1113197f4e51be9a1ceaa816b709db8f",
+    "engines/browser-native/constructor.html": "bfe6565b10d97e50158727bb610838ba966df2ac084a78fb907e96af32878cac",
+    "engines/browser-native/verify-mewtwo.mjs": "0ab202a94f4d5277c3c4378b72c9c14b701c44b6330cf960e40118bc544396df",
+    "scripts/native-port/probe-constructor.mjs": "2123d548dcfc3607fb0545f96230b581d552c1dca11c8e8a8beb08f0e74da458"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "browser": "Google Chrome 151.0.7922.137",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "assetIntegration": {
+    "articles": [
+      "Disable",
+      "Shadow Ball"
+    ],
+    "serializedStates": [
+      1,
+      10
+    ],
+    "specialWords": [
+      2,
+      16
+    ],
+    "shadowBallSignedCounterOffset": "0x20",
+    "effectBank": 13,
+    "particleCommands": 9,
+    "textureGroups": 4,
+    "effectModels": 4,
+    "untypedEffectRelocations": 0,
+    "gameplayFunctionBodiesUnchanged": true
+  },
+  "validation": {
+    "unitTests": 179,
+    "failedTests": 0,
+    "fighterBuildPassed": true,
+    "originalDecompCheckoutClean": true,
+    "moves": {
+      "artifact": "mewtwo-moves-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+      "completed": true,
+      "frames": 2296,
+      "renderedFrames": 2438,
+      "phases": [
+        {
+          "name": "Shadow Ball charge cancel",
+          "frames": 152,
+          "states": [
+            341,
+            342,
+            344,
+            14
+          ],
+          "itemKinds": [
+            112
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "full Shadow Ball",
+          "frames": 344,
+          "states": [
+            341,
+            342,
+            343,
+            345,
+            14
+          ],
+          "itemKinds": [
+            112
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "air Shadow Ball",
+          "frames": 340,
+          "states": [
+            24,
+            25,
+            346,
+            347,
+            350,
+            345,
+            14
+          ],
+          "itemKinds": [
+            112
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "ground Disable",
+          "frames": 161,
+          "states": [
+            359,
+            14
+          ],
+          "itemKinds": [
+            110
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "air Disable",
+          "frames": 259,
+          "states": [
+            24,
+            25,
+            360,
+            359,
+            14
+          ],
+          "itemKinds": [
+            110
+          ],
+          "peakItems": 1,
+          "finalState": 14
+        },
+        {
+          "name": "ground Confusion miss",
+          "frames": 121,
+          "states": [
+            351,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air Confusion miss",
+          "frames": 259,
+          "states": [
+            24,
+            25,
+            352,
+            351,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "ground Teleport",
+          "frames": 321,
+          "states": [
+            353,
+            357,
+            43,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        },
+        {
+          "name": "air Teleport",
+          "frames": 339,
+          "states": [
+            24,
+            25,
+            356,
+            357,
+            358,
+            35,
+            43,
+            14
+          ],
+          "itemKinds": [],
+          "peakItems": 0,
+          "finalState": 14
+        }
+      ]
+    },
+    "contacts": [
+      {
+        "mode": "shadowball",
+        "artifact": "mewtwo-shadowball-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 827,
+        "renderedFrames": 969,
+        "damage": 25,
+        "hitlag": 11,
+        "knockback": 98.35675811767578,
+        "blockedFrames": 0,
+        "attackerStates": [
+          341,
+          342,
+          343,
+          345,
+          14,
+          29,
+          252,
+          253
+        ],
+        "defenderStates": [
+          14,
+          89,
+          38,
+          191,
+          192,
+          194
+        ]
+      },
+      {
+        "mode": "shadowball-shield",
+        "artifact": "mewtwo-shadowball-shield-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 827,
+        "renderedFrames": 969,
+        "damage": 0,
+        "hitlag": 11,
+        "knockback": 0,
+        "blockedFrames": 11,
+        "attackerStates": [
+          341,
+          342,
+          343,
+          345,
+          14,
+          29,
+          252,
+          253
+        ],
+        "defenderStates": [
+          14,
+          182,
+          179,
+          181,
+          180
+        ]
+      },
+      {
+        "mode": "shadowball-shield-break",
+        "artifact": "mewtwo-shadowball-shield-break-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 827,
+        "renderedFrames": 969,
+        "damage": 0,
+        "hitlag": 11,
+        "knockback": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          341,
+          342,
+          343,
+          345,
+          14,
+          29,
+          252,
+          253
+        ],
+        "defenderStates": [
+          182,
+          179,
+          205,
+          206,
+          208,
+          210,
+          211
+        ]
+      },
+      {
+        "mode": "disable",
+        "artifact": "mewtwo-disable-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 1,
+        "hitlag": 3,
+        "knockback": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          359,
+          14
+        ],
+        "defenderStates": [
+          14,
+          300
+        ]
+      },
+      {
+        "mode": "confusion",
+        "artifact": "mewtwo-confusion-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 10,
+        "hitlag": 0,
+        "knockback": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          351,
+          14
+        ],
+        "defenderStates": [
+          14,
+          303,
+          38,
+          183,
+          184,
+          186
+        ]
+      },
+      {
+        "mode": "grab",
+        "artifact": "mewtwo-grab-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 10,
+        "hitlag": 3,
+        "knockback": 60.27027130126953,
+        "blockedFrames": 0,
+        "attackerStates": [
+          212,
+          213,
+          216,
+          219,
+          14
+        ],
+        "defenderStates": [
+          14,
+          226,
+          227,
+          239,
+          85,
+          86,
+          29,
+          42
+        ]
+      },
+      {
+        "mode": "control",
+        "artifact": "mewtwo-control-Mt-hardware-stage-callbacks-intro-damage-tournament-constructor-input-render-probe.json",
+        "completed": true,
+        "frames": 740,
+        "renderedFrames": 882,
+        "damage": 0,
+        "hitlag": 0,
+        "knockback": 0,
+        "blockedFrames": 0,
+        "attackerStates": [
+          14
+        ],
+        "defenderStates": [
+          14
+        ]
+      }
+    ],
+    "gpuProjectile": {
+      "artifact": "mewtwo-shadowball-Mt-hardware-constructor-input-render-probe.json",
+      "completed": true,
+      "renderedFrames": 969,
+      "allRenderedFramesVertexChecked": true,
+      "projectionChecks": {
+        "passed": true,
+        "cases": 4,
+        "components": 12
+      },
+      "finalGpuErrorCheck": true
+    },
+    "selectedTimingTracesIdentical": true
+  },
+  "performance": [
+    {
+      "artifact": "deferred-errors-Mt-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": false,
+      "driverShaderCacheDisabled": false,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60042,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.48994444425735206,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 1.800000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.795416666724615,
+        "p50Ms": 6.4000000059604645,
+        "p95Ms": 9.900000005960464,
+        "maxMs": 24.599999994039536
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757736,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.19999999999982
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 2805,
+        "framesWithHitlag": 535,
+        "framesWithDamage": 3503,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 94,
+            "attack": 434
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 104,
+            "attack": 481
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 102,
+            "attack": 492
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 79,
+            "attack": 441
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 82,
+            "attack": 453
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 74,
+            "attack": 504
+          }
+        ]
+      },
+      "slowestCapturedDraws": [
+        {
+          "frame": 98,
+          "costMs": 24.599999994039536,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 81,
+            "immediateVertices": 324,
+            "particleDraws": 81,
+            "particleVertices": 324,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 26,
+                "origin": "model",
+                "cpuMs": 4.799999982118607
+              },
+              {
+                "program": 27,
+                "origin": "model",
+                "cpuMs": 4.4000000059604645
+              },
+              {
+                "program": 28,
+                "origin": "model",
+                "cpuMs": 2
+              }
+            ],
+            "draws": 204,
+            "programs": 28,
+            "images": 100,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 2,
+            "effectRetired": 2,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 931,
+          "costMs": 20.400000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 101,
+            "immediateVertices": 404,
+            "particleDraws": 101,
+            "particleVertices": 404,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 236,
+            "programs": 30,
+            "images": 132,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 10,
+            "effectRetired": 9,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 376,
+          "costMs": 17.30000001192093,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 90,
+            "immediateVertices": 360,
+            "particleDraws": 90,
+            "particleVertices": 360,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [
+              {
+                "program": 29,
+                "origin": "model",
+                "cpuMs": 5.300000011920929
+              }
+            ],
+            "draws": 223,
+            "programs": 29,
+            "images": 122,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 3,
+            "effectRetired": 2,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        },
+        {
+          "frame": 910,
+          "costMs": 16.900000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 160,
+            "immediateVertices": 640,
+            "particleDraws": 160,
+            "particleVertices": 640,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 285,
+            "programs": 30,
+            "images": 132,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 8,
+            "effectRetired": 8,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [
+        {
+          "frame": 98,
+          "program": 26,
+          "origin": "model",
+          "cpuMs": 4.799999982118607
+        },
+        {
+          "frame": 98,
+          "program": 27,
+          "origin": "model",
+          "cpuMs": 4.4000000059604645
+        },
+        {
+          "frame": 98,
+          "program": 28,
+          "origin": "model",
+          "cpuMs": 2
+        },
+        {
+          "frame": 376,
+          "program": 29,
+          "origin": "model",
+          "cpuMs": 5.300000011920929
+        },
+        {
+          "frame": 384,
+          "program": 30,
+          "origin": "model",
+          "cpuMs": 3.800000011920929
+        },
+        {
+          "frame": 2277,
+          "program": 31,
+          "origin": "model",
+          "cpuMs": 2
+        },
+        {
+          "frame": 2677,
+          "program": 32,
+          "origin": "model",
+          "cpuMs": 3.300000011920929
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 32,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 32
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    },
+    {
+      "artifact": "deferred-errors-prepared-Mt-hardware-stage-callbacks-intro-damage-workload-tournament-constructor-live-probe.json",
+      "prepared": true,
+      "driverShaderCacheDisabled": true,
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60031.59999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.47680555580390827,
+        "p50Ms": 0.5,
+        "p95Ms": 0.7999999821186066,
+        "maxMs": 1.4000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.001111110887594,
+        "p50Ms": 6.5999999940395355,
+        "p95Ms": 10.599999994039536,
+        "maxMs": 16.900000005960464
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670602945261745,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000018
+      },
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 2805,
+        "framesWithHitlag": 535,
+        "framesWithDamage": 3503,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 94,
+            "attack": 434
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 104,
+            "attack": 481
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 102,
+            "attack": 492
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 79,
+            "attack": 441
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 82,
+            "attack": 453
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 74,
+            "attack": 504
+          }
+        ]
+      },
+      "slowestCapturedDraws": [
+        {
+          "frame": 1775,
+          "costMs": 16.900000005960464,
+          "materials": {
+            "vertexChecks": null,
+            "immediateDraws": 187,
+            "immediateVertices": 748,
+            "particleDraws": 187,
+            "particleVertices": 748,
+            "afterimageDraws": 0,
+            "afterimageVertices": 0,
+            "shaderCompilations": [],
+            "draws": 321,
+            "programs": 39,
+            "images": 134,
+            "originalMaterialState": true,
+            "visualParity": false,
+            "performanceMeasured": false
+          },
+          "resources": {
+            "stageCreated": 3,
+            "stageRetired": 0,
+            "effectCreated": 18,
+            "effectRetired": 18,
+            "peakEffectModels": 2,
+            "itemCreated": 0,
+            "itemRetired": 0,
+            "peakItemModels": 0
+          }
+        }
+      ],
+      "shaderCompilations": [],
+      "shaderCoverage": {
+        "programs": 39,
+        "prepared": 39,
+        "preparedUsed": 32,
+        "unpreparedUsed": 0
+      },
+      "shaderPreparation": {
+        "requested": 39,
+        "compiled": 39,
+        "cpuMs": 474.69999998807907,
+        "fighterStateUnchanged": true
+      },
+      "finalGpuErrorCheck": true,
+      "presentationFpsMeasured": false,
+      "inputToPhotonMeasured": false,
+      "performanceCertified": false
+    }
+  ],
+  "limitations": [
+    "Selected integration checks, not retail parity proof.",
+    "No presented-FPS or input-to-photon measurement.",
+    "Timing workload uses close combat, not repeated Shadow Ball/Disable/Confusion stress.",
+    "19 fighter components have constructor/input integration; eight components, other costumes, complete scenes/menus/audio, networking, parity and deployment remain unfinished."
+  ],
+  "competitiveAcceptanceAchieved": false
+}

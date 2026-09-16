@@ -5,6 +5,41 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Mewtwo now passes default-costume constructor/input, nine selected move phases
+and seven rendered contact checks. Its Disable and Shadow Ball Articles, ten
+serialized Shadow Ball states and four effect models are imported. The move
+sequence renders 2,438 frames, including charging/cancellation, ground and air
+release, Disable, Confusion misses and both Teleport paths. An isolated Shadow
+Ball contact also GPU-verifies all 969 rendered frames.
+
+A full Shadow Ball deals 25 damage. A fresh shield blocks it with eleven hitlag
+frames and zero body damage; a shield held through charging breaks and enters
+its original stun sequence. Disable deals one damage, enters DamageBind and
+recovers. Confusion enters ThrownMewtwo and deals ten damage; the forward throw
+also deals ten. The no-input control remains at zero. The tests initially expected
+the wrong state names for Disable/Confusion and held shield too early; assertions
+and controller timing were corrected against the original callbacks. Gameplay
+function bodies, charge rates, shield drain and damage were not changed.
+
+Two 960×720 two-Mewtwo Battlefield samples each submit 3,600 draws in about
+60 seconds, with no catch-up simulation callbacks. Simulation means are
+0.490/0.477 ms and draw-submission means are 6.795/7.001 ms. Preparing 39 shaders
+with the driver cache disabled removes seven live compilations, and selected
+gameplay traces match. Prepared draw p95 is 10.6 ms, with a 16.9 ms maximum.
+This does not establish an average speedup or prove distinct displayed FPS and
+input-to-photon latency; the timing workload is close combat, not special-move
+stress.
+
+All 179 tests and the fighter build pass. The C core remains `b4ee4a0c…`; this
+integration adds typed assets, renderer registration and validation. Nineteen
+fighter components now have constructor/input integration. Eight components,
+other costumes, complete scenes/menus/audio, retail parity, networking and
+native-port deployment remain unfinished. The overall 720p60 competitive
+acceptance criterion is **not achieved**.
+[Mewtwo evidence](benchmarks/browser-2026-09-16-native-port-mewtwo.json).
+
+Previous Yoshi checkpoint:
+
 Yoshi now passes the original constructor, default-costume rendering, selected
 controller moves and five contact checks. The port imports the thrown egg,
 landing stars, Egg Lay item, captured-fighter shell and Yoshi effect bank.

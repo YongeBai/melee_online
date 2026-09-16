@@ -32,6 +32,23 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Mewtwo imports the original Disable and Shadow Ball Articles, all ten serialized
+Shadow Ball states, and its four effect models. The Shadow Ball attribute at
+0x20 is a signed integer counter; the importer preserves its integer bits.
+Original charge/cancel/release, Confusion, Disable and Teleport callbacks run
+without replacement gameplay logic.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Mt --input --mewtwo-moves --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Mt --input --mewtwo-contact=shadowball --stage-callbacks --render-steps --hardware
+```
+
+Mewtwo contact modes are `shadowball`, `shadowball-shield`,
+`shadowball-shield-break`, `disable`, `confusion`, `grab` and `control`.
+The two shield cases use a fresh shield at release and a shield held throughout
+charging respectively. Positioning, charging and defense use controller inputs;
+the harness does not rewrite damage, charge levels, shields or fighter positions.
+
 Yoshi imports the original thrown egg, landing star and Egg Lay Articles, plus
 the separate shell accessory attached to a captured fighter. The Egg Lay Article
 explicitly has no special-attribute or animation-state table. Its shell descriptor

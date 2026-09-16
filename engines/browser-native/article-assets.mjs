@@ -23,6 +23,7 @@ export const fighterArticleProfiles=Object.freeze({
   Pc:{slots:3,articles:{0:[1,3],1:[2,4],2:[1,1]}},
   Kp:{slots:1,articles:{0:[1,6]}},
   Ys:{slots:4,articles:{0:[2,2],1:[1,2],2:[0,0]}},
+  Mt:{slots:2,articles:{0:[1,2],1:[10,16]}},
   Lk:{slots:7,articles:{0:[3,16],1:[3,17],2:[0,21],3:[1,9],4:[6,1]}},
   Cl:{slots:7,articles:{0:[3,16],1:[3,17],2:[0,21],3:[1,9],4:[6,1],5:[2,1]}},
   Ss:{slots:5,articles:{0:[2,7],1:[9,8],2:[4,16],3:[0,25]}},
@@ -83,7 +84,7 @@ export function convertFighterArticles(input,name) {
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
-    for(let j=0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    for(let j=0;j<specialWords;j++)scalar(special+j*4,4,!(code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
     if(code==='Ss'&&model.slot===3){
       for(let off=0x64;off<=0x70;off+=4)attachment(pointer(special+off),'grapple '+((off-0x64)/4));
       for(let off=0x74;off<=0xAC;off+=12){
