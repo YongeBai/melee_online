@@ -5,6 +5,23 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original global fighter startup now links and runs in a fresh browser runtime.
+`Fighter_FirstInitialize_80067A84` initializes all six original pools, 23 common
+data globals, shared materials, the original fallback lights and character startup
+callbacks. The port fixes adjacent-global address assumptions without changing
+the reset targets; 1,162 sentinel checks cover resets and preserved fields.
+Two models of every default character component construct after startup and clean
+up correctly: 54 instances across 27 entries. The original light scheduler runs
+120 steps with stable allocations. This is not 120 frames of fighter simulation.
+
+The separate `--startup` target is 263,371 bytes and retains the same 51 explicit
+GX abort guards as the scene target. It needs no new hardware placeholders. Late
+full initialization after partial common-data loading is rejected, preserving
+existing ownership. All 68 targeted tests and the existing scene suite pass;
+all 81 diagnostic 960×720 images are unchanged. Full fighter creation, tournament
+stage setup, match execution and FPS/latency validation remain incomplete.
+[Original startup checkpoint](benchmarks/browser-2026-09-15-native-port-startup.json).
+
 Original fighter model construction and part allocation now replace the generic
 scene setup in the integration fixture. All 27 entries use the fighter joint
 class, 2,179 fighter polygon objects and original HSD part/display pools. Initial

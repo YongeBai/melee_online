@@ -93,7 +93,24 @@ export function preparePortableSource(source,output) {
         '    info->event_return[info->loop_count - 1] = (CmdUnion*)\n        ((uintptr_t) info->event_return[info->loop_count - 1] - 1);');
       replace('info->ptr[0] = &info->ptr[info->loop_count][0];','info->u = info->event_return[info->loop_count - 2];');
     }
+    if(file==='src/melee/ft/kinds/ftKirby/ftkirby.c') {
+      // This reset covers the first 33 words of the 34-word original aggregate.
+      // Keep the exact extent, including the untouched final hat entry, but
+      // avoid indexing a scalar pointer member as a fabricated s32 array.
+      replace('    s32* number_list = (s32*) &ft_80459B88.x0;',
+        '    unsigned char* number_list = (unsigned char*) &ft_80459B88;');
+      replace('        number_list[i] = 0;',
+        '        memset(number_list + i * sizeof(s32), 0, sizeof(s32));');
+      text='#include <string.h>\n'+text;
+    }
     if(file==='src/melee/ft/ftdata.c') {
+      // Retail's adjacent .data/.bss layout is not a C array contract.
+      // Symbols 803C0EC0 + 0x108 / + 5940 identify these exact original arrays.
+      replace('(ftData_UnkCountStruct*) &CostumeListsForeachCharacter[Ft_Kind_Max]', 'ftData_Table_Unk0');
+      replace('(ftData_UnkCountStruct*) ((u8*) CostumeListsForeachCharacter + 5940)', 'ftData_UnkIntPairs');
+      const stateAlias='((ft_8045993C_t*) &list[Ft_Kind_Max])[i]';
+      if(text.split(stateAlias).length!==4)throw Error('Fighter startup state reset changed');
+      text=text.replaceAll(stateAlias,'ft_8045993C[i]');
       // GameCube distinguishes ARAM from RAM by the address high bit. WASM
       // instead validates a range in the immutable, prefetched native bundle.
       let copies=0;

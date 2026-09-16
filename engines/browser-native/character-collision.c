@@ -31,13 +31,14 @@ typedef struct { ftData_x30 hurt; int count; ftData_x38* dynamics; } CollisionDa
 typedef struct { Fighter fighter; ftData data; ftDynamics dynamics; } CollisionFixture;
 static CollisionFixture* context(HSD_GObj* object){if(!object||!object->user_data)abort();return object->user_data;}
 extern int portSceneInitialize(void);
+extern int portFighterStartupComplete(void);
 extern HSD_JObjInfo ftJObj;
 extern HSD_PObjInfo ftPObj;
 static void initialize_part_pools(void)
 {
     /* These pool declarations match Fighter_800679B0. The full startup path
      * must take over this one-time initialization when stage lighting is ready. */
-    static int initialized;if(initialized)return;
+    static int initialized;if(initialized||portFighterStartupComplete())return;
     HSD_ObjAllocInit(&fighter_parts_alloc_data,MAX_FT_PARTS*sizeof(FighterBone),4);
     HSD_ObjAllocInit(&fighter_dobj_list_alloc_data,124*sizeof(HSD_DObj*),4);
     HSD_ObjAllocInit(&fighter_x2040_alloc_data,32*sizeof(HSD_DObj*),4);

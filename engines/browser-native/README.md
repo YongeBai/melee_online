@@ -236,7 +236,7 @@ node scripts/native-port/verify-gpu.mjs --scene
 
 This produces `melee-scene.mjs/.wasm` and a separate `scene-build.json`. The scene
 library currently uses the audit's `-O0` objects; it is not a performance build.
-The 49 unresolved GX entry points retained by HSD class tables abort by name.
+The 51 unresolved GX entry points retained by HSD class tables abort by name.
 They do not silently skip work. `/scene.html` checks loading and animation;
 `/gpu-preview.html?scene=1` connects original HSD matrices to the diagnostic GPU
 resource path. Neither is a playable release.
@@ -268,6 +268,35 @@ proof that every referenced mode belongs in a tournament browser build.
 These tests establish subsystem behavior and selected layout compatibility.
 Expected values come from documented/source arithmetic and original asset bytes,
 not a frame-by-frame Dolphin oracle. Native gameplay parity is still unproven.
+
+## Original global fighter startup
+
+After the compile/link audit, build and verify the separate startup target:
+
+```sh
+node scripts/native-port/build.mjs --startup
+node scripts/native-port/verify-browser.mjs --startup
+```
+
+`melee-startup.mjs/.wasm` calls original `Fighter_FirstInitialize_80067A84`
+through a one-time owner. The target adds original ground/archive/light-list
+source files without linking unrelated disc, card or audio implementations.
+All six fighter pools, common archive globals, shared materials, original fallback
+lights and character startup callbacks execute. Existing model fixtures use these
+initialized pools instead of resetting them. Full startup is rejected after partial
+common initialization; resetting live globals would discard ownership.
+
+The portable mirror replaces three adjacent-global address assumptions with their
+original named arrays. Kirby's 33-word reset writes the same byte range within its
+34-word aggregate without indexing a scalar member as an array. Sentinel checks
+cover both reset and untouched fields. The browser checks 54 model instances
+across 27 default character components, shared archive retention, startup order,
+and 120 original light-proc scheduler steps. The two shared material models are
+runtime-lifetime objects, as in the original startup code.
+
+This does not create full fighters, initialize a tournament stage, draw original
+lighting or run a match. The startup and scene targets are distinct correctness
+fixtures; neither provides an FPS or input-latency measurement.
 
 ## Next milestones
 

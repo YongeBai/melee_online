@@ -40,6 +40,16 @@ int portSharedInitialize(void)
     if(common_initialized)return 1;
     Fighter_LoadCommonData();common_initialized=1;return 0;
 }
+extern int portSceneInitialize(void);
+int portFighterStartupComplete(void){return common_initialized==2;}
+int portFighterInitialize(void)
+{
+    if(common_initialized==2)return 1;
+    /* Resetting the original tables after partial loading would discard live
+     * ownership. Full startup must be the first common-data initialization. */
+    if(common_initialized||portSceneInitialize()<0)return -1;
+    Fighter_FirstInitialize_80067A84();common_initialized=2;return 0;
+}
 uintptr_t portSharedGlobal(unsigned index)
 {
     switch(index) {
