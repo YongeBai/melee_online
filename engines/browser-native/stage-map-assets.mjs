@@ -11,6 +11,7 @@ import {colorCommandWords} from './color-assets.mjs';
 export function convertBattlefieldMap(input,options={}) {return convertStageMap(input,{...options,stage:'battlefield'});}
 export const nativeStages=Object.freeze({
   battlefield:Object.freeze({name:'Battlefield',file:'GrNBa.dat',kind:31,count:7,overrideRows:17,specialCount:4,callbackScripts:2,initial:[0,3,1,6],mandatory:[0,3,6]}),
+  dreamland:Object.freeze({name:'Dream Land',file:'GrOp.dat',kind:28,count:8,overrideRows:19,specialCount:8,shadowCount:10,callbackScripts:0,initial:[0,3,7,5,4,6,1],mandatory:[0,1,3,4,5,6,7]}),
   destination:Object.freeze({name:'Final Destination',file:'GrNLa.dat',kind:32,count:10,overrideRows:16,specialCount:1,callbackScripts:4,initial:[0,1,2,3,4,5,6,7,8],mandatory:[0,1,2,3]}),
 });
 export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) {
@@ -57,7 +58,7 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
   if(splineCount!==(stage==='destination'?2:0)||(splineCount>0)!==(splines!==null))throw Error('Unexpected stage spline table');
   for(let i=0;i<splineCount;i++){const p=ptr(splines+i*4);if(p===null)throw Error('Missing stage spline');spline(p);}
   const overrides=ptr(root+24),declaredOverrides=word(root+28),shadow=ptr(root+32),shadowCount=word(root+36),special=ptr(root+40),specialCount=word(root+44);
-  if(shadowCount!==(stage==='destination'?3:0)||(shadowCount>0)!==(shadow!==null))throw Error('Unexpected stage shadow table');
+  if(shadowCount!==(spec.shadowCount??(stage==='destination'?3:0))||(shadowCount>0)!==(shadow!==null))throw Error('Unexpected stage shadow table');
   for(let i=0;i<shadowCount;i++){const p=shadow+i*8;lightAnim(ptr(p));raw(p+4,4);}
   // Retail has 17 initialized rows but declares 34. Its original lookup uses an
   // eight-byte stride and exits on a match. Import every referenced light row;
@@ -76,6 +77,12 @@ export function convertStageMap(input,{callbacks=false,stage='battlefield'}={}) 
   const publics=new Map([['native_stage_map',root],['native_stage_parameters',param]]);let yakumono=null;
   if(callbacks){
     yakumono=a.publics.get('yakumono_param');if(yakumono===undefined)throw Error('Missing stage callback parameters');
+    if(stage==='dreamland'){
+      // grOldpupupu_YakumonoParam: four signed halfwords, two signed timers,
+      // then nine floats. These drive wind strength, bounds and original timing.
+      for(let i=0;i<8;i+=2)word(yakumono+i,2);
+      for(let i=8;i<52;i+=4){word(yakumono+i);if(i>=16&&!Number.isFinite(d.getFloat32(yakumono+i)))throw Error('Nonfinite Dream Land parameter');}
+    }
     const starts=Array.from({length:spec.callbackScripts},(_,i)=>ptr(yakumono+i*4));if(starts.includes(null))throw Error('Missing stage color script');
     const scripts=readMotionScripts(a,starts,colorCommandWords,{terminalOpcodes:[0,6,7,10]});
     tree(scripts);publics.set('native_stage_callbacks',yakumono);

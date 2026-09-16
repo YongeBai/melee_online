@@ -80,7 +80,7 @@ void portTournamentInitializeStage(unsigned left,unsigned right,unsigned stage)
 {
     extern int portFighterCharacterKind(unsigned);
     int characters[2]={portFighterCharacterKind(left),portFighterCharacterKind(right)};
-    if(initialized||characters[0]<0||characters[1]<0||(stage!=St_Kind_Battle&&stage!=St_Kind_Last))abort();StartMeleeData data={0};
+    if(initialized||characters[0]<0||characters[1]<0||(stage!=St_Kind_Battle&&stage!=St_Kind_Last&&stage!=St_Kind_OldPupupu))abort();StartMeleeData data={0};
     portInitializeVsRouting();Player_80036DD8();gm_801A3E88();
     gm_SetupRulesDefaults(&data.rules);
     data.rules.match_kind=MatchKind_Stock;data.rules.is_stock=true;data.rules.is_vs=true;

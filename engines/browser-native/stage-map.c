@@ -4,12 +4,15 @@
 #include <melee/gr/granime.h>
 #include <melee/gr/grbattle.h>
 #include <melee/gr/grlast.h>
+#include <melee/gr/groldpupupu.h>
 #include <melee/gr/types.h>
 #include <melee/sc/types.h>
 #include <melee/mp/mplib.h>
 #include <melee/mp/mpcoll.h>
 #include <melee/pl/player.h>
 #include <melee/cm/camera.h>
+#include <melee/ft/ftdevice.h>
+#include <melee/ft/ftcoll.h>
 #include <sysdolphin/baselib/gobj.h>
 #include <sysdolphin/baselib/gobjplink.h>
 #include <sysdolphin/baselib/cobj.h>
@@ -79,14 +82,18 @@ void portStageRenderBegin(void)
 }
 void portStageMapInstallKind(HSD_Archive* archive,UnkStageDat* data,GroundParam* param,unsigned kind)
 {
-    if(kind!=St_Kind_Battle&&kind!=St_Kind_Last)abort();
-    model_count=kind==St_Kind_Battle?7:10;stage_kind=kind;
-    stage_callbacks=kind==St_Kind_Battle?&grNBa_StageData:&grNLa_StageData;
+    switch(kind){
+    case St_Kind_Battle:model_count=7;stage_callbacks=&grNBa_StageData;break;
+    case St_Kind_Last:model_count=10;stage_callbacks=&grNLa_StageData;break;
+    case St_Kind_OldPupupu:model_count=8;stage_callbacks=&grOp_StageData;break;
+    default:abort();
+    }
+    stage_kind=kind;
     if(installed||!archive||!data||!param||data->unkC!=model_count||portSceneInitialize()<0)abort();
     portRuntimeSetSceneDestructors(destroy_lights);
     Ground_801BFFB0();
     UnkArchiveStruct* entry=grDatFiles_GetArchive();entry->unk0=archive;entry->unk4=data;entry->unk8=0;
-    stage_info.grkind=kind==St_Kind_Battle?Gr_Kind_Battle:Gr_Kind_Last;stage_info.param=param;installed=1;
+    stage_info.grkind=stage_callbacks->grkind;stage_info.param=param;installed=1;
 }
 void portStageMapInstall(HSD_Archive* archive,UnkStageDat* data,GroundParam* param)
 {portStageMapInstallKind(archive,data,param,St_Kind_Battle);}
@@ -109,7 +116,10 @@ void portStageCallbacksInitialize(void* parameters)
     stage_info.on_check_shadow_render=stage_callbacks->on_check_shadow_render;
     stage_callbacks->on_init();
     for(unsigned i=0;i<model_count;i++)owners[i]=Ground_GetMapGObj(i);
-    if(!owners[0]||!owners[1]||!owners[3]||!(stage_kind==St_Kind_Battle?owners[6]:owners[2]))abort();
+    if(!owners[0]||!owners[1]||!owners[3])abort();
+    if(stage_kind==St_Kind_Battle&&!owners[6])abort();
+    if(stage_kind==St_Kind_Last&&!owners[2])abort();
+    if(stage_kind==St_Kind_OldPupupu&&(!owners[4]||!owners[5]||!owners[6]||!owners[7]||!Ground_GetMapGObj(8)))abort();
     callbacks_initialized=1;
 }
 void portBattlefieldCallbacksInitialize(void* parameters){portStageCallbacksInitialize(parameters);}
@@ -119,6 +129,39 @@ unsigned portStageObject(unsigned index)
     return (unsigned)Ground_GetMapGObj(index);
 }
 unsigned portBattlefieldObject(unsigned index){return portStageObject(index);}
+/* Map lookup stores only the most recently spawned object for each group.
+ * Enumerate original owners so simultaneous Dream Land background spawns all
+ * retain their own model/callbacks. The ninth owner is an empty spawn timer. */
+static void check_empty_stage_joint(HSD_JObj* joint)
+{
+    for(;joint;joint=joint->next){if(joint->u.dobj)abort();check_empty_stage_joint(joint->child);}
+}
+unsigned portStageObjects(unsigned* output,unsigned capacity)
+{
+    if(!callbacks_initialized||!output)abort();unsigned count=0;
+    for(HSD_GObj* object=HSD_GObjPLinkHead[5];object;object=object->next){
+        if(object->classifier!=HSD_GOBJ_CLASS_STAGE||!object->render_cb)continue;
+        Ground* ground=object->user_data;if(!ground||ground->map_id<0||count>=capacity)abort();
+        unsigned id=ground->map_id;
+        if(id>=model_count){if(stage_kind!=St_Kind_OldPupupu||id!=8)abort();check_empty_stage_joint(object->hsd_obj);}
+        output[count*2]=(unsigned)object;output[count*2+1]=id;count++;
+    }
+    return count;
+}
+
+/* Read-only observations of the original wind state and collision query. */
+double portDreamlandWindRead(unsigned field,unsigned slot)
+{
+    if(stage_kind!=St_Kind_OldPupupu||!callbacks_initialized||slot>=2)abort();
+    HSD_GObj* object=Ground_GetMapGObj(7);Ground* ground=object->user_data;
+    if(ft_804D6578.x0!=1||ft_80459A68[0].ground!=object||ft_80459A68[0].type!=0xA||ft_80459A68[0].active_cb!=fn_802112F4)abort();
+    if(field==0)return ground->u.oldpupupu.xDC;
+    if(field==1)return ground->u.oldpupupu.xC8;
+    if(field==2)return ground->u.oldpupupu.xD0;
+    if(field==3){HSD_GObj* fighter=Player_GetEntity(slot);Vec3 wind;if(!fighter)abort();ftColl_GetWindOffsetVec(fighter,&wind);if(wind.y!=0||wind.z!=0||!isfinite(wind.x))abort();return wind.x;}
+    if(field==4)return ((float*)stage_info.yakumono_param)[4];
+    abort();
+}
 void portStageMapBounds(void){if(!owners[0])abort();Ground_801C39C0();Ground_801C3BB4();}
 /* Camera-related calls from Ground_801C0800 and fn_8016E730. Full Stage startup
  * still owns other dependencies that this bring-up target has not integrated. */

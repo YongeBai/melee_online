@@ -139,7 +139,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     const current=stage().map(a=>({...a,stageKey:a.name+':'+a.object+':'+module._portSceneObjectRoot(a.object)})),keys=new Set(current.map(a=>a.stageKey));
     stageOwners=new Set(current.map(a=>a.object));
     for(let i=resources.length-1;i>=0;i--)if(resources[i].stageKey&&!keys.has(resources[i].stageKey)){releaseResource(resources[i]);resources.splice(i,1);resourceStats.stageRetired++;}
-    for(const actor of current)if(!resources.some(r=>r.stageKey===actor.stageKey)){addActor(actor);if(resources.some(r=>r.stageKey===actor.stageKey))resourceStats.stageCreated++;}
+    for(const actor of current)if(!actor.emptyStageObject&&!resources.some(r=>r.stageKey===actor.stageKey)){addActor(actor);if(resources.some(r=>r.stageKey===actor.stageKey))resourceStats.stageCreated++;}
   }
   let materialShaderChecks;
   try {

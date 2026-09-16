@@ -5,6 +5,42 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Dream Land is now the third live stage fixture. Its original callbacks control
+Whispy, wind and background spawns. The importer handles its eight map model
+groups, ten shadow-light entries and typed wind/timing parameters. Rendering
+now enumerates the original stage owners, preserving multiple instances of a
+map group and distinguishing process-only objects from models.
+
+A 9,000-step idle check observes both wind directions and verifies 461
+steady-wind fighter displacements against the original wind query (maximum
+error 0.00000306 game units). Stocks remain intact, 75 sampled stage draws pass
+GPU vertex checks, and the 960×720 image has been inspected. Native camera
+code and no-ISO startup are unchanged. Full Dolphin visual/mechanical parity
+is still a separate outstanding gate.
+
+The prepared cold-cache two-Falcon combat sample completes 3,600 simulation
+steps and draw submissions in 60.029 seconds, with no catch-up callbacks or live
+shader compilation. Simulation averages 0.536 ms; submission averages 5.524 ms,
+p95 7.9 ms and maximum 14.2 ms. The workload has contact in every ten-second
+window and two stock losses. Fast and timed runs match final fighter state,
+stock changes and all contact-window counts. These are submission measurements,
+not distinct displayed FPS or input-to-photon latency.
+
+This uses controller workload revision 2: ordinary stick input turns fighters
+toward nearby opponents before attacking. The previous workload stood
+back-to-back after a respawn, failed its contact gate, and is excluded as a
+passing timing result. The fast harness now starts immediately after the intro,
+matching the live path. Source hashes identify the changed workload; old/new
+input scripts are not an optimization A/B. All 152 unit tests pass. Battlefield's
+combat trace remains unchanged, and Final Destination's 27,000-step background
+regression passes with GPU checks.
+[Dream Land evidence](benchmarks/browser-2026-09-16-native-port-dreamland.json).
+
+Three tournament stages and most of the roster/moves still need integration,
+along with full scenes/menus, audio, deployment and presentation/latency checks.
+
+Previous shader-preparation checkpoint:
+
 Shader preparation now removes the observed mid-match compilation stalls in
 the selected cold-cache fixtures. Final Destination controls compiled seven
 programs during combat with 38.8/44.1 ms maximum draw submissions; preparation

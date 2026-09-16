@@ -7,7 +7,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const stageKey=process.argv.find(x=>x.startsWith('--map='))?.slice(6)??'battlefield';
-if(!['battlefield','destination'].includes(stageKey))throw Error('Unknown native map');
+if(!['battlefield','destination','dreamland'].includes(stageKey))throw Error('Unknown native map');
 const stageOnly=process.argv.includes('--stage-only'),stageFrames=Number(process.argv.find(x=>x.startsWith('--stage-frames='))?.slice(15)??4500);
 if(!Number.isInteger(stageFrames)||stageFrames<4500||stageFrames>27000||stageOnly&&(!process.argv.includes('--stage-callbacks')||process.argv.includes('--live')))throw Error('Stage-only requires --stage-callbacks without --live, 4500..27000 frames');
 const deferredGpuErrors=process.argv.includes('--defer-gpu-errors');
@@ -139,7 +139,7 @@ try {
       fs.writeFileSync(path.join(output,'native-match-countdown.png'),Buffer.from(shot.result.value.split(',')[1],'base64'));
     }
   }
-  const rendererSources=Object.fromEntries(['material-gpu.mjs','native-pixel.mjs','native-match-preview.mjs'].map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(output,name))).digest('hex')]));
+  const rendererSources=Object.fromEntries(['material-gpu.mjs','native-pixel.mjs','native-match-preview.mjs','combat-workload.mjs'].map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(output,name))).digest('hex')]));
   const report={stage:stageKey,character,recordShaders,prewarmShaders,deferredGpuErrors,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',rendererSources,cpuProfileInstrumented:cpuProfile,gpuRequested:hardware?'hardware':'software',browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),build:JSON.parse(fs.readFileSync(path.join(output,'fighter-init-build.json'))),probe};
   if(recordShaders&&!probe.error){
     const result=await command('Runtime.evaluate',{expression:'globalThis.nativeShaderSources',returnByValue:true});

@@ -710,6 +710,42 @@ existing relative tolerance. The shader itself is unchanged by this verifier
 correction; normal verification remains independent. Reports count components
 that require the rounding allowance.
 
+## Dream Land integration probe
+
+Dream Land is also available through `--map=dreamland`. Its importer converts
+eight map model groups, ten shadow-light entries, 19 light override rows and the
+original callback parameters (four signed halfwords, two timers, nine floats).
+The original `grOp_StageData` initializes Whispy and the background scheduler;
+wind timing, strength and bounds are preserved. No stage cosmetic has been
+removed or frozen by this integration.
+
+Stage rendering enumerates the original process-link owners instead of taking
+only one owner per map ID. Dream Land can spawn multiple objects from the same
+model group. Process-only objects keep running in the original scheduler, and
+the model-less spawn timer is accepted only after checking its joint tree has
+no drawable payload. Unknown model owners still fail explicitly.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --map=dreamland --stage-callbacks --stage-only --stage-frames=9000 --render --hardware --record-shaders
+```
+
+This check observes both Whispy wind directions and compares steady-wind idle
+fighter displacements with the original collision wind query. It reports phase
+and boundary transitions separately because stage callbacks and fighter physics
+run at different scheduler priorities. It does not rewrite fighter positions,
+the wind state machine, the camera or RNG. The 9,000-step check preserves stocks
+and samples 75 stage draws with GPU vertex verification. Full native-versus-
+Dolphin stage/effect parity and complete scene initialization remain pending.
+
+The deterministic combat controller is now revision 2: it uses an ordinary
+stick turn when nearby fighters face away from each other. Dream Land's wind
+and respawns exposed the old controller standing back-to-back for a full
+ten-second window. That timing run is rejected by the existing contact gate.
+The fast `--workload-steps` path also skips the separate idle-stage prelude,
+matching the live run's post-intro starting point. Workload source hashes are
+included in probe reports; do not compare revision-2 timings as if they used
+the older input workload.
+
 ## Battlefield integration probe
 
 `stage-map-assets.mjs` imports the Battlefield map head, all seven models and

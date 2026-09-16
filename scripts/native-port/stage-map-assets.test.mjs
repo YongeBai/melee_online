@@ -72,3 +72,28 @@ test('stage light animation imports its referenced spline joint with explicit ow
   const map=convertStageMap(valid,{stage:'destination'});
   assert.ok(map.models.some(m=>m.root===2900&&m.nodes===1));assert.ok(map.pointerSlots.has(2864));
 });
+
+function dreamland(change=()=>{}) {
+  return fixture(a=>{
+    const {d,body,ptr,light,joint}=a;
+    ptr(8,1800);d.setUint32(12,8);
+    for(let i=0;i<8;i++)for(let j=0;j<52;j+=4){const from=64+j,to=1800+i*52+j;d.setUint32(to,d.getUint32(from));if(a.relocs.has(from))a.relocs.add(to);}
+    ptr(24,2400);d.setUint32(28,38);
+    for(let i=0;i<19;i++){ptr(2400+i*8,light);body[2404+i*8]=0xe0;}
+    ptr(32,2552);d.setUint32(36,10);ptr(40,2632);d.setUint32(44,8);
+    for(let i=0;i<10;i++){ptr(2552+i*8,2800);body[2556+i*8]=0x80;}
+    for(let i=0;i<8;i++)ptr(2632+i*4,joint);
+    a.relocs.delete(1600);a.relocs.delete(1604);
+    for(let i=0;i<4;i++)d.setInt16(1600+i*2,[-4,12,30,0][i]);
+    d.setInt32(1608,600);d.setInt32(1612,1200);
+    for(let i=16;i<52;i+=4)d.setFloat32(1600+i,i===16?.2:-17);
+    d.setUint32(1100,28);change(a);
+  },4096);
+}
+test('Dream Land imports signed timer halves and exact float wind parameters, without script reinterpretation',()=>{
+  const source=dreamland(),copy=source.slice(),map=convertStageMap(source,{stage:'dreamland',callbacks:true}),d=new DataView(map.image.buffer,32);
+  assert.deepEqual(source,copy);assert.equal(map.count,8);assert.equal(map.shadowCount,10);assert.equal(map.typedOverrideRows,19);
+  assert.equal(d.getInt16(1600,true),-4);assert.equal(d.getInt16(1602,true),12);assert.equal(d.getInt32(1608,true),600);
+  assert.equal(d.getFloat32(1616,true),Math.fround(.2));assert.equal(d.getFloat32(1620,true),-17);assert.equal(map.pointerSlots.has(1600),false);
+  for(const change of [a=>a.d.setUint32(12,9),a=>a.d.setUint32(36,9),a=>a.d.setUint32(28,19),a=>a.d.setFloat32(1616,NaN),a=>a.ptr(1608,1300)])assert.throws(()=>convertStageMap(dreamland(change),{stage:'dreamland',callbacks:true}));
+});

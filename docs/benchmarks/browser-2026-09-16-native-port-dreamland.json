@@ -1,0 +1,447 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "fdcc2aa",
+  "scope": "Dream Land native fixture, original wind and complete live stage-owner enumeration; incomplete competitive acceptance",
+  "wasmSha256": "4372bdf0a1ef1964d2719642cb42370bb88cd79e3416b4b14b9e5ea2f3e80b8f",
+  "portableRecipeSha256": "a3c4fe2db173b40b23642d30b72c8c97a41047c81cc8bf412fa34e0b9413f335",
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "resolution": [
+    960,
+    720
+  ],
+  "sourceHashes": {
+    "stage-map-assets.mjs": "5faaa14c92ba0625d0ad12aa9ca926441aabd73152853e297647dc4e6c38b002",
+    "stage-map.c": "3bb4730adf3f119bacaeb2d229993f3296b0977d8269f6fe9c05870eaf807995",
+    "match.c": "196085225da5f1ea6f6847e8923d2851a8afb0823ef22218d3e0c7f271749873",
+    "native-match-preview.mjs": "1be66d367b05de3dc6069586c928b94867fd104c7cd89b2b5780aa62f19cc612",
+    "constructor.html": "4cf7e03285784564d1de446338dc6ecd8c378846634c2da9eda339fdd3e08003",
+    "combat-workload.mjs": "5677d0a3b04fb2483252fe7a1fcc2f737cfd58c85f89a3fb47387ad533285755"
+  },
+  "validation": {
+    "unitTests": 152,
+    "failedTests": 0,
+    "fighterBuild": true,
+    "stageCycle": {
+      "name": "Dream Land",
+      "kind": 28,
+      "collisionLoaded": true,
+      "vertexChecks": 28,
+      "modelGroups": [
+        0,
+        3,
+        7,
+        5,
+        4,
+        6,
+        1
+      ],
+      "splineCount": 0,
+      "shadowCount": 10,
+      "shadowFlagCases": 256,
+      "animationCallbackCases": 16,
+      "completeStageStartup": false,
+      "originalCallbacks": true,
+      "transitions": [
+        {
+          "frame": 1,
+          "groups": [
+            0,
+            1,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "frame": 3658,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      ],
+      "wind": {
+        "directions": [
+          2,
+          1
+        ],
+        "activeFrames": 1680,
+        "displacementChecks": 461,
+        "windTransitionFrames": 6,
+        "maxError": 0.0000030547380447387695,
+        "strength": 0.20000000298023224
+      },
+      "renderedFrames": 75,
+      "callbackFrames": 9000,
+      "callbacksVerified": true
+    },
+    "vertexChecks": {
+      "vertices": 15134,
+      "positionComponents": 45402,
+      "normalComponents": 45402,
+      "maxScaledPositionError": 2.0988400384823366e-7,
+      "maxNormalError": 1.1726617521468086e-7,
+      "roundoffPositionComponents": 0,
+      "maxPositionRoundoffAllowance": 0.00020567281864572752
+    },
+    "resourceStats": {
+      "stageCreated": 7,
+      "stageRetired": 1,
+      "effectCreated": 4,
+      "effectRetired": 4,
+      "peakEffectModels": 2,
+      "itemCreated": 0,
+      "itemRetired": 0,
+      "peakItemModels": 0
+    },
+    "finalGpuErrorCheck": true,
+    "imageInspected": true,
+    "imageSha256": "0afb19c356dc47468b3d9fa98e07053a80e1dede03d0acc622d740007bb3e800",
+    "camera": {
+      "eye": [
+        -3.2061378955841064,
+        13.308531761169434,
+        292.91888427734375
+      ],
+      "interest": [
+        8.722569465637207,
+        2.010317087173462,
+        0
+      ],
+      "fov": 30,
+      "aspect": 1.2173333168029785,
+      "near": 0.10000000149011612,
+      "far": 16384,
+      "nativeCameraCodeChanged": false
+    }
+  },
+  "workload": {
+    "revision": 2,
+    "change": "Normal stick turn before attack when a nearby opponent is behind. Controller inputs only; no fighter or stage state writes.",
+    "fastSimulationFrames": 3600,
+    "fastMatchesLiveFinalFighters": true,
+    "fastMatchesLiveStockChanges": true,
+    "fastMatchesLiveContactWindows": true,
+    "windows": [
+      {
+        "firstFrame": 1,
+        "frames": 600,
+        "hitlag": 45,
+        "attack": 267
+      },
+      {
+        "firstFrame": 601,
+        "frames": 600,
+        "hitlag": 51,
+        "attack": 328
+      },
+      {
+        "firstFrame": 1201,
+        "frames": 600,
+        "hitlag": 45,
+        "attack": 286
+      },
+      {
+        "firstFrame": 1801,
+        "frames": 600,
+        "hitlag": 48,
+        "attack": 300
+      },
+      {
+        "firstFrame": 2401,
+        "frames": 600,
+        "hitlag": 48,
+        "attack": 290
+      },
+      {
+        "firstFrame": 3001,
+        "frames": 600,
+        "hitlag": 60,
+        "attack": 340
+      }
+    ],
+    "stockChanges": [
+      {
+        "frame": 1142,
+        "slot": 1,
+        "stocks": 3
+      },
+      {
+        "frame": 2312,
+        "slot": 1,
+        "stocks": 2
+      }
+    ],
+    "fastPreludeFix": "Skip the separate idle-stage callback test in --workload-steps, so its start matches live immediately after the intro."
+  },
+  "timing": {
+    "hardware": true,
+    "driverShaderCacheDisabled": true,
+    "profileInstrumented": false,
+    "shaderPreparation": {
+      "requested": 41,
+      "compiled": 41,
+      "cpuMs": 429.2000000178814,
+      "fighterStateUnchanged": true
+    },
+    "shaderCoverage": {
+      "programs": 41,
+      "prepared": 41,
+      "preparedUsed": 39,
+      "unpreparedUsed": 0
+    },
+    "frames": 3600,
+    "drawSubmissions": 3600,
+    "elapsedMs": 60029,
+    "stepCpu": {
+      "samples": 3600,
+      "meanMs": 0.5360000000976853,
+      "p50Ms": 0.5,
+      "p95Ms": 0.8999999761581421,
+      "maxMs": 1.7999999821186066
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 5.524499999980132,
+      "p50Ms": 5.199999988079071,
+      "p95Ms": 7.9000000059604645,
+      "maxMs": 14.199999988079071
+    },
+    "catchUpCallbacks": 0,
+    "shaderCompilations": [],
+    "slowDraws": [],
+    "particleStats": {
+      "draws": 12730,
+      "vertices": 50920,
+      "frames": 1680,
+      "peakDraws": 38
+    },
+    "finalGpuErrorCheck": true,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false
+  },
+  "rejectedWorkload": {
+    "reason": "Revision 1 left nearby fighters facing away after a respawn. One ten-second window has zero hitlag. Do not count this as a passing performance result or compare it to revision 2 as an optimization A/B.",
+    "windows": [
+      {
+        "firstFrame": 1,
+        "frames": 600,
+        "hitlag": 45,
+        "attack": 267
+      },
+      {
+        "firstFrame": 601,
+        "frames": 600,
+        "hitlag": 51,
+        "attack": 328
+      },
+      {
+        "firstFrame": 1201,
+        "frames": 600,
+        "hitlag": 6,
+        "attack": 439
+      },
+      {
+        "firstFrame": 1801,
+        "frames": 600,
+        "hitlag": 0,
+        "attack": 522
+      },
+      {
+        "firstFrame": 2401,
+        "frames": 600,
+        "hitlag": 42,
+        "attack": 270
+      },
+      {
+        "firstFrame": 3001,
+        "frames": 600,
+        "hitlag": 60,
+        "attack": 358
+      }
+    ],
+    "shaderPreparation": {
+      "requested": 35,
+      "compiled": 35,
+      "cpuMs": 332,
+      "fighterStateUnchanged": true
+    },
+    "shaderCoverage": {
+      "programs": 41,
+      "prepared": 35,
+      "preparedUsed": 33,
+      "unpreparedUsed": 6
+    },
+    "shaderCompilations": [
+      {
+        "frame": 200,
+        "program": 36,
+        "origin": "model",
+        "cpuMs": 17.700000017881393
+      },
+      {
+        "frame": 208,
+        "program": 37,
+        "origin": "model",
+        "cpuMs": 14.5
+      },
+      {
+        "frame": 208,
+        "program": 38,
+        "origin": "model",
+        "cpuMs": 14
+      },
+      {
+        "frame": 1142,
+        "program": 39,
+        "origin": "model",
+        "cpuMs": 9.400000005960464
+      },
+      {
+        "frame": 1240,
+        "program": 40,
+        "origin": "model",
+        "cpuMs": 16.30000001192093
+      },
+      {
+        "frame": 1240,
+        "program": 41,
+        "origin": "model",
+        "cpuMs": 7.200000017881393
+      }
+    ]
+  },
+  "regressions": {
+    "battlefield": {
+      "stageFrames": 4500,
+      "combatFrames": 683,
+      "traceSha256": "5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0",
+      "traceUnchanged": true,
+      "lifecycleCompleted": true
+    },
+    "destination": {
+      "stageFrames": 27000,
+      "transitions": [
+        {
+          "frame": 1,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        {
+          "frame": 10909,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            9
+          ]
+        },
+        {
+          "frame": 12890,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        {
+          "frame": 23924,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            9
+          ]
+        },
+        {
+          "frame": 25905,
+          "groups": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        }
+      ],
+      "vertexChecks": {
+        "vertices": 24424,
+        "positionComponents": 73272,
+        "normalComponents": 73272,
+        "maxScaledPositionError": 0.000017852187361960464,
+        "maxNormalError": 1.103287182724344e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0022463487283418716
+      },
+      "finalGpuErrorCheck": true
+    },
+    "revisedFastWorkload": [
+      {
+        "stage": "battlefield",
+        "frames": 3600,
+        "completed": true,
+        "hitlagPerWindow": [
+          51,
+          60,
+          60,
+          30,
+          60,
+          60
+        ]
+      },
+      {
+        "stage": "destination",
+        "frames": 3600,
+        "completed": true,
+        "hitlagPerWindow": [
+          33,
+          60,
+          60,
+          60,
+          33,
+          60
+        ]
+      }
+    ]
+  },
+  "limits": [
+    "The wind check uses the original effective wind query and observes both directions without changing positions, RNG, timing, strength or bounds. Phase/boundary transitions are reported separately; steady-wind displacement checks are not full Dolphin parity.",
+    "Stage owners are enumerated from the original process list, including model-less scheduler owners; original draw callbacks retain ordering. No stage cosmetic simplification.",
+    "Shadow-light descriptors imported, but full shadow captures and all stage-particle/effect parity remain incomplete.",
+    "Seven partial fighter constructors and three live stage fixtures. Full scenes/menus/audio, remaining stages/characters/moves, static deployment, actual distinct presentations and input-to-photon still block acceptance."
+  ]
+}
