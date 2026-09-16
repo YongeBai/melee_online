@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+A sampled CPU profile identified repeated JavaScript uniform packing and exhaustive
+alpha checks in the renderer. Reusing typed packing buffers and classifying alpha
+at its comparison boundaries reduces mean draw submission from 9.102 ms in the
+control to 6.084 and 6.023 ms in two candidate runs (about 33.5%). Both candidates
+submit 3,600 draws / 3,600 simulation steps in 60.032 seconds, with no catch-up
+callbacks. Their p95 draw costs are 9.3 and 8.0 ms; simulation averages about
+0.51–0.53 ms. This is the same limited 960×720 fixture with original particles.
+
+All five deterministic images are byte-identical to the old renderer. GPU vertex
+checks and the combat trace are unchanged, and all 136 targeted tests pass.
+No camera, model, effect, gameplay or resolution simplification was introduced.
+The performance harness now distinguishes instrumented CPU profiles and records
+the tested renderer source hashes separately from the unchanged WASM hash.
+[Renderer packing experiment](benchmarks/browser-2026-09-16-native-port-uniform-packing.json).
+The full acceptance criteria remain unmet; distinct presentation and latency
+are not measured by this test.
+
+Previous checkpoints below describe their state at the time.
+
 Original particle polygons now render through efLib_render_callback and
 psDispParticles. The game still performs sorting, billboard/trail geometry,
 colors and texture selection; a scoped GX immediate-vertex boundary submits its

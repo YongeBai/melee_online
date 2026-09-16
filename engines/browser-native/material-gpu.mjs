@@ -2,7 +2,7 @@ import {immediateTriangles} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture} from './native-texture.mjs';
-import {readNativePixel,gxAlphaTest} from './native-pixel.mjs';
+import {readNativePixel,gxAlphaTestRejectsAny} from './native-pixel.mjs';
 import {readNativeModelMatrices} from './native-model.mjs';
 import {readNativeRenderContext,checkNativeRenderContext} from './native-render-context.mjs';
 import {inspectArchive} from './archive.mjs';
@@ -14,7 +14,12 @@ import {inspectArchive} from './archive.mjs';
 export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
   const programs=new Map(),variants=new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
   if(!view)throw Error('Native material view allocation');
-  const rows=(array,n)=>Float32Array.from({length:n*12},(_,i)=>array[i/12|0]?.[i%12]??0);
+  // WebGL copies uniform arguments during the call. Reuse scratch storage;
+  // queued native-state snapshots still own their data until their draw.
+  const scratch={position:new Float32Array(120),normal:new Float32Array(120),tex:new Float32Array(120),post:new Float32Array(240),
+    registers:new Int32Array(16),konst:new Int32Array(16),ambient:new Int32Array(8),material:new Int32Array(8),lightColor:new Int32Array(32),
+    lightPosition:new Float32Array(24),lightDirection:new Float32Array(24),lightAngular:new Float32Array(24),lightDistance:new Float32Array(24),bias:new Float32Array(8)};
+  function packRows(target,rows,stride){target.fill(0);for(let i=0;i<rows.length;i++)if(rows[i])target.set(rows[i],i*stride);return target;}
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0;const immediatePlans=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
@@ -49,22 +54,25 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false}={}) {
   function apply(state,p,camera){
     gl.useProgram(p.program);const u=name=>p.uniform(name);
     gl.uniformMatrix4fv(u('projection'),false,camera.projection);gl.uniform1i(u('currentMatrix'),state.model.current??0);
-    gl.uniform4fv(u('positionRows'),rows(state.model.positions,10));gl.uniform4fv(u('normalRows'),rows(state.model.normals,10));
-    const tex=new Float32Array(120),post=new Float32Array(240);
+    gl.uniform4fv(u('positionRows'),packRows(scratch.position,state.model.positions,12));gl.uniform4fv(u('normalRows'),packRows(scratch.normal,state.model.normals,12));
+    const {tex,post,bias}=scratch;tex.fill(0);post.fill(0);bias.fill(0);
     for(const m of state.textures.matrices)(m.id<64?tex:post).set(m.values,(m.id<64?m.id-30:m.id-64)*4);
     gl.uniform4fv(u('textureRows'),tex);gl.uniform4fv(u('postRows'),post);
-    gl.uniform4iv(u('tevRegisters'),state.tev.registers.flat());gl.uniform4iv(u('tevKonst'),state.tev.konst.flat());
-    gl.uniform4iv(u('ambientColor'),state.pixel.colors.flatMap(c=>c.ambient));gl.uniform4iv(u('materialColor'),state.pixel.colors.flatMap(c=>c.material));
-    gl.uniform4iv(u('lightColor'),state.context.lights.flatMap(l=>l?.color??[0,0,0,0]));
-    for(const [name,field] of [['lightPosition','position'],['lightDirection','direction'],['lightAngular','angular'],['lightDistance','distance']])gl.uniform3fv(u(name),state.context.lights.flatMap(l=>l?.[field]??[0,0,0]));
-    const bias=new Float32Array(8);
+    gl.uniform4iv(u('tevRegisters'),packRows(scratch.registers,state.tev.registers,4));gl.uniform4iv(u('tevKonst'),packRows(scratch.konst,state.tev.konst,4));
+    for(let i=0;i<2;i++){scratch.ambient.set(state.pixel.colors[i].ambient,i*4);scratch.material.set(state.pixel.colors[i].material,i*4);}
+    gl.uniform4iv(u('ambientColor'),scratch.ambient);gl.uniform4iv(u('materialColor'),scratch.material);
+    scratch.lightColor.fill(0);for(let i=0;i<8;i++)if(state.context.lights[i])scratch.lightColor.set(state.context.lights[i].color,i*4);
+    gl.uniform4iv(u('lightColor'),scratch.lightColor);
+    for(const [name,field] of [['lightPosition','position'],['lightDirection','direction'],['lightAngular','angular'],['lightDistance','distance']]){
+      const target=scratch[name];target.fill(0);for(let i=0;i<8;i++)if(state.context.lights[i])target.set(state.context.lights[i][field],i*3);gl.uniform3fv(u(name),target);
+    }
     for(const t of state.textures.textures){gl.activeTexture(gl.TEXTURE0+t.id);gl.bindTexture(gl.TEXTURE_2D,image(t));gl.uniform1i(u('image'+t.id),t.id);bias[t.id]=t.lod.bias;}
     gl.uniform1fv(u('lodBias'),bias);gl.uniform2iv(u('alphaReference'),[state.pixel.alphaTest.reference0,state.pixel.alphaTest.reference1]);
   }
   function pixelState(pixel){
     const compare=[gl.NEVER,gl.LESS,gl.EQUAL,gl.LEQUAL,gl.GREATER,gl.NOTEQUAL,gl.GEQUAL,gl.ALWAYS];
     if(pixel.destinationAlpha.enabled||pixel.dither||pixel.blend.type===2)throw Error('Native material destination alpha/dither/logic integration pending');
-    if(pixel.depth.beforeTexture&&pixel.depth.update&&Array.from({length:256},(_,i)=>gxAlphaTest(i,pixel.alphaTest)).some(x=>!x))throw Error('Native early depth with alpha rejection requires ordered depth pass');
+    if(pixel.depth.beforeTexture&&pixel.depth.update&&gxAlphaTestRejectsAny(pixel.alphaTest))throw Error('Native early depth with alpha rejection requires ordered depth pass');
     pixel.depth.enabled?gl.enable(gl.DEPTH_TEST):gl.disable(gl.DEPTH_TEST);gl.depthFunc(compare[pixel.depth.compare]);gl.depthMask(!!pixel.depth.update);
     gl.colorMask(!!pixel.colorUpdate,!!pixel.colorUpdate,!!pixel.colorUpdate,!!pixel.alphaUpdate);gl.disable(gl.DITHER);
     if(pixel.blend.type===0)gl.disable(gl.BLEND);

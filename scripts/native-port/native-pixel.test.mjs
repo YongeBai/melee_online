@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gxAlphaTest,readNativePixel} from '../../engines/browser-native/native-pixel.mjs';
+import {gxAlphaTest,gxAlphaTestRejectsAny,readNativePixel} from '../../engines/browser-native/native-pixel.mjs';
 import {verifyNativePixel} from '../../engines/browser-native/verify-material-state.mjs';
 function fixture() {
   const heap=new Uint8Array(512),w=new Uint32Array(heap.buffer,64,80);
@@ -35,4 +35,12 @@ test('pixel snapshot rejects incomplete state, invalid channels and unavailable 
   for(const [index,value] of [[0,255],[1,3],[2,4],[7,8],[10,2],[16,256],[17,4],[20,16],[22,0],[32,2],[68,256]]) {
     const f=fixture();f.w[index]=value;assert.throws(()=>readNativePixel(f.module),/Native|native/);
   }
+});
+test('alpha rejection classifier matches all 256 inputs for every comparison and combination',()=>{
+  for(let compare0=0;compare0<8;compare0++)for(let compare1=0;compare1<8;compare1++)for(let operation=0;operation<4;operation++)
+    for(const reference0 of [0,1,2,63,127,128,254,255])for(const reference1 of [0,1,2,63,127,128,254,255]){
+      const state={compare0,compare1,operation,reference0,reference1};
+      let rejects=false;for(let alpha=0;alpha<256;alpha++)if(!gxAlphaTest(alpha,state)){rejects=true;break;}
+      assert.equal(gxAlphaTestRejectsAny(state),rejects,JSON.stringify(state));
+    }
 });

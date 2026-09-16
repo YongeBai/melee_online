@@ -1,0 +1,932 @@
+{
+  "date": "2026-09-16",
+  "scope": "Native two-Falcon Battlefield 960x720 scripted combat fixture; not complete playable Melee",
+  "baselineCommit": "2864351",
+  "wasmSha256": "2d6867ea4eb322931c8b9d40064a076e0b489350de1c41d809493a08c085af03",
+  "files": {
+    "material-gpu.mjs": {
+      "baselineSha256": "b5e98bb2956c80086a0ec485a42badcc1b09ba203b42d0b4e510d0f076b07547",
+      "candidateSha256": "ee16d2ccca5d3ce4af5a0a36f4c8d5ef408d82da0e651849e2e8386bb13a10f3"
+    },
+    "native-pixel.mjs": {
+      "baselineSha256": "1cc3ae553ec19f9250848feda35eea9a0d6ab76313832b12d7244eed5d6c8d37",
+      "candidateSha256": "f99abdceb21a4d2d2a64743ac2ce2c2591f81cdde3d2b38577733b03b095ecb9"
+    }
+  },
+  "baselineProfile": {
+    "firstFrame": 302,
+    "lastFrame": 1209,
+    "intervalMicroseconds": 1000,
+    "performanceSampleInstrumented": true,
+    "sampledDurationMs": 15080.781,
+    "self": [
+      {
+        "functionName": "(idle) :0",
+        "sampledMs": 6100.156
+      },
+      {
+        "functionName": "apply material-gpu.mjs:49",
+        "sampledMs": 1111.16
+      },
+      {
+        "functionName": "rows material-gpu.mjs:17",
+        "sampledMs": 999.77
+      },
+      {
+        "functionName": "pixelState material-gpu.mjs:64",
+        "sampledMs": 783.555
+      },
+      {
+        "functionName": "(anonymous) native-tev.mjs:11",
+        "sampledMs": 629.989
+      },
+      {
+        "functionName": "uniform3fv :0",
+        "sampledMs": 419.729
+      },
+      {
+        "functionName": "floats native-render-context.mjs:8",
+        "sampledMs": 365.882
+      },
+      {
+        "functionName": "(garbage collector) :0",
+        "sampledMs": 267.493
+      },
+      {
+        "functionName": "(program) :0",
+        "sampledMs": 251.504
+      },
+      {
+        "functionName": "(anonymous) material-gpu.mjs:17",
+        "sampledMs": 236.07
+      },
+      {
+        "functionName": "uniform4iv :0",
+        "sampledMs": 234.845
+      },
+      {
+        "functionName": "readNativeTevState native-tev.mjs:7",
+        "sampledMs": 204.895
+      },
+      {
+        "functionName": "materialShaderKey material-shader.mjs:45",
+        "sampledMs": 172.704
+      },
+      {
+        "functionName": "(anonymous) material-gpu.mjs:67",
+        "sampledMs": 165.6
+      },
+      {
+        "functionName": "readNativePixel native-pixel.mjs:2",
+        "sampledMs": 164.394
+      },
+      {
+        "functionName": "matrices native-model.mjs:7",
+        "sampledMs": 163.155
+      },
+      {
+        "functionName": "(anonymous) native-model.mjs:7",
+        "sampledMs": 147.576
+      },
+      {
+        "functionName": "rows native-tev.mjs:11",
+        "sampledMs": 130.77
+      },
+      {
+        "functionName": "getError :0",
+        "sampledMs": 130.32
+      },
+      {
+        "functionName": "readNativeTextures native-texture.mjs:11",
+        "sampledMs": 123.27
+      },
+      {
+        "functionName": "(anonymous) native-pixel.mjs:14",
+        "sampledMs": 121.135
+      },
+      {
+        "functionName": "wasm-function[9206] melee-fighter-init.wasm:1",
+        "sampledMs": 111.8
+      },
+      {
+        "functionName": "image material-gpu.mjs:34",
+        "sampledMs": 107.581
+      },
+      {
+        "functionName": "readNativeRenderContext native-render-context.mjs:3",
+        "sampledMs": 82.204
+      },
+      {
+        "functionName": "inspectArchive archive.mjs:3",
+        "sampledMs": 81.753
+      },
+      {
+        "functionName": "wasm-function[1026] melee-fighter-init.wasm:1",
+        "sampledMs": 77.867
+      },
+      {
+        "functionName": "module.onNativeDraw material-gpu.mjs:105",
+        "sampledMs": 74.835
+      },
+      {
+        "functionName": "wasm-function[740] melee-fighter-init.wasm:1",
+        "sampledMs": 74.811
+      },
+      {
+        "functionName": "bindVertexArray :0",
+        "sampledMs": 69.516
+      },
+      {
+        "functionName": "uniform material-gpu.mjs:30",
+        "sampledMs": 50.546
+      },
+      {
+        "functionName": "(anonymous) native-pixel.mjs:15",
+        "sampledMs": 45.318
+      },
+      {
+        "functionName": "(anonymous) native-render-context.mjs:9",
+        "sampledMs": 44.306
+      },
+      {
+        "functionName": "flush material-gpu.mjs:174",
+        "sampledMs": 39.941
+      },
+      {
+        "functionName": "uniform4fv :0",
+        "sampledMs": 38.977
+      },
+      {
+        "functionName": "gxAlphaTest native-pixel.mjs:25",
+        "sampledMs": 36.924
+      }
+    ],
+    "inclusive": [
+      {
+        "functionName": "(root) :0",
+        "sampledMs": 15080.036
+      },
+      {
+        "functionName": "frame native-live.mjs:51",
+        "sampledMs": 8454.563
+      },
+      {
+        "functionName": "draw native-match-preview.mjs:131",
+        "sampledMs": 8148.784
+      },
+      {
+        "functionName": "(idle) :0",
+        "sampledMs": 6100.156
+      },
+      {
+        "functionName": "flush material-gpu.mjs:174",
+        "sampledMs": 4597.477
+      },
+      {
+        "functionName": "(anonymous) melee-fighter-init.mjs:1",
+        "sampledMs": 3563.643
+      },
+      {
+        "functionName": "apply material-gpu.mjs:49",
+        "sampledMs": 3302.005
+      },
+      {
+        "functionName": "wasm-to-js :1",
+        "sampledMs": 3224.991
+      },
+      {
+        "functionName": "wasm-function[921] melee-fighter-init.wasm:1",
+        "sampledMs": 3194.302
+      },
+      {
+        "functionName": "wasm-function[1151] melee-fighter-init.wasm:1",
+        "sampledMs": 3153.157
+      },
+      {
+        "functionName": "wasm-function[1304] melee-fighter-init.wasm:1",
+        "sampledMs": 3152.105
+      },
+      {
+        "functionName": "wasm-function[1301] melee-fighter-init.wasm:1",
+        "sampledMs": 3136.263
+      },
+      {
+        "functionName": "wasm-function[923] melee-fighter-init.wasm:1",
+        "sampledMs": 3119.364
+      },
+      {
+        "functionName": "wasm-function[1288] melee-fighter-init.wasm:1",
+        "sampledMs": 3098.288
+      },
+      {
+        "functionName": "js-to-wasm:: melee-fighter-init.wasm:1",
+        "sampledMs": 3034.356
+      },
+      {
+        "functionName": "wasm-function[1839] melee-fighter-init.wasm:1",
+        "sampledMs": 3024.874
+      },
+      {
+        "functionName": "wasm-function[1668] melee-fighter-init.wasm:1",
+        "sampledMs": 3024.874
+      },
+      {
+        "functionName": "wasm-function[73] melee-fighter-init.wasm:1",
+        "sampledMs": 3023.817
+      },
+      {
+        "functionName": "wasm-function[1669] melee-fighter-init.wasm:1",
+        "sampledMs": 3022.767
+      },
+      {
+        "functionName": "module.onNativeObject native-match-preview.mjs:140",
+        "sampledMs": 3010.115
+      },
+      {
+        "functionName": "portDispatchObject melee-fighter-init.mjs:1",
+        "sampledMs": 3010.115
+      },
+      {
+        "functionName": "wasm-function[924] melee-fighter-init.wasm:1",
+        "sampledMs": 2910.675
+      },
+      {
+        "functionName": "module.onNativeDraw material-gpu.mjs:105",
+        "sampledMs": 2623.075
+      },
+      {
+        "functionName": "portEmitDraw melee-fighter-init.mjs:1",
+        "sampledMs": 2623.075
+      },
+      {
+        "functionName": "js-to-wasm:ii:i melee-fighter-init.wasm:1",
+        "sampledMs": 2193.224
+      },
+      {
+        "functionName": "wasm-function[830] melee-fighter-init.wasm:1",
+        "sampledMs": 2192.167
+      },
+      {
+        "functionName": "wasm-function[3661] melee-fighter-init.wasm:1",
+        "sampledMs": 2174.235
+      },
+      {
+        "functionName": "wasm-function[3658] melee-fighter-init.wasm:1",
+        "sampledMs": 2167.908
+      },
+      {
+        "functionName": "rows material-gpu.mjs:17",
+        "sampledMs": 1235.84
+      },
+      {
+        "functionName": "pixelState material-gpu.mjs:64",
+        "sampledMs": 1033.488
+      },
+      {
+        "functionName": "js-to-wasm:iii:i melee-fighter-init.wasm:1",
+        "sampledMs": 1009.495
+      },
+      {
+        "functionName": "wasm-function[925] melee-fighter-init.wasm:1",
+        "sampledMs": 1005.295
+      },
+      {
+        "functionName": "readNativeTevState native-tev.mjs:7",
+        "sampledMs": 989.81
+      },
+      {
+        "functionName": "wasm-function[75] melee-fighter-init.wasm:1",
+        "sampledMs": 987.36
+      },
+      {
+        "functionName": "rows native-tev.mjs:11",
+        "sampledMs": 759.704
+      }
+    ],
+    "note": "Inclusive times overlap and must not be summed. Instrumented profile is diagnostic, not FPS evidence."
+  },
+  "changes": [
+    "Reuse typed uniform packing buffers while preserving independent queued draw snapshots",
+    "Replace exhaustive per-draw alpha classification with exact comparison-boundary checks"
+  ],
+  "validation": {
+    "targetedTests": 136,
+    "failedTests": 0,
+    "alphaComparisons": "All 8x8 comparison pairs and 4 combinations, 64 reference pairs, checked against exhaustive alpha enumeration",
+    "gpuVertexChecksPassed": true,
+    "combatTraceSha256": "5bd54513b8a4aac1a487b0fd194c5ca1602638330eca17e5df5353335b329cd0",
+    "identicalRenderedImages": [
+      {
+        "name": "native-match-ready.png",
+        "sha256": "b69fa73b2737574fdbf584df5f29023ef16d8ebc6301918614a0570f6ef8aeb2",
+        "candidateEqualsBaseline": true
+      },
+      {
+        "name": "native-match-go.png",
+        "sha256": "dbf110b54df48a703ba3a1bc9ea56fa13d4c83f21f2f0301723000f7f392531f",
+        "candidateEqualsBaseline": true
+      },
+      {
+        "name": "native-match-settled.png",
+        "sha256": "60831b719f18b80eab99fc13def93cdfdb22b05d35b6af5570a5421ad9fe1665",
+        "candidateEqualsBaseline": true
+      },
+      {
+        "name": "native-match-final.png",
+        "sha256": "1309fd01f11d9aa926508f12b01a1de11629fd88795cde5053fc8f2b59759380",
+        "candidateEqualsBaseline": true
+      },
+      {
+        "name": "native-match-particles.png",
+        "sha256": "8822bec72a69d6d2089b6dc9bd00af286011d335b03bbb3ee9a4b3dab4222b5d",
+        "candidateEqualsBaseline": true
+      }
+    ],
+    "combatTraceUnchanged": true
+  },
+  "runs": [
+    {
+      "name": "candidate",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60032.29999999702,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5341111110771696,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.084333333455854,
+        "p50Ms": 5.799999997019768,
+        "p95Ms": 9.299999997019768,
+        "maxMs": 17.200000002980232
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757736,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.399999999999636
+      },
+      "particleStats": {
+        "draws": 12776,
+        "vertices": 51104,
+        "frames": 1820,
+        "peakDraws": 39
+      },
+      "maxDebtMs": 33.23333333333301,
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 1915,
+        "framesWithHitlag": 321,
+        "framesWithDamage": 3346,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 182
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      }
+    },
+    {
+      "name": "baselineControl",
+      "frames": 3600,
+      "draws": 3599,
+      "elapsedMs": 60040.70000000298,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.4901111111500197,
+        "p50Ms": 0.5,
+        "p95Ms": 0.7999999970197678,
+        "maxMs": 2.5999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 9.10175048638364,
+        "p50Ms": 8.700000002980232,
+        "p95Ms": 11.099999994039536,
+        "maxMs": 20.900000005960464
+      },
+      "rafDrawIntervals": {
+        "samples": 3598,
+        "meanMs": 16.675236242356036,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.399999999999636
+      },
+      "particleStats": {
+        "draws": 12759,
+        "vertices": 51036,
+        "frames": 1819,
+        "peakDraws": 39
+      },
+      "maxDebtMs": 48.399999999988424,
+      "cadence": {
+        "callbacks": 3603,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 1,
+        "rafGapsOver25Ms": 2
+      },
+      "workload": {
+        "framesWithAttack": 1915,
+        "framesWithHitlag": 321,
+        "framesWithDamage": 3346,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 182
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      }
+    },
+    {
+      "name": "candidateRepeat",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60032.40000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5109999999279777,
+        "p50Ms": 0.5,
+        "p95Ms": 0.7999999970197678,
+        "maxMs": 1.7000000029802322
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.023111111116078,
+        "p50Ms": 5.799999997019768,
+        "p95Ms": 8,
+        "maxMs": 18.200000002980232
+      },
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757726,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000018
+      },
+      "particleStats": {
+        "draws": 12776,
+        "vertices": 51104,
+        "frames": 1820,
+        "peakDraws": 39
+      },
+      "maxDebtMs": 33.23333333333261,
+      "cadence": {
+        "callbacks": 3604,
+        "zeroStepCallbacks": 4,
+        "multiStepCallbacks": 0,
+        "rafGapsOver25Ms": 1
+      },
+      "workload": {
+        "framesWithAttack": 1915,
+        "framesWithHitlag": 321,
+        "framesWithDamage": 3346,
+        "stockChanges": [
+          {
+            "frame": 2046,
+            "slot": 1,
+            "stocks": 3
+          }
+        ],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 325
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 30,
+            "attack": 182
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 358
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      }
+    }
+  ],
+  "acceptanceMet": false,
+  "presentationFpsMeasured": false,
+  "inputToPhotonMeasured": false,
+  "browser": "Google Chrome 151.0.7922.137",
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "scopeNotes": [
+    "Original 124-frame Ready/Go intro runs before timing and is excluded",
+    "Draw submissions are not distinct presentations",
+    "No simulated frames skipped; native gameplay and camera unchanged",
+    "CPU and GPU can vary with other activity on this machine",
+    "Point/line particles, morph geometry, shadow/refraction, audio, full scenes/roster/stages and integration remain incomplete"
+  ],
+  "result": {
+    "retained": true,
+    "meanDrawSubmissionReductionPercent": 33.488374227106874,
+    "note": "Candidate/control/candidate; both candidates submitted all 3600 draws, but this is not distinct presentation or full acceptance certification."
+  },
+  "candidateProfile": {
+    "firstFrame": 303,
+    "lastFrame": 1208,
+    "intervalMicroseconds": 1000,
+    "performanceSampleInstrumented": true,
+    "sampledDurationMs": 15085.769,
+    "self": [
+      {
+        "functionName": "(idle) :0",
+        "sampledMs": 9392.923
+      },
+      {
+        "functionName": "(anonymous) native-tev.mjs:11",
+        "sampledMs": 624.644
+      },
+      {
+        "functionName": "getError :0",
+        "sampledMs": 609.667
+      },
+      {
+        "functionName": "floats native-render-context.mjs:8",
+        "sampledMs": 389.71
+      },
+      {
+        "functionName": "(program) :0",
+        "sampledMs": 242.184
+      },
+      {
+        "functionName": "apply material-gpu.mjs:54",
+        "sampledMs": 238.211
+      },
+      {
+        "functionName": "(garbage collector) :0",
+        "sampledMs": 217.036
+      },
+      {
+        "functionName": "readNativePixel native-pixel.mjs:2",
+        "sampledMs": 204.544
+      },
+      {
+        "functionName": "readNativeTevState native-tev.mjs:7",
+        "sampledMs": 200.343
+      },
+      {
+        "functionName": "materialShaderKey material-shader.mjs:45",
+        "sampledMs": 170.544
+      },
+      {
+        "functionName": "(anonymous) native-model.mjs:7",
+        "sampledMs": 164.47
+      },
+      {
+        "functionName": "readNativeTextures native-texture.mjs:11",
+        "sampledMs": 149.646
+      },
+      {
+        "functionName": "packRows material-gpu.mjs:22",
+        "sampledMs": 145.437
+      },
+      {
+        "functionName": "matrices native-model.mjs:7",
+        "sampledMs": 137.991
+      },
+      {
+        "functionName": "rows native-tev.mjs:11",
+        "sampledMs": 134.791
+      },
+      {
+        "functionName": "(anonymous) native-pixel.mjs:14",
+        "sampledMs": 118.144
+      },
+      {
+        "functionName": "image material-gpu.mjs:39",
+        "sampledMs": 116.989
+      },
+      {
+        "functionName": "wasm-function[9206] melee-fighter-init.wasm:1",
+        "sampledMs": 111.544
+      },
+      {
+        "functionName": "wasm-function[740] melee-fighter-init.wasm:1",
+        "sampledMs": 87.298
+      },
+      {
+        "functionName": "module.onNativeDraw material-gpu.mjs:113",
+        "sampledMs": 86.32
+      },
+      {
+        "functionName": "readNativeRenderContext native-render-context.mjs:3",
+        "sampledMs": 70.594
+      },
+      {
+        "functionName": "inspectArchive archive.mjs:3",
+        "sampledMs": 69.503
+      },
+      {
+        "functionName": "wasm-function[1026] melee-fighter-init.wasm:1",
+        "sampledMs": 68.469
+      },
+      {
+        "functionName": "(anonymous) native-render-context.mjs:9",
+        "sampledMs": 65.297
+      },
+      {
+        "functionName": "bindVertexArray :0",
+        "sampledMs": 52.728
+      },
+      {
+        "functionName": "(anonymous) native-pixel.mjs:15",
+        "sampledMs": 40.057
+      },
+      {
+        "functionName": "uniform material-gpu.mjs:35",
+        "sampledMs": 33.766
+      },
+      {
+        "functionName": "flush material-gpu.mjs:182",
+        "sampledMs": 31.598
+      },
+      {
+        "functionName": "uniform4fv :0",
+        "sampledMs": 30.517
+      },
+      {
+        "functionName": "visit joint-assets.mjs:16",
+        "sampledMs": 25.145
+      },
+      {
+        "functionName": "validateTevStages native-tev.mjs:16",
+        "sampledMs": 24.203
+      },
+      {
+        "functionName": "draw native-match-preview.mjs:131",
+        "sampledMs": 23.268
+      },
+      {
+        "functionName": "(anonymous) native-pixel.mjs:9",
+        "sampledMs": 23.207
+      },
+      {
+        "functionName": "(anonymous) melee-fighter-init.mjs:1",
+        "sampledMs": 23.19
+      },
+      {
+        "functionName": "wasm-function[47] melee-fighter-init.wasm:1",
+        "sampledMs": 22.115
+      }
+    ],
+    "inclusive": [
+      {
+        "functionName": "(root) :0",
+        "sampledMs": 15085.548
+      },
+      {
+        "functionName": "(idle) :0",
+        "sampledMs": 9392.923
+      },
+      {
+        "functionName": "frame native-live.mjs:51",
+        "sampledMs": 5229.196
+      },
+      {
+        "functionName": "draw native-match-preview.mjs:131",
+        "sampledMs": 4947.566
+      },
+      {
+        "functionName": "(anonymous) melee-fighter-init.mjs:1",
+        "sampledMs": 3526.983
+      },
+      {
+        "functionName": "wasm-to-js :1",
+        "sampledMs": 3223.902
+      },
+      {
+        "functionName": "wasm-function[921] melee-fighter-init.wasm:1",
+        "sampledMs": 3196.494
+      },
+      {
+        "functionName": "wasm-function[1151] melee-fighter-init.wasm:1",
+        "sampledMs": 3158.631
+      },
+      {
+        "functionName": "wasm-function[1304] melee-fighter-init.wasm:1",
+        "sampledMs": 3156.522
+      },
+      {
+        "functionName": "wasm-function[1301] melee-fighter-init.wasm:1",
+        "sampledMs": 3141.752
+      },
+      {
+        "functionName": "wasm-function[923] melee-fighter-init.wasm:1",
+        "sampledMs": 3128.053
+      },
+      {
+        "functionName": "wasm-function[1288] melee-fighter-init.wasm:1",
+        "sampledMs": 3103.815
+      },
+      {
+        "functionName": "js-to-wasm:: melee-fighter-init.wasm:1",
+        "sampledMs": 3034.09
+      },
+      {
+        "functionName": "wasm-function[1668] melee-fighter-init.wasm:1",
+        "sampledMs": 3028.82
+      },
+      {
+        "functionName": "wasm-function[73] melee-fighter-init.wasm:1",
+        "sampledMs": 3027.764
+      },
+      {
+        "functionName": "wasm-function[1839] melee-fighter-init.wasm:1",
+        "sampledMs": 3027.764
+      },
+      {
+        "functionName": "wasm-function[1669] melee-fighter-init.wasm:1",
+        "sampledMs": 3026.713
+      },
+      {
+        "functionName": "module.onNativeObject native-match-preview.mjs:140",
+        "sampledMs": 3021.439
+      },
+      {
+        "functionName": "portDispatchObject melee-fighter-init.mjs:1",
+        "sampledMs": 3021.439
+      },
+      {
+        "functionName": "wasm-function[924] melee-fighter-init.wasm:1",
+        "sampledMs": 2956.751
+      },
+      {
+        "functionName": "portEmitDraw melee-fighter-init.mjs:1",
+        "sampledMs": 2676.088
+      },
+      {
+        "functionName": "module.onNativeDraw material-gpu.mjs:113",
+        "sampledMs": 2673.978
+      },
+      {
+        "functionName": "js-to-wasm:ii:i melee-fighter-init.wasm:1",
+        "sampledMs": 2172.609
+      },
+      {
+        "functionName": "wasm-function[830] melee-fighter-init.wasm:1",
+        "sampledMs": 2170.502
+      },
+      {
+        "functionName": "wasm-function[3661] melee-fighter-init.wasm:1",
+        "sampledMs": 2155.751
+      },
+      {
+        "functionName": "wasm-function[3658] melee-fighter-init.wasm:1",
+        "sampledMs": 2146.303
+      },
+      {
+        "functionName": "flush material-gpu.mjs:182",
+        "sampledMs": 1417.033
+      },
+      {
+        "functionName": "js-to-wasm:iii:i melee-fighter-init.wasm:1",
+        "sampledMs": 1033.378
+      },
+      {
+        "functionName": "wasm-function[925] melee-fighter-init.wasm:1",
+        "sampledMs": 1029.155
+      },
+      {
+        "functionName": "wasm-function[75] melee-fighter-init.wasm:1",
+        "sampledMs": 1013.383
+      },
+      {
+        "functionName": "readNativeTevState native-tev.mjs:7",
+        "sampledMs": 987.145
+      },
+      {
+        "functionName": "wasm-function[3043] melee-fighter-init.wasm:1",
+        "sampledMs": 767.666
+      },
+      {
+        "functionName": "rows native-tev.mjs:11",
+        "sampledMs": 759.435
+      },
+      {
+        "functionName": "apply material-gpu.mjs:54",
+        "sampledMs": 683.957
+      },
+      {
+        "functionName": "(anonymous) native-tev.mjs:11",
+        "sampledMs": 624.644
+      }
+    ],
+    "note": "Inclusive times overlap and must not be summed. Instrumented profile is diagnostic, not FPS evidence."
+  }
+}

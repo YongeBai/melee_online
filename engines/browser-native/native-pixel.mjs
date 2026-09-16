@@ -32,3 +32,15 @@ export function gxAlphaTest(alpha,{compare0,reference0,operation,compare1,refere
   const a=compare(compare0,reference0),b=compare(compare1,reference1);
   switch(operation){case 0:return a&&b;case 1:return a||b;case 2:return a!==b;case 3:return a===b;default:throw Error('GX alpha operation');}
 }
+
+// Each integer comparison changes only at its reference and the next value.
+// Check one point in every resulting interval, including isolated equality.
+// This is equivalent to enumerating all 256 alpha values.
+export function gxAlphaTestRejectsAny(test) {
+  if(!gxAlphaTest(0,test))return true;
+  for(const reference of [test.reference0,test.reference1]) {
+    if(!gxAlphaTest(reference,test))return true;
+    if(reference<255&&!gxAlphaTest(reference+1,test))return true;
+  }
+  return false;
+}

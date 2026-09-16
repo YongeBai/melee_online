@@ -102,6 +102,12 @@ The optional workload drives both fighters toward each other with repeated attac
 and intermittent shields. It reports attack/hitlag/damage frames separately from
 keyboard-event tests. These reports are not competitive gameplay or
 distinct-presentation certification.
+For a sampled CPU profile, add `--cpu-profile` to a live scripted workload of
+at least 1,800 frames. The probe waits for frame 300, samples for 15 seconds,
+and writes `constructor-live.cpuprofile` plus its frame window under
+`dist/native-port`. Profiling perturbs execution; use a separate uninstrumented
+run for performance comparisons.
+
 The unpaced workload executes the same controller script without rendering;
 it is a fast correctness check, never an FPS result. The lifecycle regression
 also holds/releases crouch to exercise the native slope-adjustment path.
