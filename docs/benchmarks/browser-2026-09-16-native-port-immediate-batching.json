@@ -1,0 +1,713 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "97358e4",
+  "scope": "Adjacent immediate primitive batching with per-vertex signed integer TEV registers. No native simulation, camera, input, stage or asset changes.",
+  "decision": "Retain. GPU submissions decrease deterministically; CPU improvement is modest and variable. Full competitive acceptance is incomplete.",
+  "command": "node scripts/native-port/probe-constructor.mjs --map=fountain --character=Pe --stage-callbacks --live --workload --frames=3600 --hardware --fountain-cosmetics-off --fountain-scenery-off --defer-gpu-errors",
+  "order": [
+    "B1 candidate",
+    "A1 original renderer",
+    "B2 candidate",
+    "A2 original renderer"
+  ],
+  "controls": "Same core, shaders, geometry module and instrumentation; only material-gpu.mjs switches between the original renderer and candidate. Candidate shader register layout is selected only for immediate draws.",
+  "earlierStrictBatch": {
+    "primitives": 330418,
+    "submittedDraws": 319499,
+    "interpretation": "Only about 3% of primitives merged with all register values required to match."
+  },
+  "stateDiagnosis": {
+    "artifact": "dist/native-port/experiment-immediate-batch/state-diagnostic.json",
+    "adjacentBatchPairs": 95,
+    "pairsDifferingOnlyInTevRegisters": 58
+  },
+  "comparison": {
+    "controlMeanOfRunMeansMs": 7.143057006469904,
+    "candidateMeanOfRunMeansMs": 6.82983333317356,
+    "reductionPercent": 4.3850087296326885,
+    "particleSubmissionReductionPercent": 58.983842418733715,
+    "interpretation": "Both candidates submitted all 3600 frames; controls submitted 3600 and 3599. Displayed FPS was not measured; draw cadence did not show a decisive improvement. B1 was slightly slower than A1 in CPU submission time; variation limits precision."
+  },
+  "rows": [
+    {
+      "id": "b1",
+      "artifact": "dist/native-port/experiment-immediate-batch/flat-b1.json",
+      "artifactSha256": "0086119dc95f5ef05ea7a345de9dd16b83a2451b516aa0527c4cf234d2334326",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "267973e79d75d9f47295307ba0a46897549c4435e9881570b96e4db93532a0af",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60021.5,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.8463611114687389,
+        "p50Ms": 0.800000011920929,
+        "p95Ms": 1.4000000059604645,
+        "maxMs": 2.5
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.141388888690207,
+        "p50Ms": 6.300000011920929,
+        "p95Ms": 11.799999982118607,
+        "maxMs": 28.900000005960464
+      },
+      "immediateStats": {
+        "primitives": 334456,
+        "submittedDraws": 137181,
+        "vertices": 1337824,
+        "frames": 3600
+      },
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1,
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      }
+    },
+    {
+      "id": "a1",
+      "artifact": "dist/native-port/experiment-immediate-batch/flat-a1.json",
+      "artifactSha256": "939418ac8a7ece3ba0cda536f450902385572412a2c14daa3b6a81c4d62ca00e",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "056ff21c524dd500070382a25303a2070f8a93fe04ea7e02db93dfb56279d90d",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60032.19999998808,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.799805555774106,
+        "p50Ms": 0.7000000178813934,
+        "p95Ms": 1.300000011920929,
+        "maxMs": 2.0999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 7.075666666693158,
+        "p50Ms": 6.300000011920929,
+        "p95Ms": 12,
+        "maxMs": 23
+      },
+      "immediateStats": {
+        "primitives": 334456,
+        "submittedDraws": 334456,
+        "vertices": 1337824,
+        "frames": 3600
+      },
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1,
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      }
+    },
+    {
+      "id": "b2",
+      "artifact": "dist/native-port/experiment-immediate-batch/flat-b2.json",
+      "artifactSha256": "db75a16873ecd2ebb5bc47ba104202ad7086bf7e5ee18e75b9103e29fb2a9399",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "267973e79d75d9f47295307ba0a46897549c4435e9881570b96e4db93532a0af",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60030.90000000596,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.8180000001192093,
+        "p50Ms": 0.800000011920929,
+        "p95Ms": 1.2999999821186066,
+        "maxMs": 2.9000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 6.5182777776569125,
+        "p50Ms": 5.700000017881393,
+        "p95Ms": 11.5,
+        "maxMs": 23.399999976158142
+      },
+      "immediateStats": {
+        "primitives": 334456,
+        "submittedDraws": 137181,
+        "vertices": 1337824,
+        "frames": 3600
+      },
+      "multiStepCallbacks": 0,
+      "rafGapsOver25Ms": 1,
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      }
+    },
+    {
+      "id": "a2",
+      "artifact": "dist/native-port/experiment-immediate-batch/flat-a2.json",
+      "artifactSha256": "d51d1199736df36ba285374330cfbe4de2266383d57c8ec9560a8f402e34ff9f",
+      "wasmSha256": "1688db1677a764ccad49c89dd84600bba6c000b227701fbf9a40771dc053e241",
+      "rendererSources": {
+        "material-gpu.mjs": "056ff21c524dd500070382a25303a2070f8a93fe04ea7e02db93dfb56279d90d",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "frames": 3600,
+      "draws": 3599,
+      "elapsedMs": 60021.20000001788,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.8101388889551163,
+        "p50Ms": 0.7999999821186066,
+        "p95Ms": 1.2999999821186066,
+        "maxMs": 1.9000000059604645
+      },
+      "drawSubmissionCpu": {
+        "samples": 3599,
+        "meanMs": 7.21044734624665,
+        "p50Ms": 6.4000000059604645,
+        "p95Ms": 12.300000011920929,
+        "maxMs": 21.19999998807907
+      },
+      "immediateStats": {
+        "primitives": 334339,
+        "submittedDraws": 334339,
+        "vertices": 1337356,
+        "frames": 3599
+      },
+      "multiStepCallbacks": 1,
+      "rafGapsOver25Ms": 2,
+      "finalStateSha256": "45b4c45c614face4e6a4546150c582e1323d5a11b4a54d9102fbee0b78d72e52",
+      "workload": {
+        "framesWithAttack": 1910,
+        "framesWithHitlag": 331,
+        "framesWithDamage": 3419,
+        "stockChanges": [],
+        "windows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 43,
+            "attack": 251
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 51,
+            "attack": 262
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 57,
+            "attack": 341
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 352
+          }
+        ]
+      }
+    }
+  ],
+  "verification": {
+    "unitTestsPassed": 216,
+    "sharedBrowserChecksPassed": true,
+    "coreUnchanged": true,
+    "initialFinalWorkloadAndActionTracesIdentical": true,
+    "fountain": {
+      "artifact": "dist/native-port/experiment-immediate-batch/flat-gpu-candidate.json",
+      "artifactSha256": "8e225b88f88d57217095930482957773486fd5c3fb94edd2c29299e40a6c69dd",
+      "rendererSources": {
+        "material-gpu.mjs": "267973e79d75d9f47295307ba0a46897549c4435e9881570b96e4db93532a0af",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "inputFrames": 142,
+      "introFrames": 124,
+      "preview": {
+        "settled": {
+          "draws": 134,
+          "immediateDraws": 0,
+          "mergedPrimitives": 0,
+          "verifiedVertices": 9156,
+          "maxScaledPositionError": 8.910370771120052e-7,
+          "maxNormalError": 9.361237274241319e-8
+        },
+        "final": {
+          "draws": 277,
+          "immediateDraws": 38,
+          "mergedPrimitives": 59,
+          "verifiedVertices": 23340,
+          "maxScaledPositionError": 8.816080214253565e-7,
+          "maxNormalError": 1.2222556611263258e-7
+        }
+      }
+    },
+    "marthControl": {
+      "artifact": "dist/native-port/experiment-immediate-batch/marth-control.json",
+      "artifactSha256": "ab01aaf9768abb24a9a08ae2e791a4327d02a3fc8370cbf015ab709870851e22",
+      "rendererSources": {
+        "material-gpu.mjs": "056ff21c524dd500070382a25303a2070f8a93fe04ea7e02db93dfb56279d90d",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "inputFrames": 142,
+      "renderedSteps": 142,
+      "introFrames": 124,
+      "afterimages": {
+        "frames": 12,
+        "draws": 12,
+        "vertices": 762
+      },
+      "preview": {
+        "settled": {
+          "draws": 80,
+          "immediateDraws": 0,
+          "mergedPrimitives": 0,
+          "verifiedVertices": 9902,
+          "maxScaledPositionError": 0.0000033034058077865696,
+          "maxNormalError": 8.722379674086511e-8
+        },
+        "final": {
+          "draws": 279,
+          "immediateDraws": 72,
+          "mergedPrimitives": 0,
+          "verifiedVertices": 24464,
+          "maxScaledPositionError": 0.0000011999077240218712,
+          "maxNormalError": 1.267887640432619e-7
+        },
+        "afterimage": {
+          "draws": 264,
+          "immediateDraws": 57,
+          "mergedPrimitives": 0,
+          "verifiedVertices": 24425,
+          "maxScaledPositionError": 0.00000452630028617369,
+          "maxNormalError": 1.259489634808375e-7
+        }
+      }
+    },
+    "marthCandidate": {
+      "artifact": "dist/native-port/experiment-immediate-batch/marth-candidate.json",
+      "artifactSha256": "81aab8f97d8518b00ebfb3d940569f5068b4b89dfd2c50737425b969a9132e5d",
+      "rendererSources": {
+        "material-gpu.mjs": "267973e79d75d9f47295307ba0a46897549c4435e9881570b96e4db93532a0af",
+        "material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+        "tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+        "immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+        "native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+        "native-pixel.mjs": "7a0a6bac804b4bb92e114ff08196cc4826c58b9aca650d13bf2880f5138d9a90",
+        "native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+        "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59"
+      },
+      "inputFrames": 142,
+      "renderedSteps": 142,
+      "introFrames": 124,
+      "afterimages": {
+        "frames": 12,
+        "draws": 12,
+        "vertices": 762
+      },
+      "preview": {
+        "settled": {
+          "draws": 80,
+          "immediateDraws": 0,
+          "mergedPrimitives": 0,
+          "verifiedVertices": 9902,
+          "maxScaledPositionError": 0.0000033034058077865696,
+          "maxNormalError": 8.722379674086511e-8
+        },
+        "final": {
+          "draws": 228,
+          "immediateDraws": 21,
+          "mergedPrimitives": 51,
+          "verifiedVertices": 24464,
+          "maxScaledPositionError": 0.0000011999077240218712,
+          "maxNormalError": 1.267887640432619e-7
+        },
+        "afterimage": {
+          "draws": 232,
+          "immediateDraws": 25,
+          "mergedPrimitives": 32,
+          "verifiedVertices": 24425,
+          "maxScaledPositionError": 0.00000452630028617369,
+          "maxNormalError": 1.259489634808375e-7
+        }
+      }
+    },
+    "integerShaderOracle": {
+      "passed": true,
+      "programs": 223,
+      "capturedPrograms": 36,
+      "samplesPerProgram": 16,
+      "registerTransports": [
+        "uniform",
+        "flat integer attributes"
+      ],
+      "integerChannelChecks": 28544
+    },
+    "images": [
+      {
+        "name": "native-match-ready.png",
+        "identicalPng": true,
+        "sha256": "008cfd79c4103c261c83ee9353e1a01aa09a1e3dd378b5465cdfd25d4b1e1365"
+      },
+      {
+        "name": "native-match-go.png",
+        "identicalPng": true,
+        "sha256": "0948da199673270979887870ec0593c1a7b9f0d3b8d406f9b04cf20adfc359ba"
+      },
+      {
+        "name": "native-match-settled.png",
+        "identicalPng": true,
+        "sha256": "38c626cf70bbf83d7d13545e18d48b73193dd7b1cfc1871270568ccb7cec2ca1"
+      },
+      {
+        "name": "native-match-final.png",
+        "identicalPng": true,
+        "sha256": "d31cf4ed21441f8e6dd09b0979ecf4daf603526ce973ebfff081ca7d9dc43b6e"
+      },
+      {
+        "name": "Marth sword trail",
+        "identicalPng": true,
+        "sha256": "3e433f7768785bb929ac2b63dc41f6516911dee253794220128b720692a5cb40"
+      }
+    ],
+    "visualInspection": "Fountain final frame and Marth sword-trail frame inspected. Images compare to the native-port control, not retail parity."
+  },
+  "presentationFpsMeasured": false,
+  "inputToPhotonMeasured": false,
+  "competitiveAcceptance": false,
+  "profile": {
+    "artifact": "dist/native-port/experiment-immediate-batch/constructor-live.cpuprofile",
+    "summary": "dist/native-port/experiment-immediate-batch/profile-summary.json",
+    "window": {
+      "firstFrame": 301,
+      "lastFrame": 1212,
+      "intervalMicroseconds": 1000,
+      "performanceSampleInstrumented": true
+    },
+    "totalMs": 15157.804,
+    "self": [
+      {
+        "name": "(idle) :0",
+        "selfMs": 6477.606,
+        "wallPercent": 42.73446206323818
+      },
+      {
+        "name": "apply /material-gpu.mjs:65",
+        "selfMs": 721.732,
+        "wallPercent": 4.76145489148692
+      },
+      {
+        "name": "(program) :0",
+        "selfMs": 490.779,
+        "wallPercent": 3.237797506815631
+      },
+      {
+        "name": "(garbage collector) :0",
+        "selfMs": 473.738,
+        "wallPercent": 3.1253735699445646
+      },
+      {
+        "name": "packRows /material-gpu.mjs:30",
+        "selfMs": 413.381,
+        "wallPercent": 2.7271826446627756
+      },
+      {
+        "name": "capture /constructor.html:80",
+        "selfMs": 401.643,
+        "wallPercent": 2.64974398666192
+      },
+      {
+        "name": "materialShaderKey /material-shader.mjs:45",
+        "selfMs": 297.427,
+        "wallPercent": 1.962203759858618
+      },
+      {
+        "name": "readNativeTextures /native-texture.mjs:11",
+        "selfMs": 288.185,
+        "wallPercent": 1.9012318670963158
+      },
+      {
+        "name": "(anonymous) /native-model.mjs:7",
+        "selfMs": 251.909,
+        "wallPercent": 1.661909601153307
+      },
+      {
+        "name": "matrices /native-model.mjs:7",
+        "selfMs": 233.742,
+        "wallPercent": 1.542057147592092
+      },
+      {
+        "name": "(anonymous) /immediate-geometry.mjs:19",
+        "selfMs": 229.983,
+        "wallPercent": 1.5172580408085499
+      },
+      {
+        "name": "module.onNativeDraw /material-gpu.mjs:128",
+        "selfMs": 226.894,
+        "wallPercent": 1.4968790993734977
+      },
+      {
+        "name": "image /material-gpu.mjs:50",
+        "selfMs": 198.271,
+        "wallPercent": 1.308045677328985
+      },
+      {
+        "name": "wasm-function[9207] /melee-fighter-init.wasm:1",
+        "selfMs": 195.237,
+        "wallPercent": 1.288029585288212
+      },
+      {
+        "name": "readNativeRenderContext /native-render-context.mjs:3",
+        "selfMs": 188.224,
+        "wallPercent": 1.2417629888867807
+      },
+      {
+        "name": "bindVertexArray :0",
+        "selfMs": 187.129,
+        "wallPercent": 1.2345389873097712
+      },
+      {
+        "name": "inspectArchive /archive.mjs:3",
+        "selfMs": 180.715,
+        "wallPercent": 1.192224150675124
+      },
+      {
+        "name": "flush /material-gpu.mjs:215",
+        "selfMs": 164.77,
+        "wallPercent": 1.0870308126427812
+      }
+    ],
+    "inclusive": [
+      {
+        "name": "draw",
+        "inclusiveMs": 6984.597,
+        "wallPercent": 46.07921437696384
+      },
+      {
+        "name": "flush",
+        "inclusiveMs": 2380.318,
+        "wallPercent": 15.703580808935119
+      },
+      {
+        "name": "apply",
+        "inclusiveMs": 1747.354,
+        "wallPercent": 11.527751645291099
+      },
+      {
+        "name": "readNativeModelMatrices",
+        "inclusiveMs": 512.094,
+        "wallPercent": 3.378418140253034
+      },
+      {
+        "name": "packRows",
+        "inclusiveMs": 413.381,
+        "wallPercent": 2.7271826446627756
+      },
+      {
+        "name": "readNativeTextures",
+        "inclusiveMs": 355.977,
+        "wallPercent": 2.3484734332229125
+      },
+      {
+        "name": "materialShaderKey",
+        "inclusiveMs": 349.199,
+        "wallPercent": 2.30375719332431
+      },
+      {
+        "name": "readNativeRenderContext",
+        "inclusiveMs": 330.963,
+        "wallPercent": 2.1834495287048177
+      }
+    ],
+    "note": "Instrumented profile, not an acceptance timing sample. Program linking still unconditionally retains transform-feedback outputs even when vertex verification is disabled; test removing that requirement and inactive uniform preparation next."
+  },
+  "sourceHashes": {
+    "engines/browser-native/immediate-geometry.mjs": "1ecced55aacf40ab3647512e032a680b1cda1f8d52df6f01569a7bf1faa7ee61",
+    "engines/browser-native/material-gpu.mjs": "267973e79d75d9f47295307ba0a46897549c4435e9881570b96e4db93532a0af",
+    "engines/browser-native/material-shader.mjs": "f53f7983d4cb4de7c91bb20079dbb4141b44f63b638c9281f09f4f0db98993b0",
+    "engines/browser-native/native-live.mjs": "6b5ed10793b39d57035510a7d5dca01d8eb9135b9bd0454efad2245c9cdc861c",
+    "engines/browser-native/native-match-preview.mjs": "f65edcf1d83cad7f794fc93cd34fdb48d5cbdf4786023af9ba36686713c5e910",
+    "engines/browser-native/tev-shader.mjs": "dc51c38ba962dd06591dc197b8c3318ce3646a9c1e94c031a2a0a21266d69343",
+    "engines/browser-native/verify-tev.mjs": "1580298feff13527b9aa8bd1547ff5d1eb8c1f06b516fd71ca7630efedc3a4c5",
+    "scripts/native-port/immediate-geometry.test.mjs": "2bd9d7031d88d59730e08b444a86c0d1fdd44e9c4a205fb488ce6297cc5c2e6e",
+    "scripts/native-port/material-shader-cache.test.mjs": "e096fb3b521f2858c9a914b1e666aa1d9d77332b055455cc26a051ed8f23f06f",
+    "scripts/native-port/probe-constructor.mjs": "b1ed61763690510e889f67b79167242992b241f0eaedd4a086292e832632c71a"
+  }
+}

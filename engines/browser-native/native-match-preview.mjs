@@ -93,7 +93,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
   let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
-  const particleStats={draws:0,vertices:0,frames:0,peakDraws:0},afterimageStats={draws:0,vertices:0,frames:0,peakDraws:0};
+  const immediateStats={primitives:0,submittedDraws:0,vertices:0,frames:0},particleStats={draws:0,vertices:0,frames:0,peakDraws:0},afterimageStats={draws:0,vertices:0,frames:0,peakDraws:0};
   const resourceStats={stageCreated:0,stageRetired:0,effectCreated:0,effectRetired:0,peakEffectModels:0,itemCreated:0,itemRetired:0,peakItemModels:0};
   const itemList=items?module._malloc(1024*12):0;
   if(items&&!itemList)throw Error('Item owner allocation');
@@ -171,7 +171,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       prewarm(sources){if(!materialRenderer)throw Error('Shader preparation requires material renderer');return materialRenderer.prewarm(sources);},
       shaderSources(){return materialRenderer?.shaderSources()??[];},
       shaderCoverage(){return materialRenderer?.shaderCoverage()??null;},
-      resetImmediateStats(){for(const stats of [particleStats,afterimageStats])for(const key of Object.keys(stats))stats[key]=0;},
+      resetImmediateStats(){for(const stats of [particleStats,afterimageStats,immediateStats])for(const key of Object.keys(stats))stats[key]=0;},
       draw(){
         if(callbacks){
           if(!materialRenderer)throw Error('Original callbacks require native materials');
@@ -207,7 +207,8 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           for(const [stats,draws,vertices] of [[particleStats,materialDraws.particleDraws,materialDraws.particleVertices],[afterimageStats,materialDraws.afterimageDraws,materialDraws.afterimageVertices]]){
             stats.draws+=draws;stats.vertices+=vertices;if(draws)stats.frames++;stats.peakDraws=Math.max(stats.peakDraws,draws);
           }
-          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
+          immediateStats.primitives+=materialDraws.particleDraws+materialDraws.afterimageDraws;immediateStats.submittedDraws+=materialDraws.immediateDraws;immediateStats.vertices+=materialDraws.immediateVertices;immediateStats.frames++;
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot,cameraValidation);
         module._portStageRenderBegin();

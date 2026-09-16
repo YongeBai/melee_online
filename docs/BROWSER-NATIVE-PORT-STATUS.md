@@ -5,6 +5,30 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Immediate particle/trail drawing now batches adjacent compatible primitives,
+carrying each primitive's TEV registers as flat integer vertex data. Full state
+matching alone merged only about 3% of primitives: a captured frame showed 58
+adjacent pairs differing only in TEV register values. The final candidate reduces
+334,456 particle submissions to 137,181 in the 3,600-frame Peach/Fountain workload,
+without changing the vertex count. Both candidate runs submit all 3,600 frames;
+controls submit 3,600 and 3,599. Mean draw-submission CPU is 6.83 ms versus 7.14 ms
+across run means, a modest 4.4% difference with visible run-to-run variation.
+This is a repeatable draw-call reduction; displayed FPS was not measured.
+
+All 216 unit tests and shared browser checks pass. The integer GPU oracle checks
+223 programs through both uniform and vertex register paths (28,544 channel
+comparisons). Four Fountain images and the Marth sword-trail image are identical
+to the port controls. Marth passes all 142 rendered input frames with GPU checks,
+including twelve sword-trail frames. All four timing runs have identical recorded
+initial/final fighter values, workload counts and action-state traces. Full
+competitive gameplay, presentation and latency acceptance remain incomplete.
+[Batching evidence](benchmarks/browser-2026-09-16-native-port-immediate-batching.json).
+The follow-up profile puts uniform preparation/upload at 11.5% of sampled wall
+time and the batch-state matcher at 1.5% self time. Shader linking still retains
+vertex outputs used only by validation even in live runs. The next experiment
+will allow live shaders to discard those outputs and avoid preparing unused
+uniforms, while keeping the verification path available.
+
 The renderer now reuses identical consecutive pixel/channel snapshots instead
 of repeatedly decoding and allocating them. Changed snapshots retain independent
 data for queued draws. In the corrected-dynamics Peach/Fountain workload, control
@@ -24,8 +48,7 @@ guard did not improve timing, and skipping inactive uniform packing did not
 show a reliable gain against variable controls. Their
 [address-check results](benchmarks/browser-2026-09-16-native-port-stage-address-experiment.json)
 and [uniform results](benchmarks/browser-2026-09-16-native-port-active-uniform-experiment.json)
-are retained. The next larger renderer experiment is batching adjacent particle
-primitives only when their complete render state matches, preserving draw order.
+are retained. The batching experiment above follows those rejected candidates.
 
 A new runtime check exposed missing dynamic-bone pool initialization in the
 match harness: a Pikachu copy hat declared three chains but had zero live nodes.

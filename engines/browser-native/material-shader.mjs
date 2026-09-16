@@ -42,13 +42,17 @@ function alphaTest(a) {
 }
 // Only shader-generating state belongs in this key. Matrices, light values,
 // colors, alpha references and texture resources are uploaded as uniforms.
-export function materialShaderKey({tev,textures,pixel},attributes) {
+export function materialShaderKey({tev,textures,pixel},attributes,{immediateRegisters=false}={}) {
   const a=pixel.alphaTest;
-  return JSON.stringify([tev.stages,textures.generators,textures.textures.map(t=>t.id),pixel.channelCount,pixel.channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b)]);
+  return JSON.stringify([tev.stages,textures.generators,textures.textures.map(t=>t.id),pixel.channelCount,pixel.channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b),immediateRegisters]);
 }
-export function generateMaterialShaders({tev,textures,pixel},attributes) {
+export function generateMaterialShaders({tev,textures,pixel},attributes,{immediateRegisters=false}={}) {
   const has=id=>attributes.some(a=>a.attr===id),gens=textures.generators;
+  // Immediate geometry supplies only UV0. Keep other layouts on the ordinary
+  // uniform path instead of stealing an attribute location they might use.
+  if(immediateRegisters&&(attributes.some(a=>![9,11,13].includes(a.attr))||gens.some(g=>g.source>=5&&g.source<=11)))throw Error('Native immediate register layout');
   const outputs=['out vec4 raster0,raster1;','out vec3 transformedPosition,transformedNormal,verifiedTexcoord;',...gens.map(g=>`out vec3 texcoord${g.id};`)];
+  if(immediateRegisters)outputs.push('flat out highp ivec4 tevRegisters[4];');
   const declarations=`layout(location=0) in vec3 rawPosition;
 layout(location=1) in float positionIndex;
 layout(location=2) in vec3 rawNormal;
@@ -56,7 +60,8 @@ layout(location=3) in vec3 rawBinormal;
 layout(location=4) in vec3 rawTangent;
 layout(location=5) in vec4 rawColor0;
 layout(location=6) in vec4 rawColor1;
-${Array.from({length:8},(_,i)=>`layout(location=${i+7}) in vec3 rawUV${i};`).join('\n')}
+${Array.from({length:immediateRegisters?1:8},(_,i)=>`layout(location=${i+7}) in vec3 rawUV${i};`).join('\n')}
+${immediateRegisters?Array.from({length:4},(_,i)=>`layout(location=${i+8}) in ivec4 rawTev${i};`).join('\n'):''}
 uniform vec4 positionRows[30],normalRows[30],textureRows[30],postRows[60];
 uniform mat4 projection;
 uniform int currentMatrix;
@@ -73,6 +78,7 @@ vec4 lit0=nativeLighting0(${has(11)?'rawColor0':has(12)?'rawColor1':'vec4(1)'},t
 vec4 lit1=nativeLighting1(${has(11)&&has(12)?'rawColor1':'vec4(1)'},transformedPosition,transformedNormal);
 raster0=${pixel.channelCount>0?'lit0':'vec4(0)'};raster1=${pixel.channelCount>1?'lit1':'vec4(0)'};
 gl_Position=projection*vec4(transformedPosition,1.0);gl_Position.z=2.0*gl_Position.z+gl_Position.w;`];
+  if(immediateRegisters)for(let i=0;i<4;i++)body.push(`tevRegisters[${i}]=rawTev${i};`);
   for(const g of gens) {
     if(g.type===10) {
       if(![19,20].includes(g.source))throw Error('Native SRTG source');
@@ -110,7 +116,7 @@ in vec4 raster0,raster1;
 ${gens.map(g=>`in vec3 texcoord${g.id};`).join('\n')}
 ${samplers.map(i=>`uniform sampler2D image${i};`).join('\n')}
 uniform float lodBias[8];uniform ivec2 alphaReference;out vec4 fragmentColor;
-${generateTevFunction(tev.stages)}
+${generateTevFunction(tev.stages,{registerInput:immediateRegisters?'flat':'uniform'})}
 void main(){ivec4 texels[${n}],rasters[${n}];${samples.join('\n')}
 ivec4 color=nativeTev(texels,rasters)&ivec4(255);
 if(!${alphaTest(pixel.alphaTest)})discard;fragmentColor=vec4(color)/255.0;}`;

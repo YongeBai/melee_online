@@ -41,10 +41,11 @@ function combine(s,alpha) {
 // Emits straight-line GLSL ES 3, one original TEV program per shader. Callers
 // supply sampled RGBA8 texture/raster values per stage, BEFORE swap selection.
 // Texture addressing, texgen, lighting, fog and pixel-engine state are separate.
-export function generateTevFunction(input,{swaps=defaultTevSwaps}={}) {
+export function generateTevFunction(input,{swaps=defaultTevSwaps,registerInput='uniform'}={}) {
   const stages=explicitTevStages(input);
   if(swaps.length!==4||swaps.some(s=>typeof s!=='string'||!(/^[rgba]{4}$/).test(s)))throw Error('Native TEV swap table');
-  const lines=['uniform ivec4 tevRegisters[4];','uniform ivec4 tevKonst[4];',
+  if(!['uniform','flat'].includes(registerInput))throw Error('Native TEV register input');
+  const lines=[registerInput==='flat'?'flat in highp ivec4 tevRegisters[4];':'uniform ivec4 tevRegisters[4];','uniform ivec4 tevKonst[4];',
     `ivec4 nativeTev(ivec4 texels[${stages.length}],ivec4 raster[${stages.length}]) {`,
     'ivec4 r[4]; for(int i=0;i<4;i++)r[i]=tevRegisters[i];'];
   stages.forEach((s,i)=>{

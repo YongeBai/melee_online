@@ -1,4 +1,4 @@
-import {immediateTriangles} from './immediate-geometry.mjs';
+import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture} from './native-texture.mjs';
@@ -28,13 +28,13 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     registers:new Int32Array(16),konst:new Int32Array(16),ambient:new Int32Array(8),material:new Int32Array(8),lightColor:new Int32Array(32),
     lightPosition:new Float32Array(24),lightDirection:new Float32Array(24),lightAngular:new Float32Array(24),lightDistance:new Float32Array(24),bias:new Float32Array(8)};
   function packRows(target,rows,stride){target.fill(0);for(let i=0;i<rows.length;i++)if(rows[i])target.set(rows[i],i*stride);return target;}
-  const readPixel=createNativePixelReader(module);
+  const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
-  function program(state,attributes,origin){
-    const variant=materialShaderKey(state,attributes);if(variants.has(variant))return variants.get(variant);
-    const result=compileProgram(generateMaterialShaders(state,attributes),origin);result.used=true;variants.set(variant,result);return result;
+  function program(state,attributes,origin,immediateRegisters=false){
+    const variant=materialShaderKey(state,attributes,{immediateRegisters});if(variants.has(variant))return variants.get(variant);
+    const result=compileProgram(generateMaterialShaders(state,attributes,{immediateRegisters}),origin);result.used=true;variants.set(variant,result);return result;
   }
   function compileProgram(sources,origin){
     const key=sources.vertex+'\n'+sources.fragment;if(programs.has(key))return programs.get(key);
@@ -134,25 +134,33 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   };
   if(module.onNativeImmediate)throw Error('Immediate draw receiver already owned');
   module.onNativeImmediate=(primitive,count,ptr,cull,textured,tev,kind)=>{
-    const data=Float32Array.from(new Float32Array(module.HEAPU8.buffer,ptr,count*9)),triangles=immediateTriangles(primitive,count);
+    const data=new Float32Array(module.HEAPU8.buffer,ptr,count*9),triangles=immediateTriangles(primitive,count);
     if(!data.every(Number.isFinite)||cull>3||![0,1].includes(kind))throw Error('Invalid immediate geometry');
-    let plan=immediatePlans[immediateUsed];
+    const previous=queue.at(-1),eligible=previous?.immediate&&previous.kind===kind&&previous.textured===textured&&previous.camera===snapshot&&previous.plan.mesh.flags===(cull<<14)&&previous.plan.stream.vertexCount+count<=4096;
+    const merge=matchImmediateState(tev,eligible,previous?.flatRegisters===true);
+    let plan=merge?previous.plan:immediatePlans[immediateUsed];
     if(!plan){
-      plan={vao:gl.createVertexArray(),vertex:gl.createBuffer(),indices:gl.createBuffer()};immediatePlans.push(plan);
+      plan={vao:gl.createVertexArray(),vertex:gl.createBuffer(),indices:gl.createBuffer(),registers:gl.createBuffer(),stream:{data:new Float32Array(0),indices:new Uint32Array(0),vertexCount:0,indexCount:0}};immediatePlans.push(plan);
       gl.bindVertexArray(plan.vao);gl.bindBuffer(gl.ARRAY_BUFFER,plan.vertex);
       for(const [location,size,offset] of [[0,3,0],[5,4,12],[7,2,28]]){gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,36,offset);}
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,plan.indices);
+      gl.bindBuffer(gl.ARRAY_BUFFER,plan.registers);
+      for(let i=0;i<4;i++)gl.vertexAttribIPointer(i+8,4,gl.INT,64,i*16);
     }
-    immediateUsed++;immediateVertices+=count;
+    if(!merge){
+      immediateUsed++;plan.stream.vertexCount=plan.stream.indexCount=0;
+      const attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
+      plan.mesh={triangles:null,flags:cull<<14,attrs,vertices:[]};
+      const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+      checkNativeRenderContext(state.context,snapshot,state.pixel);
+      const flatRegisters=!state.textures.generators.some(g=>g.source>=5&&g.source<=11);
+      queue.push({owner:kind===0?'particles':'afterimage',plan,state,camera:snapshot,program:program(state,attrs,kind===0?'particles':'afterimage',flatRegisters),immediate:true,flatRegisters,kind,textured});
+    }
+    appendImmediateGeometry(plan.stream,data,triangles,queue.at(-1).flatRegisters?new Int32Array(module.HEAPU8.buffer,tev+16,16):null);
+    plan.mesh.triangles=plan.stream.indices.subarray(0,plan.stream.indexCount);
+    if(verifyVertices)for(let i=0;i<count;i++)plan.mesh.vertices.push({9:[...data.slice(i*9,i*9+3)],11:[...data.slice(i*9+3,i*9+7)],13:[...data.slice(i*9+7,i*9+9)]});
+    immediateVertices+=count;
     if(kind===0){particleDraws++;particleVertices+=count;}else{afterimageDraws++;afterimageVertices+=count;}
-    gl.bindVertexArray(plan.vao);gl.bindBuffer(gl.ARRAY_BUFFER,plan.vertex);gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,plan.indices);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,triangles,gl.DYNAMIC_DRAW);
-    const attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
-    plan.mesh={triangles,flags:cull<<14,attrs,vertices:verifyVertices?Array.from({length:count},(_,i)=>({9:[...data.slice(i*9,i*9+3)],11:[...data.slice(i*9+3,i*9+7)],13:[...data.slice(i*9+7,i*9+9)]})):[]};
-    const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
-    checkNativeRenderContext(state.context,snapshot,state.pixel);
-    const selectedProgram=program(state,attrs,kind===0?'particles':'afterimage');
-    queue.push({owner:kind===0?'particles':'afterimage',plan,state,camera:snapshot,program:selectedProgram});
   };
   function upload(model,bytes,nodes,owner){
     const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
@@ -210,18 +218,26 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       // actor order stable, completing opaque draws before blended draws.
       const drawsInOrder=ordered?queue:[...queue.filter(d=>d.state.pixel.blend.type===0),...queue.filter(d=>d.state.pixel.blend.type!==0)];
       for(const draw of drawsInOrder) {
-        gl.bindVertexArray(draw.plan.vao);apply(draw.state,draw.program,draw.camera);pixelState(draw.state.pixel);
+        gl.bindVertexArray(draw.plan.vao);
+        if(draw.immediate){
+          const stream=draw.plan.stream;
+          for(let i=8;i<12;i++)draw.flatRegisters?gl.enableVertexAttribArray(i):gl.disableVertexAttribArray(i);
+          if(draw.flatRegisters){gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.registers);gl.bufferData(gl.ARRAY_BUFFER,stream.registers.subarray(0,stream.vertexCount*16),gl.DYNAMIC_DRAW);}
+          gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.vertex);gl.bufferData(gl.ARRAY_BUFFER,stream.data.subarray(0,stream.vertexCount*9),gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,draw.plan.indices);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,draw.plan.mesh.triangles,gl.DYNAMIC_DRAW);
+        }
+        apply(draw.state,draw.program,draw.camera);pixelState(draw.state.pixel);
         const cull=draw.plan.mesh.flags&0xc000;
         if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);
         if(verifyVertices)verifyDrawVertices(draw);
         gl.drawElements(gl.TRIANGLES,draw.plan.mesh.triangles.length,gl.UNSIGNED_INT,0);draws++;
       }
       if(checkErrors&&gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
-      return {vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
+      return {vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}
       return {tevPrograms:[...tev.values()],pixelStates:[...pixels.values()],lightStates:[...lights.values()]};
-    },dispose(){delete module.onNativeDraw;delete module.onNativeImmediate;for(const p of immediatePlans){gl.deleteVertexArray(p.vao);gl.deleteBuffer(p.vertex);gl.deleteBuffer(p.indices);}for(const model of [...models])model.dispose();for(const p of programs.values())gl.deleteProgram(p.program);for(const image of images.values())gl.deleteTexture(image);module._free(view);},
+    },dispose(){delete module.onNativeDraw;delete module.onNativeImmediate;for(const p of immediatePlans){gl.deleteVertexArray(p.vao);gl.deleteBuffer(p.vertex);gl.deleteBuffer(p.indices);gl.deleteBuffer(p.registers);}for(const model of [...models])model.dispose();for(const p of programs.values())gl.deleteProgram(p.program);for(const image of images.values())gl.deleteTexture(image);module._free(view);},
   };
 }

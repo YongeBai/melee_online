@@ -505,6 +505,15 @@ and writes `constructor-live.cpuprofile` plus its frame window under
 `dist/native-port`. Profiling perturbs execution; use a separate uninstrumented
 run for performance comparisons.
 
+Adjacent particle/trail primitives may share a GPU draw only when the captured
+GX state, camera, culling and vertex layout are compatible. TEV registers travel
+as flat integer vertex data; textures, transforms, lighting and pixel state still
+form batch boundaries. This preserves triangle order and each primitive's colors.
+Layouts using additional UV inputs retain uniform registers. The batch is capped
+at 4,096 vertices, and queued streams own their data before native buffers change.
+`particleStats.draws` and `afterimageStats.draws` count original primitives;
+`immediateStats.submittedDraws` counts GPU batches. Neither is a frame-rate metric.
+
 The unpaced workload executes the same controller script without rendering;
 it is a fast correctness check, never an FPS result. The lifecycle regression
 also holds/releases crouch to exercise the native slope-adjustment path.

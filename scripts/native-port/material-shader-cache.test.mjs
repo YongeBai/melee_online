@@ -29,3 +29,14 @@ test('material cache key follows texgen and texture binding layout',()=>{
   }
   const missing=structuredClone(base);missing.textures.textures=[];assert.notEqual(materialShaderKey(missing,attributes),key);assert.throws(()=>generateMaterialShaders(missing,attributes),/missing texture/);
 });
+test('immediate register transport has a distinct shader layout and retains TEV arithmetic',()=>{
+  const state=fixture(),attrs=[{attr:9},{attr:11},{attr:13}],options={immediateRegisters:true};
+  const normal=generateMaterialShaders(state,attrs),flat=generateMaterialShaders(state,attrs,options);
+  assert.notEqual(materialShaderKey(state,attrs),materialShaderKey(state,attrs,options));
+  assert.match(flat.vertex,/layout\(location=8\) in ivec4 rawTev0/);
+  assert.match(flat.vertex,/flat out highp ivec4 tevRegisters\[4\]/);
+  assert.match(flat.fragment,/flat in highp ivec4 tevRegisters\[4\]/);
+  assert.equal(flat.fragment.replace('flat in highp ivec4 tevRegisters','uniform ivec4 tevRegisters'),normal.fragment);
+  assert.throws(()=>generateMaterialShaders(state,attributes,options),/layout/);
+  state.textures.generators=[{id:0,source:5}];assert.throws(()=>generateMaterialShaders(state,attrs,options),/layout/);
+});
