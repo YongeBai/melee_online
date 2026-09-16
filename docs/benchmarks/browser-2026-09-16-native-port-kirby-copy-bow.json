@@ -1,0 +1,1164 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "cd97e2f",
+  "scope": "Original Kirby Link and Young Link copy abilities: typed asset graphs, dynamic hats, bow/arrow states, auxiliary arrow model discovery and controller-driven lifecycle/contact validation. No gameplay callback replacement, stage or camera changes.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+    "wasmBytes": 2958118
+  },
+  "sourceHashes": {
+    "article-assets.mjs": "ab0ef6abff0c76d33d2ec88590819010dc3415f232e9c525272ca1092cbe09c5",
+    "kirby-copy-assets.mjs": "fdef4301baccd3b9836beedb7484d93e586a55d1fb7a5d1693d49e7362ad502e",
+    "item-runtime.c": "dc881b110c26eb8aa4178230bcc752655b58fa75164757801d737a3dc6d6f336",
+    "constructor.html": "2dd0aa274a98db27d1aa93704725781257ff91bfe6419462d24395797fead17c",
+    "verify-kirby.mjs": "d88a34066f0cc0451e81408663985d7a3e3f327ef389d940e3e76460bce88daa",
+    "material-gpu.mjs": "d884a2dfce2fa4c8f44c66043ccd37cc43c8c67f8ac6148be8d1ae158b69662c",
+    "native-match-preview.mjs": "93d18b7c91127fc19c0b1c766e87c9a88291703b010a5dece9723941ccc7d017"
+  },
+  "assets": [
+    {
+      "code": "Lk",
+      "root": 884,
+      "joint": 9772,
+      "nodes": 6,
+      "meshes": 5,
+      "typedRelocations": 879,
+      "omittedExporterRelocations": 15,
+      "dynamicChains": [
+        {
+          "bone": 3,
+          "nodes": 3
+        }
+      ],
+      "articles": [
+        {
+          "slot": 0,
+          "root": 724,
+          "stateCount": 1,
+          "specialWords": 9,
+          "joint": 14728,
+          "animations": [
+            {
+              "joint": null,
+              "material": null,
+              "shape": null
+            }
+          ]
+        },
+        {
+          "slot": 1,
+          "root": 860,
+          "stateCount": 6,
+          "specialWords": 1,
+          "joint": 26664,
+          "animations": [
+            {
+              "joint": 31792,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 33432,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 35176,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 36648,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 38288,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 40008,
+              "material": null,
+              "shape": null
+            }
+          ]
+        }
+      ],
+      "attachments": [
+        {
+          "joint": 17320,
+          "label": "arrow 36",
+          "nodes": 1
+        },
+        {
+          "joint": 19400,
+          "label": "arrow 40",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "code": "Cl",
+      "root": 884,
+      "joint": 9772,
+      "nodes": 6,
+      "meshes": 5,
+      "typedRelocations": 879,
+      "omittedExporterRelocations": 15,
+      "dynamicChains": [
+        {
+          "bone": 3,
+          "nodes": 3
+        }
+      ],
+      "articles": [
+        {
+          "slot": 0,
+          "root": 724,
+          "stateCount": 1,
+          "specialWords": 9,
+          "joint": 14568,
+          "animations": [
+            {
+              "joint": null,
+              "material": null,
+              "shape": null
+            }
+          ]
+        },
+        {
+          "slot": 1,
+          "root": 860,
+          "stateCount": 6,
+          "specialWords": 1,
+          "joint": 26504,
+          "animations": [
+            {
+              "joint": 31632,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 33272,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 35016,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 36488,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 38128,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 39848,
+              "material": null,
+              "shape": null
+            }
+          ]
+        }
+      ],
+      "attachments": [
+        {
+          "joint": 17160,
+          "label": "arrow 36",
+          "nodes": 1
+        },
+        {
+          "joint": 19240,
+          "label": "arrow 40",
+          "nodes": 1
+        }
+      ]
+    }
+  ],
+  "commands": {
+    "lifecycle": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent={Lk,Cl} --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent={Lk,Cl} --input --kirby-copy=contact --stage-callbacks --render-steps --hardware",
+    "gpu": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent={Lk,Cl} --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "regression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pk --input --combat --kirby-copy=swallow",
+    "note": "Run separately for each opponent; braces above denote alternatives, not a single two-opponent command."
+  },
+  "validation": {
+    "unitTests": {
+      "passed": 218,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "sharedBrowser": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "102805183f6e10810e4399f6958653cffc322454ebe18a59c3fb6cf8080142c4",
+      "command": "node scripts/native-port/verify-browser.mjs --fighter-init"
+    },
+    "visualInspection": "Saved Link/Young Link hat and firing frames inspected at 960x720. Original camera values are retained; this is not a retail-image comparison.",
+    "input": "All movement, capture, full charge, release, copy loss and reacquisition use controller inputs. No position, damage, copy kind or action state is assigned by the copy test.",
+    "retirement": "Original arrow ground-state cleanup can exceed the former fixed recovery window. Tests wait up to 600 additional simulation frames for native item/attachment retirement; no item is forcibly removed.",
+    "shield": "Contact fixture turns the idle Link/Young Link target away using controller input. Original physical shield behavior stays enabled.",
+    "telemetry": "Per-owner callback counters combine main and attachment geometry. Final lifecycle probes request per-model queued draw counts to prove attachment submission, with no instrumentation scan in normal live runs. GPU/contact probes preceded this additional telemetry; their native core and rendering behavior are the same."
+  },
+  "rows": [
+    {
+      "id": "link-full",
+      "artifact": "dist/native-port/experiment-kirby-copy-bow/link-full.json",
+      "artifactSha256": "4b8d7916502a50a5abeb1a626afe2e08a9eae7c03f56a53d2e9756f155ce80f2",
+      "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+      "browser": "Google Chrome 151.0.7922.137",
+      "character": "Kb",
+      "opponent": "Lk",
+      "copyKind": 6,
+      "mode": "swallow",
+      "renderedInputFrames": 2205,
+      "renderedIntroFrames": 124,
+      "copyScriptFrames": 2063,
+      "copyStates": [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        401,
+        402,
+        403,
+        24,
+        25,
+        404,
+        406,
+        265
+      ],
+      "itemKinds": [
+        142,
+        140,
+        52
+      ],
+      "peakAttachments": 2,
+      "attachmentRenderedFrames": 120,
+      "maxAttachmentDraws": 2,
+      "hat": {
+        "first": [
+          6,
+          15416800,
+          15223884,
+          1,
+          3,
+          0,
+          0
+        ],
+        "second": [
+          6,
+          15376576,
+          15223884,
+          1,
+          3,
+          0,
+          0
+        ],
+        "poolBefore": 316,
+        "poolWithHat": 313,
+        "poolAfterLoss": 316,
+        "poolAfterReacquire": 313
+      },
+      "arrowRetirementWaits": [
+        {
+          "phase": "copied neutral special",
+          "frames": 0
+        },
+        {
+          "phase": "air copied neutral special",
+          "frames": 102
+        },
+        {
+          "phase": "reacquired neutral special",
+          "frames": 0
+        }
+      ],
+      "contact": null,
+      "gpu": {
+        "info": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderChecks": null,
+        "vertexChecks": null,
+        "attachmentDraws": [
+          {
+            "name": "Kirby copy Lk arrow 36",
+            "draws": 1
+          },
+          {
+            "name": "Kirby copy Lk arrow 40",
+            "draws": 0
+          }
+        ],
+        "eye": [
+          12.253752708435059,
+          52.90133285522461,
+          215.52020263671875
+        ],
+        "interest": [
+          23.28676986694336,
+          23.342308044433594,
+          0
+        ],
+        "fov": 30,
+        "aspect": 1.2173333168029785
+      },
+      "originalCameraPasses": true,
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "younglink-full",
+      "artifact": "dist/native-port/experiment-kirby-copy-bow/younglink-full.json",
+      "artifactSha256": "9898c5d3516c4df76b28b3d6b6a9dc0bda68f0d245651b29871b5eb464e210fb",
+      "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+      "browser": "Google Chrome 151.0.7922.137",
+      "character": "Kb",
+      "opponent": "Cl",
+      "copyKind": 20,
+      "mode": "swallow",
+      "renderedInputFrames": 2303,
+      "renderedIntroFrames": 124,
+      "copyScriptFrames": 2161,
+      "copyStates": [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        514,
+        515,
+        516,
+        24,
+        25,
+        517,
+        519,
+        265
+      ],
+      "itemKinds": [
+        143,
+        141,
+        52
+      ],
+      "peakAttachments": 2,
+      "attachmentRenderedFrames": 101,
+      "maxAttachmentDraws": 2,
+      "hat": {
+        "first": [
+          20,
+          15717376,
+          15524780,
+          1,
+          3,
+          0,
+          0
+        ],
+        "second": [
+          20,
+          15676928,
+          15524780,
+          1,
+          3,
+          0,
+          0
+        ],
+        "poolBefore": 316,
+        "poolWithHat": 313,
+        "poolAfterLoss": 316,
+        "poolAfterReacquire": 313
+      },
+      "arrowRetirementWaits": [
+        {
+          "phase": "copied neutral special",
+          "frames": 131
+        },
+        {
+          "phase": "air copied neutral special",
+          "frames": 97
+        },
+        {
+          "phase": "reacquired neutral special",
+          "frames": 0
+        }
+      ],
+      "contact": null,
+      "gpu": {
+        "info": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderChecks": null,
+        "vertexChecks": null,
+        "attachmentDraws": [
+          {
+            "name": "Kirby copy Cl arrow 36",
+            "draws": 1
+          },
+          {
+            "name": "Kirby copy Cl arrow 40",
+            "draws": 0
+          }
+        ],
+        "eye": [
+          12.231481552124023,
+          52.90636444091797,
+          215.32351684570312
+        ],
+        "interest": [
+          23.224641799926758,
+          23.349924087524414,
+          0
+        ],
+        "fov": 30,
+        "aspect": 1.2173333168029785
+      },
+      "originalCameraPasses": true,
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "link-contact",
+      "artifact": "dist/native-port/experiment-kirby-copy-bow/link-contact.json",
+      "artifactSha256": "b5b096bd7600f0d978308208de0822742dacf3d4813582c9cdae856d6676bc5b",
+      "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+      "browser": "Google Chrome 151.0.7922.137",
+      "character": "Kb",
+      "opponent": "Lk",
+      "copyKind": 6,
+      "mode": "contact",
+      "renderedInputFrames": 1058,
+      "renderedIntroFrames": 124,
+      "copyScriptFrames": 916,
+      "copyStates": [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        401,
+        402,
+        403
+      ],
+      "itemKinds": [
+        142,
+        140
+      ],
+      "peakAttachments": 2,
+      "attachmentRenderedFrames": null,
+      "maxAttachmentDraws": null,
+      "hat": {
+        "first": [
+          6,
+          15416800,
+          15223884,
+          1,
+          3,
+          0,
+          0
+        ],
+        "second": null,
+        "poolBefore": 316,
+        "poolWithHat": 313,
+        "poolAfterLoss": null,
+        "poolAfterReacquire": null
+      },
+      "arrowRetirementWaits": [
+        {
+          "phase": "copied neutral special",
+          "frames": 0
+        }
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          26
+        ],
+        "impactHitlag": [
+          0,
+          9
+        ]
+      },
+      "gpu": {
+        "info": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderChecks": null,
+        "vertexChecks": null,
+        "attachmentDraws": null,
+        "eye": [
+          18.754575729370117,
+          28.486265182495117,
+          188.31954956054688
+        ],
+        "interest": [
+          31.886404037475586,
+          9.996302604675293,
+          0
+        ],
+        "fov": 30,
+        "aspect": 1.2173333168029785
+      },
+      "originalCameraPasses": true,
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "younglink-contact",
+      "artifact": "dist/native-port/experiment-kirby-copy-bow/younglink-contact.json",
+      "artifactSha256": "30214c5de12460e6bef134bf0d9a819e18053e37649d644c81d1cd6b50108e52",
+      "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+      "browser": "Google Chrome 151.0.7922.137",
+      "character": "Kb",
+      "opponent": "Cl",
+      "copyKind": 20,
+      "mode": "contact",
+      "renderedInputFrames": 1044,
+      "renderedIntroFrames": 124,
+      "copyScriptFrames": 902,
+      "copyStates": [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        514,
+        515,
+        516
+      ],
+      "itemKinds": [
+        143,
+        141
+      ],
+      "peakAttachments": 2,
+      "attachmentRenderedFrames": null,
+      "maxAttachmentDraws": null,
+      "hat": {
+        "first": [
+          20,
+          15717376,
+          15524780,
+          1,
+          3,
+          0,
+          0
+        ],
+        "second": null,
+        "poolBefore": 316,
+        "poolWithHat": 313,
+        "poolAfterLoss": null,
+        "poolAfterReacquire": null
+      },
+      "arrowRetirementWaits": [
+        {
+          "phase": "copied neutral special",
+          "frames": 0
+        }
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          23
+        ],
+        "impactHitlag": [
+          0,
+          8
+        ]
+      },
+      "gpu": {
+        "info": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderChecks": null,
+        "vertexChecks": null,
+        "attachmentDraws": null,
+        "eye": [
+          18.732221603393555,
+          28.4912052154541,
+          188.1236114501953
+        ],
+        "interest": [
+          31.730436325073242,
+          10.009113311767578,
+          0
+        ],
+        "fov": 30,
+        "aspect": 1.2173333168029785
+      },
+      "originalCameraPasses": true,
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "link-gpu",
+      "artifact": "dist/native-port/experiment-kirby-copy-bow/link-gpu.json",
+      "artifactSha256": "338a144e661345dd667360e98ac6e5128a012e697e9eaced54dc48ca69c74be8",
+      "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+      "browser": "Google Chrome 151.0.7922.137",
+      "character": "Kb",
+      "opponent": "Lk",
+      "copyKind": 6,
+      "mode": "contact",
+      "renderedInputFrames": 1058,
+      "renderedIntroFrames": 0,
+      "copyScriptFrames": 916,
+      "copyStates": [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        401,
+        402,
+        403
+      ],
+      "itemKinds": [
+        142,
+        140
+      ],
+      "peakAttachments": 2,
+      "attachmentRenderedFrames": null,
+      "maxAttachmentDraws": null,
+      "hat": {
+        "first": [
+          6,
+          13928256,
+          13885996,
+          1,
+          3,
+          0,
+          0
+        ],
+        "second": null,
+        "poolBefore": 316,
+        "poolWithHat": 313,
+        "poolAfterLoss": null,
+        "poolAfterReacquire": null
+      },
+      "arrowRetirementWaits": [
+        {
+          "phase": "copied neutral special",
+          "frames": 0
+        }
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          26
+        ],
+        "impactHitlag": [
+          0,
+          9
+        ]
+      },
+      "gpu": {
+        "info": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderChecks": {
+          "passed": true,
+          "cases": [
+            "unlit material",
+            "diffuse toward light",
+            "clamped diffuse away",
+            "signed diffuse subtraction",
+            "diffuse accumulator clamp",
+            "SDK specular forces diffuse NONE",
+            "vertex material RGBA",
+            "alpha rejection",
+            "UV texgen and nearest sampling",
+            "normal reflection texgen",
+            "bump texture coordinates",
+            "vertex matrix texture coordinates",
+            "SRTG texture coordinates"
+          ],
+          "pixelChannelChecks": 52
+        },
+        "vertexChecks": {
+          "vertices": 20777,
+          "positionComponents": 62331,
+          "normalComponents": 62331,
+          "maxScaledPositionError": 0.0000014768504694010479,
+          "maxNormalError": 1.1743358396820724e-7,
+          "roundoffPositionComponents": 0,
+          "maxPositionRoundoffAllowance": 0.00042364278415416457,
+          "byOwner": {
+            "1607680": {
+              "vertices": 458,
+              "ndcMin": [
+                -449.09999190085864,
+                -280.58294987354014,
+                -0.0906625508831461
+              ],
+              "ndcMax": [
+                1305.6781064997142,
+                684.7080951434926,
+                0.029234780021031477
+              ]
+            },
+            "1609568": {
+              "vertices": 8608,
+              "ndcMin": [
+                -1.7691915260232998,
+                -0.9746589954388329,
+                -0.0006238761226151622
+              ],
+              "ndcMax": [
+                0.6297628508448803,
+                0.9237293838571791,
+                -0.0004508128169970664
+              ]
+            },
+            "1614016": {
+              "vertices": 3854,
+              "ndcMin": [
+                -0.8332984602333049,
+                -0.2164751378972469,
+                -0.0005644554763885942
+              ],
+              "ndcMax": [
+                -0.5943666080412087,
+                0.023104354418408652,
+                -0.0005164939820329134
+              ]
+            },
+            "12072480": {
+              "vertices": 7244,
+              "ndcMin": [
+                -0.12757424876153284,
+                -0.20235169144558143,
+                -0.0005304002880066029
+              ],
+              "ndcMax": [
+                0.04078790132528134,
+                0.16074428650066605,
+                -0.0005011518700626543
+              ]
+            },
+            "13922816": {
+              "vertices": 124,
+              "ndcMin": [
+                -0.7657518791506739,
+                -0.12736873486762892,
+                -0.000529038104558362
+              ],
+              "ndcMax": [
+                -0.5982668795096644,
+                -0.08983505035360895,
+                -0.00052593378101166
+              ]
+            },
+            "13937696": {
+              "vertices": 379,
+              "ndcMin": [
+                -0.7475635892080813,
+                -0.169473567444261,
+                -0.0005244243315317305
+              ],
+              "ndcMax": [
+                -0.6083018269009484,
+                -0.022538184986741056,
+                -0.000519969446137444
+              ]
+            },
+            "14009536": {
+              "vertices": 110,
+              "ndcMin": [
+                -1.132680420033941,
+                -0.22505398626413425,
+                -0.0005994124459790591
+              ],
+              "ndcMax": [
+                -0.7654580363687397,
+                -0.04227199232245439,
+                -0.0004783061669366731
+              ]
+            }
+          }
+        },
+        "attachmentDraws": null,
+        "eye": [
+          18.754575729370117,
+          28.486265182495117,
+          188.31954956054688
+        ],
+        "interest": [
+          31.886404037475586,
+          9.996302604675293,
+          0
+        ],
+        "fov": 30,
+        "aspect": 1.2173333168029785
+      },
+      "originalCameraPasses": false,
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "younglink-gpu",
+      "artifact": "dist/native-port/experiment-kirby-copy-bow/younglink-gpu.json",
+      "artifactSha256": "278efa1e79336525c0cb9819d4657a1f4ff2a96dadb71e914db1287752027fa0",
+      "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+      "browser": "Google Chrome 151.0.7922.137",
+      "character": "Kb",
+      "opponent": "Cl",
+      "copyKind": 20,
+      "mode": "contact",
+      "renderedInputFrames": 1044,
+      "renderedIntroFrames": 0,
+      "copyScriptFrames": 902,
+      "copyStates": [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        514,
+        515,
+        516
+      ],
+      "itemKinds": [
+        143,
+        141
+      ],
+      "peakAttachments": 2,
+      "attachmentRenderedFrames": null,
+      "maxAttachmentDraws": null,
+      "hat": {
+        "first": [
+          20,
+          14230848,
+          14188908,
+          1,
+          3,
+          0,
+          0
+        ],
+        "second": null,
+        "poolBefore": 316,
+        "poolWithHat": 313,
+        "poolAfterLoss": null,
+        "poolAfterReacquire": null
+      },
+      "arrowRetirementWaits": [
+        {
+          "phase": "copied neutral special",
+          "frames": 0
+        }
+      ],
+      "contact": {
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          23
+        ],
+        "impactHitlag": [
+          0,
+          8
+        ]
+      },
+      "gpu": {
+        "info": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderChecks": {
+          "passed": true,
+          "cases": [
+            "unlit material",
+            "diffuse toward light",
+            "clamped diffuse away",
+            "signed diffuse subtraction",
+            "diffuse accumulator clamp",
+            "SDK specular forces diffuse NONE",
+            "vertex material RGBA",
+            "alpha rejection",
+            "UV texgen and nearest sampling",
+            "normal reflection texgen",
+            "bump texture coordinates",
+            "vertex matrix texture coordinates",
+            "SRTG texture coordinates"
+          ],
+          "pixelChannelChecks": 52
+        },
+        "vertexChecks": {
+          "vertices": 21450,
+          "positionComponents": 64350,
+          "normalComponents": 64350,
+          "maxScaledPositionError": 0.0000018037416557582052,
+          "maxNormalError": 1.1900427654421009e-7,
+          "roundoffPositionComponents": 0,
+          "maxPositionRoundoffAllowance": 0.0004237839320940365,
+          "byOwner": {
+            "1607680": {
+              "vertices": 458,
+              "ndcMin": [
+                -698.956616313006,
+                -2223.08549673376,
+                -0.04468074697909832
+              ],
+              "ndcMax": [
+                402.9821072922957,
+                300.77935423033085,
+                0.14393482180105618
+              ]
+            },
+            "1609568": {
+              "vertices": 9348,
+              "ndcMin": [
+                -1.76795806275453,
+                -0.9756619964183599,
+                -0.0006245324656133845
+              ],
+              "ndcMax": [
+                0.6330427370137321,
+                0.924396953633205,
+                -0.0004511846555412762
+              ]
+            },
+            "1614016": {
+              "vertices": 3854,
+              "ndcMin": [
+                -0.8325935736239468,
+                -0.21687540502051758,
+                -0.0005650606852276721
+              ],
+              "ndcMax": [
+                -0.5923891936914576,
+                0.02241450612418494,
+                -0.0005169350850019682
+              ]
+            },
+            "12032960": {
+              "vertices": 7177,
+              "ndcMin": [
+                -0.11383581452585931,
+                -0.20050722941595714,
+                -0.0005293981067177044
+              ],
+              "ndcMax": [
+                0.032083124857874415,
+                0.0994903957094152,
+                -0.0005038115202878998
+              ]
+            },
+            "14225568": {
+              "vertices": 124,
+              "ndcMin": [
+                -0.7638587025867238,
+                -0.12759082530543497,
+                -0.0005294952629833234
+              ],
+              "ndcMax": [
+                -0.5962881034419164,
+                -0.09005899362573985,
+                -0.0005263920087506428
+              ]
+            },
+            "14240128": {
+              "vertices": 379,
+              "ndcMin": [
+                -0.7456953166109399,
+                -0.16980256890873638,
+                -0.000524892481135843
+              ],
+              "ndcMax": [
+                -0.6063307033712195,
+                -0.022739878821023463,
+                -0.0005204342472955672
+              ]
+            },
+            "14313728": {
+              "vertices": 110,
+              "ndcMin": [
+                -1.13108495069616,
+                -0.22541898031551483,
+                -0.0005999772431588767
+              ],
+              "ndcMax": [
+                -0.7635970621623441,
+                -0.04245559137003644,
+                -0.0004786639075864791
+              ]
+            }
+          }
+        },
+        "attachmentDraws": null,
+        "eye": [
+          18.732221603393555,
+          28.4912052154541,
+          188.1236114501953
+        ],
+        "interest": [
+          31.730436325073242,
+          10.009113311767578,
+          0
+        ],
+        "fov": 30,
+        "aspect": 1.2173333168029785
+      },
+      "originalCameraPasses": false,
+      "finalGpuErrorCheck": true
+    },
+    {
+      "id": "pikachu-regression",
+      "artifact": "dist/native-port/experiment-kirby-copy-bow/pikachu-regression.json",
+      "artifactSha256": "02399f2ca456ad0bcf3186d173775f1cf6423478ebaf63bec61f0dd73812fb51",
+      "wasmSha256": "a51e2ff0c03aaeb04132f495c0e9cb0dd6b7669d3ec09ce9e571d33300c48221",
+      "browser": "Google Chrome 151.0.7922.137",
+      "character": "Kb",
+      "opponent": "Pk",
+      "copyKind": 12,
+      "mode": "swallow",
+      "renderedInputFrames": 0,
+      "renderedIntroFrames": 0,
+      "copyScriptFrames": 1845,
+      "copyStates": [
+        14,
+        15,
+        16,
+        18,
+        353,
+        356,
+        358,
+        359,
+        367,
+        429,
+        24,
+        25,
+        430,
+        265
+      ],
+      "itemKinds": [
+        147,
+        148,
+        52
+      ],
+      "peakAttachments": 0,
+      "attachmentRenderedFrames": null,
+      "maxAttachmentDraws": null,
+      "hat": {
+        "first": [
+          12,
+          1959744,
+          13485920,
+          3,
+          3,
+          3,
+          4
+        ],
+        "second": [
+          12,
+          13598496,
+          13485920,
+          3,
+          3,
+          3,
+          4
+        ],
+        "poolBefore": 320,
+        "poolWithHat": 310,
+        "poolAfterLoss": 320,
+        "poolAfterReacquire": 310
+      },
+      "arrowRetirementWaits": [],
+      "contact": null,
+      "gpu": null,
+      "originalCameraPasses": null,
+      "finalGpuErrorCheck": null
+    }
+  ],
+  "limits": {
+    "completePlayableGame": false,
+    "retailGameplayParity": false,
+    "retailVisualParity": false,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "performanceCertified": false,
+    "notes": [
+      "Correctness evidence only; no new performance claim for this native core.",
+      "Full lifecycle rendering includes airborne release; focused GPU feedback checks cover the separate contact sequence.",
+      "Missing copy abilities, full scene/menu/audio integration, public static deployment and complete competitive acceptance remain.",
+      "Browser probes load hosted generated fixtures automatically. Development fixture preparation does not introduce a player ISO requirement."
+    ]
+  }
+}

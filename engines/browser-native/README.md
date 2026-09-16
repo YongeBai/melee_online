@@ -87,6 +87,16 @@ imported descriptors. The corrected-core Peach/Fountain 60-second sample has
 rendering target. Submission timing and a CPU profile are recorded in
 [the dynamics checkpoint](../../docs/benchmarks/browser-2026-09-16-native-port-kirby-copy-jolt.json).
 
+Link and Young Link copies (`--opponent=Lk` / `--opponent=Cl`) import the
+original hat, three dynamic nodes, arrow and six-state bow animation data.
+The arrow's two separate attachment models retain their native owner and
+lifetime. Neither copy has a separate effect-bank file. The lifecycle probe
+holds B until the original full-charge state, releases it, fires in the air,
+loses the copy and reacquires it. Embedded arrows can remain after recovery;
+the probe waits for bounded native retirement without deleting them. Contact
+mode turns the target away through controller input so its physical shield
+does not block the damage check. The native shield behavior remains active.
+
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy --stage-callbacks --render-steps --hardware
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy=spit --stage-callbacks --render-steps --hardware

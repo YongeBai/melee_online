@@ -188,7 +188,11 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
         plans.push({mesh,vao,display:indexOf(model.tree.nodes[mesh.joint].display,mesh.dobj),polygon:indexOf(d.getUint32(mesh.dobj+12),mesh.pobj)});
       }
       refreshBindings();
-      result={refreshBindings,enqueue(flags,visibility,show=true){
+      result={refreshBindings,
+        // Probe-only lookup: attachment models share their parent's GObj, so
+        // an owner-level callback count cannot prove that each model drew.
+        queuedDrawCount(){return queue.reduce((n,draw)=>n+(plans.includes(draw.plan)?1:0),0);},
+        enqueue(flags,visibility,show=true){
         let count=0;if(!show)return count;
         for(const [i,plan] of plans.entries()) {
           const {mesh}=plan;if((flags[mesh.joint]&16)||!visibility[i])continue;

@@ -14,6 +14,8 @@ const profiles={
   Fx:{symbol:'Fox',articles:[[2,10],[9,10]],wrappers:[[0,null,null,49320,[0]],[1,null,null,75392,[0]]]},
   Ns:{symbol:'Ness',articles:[[3,11],[1,5]],wrappers:[[0,54308,null,54320,[0,1]],[1,81960,81968,81976,[0]]]},
   Pe:{symbol:'Peach',articles:[[2,1],[1,4]],wrappers:[[0,35884,35896,35908,[0,1]]]},
+  Lk:{symbol:'Link',dynamics:true,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16864,[0]],[1,40268,null,40296,[0,1,2,3,4,5]]],attachmentWrappers:[[18944,0],[21024,1]]},
+  Cl:{symbol:'Clink',dynamics:true,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16704,[0]],[1,40108,null,40136,[0,1,2,3,4,5]]],attachmentWrappers:[[18784,0],[20864,1]]},
   Ca:{symbol:'Captain'},Gn:{symbol:'Ganon'},
 };
 export function convertKirbyCopy(input,code){
@@ -23,7 +25,7 @@ export function convertKirbyCopy(input,code){
   const ptr=at=>{if(!a.relocations.has(at))throw Error('Missing Kirby copy pointer');const value=d.getUint32(at);if(value%4||value+4>a.dataSize)throw Error('Kirby copy pointer bounds');return value;};
   const joint=ptr(root),specs=profile.articles??[],entries=specs.map((_,slot)=>({slot,article:ptr(root+12+slot*4)}));
   for(let i=specs.length;i<2;i++)if(a.relocations.has(root+12+i*4)||d.getUint32(root+12+i*4))throw Error('Unexpected copy Article/extra');
-  const scene=convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+4,1),articles=entries.length?convertArticleEntries(input,entries,Object.fromEntries(specs.map((s,i)=>[i,s]))):{rows:[]};
+  const scene=convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+4,1),articles=entries.length?convertArticleEntries(input,entries,Object.fromEntries(specs.map((s,i)=>[i,s])),{arrowSlots:profile.arrowSlots??[]}):{rows:[],attachments:[]};
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),pointers=new Set(),claimed=new Map();
   function merge(image,typed,slots){
     for(const at of typed){if(at<0||at>=a.dataSize)throw Error('Copy typed byte bounds');const value=image[32+at];if(claimed.has(at)&&claimed.get(at)!==value)throw Error('Conflicting Kirby copy descriptors');claimed.set(at,value);body[at]=value;}
@@ -69,6 +71,10 @@ export function convertKirbyCopy(input,code){
     }
     orphan.set(model,row.joint);if(anims.some(a=>a.joint!==null))orphan.set(model+4,joints);if(anims.some(a=>a.material!==null))orphan.set(model+8,materials);if(anims.some(a=>a.shape!==null))orphan.set(model+12,shapes);orphan.set(model+16,model);
   }
-  if(untyped.length!==orphan.size||untyped.some(p=>!orphan.has(p)||d.getUint32(p)!==orphan.get(p))||[...pointers].some(p=>orphan.has(d.getUint32(p))))throw Error('Unexpected projectile copy orphan scene');
+  for(const [model,index] of profile.attachmentWrappers??[]){
+    const attachment=articles.attachments[index];if(!attachment)throw Error('Missing copy exporter attachment');
+    orphan.set(model,attachment.joint);orphan.set(model+16,model);
+  }
+  if(untyped.length!==orphan.size||untyped.some(p=>!orphan.has(p)||d.getUint32(p)!==orphan.get(p))||[...pointers].some(p=>orphan.has(d.getUint32(p))))throw Error('Unexpected projectile copy orphan scene: '+JSON.stringify({untyped:untyped.map(p=>[p,d.getUint32(p)]),expected:[...orphan],reachable:[...pointers].filter(p=>orphan.has(d.getUint32(p)))}));
   return {code,symbol,root,joint,scene,visibility,articles,dynamics,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(body,pointers,new Map([[symbol,root]]))};
 }

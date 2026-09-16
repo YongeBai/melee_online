@@ -53,9 +53,10 @@ export function convertFighterArticles(input,name) {
 }
 // Copy-ability archives embed Articles directly, without an ftData x48 table.
 // This entry point accepts explicit, independently known descriptor extents.
-export function convertArticleEntries(input,entries,profiles) {
+export function convertArticleEntries(input,entries,profiles,{arrowSlots=[]}={}) {
   if(!Array.isArray(entries)||!entries.length||entries.some(e=>!Array.isArray(profiles[e.slot])||profiles[e.slot].length!==2||profiles[e.slot].some(n=>!Number.isInteger(n)||n<0||n>64)))throw Error('Invalid explicit Article profile');
-  return convertArticles(input,null,{entries,profiles});
+  if(!Array.isArray(arrowSlots)||new Set(arrowSlots).size!==arrowSlots.length||arrowSlots.some(slot=>!Number.isInteger(slot)||!entries.some(e=>e.slot===slot)||profiles[slot][1]!==9))throw Error('Invalid arrow Article profile');
+  return convertArticles(input,null,{entries,profiles,arrowSlots});
 }
 function convertArticles(input,name,custom) {
   const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1];
@@ -139,7 +140,17 @@ function convertArticles(input,name,custom) {
         for(const off of [0x4C,0x58]){jointAnimation(pointer(special+off));materialAnimation(pointer(special+off+4));const shape=pointer(special+off+8);if(shape!==null)shapeTopology(shape);}
       }
       if(model.slot===2)for(const off of [0x54,0x58,0x5C])attachment(pointer(special+off),'hookshot '+off);
-      if(model.slot===3){for(const off of [0x24,0x28])attachment(pointer(special+off),'arrow '+off);scalar(special+0x2C,4,true);}
+    }
+    // Link's copied arrow keeps the same attribute structure in copy slot 0.
+    // The two trailing joints and final float are outside its nine scalars.
+    if(['Lk','Cl'].includes(code)&&model.slot===3||custom?.arrowSlots.includes(model.slot)){
+      for(const off of [0x24,0x28])attachment(pointer(special+off),'arrow '+off);
+      scalar(special+0x2C,4,true);
+      if(custom?.arrowSlots.includes(model.slot)){
+        // Copy archives also retain duplicate attachment roots immediately
+        // after the 16-byte ItemModelDesc. Keep and check those references.
+        for(let i=0;i<2;i++)if(pointer(model.model+16+i*4)!==d.getUint32(special+0x24+i*4))throw Error('Copy arrow attachment reference mismatch');
+      }
     }
     const scripts=[],animations=[];
     for(let j=0;j<stateCount;j++) {

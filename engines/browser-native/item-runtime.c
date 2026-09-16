@@ -82,7 +82,7 @@ unsigned portItemAttachmentsList(unsigned* result,unsigned capacity)
     for(HSD_GObj* object=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];object;object=object->next){
         Item* item=object->user_data;HSD_JObj** roots=NULL;
         if(item->kind==It_Kind_Link_Boomerang||item->kind==It_Kind_CLink_Boomerang)roots=item->xDD4_itemVar.linkboomerang.xF90;
-        else if(item->kind==It_Kind_Link_Arrow||item->kind==It_Kind_CLink_Arrow)roots=item->xDD4_itemVar.linkarrow.xB4;
+        else if(item->kind==It_Kind_Link_Arrow||item->kind==It_Kind_CLink_Arrow||item->kind==It_Kind_Kirby_LinkArrow||item->kind==It_Kind_Kirby_CLinkArrow)roots=item->xDD4_itemVar.linkarrow.xB4;
         if(!roots)continue;
         for(unsigned i=0;i<2;i++)if(roots[i]){
             if(n<capacity){result[n*3]=(unsigned)object;result[n*3+1]=(unsigned)roots[i];result[n*3+2]=roots[i]->id;}n++;

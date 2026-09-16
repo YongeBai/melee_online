@@ -5,6 +5,27 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Link and Young Link copies now import their original hats, arrow/bow
+Articles and both arrow attachment models. Full rendered lifecycle checks pass
+2,205 and 2,303 input frames respectively, plus 124 intro frames each: acquisition,
+full ground charge, airborne release, copy loss and reacquisition. Each hat
+allocates three dynamic nodes; pool counts go 316 → 313 → 316 → 313 through
+those transitions. Per-model submission checks observe arrow attachments drawing
+in 120 and 101 frames, rather than inferring visibility from owner-level counts.
+Embedded arrows retire through the original callback, including its prolonged
+cleanup state; the harness waits without deleting them.
+
+Contact tests increase the target's damage from 8 to 26 for Link and 8 to 23
+for Young Link, with nine/eight hitlag frames at impact. Focused GPU validation
+passes all 1,058/1,044 rendered contact-sequence frames. These checks retain
+normal controller inputs, original camera and native physical shields; the
+damage fixture turns the target away instead of disabling its shield. No new
+performance claim is made for this core (`a51e2ff0…`). All 218 unit tests, shared
+browser checks and the Pikachu copy lifecycle regression pass. The all-character game, full scenes,
+menus/audio, retail parity, public deployment, presentation and latency acceptance
+remain unfinished.
+[Bow-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-bow.json).
+
 The live-shader experiment was rejected and reverted. Removing validation-only
 transform-feedback outputs and skipping inactive uniform preparation produced
 draw-submission means of 9.27 and 7.77 ms against 8.86 and 7.93 ms controls in

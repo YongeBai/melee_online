@@ -102,3 +102,33 @@ test('Pikachu and Pichu copies retain dynamic hat chains, shared parameters and 
     for(const change of [a=>a.d.setUint32(800,10),a=>a.d.setUint32(6000,14),a=>a.d.setUint32(6008,0),a=>a.ptr(6004,2000),a=>a.d.setFloat32(7000,NaN),a=>a.relocs.add(7000),a=>a.ptr(808,6000),a=>a.ptr(804,800),a=>a.relocs.delete(920),a=>a.ptr((code==='Pk'?103488:115744)+16,2000)])assert.throws(()=>convertKirbyCopy(joltFixture(code,change),code));
   }
 });
+
+function bowFixture(code,change=()=>{}){
+  const shift=code==='Cl'?160:0,body=new Uint8Array(40320-shift),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(900,2000);d.setUint32(904,1);ptr(908,1000);ptr(912,400);ptr(916,424);ptr(920,800);
+  for(let i=0;i<6;i++){const at=2000+i*64;for(let j=0;j<3;j++)d.setFloat32(at+32+j*4,1);if(i<5)ptr(at+8,at+64);}
+  for(const joint of [4096,4304,4400,4608])for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  for(const [article,attributes,special,states,model,joint]of [[400,0,132,600,500,4096],[424,224,360,624,524,4608]]){ptr(article,attributes);ptr(article+4,special);ptr(article+12,states);ptr(article+16,model);ptr(model,joint);d.setUint32(model+4,1);}
+  ptr(168,4304);ptr(172,4400);d.setFloat32(176,2.75);ptr(516,4304);ptr(520,4400);
+  d.setUint32(800,1);ptr(804,6000);d.setUint32(6000,3);ptr(6004,7000);d.setUint32(6008,3);d.setFloat32(7000,-1.25);
+  const table=40268-shift,model=40296-shift;
+  for(let i=0;i<6;i++){ptr(624+i*16,5000+i*32);ptr(table+i*4,5000+i*32);}
+  ptr(model,4608);ptr(model+4,table);ptr(model+16,model);
+  for(const [at,joint]of [[16864,4096],[18944,4304],[21024,4400]]){ptr(at-shift,joint);ptr(at-shift+16,at-shift);}
+  change({d,ptr,relocs,shift});
+  const name=new TextEncoder().encode('ftDataKirbyCopy'+(code==='Lk'?'Link':'Clink')+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,900);bytes.set(name,pub+8);return bytes;
+}
+test('Link copies retain bow states, both arrow attachments and their original dynamic hat chain',()=>{
+  for(const code of ['Lk','Cl']){
+    const input=bowFixture(code),before=input.slice(),r=convertKirbyCopy(input,code),d=new DataView(r.image.buffer,32);
+    assert.deepEqual(input,before);assert.deepEqual(r.articles.rows.map(r=>[r.stateCount,r.specialWords]),[[1,9],[6,1]]);
+    assert.deepEqual(r.articles.attachments.map(r=>r.joint),[4304,4400]);assert.deepEqual(r.dynamics.map(r=>[r.bone,r.nodes]),[[3,3]]);
+    assert.equal(d.getFloat32(176,true),2.75);assert.equal(d.getFloat32(7000,true),-1.25);assert.equal(r.unreferencedRelocations.length,15);
+    for(const [at,to]of [[168,4304],[172,4400],[516,4304],[520,4400]]){assert(r.pointerSlots.has(at));assert.equal(d.getUint32(at,true),to);}
+    assert.deepEqual(r.articles.rows[1].animations.map(r=>r.joint),[5000,5032,5064,5096,5128,5160]);
+  }
+});
+test('Link copies reject missing or inconsistent attachment roots and malformed charge animation wrappers',()=>{
+  for(const code of ['Lk','Cl'])for(const change of [a=>a.relocs.delete(168),a=>a.ptr(516,4400),a=>a.ptr(172,900),a=>a.d.setFloat32(176,NaN),a=>a.ptr(4304+8,4304),a=>a.ptr(40268-a.shift+20,5000),a=>a.ptr(18944-a.shift,4096),a=>a.d.setUint32(6000,4)])assert.throws(()=>convertKirbyCopy(bowFixture(code,change),code));
+});

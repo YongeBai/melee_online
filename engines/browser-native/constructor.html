@@ -106,11 +106,11 @@ try {
   const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Pp'?['Nn']:c==='Nn'?['Pp']:c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
   for(const selected of packageCodes)packages.push(await loadFighterPackage(module,selected,packageOptions));
   const kirbyCopies=[];
-  if(packageCodes.includes('Kb'))for(const selected of packages.filter(p=>['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx','Pk','Pc'].includes(p.code))){
+  if(packageCodes.includes('Kb'))for(const selected of packages.filter(p=>['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx','Pk','Pc','Lk','Cl'].includes(p.code))){
     const copyName='PlKbCp'+selected.code+'.dat',bytes=await asset(copyName),source=convertKirbyCopy(bytes,selected.code);installResidentFile(module,copyName,source.image);
     const effectName='EfKb'+(selected.code==='Dr'?'Mr':selected.code==='Pc'?'Pk':selected.code)+'.dat';
-    // Original effect entries 42 (Ness) and 45 (Peach) have no file.
-    if(!['Ns','Pe'].includes(selected.code)&&!effectFiles.has(effectName)){const effectBytes=await asset(effectName),effectSource=convertKirbyCopyEffects(effectBytes,selected.code);installResidentFile(module,effectName,effectSource.image);effectFiles.set(effectName,{bytes:effectBytes,source:effectSource});}
+    // Original Link/Young Link, Ness and Peach copy effects have no file.
+    if(!['Ns','Pe','Lk','Cl'].includes(selected.code)&&!effectFiles.has(effectName)){const effectBytes=await asset(effectName),effectSource=convertKirbyCopyEffects(effectBytes,selected.code);installResidentFile(module,effectName,effectSource.image);effectFiles.set(effectName,{bytes:effectBytes,source:effectSource});}
     kirbyCopies.push({code:selected.code,kind:selected.kind,bytes,source});
   }
   const primary=packages.find(p=>p.code===code),secondary=packages.find(p=>p.code===opponentCode),baseBytes=primary.baseBytes;
@@ -298,7 +298,7 @@ try {
         for(const [i,e] of source.effects.entries())effectModels.set(base+e.joint,{name:'Effect '+source.bank+':'+i,bytes:archiveRootView(archive,'effect_Share_joint',e.joint)});
       }
       let itemModels=stageItemModels;
-      for(const c of kirbyCopies){itemModels??=new Map();const a=inspectArchive(c.bytes);for(const row of c.source.articles.rows)if(row.joint!==null)itemModels.set(c.base+row.joint,{name:'Kirby copy '+c.code+' item '+row.slot,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
+      for(const c of kirbyCopies){itemModels??=new Map();const a=inspectArchive(c.bytes);for(const row of [...c.source.articles.rows,...c.source.articles.attachments])if(row.joint!==null)itemModels.set(c.base+row.joint,{name:'Kirby copy '+c.code+' '+(row.label??'item '+row.slot),bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
       if(peachCommon){itemModels??=new Map();const {source,base}=peachCommon,a=inspectArchive(source.source);for(const row of source.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:'Common item '+row.kind,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
       for(const pkg of packages)if(fighterArticleProfiles[pkg.code]){
         const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg===pkg)?.owner;
@@ -313,7 +313,7 @@ try {
           else itemModels.set(base+row.joint,{name:character+' '+row.label,bytes});
         }
       }
-      preview=createNativeMatchPreview(module,canvas,previewActors,{gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});
+      preview=createNativeMatchPreview(module,canvas,previewActors,{traceAttachments:params.has('kirbycopy'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});
       if(params.has('prewarmshaders')){
         const build=await (await fetch('./fighter-init-build.json')).json();
         const hashes=await Promise.all(shaderIdentityFiles.map(async name=>{const bytes=await (await fetch('./'+name)).arrayBuffer(),hash=await crypto.subtle.digest('SHA-256',bytes);return [name,Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')];}));
@@ -460,7 +460,9 @@ try {
       report.input.completed=true;
       if(params.has('kirbycopy')){report.kirbyCopy={};verifyKirbyCopy(module,[object,opponent],report.kirbyCopy,{step,mode:params.get('kirbycopy'),onStep:renderSteps?r=>{
         const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
-        const last=r.trace.at(-1),name=last.items.some(i=>i[0]===r.secondaryItemKind)&&(![12,23].includes(r.copyKind)||report.preview.copyfire)?'copysecondary':r.projectileKind===null&&r.attackStates.includes(last.state[0][0])&&(last.state[0][2]>=(r.copyKind===2?55:70)||r.contactBefore&&last.state[1][13]>r.contactBefore[1][13])&&drawn.effectModels?'copyattack':last.items.some(i=>i[0]===r.projectileKind&&(r.copyKind!==8||Math.hypot(i[2]-last.state[0][4],i[3]-last.state[0][5])>15)&&(r.copyKind!==9||last.state[0][2]>=10))?'copyfire':last.items.some(i=>i[0]===52&&Math.hypot(i[2]-last.state[0][4],i[3]-last.state[0][5])>15)?'copystar':last.hat[1]&&last.state[0][0]===14?'copyhat':last.state[0][0]===359?'captured':null;
+        const arrowAttachmentDraws=drawn.attachmentDraws.filter(a=>/^Kirby copy (Lk|Cl) arrow /.test(a.name)).reduce((sum,a)=>sum+a.draws,0);
+        if([6,20].includes(r.copyKind)){r.arrowAttachmentRenderedFrames=(r.arrowAttachmentRenderedFrames??0)+(arrowAttachmentDraws>0?1:0);r.maxArrowAttachmentDraws=Math.max(r.maxArrowAttachmentDraws??0,arrowAttachmentDraws);}
+        const last=r.trace.at(-1),name=last.items.some(i=>i[0]===r.secondaryItemKind)&&(![12,23].includes(r.copyKind)||report.preview.copyfire)&&(![6,20].includes(r.copyKind)||!report.preview.copysecondary)?'copysecondary':r.projectileKind===null&&r.attackStates.includes(last.state[0][0])&&(last.state[0][2]>=(r.copyKind===2?55:70)||r.contactBefore&&last.state[1][13]>r.contactBefore[1][13])&&drawn.effectModels?'copyattack':last.items.some(i=>i[0]===r.projectileKind&&(![6,20].includes(r.copyKind)||last.attachments===2&&arrowAttachmentDraws>0)&&(r.copyKind!==8||Math.hypot(i[2]-last.state[0][4],i[3]-last.state[0][5])>15)&&(r.copyKind!==9||last.state[0][2]>=10))?'copyfire':last.items.some(i=>i[0]===52&&Math.hypot(i[2]-last.state[0][4],i[3]-last.state[0][5])>15)?'copystar':last.hat[1]&&last.state[0][0]===14?'copyhat':last.state[0][0]===359?'captured':null;
         if(name&&!report.preview[name]){report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}
       }:undefined});}
       if(params.has('kirbymoves')){report.kirbyMoves={};verifyKirbyMoves(module,object,report.kirbyMoves,{step,only:params.get('kirbymove'),onStep:renderSteps?phase=>{

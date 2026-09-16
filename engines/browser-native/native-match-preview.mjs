@@ -15,7 +15,7 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. The native-material path is still missing full draw callbacks.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true,traceAttachments=false}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
@@ -89,7 +89,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         modelProbe=createNativeModelProbe(module,model,actor.bytes,nodes,skin,actor.object);
         }
         materialGpu=materialRenderer?.upload(model,actor.bytes,nodes,actor.object);
-        resources.push({itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessories:[actor.accessory,...(actor.accessories??[])].filter(Boolean).map(accessory=>({accessory})),name:actor.name,active:actor.active,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
+        resources.push({itemAttachment:!!(actor.itemKey&&actor.root),itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessories:[actor.accessory,...(actor.accessories??[])].filter(Boolean).map(accessory=>({accessory})),name:actor.name,active:actor.active,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
   let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
@@ -204,11 +204,12 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           }
           }
           const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),materialDraws=materialRenderer.flush({ordered:true});
+          const attachmentDraws=traceAttachments?resources.filter(r=>r.itemAttachment).map(r=>({name:r.name,draws:r.materialGpu.queuedDrawCount()})):null;
           for(const [stats,draws,vertices] of [[particleStats,materialDraws.particleDraws,materialDraws.particleVertices],[afterimageStats,materialDraws.afterimageDraws,materialDraws.afterimageVertices]]){
             stats.draws+=draws;stats.vertices+=vertices;if(draws)stats.frames++;stats.peakDraws=Math.max(stats.peakDraws,draws);
           }
           immediateStats.primitives+=materialDraws.particleDraws+materialDraws.afterimageDraws;immediateStats.submittedDraws+=materialDraws.immediateDraws;immediateStats.vertices+=materialDraws.immediateVertices;immediateStats.frames++;
-          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,attachmentDraws,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot,cameraValidation);
         module._portStageRenderBegin();

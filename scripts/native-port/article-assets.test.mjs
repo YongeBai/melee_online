@@ -286,5 +286,6 @@ test('Explicit Article entries preserve source offsets and reject invalid descri
   const input=fixture('Fx'),r=convertArticleEntries(input,[{slot:0,article:160}],{0:[2,10]});
   assert.equal(r.rows.length,1);assert.equal(r.rows[0].article,160);assert(r.typedBytes.has(160));assert(!r.typedBytes.has(3000));
   for(const profile of [{}, {0:[65,10]}, {0:[2,-1]}, {0:[2,10,1]}])assert.throws(()=>convertArticleEntries(input,[{slot:0,article:160}],profile));
+  for(const arrowSlots of [null,{},[0,0],[-1],[1],[.5],[0]])assert.throws(()=>convertArticleEntries(input,[{slot:0,article:160}],{0:[2,10]},{arrowSlots}),/Invalid arrow Article profile/);
   assert.throws(()=>convertArticleEntries(input,[{slot:0,article:160},{slot:0,article:160}],{0:[2,10]}));
 });
