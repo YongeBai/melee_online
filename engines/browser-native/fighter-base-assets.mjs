@@ -9,12 +9,12 @@ import {convertGameplayParameters,gameplayFields} from './gameplay-assets.mjs';
 import {convertDynamics} from './dynamics-assets.mjs';
 import {convertCharacterCollision} from './character-collision-assets.mjs';
 import {convertAuxiliaryAsset} from './auxiliary-assets.mjs';
-import {convertFighterArticles} from './article-assets.mjs';
+import {convertFighterArticles,fighterArticleProfiles} from './article-assets.mjs';
 import {convertFoxExtra} from './fox-extra-assets.mjs';
 import {convertPurinExtra} from './purin-extra-assets.mjs';
 
 // Complete typed ftData graph for fighters without an x48 item/extra table,
-// plus Fox/Falco's five-slot tables, Fox's scalar extra record, and Purin's
+// plus typed Article tables, Fox's scalar extra record, and Purin's
 // costume-attachment visibility table.
 // Keep independently validated graphs separate initially. This deliberately
 // duplicates unreachable source bytes; archive compaction is a later size task.
@@ -22,7 +22,7 @@ export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCoun
   const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1],symbol=fighterArchives[code];
   if(!symbol)throw Error('Unknown complete fighter archive');
   const a=inspectArchive(input),source=a.publics.get('ftData'+symbol),d=a.data;
-  if(source===undefined||source+96>a.dataSize||(!['Fc','Fx','Pr'].includes(code)&&(a.relocations.has(source+0x48)||d.getUint32(source+0x48))))throw Error('Unsupported complete fighter root');
+  if(source===undefined||source+96>a.dataSize||(!(fighterArticleProfiles[code]||code==='Pr')&&(a.relocations.has(source+0x48)||d.getUint32(source+0x48))))throw Error('Unsupported complete fighter root');
   const chunks=[],pointers=new Set(),fields=new Array(24).fill(null),imports=[];let length=96;
   function append(bytes){const at=(length+3)&~3;chunks.push({at,bytes:Uint8Array.from(bytes)});length=at+bytes.length;return at;}
   function graph(image,label) {
@@ -51,16 +51,16 @@ export function convertFighterBase(input,name,{motionSpec,attributeSpec,partCoun
   bind(0x30,graph(convertCharacterCollision(input,name,partCount).image,'hurtboxes').symbols[0]);
   bind(0x5C,graph(convertAuxiliaryAsset(input,name).image,'auxiliary model').symbols[0]);
   if(code==='Pr')bind(0x48,graph(convertPurinExtra(input,costumes).image,'Purin costume attachment').symbols[0]);
-  if(['Fc','Fx'].includes(code)) {
-    if(!a.relocations.has(source+0x48))throw Error('Missing blaster fighter item table');
+  if(fighterArticleProfiles[code]) {
+    if(!a.relocations.has(source+0x48))throw Error('Missing fighter item table');
     const articles=convertFighterArticles(input,name),loaded=graph(articles.image,'articles'),extra=code==='Fx'?graph(convertFoxExtra(input,init.count).image,'Fox extra').symbols[0]:null;
-    const table=d.getUint32(source+0x48),entries=new Uint8Array(20),v=new DataView(entries.buffer),start=append(entries);
-    if(table+20>a.dataSize)throw Error('Blaster fighter item table bounds');
-    for(let slot=0;slot<5;slot++) {
+    const table=d.getUint32(source+0x48),entries=new Uint8Array(fighterArticleProfiles[code].slots*4),v=new DataView(entries.buffer),start=append(entries);
+    if(table+entries.length>a.dataSize)throw Error('Fighter item table bounds');
+    for(let slot=0;slot<entries.length/4;slot++) {
       const row=articles.rows.find(r=>r.slot===slot),at=table+slot*4;
-      if(row){if(!a.relocations.has(at)||d.getUint32(at)!==row.article)throw Error('Blaster fighter article slot');v.setUint32(slot*4,loaded.at+row.article,true);pointers.add(start+slot*4);}
+      if(row){if(!a.relocations.has(at)||d.getUint32(at)!==row.article)throw Error('Fighter article slot');v.setUint32(slot*4,loaded.at+row.article,true);pointers.add(start+slot*4);}
       else if(slot===4&&extra!==null){v.setUint32(slot*4,extra,true);pointers.add(start+slot*4);}
-      else if(a.relocations.has(at)||d.getUint32(at))throw Error('Unconverted blaster fighter extra slot');
+      else if(a.relocations.has(at)||d.getUint32(at))throw Error('Unconverted fighter extra slot');
     }
     chunks.at(-1).bytes.set(entries);bind(0x48,start);
   }

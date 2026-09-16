@@ -12,6 +12,9 @@ export function convertCaptainEffects(input) {
 }
 export function convertFighterEffects(input,code) {
   const specs={
+    Mr:{name:'effMarioDataTable',bank:1,first:1000,count:14,groups:6,models:2},
+    Dr:{name:'effMarioDataTable',bank:1,first:1000,count:14,groups:6,models:2},
+    Lg:{name:'effLuigiDataTable',bank:18,first:18000,count:12,groups:6,models:2},
     Pr:{name:'effPurinDataTable',bank:11,first:11000,count:5,groups:2,models:1},
     Fx:{name:'effFoxDataTable',bank:3,first:3000,count:11,groups:8,models:6},
     Fc:{name:'effFoxDataTable',bank:3,first:3000,count:11,groups:8,models:6},
@@ -108,7 +111,11 @@ function convertEffects(input,spec) {
   // pointers are null. Only the graph reachable through the typed table is
   // exposed to HSD; never relocate or expose those unused archive records.
   if(spec.bank===8&&untyped.length&&(untyped.length!==42||effects.some(e=>e.shape!==null)))throw Error('Unexpected Donkey orphan shape layout');
-  if(untyped.length&&!spec.stage&&![0,8].includes(spec.bank))throw Error('Untyped effect archive relocations: '+untyped.join(','));
+  // Mario retains two unreachable export-time shape trees; both effect-table
+  // shape pointers are null. Validate this pinned archive layout without making
+  // those orphan records reachable through the published effect table.
+  if(spec.bank===1&&untyped.length&&(effects.some(e=>e.shape!==null)||JSON.stringify(untyped)!==JSON.stringify([73192,73212,77816,77840,77856,77872,77876,77880,77884,77900,77912])))throw Error('Unexpected Mario orphan shape layout');
+  if(untyped.length&&!spec.stage&&![0,1,8].includes(spec.bank))throw Error('Untyped effect archive relocations: '+untyped.join(','));
   return {stage:!!spec.stage,root,cmd,tex,bank,version,first,count,commands,textures,effects,pointerSlots:pointers,unreferencedRelocations:untyped,packedBytes:packed.size,
     image:nativeSubgraphImage(body,pointers,new Map(spec.stage?[['native_stage_particles',cmd],['native_stage_particle_textures',tex]]:[[spec.name,root]]))};
 }

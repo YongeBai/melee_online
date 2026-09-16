@@ -32,6 +32,29 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Mario, Luigi and Dr. Mario now use the same original item runtime. Their typed
+Article imports include joint and material animations: fireballs, pills and the
+two capes. Dr. Mario shares Mario's original effect bank. The Mario effect archive
+retains eleven unreachable shape relocations; the importer validates that exact
+pinned layout and keeps the effect table's null shape pointers.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Mr --input --projectiles --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Mr --input --mario-moves --render-steps --verify-vertices --hardware
+node scripts/native-port/probe-constructor.mjs --character=Mr --input --projectile-combat
+node scripts/native-port/probe-constructor.mjs --character=Mr --input --projectile-control
+node scripts/native-port/probe-constructor.mjs --character=Mr --input --projectile-shield
+```
+
+Use `Lg` or `Dr` for Luigi or Dr. Mario. The move probe exercises grounded/air
+cape attachment and retirement, Cyclone and up special; Luigi instead adds
+Green Missile startup/charge/release. The reflection probe also accepts `Mr` and `Dr`: controller-triggered capes
+transfer projectile ownership and damage the original shooter while protecting
+the defender. A complete retail move/interaction comparison remains separate work. The original executable at
+`802B2730` passes the cape item GObj to `ftLib_800865CC`: do not “fix” its item
+animation selector to use the airborne fighter. Both cape item states are imported,
+but the tested ground and air cape sequences select item state 0.
+
 Fox and Falco now run through the complete fighter archive assembler, original OnLoad
 article registration, item constructor and item scheduler. The original neutral
 special creates its blaster and laser; the live renderer tracks their original

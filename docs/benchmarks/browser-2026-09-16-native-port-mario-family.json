@@ -1,0 +1,3329 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "b69c3ce",
+  "scope": "Mario, Luigi and Dr. Mario default-costume native integration and limited Battlefield workloads; full competitive acceptance remains incomplete",
+  "wasmSha256": "ec053ec9508d5e9898d49050efc6e596f135aec2d4e2607d4afbddfebbcd5537",
+  "sourceHashes": {
+    "engines/browser-native/article-assets.mjs": "1cd56321a7676c55c325ad3c1509fc8f390b93d274d81f3c2fd6c6fcdc813676",
+    "engines/browser-native/material-animation-assets.mjs": "db487c0829b95ba0a4258f53ddcb5e7babdd2e7260865b185989d4db1b4ea1fb",
+    "engines/browser-native/fighter-base-assets.mjs": "c9db9d3b560f68664edc6ccf860e07fdaf9ca3c6f1ccdf99ed45a619f9ff1460",
+    "engines/browser-native/effect-assets.mjs": "6f9178a57e274e7f97385a5d457c7a7d2f4890f023ed75b3b6b8799ee4cb6803",
+    "engines/browser-native/verify-mario-family.mjs": "7f45152af260bb60c13acd6f434348ddd46bbcb9a0bc7267a6b0d4965adc5c1e",
+    "engines/browser-native/constructor.html": "10040b36b6b80662ffb1588160adff12bf69c3163ee663d7093a3c96808e30dd",
+    "scripts/native-port/probe-constructor.mjs": "5413968f1034e3489113d5602f32c72d5a5229bb2272024dfd5b94c2f0d6db75"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "validation": {
+    "unitTests": 166,
+    "failedTests": 0,
+    "build": true,
+    "characters": {
+      "Mr": {
+        "baseArchive": {
+          "passed": true,
+          "checks": 1256217,
+          "bytes": 1277448,
+          "partCount": 61,
+          "costumes": 5,
+          "motionRows": 303,
+          "demoRows": 16,
+          "imports": [
+            {
+              "label": "initialization",
+              "at": 96,
+              "size": 180660,
+              "pointers": 624
+            },
+            {
+              "label": "visibility",
+              "at": 180888,
+              "size": 180640,
+              "pointers": 12
+            },
+            {
+              "label": "demo motions",
+              "at": 361528,
+              "size": 180640,
+              "pointers": 33
+            },
+            {
+              "label": "secondary animations",
+              "at": 542200,
+              "size": 180640,
+              "pointers": 896
+            },
+            {
+              "label": "gameplay parameters",
+              "at": 722840,
+              "size": 180676,
+              "pointers": 22
+            },
+            {
+              "label": "dynamics",
+              "at": 903516,
+              "size": 20,
+              "pointers": 0
+            },
+            {
+              "label": "hurtboxes",
+              "at": 903536,
+              "size": 416,
+              "pointers": 1
+            },
+            {
+              "label": "auxiliary model",
+              "at": 903952,
+              "size": 180640,
+              "pointers": 564
+            },
+            {
+              "label": "articles",
+              "at": 1084592,
+              "size": 180672,
+              "pointers": 852
+            }
+          ],
+          "relocations": 3029
+        },
+        "effectBank": {
+          "passed": true,
+          "checks": 1562,
+          "models": 2,
+          "commands": 14,
+          "textures": 6,
+          "relocations": 159,
+          "unreferencedRelocations": 11
+        },
+        "moves": {
+          "completed": true,
+          "frames": 776,
+          "phases": [
+            {
+              "name": "cape",
+              "frames": 101,
+              "states": [
+                345,
+                14
+              ],
+              "capeFrames": 35,
+              "itemStates": [
+                0
+              ],
+              "peakItems": 1,
+              "final": [
+                14,
+                3,
+                15,
+                0,
+                5.783504009246826,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10320864,
+                15,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "air cape",
+              "frames": 233,
+              "states": [
+                24,
+                25,
+                346,
+                29,
+                42,
+                14
+              ],
+              "capeFrames": 35,
+              "itemStates": [
+                0
+              ],
+              "peakItems": 1,
+              "final": [
+                14,
+                3,
+                25,
+                0,
+                5.783504009246826,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10320864,
+                15,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "cyclone",
+              "frames": 201,
+              "states": [
+                350,
+                349,
+                14
+              ],
+              "capeFrames": 0,
+              "itemStates": [],
+              "peakItems": 0,
+              "final": [
+                14,
+                2,
+                21,
+                0,
+                5.783504009246826,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10320864,
+                15,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "up special",
+              "frames": 241,
+              "states": [
+                347,
+                35,
+                43,
+                14
+              ],
+              "capeFrames": 0,
+              "itemStates": [],
+              "peakItems": 0,
+              "final": [
+                14,
+                3,
+                117,
+                0,
+                27.408899307250977,
+                27.20009994506836,
+                0,
+                1465376,
+                10320864,
+                15,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            }
+          ],
+          "retailParityVerified": false,
+          "renderedSteps": 918,
+          "finalGpuErrorCheck": true
+        },
+        "freeProjectile": {
+          "completed": true,
+          "kind": 48,
+          "frames": 75,
+          "peakItems": 1,
+          "yRange": [
+            -30.41741943359375,
+            7.2992634773254395
+          ],
+          "verticalDirectionChanges": 2,
+          "renderedSteps": 322,
+          "finalGpuErrorCheck": true
+        },
+        "contacts": {
+          "contact": {
+            "completed": true,
+            "projectileKind": 48,
+            "itemFrames": 7,
+            "peakItems": 1,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              46,
+              0,
+              -8.15853500366211,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              3,
+              86,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 10.34000015258789,
+            "defenderStates": [
+              14,
+              78
+            ]
+          },
+          "control": {
+            "completed": true,
+            "projectileKind": 48,
+            "itemFrames": 0,
+            "peakItems": 0,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              7,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              7,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 0,
+            "peakKnockback": 0,
+            "defenderStates": [
+              14
+            ]
+          },
+          "shield": {
+            "completed": true,
+            "projectileKind": 48,
+            "itemFrames": 4,
+            "peakItems": 1,
+            "before": [
+              179,
+              -1,
+              -1,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              56.920013427734375,
+              4
+            ],
+            "after": [
+              179,
+              -1,
+              -1,
+              0,
+              -9.883536338806152,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              4.280068397521973,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              3,
+              86,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 0,
+            "defenderStates": [
+              179,
+              181
+            ]
+          },
+          "reflect": {
+            "completed": true,
+            "projectileKind": 48,
+            "itemFrames": 20,
+            "peakItems": 2,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              3,
+              32,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10320864,
+              15,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              3,
+              83,
+              0,
+              23.407184600830078,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10320864,
+              15,
+              1,
+              0,
+              0,
+              17,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 14,
+            "peakHitlag": 3,
+            "peakKnockback": 0,
+            "defenderStates": [
+              14,
+              345
+            ]
+          }
+        },
+        "live": [
+          {
+            "prepared": false,
+            "driverShaderCacheDisabled": false,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60036.59999999404,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.531638888799482,
+              "p50Ms": 0.5,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 2.0999999940395355
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 6.165777778004607,
+              "p50Ms": 5.899999976158142,
+              "p95Ms": 7.9000000059604645,
+              "maxMs": 23.19999998807907
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67060294526172,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.700000000004366,
+              "maxMs": 33.19999999999982
+            },
+            "cadence": {
+              "callbacks": 3604,
+              "zeroStepCallbacks": 4,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -1002.7999999821186,
+                  "callbackTime": 1.800000011920929,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -2.8999999821185156,
+                  "callbackTime": 4,
+                  "interval": 999.9000000000001,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 13.800000017881302,
+                  "callbackTime": 13.800000011920929,
+                  "interval": 16.699999999999818,
+                  "debt": 0
+                },
+                {
+                  "callback": 4,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 30.500000017881575,
+                  "callbackTime": 30.599999994039536,
+                  "interval": 16.700000000000273,
+                  "debt": 0.033333333333605
+                },
+                {
+                  "callback": 5,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 47.100000017881484,
+                  "callbackTime": 47.30000001192093,
+                  "interval": 16.59999999999991,
+                  "debt": -0.0333333333331538
+                },
+                {
+                  "callback": 6,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 63.70000001788139,
+                  "callbackTime": 63.900000005960464,
+                  "interval": 16.59999999999991,
+                  "debt": -0.0999999999999126
+                },
+                {
+                  "callback": 7,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 80.50000001788158,
+                  "callbackTime": 80.90000000596046,
+                  "interval": 16.800000000000182,
+                  "debt": 0.033333333333601445
+                },
+                {
+                  "callback": 8,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 97.10000001788148,
+                  "callbackTime": 97.30000001192093,
+                  "interval": 16.59999999999991,
+                  "debt": -0.033333333333157356
+                },
+                {
+                  "callback": 208,
+                  "frame": 204,
+                  "steps": 0,
+                  "timestamp": 3430.2000000178814,
+                  "callbackTime": 3430.5999999940395,
+                  "interval": 16.5,
+                  "debt": 16.39999999999985
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 1919,
+              "framesWithHitlag": 339,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 51,
+                  "attack": 289
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 54,
+                  "attack": 304
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 54,
+                  "attack": 306
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 30,
+              "prepared": 0,
+              "preparedUsed": 0,
+              "unpreparedUsed": 30
+            },
+            "shaderCompilations": [
+              {
+                "frame": 201,
+                "program": 26,
+                "origin": "model",
+                "cpuMs": 5.199999988079071
+              },
+              {
+                "frame": 209,
+                "program": 27,
+                "origin": "model",
+                "cpuMs": 4.800000011920929
+              },
+              {
+                "frame": 2277,
+                "program": 28,
+                "origin": "model",
+                "cpuMs": 2.0999999940395355
+              },
+              {
+                "frame": 2399,
+                "program": 29,
+                "origin": "model",
+                "cpuMs": 2.7000000178813934
+              },
+              {
+                "frame": 2677,
+                "program": 30,
+                "origin": "model",
+                "cpuMs": 5.699999988079071
+              }
+            ],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "54ca89b3f669a4189bbd4697ca160eee475dc85abdb1dd83b8db9e678ac36788",
+            "initial": [
+              [
+                14,
+                2,
+                16,
+                0,
+                0,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11671968,
+                15,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                11,
+                0,
+                0,
+                54.40010070800781,
+                0,
+                1465484,
+                11671968,
+                15,
+                1,
+                0,
+                1,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ],
+            "final": [
+              [
+                14,
+                2,
+                9,
+                0,
+                28.408376693725586,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11671968,
+                15,
+                1,
+                0,
+                0,
+                19,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                3,
+                0,
+                17.075204849243164,
+                0.00009999999747378752,
+                0,
+                1465484,
+                11671968,
+                15,
+                1,
+                0,
+                1,
+                273,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ]
+          },
+          {
+            "prepared": true,
+            "driverShaderCacheDisabled": true,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60027.29999998212,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.527611111311449,
+              "p50Ms": 0.5,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.699999988079071
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 6.066999999822841,
+              "p50Ms": 5.700000017881393,
+              "p95Ms": 7.699999988079071,
+              "maxMs": 15.400000005960464
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.670602945261784,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.700000000004366,
+              "maxMs": 33.30000000000018
+            },
+            "cadence": {
+              "callbacks": 3604,
+              "zeroStepCallbacks": 4,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -644.6939999940396,
+                  "callbackTime": 1.7999999821186066,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -11.299999994039354,
+                  "callbackTime": 3.0999999940395355,
+                  "interval": 633.3940000000002,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 5.300000005960555,
+                  "callbackTime": 5.5,
+                  "interval": 16.59999999999991,
+                  "debt": 0
+                },
+                {
+                  "callback": 4,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 22.000000005960374,
+                  "callbackTime": 22.099999994039536,
+                  "interval": 16.699999999999818,
+                  "debt": 0.03333333333315025
+                },
+                {
+                  "callback": 5,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 38.60000000596028,
+                  "callbackTime": 38.69999998807907,
+                  "interval": 16.59999999999991,
+                  "debt": -0.03333333333360855
+                },
+                {
+                  "callback": 6,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 55.300000005960555,
+                  "callbackTime": 55.69999998807907,
+                  "interval": 16.700000000000273,
+                  "debt": -3.552713678800501e-15
+                },
+                {
+                  "callback": 7,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 72.00000000596037,
+                  "callbackTime": 72.69999998807907,
+                  "interval": 16.699999999999818,
+                  "debt": 0.0333333333331467
+                },
+                {
+                  "callback": 8,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 88.60000000596028,
+                  "callbackTime": 89.2999999821186,
+                  "interval": 16.59999999999991,
+                  "debt": -0.0333333333336121
+                },
+                {
+                  "callback": 295,
+                  "frame": 291,
+                  "steps": 0,
+                  "timestamp": 4871.700000005961,
+                  "callbackTime": 4872.199999988079,
+                  "interval": 16.600000000000364,
+                  "debt": 16.399999999999746
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 1919,
+              "framesWithHitlag": 339,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 51,
+                  "attack": 289
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 54,
+                  "attack": 304
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 54,
+                  "attack": 306
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 40,
+              "prepared": 40,
+              "preparedUsed": 30,
+              "unpreparedUsed": 0
+            },
+            "shaderCompilations": [],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "54ca89b3f669a4189bbd4697ca160eee475dc85abdb1dd83b8db9e678ac36788",
+            "initial": [
+              [
+                14,
+                2,
+                16,
+                0,
+                0,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11671968,
+                15,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                11,
+                0,
+                0,
+                54.40010070800781,
+                0,
+                1465484,
+                11671968,
+                15,
+                1,
+                0,
+                1,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ],
+            "final": [
+              [
+                14,
+                2,
+                9,
+                0,
+                28.408376693725586,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11671968,
+                15,
+                1,
+                0,
+                0,
+                19,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                3,
+                0,
+                17.075204849243164,
+                0.00009999999747378752,
+                0,
+                1465484,
+                11671968,
+                15,
+                1,
+                0,
+                1,
+                273,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "Lg": {
+        "baseArchive": {
+          "passed": true,
+          "checks": 1126613,
+          "bytes": 1141348,
+          "partCount": 61,
+          "costumes": 4,
+          "motionRows": 312,
+          "demoRows": 16,
+          "imports": [
+            {
+              "label": "initialization",
+              "at": 96,
+              "size": 161748,
+              "pointers": 646
+            },
+            {
+              "label": "visibility",
+              "at": 161996,
+              "size": 161728,
+              "pointers": 12
+            },
+            {
+              "label": "demo motions",
+              "at": 323724,
+              "size": 161728,
+              "pointers": 31
+            },
+            {
+              "label": "secondary animations",
+              "at": 485484,
+              "size": 161728,
+              "pointers": 769
+            },
+            {
+              "label": "gameplay parameters",
+              "at": 647212,
+              "size": 161764,
+              "pointers": 22
+            },
+            {
+              "label": "dynamics",
+              "at": 808976,
+              "size": 20,
+              "pointers": 0
+            },
+            {
+              "label": "hurtboxes",
+              "at": 808996,
+              "size": 416,
+              "pointers": 1
+            },
+            {
+              "label": "auxiliary model",
+              "at": 809412,
+              "size": 161728,
+              "pointers": 550
+            },
+            {
+              "label": "articles",
+              "at": 971140,
+              "size": 161748,
+              "pointers": 46
+            }
+          ],
+          "relocations": 2101
+        },
+        "effectBank": {
+          "passed": true,
+          "checks": 1426,
+          "models": 2,
+          "commands": 12,
+          "textures": 6,
+          "relocations": 159,
+          "unreferencedRelocations": 0
+        },
+        "moves": {
+          "completed": true,
+          "frames": 793,
+          "phases": [
+            {
+              "name": "cyclone",
+              "frames": 201,
+              "states": [
+                357,
+                14
+              ],
+              "capeFrames": 0,
+              "itemStates": [],
+              "peakItems": 0,
+              "final": [
+                14,
+                2,
+                11,
+                0,
+                8.4830322265625,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10220448,
+                15,
+                1,
+                17,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "up special",
+              "frames": 241,
+              "states": [
+                355,
+                35,
+                43,
+                14
+              ],
+              "capeFrames": 0,
+              "itemStates": [],
+              "peakItems": 0,
+              "final": [
+                14,
+                2,
+                19,
+                0,
+                8.4830322265625,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10220448,
+                15,
+                1,
+                17,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "Green Missile",
+              "frames": 351,
+              "states": [
+                18,
+                14,
+                343,
+                344,
+                347,
+                351,
+                346
+              ],
+              "capeFrames": 0,
+              "itemStates": [],
+              "peakItems": 0,
+              "final": [
+                14,
+                2,
+                46,
+                0,
+                -62.18365478515625,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10220448,
+                15,
+                1,
+                17,
+                0,
+                0,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ]
+            }
+          ],
+          "retailParityVerified": false,
+          "renderedSteps": 935,
+          "finalGpuErrorCheck": true
+        },
+        "freeProjectile": {
+          "completed": true,
+          "kind": 105,
+          "frames": 50,
+          "peakItems": 1,
+          "yRange": [
+            6.460427284240723,
+            6.460427284240723
+          ],
+          "verticalDirectionChanges": 0,
+          "renderedSteps": 322,
+          "finalGpuErrorCheck": true
+        },
+        "contacts": {
+          "contact": {
+            "completed": true,
+            "projectileKind": 105,
+            "itemFrames": 14,
+            "peakItems": 1,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -9.713269233703613,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10220448,
+              15,
+              1,
+              17,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              16,
+              0,
+              -11.485668182373047,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10220448,
+              15,
+              1,
+              17,
+              1,
+              6,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              24.900787353515625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10220448,
+              15,
+              1,
+              17,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              3,
+              13,
+              0,
+              24.900787353515625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10220448,
+              15,
+              1,
+              17,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 10.34000015258789,
+            "defenderStates": [
+              14,
+              78
+            ]
+          },
+          "control": {
+            "completed": true,
+            "projectileKind": 105,
+            "itemFrames": 0,
+            "peakItems": 0,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -9.713269233703613,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10220448,
+              15,
+              1,
+              17,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              27,
+              0,
+              -9.713269233703613,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10220448,
+              15,
+              1,
+              17,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              24.900787353515625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10220448,
+              15,
+              1,
+              17,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              27,
+              0,
+              24.900787353515625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10220448,
+              15,
+              1,
+              17,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 0,
+            "peakKnockback": 0,
+            "defenderStates": [
+              14
+            ]
+          },
+          "shield": {
+            "completed": true,
+            "projectileKind": 105,
+            "itemFrames": 12,
+            "peakItems": 1,
+            "before": [
+              179,
+              -1,
+              -1,
+              0,
+              -9.713269233703613,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10220448,
+              15,
+              1,
+              17,
+              1,
+              0,
+              0,
+              0,
+              1,
+              56.920013427734375,
+              4
+            ],
+            "after": [
+              179,
+              -1,
+              -1,
+              0,
+              -15.796268463134766,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10220448,
+              15,
+              1,
+              17,
+              1,
+              0,
+              0,
+              0,
+              1,
+              4.280068397521973,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              24.900787353515625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10220448,
+              15,
+              1,
+              17,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              13,
+              0,
+              24.900787353515625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10220448,
+              15,
+              1,
+              17,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 0,
+            "defenderStates": [
+              179,
+              181
+            ]
+          }
+        },
+        "live": [
+          {
+            "prepared": false,
+            "driverShaderCacheDisabled": false,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60031.59999999404,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.5475555549313624,
+              "p50Ms": 0.5999999940395355,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.5
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 5.935083333344923,
+              "p50Ms": 5.699999988079071,
+              "p95Ms": 7.300000011920929,
+              "maxMs": 14.400000005960464
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.670630730757726,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.700000000004366,
+              "maxMs": 33.399999999999636
+            },
+            "cadence": {
+              "callbacks": 3604,
+              "zeroStepCallbacks": 4,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -957.9279999880791,
+                  "callbackTime": 2.199999988079071,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -7.999999988079253,
+                  "callbackTime": 5.4000000059604645,
+                  "interval": 949.9279999999999,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 8.60000001192111,
+                  "callbackTime": 8.800000011920929,
+                  "interval": 16.600000000000364,
+                  "debt": 0
+                },
+                {
+                  "callback": 4,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 25.30000001192093,
+                  "callbackTime": 25.400000005960464,
+                  "interval": 16.699999999999818,
+                  "debt": 0.03333333333315025
+                },
+                {
+                  "callback": 5,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 42.00000001192075,
+                  "callbackTime": 42.19999998807907,
+                  "interval": 16.699999999999818,
+                  "debt": 0.0666666666663005
+                },
+                {
+                  "callback": 6,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 58.70000001192102,
+                  "callbackTime": 58.80000001192093,
+                  "interval": 16.700000000000273,
+                  "debt": 0.0999999999999055
+                },
+                {
+                  "callback": 7,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 75.30000001192093,
+                  "callbackTime": 75.5,
+                  "interval": 16.59999999999991,
+                  "debt": 0.0333333333331467
+                },
+                {
+                  "callback": 8,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 91.90000001192084,
+                  "callbackTime": 92.19999998807907,
+                  "interval": 16.59999999999991,
+                  "debt": -0.0333333333336121
+                },
+                {
+                  "callback": 328,
+                  "frame": 324,
+                  "steps": 0,
+                  "timestamp": 5425.000000011921,
+                  "callbackTime": 5425.199999988079,
+                  "interval": 16.599999999999454,
+                  "debt": 16.399999999999253
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 1902,
+              "framesWithHitlag": 336,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 51,
+                  "attack": 289
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 48,
+                  "attack": 268
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 57,
+                  "attack": 325
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 30,
+              "prepared": 0,
+              "preparedUsed": 0,
+              "unpreparedUsed": 30
+            },
+            "shaderCompilations": [
+              {
+                "frame": 204,
+                "program": 26,
+                "origin": "model",
+                "cpuMs": 4.800000011920929
+              },
+              {
+                "frame": 212,
+                "program": 27,
+                "origin": "model",
+                "cpuMs": 2.199999988079071
+              },
+              {
+                "frame": 1626,
+                "program": 28,
+                "origin": "model",
+                "cpuMs": 2.7000000178813934
+              },
+              {
+                "frame": 2277,
+                "program": 29,
+                "origin": "model",
+                "cpuMs": 3.9000000059604645
+              },
+              {
+                "frame": 2677,
+                "program": 30,
+                "origin": "model",
+                "cpuMs": 3.0999999940395355
+              }
+            ],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "c9d2353249fa11c9752c4292efa7b17cd2bbb257d8c3beb4b322756d55e6b373",
+            "initial": [
+              [
+                14,
+                2,
+                13,
+                0,
+                0,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11571552,
+                15,
+                1,
+                17,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                8,
+                0,
+                0,
+                54.40010070800781,
+                0,
+                1465484,
+                11571552,
+                15,
+                1,
+                17,
+                1,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ],
+            "final": [
+              [
+                14,
+                2,
+                9,
+                0,
+                -13.072145462036133,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11571552,
+                15,
+                1,
+                17,
+                0,
+                22,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                3,
+                0,
+                -23.28005599975586,
+                0.00009999999747378752,
+                0,
+                1465484,
+                11571552,
+                15,
+                1,
+                17,
+                1,
+                267,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "Dr": {
+        "baseArchive": {
+          "passed": true,
+          "checks": 1590091,
+          "bytes": 1612710,
+          "partCount": 86,
+          "costumes": 5,
+          "motionRows": 303,
+          "demoRows": 14,
+          "imports": [
+            {
+              "label": "initialization",
+              "at": 96,
+              "size": 228404,
+              "pointers": 626
+            },
+            {
+              "label": "visibility",
+              "at": 228632,
+              "size": 228384,
+              "pointers": 15
+            },
+            {
+              "label": "demo motions",
+              "at": 457016,
+              "size": 228384,
+              "pointers": 30
+            },
+            {
+              "label": "secondary animations",
+              "at": 685428,
+              "size": 228384,
+              "pointers": 949
+            },
+            {
+              "label": "gameplay parameters",
+              "at": 913812,
+              "size": 228420,
+              "pointers": 22
+            },
+            {
+              "label": "dynamics",
+              "at": 1142232,
+              "size": 284,
+              "pointers": 7
+            },
+            {
+              "label": "hurtboxes",
+              "at": 1142516,
+              "size": 416,
+              "pointers": 1
+            },
+            {
+              "label": "auxiliary model",
+              "at": 1142932,
+              "size": 228384,
+              "pointers": 618
+            },
+            {
+              "label": "articles",
+              "at": 1371316,
+              "size": 228416,
+              "pointers": 934
+            }
+          ],
+          "relocations": 3227
+        },
+        "effectBank": {
+          "passed": true,
+          "checks": 1562,
+          "models": 2,
+          "commands": 14,
+          "textures": 6,
+          "relocations": 159,
+          "unreferencedRelocations": 11
+        },
+        "moves": {
+          "completed": true,
+          "frames": 776,
+          "phases": [
+            {
+              "name": "cape",
+              "frames": 101,
+              "states": [
+                345,
+                14
+              ],
+              "capeFrames": 35,
+              "itemStates": [
+                0
+              ],
+              "peakItems": 1,
+              "final": [
+                14,
+                2,
+                5,
+                0,
+                5.783504009246826,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10330368,
+                15,
+                1,
+                21,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "air cape",
+              "frames": 233,
+              "states": [
+                24,
+                25,
+                346,
+                29,
+                42,
+                14
+              ],
+              "capeFrames": 35,
+              "itemStates": [
+                0
+              ],
+              "peakItems": 1,
+              "final": [
+                14,
+                2,
+                22,
+                0,
+                5.783504009246826,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10330368,
+                15,
+                1,
+                21,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "cyclone",
+              "frames": 201,
+              "states": [
+                350,
+                349,
+                14
+              ],
+              "capeFrames": 0,
+              "itemStates": [],
+              "peakItems": 0,
+              "final": [
+                14,
+                3,
+                1,
+                0,
+                5.783504009246826,
+                0.00009999999747378752,
+                0,
+                1465376,
+                10330368,
+                15,
+                1,
+                21,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            },
+            {
+              "name": "up special",
+              "frames": 241,
+              "states": [
+                347,
+                35,
+                43,
+                14
+              ],
+              "capeFrames": 0,
+              "itemStates": [],
+              "peakItems": 0,
+              "final": [
+                14,
+                2,
+                47,
+                0,
+                27.408899307250977,
+                27.20009994506836,
+                0,
+                1465376,
+                10330368,
+                15,
+                1,
+                21,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            }
+          ],
+          "retailParityVerified": false,
+          "renderedSteps": 918,
+          "finalGpuErrorCheck": true
+        },
+        "freeProjectile": {
+          "completed": true,
+          "kind": 49,
+          "frames": 75,
+          "peakItems": 1,
+          "yRange": [
+            -20.146472930908203,
+            14.423017501831055
+          ],
+          "verticalDirectionChanges": 2,
+          "renderedSteps": 322,
+          "finalGpuErrorCheck": true
+        },
+        "contacts": {
+          "contact": {
+            "completed": true,
+            "projectileKind": 49,
+            "itemFrames": 9,
+            "peakItems": 1,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              24,
+              0,
+              -8.242536544799805,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              8,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              16,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 10.899999618530273,
+            "defenderStates": [
+              14,
+              81
+            ]
+          },
+          "control": {
+            "completed": true,
+            "projectileKind": 49,
+            "itemFrames": 0,
+            "peakItems": 0,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              27,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 0,
+            "peakKnockback": 0,
+            "defenderStates": [
+              14
+            ]
+          },
+          "shield": {
+            "completed": true,
+            "projectileKind": 49,
+            "itemFrames": 7,
+            "peakItems": 1,
+            "before": [
+              179,
+              -1,
+              -1,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              0,
+              0,
+              0,
+              1,
+              56.920013427734375,
+              4
+            ],
+            "after": [
+              179,
+              -1,
+              -1,
+              0,
+              -10.939537048339844,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              0,
+              0,
+              0,
+              1,
+              3.160064458847046,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              2,
+              16,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 0,
+            "peakHitlag": 3,
+            "peakKnockback": 0,
+            "defenderStates": [
+              179,
+              181
+            ]
+          },
+          "reflect": {
+            "completed": true,
+            "projectileKind": 49,
+            "itemFrames": 32,
+            "peakItems": 2,
+            "before": [
+              14,
+              2,
+              27,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "after": [
+              14,
+              2,
+              12,
+              0,
+              -7.507535934448242,
+              0.00009999999747378752,
+              0,
+              1465484,
+              10330368,
+              15,
+              1,
+              21,
+              1,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "shooterBefore": [
+              14,
+              2,
+              27,
+              0,
+              19.42041015625,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              0,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "shooterAfter": [
+              14,
+              3,
+              1,
+              0,
+              25.52475357055664,
+              0.00009999999747378752,
+              0,
+              1465376,
+              10330368,
+              15,
+              1,
+              21,
+              0,
+              24,
+              0,
+              0,
+              -1,
+              60,
+              4
+            ],
+            "reflectedFrames": 25,
+            "peakHitlag": 3,
+            "peakKnockback": 0,
+            "defenderStates": [
+              14,
+              345
+            ]
+          }
+        },
+        "live": [
+          {
+            "prepared": false,
+            "driverShaderCacheDisabled": false,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60022.5,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.5674166663073831,
+              "p50Ms": 0.5999999940395355,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.800000011920929
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 6.216666667006082,
+              "p50Ms": 5.800000011920929,
+              "p95Ms": 8.299999982118607,
+              "maxMs": 16.700000017881393
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67063073075772,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.700000000004366,
+              "maxMs": 33.399999999999636
+            },
+            "cadence": {
+              "callbacks": 3603,
+              "zeroStepCallbacks": 3,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -982.1339999940396,
+                  "callbackTime": 1.800000011920929,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 1.1000000059602826,
+                  "callbackTime": 4.4000000059604645,
+                  "interval": 983.2339999999999,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 17.800000005960555,
+                  "callbackTime": 18.099999994039536,
+                  "interval": 16.700000000000273,
+                  "debt": 0.033333333333605
+                },
+                {
+                  "callback": 4,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 34.400000005960464,
+                  "callbackTime": 34.80000001192093,
+                  "interval": 16.59999999999991,
+                  "debt": -0.0333333333331538
+                },
+                {
+                  "callback": 5,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 51.200000005960646,
+                  "callbackTime": 51.900000005960464,
+                  "interval": 16.800000000000182,
+                  "debt": 0.10000000000036025
+                },
+                {
+                  "callback": 6,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 67.80000000596056,
+                  "callbackTime": 68.40000000596046,
+                  "interval": 16.59999999999991,
+                  "debt": 0.033333333333601445
+                },
+                {
+                  "callback": 7,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 84.50000000596037,
+                  "callbackTime": 85.09999999403954,
+                  "interval": 16.699999999999818,
+                  "debt": 0.0666666666667517
+                },
+                {
+                  "callback": 8,
+                  "frame": 5,
+                  "steps": 1,
+                  "timestamp": 101.10000000596028,
+                  "callbackTime": 101.80000001192093,
+                  "interval": 16.59999999999991,
+                  "debt": -7.105427357601002e-15
+                },
+                {
+                  "callback": 300,
+                  "frame": 297,
+                  "steps": 0,
+                  "timestamp": 4967.500000005961,
+                  "callbackTime": 4967.9000000059605,
+                  "interval": 16.600000000000364,
+                  "debt": 16.400000000000194
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 1919,
+              "framesWithHitlag": 339,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 51,
+                  "attack": 289
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 48,
+                  "attack": 270
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 36,
+              "prepared": 0,
+              "preparedUsed": 0,
+              "unpreparedUsed": 36
+            },
+            "shaderCompilations": [
+              {
+                "frame": 203,
+                "program": 32,
+                "origin": "model",
+                "cpuMs": 6.800000011920929
+              },
+              {
+                "frame": 211,
+                "program": 33,
+                "origin": "model",
+                "cpuMs": 3.2000000178813934
+              },
+              {
+                "frame": 1498,
+                "program": 34,
+                "origin": "model",
+                "cpuMs": 3.800000011920929
+              },
+              {
+                "frame": 2277,
+                "program": 35,
+                "origin": "model",
+                "cpuMs": 3
+              },
+              {
+                "frame": 2677,
+                "program": 36,
+                "origin": "model",
+                "cpuMs": 4.300000011920929
+              }
+            ],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "3bad0df85825c7db4f956aeb581150d5d8c6f0e32a40d2ea7f66118569cad938",
+            "initial": [
+              [
+                14,
+                2,
+                16,
+                0,
+                0,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11681472,
+                15,
+                1,
+                21,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                11,
+                0,
+                0,
+                54.40010070800781,
+                0,
+                1465484,
+                11681472,
+                15,
+                1,
+                21,
+                1,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ],
+            "final": [
+              [
+                14,
+                2,
+                8,
+                0,
+                -33.180885314941406,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11681472,
+                15,
+                1,
+                21,
+                0,
+                22,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                3,
+                0,
+                -44.35385513305664,
+                0.00009999999747378752,
+                0,
+                1465484,
+                11681472,
+                15,
+                1,
+                21,
+                1,
+                364,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ]
+          },
+          {
+            "prepared": true,
+            "driverShaderCacheDisabled": true,
+            "frames": 3600,
+            "draws": 3600,
+            "elapsedMs": 60023.70000001788,
+            "stepCpu": {
+              "samples": 3600,
+              "meanMs": 0.49894444447424674,
+              "p50Ms": 0.5,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.600000023841858
+            },
+            "drawSubmissionCpu": {
+              "samples": 3600,
+              "meanMs": 6.101972222394413,
+              "p50Ms": 5.700000017881393,
+              "p95Ms": 8.200000017881393,
+              "maxMs": 14.599999994039536
+            },
+            "rafDrawIntervals": {
+              "samples": 3599,
+              "meanMs": 16.670630730757768,
+              "p50Ms": 16.69999999999709,
+              "p95Ms": 16.799999999995634,
+              "maxMs": 33.29999999999927
+            },
+            "cadence": {
+              "callbacks": 3603,
+              "zeroStepCallbacks": 3,
+              "multiStepCallbacks": 0,
+              "rafGapsOver25Ms": 1,
+              "timingSamples": [
+                {
+                  "callback": 1,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": -597.9620000059604,
+                  "callbackTime": 1.9000000059604645,
+                  "interval": null,
+                  "debt": 0
+                },
+                {
+                  "callback": 2,
+                  "frame": 0,
+                  "steps": 0,
+                  "timestamp": 1.9999999940396265,
+                  "callbackTime": 3.0999999940395355,
+                  "interval": 599.962,
+                  "debt": 0
+                },
+                {
+                  "callback": 3,
+                  "frame": 0,
+                  "steps": 1,
+                  "timestamp": 18.799999994039354,
+                  "callbackTime": 18.900000005960464,
+                  "interval": 16.799999999999727,
+                  "debt": 0.1333333333330593
+                },
+                {
+                  "callback": 4,
+                  "frame": 1,
+                  "steps": 1,
+                  "timestamp": 35.39999999403972,
+                  "callbackTime": 35.599999994039536,
+                  "interval": 16.600000000000364,
+                  "debt": 0.06666666666675525
+                },
+                {
+                  "callback": 5,
+                  "frame": 2,
+                  "steps": 1,
+                  "timestamp": 52.099999994039536,
+                  "callbackTime": 52.400000005960464,
+                  "interval": 16.699999999999818,
+                  "debt": 0.0999999999999055
+                },
+                {
+                  "callback": 6,
+                  "frame": 3,
+                  "steps": 1,
+                  "timestamp": 68.69999999403944,
+                  "callbackTime": 69,
+                  "interval": 16.59999999999991,
+                  "debt": 0.0333333333331467
+                },
+                {
+                  "callback": 7,
+                  "frame": 4,
+                  "steps": 1,
+                  "timestamp": 85.39999999403972,
+                  "callbackTime": 85.7000000178814,
+                  "interval": 16.700000000000273,
+                  "debt": 0.0666666666667517
+                },
+                {
+                  "callback": 8,
+                  "frame": 5,
+                  "steps": 1,
+                  "timestamp": 102.09999999403954,
+                  "callbackTime": 102.40000000596046,
+                  "interval": 16.699999999999818,
+                  "debt": 0.09999999999990195
+                },
+                {
+                  "callback": 420,
+                  "frame": 417,
+                  "steps": 0,
+                  "timestamp": 6968.399999994039,
+                  "callbackTime": 6968.800000011921,
+                  "interval": 16.599999999998545,
+                  "debt": 16.399999999998688
+                }
+              ]
+            },
+            "workload": {
+              "framesWithAttack": 1919,
+              "framesWithHitlag": 339,
+              "framesWithDamage": 3509,
+              "stockChanges": [],
+              "windows": [
+                {
+                  "firstFrame": 1,
+                  "frames": 600,
+                  "hitlag": 51,
+                  "attack": 289
+                },
+                {
+                  "firstFrame": 601,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 1201,
+                  "frames": 600,
+                  "hitlag": 48,
+                  "attack": 270
+                },
+                {
+                  "firstFrame": 1801,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 2401,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                },
+                {
+                  "firstFrame": 3001,
+                  "frames": 600,
+                  "hitlag": 60,
+                  "attack": 340
+                }
+              ]
+            },
+            "shaderCoverage": {
+              "programs": 40,
+              "prepared": 40,
+              "preparedUsed": 36,
+              "unpreparedUsed": 0
+            },
+            "shaderCompilations": [],
+            "finalGpuErrorCheck": true,
+            "gameplayTraceSha256": "3bad0df85825c7db4f956aeb581150d5d8c6f0e32a40d2ea7f66118569cad938",
+            "initial": [
+              [
+                14,
+                2,
+                16,
+                0,
+                0,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11681472,
+                15,
+                1,
+                21,
+                0,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                11,
+                0,
+                0,
+                54.40010070800781,
+                0,
+                1465484,
+                11681472,
+                15,
+                1,
+                21,
+                1,
+                0,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ],
+            "final": [
+              [
+                14,
+                2,
+                8,
+                0,
+                -33.180885314941406,
+                0.00009999999747378752,
+                0,
+                1465376,
+                11681472,
+                15,
+                1,
+                21,
+                0,
+                22,
+                0,
+                0,
+                -1,
+                60,
+                4
+              ],
+              [
+                14,
+                2,
+                3,
+                0,
+                -44.35385513305664,
+                0.00009999999747378752,
+                0,
+                1465484,
+                11681472,
+                15,
+                1,
+                21,
+                1,
+                364,
+                0,
+                0,
+                1,
+                60,
+                4
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "regressions": {
+      "falcoReflection": {
+        "completed": true,
+        "contact": {
+          "before": [
+            361,
+            314,
+            8,
+            0,
+            62.52003860473633,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10091328,
+            15,
+            1,
+            22,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "after": [
+            361,
+            314,
+            22,
+            0,
+            62.52003860473633,
+            0.00009999999747378752,
+            0,
+            1465484,
+            10091328,
+            15,
+            1,
+            22,
+            1,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          "shooterBefore": [
+            14,
+            2,
+            55,
+            0,
+            28.16823387145996,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10091328,
+            15,
+            1,
+            22,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "shooterAfter": [
+            14,
+            2,
+            136,
+            0,
+            25.421567916870117,
+            0.00009999999747378752,
+            0,
+            1465376,
+            10091328,
+            15,
+            1,
+            22,
+            0,
+            5,
+            0,
+            0,
+            1,
+            60,
+            4
+          ],
+          "reflectedFrames": 5,
+          "peakHitlag": 0,
+          "peakKnockback": 0,
+          "defenderStates": [
+            361,
+            362
+          ]
+        },
+        "gpu": true
+      },
+      "story": {
+        "name": "Yoshi's Story",
+        "kind": 8,
+        "collisionLoaded": true,
+        "vertexChecks": 68,
+        "modelGroups": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "splineCount": 1,
+        "shadowCount": 0,
+        "shadowFlagCases": 256,
+        "animationCallbackCases": 16,
+        "completeStageStartup": false,
+        "originalCallbacks": true,
+        "transitions": [
+          {
+            "frame": 1,
+            "groups": [
+              0,
+              1,
+              2,
+              3
+            ]
+          }
+        ],
+        "peakStageParticles": 0,
+        "randall": {
+          "hiddenFrames": 0,
+          "minX": -97.47500610351562,
+          "maxX": 97.4749984741211,
+          "minY": -38.5,
+          "maxY": -18.899991989135742,
+          "leftFrames": 2102,
+          "rightFrames": 2095,
+          "upFrames": 353,
+          "downFrames": 363,
+          "collisionChecks": 4500,
+          "maxCollisionError": 0.000003919005393981934
+        },
+        "shyGuys": {
+          "peak": 3,
+          "spawns": 7,
+          "retirements": 4,
+          "minX": -196.25,
+          "maxX": 304
+        },
+        "callbackFrames": 4500,
+        "callbacksVerified": true
+      }
+    }
+  },
+  "traceDefinition": "SHA-256(JSON.stringify({initial,final,stateChanges,inputChanges,workload})) from live fixture; timing excluded",
+  "limitations": [
+    "Draw submissions and CPU costs are measured, not distinct display presentations or physical input latency.",
+    "Default costumes and selected moves only; full retail frame parity, additional matchups/stages and costumes remain.",
+    "Contact fixtures use original default damage rules and controller-owned fighters, not a complete VS scene.",
+    "Reflected shooter damage includes any cape contact; ownership transfer is checked separately.",
+    "Live workload uses ordinary attacks/shields; projectile and special-move interactions are separate probes.",
+    "Full roster, scenes, audio, deployment and multiplayer integration remain incomplete."
+  ],
+  "portableRecipeSha256": "272b977aebb5466656c582eb0520c1fee065720bd1a055397d55d02c91712f6a",
+  "toolchain": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "hardware": "AMD Radeon 890M (radeonsi gfx1150 LLVM 20.1.2), Chrome ANGLE hardware WebGL2",
+  "resolution": [
+    960,
+    720
+  ],
+  "noIsoStartup": "Hosted assets loaded automatically by the development static fixture; no player file picker",
+  "camera": "Original native camera callbacks and 4:3 framing retained; projectile/cape screenshots visually inspected"
+}

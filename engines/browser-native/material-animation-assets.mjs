@@ -51,5 +51,5 @@ export function convertMaterialAnimation(input) {
   for(const at of packed)if(words.has(at&~3)||halves.has(at&~1)||archive.relocations.has(at&~3))throw Error('Material animation payload overlaps descriptors');
   const body=Uint8Array.from(archive.bytes.subarray(32,32+archive.dataSize)),out=new DataView(body.buffer);
   for(const at of words)out.setUint32(at,d.getUint32(at),true);for(const at of halves)out.setUint16(at,d.getUint16(at),true);
-  return {name,root,nodes,images,palettes,words,halves,pointers,image:nativeSubgraphImage(body,pointers,new Map([[name,root]]))};
+  return {name,root,nodes,images,palettes,words,halves,pointers,packed,image:nativeSubgraphImage(body,pointers,new Map([[name,root]]))};
 }

@@ -5,6 +5,32 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Mario, Luigi and Dr. Mario now pass default-costume constructor, controller input
+and rendered special-move integration checks. The shared Article importer handles
+original joint/material animation data for fireballs, pills and capes. The probes
+cover ground/air capes, Cyclone, up special, and Luigi's Green Missile charge/release.
+Fireball/pill tests cover spawn, travel, retirement, hits, no-fire controls and
+shielding. Mario/Luigi hits deal 6 damage; Dr. Mario's pill deals 8. Cape reflection
+transfers projectile ownership and protects the defender in both Mario variants.
+These are selected integration checks, not complete character or retail parity.
+
+Each two-fighter Battlefield workload submits all 3,600 draws in about 60 seconds
+at 960×720, with contact in every ten-second window. Mean simulation costs are
+0.53–0.57 ms and mean draw submission costs 5.94–6.22 ms in the initial samples.
+With all 40 catalog programs prepared and driver caching disabled, the repeated
+Mario/Dr. Mario samples have no live compilations or catch-up callbacks. Their
+mean draw costs are 6.067/6.102 ms, p95 7.7/8.2 ms and maxima 15.4/14.6 ms. Recorded
+gameplay traces match their respective initial runs. This is draw-submission
+and CPU evidence; distinct displayed FPS and physical input latency remain unmeasured.
+
+All 166 targeted tests and the reproducible fighter build pass. The core hash
+remains `ec053ec9…`; no gameplay C changes were needed. Falco reflection and Story's
+4,500-frame Randall/collision/Shy Guy regression pass. Full roster/costume coverage,
+complete scenes/audio, retail parity, networking and deployment remain unfinished.
+[Mario-family evidence](benchmarks/browser-2026-09-16-native-port-mario-family.json).
+
+Previous Jigglypuff checkpoint:
+
 Jigglypuff now completes the original native constructor and input/render path.
 Its extra costume-attachment table is imported with the correct visibility type;
 the original effect bank and animated Sing model are loaded. Controller-only
