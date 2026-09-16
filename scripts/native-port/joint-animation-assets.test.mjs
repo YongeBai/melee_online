@@ -36,3 +36,10 @@ test('joint animation rejects cyclic, unowned and malformed descriptors',()=> {
     const archive=fixture();mutate(archive);assert.throws(()=>readJointAnimation(archive,0));
   }
 });
+test('joint path animation can reference only a joint in its explicitly imported model',()=>{
+  const archive=fixture();archive.data.setUint32(52,20);archive.relocations.add(52);
+  assert.throws(()=>readJointAnimation(archive,0),/explicit ownership/);
+  const result=readJointAnimation(archive,0,new Set([20]));
+  assert.equal(result.nodes[0].animation.object,20);assert.ok(result.pointers.has(52));
+  assert.throws(()=>readJointAnimation(archive,0,new Set([24])),/explicit ownership/);
+});

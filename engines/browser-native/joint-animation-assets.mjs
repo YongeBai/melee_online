@@ -1,6 +1,6 @@
 import {readAnimationObject} from './animation-object-assets.mjs';
 // HSD_AnimJoint/HSD_AObjDesc/HSD_FObjDesc; payloads are byte-coded LE.
-export function readJointAnimation(archive,root) {
+export function readJointAnimation(archive,root,ownedObjects=new Set()) {
   const d=archive.data,pointers=new Set(),words=new Set(),nodes=[],seen=new Set(),active=new Set();
   const bounds=(at,size)=>{if(at%4||at<0||at+size>d.byteLength)throw Error('Joint animation descriptor out of bounds');};
   function word(at){bounds(at,4);words.add(at);return d.getUint32(at);}
@@ -12,7 +12,7 @@ export function readJointAnimation(archive,root) {
     if(robj!==null)throw Error('Constraint animation needs explicit integration');
     const node={offset:at,parent,flags,animation:null};nodes.push(node);
     if(aobj!==null) {
-      const animation=readAnimationObject(archive,aobj,index);
+      const animation=readAnimationObject(archive,aobj,index,ownedObjects);
       for(const at of animation.pointers)pointers.add(at);
       for(const at of animation.words)words.add(at);
       node.animation=animation;

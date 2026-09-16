@@ -1,13 +1,13 @@
 import {validateTrack} from './animation-assets.mjs';
 // Shared HSD_AObjDesc/FObjDesc reader. Track payloads retain their byte coding.
-export function readAnimationObject(archive,root,bone=0) {
+export function readAnimationObject(archive,root,bone=0,ownedObjects=new Set()) {
   const d=archive.data,pointers=new Set(),words=new Set(),packed=new Set();
   const bounds=(at,size)=>{if(!Number.isInteger(at)||at%4||at<0||at+size>d.byteLength)throw Error('Animation object descriptor out of bounds');};
   function word(at){bounds(at,4);words.add(at);return d.getUint32(at);}
   function ptr(at){const v=word(at);if(!archive.relocations.has(at)){if(v)throw Error('Unrelocated animation object pointer');return null;}pointers.add(at);return v;}
   bounds(root,16);const flags=word(root),end=d.getFloat32(root+4);word(root+4);
   let track=ptr(root+8);const object=ptr(root+12);
-  if(object!==null)throw Error('Animation object references need explicit ownership');
+  if(object!==null&&!ownedObjects.has(object))throw Error('Animation object references need explicit ownership');
   if(!Number.isFinite(end)||end<0)throw Error('Invalid animation duration');
   const tracks=[],visited=new Set();
   while(track!==null) {
@@ -20,5 +20,5 @@ export function readAnimationObject(archive,root,bone=0) {
     tracks.push({bone,start,objType,fracValue,fracSlope,bytes});track=next;
   }
   for(const at of packed)if(words.has(at&~3)||archive.relocations.has(at&~3))throw Error('Animation payload overlaps descriptors');
-  return {root,flags,end,tracks,pointers,words,packed};
+  return {root,flags,end,object,tracks,pointers,words,packed};
 }

@@ -29,6 +29,7 @@ try {
   if(stageMap){
     if(!verification.passed||verification.rows?.length!==7||verification.updates!==120||verification.flagCases!==256||!verification.changed)throw Error('Incomplete original stage map coverage');
   } else if(startup||fighterInit) {
+    if(fighterInit&&(!verification.commonEffects?.passed||verification.commonEffects.models.length!==47||verification.commonEffects.bank?.commands!==592||!verification.commonEffects.peakParticles))throw Error('Incomplete common effect model/particle lifecycle coverage');
     if(fighterInit&&(!verification.effects?.passed||verification.effects.models.length!==6||verification.effects.updates!==742||verification.effects.operandChecks!==4104||!verification.effects.peakParticles||!verification.effects.peakGenerators))throw Error('Incomplete original effect model/particle lifecycle coverage');
     if(fighterInit&&(!verification.itemModels?.passed||verification.itemModels.rows.length!==27||verification.itemModels.rows.flatMap(r=>r.articles).length!==77||verification.itemModels.instances!==154||verification.itemModels.updates!==616||verification.itemModels.packedFlagChecks!==65536))throw Error('Incomplete original item model and hurtbox coverage');
     if(fighterInit&&verification.dynamics?.rows.some(r=>!r.animation?.originalMotionLoader||r.animation.loaderTreeChecks!==18||r.animation.liveBufferChecks!==6))throw Error('Incomplete owned motion-loader integration');

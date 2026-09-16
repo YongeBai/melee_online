@@ -22,6 +22,7 @@ void portEffectsInitialize(void) { static int ready;if(!ready){if(portSceneIniti
 // Match startup uses 70 original camera subjects. No projection/camera offsets.
 void portMatchCameraInitialize(void) { static int ready;if(!ready){Camera_Init(70);Camera_Create();ready=1;} }
 void* portEffectsLoad(void) { efAsync_LoadSync(4);return efAsync_DatEntries[4].data; }
+void* portCommonEffectsLoad(void) { efAsync_LoadSync(0);return efAsync_DatEntries[0].data; }
 double portEffectsRead(unsigned field,unsigned index) {
     switch(field){
       case 0:return (uintptr_t)efAsync_DatEntries[4].data;
@@ -47,14 +48,16 @@ HSD_GObj* portEffectParentCreate(void) {
     HSD_GObjObject_80390A70(object,HSD_GObj_JObjKind,joint);
     return object;
 }
-HSD_GObj* portEffectCreate(unsigned index,HSD_GObj* parent) {
-    if(index>=6||!parent||!efAsync_DatEntries[4].data||efLib_AnimCount)abort();
+HSD_GObj* portEffectBankCreate(unsigned bank,unsigned index,HSD_GObj* parent) {
+    if((bank!=0&&bank!=4)||index>=(bank==0?47:6)||!parent||!efAsync_DatEntries[bank].data||efLib_AnimCount)abort();
     efLib_LoadKind=EF_LOADKIND_SYNC;
-    EF_Effect* effect=efLib_Create(4000+index,parent);
+    EF_Effect* effect=efLib_Create(bank*1000+index,parent);
     // Finish the same deferred initial animation queue used by efSync_Spawn.
     while(efLib_AnimCount)HSD_JObjAnimAll(((HSD_JObj**)efLib_AnimQueue)[--efLib_AnimCount]);
     return effect?effect->gobj:NULL;
 }
+HSD_GObj* portEffectCreate(unsigned index,HSD_GObj* parent) { return portEffectBankCreate(4,index,parent); }
+void portEffectsDestroyOwner(HSD_GObj* parent) { if(!parent)abort();efLib_DestroyAll(parent); }
 unsigned portEffectLife(HSD_GObj* object) { if(!object||!object->user_data)abort();return ((EF_Effect*)object->user_data)->lifetime; }
 void portEffectStep(HSD_GObj* object) { efLib_Update(object); }
 void portEffectsParticleStep(void) {

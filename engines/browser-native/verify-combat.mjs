@@ -1,8 +1,10 @@
+import {createNativeCamera,checkNativeCamera} from './native-camera.mjs';
 // Integration probe over original Fighter callbacks. Inputs are normalized HSD
 // samples; no fighter positions, damage, motion states or physics are assigned.
-export async function verifyCombat(module,objects,report,{control=false,progress=()=>{}}={}) {
+export async function verifyCombat(module,objects,report,{control=false,camera=false,progress=()=>{}}={}) {
   const state=o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i));
-  const snapshot=()=>objects.map(state),trace=[];
+  const snapshot=()=>objects.map(state),trace=[],cameraTrace=[],nativeCamera=camera?createNativeCamera(module):null;
+  try {
   const require=(ok,message)=>{if(!ok)throw Error('Combat: '+message);};
   function tick(a=[0,0,0],b=[0,0,0]) {
     module._portStageProbePad(0,...a);module._portStageProbePad(1,...b);module._portRuntimeStep();report.frames++;
@@ -10,9 +12,14 @@ export async function verifyCombat(module,objects,report,{control=false,progress
     for(let i=0;i<2;i++)require(current[i].every(Number.isFinite)&&current[i][9]===15&&current[i][10]===1&&current[i][12]===i&&current[i][18]===4,'finite state, independent ownership and retained stocks');
     // Exclude pointer addresses; retain every observed gameplay field per step.
     trace.push(current.map(s=>[...s.slice(0,7),...s.slice(9)]));
+    report.effects.peakParticles=Math.max(report.effects.peakParticles,module._portEffectsRead(8,0));
+    report.effects.peakGenerators=Math.max(report.effects.peakGenerators,module._portEffectsRead(6,0));
+    report.effects.peakModels=Math.max(report.effects.peakModels,module._portEffectsRead(5,0));
+    if(nativeCamera){const s=nativeCamera.snapshot();checkNativeCamera(s);cameraTrace.push(Array.from(s.raw));}
     return current;
   }
   report.control=control;report.frames=0;report.settled=snapshot();
+  report.effects={peakParticles:0,peakGenerators:0,peakModels:0};
   require(report.settled.every(s=>s[0]===14&&s[3]===0&&s[13]===0),'both fighters settled at zero damage');
   module._Player_80031848(0);module._Player_80031848(1);progress();
   for(let frame=0;frame<90;frame++)tick(undefined,[0,0,frame<5?-1:0]);
@@ -63,7 +70,13 @@ export async function verifyCombat(module,objects,report,{control=false,progress
     require(grab.states[0].includes(216)&&grab.states[0].includes(219)&&grab.states[1].includes(239)&&grab.after[1][13]>grab.before[1][13],'grab wait, forward throw, thrown reaction and added damage');
   }
   report.traceSha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(trace)))),b=>b.toString(16).padStart(2,'0')).join('');
+  if(nativeCamera){
+    const first=cameraTrace[0],last=cameraTrace.at(-1),changed=cameraTrace.filter(row=>row.some((v,i)=>v!==first[i])).length;
+    require(changed>0,'native camera tracks moving fighters');
+    report.camera={samples:cameraTrace.length,first,last,changed,projectionAspect:first[35],displayResolution:[960,720],visualParity:false};
+  }
   report.completed=true;
-  report.limitation='Two Falcons, one stage, default rules and scripted normalized inputs. No full match lifecycle, complete stage callbacks, general effects, audio playback, browser device sampling, gameplay rendering or measured FPS/latency.';
+  report.limitation='Two Falcons, one stage, original common/Captain effect banks, default rules and scripted normalized inputs. No full match lifecycle, complete stage callbacks, broad move/character parity, GPU effect drawing, audio playback, browser device sampling, gameplay rendering or measured FPS/latency.';
   return report;
+  } finally {nativeCamera?.dispose();}
 }

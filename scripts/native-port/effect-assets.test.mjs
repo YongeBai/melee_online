@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {convertCaptainEffects} from '../../engines/browser-native/effect-assets.mjs';
+import {convertCaptainEffects,convertCommonEffects} from '../../engines/browser-native/effect-assets.mjs';
 function fixture(mutate=()=>{}) {
   const body=new Uint8Array(1792),d=new DataView(body.buffer),relocs=new Set(),cmd=128,tex=1296,joint=1616;
   const ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};ptr(0,cmd);ptr(4,tex);
@@ -26,4 +26,26 @@ test('effect import rejects malformed banks, relocated relative words, payload o
     a=>a.d.setFloat32(a.cmd+80+12,NaN),a=>a.relocs.add(a.cmd+12),a=>a.d.setUint32(a.tex+4,4),
     a=>a.d.setUint32(a.tex+32+24,32),a=>a.d.setUint16(a.cmd+80+2,7),a=>{a.relocs.add(24);a.d.setUint32(24,a.joint);},
   ])assert.throws(()=>convertCaptainEffects(fixture(mutate)));
+});
+
+function commonFixture(mutate=()=>{}) {
+  const body=new Uint8Array(3712),d=new DataView(body.buffer),relocs=new Set(),cmd=1024,tex=3404,joint=3552,shape=3616;
+  const ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};ptr(0,cmd);ptr(4,tex);
+  for(let i=0;i<47;i++)ptr(12+i*20,joint);
+  ptr(24,shape);ptr(shape+8,shape+12); // Empty original shape topology.
+  d.setUint16(cmd,0x42);d.setUint32(cmd+8,592);d.setUint32(tex,36);
+  for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  mutate({body,d,relocs,ptr,cmd,tex,joint,shape});
+  const name=new TextEncoder().encode('effCommonDataTable\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),v=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>v.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>v.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return bytes;
+}
+test('common effects import all model entries and retain empty shape topology',()=>{
+  const input=commonFixture(),before=input.slice(),result=convertCommonEffects(input);
+  assert.equal(result.effects.length,47);assert.equal(result.commands.length,592);assert.equal(result.textures.length,36);
+  assert.deepEqual(result.effects[0].shapeTopology,{joints:1,objects:1});assert.deepEqual(input,before);
+  assert.equal(result.pointerSlots.has(3624),true);
+});
+test('common effect shape graphs reject cycles and unsupported morph data',()=>{
+  for(const mutate of [a=>a.ptr(a.shape,a.shape),a=>a.ptr(a.shape+16,a.joint),a=>a.d.setUint16(a.cmd+2,4)])
+    assert.throws(()=>convertCommonEffects(commonFixture(mutate)));
 });

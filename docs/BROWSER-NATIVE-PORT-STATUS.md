@@ -5,6 +5,29 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+The common effect bank and native camera now run in the two-Falcon integration
+probe. Original effect loading covers 47 model descriptors, 592 particle commands
+and 36 texture groups. The model lifecycle test creates two instances of each
+model, runs 2,818 updates and 1,488 particle updates, and verifies that all ten
+checked scene pools return to baseline. It includes the original spline-driven
+effect and indefinite effects released through the original owner cleanup path.
+
+**Correction to the earlier combat checkpoint:** it had not loaded the common
+effect bank, and its position/damage assertions missed invalid memory access.
+A fail-fast guard now catches requests to unloaded banks. Further integration
+found three retail-global-layout assumptions: camera quake reads, shield parameter
+writes past the animation queue, and particle teardown through a fabricated
+aggregate. The portable source recipe now references the actual original globals;
+it does not change camera offsets, shield mechanics or particle algorithms.
+The older combat hash is historical bring-up evidence, not a validated baseline.
+
+The camera bridge reads original eye/interest, view matrix, FOV and projection.
+Its numerical checks cover finite values, an orthonormal view, eye/interest axes,
+original clip planes and GX depth coefficients. The original projection aspect
+is 1.2173333; the 960×720 display remains 4:3. Numerical checks do not establish
+visual parity. A native rendered match and its FPS/latency are still unmeasured.
+[Common effects and camera checkpoint](benchmarks/browser-2026-09-15-native-port-effects-camera.json).
+
 Two player-owned Falcons now interact on Battlefield through original fighter
 callbacks. The integration probe covers a platform drop, repeated jabs, hitlag,
 knockback/displacement, shield stun, grabbing and a forward throw. It initializes
@@ -19,7 +42,7 @@ Chrome instances produce identical per-frame trace hashes. This is same-build
 repeatability, not retail gameplay parity or presented FPS. All 86 targeted
 tests and solo-input, fighter, stage-map and scene regressions pass.
 
-Full match startup, tournament rule handling, common effects/items, audio,
+Full match startup, tournament rule handling, general items, audio,
 browser device input and gameplay rendering remain incomplete. No 720p60 or
 input-to-photon result exists for the port.
 [Two-fighter combat checkpoint](benchmarks/browser-2026-09-15-native-port-combat.json).

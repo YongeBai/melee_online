@@ -7,7 +7,13 @@ import {textureByteLength} from './texture.mjs';
 // Captain's six model effects are referenced as 4000..4005 by efAlt_Spawn.
 // Particle scripts use the original byte stream; psReadFloat handles BE operands.
 export function convertCaptainEffects(input) {
-  const a=inspectArchive(input),d=a.data,root=a.publics.get('effCaptainDataTable');
+  return convertEffects(input,{name:'effCaptainDataTable',bank:4,first:4000,count:17,groups:7,models:6});
+}
+export function convertCommonEffects(input) {
+  return convertEffects(input,{name:'effCommonDataTable',bank:0,first:0,count:592,groups:36,models:47});
+}
+function convertEffects(input,spec) {
+  const a=inspectArchive(input),d=a.data,root=a.publics.get(spec.name);
   if(root===undefined||a.externs.size)throw Error('Unsupported effect archive');
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),out=new DataView(body.buffer),pointers=new Set(),claims=new Map(),packed=new Set();
   const bounds=(at,size,align=4)=>{if(!Number.isInteger(at)||at<0||at%align||at+size>d.byteLength)throw Error('Effect data bounds');};
@@ -18,7 +24,7 @@ export function convertCaptainEffects(input) {
   function words(tree){for(const at of tree.words)tree.pointers.has(at)?pointer(at):scalar(at);if(tree.halves)for(const at of tree.halves)scalar(at,2);if(tree.packed)for(const at of tree.packed)raw(at,1);}
   const cmd=pointer(root),tex=pointer(root+4);if(cmd===null||tex===null||tex<=cmd)throw Error('Missing effect banks');
   const version=scalar(cmd,2),bank=scalar(cmd+2,2),first=scalar(cmd+4),count=scalar(cmd+8);
-  if(version!==0x42||bank!==4||first!==4000||count!==17)throw Error('Unsupported Captain particle bank');
+  if(version!==0x42||bank!==spec.bank||first!==spec.first||count!==spec.count)throw Error('Unsupported particle bank');
   bounds(cmd,12+count*4);const commands=[];
   for(let i=0;i<count;i++){const offset=scalar(cmd+12+i*4);if(!offset){commands.push(null);continue;}const at=cmd+offset;if(at<cmd+12+count*4||at+61>tex||at%4)throw Error('Invalid particle command descriptor');commands.push({offset:at,relativeOffset:offset});}
   const order=[...new Set(commands.filter(Boolean).map(c=>c.offset))].sort((x,y)=>x-y);
@@ -27,7 +33,7 @@ export function convertCaptainEffects(input) {
     for(let o=12;o<60;o+=4){scalar(at+o);const v=d.getFloat32(at+o);if(!Number.isFinite(v))throw Error('Nonfinite particle parameter');c.floats.push(v);}
     c.scriptStart=at+60;c.scriptEnd=order[order.indexOf(at)+1]??tex;if(c.scriptEnd<=c.scriptStart)throw Error('Overlapping particle commands');raw(c.scriptStart,c.scriptEnd-c.scriptStart);
   }
-  const groups=scalar(tex);if(groups!==7)throw Error('Unsupported Captain texture groups');const textures=[],groupOffsets=new Set();
+  const groups=scalar(tex);if(groups!==spec.groups)throw Error('Unsupported texture groups');const textures=[],groupOffsets=new Set();
   function relative(slot,size,alignment=1){const offset=scalar(slot);if(!offset)return null;const at=tex+offset;bounds(at,size,alignment);return at;}
   for(let i=0;i<groups;i++) {
     const at=relative(tex+4+i*4,24,4);if(at===null){textures.push(null);continue;}
@@ -40,17 +46,43 @@ export function convertCaptainEffects(input) {
   }
   for(const c of commands.filter(Boolean))if(c.shorts[1]>=groups)throw Error('Particle texture group index');
   const effects=[];
-  for(let i=0;i<6;i++) {
+  function shapeTree(root) {
+    const seen=new Set(),active=new Set();let joints=0,objects=0;
+    function visit(at,type) {
+      if(at===null)return;
+      if(active.has(at)||seen.has(at))throw Error('Cyclic/shared shape animation node');
+      seen.add(at);active.add(at);if(seen.size>4096)throw Error('Shape animation capacity');
+      if(type==='joint') {
+        bounds(at,12);joints++;
+        const child=pointer(at),next=pointer(at+4),object=pointer(at+8);
+        visit(child,'joint');visit(next,'joint');visit(object,'object');
+      } else {
+        bounds(at,8);objects++;const next=pointer(at),animation=pointer(at+4);
+        // Common effects contain an empty shape-animation topology. A real
+        // morph track needs the corresponding shape geometry importer too.
+        if(animation!==null)throw Error('Shape morph tracks require typed geometry');
+        visit(next,'object');
+      }
+      active.delete(at);
+    }
+    visit(root,'joint');return {joints,objects};
+  }
+  for(let i=0;i<spec.models;i++) {
     const at=root+8+i*20;scalar(at);const lifetime=d.getFloat32(at);if(!Number.isFinite(lifetime))throw Error('Invalid effect lifetime');
     const joint=pointer(at+4),animation=pointer(at+8),material=pointer(at+12),shape=pointer(at+16);
-    if(joint===null||shape!==null)throw Error('Unsupported effect model');
+    if(joint===null)throw Error('Unsupported effect model');
     const scene=convertSceneAsset(archiveRootView(a,'effect_Share_joint',joint));
     for(const p of scene.pointerSlots)pointer(p);for(const [p,size] of scene.writes)scalar(p,size);
-    const anim=animation===null?null:readJointAnimation(a,animation);if(anim){words(anim);for(const n of anim.nodes)if(n.animation)for(const p of n.animation.packed)raw(p,1);}
+    const anim=animation===null?null:readJointAnimation(a,animation,new Set(scene.model.tree.nodes.map(n=>n.offset)));if(anim){words(anim);for(const n of anim.nodes)if(n.animation)for(const p of n.animation.packed)raw(p,1);}
     const mat=material===null?null:convertMaterialAnimation(archiveRootView(a,'effect_Share_matanim_joint',material));if(mat)words(mat);
-    effects.push({offset:at,lifetime,joint,animation,material,scene,anim,mat});
+    const shapeTopology=shape===null?null:shapeTree(shape);
+    effects.push({offset:at,lifetime,joint,animation,material,shape,shapeTopology,scene,anim,mat});
   }
-  if([...a.relocations].some(p=>!pointers.has(p)))throw Error('Untyped effect archive relocation');
-  return {root,cmd,tex,bank,version,first,count,commands,textures,effects,pointerSlots:pointers,packedBytes:packed.size,
-    image:nativeSubgraphImage(body,pointers,new Map([['effCaptainDataTable',root]]))};
+  const untyped=[...a.relocations].filter(p=>!pointers.has(p));
+  // EfCo retains orphan export-time shape trees whose effect-table shape
+  // pointers are null. Only the graph reachable through the typed table is
+  // exposed to HSD; never relocate or expose those unused archive records.
+  if(untyped.length&&spec.bank!==0)throw Error('Untyped effect archive relocations: '+untyped.join(','));
+  return {root,cmd,tex,bank,version,first,count,commands,textures,effects,pointerSlots:pointers,unreferencedRelocations:untyped,packedBytes:packed.size,
+    image:nativeSubgraphImage(body,pointers,new Map([[spec.name,root]]))};
 }

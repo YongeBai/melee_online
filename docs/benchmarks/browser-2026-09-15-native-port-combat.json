@@ -332,5 +332,7 @@
     "Common hit effects and item systems remain incomplete.",
     "This is same-build repeatability, not a cross-check against retail gameplay or multiplayer rollback.",
     "Archives and collision arrays remain pinned until the instance is destroyed; rematch cleanup is pending."
-  ]
+  ],
+  "supersededBy": "browser-2026-09-15-native-port-effects-camera.json",
+  "validationCorrection": "This historical probe omitted the common effects bank and did not detect retail-global-layout memory corruption. Do not use its trace as a correctness baseline."
 }

@@ -101,7 +101,7 @@ double portSceneMetric(unsigned count,HSD_JObj** nodes,unsigned metric)
             7.0*j->translate.x+8.0*j->translate.y+9.0*j->translate.z;
         if(metric==1&&j->envelopemtx)for(int r=0;r<3;r++)for(int c=0;c<4;c++)value+=(r*4+c+1.0)*j->envelopemtx[r][c];
         if(metric==2&&HSD_IDGetDataFromTable(NULL,j->id,NULL)!=j)abort();
-        for(HSD_DObj* d=j->u.dobj;d;d=d->next) {
+        for(HSD_DObj* d=union_type_dobj(j)?j->u.dobj:NULL;d;d=d->next) {
             if(metric==3)value++;
             if(metric==4)value+=d->mobj->mat->alpha+2.0*d->mobj->mat->shininess;
             for(HSD_TObj* t=d->mobj->tobj;t;t=t->next)if(metric==5)value+=t->imagedesc->width+2.0*t->imagedesc->height+3.0*t->imagedesc->format;

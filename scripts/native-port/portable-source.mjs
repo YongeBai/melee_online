@@ -34,6 +34,26 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/melee/cm/camera.c') {
+      // Retail placed these separate symbols consecutively. C/WASM does not
+      // promise that layout: use the actual original camera descriptor.
+      replace('    struct CameraStaticData {\n        CameraModeCallbacks callbacks;\n        HSD_WObjDesc interest;\n        HSD_WObjDesc eyepos;\n        HSD_CameraDescPerspective desc;\n    }* data = (struct CameraStaticData*) &cm_803BCB18;','    HSD_CameraDescPerspective* desc = &cm_803BCB64;');
+      text=text.replaceAll('data->desc.','desc->');
+    }
+    if(file==='src/melee/ef/eflib.c') {
+      // The retail executable placed ParamTable immediately after AnimQueue.
+      // These out-of-array writes otherwise corrupt unrelated WASM globals.
+      for(const [from,to,count] of [
+        ['efLib_AnimQueue + 0x10','efLib_ParamTable',2],
+        ['efLib_AnimQueue[idx + 0x10]','efLib_ParamTable[idx]',4],
+      ]) {
+        if(text.split(from).length!==count+1)throw Error('Effect parameter table references changed');
+        text=text.replaceAll(from,to);
+      }
+      replace('    desc = &((EF_EffectDesc*) efAsync_DatEntries[gfx_id / 1000]',
+        '    HSD_ASSERTREPORT(0, gfx_id >= 0 && gfx_id / 1000 < 51 && efAsync_DatEntries[gfx_id / 1000].data != NULL, "Native effect bank not initialized: gfx=%d\\n", gfx_id);\n'+
+        '    desc = &((EF_EffectDesc*) efAsync_DatEntries[gfx_id / 1000]');
+    }
     if(file==='src/melee/gr/ground.c') {
       replace('    /* 0x4 */ u8 a : 1;\n    /* 0x4 */ u8 b : 1;\n    /* 0x4 */ u8 c : 1;\n    /* 0x4 */ u8 _ : 5;',
         '    /* Original archive byte: a=0x80, b=0x40, c=0x20. */\n    u8 _ : 5; u8 c : 1; u8 b : 1; u8 a : 1;');
@@ -41,6 +61,14 @@ export function preparePortableSource(source,output) {
       text+='LightList** portStageSelectLights(UnkArchiveStruct* archive, LightList** list) { return Ground_801C20E0(archive,list); }\n';
     }
     if(file==='src/sysdolphin/baselib/particle.c') {
+      // Particle teardown likewise aliases several independent retail globals
+      // through a fabricated aggregate. Preserve the real list and pool owners.
+      replace('    typedef struct {\n        HSD_JObj* jobj[8];\n        HSD_Particle* particle[146];\n        u8 pad[0x410];\n        HSD_ObjAllocData alloc_data;\n    } ParticleData;\n    ParticleData* data = (ParticleData*) hsd_804D08E8;','');
+      replace('head = &data->particle[gen->linkNo];','head = &hsd_804D0908[gen->linkNo];');
+      for(const [from,to,count] of [['data->jobj[jidx]','hsd_804D08E8[jidx]',3],['&data->alloc_data','&hsd_804D0F60.alloc_data',1]]) {
+        if(text.split(from).length!==count+1)throw Error('Particle teardown references changed');
+        text=text.replaceAll(from,to);
+      }
       replace('    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[0] = *p++;\n'+
         '    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[1] = *p++;\n'+
         '    ((ParticleFloatBytes*) &hsd_804D78D0)->bytes[2] = *p++;\n'+

@@ -7,6 +7,7 @@
 #include <melee/mp/mplib.h>
 #include <melee/mp/mpcoll.h>
 #include <melee/pl/player.h>
+#include <melee/cm/camera.h>
 #include <sysdolphin/baselib/gobj.h>
 #include <sysdolphin/baselib/gobjplink.h>
 #include <sysdolphin/baselib/cobj.h>
@@ -16,6 +17,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 _Static_assert(sizeof(UnkStageDat)==48&&sizeof(struct UnkStageDat_x8_t)==52,"Stage map ABI");
 _Static_assert(sizeof(GroundParam)==220&&sizeof(StageParam)==100,"Stage parameter ABI");
 extern int portSceneInitialize(void);
@@ -43,6 +45,37 @@ HSD_GObj* portStageMapCreate(unsigned index)
     return owners[index];
 }
 void portStageMapBounds(void){if(!owners[0])abort();Ground_801C39C0();Ground_801C3BB4();}
+/* Camera-related calls from Ground_801C0800 and fn_8016E730. Full Stage startup
+ * still owns other dependencies that this bring-up target has not integrated. */
+void portStageCameraStart(void)
+{
+    if(!installed||!collision_installed||!owners[0]||!Camera_80030A50())abort();
+    GroundParam* p=stage_info.param;
+    Ground_801C38D0(p->x8,p->x14,p->x1C,p->x18);
+    Ground_801C38EC(p->x10,p->xC);
+    Ground_801C3970(p->x28);
+    Ground_801C3900(p->x2E,p->x30,p->x34,p->x38,p->x3C,p->x40,p->x44,p->x48);
+    Ground_801C392C(p->x50,p->x54,p->x58,p->x5C,p->x60,p->x64);
+    Ground_801C3960(p->x20);Ground_801C3950(p->x24);
+    Camera_80030730(Ground_801C20D0());
+    Ground_EnableMatchCamera();Camera_8002F3AC();
+}
+/* Exact native view/projection inputs, before GPU clip-space conversion.
+ * Layout: view[12], projection[16], eye[3], interest[3], fov/aspect/near/far.
+ * The original camera aspect is preserved; output framing remains 4:3. */
+void portStageCameraSnapshot(float* output)
+{
+    HSD_GObj* object=Camera_80030A50();
+    if(!output||!object||!object->hsd_obj)abort();
+    HSD_CObj* c=object->hsd_obj;
+    Camera_8002A4AC(object);
+    if(HSD_CObjGetProjectionType(c)!=PROJ_PERSPECTIVE){fprintf(stderr,"Unexpected native projection %d\n",HSD_CObjGetProjectionType(c));abort();}
+    HSD_CObjGetViewingMtx(c,(float(*)[4])output);
+    MTXPerspective((float(*)[4])(output+12),HSD_CObjGetFov(c),HSD_CObjGetAspect(c),HSD_CObjGetNear(c),HSD_CObjGetFar(c));
+    HSD_CObjGetEyePosition(c,(Vec3*)(output+28));HSD_CObjGetInterest(c,(Vec3*)(output+31));
+    output[34]=HSD_CObjGetFov(c);output[35]=HSD_CObjGetAspect(c);output[36]=HSD_CObjGetNear(c);output[37]=HSD_CObjGetFar(c);
+    for(unsigned i=0;i<38;i++)if(!isfinite(output[i])){fprintf(stderr,"Nonfinite native camera field %u\n",i);abort();}
+}
 /* The original collision arrays are arena-lived. This bring-up runtime pins
  * both archives until the whole WASM instance is destroyed. */
 void portStageMapCollisionLoad(MapCollData* data)

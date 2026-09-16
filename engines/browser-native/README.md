@@ -579,3 +579,24 @@ fighters retain four stocks. Two fresh browsers have matching trace hashes.
 These scheduler steps are not presented frames or a performance benchmark.
 General hit effects, item systems, native match rendering, device sampling,
 audio, complete stage callbacks and rematch teardown remain integration work.
+
+## Common effects and native camera bring-up
+
+The constructor probe automatically loads the typed common and Captain effect
+banks through original `efAsync_LoadSync`. Missing effect banks abort before
+access. The common bank imports all 47 model descriptors, 592 particle commands,
+36 texture groups, empty shape-animation trees and the original spline data.
+Only the graph reachable from the effect table is exposed; 65 relocations in
+unreferenced export-time shape metadata are omitted from the native subgraph.
+
+The original C camera now supplies the view and projection snapshot. Use
+`node scripts/native-port/probe-constructor.mjs --camera` after the fighter-init
+build for the two-Falcon combat/camera integration probe. It validates matrices
+numerically and does not render gameplay or certify camera visual parity.
+
+The portable recipe removes three additional retail-global-adjacency assumptions:
+camera quake descriptors, effect parameter-table writes and particle teardown
+lists/pools. All refer directly to the intended original symbols. The common
+effect lifecycle suite runs with `verify-browser.mjs --fighter-init`.
+The earlier combat-only checkpoint omitted common effects and is superseded by
+these checks; same-build deterministic state alone did not detect corruption.

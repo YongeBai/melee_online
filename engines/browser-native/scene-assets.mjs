@@ -9,8 +9,8 @@ export function convertSceneAsset(input) {
   const archive=inspectArchive(input),d=archive.data,model=readModelMeshes(input),assets=readModelMaterials(input,model);
   readSkinBindings(input,model); // Validate every reference and weight first.
   if(archive.externs.size)throw Error('Scene extern references require explicit linking');
-  if(model.tree.nodes.some(n=>n.className!==null||n.constraints!==null||(n.flags&0x5020)))
-    throw Error('Custom, constrained, instance, spline or particle joints require a typed importer');
+  if(model.tree.nodes.some(n=>n.className!==null||n.constraints!==null||(n.flags&0x1020)))
+    throw Error('Custom, constrained, instance or particle joints require a typed importer');
   // Hide public entry points whose payload type has not been imported.
   const publics=new Map([...archive.publics].filter(([,at])=>at===model.tree.nodes[0].offset));
   const image=nativeArchiveImage(archive,publics);
@@ -24,6 +24,23 @@ export function convertSceneAsset(input) {
     for(const node of model.tree.nodes) {
       claim(node.offset,64);word(node.offset+4);for(let i=0;i<9;i++)word(node.offset+20+i*4);
       if(node.inverseBind!==null)for(let i=0;i<12;i++)word(node.inverseBind+i*4);
+      if(node.flags&0x4000) {
+        // HSD_Spline is the joint's display union, not a DObj. Keep the
+        // original control points and arc-length coefficients for HSD.
+        const at=node.display;
+        if(at===null||at%4||at+24>d.byteLength)throw Error('Invalid spline descriptor');
+        const type=d.getUint8(at),count=d.getInt16(at+2);
+        if(type>3||count<2||count>4096)throw Error('Invalid spline type/count');
+        if(!Number.isFinite(d.getFloat32(at+4))||!Number.isFinite(d.getFloat32(at+12))||d.getFloat32(at+12)<0)throw Error('Invalid spline parameter');
+        claim(at,24);half(at+2);word(at+4);word(at+12);
+        const sizes=[(type===1?3*(count-1)+1:type>=2?count+2:count)*3,count,(count-1)*5];
+        for(let k=0;k<3;k++) {
+          const data=ptr(at+[8,16,20][k]);
+          if(data===null){if(k===2&&type===0)continue;throw Error('Missing spline array');}
+          if(data%4||data+sizes[k]*4>d.byteLength)throw Error('Spline array bounds');
+          for(let i=0;i<sizes[k];i++){if(!Number.isFinite(d.getFloat32(data+i*4)))throw Error('Nonfinite spline coefficient');word(data+i*4);}
+        }
+      }
     }
     const dobjs=new Set();let weightSum=0;
     for(const mesh of model.meshes) {
