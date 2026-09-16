@@ -1,10 +1,12 @@
-/* Original part/material class setup and hurtbox routines in a limited Fighter
- * fixture. Combat, material drawing and dynamic-bone simulation are separate
+/* Original per-fighter field initialization, model/part setup and hurtbox
+ * routines in a limited Fighter fixture. Combat, material drawing and dynamic-bone simulation are separate
  * integration steps; no replacement collision algorithm is used here. */
 #include <melee/ft/fighter.h>
 #include <melee/ft/ftcoll.h>
 #include <melee/ft/ft_0C88.h>
 #include <melee/ft/ftdata.h>
+#include <melee/pl/player.h>
+#include <melee/pl/types.h>
 #include <melee/ft/ftanim.h>
 #include <sysdolphin/baselib/id.h>
 #include <melee/ft/ftparts.h>
@@ -57,17 +59,68 @@ unsigned portFighterModelLive(void)
     return fighter_parts_alloc_data.used+fighter_dobj_list_alloc_data.used+fighter_x2040_alloc_data.used+
         HSD_CLASS_INFO(&ftJObj)->head.nb_exist+HSD_CLASS_INFO(&ftPObj)->head.nb_exist+HSD_CLASS_INFO(&ftMObj)->head.nb_exist;
 }
-HSD_GObj* portFighterModelCreate(unsigned kind)
+typedef struct {ftCo_DatAttrs* attributes;itPickup* pickup;Vec2* offset;Fighter_WaitAnimData* motions;u8 (*mapping)[2];} FighterInitBinding;
+_Static_assert(sizeof(FighterInitBinding)==20,"Fighter initialization binding");
+_Static_assert(offsetof(Fighter,x670_timer_lstick_tilt_x)==0x670&&offsetof(Fighter,x68B)==0x68B,"Input timer byte range");
+static HSD_GObj* create_model_owner(unsigned kind)
 {
     if(kind>=27||!CostumeListsForeachCharacter[kind].costume_list[0].joint||portSceneInitialize()<0)return NULL;
     CollisionFixture* c=calloc(1,sizeof(*c));if(!c)return NULL;
     HSD_GObj* object=GObj_Create(HSD_GOBJ_CLASS_FIGHTER,8,0);if(!object){free(c);return NULL;}
     c->fighter.gobj=object;c->fighter.kind=kind;c->fighter.ft_data=&c->data;
     c->fighter.x34_scale.x=c->fighter.x34_scale.y=c->fighter.x34_scale.z=1.0f;
-    GObj_InitUserData(object,4,release_fixture,c);
+    GObj_InitUserData(object,4,release_fixture,c);return object;
+}
+static void attach_model(HSD_GObj* object)
+{
     Fighter_UnkUpdateCostumeJoint_800686E4(object);
-    initialize_part_pools();ftParts_80074E58(&c->fighter);
-    return object;
+    initialize_part_pools();ftParts_80074E58(&context(object)->fighter);
+}
+HSD_GObj* portFighterModelCreate(unsigned kind)
+{
+    HSD_GObj* object=create_model_owner(kind);if(object)attach_model(object);return object;
+}
+HSD_GObj* portFighterInitModelCreate(unsigned kind,unsigned slot,FighterInitBinding* data,unsigned sub,int tag)
+{
+    if(!portFighterStartupComplete()||slot>=6||!data||!data->attributes||!data->pickup||!data->offset||!data->motions||!data->mapping)return NULL;
+    HSD_GObj* object=create_model_owner(kind);if(!object)return NULL;CollisionFixture* c=context(object);
+    c->data.x0=data->attributes;c->data.x40=data->pickup;c->data.x50=data->offset;c->data.xC=data->motions;c->data.x10=data->mapping;
+    struct plAllocInfo info={0};info.internal_id=kind;info.slot=slot;info.x5=tag;info.b0=sub!=0;
+    // Seed input history to prove the original initializer resets it.
+    memset(&c->fighter.input,0xA5,sizeof(c->fighter.input));
+    ftData* previous=gFtDataList[kind];gFtDataList[kind]=&c->data;
+    Fighter_UnkInitLoad_80068914(object,&info);gFtDataList[kind]=previous;
+    attach_model(object);return object;
+}
+void portFighterPlayerConfigure(unsigned slot,unsigned controller,unsigned costume,unsigned team,unsigned player,float scale,unsigned flags)
+{
+    if(slot>=6||controller>4||costume>255||team>3||player>5||scale<=0)abort();
+    Player_SetControllerIndex(slot,controller);Player_SetCostumeId(slot,costume);Player_SetTeam(slot,team);Player_SetPlayerId(slot,player);Player_SetModelScale(slot,scale);
+    Player_SetFlagsBit5(slot,flags&1);Player_SetFlagsBit6(slot,(flags>>1)&1);Player_SetFlagsBit7(slot,(flags>>2)&1);
+    Player_SetMoreFlagsBit1(slot,(flags>>3)&1);Player_SetMoreFlagsBit2(slot,(flags>>4)&1);Player_SetMoreFlagsBit6(slot,(flags>>5)&1);Player_SetFlagsAEBit0(slot,(flags>>6)&1);
+}
+extern MotionState* ftData_CharacterStateTables[Ft_Kind_Max];
+double portFighterInitRead(HSD_GObj* object,unsigned field,unsigned index)
+{
+    Fighter* fp=&context(object)->fighter;
+    switch(field) {
+    case 0:return fp->kind;case 1:return fp->player_id;case 2:return fp->x61A_controller_index;
+    case 3:return fp->x618_player_id;case 4:return fp->x619_costume_id;case 5:return fp->team;case 6:return fp->is_sub_fighter;case 7:return fp->x61C;case 8:return fp->x34_scale.x;
+    case 9:return fp->x18;case 10:return fp->x1C_actionStateList==ftData_MotionStateList;case 11:return fp->x20_actionStateList==ftData_CharacterStateTables[fp->kind];
+    case 12:return (uintptr_t)fp->x24;case 13:return (uintptr_t)fp->x28;case 14:return fp->gobj==object;
+    case 15:return fp->is_always_metal|(fp->x2226_b3<<1)|(fp->x2226_b6<<2)|(fp->x2225_b5<<3)|(fp->x2225_b7<<4)|(fp->x2228_b3<<5)|(fp->x2229_b1<<6);
+    case 16:if(index>=4)abort();return ((u8*)&fp->x610_color_rgba[0])[index];
+    case 20:return (uintptr_t)&fp->co_attrs;case 21:return (uintptr_t)&fp->x294_itPickup;case 22:return (uintptr_t)&fp->x2C4;
+    case 23:return sizeof(ftCo_DatAttrs);
+    case 24:
+        if(index<6)return index%2?fp->input.lstick[index/2].y:fp->input.lstick[index/2].x;
+        if(index<12){index-=6;return index%2?fp->input.cstick[index/2].y:fp->input.cstick[index/2].x;}
+        if(index<15)return fp->input.triggers[index-12];if(index<18)return fp->input.held_buttons[index-15];
+        if(index==18)return fp->input.pressed_buttons;if(index==19)return fp->input.released_buttons;abort();
+    case 25:if(index>=28)abort();return ((u8*)fp)[0x670+index];
+    case 26:return fp->x21FC_flag.byte;case 27:return fp->smash_attrs.x2135;
+    default:abort();
+    }
 }
 int portCollisionAttach(HSD_GObj* object,CollisionData* data,unsigned count,HSD_JObj** parts,unsigned kind)
 {

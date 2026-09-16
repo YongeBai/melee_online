@@ -67,5 +67,5 @@ export function convertFighterMotions(input,name,spec) {
     if((i===0&&motion.nameAt!==null)||(i===12&&motion.script!==null))pointers.add(motion.offset+i);
   }
   for(const at of model.scripts.words.keys())out.setUint32(at,archive.data.getUint32(at),true);
-  return {...model,image:nativeSubgraphImage(data,pointers,new Map([['native_motion_table',model.table]]))};
+  return {...model,pointerSlots:pointers,image:nativeSubgraphImage(data,pointers,new Map([['native_motion_table',model.table]]))};
 }

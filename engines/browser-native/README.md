@@ -298,6 +298,35 @@ This does not create full fighters, initialize a tournament stage, draw original
 lighting or run a match. The startup and scene targets are distinct correctness
 fixtures; neither provides an FPS or input-latency measurement.
 
+## Original per-fighter initialization
+
+Prepare fixtures again to include the original SIS font, then:
+
+```sh
+node scripts/native-port/build.mjs --fighter-init
+node scripts/native-port/verify-browser.mjs --fighter-init
+```
+
+The `melee-fighter-init` target links the wider original game callback graph,
+including `Fighter_Create`, and executes `Fighter_UnkInitLoad_80068914` before
+model construction. Its typed binding imports common parameters, pickup offsets,
+the extra Vec2, motion rows and the two-byte per-animation mapping. The incomplete
+full `ftData` root is not published. The owner remains an integration fixture.
+
+The browser verifies five configurations for each of 27 components: player and
+controller indices, scales, seven player flags, costume fallback, color arithmetic,
+real action-table bindings, all 444 copied parameter bytes, seeded input history,
+timer sentinels and shared-pool cleanup. Original action callbacks are linked but
+not executed by this test; neither browser input polling nor combat is running.
+
+`game-link.mjs` excludes the console program entry point and renames only the
+six original definitions already implemented by the browser resident-file boundary.
+Their other callers and source-file functions remain unchanged. In addition to
+51 scene GX guards, 89 retained platform calls abort by name. They must be
+implemented when integration reaches them. This is not a hardware-complete game.
+The original SIS atlas is generated from the development executable into ignored
+output and linked into this target; no player disc upload is introduced.
+
 ## Next milestones
 
 1. Connect `Fighter_Create` to the native HSD owner, remaining fighter archive

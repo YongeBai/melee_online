@@ -5,6 +5,28 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a playable game yet, and there is no native-port FPS result.
 
+Original per-fighter field initialization now executes against native character
+data and the real action-state tables. All 27 character components pass five
+configurations each: 135 instances, five live together per character, and 69,876
+checks of parameter copies, player/controller fields, input history, timer
+sentinels, costume fallback, color calculation and cleanup. The input history
+starts with nonzero bytes so the original reset is exercised.
+
+The wider target also links original `Fighter_Create`, but does not execute it
+yet. Explicit `--no-entry` prevents Emscripten from also pulling the console
+entry point. Browser resident-file definitions replace only their matching
+original definitions; remaining game logic stays linked. There are 89 additional
+platform abort boundaries plus the existing 51 GX guards. No unsupported call is
+silently treated as successful. The supplied disc prepares the original SIS font
+only during development; browser startup remains automatic.
+
+The new target is 2,806,536 bytes, with many game/HSD objects still at audit
+optimization. It is not a performance build or a playable match. All 71 targeted
+tests, the original startup/scene checks and 81 unchanged diagnostic GPU images
+pass. Complete fighter-data import and execution of the full constructor remain
+next, followed by actual match-loop and renderer integration.
+[Per-fighter initialization checkpoint](benchmarks/browser-2026-09-15-native-port-fighter-initialization.json).
+
 Original global fighter startup now links and runs in a fresh browser runtime.
 `Fighter_FirstInitialize_80067A84` initializes all six original pools, 23 common
 data globals, shared materials, the original fallback lights and character startup

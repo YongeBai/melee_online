@@ -8,13 +8,15 @@ import {createHash} from 'node:crypto';
 import {preparePortableSource} from './portable-source.mjs';
 import {commandProbeSource} from './command-probes.mjs';
 import {sceneLinkInputs} from './scene-link.mjs';
+import {gameLinkInputs} from './game-link.mjs';
 const root = path.resolve(import.meta.dirname, '../..');
 const source = JSON.parse(fs.readFileSync(new URL('./source.json', import.meta.url)));
 const upstream = path.join(root, 'engines/melee-decomp');
 const output = path.join(root, 'dist/native-port');
-const startup=process.argv.includes('--startup');
-if(startup&&process.argv.includes('--scene'))throw Error('Choose one native integration target');
-const scene=startup||process.argv.includes('--scene'),moduleName=startup?'melee-startup':scene?'melee-scene':'melee-native';
+const fighterInit=process.argv.includes('--fighter-init');
+const startup=fighterInit||process.argv.includes('--startup');
+if(['--scene','--startup','--fighter-init'].filter(flag=>process.argv.includes(flag)).length>1)throw Error('Choose one native integration target');
+const scene=startup||process.argv.includes('--scene'),moduleName=fighterInit?'melee-fighter-init':startup?'melee-startup':scene?'melee-scene':'melee-native';
 const compiler = process.env.EMCC || path.join(root, '.browser-tools/emsdk/upstream/emscripten/emcc');
 const git = args => execFileSync('git', args, {cwd:upstream, encoding:'utf8'}).trim();
 if (git(['rev-parse', 'HEAD']) !== source.commit || git(['status', '--porcelain', '--untracked-files=no']))
@@ -42,12 +44,12 @@ for(const [name,file] of [['float-utils',path.join(vendor,'Common/FloatUtils.cpp
   execFileSync(compiler,['-std=c++20','-O2','-fno-fast-math','-ffp-contract=off','-fno-exceptions',
     '-I'+vendor,'-c',file,'-o',object],{stdio:'inherit'});
 }
-// This SDK file mixes portable C with inline PPC assembly. Select two complete
+// This SDK file mixes portable C with inline PPC assembly. Select complete
 // unchanged C definitions from the pinned source rather than compile asm stubs.
 const sdkMatrix=fs.readFileSync(path.join(upstream,'libs/dolphin/src/dolphin/mtx/mtx.c'),'utf8');
-const selectedSdkFunctions=['MTXRotRad','C_MTXLookAt'];
+const selectedSdkFunctions=['MTXRotRad','C_MTXLookAt',...(fighterInit?['MTXLightPerspective']:[])];
 const selectedText=[['void MTXRotRad(', '\nvoid PSMTXRotTrig('],
-  ['void C_MTXLookAt(', '\nvoid MTXLightFrustum(']].map(([start,end])=>{
+  ['void C_MTXLookAt(', '\nvoid MTXLightFrustum('],...(fighterInit?[['void MTXLightPerspective(', '\nvoid MTXLightOrtho(']]:[])].map(([start,end])=>{
     if(sdkMatrix.split(start).length!==2||sdkMatrix.split(end).length!==2)throw Error('SDK function selection changed');
     const from=sdkMatrix.indexOf(start),to=sdkMatrix.indexOf(end,from);
     if(to<from)throw Error('Invalid SDK selection');return sdkMatrix.slice(from,to);
@@ -123,11 +125,13 @@ if(scene) {
     'portFileInstall','portFileCount','portFileBytes','portFileReads','portFileAllocations','portFileClear','portFileArchive','portFileArchiveClose','portFileArchivePair',
     'portSceneAnimation','portSceneRequest','portSceneAnimate','portSceneFlags','portSceneLiveObjects');
 }
+if(fighterInit)exports.push('Fighter_Create','portFighterInitModelCreate','portFighterPlayerConfigure','portFighterInitRead');
 if(startup)exports.push('portFighterInitialize','portStartupMetric','portStartupResetCheck');
 const selectedUnits=scene?units.filter(file=>!file.startsWith('src/melee/')):units;
 selectedUnits.push('src/melee/lb/lbcommand.c');
 if(scene)selectedUnits.push('src/melee/ft/ft_0C88.c','src/melee/ft/ftmetal.c','src/melee/ft/ftanim.c','src/melee/ft/ftmaterial.c','src/melee/lb/lbrefract.c','src/melee/ft/ftdevice.c','src/melee/ft/kinds/ftCommon/ftCo_09F4.c','src/melee/ft/ft_0C8C.c','src/melee/ft/ftCo_800C7CA0.c','src/melee/ft/ftcoll.c','src/melee/lb/lbcollision.c','src/melee/lb/lb_00B0.c','src/melee/lb/lbanim.c','src/melee/lb/lbarchive.c','src/melee/lb/lb_013B.c','src/melee/lb/lb_0219.c','src/melee/ft/ftaction.c','src/melee/ft/ftcmdscript.c','src/melee/ft/ftcpuattack.c','src/melee/ft/ftdata.c','src/melee/ft/ftparts.c','src/melee/ft/ftcommon.c','src/melee/ft/fighter.c','src/melee/pl/player.c');
 if(startup)selectedUnits.push('src/melee/gr/ground.c','src/melee/gr/grdatfiles.c','src/melee/lb/lbspdisplay.c');
+const gameInputs=fighterInit?gameLinkInputs(root,upstream,output):null;
 execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.directory,file)), selectedSdk,sdkLight,textureSource,...estimateObjects,
   path.join(root, 'engines/browser-native/errors.c'),commandProbe,path.join(root,'engines/browser-native/commands.c'),
   ...(scene?[]:[path.join(root, 'engines/browser-native/platform.c'),path.join(root, 'engines/browser-native/fighter.c')]),
@@ -139,12 +143,13 @@ execFileSync(compiler, [...flags, ...selectedUnits.map(file=>path.join(portable.
   path.join(root, 'engines/browser-native/skin.c'),
   ...(sceneInputs?[attributeProbe,path.join(root,'engines/browser-native/attributes.c'),path.join(root,'engines/browser-native/character-collision.c'),sharedProbe,path.join(root,'engines/browser-native/cpu.c'),path.join(root,'engines/browser-native/colors.c'),path.join(root,'engines/browser-native/shared.c'),path.join(root,'engines/browser-native/motions.c'),path.join(root,'engines/browser-native/resident-files.c'),...sceneInputs.files]:[]),
   ...(startup?[path.join(root,'engines/browser-native/startup.c')]:[]),
-  '-Wl,--error-limit=0',
+  ...(gameInputs?gameInputs.files:[]),
+  '--no-entry','-Wl,--error-limit=0',
   '-sEXPORTED_FUNCTIONS=' + exports.map(x => '_' + x).join(','),
   '-sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32', '-sMODULARIZE=1',
   '-sEXPORT_NAME=createMeleeNative', '-sENVIRONMENT=web,node', '-sALLOW_MEMORY_GROWTH=1',
   '-sASSERTIONS=1', '-o', path.join(output, moduleName+'.mjs')], {cwd:upstream, stdio:'inherit'});
-for (const name of ['startup.html','verify-startup.mjs','costume-assets.mjs','animation-object-assets.mjs','material-animation-assets.mjs','verify-material-animation.mjs','visibility-assets.mjs','auxiliary-assets.mjs','verify-lights.mjs','attribute-assets.mjs','verify-attributes.mjs','character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
+for (const name of ['fighter-init-assets.mjs','verify-fighter-init.mjs','fighter-init.html','startup.html','verify-startup.mjs','costume-assets.mjs','animation-object-assets.mjs','material-animation-assets.mjs','verify-material-animation.mjs','visibility-assets.mjs','auxiliary-assets.mjs','verify-lights.mjs','attribute-assets.mjs','verify-attributes.mjs','character-collision-assets.mjs','verify-character-collision.mjs','verify-common-initialization.mjs','joint-animation-assets.mjs','verify-cpu.mjs','cpu-assets.mjs','color-reference.mjs','verify-colors.mjs','color-assets.mjs','verify-shared.mjs','shared-assets.mjs','verify-motions.mjs','motion-assets.mjs','motion-animations.mjs','verify-commands.mjs','resident-files.mjs','verify-resident-files.mjs','archive.mjs','scene-assets.mjs','verify-scene.mjs','scene.html', 'stage-collision.mjs', 'fighter-assets.mjs', 'verify-fighters.mjs',
   'animation-assets.mjs', 'verify-animations.mjs','math-reference.mjs','verify-math.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
@@ -153,6 +158,6 @@ const module = new WebAssembly.Module(wasm);
 const report = {source, compiler:execFileSync(compiler, ['--version'], {encoding:'utf8'}).split('\n')[0],
   units:selectedUnits,portableSource:portable.manifest,selectedSdkFunctions,selectedHsdFunctions:['MakeTextureMtx'],arithmeticReference:provenance,flags:flags.filter(x=>!x.startsWith('-I')), wasmBytes:wasm.length,
   wasmSha256:createHash('sha256').update(wasm).digest('hex'), imports:WebAssembly.Module.imports(module),
-  ...(scene?{sceneBringup:sceneInputs}:{}),...(startup?{startupEntry:'Fighter_FirstInitialize_80067A84',startupLights:'original Ground fallback; tournament stage initialization pending'}:{}),playable:false, gameplayParity:false, performanceCertified:false};
-fs.writeFileSync(path.join(output, startup?'startup-build.json':scene?'scene-build.json':'build.json'), JSON.stringify(report, null, 2) + '\n');
+  ...(scene?{sceneBringup:sceneInputs}:{}),...(gameInputs?{gameInputs}:{}),...(startup?{startupEntry:'Fighter_FirstInitialize_80067A84',startupLights:'original Ground fallback; tournament stage initialization pending'}:{}),playable:false, gameplayParity:false, performanceCertified:false};
+fs.writeFileSync(path.join(output, fighterInit?'fighter-init-build.json':startup?'startup-build.json':scene?'scene-build.json':'build.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify(report, null, 2));

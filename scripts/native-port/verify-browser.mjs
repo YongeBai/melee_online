@@ -6,9 +6,11 @@ import {promisify} from 'node:util';
 import {createNativePortServer} from './serve.mjs';
 const run=promisify(execFile), chrome=process.env.CHROME||'google-chrome';
 const allAnimations=process.argv.includes('--all-animations');
+const fighterInit=process.argv.includes('--fighter-init');
 const scene=process.argv.includes('--scene'),startup=process.argv.includes('--startup');
+if(fighterInit&&(scene||startup||allAnimations))throw Error('Fighter initialization requires a fresh target');
 if(startup&&(scene||allAnimations))throw Error('Startup verification needs its own fresh runtime');
-const reportPrefix=startup?'startup-':scene?'scene-':'';
+const reportPrefix=fighterInit?'fighter-init-':startup?'startup-':scene?'scene-':'';
 if(scene&&allAnimations)throw Error('Scene verification selects its explicit 38-clip integration corpus');
 const output=path.resolve(import.meta.dirname,'../../dist/native-port');
 const profile=fs.mkdtempSync(path.join(os.tmpdir(),'melee-native-port-check-'));
@@ -17,12 +19,13 @@ try {
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
   const {stdout}=await run(chrome,['--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
     '--user-data-dir='+profile,'--virtual-time-budget=15000','--dump-dom',
-    'http://127.0.0.1:'+server.address().port+'/'+(startup?'startup.html':scene?'scene.html':allAnimations?'?allanimations=1':'')],{timeout:60000,maxBuffer:8*1024**2});
+    'http://127.0.0.1:'+server.address().port+'/'+(fighterInit?'fighter-init.html':startup?'startup.html':scene?'scene.html':allAnimations?'?allanimations=1':'')],{timeout:60000,maxBuffer:8*1024**2});
   const match=stdout.match(/<pre id="result">([\s\S]*?)<\/pre>/);
   if(!match||!stdout.includes('data-result="passed"'))throw Error('Browser verification failed: '+(match?.[1]||stdout));
   const entities={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"'};
   const verification=JSON.parse(match[1].replace(/&(amp|lt|gt|quot);/g,x=>entities[x]));
-  if(startup) {
+  if(startup||fighterInit) {
+    if(fighterInit&&(!verification.perFighter?.passed||verification.perFighter.rows.length!==27||verification.perFighter.instances!==135))throw Error("Incomplete original per-fighter initialization");
     if(!verification.passed||verification.pools.length!==6||verification.lights.length!==2||verification.schedulerSteps!==120||verification.modelInstances!==54||verification.modelRows.length!==27||!verification.resetChecks||!verification.startupOrder?.passed)throw Error('Incomplete original fighter startup');
   } else if(scene) {
     if(!verification.attributes?.passed||verification.attributes.rows.length!==27||verification.attributes.copies!==135)throw Error('Incomplete original character attribute coverage');
@@ -44,7 +47,7 @@ try {
   const report={browser:(await run(chrome,['--version'])).stdout.trim(),
     build:JSON.parse(fs.readFileSync(path.join(output,reportPrefix+'build.json'))),verification};
   fs.writeFileSync(path.join(output,reportPrefix+'browser-verification.json'),JSON.stringify(report,null,2)+'\n');
-  console.log(JSON.stringify({passed:true,...(startup?{startup:true}:scene?{sceneModels:verification.models.length}:{stages:verification.stages.length,fighters:verification.fighters.length}),
+  console.log(JSON.stringify({passed:true,...(startup||fighterInit?{startup:true,fighterInit}:scene?{sceneModels:verification.models.length}:{stages:verification.stages.length,fighters:verification.fighters.length}),
     clips:verification.animations?.clips.length,wasmBytes:report.build.wasmBytes,playable:false,performanceMeasured:false}));
 } finally {
   await new Promise(resolve=>server.close(resolve));
