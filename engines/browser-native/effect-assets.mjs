@@ -46,7 +46,7 @@ export function convertCommonEffects(input) {
   return convertEffects(input,{name:'effCommonDataTable',bank:0,first:0,count:592,groups:36,models:47});
 }
 export function convertKirbyCopyEffects(input,code){
-  const profile={Pk:['Pikachu',36,4,2,0],Pc:['Pikachu',36,4,2,0],Fx:['Fox',33,0,0,1],Mr:['Mario',32,7,3,1],Dr:['Mario',32,7,3,1],Lg:['Luigi',37,7,3,1],Ca:['Captain',38,4,3,2],Gn:['Ganon',47,4,3,2]}[code];
+  const profile={Ss:['Samus',34,11,7,1],Pk:['Pikachu',36,4,2,0],Pc:['Pikachu',36,4,2,0],Fx:['Fox',33,0,0,1],Mr:['Mario',32,7,3,1],Dr:['Mario',32,7,3,1],Lg:['Luigi',37,7,3,1],Ca:['Captain',38,4,3,2],Gn:['Ganon',47,4,3,2]}[code];
   if(!profile)throw Error('Kirby copy effect conversion pending: '+code);
   return convertEffects(input,{name:'effKirby'+profile[0]+'DataTable',bank:profile[1],first:profile[1]*1000,count:profile[2],groups:profile[3],models:profile[4]});
 }
@@ -65,7 +65,7 @@ function convertEffects(input,spec) {
   function pointer(at){claim(at,4);const v=d.getUint32(at);if(!a.relocations.has(at)){if(v)throw Error('Unrelocated effect pointer');out.setUint32(at,0,true);return null;}bounds(v,1,1);pointers.add(at);out.setUint32(at,v,true);return v;}
   function raw(at,size){bounds(at,size,1);for(let i=at;i<at+size;i++){if(claims.has(i)||a.relocations.has(i&~3))throw Error('Effect payload overlaps descriptor');packed.add(i);}}
   function words(tree){for(const at of tree.words)tree.pointers.has(at)?pointer(at):scalar(at);if(tree.halves)for(const at of tree.halves)scalar(at,2);if(tree.packed)for(const at of tree.packed)raw(at,1);}
-  const cmd=spec.stage?root:pointer(root),tex=spec.stage?a.publics.get('map_texg'):pointer(root+4),commands=[],textures=[];
+  const cmd=spec.stage?root:pointer(root),tex=spec.stage?a.publics.get('map_texg'):pointer(root+4),commands=[],textures=[],relocationOnlyPalettes=[];
   if(spec.stage&&(tex===undefined||tex===cmd))throw Error('Missing stage particle texture root');
   let version=null,bank=spec.bank,first=spec.first,count=spec.count;
   if(spec.count){
@@ -88,7 +88,18 @@ function convertEffects(input,spec) {
       const n=scalar(at),format=scalar(at+4),tlut=scalar(at+8),width=scalar(at+12),height=scalar(at+16),palnum=scalar(at+20,2),palflag=scalar(at+22,2);
       if(n>256||!n||palnum>256)throw Error('Invalid particle texture count');
       const size=textureByteLength(width,height,format),palettes=[8,9,10].includes(format)?((palflag&1)?1:(palnum||n)):0,slots=[];
-      for(let t=0;t<n+palettes;t++){const sizeBytes=t<n?size:2*({8:16,9:256,10:16384}[format]),p=relative(at+24+t*4,sizeBytes);if(p!==null)raw(p,sizeBytes);slots.push(p);}
+      for(let t=0;t<n+palettes;t++){
+        const slot=at+24+t*4,sizeBytes=t<n?size:2*({8:16,9:256,10:16384}[format]);
+        // USA 1.02 EfKbSs retains this invalid palette in texture group 0.
+        // psInitDataBankLocate only adds the texture-bank base; it never reads
+        // the palette. Preserve that relocation exactly, without manufacturing
+        // texture data. Actual selection still fails the runtime texture bounds
+        // check. All other palette/image extents remain strictly validated.
+        if(spec.name==='effKirbySamusDataTable'&&a.dataSize===41852&&root===0&&cmd===32&&tex===1120&&i===0&&at===1152&&n===1&&format===9&&tlut===2&&width===64&&height===64&&palnum===0&&palflag===0&&t===1&&d.getUint32(at+24)===64&&d.getUint32(slot)===0x80a8812a){
+          const offset=scalar(slot);slots.push(tex+offset);relocationOnlyPalettes.push({group:i,slot,relativeOffset:offset});continue;
+        }
+        const p=relative(slot,sizeBytes);if(p!==null)raw(p,sizeBytes);slots.push(p);
+      }
       textures.push({offset:at,count:n,format,tlut,width,height,palnum,palflag,palettes,slots});
     }
     for(const c of commands.filter(Boolean))if(c.shorts[1]>=groups)throw Error('Particle texture group index');
@@ -136,6 +147,6 @@ function convertEffects(input,spec) {
   // those orphan records reachable through the published effect table.
   if(spec.bank===1&&untyped.length&&(effects.some(e=>e.shape!==null)||JSON.stringify(untyped)!==JSON.stringify([73192,73212,77816,77840,77856,77872,77876,77880,77884,77900,77912])))throw Error('Unexpected Mario orphan shape layout');
   if(untyped.length&&!spec.stage&&![0,1,8].includes(spec.bank))throw Error('Untyped effect archive relocations: '+untyped.join(','));
-  return {stage:!!spec.stage,root,cmd,tex,bank,version,first,count,commands,textures,effects,pointerSlots:pointers,unreferencedRelocations:untyped,packedBytes:packed.size,
+  return {stage:!!spec.stage,root,cmd,tex,bank,version,first,count,commands,textures,effects,relocationOnlyPalettes,pointerSlots:pointers,unreferencedRelocations:untyped,packedBytes:packed.size,
     image:nativeSubgraphImage(body,pointers,new Map(spec.stage?[['native_stage_particles',cmd],['native_stage_particle_textures',tex]]:[[spec.name,root]]))};
 }

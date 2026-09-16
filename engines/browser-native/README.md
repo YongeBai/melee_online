@@ -97,6 +97,23 @@ the probe waits for bounded native retirement without deleting them. Contact
 mode turns the target away through controller input so its physical shield
 does not block the damage check. The native shield behavior remains active.
 
+Samus's copy (`--opponent=Ss`) imports the original nine-state Charge Shot
+Article, hat and effect bank 34. Both exported material/shape animation external
+chains are initialized to null at the original archive-loader boundary; the
+same normalized archive feeds model discovery. The lifecycle probe exercises
+partial ground/air shots, shield cancellation and stored charge, resuming to
+full charge, full ground/air shots, copy loss and reacquisition. Three read-only
+diagnostic fields expose stored charge, its original maximum and charging item;
+the probe never assigns these values or changes move callbacks.
+
+USA 1.02 `EfKbSs.dat` contains an out-of-range palette word in texture group 0.
+The original loader relocates it without reading the palette. A narrowly checked
+import case preserves that exact word and records it as `relocationOnlyPalettes`.
+Other invalid extents still reject, and actual rendering of that palette still
+fails the runtime memory bounds check. Do not invent a replacement palette or
+generalize this exception to other archives. Passing the exercised charge paths
+does not prove every possible particle-script path avoids this reference.
+
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy --stage-callbacks --render-steps --hardware
 node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mr --input --kirby-copy=spit --stage-callbacks --render-steps --hardware

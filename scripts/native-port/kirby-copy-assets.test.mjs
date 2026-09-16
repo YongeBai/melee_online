@@ -132,3 +132,25 @@ test('Link copies retain bow states, both arrow attachments and their original d
 test('Link copies reject missing or inconsistent attachment roots and malformed charge animation wrappers',()=>{
   for(const code of ['Lk','Cl'])for(const change of [a=>a.relocs.delete(168),a=>a.ptr(516,4400),a=>a.ptr(172,900),a=>a.d.setFloat32(176,NaN),a=>a.ptr(4304+8,4304),a=>a.ptr(40268-a.shift+20,5000),a=>a.ptr(18944-a.shift,4096),a=>a.d.setUint32(6000,4)])assert.throws(()=>convertKirbyCopy(bowFixture(code,change),code));
 });
+
+function chargeFixture(change=()=>{}){
+  const body=new Uint8Array(52696),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(640,2000);d.setUint32(644,1);ptr(648,440);ptr(652,616);
+  ptr(616,0);ptr(620,132);ptr(628,472);ptr(632,400);ptr(400,4096);d.setUint32(404,1);
+  [70,0,1.3,2.7,4,22,.5,2].forEach((n,i)=>d.setFloat32(132+i*4,n));
+  for(const joint of [2000,4096])for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  for(let i=0;i<9;i++){ptr(472+i*16,5000);d.setUint32(476+i*16,i<8?476+(i+1)*16:0xffffffff);d.setUint32(480+i*16,i<8?480+(i+1)*16:0xffffffff);}
+  for(const [at,to]of [[52664,5000],[52672,4096],[52676,52664],[52688,52672]])ptr(at,to);
+  const names=['ftDataKirbyCopySamus','ItmKirbySsChargeShot_TopN_matanim_joint','ItmKirbySsChargeShot_TopN_shapeanim_joint'];
+  change({d,ptr,relocs,names});
+  const text=new TextEncoder().encode(names.join('\0')+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+24+text.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,2].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));
+  let offset=0;[640,476,480].forEach((at,i)=>{out.setUint32(pub+i*8,at);out.setUint32(pub+i*8+4,offset);offset+=names[i].length+1;});bytes.set(text,pub+24);return bytes;
+}
+test('Samus copy initializes both original external chains to null across all nine Charge Shot states',()=>{
+  const input=chargeFixture(),before=input.slice(),r=convertKirbyCopy(input,'Ss'),d=new DataView(r.image.buffer,32);assert.deepEqual(input,before);assert.equal(new DataView(r.bytes.buffer).getUint32(16),0);
+  assert.deepEqual(r.articles.rows.map(a=>[a.stateCount,a.specialWords]),[[9,8]]);assert.equal(r.unreferencedRelocations.length,4);
+  for(let i=0;i<9;i++){assert.equal(d.getUint32(476+i*16,true),0);assert.equal(d.getUint32(480+i*16,true),0);assert.equal(r.articles.rows[0].animations[i].joint,5000);assert.equal(r.articles.rows[0].animations[i].material,null);assert.equal(r.articles.rows[0].animations[i].shape,null);}
+  assert.equal(d.getFloat32(148,true),4);assert.equal(d.getFloat32(152,true),22);
+  for(const change of [a=>a.names[1]='UnexpectedExternal',a=>a.d.setUint32(476,476),a=>a.d.setUint32(480,476),a=>a.d.setUint32(476,52696),a=>a.ptr(52664,2000),a=>a.ptr(476,5000)])assert.throws(()=>convertKirbyCopy(chargeFixture(change),'Ss'));
+});

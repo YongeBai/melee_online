@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Samus copy now imports the original hat, nine-state Charge Shot Article
+and effect bank 34. The rendered lifecycle passes 3,176 input frames plus 124
+intro frames, covering partial and full ground/air shots, shield cancellation,
+stored charge, resuming charge, copy loss and reacquisition. Cancellation stores
+level 3 of 7; full shots consume charge, and reacquisition starts at zero.
+The contact probe passes 1,039 rendered frames with GPU validation, increasing
+target damage from 8 to 19 with nine hitlag frames at impact. The saved firing
+frame checks 20,775 vertices. Original callbacks and controller inputs drive
+the sequence; the added charge diagnostics only read state.
+
+The original effect archive contains an invalid palette reference in group 0.
+Its loader relocates that word without reading the palette. The importer now
+preserves this exact pinned case; selected texture memory remains bounds checked,
+and other invalid references still reject. The exercised charge paths pass, but
+this does not prove every possible effect-script path avoids the reference.
+The loaded copy effect bank passes 725 descriptor/relocation checks. All 221 unit
+tests and shared browser checks pass. This is a compatibility checkpoint, not
+a new performance result or completion of the 720p60 goal.
+[Charge Shot copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-samus.json).
+
 Kirby's Link and Young Link copies now import their original hats, arrow/bow
 Articles and both arrow attachment models. Full rendered lifecycle checks pass
 2,205 and 2,303 input frames respectively, plus 124 intro frames each: acquisition,

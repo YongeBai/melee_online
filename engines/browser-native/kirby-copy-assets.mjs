@@ -1,4 +1,4 @@
-import {inspectArchive,archiveRootView,nativeSubgraphImage} from './archive.mjs';
+import {inspectArchive,archiveRootView,nativeSubgraphImage,initializeArchiveExternals} from './archive.mjs';
 import {convertSceneAsset} from './scene-assets.mjs';
 import {convertPartsVisibility} from './visibility-assets.mjs';
 import {convertArticleEntries} from './article-assets.mjs';
@@ -12,6 +12,7 @@ const profiles={
   Pk:{symbol:'Pikachu',dynamics:true,articles:[[2,4],[1,3]],wrappers:[[1,103488,103496,103512,[0],103504]]},
   Pc:{symbol:'Pichu',dynamics:true,articles:[[2,4],[1,3]],wrappers:[[1,115744,115752,115768,[0],115760]]},
   Fx:{symbol:'Fox',articles:[[2,10],[9,10]],wrappers:[[0,null,null,49320,[0]],[1,null,null,75392,[0]]]},
+  Ss:{symbol:'Samus',articles:[[9,8]],externals:['ItmKirbySsChargeShot_TopN_matanim_joint','ItmKirbySsChargeShot_TopN_shapeanim_joint'],wrappers:[[0,52664,null,52672,[0]]]},
   Ns:{symbol:'Ness',articles:[[3,11],[1,5]],wrappers:[[0,54308,null,54320,[0,1]],[1,81960,81968,81976,[0]]]},
   Pe:{symbol:'Peach',articles:[[2,1],[1,4]],wrappers:[[0,35884,35896,35908,[0,1]]]},
   Lk:{symbol:'Link',dynamics:true,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16864,[0]],[1,40268,null,40296,[0,1,2,3,4,5]]],attachmentWrappers:[[18944,0],[21024,1]]},
@@ -20,6 +21,7 @@ const profiles={
 };
 export function convertKirbyCopy(input,code){
   const profile=profiles[code];if(!profile)throw Error('Kirby copy conversion pending: '+code);
+  if(profile.externals)input=initializeArchiveExternals(input,profile.externals);
   const symbol='ftDataKirbyCopy'+profile.symbol,a=inspectArchive(input),d=a.data,root=a.publics.get(symbol);
   if(root===undefined||root+(profile.dynamics?24:20)>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
   const ptr=at=>{if(!a.relocations.has(at))throw Error('Missing Kirby copy pointer');const value=d.getUint32(at);if(value%4||value+4>a.dataSize)throw Error('Kirby copy pointer bounds');return value;};
@@ -76,5 +78,5 @@ export function convertKirbyCopy(input,code){
     orphan.set(model,attachment.joint);orphan.set(model+16,model);
   }
   if(untyped.length!==orphan.size||untyped.some(p=>!orphan.has(p)||d.getUint32(p)!==orphan.get(p))||[...pointers].some(p=>orphan.has(d.getUint32(p))))throw Error('Unexpected projectile copy orphan scene: '+JSON.stringify({untyped:untyped.map(p=>[p,d.getUint32(p)]),expected:[...orphan],reachable:[...pointers].filter(p=>orphan.has(d.getUint32(p)))}));
-  return {code,symbol,root,joint,scene,visibility,articles,dynamics,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(body,pointers,new Map([[symbol,root]]))};
+  return {code,symbol,root,joint,bytes:a.bytes,scene,visibility,articles,dynamics,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(body,pointers,new Map([[symbol,root]]))};
 }

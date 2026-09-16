@@ -1,0 +1,413 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "fe67291",
+  "scope": "Kirby Samus copy typed assets and original charge/store/cancel/fire/copy-loss lifecycle. No gameplay callbacks, camera or renderer behavior replaced.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "d9c18b9f95544c33a7a1f05aad1f2923363913b93674749fe71cbafe42fea895",
+    "wasmBytes": 2958157
+  },
+  "sourceHashes": {
+    "character-collision.c": "3cb4ceb8a9e3848e378a07b753eb93d04dd2a7dd55dd36f21a7032a0fe4708ab",
+    "constructor.html": "097d4ec8a7e03e8c54f9f0dd3dd2beeda592489ec417b348e8ead71c310a73f4",
+    "effect-assets.mjs": "90312abc59b5d9c8ae4f0a356a90b96502c632e3310073c5733fb4318d3d262a",
+    "kirby-copy-assets.mjs": "399ccc105457a88b8c4be6fa24316bdeb902707a7953de7bc6ad0bbd34f4ac3b",
+    "verify-kirby.mjs": "53cb0e3a33ae0f6d90320cb484b5d0fd11431dd569f9c07b2ad6ca7f06711e71"
+  },
+  "assets": {
+    "copy": {
+      "root": 640,
+      "joint": 16840,
+      "nodes": 1,
+      "meshes": 13,
+      "typedRelocations": 244,
+      "omittedExporterRelocations": [
+        52664,
+        52672,
+        52676,
+        52688
+      ],
+      "articles": [
+        {
+          "slot": 0,
+          "stateCount": 9,
+          "specialWords": 8,
+          "joint": 41128,
+          "animations": [
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            },
+            {
+              "joint": 52504,
+              "material": null,
+              "shape": null
+            }
+          ]
+        }
+      ]
+    },
+    "effect": {
+      "bank": 34,
+      "commands": 11,
+      "groups": 7,
+      "models": 1,
+      "typedRelocations": 36,
+      "relocationOnlyPalettes": [
+        {
+          "group": 0,
+          "slot": 1180,
+          "relativeOffset": 2158526762
+        }
+      ]
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ss --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contactGpu": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ss --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "baseSamus": "node scripts/native-port/probe-constructor.mjs --character=Ss --input --samus-moves",
+    "copyRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Lk|Pk --input --combat --kirby-copy=swallow"
+  },
+  "validation": {
+    "unitTests": {
+      "passed": 221,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "sharedBrowser": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "bb4254a711827bbfec23a38f81eea5ac23ec233341311fcafa16a8e4f3482eec"
+    },
+    "visualInspection": "Saved 960x720 copy hat and projectile images inspected. Original camera and 4:3 preserved; no retail image comparison.",
+    "browser": "Chrome 151.0.7922.137",
+    "gpu": {
+      "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+      "vendor": "Google Inc. (AMD)",
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+    },
+    "contactFiringVertices": 20775,
+    "shaderCases": 13,
+    "pixelChannelChecks": 52,
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-samus/full.json",
+      "sha256": "e2b6f2583eb0b2d021b82665db8b5e706c0ede6e21b9504124e181106a82495a",
+      "completed": true,
+      "copyFrames": 3034,
+      "renderedInputFrames": 3176,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          407,
+          408,
+          410,
+          24,
+          25,
+          411,
+          412,
+          409,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292
+        ]
+      ],
+      "itemKinds": [
+        151,
+        52
+      ],
+      "charge": {
+        "partial": 3,
+        "stored": 3,
+        "max": 7,
+        "afterReacquire": 0
+      },
+      "hat": [
+        13,
+        15990752,
+        15752072,
+        0,
+        0,
+        0,
+        0
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "effectBankChecks": {
+        "passed": true,
+        "checks": 725,
+        "models": 1,
+        "commands": 11,
+        "textures": 7,
+        "relocations": 36,
+        "unreferencedRelocations": 0
+      }
+    },
+    "contact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-samus/contact-gpu.json",
+      "sha256": "fcaff58078ef930ad331adfe18a230cba839dea7702dfa48847fd5c73e7aa5a3",
+      "completed": true,
+      "copyFrames": 897,
+      "renderedInputFrames": 1039,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          407,
+          408,
+          410
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          82
+        ]
+      ],
+      "itemKinds": [
+        151
+      ],
+      "hat": [
+        13,
+        14499776,
+        14411720,
+        0,
+        0,
+        0,
+        0
+      ],
+      "damage": [
+        8,
+        19
+      ],
+      "hitlagAtImpact": 9,
+      "effectBankChecks": null
+    },
+    "baseSamus": {
+      "completed": true,
+      "frames": 1715,
+      "phases": [
+        "partial Charge Shot",
+        "homing Missile",
+        "Super Missile",
+        "Bomb",
+        "Screw Attack",
+        "ground grapple",
+        "air grapple"
+      ],
+      "artifact": "dist/native-port/experiment-kirby-copy-samus/base-samus-regression.json",
+      "sha256": "985ebd544c3973cd805a78628e90e3d737a92f9f1c670edc47230d8e2c35761e"
+    },
+    "linkRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-samus/link-regression.json",
+      "sha256": "c49f14cc3074b08c4a71ea3013e3e3a16520496d18f22a8e65e1bc484c7cc942",
+      "completed": true,
+      "copyFrames": 2063,
+      "renderedInputFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          401,
+          402,
+          403,
+          24,
+          25,
+          404,
+          406,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        142,
+        140,
+        52
+      ],
+      "hat": [
+        6,
+        13936928,
+        13885868,
+        1,
+        3,
+        0,
+        0
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "effectBankChecks": null
+    },
+    "pikachuRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-samus/pikachu-regression.json",
+      "sha256": "144029c1e9ff92b2e54dbfe647a4959f04ce2feb566e7fc2c3a7e7db7d0127bc",
+      "completed": true,
+      "copyFrames": 1845,
+      "renderedInputFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          429,
+          24,
+          25,
+          430,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        147,
+        148,
+        52
+      ],
+      "hat": [
+        12,
+        1959744,
+        13485920,
+        3,
+        3,
+        3,
+        4
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "effectBankChecks": {
+        "passed": true,
+        "checks": 270,
+        "models": 0,
+        "commands": 4,
+        "textures": 2,
+        "relocations": 2,
+        "unreferencedRelocations": 0
+      }
+    }
+  },
+  "palette": {
+    "word": "0x80a8812a",
+    "slot": 1180,
+    "group": 0,
+    "behavior": "Preserve original relative relocation without reading or substituting palette data. Exact pinned descriptor exception only; runtime selection remains bounds-checked.",
+    "originalLoader": "src/sysdolphin/baselib/particle.c psInitDataBankLocate only adds texBank to palette pointers.",
+    "limits": "Exercised charge paths did not select the invalid palette; exhaustive particle-script reachability has not been established."
+  },
+  "limits": [
+    "Original C integration and internal GPU oracle, not retail per-frame parity.",
+    "GPU contact sequence precedes additional read-only copied-bank verification in constructor setup; same native core and rendering behavior. Full final lifecycle validates 725 bank fields and relocations.",
+    "No performance, distinct presentation cadence or input-to-photon latency measurement in this checkpoint.",
+    "Native port remains incomplete: remaining abilities/costumes, complete scenes/menus/audio, retail parity, networking and public static deployment.",
+    "Hosted automatic no-ISO flow unchanged; only development fixture preparation names were extended."
+  ]
+}

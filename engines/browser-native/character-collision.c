@@ -41,7 +41,20 @@ unsigned portKirbyRead(HSD_GObj* object,unsigned field)
 {
     if(!object||!object->user_data)abort();Fighter* fp=object->user_data;
     if(fp->kind!=Ft_Kind_Kirby)abort();
-    switch(field){case 0:return fp->u.kb.hat.kind;case 1:return (unsigned)fp->u.kb.hat.jobj;case 2:return fp->u.kb.hat.jobj?fp->u.kb.hat.jobj->id:0;case 3:return fp->dynamics_num;case 4:case 5:case 6:return (unsigned)fp->dynamics_num>field-4?fp->dynamic_bone_sets[field-4].dyn_desc.count:0;default:abort();}
+    switch(field){
+    case 0:return fp->u.kb.hat.kind;
+    case 1:return (unsigned)fp->u.kb.hat.jobj;
+    case 2:return fp->u.kb.hat.jobj?fp->u.kb.hat.jobj->id:0;
+    case 3:return fp->dynamics_num;
+    case 4:case 5:case 6:
+        return (unsigned)fp->dynamics_num>field-4?fp->dynamic_bone_sets[field-4].dyn_desc.count:0;
+    /* Read-only original Samus copy charge state, including stored charge when
+     * the charging item is absent. No test-only simulation overrides. */
+    case 7:return fp->u.kb.xA8;
+    case 8:return (unsigned)((ftKb_DatAttrs*)fp->dat_attrs)->specialn_ss_charge_time;
+    case 9:return (unsigned)fp->u.kb.xA4;
+    default:abort();
+    }
 }
 _Static_assert(sizeof(ftHurtboxInit)==40,"Hurtbox descriptor ABI");
 unsigned portPackedFlagBits(unsigned value)

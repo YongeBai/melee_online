@@ -124,3 +124,21 @@ test('Kirby Fox retains its model-only muzzle effect and no particle banks',()=>
 test('Pikachu and Pichu copies share the original particle-only bank 36',()=>{
   const spec={symbol:'effKirbyPikachuDataTable',bank:36,count:4,groups:2,models:0};for(const code of ['Pk','Pc']){const input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,code);assert.deepEqual(input,before);assert.equal(r.bank,36);assert.equal(r.effects.length,0);assert.equal(r.commands.length,4);assert.equal(r.textures.length,2);assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.d.setUint16(a.cmd+2,7)),code));}
 });
+
+function samusCopyPaletteFixture(change=()=>{}){
+  const body=new Uint8Array(41852),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{relocs.add(at);d.setUint32(at,to);};
+  ptr(0,32);ptr(4,1120);ptr(12,41416);
+  d.setUint16(32,0x42);d.setUint16(34,34);d.setUint32(36,34000);d.setUint32(40,11);d.setUint32(1120,7);d.setUint32(1124,32);
+  for(const [at,n]of [[1152,1],[1156,9],[1160,2],[1164,64],[1168,64],[1176,64],[1180,0x80a8812a]])d.setUint32(at,n);
+  for(let i=0;i<3;i++)d.setFloat32(41416+32+i*4,1);
+  change({d,ptr,body});
+  const name=new TextEncoder().encode('effKirbySamusDataTable\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));bytes.set(name,pub+8);return bytes;
+}
+test('Samus copy preserves its pinned relocation-only palette without reading or substituting texture data',()=>{
+  const input=samusCopyPaletteFixture(),before=input.slice(),r=convertKirbyCopyEffects(input,'Ss'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.equal(r.bank,34);assert.equal(r.commands.length,11);assert.equal(r.effects.length,1);
+  assert.deepEqual(r.relocationOnlyPalettes,[{group:0,slot:1180,relativeOffset:0x80a8812a}]);
+  assert.equal(d.getUint32(1180,true),0x80a8812a);assert.deepEqual(r.textures[0].slots,[1184,1120+0x80a8812a]);assert.equal(r.packedBytes,4096);
+  for(const change of [a=>a.d.setUint32(1180,0x80a8812b),a=>a.d.setUint32(1164,32),a=>a.d.setUint32(1160,1),a=>a.d.setUint16(1172,1),a=>a.d.setUint32(1176,68),a=>{a.d.setUint32(1124,0);a.d.setUint32(1128,32);},a=>a.ptr(1180,0)])assert.throws(()=>convertKirbyCopyEffects(samusCopyPaletteFixture(change),'Ss'));
+});

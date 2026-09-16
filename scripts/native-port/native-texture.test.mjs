@@ -44,3 +44,8 @@ test('texgen enable count preserves initialized registers across particle mode c
   f.words[3]=1;assert.equal(readNativeTextures(f.module).generators.length,1);
   f.words[1]=0;assert.throws(()=>readNativeTextures(f.module),/resource masks/);
 });
+
+test('an actually selected out-of-heap particle palette fails before texture decoding',()=>{
+  const f=fixture(),t={...readNativeTextures(f.module).textures[0],format:9,paletteAddress:1120+0x80a8812a,paletteEntries:256,paletteFormat:2};
+  assert.throws(()=>decodeNativeTexture(f.module,t),/memory bounds/);
+});
