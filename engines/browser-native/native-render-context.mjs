@@ -26,3 +26,25 @@ export function checkNativeRenderContext(context,camera,pixel) {
   if(context.viewport[2]<=0||context.viewport[3]<=0||context.viewport[4]!==0||context.viewport[5]!==1||!context.scissor[2]||!context.scissor[3])throw Error('Invalid native viewport');
   if(pixel)for(const channel of pixel.channels)if(channel?.enabled&&(channel.lights&~context.lightMask))throw Error('Material references unloaded native light');
 }
+
+// Per-renderer memoization of decoded values, never of live native pointers.
+// Compare every context/fog word on every draw. lightLoads is a diagnostic
+// counter, returned exactly even when the remaining decoded values are reused.
+// All returned arrays are owned snapshots and must be treated as immutable.
+export function createNativeRenderContextReader(module){
+  const saved=new Uint32Array(158),savedFog=new Uint32Array(5);let context=null;
+  return ()=>{
+    const p=module._portRenderContextState(),q=module._portFogState(),heap=module.HEAPU8;
+    if(!p||p%4||p+632>heap.length)throw Error('Native render context bounds');
+    if(!q||q%4||q+20>heap.length)throw Error('Native fog bounds');
+    const words=new Uint32Array(heap.buffer,p,158),fog=new Uint32Array(heap.buffer,q,5);
+    let equal=context!==null;
+    if(equal)for(let i=0;i<158;i++)if(i!==1&&words[i]!==saved[i]){equal=false;break;}
+    if(equal)for(let i=0;i<5;i++)if(fog[i]!==savedFog[i]){equal=false;break;}
+    if(!equal){
+      // Validate before caching. A failed decode must not bless invalid bytes.
+      const decoded=readNativeRenderContext(module);saved.set(words);savedFog.set(fog);context=decoded;
+    }else if(context.lightLoads!==words[1])context={...context,lightLoads:words[1]};
+    return context;
+  };
+}

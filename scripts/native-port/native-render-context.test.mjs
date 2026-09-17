@@ -31,3 +31,23 @@ test('render capture fails closed on incomplete camera state, invalid colors and
   const t=fixture();t.f[50]=NaN;assert.throws(()=>readNativeRenderContext(t.module),/nonfinite/);
   assert.throws(()=>readNativeRenderContext({...t.module,_portRenderContextState:()=>700}),/bounds/);
 });
+
+test('context memoization compares all native words and preserves queued snapshots',async()=>{
+ const {createNativeRenderContextReader}=await import('../../engines/browser-native/native-render-context.mjs');
+ const {module,w,f}=fixture(),read=createNativeRenderContextReader(module),original=read();
+ assert.equal(read(),original);w[1]++;const counter=read();assert.notEqual(counter,original);assert.equal(counter.lightLoads,2);assert.equal(original.lightLoads,1);assert.equal(counter.lights,original.lights);
+ f[50]=9;const changed=read();assert.equal(changed.lights[1].angular[0],9);assert.equal(original.lights[1].angular[0],0);
+ f[50]=0;assert.deepEqual(read(),counter);
+ // Includes inactive light storage, not just the currently visible fields.
+ for(let i=0;i<158;i++){
+  const before=read(),word=w[i];w[i]^=1;
+  try{const expected=readNativeRenderContext(module),actual=read();assert.deepEqual(actual,expected);assert.notEqual(actual,before);}catch(e){assert.throws(()=>readNativeRenderContext(module));assert.throws(read);}
+  w[i]=word;assert.deepEqual(read(),readNativeRenderContext(module));
+ }
+ const fog=new Uint32Array(module.HEAPU8.buffer,16,5);
+ for(let i=0;i<5;i++){fog[i]^=1;assert.deepEqual(read(),readNativeRenderContext(module));fog[i]^=1;assert.deepEqual(read(),readNativeRenderContext(module));}
+ f[50]=NaN;assert.throws(read,/nonfinite/);assert.throws(read,/nonfinite/);f[50]=0;assert.deepEqual(read(),counter);
+ // Heap identity is not a cache key: replacement/growth still reads new bytes.
+ module.HEAPU8=module.HEAPU8.slice();new Float32Array(module.HEAPU8.buffer,64,158)[50]=12;assert.equal(read().lights[1].angular[0],12);
+ module._portRenderContextState=()=>700;assert.throws(read,/bounds/);
+});

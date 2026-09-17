@@ -23,7 +23,7 @@ if(mode==='calibration'){
 }else try{
  if(!Number.isInteger(frames)||frames<60||frames>3600||!['local','isolated','rollback'].includes(mode)||![0,1].includes(seat))throw Error('Certification configuration');
  const dirty=params.get('replicacopy')==='dirty'?await loadDirtyCore():null;const audio=createRollbackAudio(),bytes=dirty?.bytes??new Uint8Array(await(await fetch('./melee-fighter-init.wasm')).arrayBuffer());
- const runtime=await createSnapshotRuntime(create,bytes,{dirtyManifest:dirty?.manifest,onNativeMusic:r=>audio.request(r),onNativeAudioMode:()=>true}),module=runtime.module,cache=createPresentationCache();
+ const runtime=await createSnapshotRuntime(create,bytes,{dirtyManifest:dirty?.manifest,onNativeMusic:r=>audio.request(r),onNativeAudioMode:()=>true}),module=runtime.module,cache=createPresentationCache({submissionOptimized:params.get('drawopt')!=='0'});
  module._portMenuDiagnosticMute();
  const boot=await runNativeConstructor({module,presentationCache:cache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
   for(const image of document.querySelectorAll('img[id^="native-preview-"]'))image.remove();

@@ -4,7 +4,7 @@ import {readNativeTevState} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
 import {createNativePixelReader,gxAlphaTestRejectsAny} from './native-pixel.mjs';
 import {readNativeModelMatrices} from './native-model.mjs';
-import {readNativeRenderContext,checkNativeRenderContext} from './native-render-context.mjs';
+import {readNativeRenderContext,createNativeRenderContextReader,checkNativeRenderContext} from './native-render-context.mjs';
 import {inspectArchive} from './archive.mjs';
 import {snapshotShapeGeometry} from './shape-geometry.mjs';
 import {verifyShapeSamples} from './verify-shape.mjs';
@@ -23,7 +23,7 @@ export function nativePositionRoundoffBound(matrix,row,point) {
 // ordering and mutable-image invalidation remain work for the playable renderer.
 export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true,presentationCache=null}={}) {
   const assetLease=presentationCache?.acquire(gl);
-  const programs=assetLease?.programs??new Map(),variants=new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
+  const programs=assetLease?.programs??new Map(),variants=assetLease?.submissionOptimized?assetLease.variants:new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
   if(!view){assetLease?.release();throw Error('Native material view allocation');}
   // WebGL copies uniform arguments during the call. Reuse scratch storage;
   // queued native-state snapshots still own their data until their draw.
@@ -31,6 +31,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     registers:new Int32Array(16),konst:new Int32Array(16),ambient:new Int32Array(8),material:new Int32Array(8),lightColor:new Int32Array(32),
     lightPosition:new Float32Array(24),lightDirection:new Float32Array(24),lightAngular:new Float32Array(24),lightDistance:new Float32Array(24),bias:new Float32Array(8)};
   function packRows(target,rows,stride){target.fill(0);for(let i=0;i<rows.length;i++)if(rows[i])target.set(rows[i],i*stride);return target;}
+  const readContext=assetLease?.submissionOptimized?createNativeRenderContextReader(module):()=>readNativeRenderContext(module);
   const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
@@ -71,19 +72,21 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   }
   function apply(state,p,camera){
     gl.useProgram(p.program);const u=name=>p.uniform(name);
+    // A null location is absent from this linked program, including its transform
+    // feedback outputs. Preserve the old path for independent uncached oracles.
+    const active=name=>!assetLease?.submissionOptimized||u(name)!==null;
     if(state.context.fog?.type){const f=state.context.fog;gl.uniform2f(u('fogAC'),f.a,f.c);gl.uniform2i(u('fogBShift'),f.b,f.shift);gl.uniform3iv(u('fogColor'),f.color);}
     gl.uniformMatrix4fv(u('projection'),false,camera.projection);gl.uniform1i(u('currentMatrix'),state.model.current??0);
-    gl.uniform4fv(u('positionRows'),packRows(scratch.position,state.model.positions,12));gl.uniform4fv(u('normalRows'),packRows(scratch.normal,state.model.normals,12));
-    const {tex,post,bias}=scratch;tex.fill(0);post.fill(0);bias.fill(0);
-    for(const m of state.textures.matrices)(m.id<64?tex:post).set(m.values,(m.id<64?m.id-30:m.id-64)*4);
-    gl.uniform4fv(u('textureRows'),tex);gl.uniform4fv(u('postRows'),post);
-    gl.uniform4iv(u('tevRegisters'),packRows(scratch.registers,state.tev.registers,4));gl.uniform4iv(u('tevKonst'),packRows(scratch.konst,state.tev.konst,4));
-    for(let i=0;i<2;i++){scratch.ambient.set(state.pixel.colors[i].ambient,i*4);scratch.material.set(state.pixel.colors[i].material,i*4);}
-    gl.uniform4iv(u('ambientColor'),scratch.ambient);gl.uniform4iv(u('materialColor'),scratch.material);
-    scratch.lightColor.fill(0);for(let i=0;i<8;i++)if(state.context.lights[i])scratch.lightColor.set(state.context.lights[i].color,i*4);
-    gl.uniform4iv(u('lightColor'),scratch.lightColor);
+    if(active('positionRows'))gl.uniform4fv(u('positionRows'),packRows(scratch.position,state.model.positions,12));if(active('normalRows'))gl.uniform4fv(u('normalRows'),packRows(scratch.normal,state.model.normals,12));
+    const {tex,post,bias}=scratch,texActive=active('textureRows'),postActive=active('postRows');if(texActive)tex.fill(0);if(postActive)post.fill(0);bias.fill(0);
+    for(const m of state.textures.matrices)if(m.id<64?texActive:postActive)(m.id<64?tex:post).set(m.values,(m.id<64?m.id-30:m.id-64)*4);
+    if(texActive)gl.uniform4fv(u('textureRows'),tex);if(postActive)gl.uniform4fv(u('postRows'),post);
+    if(active('tevRegisters'))gl.uniform4iv(u('tevRegisters'),packRows(scratch.registers,state.tev.registers,4));if(active('tevKonst'))gl.uniform4iv(u('tevKonst'),packRows(scratch.konst,state.tev.konst,4));
+    if(active('ambientColor')){for(let i=0;i<2;i++)scratch.ambient.set(state.pixel.colors[i].ambient,i*4);gl.uniform4iv(u('ambientColor'),scratch.ambient);}
+    if(active('materialColor')){for(let i=0;i<2;i++)scratch.material.set(state.pixel.colors[i].material,i*4);gl.uniform4iv(u('materialColor'),scratch.material);}
+    if(active('lightColor')){scratch.lightColor.fill(0);for(let i=0;i<8;i++)if(state.context.lights[i])scratch.lightColor.set(state.context.lights[i].color,i*4);gl.uniform4iv(u('lightColor'),scratch.lightColor);}
     for(const [name,field] of [['lightPosition','position'],['lightDirection','direction'],['lightAngular','angular'],['lightDistance','distance']]){
-      const target=scratch[name];target.fill(0);for(let i=0;i<8;i++)if(state.context.lights[i])target.set(state.context.lights[i][field],i*3);gl.uniform3fv(u(name),target);
+      if(!active(name))continue;const target=scratch[name];target.fill(0);for(let i=0;i<8;i++)if(state.context.lights[i])target.set(state.context.lights[i][field],i*3);gl.uniform3fv(u(name),target);
     }
     for(const t of state.textures.textures){gl.activeTexture(gl.TEXTURE0+t.id);gl.bindTexture(gl.TEXTURE_2D,image(t));gl.uniform1i(u('image'+t.id),t.id);bias[t.id]=t.lod.bias;}
     gl.uniform1fv(u('lodBias'),bias);gl.uniform2iv(u('alphaReference'),[state.pixel.alphaTest.reference0,state.pixel.alphaTest.reference1]);
@@ -136,7 +139,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   module.onNativeDraw=(owner,joint,display,polygon,ptr,positions=0,count=0,normals=0,normalCount=0)=>{
     const plan=nativePlans.get(owner+':'+joint+':'+polygon);
     if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
-    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readContext()};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
     const shaped=(plan.mesh.flags&0x3000)===0x1000;
     if(shaped!==!!positions)throw Error('Native shape geometry missing or unexpected');
@@ -163,7 +166,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       immediateUsed++;plan.stream.vertexCount=plan.stream.indexCount=0;
       const attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
       plan.mesh={triangles:null,flags:cull<<14,attrs,vertices:[]};
-      const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+      const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readContext()};
       checkNativeRenderContext(state.context,snapshot,state.pixel);
       const flatRegisters=!state.textures.generators.some(g=>g.source>=5&&g.source<=11);
       queue.push({owner:kind===0?'particles':kind===1?'afterimage':'text',plan,state,camera:snapshot,program:program(state,attrs,kind===0?'particles':kind===1?'afterimage':'text',flatRegisters),immediate:true,flatRegisters,kind,textured});
@@ -222,7 +225,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           if((mesh.flags&0x3000)===0x1000)throw Error('Shape rendering requires original callbacks');
           const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[mesh.joint];
           const ptr=module._portMaterialDrawState(joint,plan.display,plan.polygon,view,owner);
-          const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
+          const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readContext()};
           checkNativeRenderContext(state.context,snapshot,state.pixel);
           queue.push({owner,plan,state,camera:snapshot,program:program(state,mesh.attrs)});count++;
         }
