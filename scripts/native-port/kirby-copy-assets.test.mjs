@@ -231,3 +231,19 @@ test('Bowser copy keeps a particle-only flame Article beside its dynamic hat des
   assert.deepEqual(input,before);assert.deepEqual(r.dynamics.map(x=>[x.bone,x.nodes]),[[3,2]]);assert.equal(d.getFloat32(0,true),-2.5);assert.equal(r.articles.rows[0].joint,null);assert.equal(r.articles.rows[0].stateCount,1);assert.equal(r.articles.rows[0].specialWords,6);assert.equal(d.getFloat32(316,true),3);assert.equal(r.unreferencedRelocations.length,0);
   for(const change of [a=>a.relocs.delete(492),a=>a.relocs.delete(496),a=>a.ptr(148,480),a=>a.d.setUint32(128,0),a=>a.ptr(124,2000),a=>a.ptr(1200,2000),a=>a.ptr(460,480)])assert.throws(()=>convertKirbyCopy(flameCopyFixture(change),'Kp'));
 });
+
+function iceCopyFixture(change=()=>{}){
+  const body=new Uint8Array(65240),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(1000,2000);d.setUint32(1004,1);ptr(1008,1100);ptr(1012,400);ptr(1016,5000);
+  ptr(400,0);ptr(404,132);ptr(412,600);ptr(416,500);ptr(500,4096);d.setUint32(504,1);ptr(600,6000);
+  for(let i=0;i<13;i++)d.setFloat32(132+i*4,(i-5)/2);
+  for(const joint of [2000,4096,5000])for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  for(const [at,to]of [[46228,6000],[46236,4096],[46240,46228],[46252,46236],[65216,5000],[65232,65216]])ptr(at,to);
+  change({d,ptr,relocs});const name=new TextEncoder().encode('ftDataKirbyCopyPopo\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,1000);bytes.set(name,pub+8);return bytes;
+}
+test('Ice Climbers copy imports its ice Article at +12 and separate hammer at +16',()=>{
+  const input=iceCopyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Pp'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.equal(r.articles.rows[0].stateCount,1);assert.equal(r.articles.rows[0].specialWords,13);assert.equal(r.articles.rows[0].joint,4096);assert.equal(r.articles.rows[0].animations[0].joint,6000);assert.equal(r.accessory.joint,5000);assert.equal(r.accessory.scene.model.tree.nodes.length,1);assert.equal(r.dynamics.length,0);assert.equal(r.unreferencedRelocations.length,6);assert.equal(d.getUint32(1012,true),400);assert.equal(d.getUint32(1016,true),5000);assert.equal(d.getFloat32(180,true),3.5);
+  for(const change of [a=>a.relocs.delete(1012),a=>a.relocs.delete(1016),a=>a.ptr(1012,5000),a=>a.ptr(1016,1000),a=>a.ptr(65216,2000),a=>a.ptr(46228,5000),a=>a.ptr(1500,5000)])assert.throws(()=>convertKirbyCopy(iceCopyFixture(change),'Pp'));
+});

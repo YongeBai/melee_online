@@ -1,0 +1,729 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "62c431e",
+  "scope": "Kirby Ice Climbers copy, original hammer attachment, ice Article/particles, ground/air lifecycle, native Nana-to-Popo copy normalization and GPU contact checks.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "c2b6051688b24be24235dd0a36f4e9fc726a9e6efbaf88d7755731b96979c795",
+    "wasmBytes": 2959167
+  },
+  "sourceHashes": {
+    "character-collision.c": "945a29a0fbff3c12a7868ce2bf945bc29dd1d1d31f24b75b2bd3475141ba772e",
+    "constructor.html": "bf02e663b798390f38dfa3249ea1879f29d6dc0da4c486d76e3ca4527470047c",
+    "kirby-copy-assets.mjs": "8d48f837ff74fcf3c7992a8c842f2a2a8aa9e517d7223f6cb05a4e76957f5bb7",
+    "effect-assets.mjs": "421816a22441e5973d31131c11fcced9d935369a29bc94410679df2f47bbfc98",
+    "verify-kirby.mjs": "a8c337ff300cd142f88f96168963503ec15e93a6caa607e2da2fb6fd173a472f"
+  },
+  "assets": {
+    "copy": {
+      "root": 332,
+      "dataSize": 65240,
+      "relocations": 211,
+      "externals": [],
+      "joint": 16712,
+      "hatNodes": 1,
+      "hatMeshes": 14,
+      "hammer": {
+        "joint": 48616,
+        "nodes": 3,
+        "meshes": 3
+      },
+      "dynamics": 0,
+      "articles": [
+        {
+          "article": 308,
+          "stateCount": 1,
+          "specialWords": 13,
+          "joint": 43432
+        }
+      ],
+      "typed": 205,
+      "omitted": [
+        [
+          46228,
+          46188
+        ],
+        [
+          46236,
+          43432
+        ],
+        [
+          46240,
+          46228
+        ],
+        [
+          46252,
+          46236
+        ],
+        [
+          65216,
+          48616
+        ],
+        [
+          65232,
+          65216
+        ]
+      ]
+    },
+    "effect": {
+      "bank": 46,
+      "commands": 7,
+      "textures": 3,
+      "models": 0,
+      "typed": 2,
+      "omitted": 0
+    }
+  },
+  "commands": {
+    "popoFull": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pp --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "nanaFull": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pp --input --kirby-copy=swallow --kirby-copy-nana --stage-callbacks --render-steps --hardware",
+    "contact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pp --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "royRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fe --input --combat --kirby-copy=swallow",
+    "bowserRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Kp --input --combat --kirby-copy=swallow",
+    "climbersRegression": "node scripts/native-port/probe-constructor.mjs --character=Pp --input --climbers-moves"
+  },
+  "validation": {
+    "tests": {
+      "passed": 232,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "shared": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "75cd0ae596a486e6929212c6286de99fdcbc5aecca79fecf0ed65b5059566db3"
+    },
+    "popoFull": {
+      "artifact": "dist/native-port/experiment-kirby-copy-ice/popo-full.json",
+      "sha256": "e2b3354e778c2cdc196a92493e68d4ab14e59b5f964349bea649a86f255d48cd",
+      "completed": true,
+      "frames": 1841,
+      "renderedFrames": 1983,
+      "introFrames": 124,
+      "donor": "primary",
+      "donorKind": 10,
+      "capturedKind": 10,
+      "recapturedKind": 11,
+      "copyKind": 10,
+      "states": [
+        [
+          14,
+          18,
+          15,
+          16,
+          353,
+          356,
+          358,
+          359,
+          367,
+          453,
+          24,
+          25,
+          454,
+          43,
+          264
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          18,
+          288,
+          289,
+          291,
+          292,
+          90,
+          183,
+          184,
+          186,
+          15,
+          78
+        ]
+      ],
+      "itemKinds": [
+        133,
+        52
+      ],
+      "hammerRenderedFrames": 173,
+      "peakHammerDraws": 3,
+      "hammerAttachmentFrames": 173,
+      "climberPairChecks": 1841,
+      "copySetup": [
+        {
+          "code": "Pp",
+          "root": 15331468,
+          "bodyCopy": false,
+          "hatNodes": 1,
+          "hatMeshes": 14,
+          "accessoryMeshes": 3,
+          "dynamicBoneChains": 0,
+          "articles": 1,
+          "effects": {
+            "passed": true,
+            "checks": 467,
+            "models": 0,
+            "commands": 7,
+            "textures": 3,
+            "relocations": 2,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "nanaFull": {
+      "artifact": "dist/native-port/experiment-kirby-copy-ice/nana-full.json",
+      "sha256": "77c0c377f1a20068883051b1031a8cb932b742052818571e396888af83bb210e",
+      "completed": true,
+      "frames": 2374,
+      "renderedFrames": 2516,
+      "introFrames": 124,
+      "donor": "nana",
+      "donorKind": 11,
+      "capturedKind": 11,
+      "recapturedKind": 11,
+      "copyKind": 10,
+      "states": [
+        [
+          14,
+          24,
+          25,
+          341,
+          42,
+          39,
+          244,
+          18,
+          15,
+          16,
+          353,
+          356,
+          358,
+          359,
+          367,
+          453,
+          454,
+          43,
+          265,
+          26,
+          41
+        ],
+        [
+          14,
+          39,
+          244,
+          29,
+          42,
+          15,
+          288,
+          289,
+          292,
+          78,
+          90,
+          191,
+          194
+        ]
+      ],
+      "itemKinds": [
+        133,
+        52
+      ],
+      "hammerRenderedFrames": 159,
+      "peakHammerDraws": 3,
+      "hammerAttachmentFrames": 159,
+      "climberPairChecks": 2374,
+      "copySetup": [
+        {
+          "code": "Pp",
+          "root": 15331468,
+          "bodyCopy": false,
+          "hatNodes": 1,
+          "hatMeshes": 14,
+          "accessoryMeshes": 3,
+          "dynamicBoneChains": 0,
+          "articles": 1,
+          "effects": {
+            "passed": true,
+            "checks": 467,
+            "models": 0,
+            "commands": 7,
+            "textures": 3,
+            "relocations": 2,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "contact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-ice/contact-gpu.json",
+      "sha256": "4d51db2f02a3a93e20d30f913db35598f05f0f1063b10deec3c567313be2f92c",
+      "completed": true,
+      "frames": 850,
+      "renderedFrames": 992,
+      "introFrames": 0,
+      "donor": "primary",
+      "donorKind": 10,
+      "capturedKind": 10,
+      "copyKind": 10,
+      "states": [
+        [
+          14,
+          18,
+          15,
+          16,
+          353,
+          356,
+          358,
+          359,
+          367,
+          453
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          18,
+          288,
+          289,
+          291,
+          292,
+          15,
+          78
+        ]
+      ],
+      "itemKinds": [
+        133
+      ],
+      "hammerRenderedFrames": 59,
+      "peakHammerDraws": 3,
+      "hammerAttachmentFrames": 59,
+      "climberPairChecks": 850,
+      "contact": {
+        "before": [
+          0,
+          8
+        ],
+        "after": [
+          0,
+          13
+        ],
+        "firstImpactHitlag": 4
+      },
+      "copySetup": [
+        {
+          "code": "Pp",
+          "root": 14002732,
+          "bodyCopy": false,
+          "hatNodes": 1,
+          "hatMeshes": 14,
+          "accessoryMeshes": 3,
+          "dynamicBoneChains": 0,
+          "articles": 1,
+          "effects": {
+            "passed": true,
+            "checks": 467,
+            "models": 0,
+            "commands": 7,
+            "textures": 3,
+            "relocations": 2,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "royRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-ice/roy-regression.json",
+      "sha256": "394ff0b40507c72d5e886c749db45c62e0186ced3e116f991016ec7f8fd9a706",
+      "completed": true,
+      "frames": 2496,
+      "renderedFrames": 0,
+      "introFrames": 0,
+      "donor": "primary",
+      "donorKind": 26,
+      "copyKind": 26,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          530,
+          531,
+          532,
+          24,
+          25,
+          534,
+          536,
+          533,
+          265
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "hammerAttachmentFrames": 0,
+      "climberPairChecks": 0,
+      "copySetup": [
+        {
+          "code": "Fe",
+          "root": 14046916,
+          "bodyCopy": false,
+          "hatNodes": 14,
+          "hatMeshes": 21,
+          "accessoryMeshes": 4,
+          "dynamicBoneChains": 4,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 702,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 302,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "bowserRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-ice/bowser-regression.json",
+      "sha256": "c4b37f560d1997178db319c53b7727ce25f863062b4da0da2c92ffdda17edc72",
+      "completed": true,
+      "frames": 3058,
+      "renderedFrames": 0,
+      "introFrames": 0,
+      "donor": "primary",
+      "donorKind": 5,
+      "copyKind": 5,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          443,
+          444,
+          445,
+          24,
+          25,
+          446,
+          447,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        154,
+        52
+      ],
+      "hammerAttachmentFrames": 0,
+      "climberPairChecks": 0,
+      "copySetup": [
+        {
+          "code": "Kp",
+          "root": 13663328,
+          "bodyCopy": false,
+          "hatNodes": 5,
+          "hatMeshes": 9,
+          "dynamicBoneChains": 1,
+          "articles": 1,
+          "effects": {
+            "passed": true,
+            "checks": 533,
+            "models": 0,
+            "commands": 4,
+            "textures": 1,
+            "relocations": 2,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "climbersRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-ice/climbers-regression.json",
+      "sha256": "8678cc47cdca3f3db2d7bb9b5bad36c6bdda26d7eb01472613080818639ea8b5",
+      "completed": true,
+      "frames": 4138,
+      "renderedFrames": 0,
+      "introFrames": 0,
+      "states": [
+        {
+          "name": "partner walk and jump",
+          "states": [
+            [
+              14,
+              18,
+              15,
+              24,
+              25,
+              29,
+              42
+            ],
+            [
+              14,
+              18,
+              15,
+              24,
+              25,
+              29,
+              42
+            ]
+          ]
+        },
+        {
+          "name": "ground Ice Shot",
+          "states": [
+            [
+              341,
+              14
+            ],
+            [
+              14,
+              341
+            ]
+          ]
+        },
+        {
+          "name": "air Ice Shot",
+          "states": [
+            [
+              24,
+              25,
+              342,
+              43,
+              14
+            ],
+            [
+              14,
+              24,
+              25,
+              342,
+              43
+            ]
+          ]
+        },
+        {
+          "name": "ground Blizzard",
+          "states": [
+            [
+              357,
+              39,
+              41,
+              14
+            ],
+            [
+              14,
+              357,
+              39,
+              41
+            ]
+          ]
+        },
+        {
+          "name": "air Blizzard",
+          "states": [
+            [
+              24,
+              25,
+              358,
+              357,
+              14
+            ],
+            [
+              14,
+              24,
+              25,
+              358,
+              357
+            ]
+          ]
+        },
+        {
+          "name": "ground Squall Hammer",
+          "states": [
+            [
+              344,
+              346,
+              14
+            ],
+            [
+              359,
+              360,
+              14
+            ]
+          ]
+        },
+        {
+          "name": "air Squall Hammer",
+          "states": [
+            [
+              24,
+              25,
+              346,
+              35,
+              43,
+              15,
+              16,
+              17,
+              14
+            ],
+            [
+              14,
+              24,
+              25,
+              360,
+              35,
+              43,
+              15,
+              20,
+              18,
+              16,
+              29,
+              27,
+              32,
+              42
+            ]
+          ]
+        },
+        {
+          "name": "ground Belay",
+          "states": [
+            [
+              39,
+              244,
+              29,
+              42,
+              14,
+              347,
+              348,
+              354,
+              35,
+              43
+            ],
+            [
+              14,
+              39,
+              244,
+              29,
+              42,
+              361,
+              365,
+              35,
+              43,
+              24,
+              25,
+              16
+            ]
+          ]
+        },
+        {
+          "name": "air Belay",
+          "states": [
+            [
+              39,
+              244,
+              42,
+              14,
+              18,
+              15,
+              16,
+              24,
+              25,
+              352,
+              353,
+              354,
+              35,
+              43
+            ],
+            [
+              14,
+              39,
+              244,
+              42,
+              18,
+              15,
+              16,
+              24,
+              25,
+              361,
+              365,
+              35,
+              43,
+              29
+            ]
+          ]
+        }
+      ],
+      "copySetup": []
+    },
+    "gpu": {
+      "renderer": {
+        "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+        "vendor": "Google Inc. (AMD)",
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+      },
+      "resolution": [
+        960,
+        720
+      ],
+      "vertices": 21091,
+      "shaderCases": 13,
+      "pixelChannels": 52,
+      "finalErrorCheck": true
+    },
+    "visual": "Saved Popo/Nana lifecycle and contact copyfire images inspected at 960x720. Original camera path and 4:3 framing preserved. No retail screenshot comparison."
+  },
+  "implementation": {
+    "assets": "Explicit +16 hammer and +12 ice Article; sword profiles retain +12 accessory/+16 dynamics. All reachable pointers typed; six exact unreachable exporter pointers validated and omitted. Bank 46 retains seven particle commands, three texture groups, no effect models.",
+    "accessory": "Adapter accepts the native hammer only when its JObj id matches the original copy descriptor. Original C attaches it to LThumbNb. GPU resources follow native removal.",
+    "nana": "--kirby-copy-nana targets the existing Player_GetEntityAtIndex(1,1) partner. Ordinary jumps/walking approach from outside the pair. Captured fighter kind is read before each swallow and must be Nana; original ftCo_800BD9E0 maps it to Popo. Both partners remain active with unchanged stocks. No position/AI/collision overrides.",
+    "diagnostics": "Read-only owned ice pointer, aerial-use flag and captured fighter pointer. Original gameplay C unchanged."
+  },
+  "limits": [
+    "Selected integration paths, not exhaustive retail trace or matchup parity.",
+    "The primary-donor sequence captures Popo first and Nana on reacquisition; the Nana-focused sequence captures Nana both times.",
+    "No new performance gain, presented-FPS or input-to-photon measurement.",
+    "Remaining copies, complete scenes/menus/audio, other costumes, retail parity, networking and public static deployment remain incomplete.",
+    "Automatic hosted no-ISO startup and native camera remain unchanged; no game assets or binaries committed."
+  ]
+}

@@ -160,3 +160,8 @@ test('Bowser copy retains the separate four-command particle bank without model 
   const spec={symbol:'effKirbyKoopaDataTable',bank:41,count:4,groups:1,models:0},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,'Kp');assert.deepEqual(input,before);assert.equal(r.bank,41);assert.equal(r.commands.length,4);assert.equal(r.textures.length,1);assert.equal(r.effects.length,0);
   for(const change of [a=>a.d.setUint16(a.cmd+2,12),a=>a.d.setUint32(a.cmd+8,9),a=>a.d.setUint32(a.tex,2),a=>a.ptr(12,512)])assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,change),'Kp'));
 });
+
+test('Ice Climbers copy preserves original particle bank 46 independently of the donor',()=>{
+  const spec={symbol:'effKirbyIceDataTable',bank:46,count:7,groups:3,models:0},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,'Pp');assert.deepEqual(input,before);assert.equal(r.bank,46);assert.equal(r.commands.length,7);assert.equal(r.textures.length,3);assert.equal(r.effects.length,0);
+  for(const change of [a=>a.d.setUint16(a.cmd+2,14),a=>a.d.setUint32(a.cmd+8,6),a=>a.d.setUint32(a.tex,2),a=>a.ptr(12,512)])assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,change),'Pp'));
+});

@@ -6,6 +6,7 @@ import {convertArticleEntries} from './article-assets.mjs';
 // Hat roots contain the joint, FtPartsDesc and up to two Articles.
 // Some copies append the original hat-bone dynamics descriptor.
 // Sword copies use +12 for a joint and +16 for dynamics, without Articles.
+// Ice Climbers uses +12 for its ice Article and +16 for its hammer joint.
 // Body copies instead embed visibility/texture selection first and reference
 // an extra model; their main model comes from a separate costume archive.
 const profiles={
@@ -22,10 +23,11 @@ const profiles={
   Pe:{symbol:'Peach',articles:[[2,1],[1,4]],wrappers:[[0,35884,35896,35908,[0,1]]]},
   Lk:{symbol:'Link',dynamics:20,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16864,[0]],[1,40268,null,40296,[0,1,2,3,4,5]]],attachmentWrappers:[[18944,0],[21024,1]]},
   Cl:{symbol:'Clink',dynamics:20,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16704,[0]],[1,40108,null,40136,[0,1,2,3,4,5]]],attachmentWrappers:[[18784,0],[20864,1]]},
+  Pp:{symbol:'Popo',accessory:16,accessoryWrapper:65216,articles:[[1,13]],wrappers:[[0,46228,null,46236,[0]]]},
   Kp:{symbol:'Koopa',dynamics:16,articles:[[1,6]]},
   Zd:{symbol:'Zelda',dynamics:12},Sk:{symbol:'Seak',dynamics:20,articles:[[5,3],[1,1]],wrappers:[[0,null,null,66016,[0]],[1,null,null,70464,[0]]]},
   Ca:{symbol:'Captain'},Gn:{symbol:'Ganon'},
-  Ms:{symbol:'Mars',accessory:true,accessoryWrapper:65952,dynamics:16},Fe:{symbol:'Emblem',accessory:true,accessoryWrapper:87392,dynamics:16},
+  Ms:{symbol:'Mars',accessory:12,accessoryWrapper:65952,dynamics:16},Fe:{symbol:'Emblem',accessory:12,accessoryWrapper:87392,dynamics:16},
 };
 export function convertKirbyCopy(input,code){
   const profile=profiles[code];if(!profile)throw Error('Kirby copy conversion pending: '+code);
@@ -35,9 +37,9 @@ export function convertKirbyCopy(input,code){
   const ptr=at=>{if(!a.relocations.has(at))throw Error('Missing Kirby copy pointer');const value=d.getUint32(at);if(value%4||value+4>a.dataSize)throw Error('Kirby copy pointer bounds');return value;};
   const jointSlot=root+(profile.bodyCopy?20:0),articleOffset=profile.bodyCopy?24:12;
   const joint=ptr(jointSlot),specs=profile.articles??[],entries=specs.map((_,slot)=>({slot,article:ptr(root+articleOffset+slot*4)}));
-  if(!profile.bodyCopy&&!profile.accessory)for(let i=specs.length;i<2;i++)if(articleOffset+i*4!==profile.dynamics&&(a.relocations.has(root+articleOffset+i*4)||d.getUint32(root+articleOffset+i*4)))throw Error('Unexpected copy Article/extra');
+  if(!profile.bodyCopy)for(let i=specs.length;i<2;i++)if(articleOffset+i*4!==profile.dynamics&&articleOffset+i*4!==profile.accessory&&(a.relocations.has(root+articleOffset+i*4)||d.getUint32(root+articleOffset+i*4)))throw Error('Unexpected copy Article/extra');
   const scene=convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+(profile.bodyCopy?0:4),profile.bodyCopy?6:1),articles=entries.length?convertArticleEntries(input,entries,Object.fromEntries(specs.map((s,i)=>[i,s])),{arrowSlots:profile.arrowSlots??[]}):{rows:[],attachments:[]};
-  const accessory=profile.accessory?{joint:ptr(root+12),scene:convertSceneAsset(archiveRootView(a,'accessory_Share_joint',ptr(root+12)))}:null;
+  const accessory=profile.accessory?{joint:ptr(root+profile.accessory),scene:convertSceneAsset(archiveRootView(a,'accessory_Share_joint',ptr(root+profile.accessory)))}:null;
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),pointers=new Set(),claimed=new Map();
   function merge(image,typed,slots){
     for(const at of typed){if(at<0||at>=a.dataSize)throw Error('Copy typed byte bounds');const value=image[32+at];if(claimed.has(at)&&claimed.get(at)!==value)throw Error('Conflicting Kirby copy descriptors');claimed.set(at,value);body[at]=value;}
@@ -48,7 +50,7 @@ export function convertKirbyCopy(input,code){
   if(accessory){const s=accessory.scene,typed=new Set([...s.pointerSlots].flatMap(p=>[p,p+1,p+2,p+3]));for(const [at,n]of s.writes)for(let i=0;i<n;i++)typed.add(at+i);merge(s.image,typed,s.pointerSlots);}
   const v=new DataView(visibility.image.buffer),size=v.getUint32(4,true),visPointers=Array.from({length:v.getUint32(8,true)},(_,i)=>v.getUint32(32+size+i*4,true));
   merge(visibility.image,visibility.typedBytes,visPointers);if(entries.length)merge(articles.image,articles.typedBytes,articles.pointerSlots);
-  const out=new DataView(body.buffer);for(const at of [jointSlot,...(accessory?[root+12]:[]),...entries.map(e=>root+articleOffset+e.slot*4)]){if([0,1,2,3].some(i=>claimed.has(at+i)))throw Error('Copy root overlap');out.setUint32(at,d.getUint32(at),true);pointers.add(at);}
+  const out=new DataView(body.buffer);for(const at of [jointSlot,...(accessory?[root+profile.accessory]:[]),...entries.map(e=>root+articleOffset+e.slot*4)]){if([0,1,2,3].some(i=>claimed.has(at+i)))throw Error('Copy root overlap');out.setUint32(at,d.getUint32(at),true);pointers.add(at);}
   const textureRows=[];
   if(profile.bodyCopy){
     function scalar(at,width=4){

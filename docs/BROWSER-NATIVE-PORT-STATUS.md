@@ -5,6 +5,29 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Ice Climbers copy now imports the original hat, separate hammer, ice
+Article and particle bank 46. The accessory descriptor is explicitly read from
+root +16 while +12 remains the projectile Article; Marth/Roy retain their +12
+sword descriptors. Rendering validates the exact native hammer descriptor and
+follows its original LThumbNb attachment. Unknown accessories still fail.
+
+The Popo-donor lifecycle passes 1,983 rendered input frames; the Nana-donor
+lifecycle passes 2,516. Both include another 124 intro frames. Normal controller
+movement places Kirby on the appropriate side of the live pair. The Nana probe
+checks the actual captured fighter kind on both captures: 11 maps to copy kind
+10 through the original swallow code. Both partners remain active with unchanged
+stocks. Ground/air ice, held-item release, landing reset, hammer removal, copy
+loss and reacquisition all pass. The hammer draws in 173/159 frames respectively,
+with three mesh draws at peak. These remain selected compatibility checks;
+complete gameplay parity, presented 720p60 and latency are not certified.
+
+The GPU contact test passes 992 rendered frames: the copied ice raises target
+damage from 8 to 13 with four hitlag frames at first impact. The firing snapshot
+checks 21,091 vertices plus 13 shader cases and 52 pixel channels. All 232 unit
+tests and shared browser checks pass. Roy-copy, Bowser-copy and original
+Ice Climbers regressions pass 2,496 / 3,058 / 4,138 simulation frames.
+[Ice-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-ice.json).
+
 Kirby's Bowser copy imports the native five-node/nine-mesh hat, two dynamic
 nodes, one particle-only Flame Article and effect bank 41 (four commands, one
 texture group). Original C drives the flame's collision, lifetime and ownership.

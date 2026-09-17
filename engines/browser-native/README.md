@@ -32,6 +32,15 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Kirby's Ice Climbers copy uses the native hat, LThumbNb hammer accessory, ice
+Article and particle bank 46. Test the actual Nana partner with
+`--kirby-copy-nana`; Nana is not spawned as a separate selectable character:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pp --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pp --input --kirby-copy=swallow --kirby-copy-nana --stage-callbacks --render-steps --hardware
+```
+
 Kirby's Bowser copy loads its native dynamic hat, flame Article and separate
 particle bank. Ground/air breath, fuel depletion/recharge, copy loss and
 reacquisition use original C and normal controller input. Run:
