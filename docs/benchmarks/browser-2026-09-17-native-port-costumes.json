@@ -1,0 +1,374 @@
+{
+  "date": "2026-09-17",
+  "scope": "Original selected costume loading and native match/model integration; incomplete competitive release",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "wasm": {
+    "sha256": "30a315bcb54d64a97562ba9695aae1dc07b44b4a6aefc8764200b1db55240185",
+    "bytes": 3546757
+  },
+  "validation": {
+    "unitTests": 265,
+    "sharedBrowserPassed": true,
+    "costumeArchiveAudit": {
+      "passed": true,
+      "slots": 127,
+      "uniqueFiles": 124,
+      "simultaneousInstancesPerCostume": 2,
+      "descriptorChecks": 2032,
+      "allColorsResidentTogether": true,
+      "cacheAndCleanupPassed": true,
+      "kindCounts": [
+        {
+          "kind": 0,
+          "code": "Mr",
+          "count": 5
+        },
+        {
+          "kind": 1,
+          "code": "Fx",
+          "count": 4
+        },
+        {
+          "kind": 2,
+          "code": "Ca",
+          "count": 6
+        },
+        {
+          "kind": 3,
+          "code": "Dk",
+          "count": 5
+        },
+        {
+          "kind": 4,
+          "code": "Kb",
+          "count": 6
+        },
+        {
+          "kind": 5,
+          "code": "Kp",
+          "count": 4
+        },
+        {
+          "kind": 6,
+          "code": "Lk",
+          "count": 5
+        },
+        {
+          "kind": 7,
+          "code": "Sk",
+          "count": 5
+        },
+        {
+          "kind": 8,
+          "code": "Ns",
+          "count": 4
+        },
+        {
+          "kind": 9,
+          "code": "Pe",
+          "count": 5
+        },
+        {
+          "kind": 10,
+          "code": "Pp",
+          "count": 4
+        },
+        {
+          "kind": 11,
+          "code": "Nn",
+          "count": 4
+        },
+        {
+          "kind": 12,
+          "code": "Pk",
+          "count": 4
+        },
+        {
+          "kind": 13,
+          "code": "Ss",
+          "count": 5
+        },
+        {
+          "kind": 14,
+          "code": "Ys",
+          "count": 6
+        },
+        {
+          "kind": 15,
+          "code": "Pr",
+          "count": 5
+        },
+        {
+          "kind": 16,
+          "code": "Mt",
+          "count": 4
+        },
+        {
+          "kind": 17,
+          "code": "Lg",
+          "count": 4
+        },
+        {
+          "kind": 18,
+          "code": "Ms",
+          "count": 5
+        },
+        {
+          "kind": 19,
+          "code": "Zd",
+          "count": 5
+        },
+        {
+          "kind": 20,
+          "code": "Cl",
+          "count": 5
+        },
+        {
+          "kind": 21,
+          "code": "Dr",
+          "count": 5
+        },
+        {
+          "kind": 22,
+          "code": "Fc",
+          "count": 4
+        },
+        {
+          "kind": 23,
+          "code": "Pc",
+          "count": 4
+        },
+        {
+          "kind": 24,
+          "code": "Gw",
+          "count": 4
+        },
+        {
+          "kind": 25,
+          "code": "Gn",
+          "count": 5
+        },
+        {
+          "kind": 26,
+          "code": "Fe",
+          "count": 5
+        }
+      ]
+    },
+    "conversionAudit": {
+      "passed": true,
+      "files": 150,
+      "bodyCopyFiles": 25
+    },
+    "cases": [
+      {
+        "name": "fox",
+        "wasmBytes": 3546538,
+        "command": "node scripts/native-port/probe-constructor.mjs --character=Fx --costume=2 --opponent-costume=1 --input --stage-callbacks --render-steps --hardware --verify-vertices",
+        "passed": true,
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "renderedSteps": 142,
+        "finalVertexChecks": 23382
+      },
+      {
+        "name": "partners",
+        "wasmBytes": 3546757,
+        "command": "node scripts/native-port/probe-constructor.mjs --character=Pp --opponent=Ca --costume=3 --opponent-costume=2 --input --stage-callbacks --render-steps --hardware --verify-vertices",
+        "passed": true,
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Pp",
+            "costume": 3
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "code": "Nn",
+            "costume": 3
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Ca",
+            "costume": 2
+          }
+        ],
+        "renderedSteps": 142,
+        "finalVertexChecks": 23954
+      },
+      {
+        "name": "kirby-falco",
+        "wasmBytes": 3546757,
+        "command": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fc --costume=2 --opponent-costume=1 --kirby-copy=acquire --input --stage-callbacks --render-steps --hardware --verify-vertices",
+        "passed": true,
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Kb",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fc",
+            "costume": 1
+          }
+        ],
+        "renderedSteps": 756,
+        "finalVertexChecks": 19112,
+        "copy": {
+          "completed": true,
+          "frames": 614,
+          "bodyCostumes": [
+            {
+              "index": 2,
+              "name": "PlKbBuCpFc.dat",
+              "nodes": 48
+            }
+          ]
+        }
+      },
+      {
+        "name": "transform",
+        "wasmBytes": 3546757,
+        "command": "node scripts/native-port/probe-constructor.mjs --character=Zd --opponent=Gw --costume=4 --opponent-costume=3 --transform --input --stage-callbacks --render-steps --hardware --verify-vertices",
+        "passed": true,
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Zd",
+            "costume": 4
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "code": "Sk",
+            "costume": 4
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Gw",
+            "costume": 3
+          }
+        ],
+        "renderedSteps": 1609,
+        "finalVertexChecks": 28006,
+        "transform": {
+          "completed": true,
+          "frames": 1467,
+          "phases": [
+            {
+              "name": "ground transform to 7",
+              "costume": 4
+            },
+            {
+              "name": "ground transform to 19",
+              "costume": 4
+            },
+            {
+              "name": "jump setup",
+              "costume": 4
+            },
+            {
+              "name": "air transform to 7",
+              "costume": 4
+            },
+            {
+              "name": "jump setup",
+              "costume": 4
+            },
+            {
+              "name": "air transform to 19",
+              "costume": 4
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "regression": {
+    "command": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --record-shaders",
+    "resolution": [
+      960,
+      720
+    ],
+    "frames": 3600,
+    "drawSubmissions": 3600,
+    "elapsedMs": 60029.19999998808,
+    "simulationCpu": {
+      "samples": 3600,
+      "meanMs": 0.39011111098859047,
+      "p50Ms": 0.4000000059604645,
+      "p95Ms": 0.699999988079071,
+      "maxMs": 2.5
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 3.3990555558519233,
+      "p50Ms": 3.199999988079071,
+      "p95Ms": 5.100000023841858,
+      "maxMs": 13.199999988079071
+    },
+    "drawIntervals": {
+      "samples": 3599,
+      "meanMs": 16.670658516253688,
+      "p50Ms": 16.69999999999709,
+      "p95Ms": 16.700000000004366,
+      "maxMs": 33.30000000000109
+    },
+    "multiStepCallbacks": 0,
+    "submissionsOverBudget": 0,
+    "gpuReadbacks": false,
+    "shaderCoverage": {
+      "programs": 34,
+      "prepared": 0,
+      "preparedUsed": 0,
+      "unpreparedUsed": 34
+    },
+    "parity": {
+      "baseline": "experiment-character-menu/combat-regression.json",
+      "excludedFields": [
+        7,
+        8
+      ],
+      "reason": "relocated pointers",
+      "checks": {
+        "initial": true,
+        "final": true,
+        "stateChanges": true,
+        "workload": true
+      }
+    },
+    "baselineCore": "27080dc64ce38fd7ed29eb9c3b6ac1fe13a38760af3e2405ca5d65d6e157e8e2"
+  },
+  "limitations": [
+    "Fox mirror used the preceding 3546538-byte costume core; other match probes, final all-costume audit and timed regression use the final 3546757-byte core.",
+    "The 127-slot audit validates native archive/model construction and lifetime, not every alternate costume through every move.",
+    "Full alternate Kirby body conversion covers 25 files; the new live copied-body test covers blue Kirby with Falco.",
+    "Regression is hardware headless Chrome draw submission timing with the normal driver cache; not an A/B gain or distinct displayed-FPS or input-to-photon measurement.",
+    "Maximum draw interval remains 33.3 ms.",
+    "CSS-to-match orchestration, audio, complete results/rematch routing, broader retail parity and public static deployment remain incomplete.",
+    "Hosted no-ISO startup and original camera/4:3 framing preserved; public /play/ route unchanged."
+  ]
+}

@@ -5,6 +5,32 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Selected costumes now reach the original match constructors and renderer.
+The original table drives filenames, joint/material symbols and color indices;
+mirror players retain separate models, and Zelda/Sheik, Popo/Nana and Kirby's
+copied bodies use their selected colors. The USA red Falcon filename is resolved
+explicitly. All 127 original costume slots (124 unique files) pass native archive
+caching, two simultaneous model instances, descriptor/envelope checks and cleanup.
+Conversion also passes all 150 extracted costume files, including 25 Kirby body
+copy files. These are separate asset and lifetime checks, not complete move parity.
+
+Rendered input probes pass a two-color Fox mirror, alternate-color Climbers
+versus red Falcon, blue Kirby copying Falco, and Zelda/Sheik versus green Game &
+Watch. The four ground/air transformations preserve costume 4. The final core
+passes 265 unit tests and shared browser checks. CSS-to-match orchestration,
+audio, full results/rematch routing and public release integration still remain;
+the constructor currently accepts diagnostic costume indices.
+An isolated Kirby/Yoshi regression completes 3,600 simulation steps and 3,600
+draw submissions in 60.029 seconds. Mean simulation is 0.390 ms; mean submission
+3.399 ms, p95 5.1 ms and maximum 13.2 ms. No multi-step callback or draw submission
+over 16.67 ms occurs, but the maximum draw interval remains 33.3 ms. Initial/final
+gameplay state, transitions and workload match the preceding character-select
+core after excluding relocated pointers. This preserves the tested workload;
+it does not establish a speedup, displayed 60 FPS, or input-to-photon latency.
+[Costume integration evidence](benchmarks/browser-2026-09-17-native-port-costumes.json).
+
+Earlier milestones below retain their historical scope and pending-work notes.
+
 Character select now hands the original native VS data to stage select. Seven
 handoffs cover all six tournament stages and a mirror with different costumes;
 stage cancellation returns to the same character/costume choices. The original

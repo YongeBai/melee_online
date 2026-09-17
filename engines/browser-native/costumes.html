@@ -1,0 +1,35 @@
+<!doctype html><meta charset="utf-8"><title>Original native costume loading</title>
+<pre id="result">Loading hosted costumes…</pre>
+<script type="module">
+import create from './melee-fighter-init.mjs';
+import {convertSharedParameters} from './shared-assets.mjs';
+import {sharedSpec} from './shared-spec.mjs';
+import {motionSpec} from './motion-spec.mjs';
+import {installResidentFile} from './resident-files.mjs';
+import {loadCostume,nativeCostumeSpec} from './costume-assets.mjs';
+const report={passed:false,playableMatch:false,rows:[]},diagnostics=[];
+try{
+ const asset=async name=>{const response=await fetch('./fixtures/'+name);if(!response.ok)throw Error('Hosted costume unavailable '+name);return new Uint8Array(await response.arrayBuffer());};
+ const module=await create({printErr:s=>diagnostics.push(s)}),common=convertSharedParameters(await asset('PlCo.dat'),sharedSpec);
+ installResidentFile(module,'PlCo.dat',common.image);if(module._portFighterInitialize()!==0)throw Error('Original fighter startup');module._portFileClear();
+ const allocations=module._portFileAllocations(),live=module._portSceneLiveObjects();
+ for(let kind=0;kind<27;kind++){
+  const files=new Map(),costumes=[];
+  try{
+   for(let index=0;index<module._portCostumeCount(kind);index++){
+    const spec=nativeCostumeSpec(module,kind,index),install=!files.has(spec.name);if(install)files.set(spec.name,await asset(spec.name));
+    const costume=loadCostume(module,files.get(spec.name),spec.name,kind,index,{install});costumes.push(costume);
+    const n=costume.model.tree.nodes.length,nodes=module._malloc(n*4),roots=[];let checks=0;
+    try{
+     for(let i=0;i<2;i++){const root=module._portSceneLoad(costume.root);if(!root)throw Error('Original costume joint constructor');roots.push(root);if(module._portSceneCollect(root,nodes,n)!==n)throw Error('Costume hierarchy count');module._portSceneMetric(n,nodes,2);checks++;}
+     for(const root of roots){if(module._portSceneCollect(root,nodes,n)!==n)throw Error('Costume hierarchy count');for(let metric=0;metric<costume.metrics.length;metric++){if(metric===2)continue;const actual=module._portSceneMetric(n,nodes,metric),expected=costume.metrics[metric];if(!Number.isFinite(actual)||Math.abs(actual-expected)>1e-8*(1+Math.abs(expected)))throw Error('Costume descriptor metric '+spec.name+' '+metric);checks++;}}
+    }finally{for(const root of roots)module._portSceneDestroy(root);module._free(nodes);}
+    report.rows.push({...spec,code:motionSpec.codes[kind],nodes:n,meshes:costume.model.meshes.length,checks});
+   }
+  }finally{for(const costume of costumes)costume.dispose();module._portFileClear();}
+  if(module._portFileAllocations()!==allocations||module._portSceneLiveObjects()!==live)throw Error('Costume lifetime leaked '+kind);
+ }
+ report.allocations=allocations;report.originalCostumes=report.rows.length;report.uniqueFiles=new Set(report.rows.map(r=>r.name)).size;report.passed=true;
+}catch(e){report.error=String(e.stack??e);}
+report.diagnostics=diagnostics;globalThis.costumeReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
+</script>

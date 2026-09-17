@@ -45,7 +45,7 @@ import {convertItemRuntime} from './item-runtime-assets.mjs';
 import {verifyColors} from './verify-colors.mjs';
 import {convertFighterArticles,fighterArticleProfiles} from './article-assets.mjs';
 import {convertKirbyCopy} from './kirby-copy-assets.mjs';
-import {convertCostume} from './costume-assets.mjs';
+import {convertCostume,nativeKirbyCostumeSpec} from './costume-assets.mjs';
 import {convertKirbyCopyEffects} from './effect-assets.mjs';
 import {loadFighterPackage} from './fighter-package.mjs';
 import {fighterArchives} from './fighter-assets.mjs';
@@ -74,6 +74,10 @@ const withStage=tournament||live||params.has('stage'),combat=tournament||live||p
 if(opponentCode!==code&&!combat)throw Error('Mixed fighters require a two-fighter scene');
 report.opponentCharacter={code:opponentCode,name:opponentCharacter,kind:opponentKind};
 report.character={code,name:character,kind};
+const costumeIndex=Number(params.get('costume')??0),opponentCostumeIndex=Number(params.get('opponentcostume')??0);
+if([costumeIndex,opponentCostumeIndex].some(v=>!Number.isInteger(v)||v<0||v>5))throw Error('Invalid selected costume');
+if((costumeIndex||opponentCostumeIndex)&&!tournament)throw Error('Selected costumes require tournament setup');
+report.selectedCostumes=[costumeIndex,opponentCostumeIndex];
 const intro=params.has('intro'),damageHud=params.has('damagehud'),withHud=tournament&&(damageHud||params.has('hud')); let hudPreview=null;
 const stageCallbacks=params.has('stagecallbacks'),stageOnly=params.has('stageonly');
 const stageFrames=Number(params.get('stageframes')??4500);
@@ -108,20 +112,28 @@ try {
   const view=()=>new DataView(module.HEAPU8.buffer),ptr=at=>view().getUint32(at,true);
   const effectFiles=new Map(),packageOptions={asset,models,motionSpec,attributeSpec,effectFiles};
   const packageCodes=[...new Set([code,opponentCode,...[code,opponentCode].flatMap(c=>c==='Pp'?['Nn']:c==='Nn'?['Pp']:c==='Sk'?['Zd']:c==='Zd'?['Sk']:[])])],packages=[];
-  for(const selected of packageCodes)packages.push(await loadFighterPackage(module,selected,packageOptions));
+  const family=c=>['Sk','Zd'].includes(c)?'Zelda':['Pp','Nn'].includes(c)?'Climbers':c;
+  for(const selected of packageCodes){
+    const costumeIndices=[[code,costumeIndex],[opponentCode,opponentCostumeIndex]].filter(([c])=>family(c)===family(selected)).map(([,index])=>index);
+    packages.push(await loadFighterPackage(module,selected,{...packageOptions,costumeIndices}));
+  }
   const kirbyCopies=[];
   if(packageCodes.includes('Kb'))for(const selected of packages.filter(p=>['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx','Pk','Pc','Lk','Cl','Ss','Fc','Dk','Ms','Fe','Zd','Sk','Kp','Pp','Mt','Pr','Gw','Ys'].includes(p.code))){
     const copyName='PlKbCp'+selected.code+'.dat',bytes=await asset(copyName),source=convertKirbyCopy(bytes,selected.code);installResidentFile(module,copyName,source.image);
     const effectName='EfKb'+(selected.code==='Pp'?'Ic':selected.code==='Sk'?'Zd':selected.code==='Fc'?'Fx':selected.code==='Dr'?'Mr':selected.code==='Pc'?'Pk':selected.code)+'.dat';
     // These copies use common/original effects without a separate copy file.
     if(!['Ns','Pe','Lk','Cl','Mt','Pr','Gw','Ys'].includes(selected.code)&&!effectFiles.has(effectName)){const effectBytes=await asset(effectName),effectSource=convertKirbyCopyEffects(effectBytes,selected.code);installResidentFile(module,effectName,effectSource.image);effectFiles.set(effectName,{bytes:effectBytes,source:effectSource});}
-    let bodyCostume=null;
-    if(source.bodyCopy){const name='PlKbNrCp'+selected.code+'.dat',bytes=await asset(name),converted=convertCostume(bytes);installResidentFile(module,name,converted.image);bodyCostume={name,bytes,converted};}
-    kirbyCopies.push({bodyCostume,code:selected.code,kind:selected.kind,bytes:source.bytes,source,effects:effectFiles.get(effectName)?.source});
+    const bodyCostumes=new Map(),installedBodies=new Map();
+    if(source.bodyCopy)for(const index of packages.find(p=>p.code==='Kb').selectedCostumes.keys()){
+      const spec=nativeKirbyCostumeSpec(module,selected.kind,index);let body=installedBodies.get(spec.name);
+      if(!body){const bytes=await asset(spec.name),converted=convertCostume(bytes);if(converted.model.tree.name!==spec.joint||(converted.animation?.name??null)!==spec.animation)throw Error('Kirby copy costume symbols differ from original table');installResidentFile(module,spec.name,converted.image);body={name:spec.name,bytes,converted};installedBodies.set(spec.name,body);}
+      bodyCostumes.set(index,{...body,index});
+    }
+    kirbyCopies.push({bodyCostumes,code:selected.code,kind:selected.kind,bytes:source.bytes,source,effects:effectFiles.get(effectName)?.source});
   }
   const primary=packages.find(p=>p.code===code),secondary=packages.find(p=>p.code===opponentCode),baseBytes=primary.baseBytes;
   report.baseArchive=primary.baseArchive;report.opponentBaseArchive=secondary.baseArchive;
-  report.residentFighters=packages.map(p=>({code:p.code,kind:p.kind,effectName:p.effectName}));
+  report.residentFighters=packages.map(p=>({code:p.code,kind:p.kind,effectName:p.effectName,costumes:[...p.selectedCostumes.keys()]}));
   module._portMatchCameraInitialize();report.dynamics={initialPool:module._portDynamicsInitialize()};if(report.dynamics.initialPool!==320)throw Error('Original dynamics pool initialization');module._portEffectsInitialize();
   const commonEffectBytes=await asset('EfCoData.dat'),effects=convertCommonEffects(commonEffectBytes);
   installResidentFile(module,'EfCoData.dat',effects.image);
@@ -134,7 +146,7 @@ try {
     installResidentFile(module,'NativeStatus.dat',status.image);
     const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models',...(withHud?['ScInfDmg_scene_data']:[])]);
     module._portTournamentStatusInstall(statusFile.archive);report.statusModels=status.models;
-    module._portTournamentInitializeStage(kind,opponentKind,stageSpec.kind);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
+    module._portTournamentInitializeCostumes(kind,opponentKind,stageSpec.kind,costumeIndex,opponentCostumeIndex);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
     if(withHud){
       report.iconSelectorChecks=verifyHudIconSelector(module);
       module._portTournamentHudInitialize(statusFile.addresses[1]);
@@ -230,16 +242,16 @@ try {
     report.opponentEffects=secondary.effect?verifyResidentEffectBank(module,secondary.effect.source,module._portEffectsBankData(secondary.effect.source.bank)):{commonOnly:true};
     report.combat={completed:false,initial:[a,b],frames:0};
   }
-  for(const copy of kirbyCopies){module._ftKb_SpecialN_800EED50(copy.kind,0);copy.root=module._portKirbyCopyRoot(copy.kind);if(!copy.root)throw Error('Original Kirby copy loader failed');copy.base=copy.root-copy.source.root;if(copy.bodyCostume){const root=module._portKirbyCostumeRoot(copy.kind);if(!root)throw Error('Missing copy body costume');copy.bodyCostume.base=root-copy.bodyCostume.converted.rootOffset;}if(copy.effects)copy.effectChecks=verifyResidentEffectBank(module,copy.effects,module._portEffectsBankData(copy.effects.bank));}
-  report.kirbyCopies=kirbyCopies.map(c=>({code:c.code,root:c.root,bodyCopy:c.source.bodyCopy,costumeNodes:c.bodyCostume?.converted.model.tree.nodes.length,hatNodes:c.source.scene?.model.tree.nodes.length??0,hatMeshes:c.source.scene?.model.meshes.length??0,accessoryMeshes:c.source.accessory?.scene.model.meshes.length,dynamicBoneChains:c.source.dynamics.length,articles:c.source.articles.rows.length,effects:c.effectChecks}));
-  const fighterOwners=[0,...(combat?[1]:[])].flatMap(slot=>[0,1].flatMap(index=>{const owner=module._Player_GetEntityAtIndex(slot,index);if(!owner)return [];const pkg=packages.find(p=>p.kind===combatState(owner)[11]);if(!pkg)throw Error('Missing native fighter form package');return [{slot,index,owner,pkg}];}));
+  for(const copy of kirbyCopies){for(const index of packages.find(p=>p.code==='Kb').selectedCostumes.keys()){module._ftKb_SpecialN_800EED50(copy.kind,index);const body=copy.bodyCostumes.get(index);if(body){const root=module._portKirbyCostumeRootAt(copy.kind,index);if(!root)throw Error('Missing copy body costume');body.base=root-body.converted.rootOffset;}}copy.root=module._portKirbyCopyRoot(copy.kind);if(!copy.root)throw Error('Original Kirby copy loader failed');copy.base=copy.root-copy.source.root;if(copy.effects)copy.effectChecks=verifyResidentEffectBank(module,copy.effects,module._portEffectsBankData(copy.effects.bank));}
+  report.kirbyCopies=kirbyCopies.map(c=>({code:c.code,root:c.root,bodyCopy:c.source.bodyCopy,costumes:[...c.bodyCostumes.values()].map(b=>({index:b.index,name:b.name,nodes:b.converted.model.tree.nodes.length})),hatNodes:c.source.scene?.model.tree.nodes.length??0,hatMeshes:c.source.scene?.model.meshes.length??0,accessoryMeshes:c.source.accessory?.scene.model.meshes.length,dynamicBoneChains:c.source.dynamics.length,articles:c.source.articles.rows.length,effects:c.effectChecks}));
+  const fighterOwners=[0,...(combat?[1]:[])].flatMap(slot=>[0,1].flatMap(index=>{const owner=module._Player_GetEntityAtIndex(slot,index);if(!owner)return [];const source=packages.find(p=>p.kind===combatState(owner)[11]);if(!source)throw Error('Missing native fighter form package');const costumeId=module._portFighterConstructRead(owner,35),selected=source.selectedCostumes.get(costumeId);if(!selected)throw Error('Missing constructed costume '+source.code+' '+costumeId);const pkg={...source,costume:selected.costume,modelBytes:selected.bytes};return [{slot,index,owner,pkg}];}));
   report.dynamics.fighters=fighterOwners.map(({owner,pkg})=>{
     const expected=pkg.source.dynamics.rows.slice(0,pkg.source.dynamics.count).map(r=>r.count),count=module._portDynamicsRead(owner,0,0);
     const nodes=Array.from({length:count},(_,i)=>module._portDynamicsRead(owner,i,2));
     if(count!==expected.length||JSON.stringify(nodes)!==JSON.stringify(expected))throw Error('Original live dynamics chain mismatch '+pkg.code+': '+JSON.stringify({expected,nodes}));
     return {code:pkg.code,owner,chains:count,nodes};
   });report.dynamics.freeAfterFighters=module._portDynamicsPoolFree();
-  report.fighterForms=fighterOwners.map(({slot,index,owner,pkg})=>({slot,index,owner,code:pkg.code}));
+  report.fighterForms=fighterOwners.map(({slot,index,owner,pkg})=>({slot,index,owner,code:pkg.code,costume:pkg.costume.index}));
   if(render||new URLSearchParams(location.search).has('camera')){module._portStageCameraStart();report.cameraStarted=true;}
   if(tournament||live||params.has('step')){
     report.schedulerContext=tournament?'Original VS rules/controller: four stocks, eight minutes, no items, '+character+' versus '+opponentCharacter+' and partial '+stageSpec.name+' startup. Audio, menus and full scene ownership remain incomplete.':combat?stageSpec.name+' geometry/collision, default rules, two player-owned fighters and scripted normalized combat input.':withStage?stageSpec.name+' geometry/collision and source spawn without complete match startup.':'Isolated constructor without a match.';
@@ -302,7 +314,7 @@ try {
       const copyHats=new Map(kirbyCopies.filter(c=>!c.source.bodyCopy).map(c=>[c.base+c.source.joint,archiveRootView(inspectArchive(c.bytes),'hat_Share_joint',c.source.joint)]));
       for(const {slot:i,owner,pkg} of fighterOwners){
         previewActors.push({name:(pkg.code==='Ca'?'Falcon':pkg.character)+' P'+(i+1),object:owner,active:()=>!['Sk','Zd'].includes(pkg.code)||module._Player_GetEntity(i)===owner,collectNodes:['Lk','Cl'].includes(pkg.code)?(target,nodes)=>collectFighterCostume(owner,pkg,target,nodes):undefined,accessories:pkg.code==='Kb'?[{root:()=>module._portKirbyRead(owner,1),kind:()=>module._portKirbyRead(owner,2),models:copyHats},...kirbyCopies.filter(c=>c.source.bodyCopy).flatMap(c=>[
-          {bytes:c.bodyCostume.bytes,base:c.bodyCostume.base,label:'costume'},
+          {bytes:c.bodyCostumes.get(pkg.costume.index).bytes,base:c.bodyCostumes.get(pkg.costume.index).base,label:'costume'},
           ...(c.source.joint===null?[]:[{bytes:archiveRootView(inspectArchive(c.bytes),'copy_body_Share_joint',c.source.joint),base:c.base,label:'extra'}])
         ].map(part=>({name:'Kirby copy '+c.code+' body '+part.label,bytes:part.bytes,descriptorBase:part.base,root:()=>module._portKirbyRead(owner,0)===c.kind?module._portKirbyRead(owner,10):0,collectNodes:(target,n)=>module._portKirbyBodyNodes(owner,target,n)})))]:[],accessory:{name:'Fighter accessory P'+(i+1),root:()=>module._portFighterAccessory(owner,0),kind:()=>module._portFighterAccessory(owner,1),models:accessoryModels},prepare:()=>module._portFighterPreviewPrepare(owner),finish:()=>module._portFighterPreviewFinish(owner),bytes:pkg.modelBytes});
       }
@@ -317,7 +329,7 @@ try {
       for(const c of kirbyCopies){itemModels??=new Map();const a=inspectArchive(c.bytes);for(const row of [...c.source.articles.rows,...c.source.articles.attachments])if(row.joint!==null)itemModels.set(c.base+row.joint,{name:'Kirby copy '+c.code+' '+(row.label??'item '+row.slot),bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
       if(peachCommon){itemModels??=new Map();const {source,base}=peachCommon,a=inspectArchive(source.source);for(const row of source.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:'Common item '+row.kind,bytes:archiveRootView(a,'item_Share_joint',row.joint)});}
       for(const pkg of packages)if(fighterArticleProfiles[pkg.code]){
-        const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg===pkg)?.owner;
+        const {baseBytes,baseName,character,source}=pkg,owner=fighterOwners.find(f=>f.pkg.kind===pkg.kind)?.owner;
         if(!owner)throw Error('Loaded opponent requires two-fighter scene');
         itemModels??=new Map();const articles=convertFighterArticles(baseBytes,baseName),archive=inspectArchive(articles.source),base=combatState(owner)[8]+source.imports.find(i=>i.label==='articles').at;
         for(const row of articles.rows)if(row.joint!==null)itemModels.set(base+row.joint,{name:character+' item '+row.slot,bytes:archiveRootView(archive,'item_Share_joint',row.joint)});

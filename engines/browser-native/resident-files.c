@@ -37,6 +37,7 @@ static struct ResidentFile* find_file(const char* name)
     if(name&&!strcmp(name,"GmPause"))name="GmPause.usd";
     if(name&&!strcmp(name,"LbMcGame."))name="LbMcGame.usd";
     if(name&&!strcmp(name,"NtMemAc"))name="NtMemAc.usd";
+    if(name&&!strcmp(name,"PlCaRe."))name="PlCaRe.usd";
     if(!valid_name(name))return NULL;
     for(unsigned i=0;i<file_count;i++)if(!strcmp(files[i].name,name))return &files[i];
     return NULL;
@@ -126,5 +127,5 @@ void portResidentCopy(void* dst,uintptr_t source,size_t size)
  * owns its copy; CostumeListsForeachCharacter provides the game-level cache. */
 HSD_Archive* lbDvd_8001819C(const char* filename)
 {
-    if(!valid_name(filename))abort();return NULL;
+    if(!valid_name(filename)&&!find_file(filename))abort();return NULL;
 }

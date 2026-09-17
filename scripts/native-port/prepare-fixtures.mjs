@@ -25,8 +25,9 @@ try {
   const total=fs.fstatSync(fd).size;
   const header=parseHeader(read(0,0x440).buffer,total);
   const files=parseFileTable(read(header.fstOffset,header.fstSize).buffer,total);
+  const costumes=files.map(f=>f.path).filter(name=>/^Pl[A-Za-z]{4}(?:Cp[A-Za-z]{2})?\.(dat|usd)$/.test(name)&&Object.hasOwn(fighterArchives,name.slice(2,4))&&!name.endsWith('AJ.dat')).sort();
   fs.mkdirSync(path.join(output,'fixtures'),{recursive:true});
-  for(const name of [...menus,...shared,...effects,...names,...fighters,...animations,...models]) {
+  for(const name of [...menus,...shared,...effects,...names,...fighters,...animations,...models,...costumes]) {
     const file=files.find(f=>f.path===name);
     if(!file)throw Error('Development asset missing: '+name);
     fs.writeFileSync(path.join(output,'fixtures',name),read(file.offset,file.size));
@@ -47,6 +48,7 @@ try {
   fs.writeFileSync(path.join(output,'stage-fixtures.json'),JSON.stringify(names,null,2)+'\n');
   fs.writeFileSync(path.join(output,'fighter-fixtures.json'),JSON.stringify(fighters,null,2)+'\n');
   fs.writeFileSync(path.join(output,'animation-fixtures.json'),JSON.stringify(animations,null,2)+'\n');
+  fs.writeFileSync(path.join(output,'costume-fixtures.json'),JSON.stringify(costumes,null,2)+'\n');
   fs.writeFileSync(path.join(output,'model-fixtures.json'),JSON.stringify(models,null,2)+'\n');
   console.log('Prepared the original SIS font, shared fighter data, six stages and 27 playable fighter components in ignored dist/native-port.');
 } finally {fs.closeSync(fd);}

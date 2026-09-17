@@ -91,10 +91,21 @@ float portKirbyFlameRead(HSD_GObj* object,unsigned field)
     default:abort();
     }
 }
+unsigned portCostumeCount(unsigned kind);
+const char* portKirbyCostumeString(unsigned kind,unsigned costume,unsigned field)
+{
+    if(kind>=27||costume>=portCostumeCount(Ft_Kind_Kirby)||field>2||!ftKb_Init_803CB3E8[kind])abort();
+    Fighter_CostumeStrings* c=&ftKb_Init_803CB3E8[kind][costume];
+    return field==0?c->dat_filename:field==1?c->joint_name:c->matanim_joint_name;
+}
+unsigned portKirbyCostumeRootAt(unsigned kind,unsigned costume)
+{
+    if(kind>=27||costume>=portCostumeCount(Ft_Kind_Kirby)||!ftKb_Init_803C9FC8[kind])abort();
+    return (unsigned)ftKb_Init_803C9FC8[kind][costume].joint;
+}
 unsigned portKirbyCostumeRoot(unsigned kind)
 {
-    if(kind>=Ft_Kind_Max||!ftKb_Init_803C9FC8[kind])abort();
-    return (unsigned)ftKb_Init_803C9FC8[kind][0].joint;
+    return portKirbyCostumeRootAt(kind,0);
 }
 unsigned portKirbyBodyNodes(HSD_GObj* object,unsigned* nodes,unsigned capacity)
 {
@@ -265,6 +276,7 @@ double portFighterConstructRead(HSD_GObj* object,unsigned field)
     case 30:return fp->x2225_b3;case 31:return fp->cpu.x444?fp->cpu.x444->lstick.x:0;
     case 32:return fp->cpu.x448?fp->cpu.x448->lstick.x:0;
     case 33:return fp->x2068_attackID;
+    case 35:return fp->x619_costume_id;
     case 34:{if(fp->motion_id<0)abort();MotionState* ms=fp->motion_id>=fp->x18?&fp->x20_actionStateList[fp->motion_id-fp->x18]:&fp->x1C_actionStateList[fp->motion_id];return ms->_;}
     default:abort();
     }
@@ -442,6 +454,13 @@ unsigned portMaterialColorRead(HSD_GObj* object,unsigned index,unsigned channel)
 }
 
 #include <melee/lb/lbarchive.h>
+extern Fighter_CostumeStrings* ftData_803C2360[Ft_Kind_Max];
+const char* portCostumeString(unsigned kind,unsigned costume,unsigned field)
+{
+    if(kind>=27||costume>=portCostumeCount(kind)||field>2)abort();
+    Fighter_CostumeStrings* c=&ftData_803C2360[kind][costume];
+    return field==0?c->dat_filename:field==1?c->joint_name:c->matanim_joint_name;
+}
 HSD_Joint* portCostumeLoad(unsigned kind,unsigned costume)
 {
     if(kind>=27||costume>=portCostumeCount(kind))abort();

@@ -104,7 +104,7 @@ void portTournamentStatusInstall(HSD_Archive* archive)
     if(!archive||started||*ifAll_GetArchive())abort();
     *ifAll_GetArchive()=archive;ifStatus_802F7134();
 }
-void portTournamentInitializeStage(unsigned left,unsigned right,unsigned stage)
+void portTournamentInitializeCostumes(unsigned left,unsigned right,unsigned stage,unsigned left_costume,unsigned right_costume)
 {
     extern int portFighterCharacterKind(unsigned);
     int characters[2]={portFighterCharacterKind(left),portFighterCharacterKind(right)};
@@ -118,8 +118,11 @@ void portTournamentInitializeStage(unsigned left,unsigned right,unsigned stage)
         gm_SetupPlayerDefaults(&data.players[i]);
         if(i<2){data.players[i].slot_type=Gm_PKind_Human;data.players[i].ckind=characters[i];data.players[i].stocks=4;data.players[i].team=i;}
     }
+    if(left_costume>=gm_GetNumCostumesForCKind(characters[0])||right_costume>=gm_GetNumCostumesForCKind(characters[1]))abort();
+    data.players[0].color=left_costume;data.players[1].color=right_costume;
     gm_SetupSubColors(&data);fn_8016DCC0(&data);initialized=1;
 }
+void portTournamentInitializeStage(unsigned left,unsigned right,unsigned stage){portTournamentInitializeCostumes(left,right,stage,0,0);}
 void portTournamentInitializeKinds(unsigned left,unsigned right){portTournamentInitializeStage(left,right,St_Kind_Battle);}
 void portTournamentInitialize(void){portTournamentInitializeKinds(Ft_Kind_Captain,Ft_Kind_Captain);}
 void portTournamentBegin(void)

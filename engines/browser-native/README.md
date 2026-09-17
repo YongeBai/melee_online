@@ -7,8 +7,8 @@ all 25 copied-ability packages, original tournament stage callbacks, camera and
 HUD. Hosted assets load automatically; a player-supplied ISO is never required.
 The local disc is used only by the development extraction tools.
 
-This is not a complete competitive release. Native menus/audio, other
-costumes, controller calibration, broader retail parity and static release
+This is not a complete competitive release. Full menu/match routing, audio,
+controller calibration, broader retail parity and static release
 integration remain unfinished. Simulation steps and GPU draw submissions are
 measured separately from distinct presented frames and input-to-photon latency.
 See [current status](../../docs/BROWSER-NATIVE-PORT-STATUS.md) for the latest
@@ -31,6 +31,27 @@ feedback and the LRAS results/menu transition are still unfinished.
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --stage-callbacks --render-steps --hardware
 node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-pause --frames=900 --hardware --defer-gpu-errors
+```
+
+## Original costume selection
+
+The match fixture loads selected costume archives using the game's original
+filename and symbol tables. `--costume=N` and `--opponent-costume=N` select
+zero-based indices with `--stage-callbacks`. Mirror players can share a fighter
+package while retaining distinct model descriptors, textures and material
+animations. Zelda/Sheik and Popo/Nana preload both components for each selected
+color. Kirby's body-copy costumes use his own color index; Game & Watch's
+shared filenames are installed once. Red Falcon's original locale-dependent
+name resolves specifically to the USA asset.
+
+`node scripts/native-port/probe-costumes.mjs` audits every original costume
+slot, keeps each fighter's colors resident together, constructs two simultaneous
+HSD model instances per color, and checks archive caching and cleanup. This is
+asset/lifetime coverage, not gameplay parity or frame-rate certification.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Fx --costume=2 --opponent-costume=1 --input --stage-callbacks --render-steps --hardware --verify-vertices
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fc --costume=2 --opponent-costume=1 --kirby-copy=acquire --input --stage-callbacks --render-steps --hardware --verify-vertices
 ```
 
 ## Original character-select integration

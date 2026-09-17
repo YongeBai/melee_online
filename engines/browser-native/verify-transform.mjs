@@ -1,7 +1,7 @@
 // Exercise the original player-owned Sheik/Zelda swap through down-B.
 export function verifyTransform(module,report,{step,onStep=()=>{}}){
   const require=(ok,message)=>{if(!ok)throw Error('Transformation: '+message);};
-  const state=()=>{const owner=module._Player_GetEntity(0);return {owner,values:Array.from({length:19},(_,i)=>module._portFighterConstructRead(owner,i))};};
+  const state=()=>{const owner=module._Player_GetEntity(0);return {owner,costume:module._portFighterConstructRead(owner,35),values:Array.from({length:19},(_,i)=>module._portFighterConstructRead(owner,i))};};
   const initial=state();require([7,19].includes(initial.values[11]),'wrong initial fighter');
   Object.assign(report,{completed:false,frames:0,phases:[],retailParityVerified:false});let phase;
   const tick=(buttons=0,x=0,y=0)=>{
@@ -29,6 +29,7 @@ export function verifyTransform(module,report,{step,onStep=()=>{}}){
     tick(0x200,0,-1);for(let i=0;i<300;i++)tick();
     const after=state();require(after.values[11]===target&&after.owner!==before.owner&&after.values[0]===14,'swap into target and recover');
     require(after.values[13]===before.values[13]&&after.values[18]===before.values[18],'preserve damage and stocks');
+    require(after.costume===before.costume&&after.costume===initial.costume,'preserve selected costume across forms');
     if(air)require(phase.trace.find(s=>s.owner!==before.owner)?.values[3]===1,'swap must occur in the air');
     else require(Math.abs(after.values[4]-before.values[4])<.01&&Math.abs(after.values[5]-before.values[5])<.01,'preserve grounded position');
     require(module._Player_GetEntityAtIndex(0,1)===before.owner,'previous fighter becomes inactive form');
