@@ -5,6 +5,13 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 const digest=text=>createHash('sha256').update(text).digest('hex');
+export function adaptPauseBounds(text){
+  const signature='void Camera_SetUpPauseCamera(s8 pauserSlot, s8 pauserId, s32 arg2)',cast='(void (*)(Camera_x2D0*))(Event) Camera_SetBounds';
+  if(text.split(signature).length!==2||text.split(cast).length!==2)throw Error('Pause bounds callback changed');
+  // PPC ignores the integer return; WASM requires a void callback. Preserve the
+  // original bounds function and map its four output words by their named fields.
+  return text.replace(signature,'static void portPauseBounds(Camera_x2D0* bounds)\n{\n    Vec4 values;\n    Camera_SetBounds(&values);\n    bounds->y_max=values.x;bounds->y_min=values.y;\n    bounds->x_min=values.z;bounds->x_max=values.w;\n}\n\n'+signature).replace(cast,'portPauseBounds');
+}
 export function adaptMotionStateWord(text) {
   const record=/struct MotionState \{([\s\S]*?)\n\};/.exec(text);
   if(!record||!record[1].includes('u8 move_id : 8;')||!record[1].includes('u8 x9_b7 : 1;'))throw Error('Motion state word layout changed');
@@ -133,6 +140,7 @@ export function preparePortableSource(source,output) {
       replace(marker,'void portStageSelectResident(StKind stkind)\n{\n'+selection+'\n}\n\n'+marker);
     }
     if(file==='src/melee/cm/camera.c') {
+      text=adaptPauseBounds(text);
       // Expose the unchanged gameplay pass sequence for the browser framebuffer
       // backend. The original camera callback uses this same sequence.
       const marker='static void fn_800301D0(HSD_GObj* gobj, int arg1)\n{';

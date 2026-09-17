@@ -79,3 +79,12 @@ test('partner input conversion goes through signed integer before keeping the lo
   assert.equal(result.replaceAll('(u8) (s32) (127.0F * x)','127.0F * x').replaceAll('(u8) (s32) (128.0F * x)','128.0F * x'),original);
   assert.throws(()=>adaptPartnerStickConversion(result),/conversion changed/);
 });
+
+test('pause bounds adapter preserves the original function and removes its mismatched callback cast',async()=>{
+ const {adaptPauseBounds}=await import('./portable-source.mjs');
+ const text=fs.readFileSync(new URL('../../engines/melee-decomp/src/melee/cm/camera.c',import.meta.url),'utf8'),converted=adaptPauseBounds(text);
+ const start=text.indexOf('s32 Camera_SetBounds(Vec4* arg0)'),end=text.indexOf('void Camera_SetUpPauseCamera',start);
+ assert(converted.includes(text.slice(start,end).trim()));assert(converted.includes('Camera_SetBounds(&values);'));
+ for(const [field,value]of [['y_max','x'],['y_min','y'],['x_min','z'],['x_max','w']])assert(converted.includes('bounds->'+field+'=values.'+value));
+ assert(!converted.includes('(void (*)(Camera_x2D0*))(Event) Camera_SetBounds'));assert.throws(()=>adaptPauseBounds(converted),/changed/);
+});

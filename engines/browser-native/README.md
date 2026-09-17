@@ -7,7 +7,7 @@ all 25 copied-ability packages, original tournament stage callbacks, camera and
 HUD. Hosted assets load automatically; a player-supplied ISO is never required.
 The local disc is used only by the development extraction tools.
 
-This is not a complete competitive release. Native menus/pause/audio, other
+This is not a complete competitive release. Native menus/audio, other
 costumes, controller calibration, broader retail parity and static release
 integration remain unfinished. Simulation steps and GPU draw submissions are
 measured separately from distinct presented frames and input-to-photon latency.
@@ -22,6 +22,17 @@ asset decoding without caching native object pointers or animated poses. Use
 Measured average submission time was unchanged; paired runs had fewer submissions
 over 16.67 ms. See the status evidence before interpreting this as an FPS gain.
 
+Original pause artwork is fetched automatically with the other hosted assets.
+The original VS routines retain owner-only unpause, debounce, process masks,
+match-clock gating and pause camera controls. The port adapts one mismatched
+PowerPC callback signature; it does not adjust camera pitch or bounds. Audio
+feedback and the LRAS results/menu transition are still unfinished.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-pause --frames=900 --hardware --defer-gpu-errors
+```
+
 ## Reproduce
 
 The live fixture now samples buttons, main stick, C-stick and analog shoulders
@@ -30,7 +41,8 @@ attacks, S uses special, X/V jump, C sends native Z grab, I/J/K/L aim the C-stic
 Shift keys shield, T taunts. Standard gamepads use the existing browser button
 layout; native fighter code retains its deadzones. Full trigger travel supplies
 the digital click; partial pressure stays analog. Nonstandard GameCube adapters,
-physical calibration and native pause/menu integration remain pending.
+physical calibration and native menu integration remain pending. Enter/Escape
+and standard-gamepad Start use the original VS pause routines.
 
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Ca --input --stage-callbacks --controller-input --render-steps --hardware

@@ -6,6 +6,11 @@ test('native keyboard separates main stick, C-stick, grab and shoulder channels'
   const keys=new Set(['ArrowRight','ArrowUp','AltLeft','KeyJ','KeyI','KeyC','ShiftRight']);const s=keyboardNativeSample(keys);
   assert.equal(s[0],0x50);assert.equal(s[1],.5/Math.SQRT2);assert.equal(s[2],.5/Math.SQRT2);assert.deepEqual(s.slice(3),[-1,1,1,0]);assert.deepEqual(keyboardNativeSample(new Set()),neutralNativeSample());
 });
+test('keyboard Start and gamepad Start share the original native button',()=>{
+  for(const key of ['Enter','Escape'])assert.equal(keyboardNativeSample(new Set([key]))[0],0x1000);
+  assert.equal(keyboardNativeSample(new Set(['Enter','Escape']))[0],0x1000);
+  const p=pad();p.buttons[9].pressed=true;assert.equal(standardNativeSample(p)[0],0x1000);
+});
 test('native gamepad retains analog magnitudes and distinguishes soft shoulders from digital clicks',()=>{
   const p=pad();p.buttons[6]={pressed:true,value:.6};p.buttons[7]={pressed:true,value:.35};let s=standardNativeSample(p);
   assert.deepEqual(s,[0,.25,.4,-.65,-.8,.6,.35]);p.buttons[6].value=1;p.buttons[0].pressed=true;p.buttons[5].pressed=true;s=standardNativeSample(p);assert.equal(s[0],0x150);assert.equal(s[5],1);assert.equal(s[6],.35);

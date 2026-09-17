@@ -3,6 +3,7 @@
 #include <melee/gm/gm_1601.h>
 #include <melee/gm/gm_1B03.h>
 #include <melee/gm/gmvs.h>
+#include <melee/gm/gmpause.h>
 #include <melee/gm/gmscene.h>
 #include <melee/gm/gm_1A36.h>
 #include <melee/gm/gm_1A3F.h>
@@ -26,6 +27,33 @@
 static int initialized,started;
 static int hud_initialized;
 static int damage_initialized;
+static HSD_GObj* pause_object;
+unsigned portTournamentPauseInitialize(void)
+{
+    if(!hud_initialized||started||pause_object)abort();
+    HSD_GObj* existing[64];unsigned count=0;
+    for(HSD_GObj* g=HSD_GObjGXLinkHead[11];g;g=g->next_gx){if(count==64)abort();existing[count++]=g;}
+    fn_801A1134();
+    for(HSD_GObj* g=HSD_GObjGXLinkHead[11];g;g=g->next_gx){
+        unsigned i=0;while(i<count&&existing[i]!=g)i++;
+        if(i<count)continue;
+        if(pause_object||g->classifier!=14||g->obj_kind!=HSD_GObj_JObjKind)abort();pause_object=g;
+    }
+    if(!pause_object||!pause_object->hsd_obj)abort();
+    return ((HSD_JObj*)pause_object->hsd_obj)->id;
+}
+double portTournamentPauseRead(unsigned field)
+{
+    if(!pause_object)abort();VsSceneState* s=gmVs_GetSceneState();
+    switch(field){
+    case 0:return gm_GetDbPauseFlag(1)!=0;
+    case 1:return s->pauser;
+    case 2:return s->pause_timer;
+    case 3:return s->unpause_timer;
+    case 4:return (((HSD_JObj*)pause_object->hsd_obj)->flags&JOBJ_HIDDEN)!=0;
+    default:abort();
+    }
+}
 extern unsigned portRuntimeStep(void);
 extern void portInitializeVsRouting(void);
 extern void portStageSelectResident(StKind);

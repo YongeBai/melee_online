@@ -15,6 +15,8 @@ import {archiveRootView,inspectArchive} from './archive.mjs';
 import {initializeStageArchive} from './stage-archive.mjs';
 import {verifyNativeProjection} from './native-camera.mjs';
 import {combatWorkload,verifyCombatWorkload} from './combat-workload.mjs';
+import {convertPauseModels} from './pause-assets.mjs';
+import {verifyNativePause} from './verify-pause.mjs';
 import {verifyControllerInput} from './verify-controller.mjs';
 import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
@@ -139,6 +141,11 @@ try {
       const archive=inspectArchive(hudBytes),base=statusFile.addresses[1]-archive.publics.get('ScInfDmg_scene_data');
       hudPreview={models:new Map([...status.models,...status.hudModels].map((model,i)=>[base+model.joint,{name:model.kind??'status '+i,bytes:archiveRootView(archive,'hud_Share_joint',model.joint)}]))};
       report.hud={models:status.hudModels,camera:status.camera};
+      const pauseBytes=await asset('GmPause.usd'),pause=convertPauseModels(pauseBytes);
+      installResidentFile(module,'GmPause.usd',pause.image);
+      const pauseDescriptor=module._portTournamentPauseInitialize();
+      hudPreview.models.set(pauseDescriptor,{name:'native pause',bytes:archiveRootView(inspectArchive(pauseBytes),'pause_Share_joint',pause.joint)});
+      report.pauseAsset={nodes:pause.nodes,meshes:pause.meshes,materialAnimations:pause.materialAnimations};
     }
   }
   else {module._portMatchPlayerInitialize();module._portFighterPlayerConfigure(0,0,0,0,0,1,0);}
@@ -438,10 +445,10 @@ try {
       if(report.hud.afterCombat.some(p=>p.display!==Math.min(999,Math.floor(p.damage))))throw Error('HUD damage differs from settled fighter damage');
     }
     if(live){
-      const controls=document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Effects, HUD, audio and full match rules are incomplete.';canvas.before(controls);
+      const controls=document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Enter/Escape: Start. Native menus, audio and full scene ownership remain incomplete.';canvas.before(controls);
       const limit=Number(params.get('liveframes')??0);if(!Number.isInteger(limit)||limit<0||limit>36000)throw Error('Invalid live frame limit');
       await new Promise((resolve,reject)=>{
-        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
+        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0))}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
           onProgress:s=>{report.live=s;document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
           onComplete:s=>{report.live=s;resolve();},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();reject(error);}});
         document.documentElement.dataset.live='ready';
@@ -467,6 +474,7 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('pauseinput')){report.pauseInput={};verifyNativePause(module,[object,opponent],report.pauseInput,{step,cameraValidation,platformMotion:stageKey==='fountain',readStage:stageKey==='fountain'?()=>[0,1].map(i=>[0,1].map(f=>module._portFountainPlatformRead(f,i))):stageKey==='story'?()=>[0,1,3].map(f=>module._portRandallRead(f)):null,onStep:row=>{if(!preview)return;const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;if(row.snapshot){report.preview[row.snapshot]=drawn;const img=document.createElement('img');img.id='native-preview-'+row.snapshot;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}}});}
       if(params.has('controllerinput')){report.controllerInput={};verifyControllerInput(module,[object,opponent],report.controllerInput,{step,onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});}
       if(params.has('kirbycopy')){report.kirbyCopy={};verifyKirbyCopy(module,[object,opponent],report.kirbyCopy,{step,mode:params.get('kirbycopy'),donor:params.get('kirbycopydonor')??'primary',onStep:renderSteps?r=>{
         const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;

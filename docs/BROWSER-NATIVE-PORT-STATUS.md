@@ -5,6 +5,32 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Native pause/resume is now integrated in the development match. The original
+USA pause artwork loads automatically; Enter/Escape and gamepad Start reach the
+original VS routines. Both player owners pass debounce, held-Start, wrong-player
+unpause rejection, frozen fighter/clock state, original pause-camera movement,
+and resume. Native artwork draws while paused and hides on resume. One bounds
+callback needed a typed WASM adapter because the original PowerPC code casts an
+integer-returning function to a void callback; the bounds function remains intact.
+
+Battlefield and Yoshi's Story pass 280 pause-test scheduler ticks each (422 input
+renders plus 124 intro frames). Randall freezes and resumes. Fountain's stronger
+2,304-tick check waits for each platform to move before pausing, then checks both
+frozen state and resumed movement (2,446 input renders plus intro). Each player
+cycle checks 58 frozen ticks. Actual browser Enter/Escape events pass a separate
+900-tick live run. Those pause-test counts include frozen gameplay, so they are
+not a gameplay-speed measurement. GPU validation passes 16,905 vertices and 52
+shader pixel channels; all 245 unit checks and shared browser checks pass.
+
+The fresh Kirby/Yoshi combat regression submits all 3,600 frames in about 60 s:
+mean simulation 0.546 ms, mean draw submission 4.580 ms, p95 6.7 ms, maximum
+17.6 ms. Final gameplay fields, recorded transitions and combat windows match
+the previous core; comparison excludes only relocated native pointer addresses.
+This is not a controlled performance improvement or a presented-FPS result.
+Native menus/audio, LRAS results/menu handoff, other costumes, full scene
+ownership, static release integration and broader retail parity remain unfinished.
+[Pause input, camera, stage and GPU evidence](benchmarks/browser-2026-09-16-native-port-pause.json).
+
 The renderer now caches immutable model geometry within each match. An A/B/A/B
 comparison reduced decoding from 4,587 to 22 operations per 3,600-frame workload.
 Mean draw-submission time was effectively unchanged (4.239 versus 4.244 ms),

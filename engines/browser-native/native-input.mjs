@@ -1,6 +1,6 @@
-export const nativeKeyboardCodes=new Set(['KeyZ','KeyS','KeyX','KeyV','KeyC','KeyT','ShiftLeft','ShiftRight','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyI','KeyJ','KeyK','KeyL','AltLeft']);
+export const nativeKeyboardCodes=new Set(['Enter','Escape','KeyZ','KeyS','KeyX','KeyV','KeyC','KeyT','ShiftLeft','ShiftRight','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyI','KeyJ','KeyK','KeyL','AltLeft']);
 export const neutralNativeSample=()=>[0,0,0,0,0,0,0];
-const keyboardButtons=new Map([['KeyZ',0x100],['KeyS',0x200],['KeyX',0x400],['KeyV',0x800],['KeyC',0x10],['KeyT',8],['ShiftLeft',0x20],['ShiftRight',0x40]]);
+const keyboardButtons=new Map([['Enter',0x1000],['Escape',0x1000],['KeyZ',0x100],['KeyS',0x200],['KeyX',0x400],['KeyV',0x800],['KeyC',0x10],['KeyT',8],['ShiftLeft',0x20],['ShiftRight',0x40]]);
 export function keyboardNativeSample(keys){
   let buttons=0;for(const [key,bit]of keyboardButtons)if(keys.has(key))buttons|=bit;
   const x=Number(keys.has('ArrowRight'))-Number(keys.has('ArrowLeft')),y=Number(keys.has('ArrowUp'))-Number(keys.has('ArrowDown'));

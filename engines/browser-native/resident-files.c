@@ -32,6 +32,9 @@ static int valid_name(const char* name)
 }
 static struct ResidentFile* find_file(const char* name)
 {
+    /* The native pause loader requests its locale basename. This target uses
+     * the prefetched USA artwork; arbitrary extension guessing stays forbidden. */
+    if(name&&!strcmp(name,"GmPause"))name="GmPause.usd";
     if(!valid_name(name))return NULL;
     for(unsigned i=0;i<file_count;i++)if(!strcmp(files[i].name,name))return &files[i];
     return NULL;

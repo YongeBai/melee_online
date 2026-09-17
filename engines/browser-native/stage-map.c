@@ -355,6 +355,9 @@ void portControllerSample(unsigned slot,unsigned buttons,float x,float y,float c
     memset(p,0,sizeof(*p));p->button=buttons;p->last_button=previous;
     p->trigger=buttons&~previous;p->release=previous&~buttons;p->nml_stickX=x;p->nml_stickY=y;
     p->nml_subStickX=cx;p->nml_subStickY=cy;p->nml_analogL=left;p->nml_analogR=right;
+    /* Native pause artwork reads master status; gameplay uses game/copy status.
+     * Browser input is sampled synchronously, so both see this same sample. */
+    HSD_PadMasterStatus[slot]=*p;
 }
 /* Keep three-channel deterministic fixtures on the same input boundary. */
 void portStageProbePad(unsigned slot,unsigned buttons,float x,float y)

@@ -1,0 +1,981 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "6f9cbf8",
+  "scope": "Original VS pause artwork, owner/debounce rules, frozen fighter/clock/stage processes and pause camera via browser input.",
+  "core": {
+    "wasmSha256": "59923da2c10c7a4791be9c6eaf47e93d0e527e036c69ffda38bb4def2b8d946e",
+    "wasmBytes": 2960925
+  },
+  "originalFunctions": [
+    "fn_801A1134",
+    "gm_DoPauseChecksAndRoutine",
+    "gm_DoUnpauseChecksAndRoutine",
+    "Camera_SetUpPauseCamera",
+    "Camera_8002C5B4",
+    "Camera_SetBounds"
+  ],
+  "implementation": {
+    "asset": "Typed USA pause model/material-animation subgraph fetched automatically from hosted fixtures.",
+    "platformBoundary": "One explicit GmPause basename maps to prefetched GmPause.usd; arbitrary extension guessing remains rejected.",
+    "controller": "Keyboard Enter/Escape and standard-gamepad Start carry the native Start bit. Master/game pad snapshots share the synchronous browser sample.",
+    "callbackABI": "A void(Camera_x2D0*) adapter calls unchanged int Camera_SetBounds(Vec4*) and transfers the four named bounds values; no arbitrary camera adjustment.",
+    "pauseOwnership": "The original constructor owns its HUD object. The bridge identifies only the new object, not every shared-class HUD object."
+  },
+  "validation": {
+    "unitTests": 245,
+    "unitFailures": 0,
+    "sharedBrowserPassed": true,
+    "compileAudit": {
+      "units": 1130,
+      "knownFailures": 79
+    },
+    "linkAuditMissing": 147,
+    "stages": {
+      "battlefield-final": {
+        "artifact": "dist/native-port/experiment-native-pause/battlefield-final.json",
+        "sha256": "d79e6ceb77a18fd78a5bb5db7dd2d6d87045c1dcd1080cb6aa4307d84c3b1118",
+        "pauseSchedulerTicks": 280,
+        "renderedSteps": 422,
+        "introFrames": 124,
+        "cycles": [
+          {
+            "slot": 0,
+            "frozenFrames": 58,
+            "clockBefore": [
+              263,
+              475,
+              22
+            ],
+            "clockAfter": [
+              284,
+              475,
+              43
+            ]
+          },
+          {
+            "slot": 1,
+            "frozenFrames": 58,
+            "clockBefore": [
+              284,
+              475,
+              43
+            ],
+            "clockAfter": [
+              305,
+              474,
+              4
+            ]
+          }
+        ],
+        "asset": {
+          "nodes": 12,
+          "meshes": 11,
+          "materialAnimations": 1
+        },
+        "finalGpuErrorCheck": true,
+        "images": [
+          {
+            "name": "pause0",
+            "sha256": "275dbe0f52f5c2aa34f4bd79725e8042f5d45098c88cce77c22173c746897aa6",
+            "nativePauseDraws": 10,
+            "eye": [
+              11.97122573852539,
+              56.05246353149414,
+              160.90948486328125
+            ],
+            "interest": [
+              15.711136817932129,
+              23.266414642333984,
+              -0.6100342273712158
+            ],
+            "fov": 29.899999618530273,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera0",
+            "sha256": "8282d6b9d327fe6501add10e4b131d947fbb4f515775113c991ceac9de44f118",
+            "nativePauseDraws": 10,
+            "eye": [
+              54.968162536621094,
+              69.30882263183594,
+              62.55815887451172
+            ],
+            "interest": [
+              5.806471824645996,
+              10.117242813110352,
+              -1.2200684547424316
+            ],
+            "fov": 29.005725860595703,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume0",
+            "sha256": "4578b47922d3e0837bc9797f5ac4ddd9af62e990794c0f90129b250854412167",
+            "nativePauseDraws": 0,
+            "eye": [
+              18.149581909179688,
+              77.9527816772461,
+              226.9071044921875
+            ],
+            "interest": [
+              22.91341781616211,
+              33.234764099121094,
+              -1.2200684547424316
+            ],
+            "fov": 29.890798568725586,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pause1",
+            "sha256": "bedac208decf8be27e29af7cd070f145a698f0be8cd320bc90c05039f7d4cbc6",
+            "nativePauseDraws": 10,
+            "eye": [
+              9.15249252319336,
+              83.85308837890625,
+              161.5335693359375
+            ],
+            "interest": [
+              11.53441047668457,
+              49.36730194091797,
+              -1.0371463298797607
+            ],
+            "fov": 29.801719665527344,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera1",
+            "sha256": "cc7f98c373e470d3f331f7880176c7ecc728ad8acf1138134321cf65929da963",
+            "nativePauseDraws": 10,
+            "eye": [
+              49.31709289550781,
+              124.69142150878906,
+              62.92400360107422
+            ],
+            "interest": [
+              0.15540236234664917,
+              65.49983215332031,
+              -0.8542243242263794
+            ],
+            "fov": 29.005104064941406,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume1",
+            "sha256": "87069bc93b999500d787a0af5932bd88b3161315ef76f4534439ef1469a2ba19",
+            "nativePauseDraws": 0,
+            "eye": [
+              18.141956329345703,
+              78.02732849121094,
+              226.90892028808594
+            ],
+            "interest": [
+              22.141286849975586,
+              40.801151275634766,
+              -0.8542243242263794
+            ],
+            "fov": 29.890775680541992,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          }
+        ]
+      },
+      "fountain-moving": {
+        "artifact": "dist/native-port/experiment-native-pause/fountain-moving.json",
+        "sha256": "417f75f1c217aa863eafb854304535cf474a5237f5992575ab32f52bc336d40f",
+        "pauseSchedulerTicks": 2304,
+        "renderedSteps": 2446,
+        "introFrames": 124,
+        "cycles": [
+          {
+            "slot": 0,
+            "movingStage": {
+              "slot": 0,
+              "before": 20,
+              "height": 20.149999618530273,
+              "waitFrames": 1104
+            },
+            "stageAfter": [
+              [
+                23.299991607666016,
+                2
+              ],
+              [
+                28,
+                1
+              ]
+            ],
+            "frozenFrames": 58,
+            "clockBefore": [
+              1367,
+              457,
+              46
+            ],
+            "clockAfter": [
+              1388,
+              456,
+              7
+            ]
+          },
+          {
+            "slot": 1,
+            "movingStage": {
+              "slot": 1,
+              "before": 28,
+              "height": 28.149999618530273,
+              "waitFrames": 920
+            },
+            "stageAfter": [
+              [
+                29.168319702148438,
+                1
+              ],
+              [
+                31.299991607666016,
+                2
+              ]
+            ],
+            "frozenFrames": 58,
+            "clockBefore": [
+              2308,
+              441,
+              27
+            ],
+            "clockAfter": [
+              2329,
+              441,
+              48
+            ]
+          }
+        ],
+        "asset": {
+          "nodes": 12,
+          "meshes": 11,
+          "materialAnimations": 1
+        },
+        "finalGpuErrorCheck": true,
+        "images": [
+          {
+            "name": "pause0",
+            "sha256": "2cfddf9ce779b8678e9b3c0a4b353c5abab14d972edf209bada0e21bbd958a0b",
+            "nativePauseDraws": 10,
+            "eye": [
+              -17.282611846923828,
+              47.78581619262695,
+              125.84812927246094
+            ],
+            "interest": [
+              -16.96614646911621,
+              27.162200927734375,
+              -0.43019554018974304
+            ],
+            "fov": 29.899999618530273,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera0",
+            "sha256": "6d5fc47ab4fa8a99f1fee4fed630251ecc0ff389fef6cec520f2082f2f994d46",
+            "nativePauseDraws": 10,
+            "eye": [
+              12.880805015563965,
+              86.50399017333984,
+              62.91783905029297
+            ],
+            "interest": [
+              -36.2808837890625,
+              27.312408447265625,
+              -0.8603910207748413
+            ],
+            "fov": 29.005725860595703,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume0",
+            "sha256": "15b74499facb1e5985131b9192f79bce7ea41960e83e78f326c831afe1e3b30b",
+            "nativePauseDraws": 0,
+            "eye": [
+              2.1172308921813965,
+              46.15315628051758,
+              153.56024169921875
+            ],
+            "interest": [
+              -10.806791305541992,
+              28.09349822998047,
+              -0.8603910207748413
+            ],
+            "fov": 29.890798568725586,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pause1",
+            "sha256": "d606e868a411d03c03d9037290a799079fe9a8c39331802a84121d7104f785a9",
+            "nativePauseDraws": 10,
+            "eye": [
+              21.382448196411133,
+              51.87727737426758,
+              126.75239562988281
+            ],
+            "interest": [
+              21.69891357421875,
+              31.856201171875,
+              0.043833255767822266
+            ],
+            "fov": 29.899993896484375,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera1",
+            "sha256": "641f6a18ec381bbfb272f44751b8f3236002a9b15bcd4f09e4727d05829e11a3",
+            "nativePauseDraws": 10,
+            "eye": [
+              90.21092987060547,
+              92.54124450683594,
+              64.72628784179688
+            ],
+            "interest": [
+              41.049232482910156,
+              33.34965515136719,
+              0.9480575323104858
+            ],
+            "fov": 29.005725860595703,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume1",
+            "sha256": "5c05dd89ae71c22c790ee15551b8c883dfc241b7446691f4ac70d53bfc7d3db6",
+            "nativePauseDraws": 0,
+            "eye": [
+              4.664917469024658,
+              49.083953857421875,
+              153.6198272705078
+            ],
+            "interest": [
+              15.528882026672363,
+              32.37267303466797,
+              0.9480575323104858
+            ],
+            "fov": 29.890798568725586,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          }
+        ]
+      },
+      "story": {
+        "artifact": "dist/native-port/experiment-native-pause/story.json",
+        "sha256": "0ebe9802d66922b25ef6b5779be639bb6f907ff9c33fcee2cf219c9bbe76914b",
+        "pauseSchedulerTicks": 280,
+        "renderedSteps": 422,
+        "introFrames": 124,
+        "cycles": [
+          {
+            "slot": 0,
+            "frozenFrames": 58,
+            "clockBefore": [
+              263,
+              475,
+              22
+            ],
+            "clockAfter": [
+              284,
+              475,
+              43
+            ]
+          },
+          {
+            "slot": 1,
+            "frozenFrames": 58,
+            "clockBefore": [
+              284,
+              475,
+              43
+            ],
+            "clockAfter": [
+              305,
+              474,
+              4
+            ]
+          }
+        ],
+        "asset": {
+          "nodes": 12,
+          "meshes": 11,
+          "materialAnimations": 1
+        },
+        "finalGpuErrorCheck": true,
+        "images": [
+          {
+            "name": "pause0",
+            "sha256": "e20ea1e710f182734eceb078b4a5b2faae871a0aef0938ac3106022d320ec503",
+            "nativePauseDraws": 10,
+            "eye": [
+              -17.597776412963867,
+              56.07215118408203,
+              167.9950408935547
+            ],
+            "interest": [
+              -17.292766571044922,
+              31.017454147338867,
+              -0.44231972098350525
+            ],
+            "fov": 20.899999618530273,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera0",
+            "sha256": "5cbefed68721ed1f36a4ac42d5bcb4a5fb926a4ad1fec928fd7038ab41ada7da",
+            "nativePauseDraws": 10,
+            "eye": [
+              12.201098442077637,
+              93.66403198242188,
+              62.893592834472656
+            ],
+            "interest": [
+              -36.960594177246094,
+              34.472450256347656,
+              -0.8846393823623657
+            ],
+            "fov": 28.948461532592773,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume0",
+            "sha256": "146a999a7f9d72c26bc0f553a8cb3312db2d2c117b129cdf046d9e51873c2263",
+            "nativePauseDraws": 0,
+            "eye": [
+              2.196153402328491,
+              53.529022216796875,
+              213.8814697265625
+            ],
+            "interest": [
+              -11.022966384887695,
+              31.76852798461914,
+              -0.8846393823623657
+            ],
+            "fov": 20.982803344726562,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pause1",
+            "sha256": "d12a525b33014fbb94d84c102eb66e9240f1cf86dcb1cd61bfcac254207ba15b",
+            "nativePauseDraws": 10,
+            "eye": [
+              21.9763126373291,
+              54.94157028198242,
+              155.63397216796875
+            ],
+            "interest": [
+              15.366750717163086,
+              31.934541702270508,
+              -0.25621145963668823
+            ],
+            "fov": 21.784523010253906,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera1",
+            "sha256": "9cada5fec60d6c7fe292b41867a72d279c46e4e2ea3bd7a126544a93ccee1a39",
+            "nativePauseDraws": 10,
+            "eye": [
+              90.91815948486328,
+              91.2921371459961,
+              64.15045166015625
+            ],
+            "interest": [
+              41.7564697265625,
+              32.100555419921875,
+              0.37221646308898926
+            ],
+            "fov": 28.954090118408203,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume1",
+            "sha256": "4e555a53f06538b53d81b471b19308c03e81109ccb214d3d6799d2082e45c313",
+            "nativePauseDraws": 0,
+            "eye": [
+              4.789541244506836,
+              53.44831848144531,
+              213.91896057128906
+            ],
+            "interest": [
+              15.785042762756348,
+              30.955081939697266,
+              0.37221646308898926
+            ],
+            "fov": 20.98301887512207,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          }
+        ]
+      },
+      "gpu": {
+        "artifact": "dist/native-port/experiment-native-pause/gpu.json",
+        "sha256": "773f3130ddfd6ee5d6a4a390e73fa1beea2221c20d7ae728573308d171d58372",
+        "pauseSchedulerTicks": 280,
+        "renderedSteps": 422,
+        "introFrames": 124,
+        "cycles": [
+          {
+            "slot": 0,
+            "frozenFrames": 58,
+            "clockBefore": [
+              263,
+              475,
+              22
+            ],
+            "clockAfter": [
+              284,
+              475,
+              43
+            ]
+          },
+          {
+            "slot": 1,
+            "frozenFrames": 58,
+            "clockBefore": [
+              284,
+              475,
+              43
+            ],
+            "clockAfter": [
+              305,
+              474,
+              4
+            ]
+          }
+        ],
+        "asset": {
+          "nodes": 12,
+          "meshes": 11,
+          "materialAnimations": 1
+        },
+        "finalGpuErrorCheck": true,
+        "images": [
+          {
+            "name": "pause0",
+            "sha256": "275dbe0f52f5c2aa34f4bd79725e8042f5d45098c88cce77c22173c746897aa6",
+            "nativePauseDraws": 10,
+            "eye": [
+              11.97122573852539,
+              56.05246353149414,
+              160.90948486328125
+            ],
+            "interest": [
+              15.711136817932129,
+              23.266414642333984,
+              -0.6100342273712158
+            ],
+            "fov": 29.899999618530273,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera0",
+            "sha256": "8282d6b9d327fe6501add10e4b131d947fbb4f515775113c991ceac9de44f118",
+            "nativePauseDraws": 10,
+            "eye": [
+              54.968162536621094,
+              69.30882263183594,
+              62.55815887451172
+            ],
+            "interest": [
+              5.806471824645996,
+              10.117242813110352,
+              -1.2200684547424316
+            ],
+            "fov": 29.005725860595703,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume0",
+            "sha256": "4578b47922d3e0837bc9797f5ac4ddd9af62e990794c0f90129b250854412167",
+            "nativePauseDraws": 0,
+            "eye": [
+              18.149581909179688,
+              77.9527816772461,
+              226.9071044921875
+            ],
+            "interest": [
+              22.91341781616211,
+              33.234764099121094,
+              -1.2200684547424316
+            ],
+            "fov": 29.890798568725586,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pause1",
+            "sha256": "bedac208decf8be27e29af7cd070f145a698f0be8cd320bc90c05039f7d4cbc6",
+            "nativePauseDraws": 10,
+            "eye": [
+              9.15249252319336,
+              83.85308837890625,
+              161.5335693359375
+            ],
+            "interest": [
+              11.53441047668457,
+              49.36730194091797,
+              -1.0371463298797607
+            ],
+            "fov": 29.801719665527344,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "pausecamera1",
+            "sha256": "cc7f98c373e470d3f331f7880176c7ecc728ad8acf1138134321cf65929da963",
+            "nativePauseDraws": 10,
+            "eye": [
+              49.31709289550781,
+              124.69142150878906,
+              62.92400360107422
+            ],
+            "interest": [
+              0.15540236234664917,
+              65.49983215332031,
+              -0.8542243242263794
+            ],
+            "fov": 29.005104064941406,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          },
+          {
+            "name": "resume1",
+            "sha256": "87069bc93b999500d787a0af5932bd88b3161315ef76f4534439ef1469a2ba19",
+            "nativePauseDraws": 0,
+            "eye": [
+              18.141956329345703,
+              78.02732849121094,
+              226.90892028808594
+            ],
+            "interest": [
+              22.141286849975586,
+              40.801151275634766,
+              -0.8542243242263794
+            ],
+            "fov": 29.890775680541992,
+            "aspect": 1.2173333168029785,
+            "resolution": [
+              960,
+              720
+            ]
+          }
+        ]
+      }
+    },
+    "gpu": {
+      "vertexChecks": {
+        "vertices": 16905,
+        "positionComponents": 50715,
+        "normalComponents": 50715,
+        "maxScaledPositionError": 0.0000033213807609243143,
+        "maxNormalError": 1.142549241883728e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.001203878918480783,
+        "byOwner": {
+          "1562880": {
+            "vertices": 247,
+            "ndcMin": [
+              -0.9210515186073006,
+              -0.8281066234816368,
+              -0.015417359523508195
+            ],
+            "ndcMax": [
+              0.9210513894328546,
+              0.8280988439478036,
+              -0.015112758659655761
+            ]
+          },
+          "1642176": {
+            "vertices": 458,
+            "ndcMin": [
+              -779.806852425958,
+              -270.9886440180557,
+              -0.004619402485992769
+            ],
+            "ndcMax": [
+              55.74314307225393,
+              1155.69144675828,
+              0.07395083548872139
+            ]
+          },
+          "1644128": {
+            "vertices": 8608,
+            "ndcMin": [
+              -1.5922677725181564,
+              -2.30108035594323,
+              -0.0017287848161171022
+            ],
+            "ndcMax": [
+              2.1555727805395195,
+              2.0390977867963764,
+              -0.0006480569361986056
+            ]
+          },
+          "1649888": {
+            "vertices": 7272,
+            "ndcMin": [
+              -0.22130594893759978,
+              -0.423797526490075,
+              -0.0010781477888532624
+            ],
+            "ndcMax": [
+              0.1794387968133935,
+              0.19779973786440289,
+              -0.0009066467305866652
+            ]
+          },
+          "particles": {
+            "vertices": 320,
+            "ndcMin": [
+              -14.503861528939806,
+              -48.531224627174964,
+              -0.002994920870336798
+            ],
+            "ndcMax": [
+              122.8659701535439,
+              472.5150725954358,
+              0.01564697882835846
+            ]
+          }
+        }
+      },
+      "shaderChecks": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      }
+    },
+    "browserKeyboard": {
+      "artifact": "dist/native-port/experiment-native-pause/live.json",
+      "sha256": "2bf4a72942cca0901fe914738f8cfcf1423c6a7279f4f02285c5488aab5f6114",
+      "ticks": 900,
+      "draws": 900,
+      "completed": true,
+      "keyboardEvents": true,
+      "paused": {
+        "frame": 65,
+        "match": {
+          "pause": [
+            1,
+            0,
+            7,
+            0,
+            0
+          ],
+          "clock": [
+            62,
+            478,
+            1
+          ]
+        }
+      },
+      "held": {
+        "frame": 96,
+        "match": {
+          "pause": [
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "clock": [
+            62,
+            478,
+            1
+          ]
+        }
+      },
+      "resumed": {
+        "frame": 109,
+        "match": {
+          "pause": [
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "clock": [
+            75,
+            478,
+            14
+          ]
+        }
+      },
+      "identicalFrozenFighterStates": true
+    }
+  },
+  "commands": {
+    "battlefield": "node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --stage-callbacks --render-steps --hardware",
+    "fountain": "node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --map=fountain --stage-callbacks --render-steps --hardware --fountain-cosmetics-off --probe-seconds=180",
+    "story": "node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --map=story --stage-callbacks --render-steps --hardware",
+    "live": "node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-pause --frames=900 --hardware --defer-gpu-errors",
+    "gpu": "node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --stage-callbacks --render-steps --verify-vertices --hardware --probe-seconds=600"
+  },
+  "limits": [
+    "Pause-validation frames count scheduler ticks, including ticks with frozen gameplay; they are not a gameplay-speed measurement.",
+    "The high-readback GPU run is correctness-only, never a performance sample.",
+    "Original pause callbacks are retained; audible pause feedback, LRAS results/menu handoff and full scene teardown are not certified.",
+    "Camera matrices satisfy native projection/view invariants; screenshot inspection is not equivalent to an exhaustive retail visual-parity comparison.",
+    "Complete native menus/audio, other costumes, static release integration, physical-controller calibration, retail parity, distinct displayed FPS and physical input latency remain unfinished."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  },
+  "combatRegression": {
+    "artifact": "dist/native-port/experiment-native-pause/combat.json",
+    "sha256": "22e81927f07ad4f101014c981dcd2e955b6974f0acb37e97a37fbdaadc7461a8",
+    "frames": 3600,
+    "draws": 3600,
+    "elapsedMs": 60030.90000000596,
+    "stepCpu": {
+      "samples": 3600,
+      "meanMs": 0.546166666696469,
+      "p50Ms": 0.5,
+      "p95Ms": 0.8999999761581421,
+      "maxMs": 2.899999976158142
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 4.579805555591981,
+      "p50Ms": 4.300000011920929,
+      "p95Ms": 6.700000017881393,
+      "maxMs": 17.599999994039536
+    },
+    "shaderCoverage": {
+      "programs": 34,
+      "prepared": 0,
+      "preparedUsed": 0,
+      "unpreparedUsed": 34
+    },
+    "modelCache": {
+      "enabled": true,
+      "decodes": 23,
+      "hits": 4565,
+      "verticesDecoded": 32450
+    },
+    "multiStepCallbacks": 0,
+    "presentationFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "identicalPriorFinalGameplayFieldsTransitionsCombatWindows": true,
+    "excludedFinalPointerFields": {
+      "7": "x890_cameraBox",
+      "8": "ft_data"
+    }
+  },
+  "sourceHashes": {
+    "engines/browser-native/pause-assets.mjs": "fcd66dad2500a3d5a44c00e0306f0cb0dd2124bb06e7848708afbcec0e756ada",
+    "engines/browser-native/verify-pause.mjs": "802f303b5a43feb7d792ab9fbfcb7eac36d27be9ddc275a9578c777486a63c63",
+    "engines/browser-native/match.c": "a3d0d9d60d3a855fe75b5f7ae1c6e24ea90d0e45a84d968f962d0d413fd1c881",
+    "engines/browser-native/native-input.mjs": "923b19e1e3d87b17aaa73c323c432b53f2affcb5f33d730748f587ee527640ea",
+    "engines/browser-native/native-live.mjs": "2c8f81c3e6b491df506777c2c9337806f5310464f7c0570b450137f046f32e65",
+    "engines/browser-native/stage-map.c": "84ec87ce7acf5043271951fdb1940a68d97a4b35c23299d1e3bdac5733c41a03",
+    "engines/browser-native/resident-files.c": "f5584ce41154648c92b2b33aa9ac9afb18aa4afed4e5ea5bbbe8e7a30feaebe4",
+    "scripts/native-port/portable-source.mjs": "e3260d10d7d03898b07149bebc0d2aaf3c29844f48615d5d47866227496d6b5c"
+  }
+}
