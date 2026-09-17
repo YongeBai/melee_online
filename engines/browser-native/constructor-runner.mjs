@@ -101,7 +101,8 @@ const capture=line=>{diagnostics.push(String(line));if(diagnostics.length>64)dia
 try {
   async function asset(name){const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable: '+name);return new Uint8Array(await r.arrayBuffer());}
   const modelNames=menuHandoff?[]:await (await fetch('./model-fixtures.json')).json();
-  const [module,common,models]=await Promise.all([options.module??create({print:capture,printErr:capture}),asset('PlCo.dat'),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
+  const [gameModule,common,models]=await Promise.all([options.module??create({print:capture,printErr:capture}),asset('PlCo.dat'),Promise.all(modelNames.map(async name=>({name,bytes:await asset(name)})))]);
+  let module=gameModule;
   if(render)report.projectionChecks=verifyNativeProjection(module);
   if(menuHandoff){installResidentFile(module,'PlCo.dat',convertSharedParameters(common,sharedSpec).image);if(module._portFighterInitialize()!==0)throw Error('Original fighter startup after menus failed');report.menuHandoff.startupPassed=true;}
   else report.startupPassed=verifyStartup(module,common,models).passed;
@@ -354,7 +355,14 @@ try {
           else itemModels.set(base+row.joint,{name:character+' '+row.label,bytes});
         }
       }
-      previewFactory=(presentationCache=options.presentationCache??null)=>createNativeMatchPreview(module,canvas,previewActors,{presentationCache,cacheModels:params.get('cachemodels')!=='0',traceAttachments:params.has('kirbycopy'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});preview=previewFactory();
+      previewFactory=(presentationCache=options.presentationCache??null,renderModule=gameModule)=>{
+        // Dynamic stage/accessory/Link callbacks above resolve this lexical
+        // module. Keep all their calls and direct HEAP writes in the same
+        // instance as the renderer. Never retain this scope across an await.
+        const scoped=fn=>{const previous=module;module=renderModule;try{const result=fn();if(result?.then)throw Error('Native presentation must be synchronous');return result;}finally{module=previous;}};
+        const renderer=scoped(()=>createNativeMatchPreview(renderModule,canvas,previewActors,{presentationCache,cacheModels:params.get('cachemodels')!=='0',traceAttachments:params.has('kirbycopy'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'}));
+        return Object.fromEntries(Object.entries(renderer).map(([key,value])=>[key,typeof value==='function'?(...args)=>scoped(()=>value(...args)):value]));
+      };preview=previewFactory();
       if(params.has('prewarmshaders')){
         const build=await (await fetch('./fighter-init-build.json')).json();
         const hashes=await Promise.all(shaderIdentityFiles.map(async name=>{const bytes=await (await fetch('./'+name)).arrayBuffer(),hash=await crypto.subtle.digest('SHA-256',bytes);return [name,Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')];}));

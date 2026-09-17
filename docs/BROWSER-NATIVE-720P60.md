@@ -4,6 +4,12 @@ This milestone adds sustained every-forward-frame measurement to the direct
 C-to-WASM port. It does not use Dolphin. Production rooms remain three-frame
 lockstep; the snapshot/replay integration is still diagnostic-only.
 
+The next [render-replica milestone](BROWSER-NATIVE-RENDER-REPLICA.md) removes the
+extra presentation checkpoint/restore in an opt-in diagnostic. Its first
+Battlefield trial improves to about 58 simulation FPS, but fresh repeats are
+slower and all rollback capture gates still fail. The table below remains the
+historical a3e0a53 baseline; do not mix its measurements with the newer trials.
+
 ## Final measured result
 
 Each gameplay run draws all 1,800 forward frames. The local runs cover about
@@ -148,7 +154,9 @@ proof of 60 FPS.
 
 ## Remaining work
 
-The high-value architectural change is a renderer whose native allocations and
+The next milestone implements an isolated replica of the renderer; see the link
+above for ownership, measurements and unresolved gameplay-dependency limits.
+The remaining high-value architectural change is a renderer whose native allocations and
 JS bindings remain coherent across rewind, eliminating the extra presentation
 checkpoint/restore on every forward frame. That requires auditing native draw
 writes and explicit invalidation/rebinding of restored objects before it can

@@ -1,5 +1,10 @@
 # Native browser port — September 17, 2026
 
+The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
+now isolates draw-side allocations and native writes in a second private WASM
+instance. It removes per-draw gameplay snapshot/restore, but rollback remains
+below the 59.5 simulation/captured-FPS gate. Production rooms remain lockstep.
+
 The new [every-frame 720p60 diagnostic](BROWSER-NATIVE-720P60.md) measures local
 combat and delayed-input rollback separately, with a 960×720 native picture in
 a 1280×720 presentation. Local Battlefield Falco/Fox and Fountain ICs/Peach

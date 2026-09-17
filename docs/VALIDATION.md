@@ -10,6 +10,11 @@ integration. It does not establish 720p60 or competitive network latency. The
 Dolphin stream measurements below are historical and apply to a different path.
 The subsequent [page-sharing and presentation-cache revision](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md)
 retains the full-copy oracle and adds exact corrected-canvas pixel comparisons.
+The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
+now isolates draw-side allocations and native writes in a second private WASM
+instance. It removes per-draw gameplay snapshot/restore, but rollback remains
+below the 59.5 simulation/captured-FPS gate. Production rooms remain lockstep.
+
 The [every-frame direct-port diagnostic](BROWSER-NATIVE-720P60.md) now separates
 30-second local combat from two-browser delayed-input rollback, including an
 independent browser capture observer and timing controls. The local workloads

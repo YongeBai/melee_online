@@ -1,3 +1,4 @@
+import {createRenderReplica} from './render-replica.mjs';
 import {createPagedWasmCheckpointStore} from './paged-snapshot.mjs';
 import {createPresentationCache} from './presentation-cache.mjs';
 import {combatWorkload} from './combat-workload.mjs';
@@ -21,6 +22,9 @@ try{
   // the canvas. Remove those diagnostics so screenshots show the corrected
   // live canvas, not the pre-intro image with hidden fighters and an unset HUD.
   for(const image of document.querySelectorAll('img[id^="native-preview-"]'))image.remove();
+  const replicaAudio=params.get('presentation')==='replica'?createRollbackAudio():null,replicaRuntime=replicaAudio?await createSnapshotRuntime(create,bytes,{memoryInitialPages:runtime.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}):null;
+  const replica=replicaRuntime?createRenderReplica(runtime,replicaRuntime,{sourceHost:audio,targetHost:replicaAudio}):null;
+  const replicaAudit=[];
   const paged=params.get('snapshot')!=='full';
   const store=(paged?createPagedWasmCheckpointStore:createWasmCheckpointStore)({...runtime,host:audio,maxBytes:2*1024**3}),module=runtime.module;
   const stageState=()=>params.get('map')==='fountain'?[0,1].map(i=>module._portFountainPlatformRead(0,i)):params.get('map')==='story'?[0,1].map(i=>module._portRandallRead(i)):params.get('map')==='stadium'?[0,1,2,3,4,5].map(i=>module._portStadiumRead(i)):params.get('map')==='dreamland'?[0,1,2].map(i=>module._portDreamlandWindRead(i,0)):[];
@@ -37,7 +41,9 @@ try{
   function pixels(){const gl=picture.getContext('webgl2'),bytes=new Uint8Array(gl.drawingBufferWidth*gl.drawingBufferHeight*4);gl.readPixels(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight,gl.RGBA,gl.UNSIGNED_BYTE,bytes);return bytes;}
   function present(frame){
    if(stats.replaying){stats.replayPresentationCalls++;throw Error('Presentation during replay');}
-   const before=store.capture(),start=performance.now();let preview;
+   const before=store.capture(),start=performance.now();
+   if(replica){replica.present(m=>boundary.createPreview(presentationCache,m),p=>{const drawn=p.draw();p.validateGpu();stats.presentations++;stats.presentationFrames.push(frame);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};});const after=store.capture(),diff=store.compare(before,after);replicaAudit.push({frame,...diff});if(diff.changedBytes||diff.globalsChanged.some(Boolean)||diff.hostChanged)throw Error('Replica mutated game state');store.release(after);store.release(before);stats.presentationCpuMs.push(performance.now()-start);return;}
+   let preview;
    try{preview=boundary.createPreview(presentationCache);const drawn=preview.draw();preview.validateGpu();stats.presentations++;stats.presentationFrames.push(frame);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};}
    finally{preview?.dispose();store.restore(before);store.release(before);stats.presentationCpuMs.push(performance.now()-start);}
   }
@@ -56,21 +62,23 @@ try{
     // Rendering after correction is isolated: renderer-owned allocations and C
     // render cache mutations are discarded only after disposing every JS owner.
     if(stats.replaying)stats.replayPresentationCalls++;let preview,correctedPixels;
-    try{preview=boundary.createPreview(presentationCache);const drawn=preview.draw();preview.validateGpu();correctedPixels=pixels();stats.presentations++;stats.presentationFrames.push(frames);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};}finally{preview?.dispose();}
-    const rendered=store.capture();stats.afterPresentationHash=await store.hash(rendered);stats.renderMutation=store.compare(final,rendered);store.release(rendered);store.restore(final);const restored=store.capture();stats.afterPresentationRestoreHash=await store.hash(restored);store.release(restored);
+    const record=p=>{const drawn=p.draw();p.validateGpu();correctedPixels=pixels();stats.presentations++;stats.presentationFrames.push(frames);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};};if(replica)replica.present(m=>boundary.createPreview(presentationCache,m),record);else try{preview=boundary.createPreview(presentationCache);record(preview);}finally{preview?.dispose();}
+    const rendered=store.capture();stats.afterPresentationHash=await store.hash(rendered);stats.renderMutation=store.compare(final,rendered);if(replica&&(stats.renderMutation.changedBytes||stats.renderMutation.globalsChanged.some(Boolean)||stats.renderMutation.hostChanged))throw Error('Final replica draw changed gameplay');store.release(rendered);store.restore(final);const restored=store.capture();stats.afterPresentationRestoreHash=await store.hash(restored);store.release(restored);
     if(stats.afterPresentationRestoreHash.stateSha256!==finalHash.stateSha256)throw Error('Renderer-detached restore failed');
     // Independent fresh GPU resources at the identical restored C boundary.
     // This oracle is excluded from presentation timing and progress counts.
-    let oracle,oraclePixels;
-    try{oracle=boundary.createPreview(null);oracle.draw();oracle.validateGpu();oraclePixels=pixels();}finally{oracle?.dispose();}
+    let oracle,oraclePixels,oracleDraw;
+    try{oracle=boundary.createPreview(null);oracleDraw=oracle.draw();oracle.validateGpu();oraclePixels=pixels();}finally{oracle?.dispose();}
+    const camera=d=>({resolution:d.resolution,eye:d.eye,interest:d.interest,fov:d.fov,aspect:d.aspect});
+    stats.cameraOracle={sameAsFresh:JSON.stringify(camera(stats.render))===JSON.stringify(camera(oracleDraw)),corrected:camera(stats.render),fresh:camera(oracleDraw)};if(!stats.cameraOracle.sameAsFresh)throw Error('Replica camera differs from fresh renderer');
     const different=correctedPixels.reduce((n,v,i)=>n+(v!==oraclePixels[i]),0);
     const pixelHash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
     stats.pixelOracle={differentBytes:different,bytes:correctedPixels.length,cached:await pixelHash(correctedPixels),fresh:await pixelHash(oraclePixels)};
     if(different)throw Error('Retained GPU assets differ from fresh reconstruction '+JSON.stringify(stats.pixelOracle));
     store.restore(final);
     stats.renderMutatedWasm=stats.afterPresentationHash.stateSha256!==finalHash.stateSha256;
-    globalThis.rollbackReport={passed:true,seat,frames,elapsedMs:performance.now()-start,...stats,kernel:kernel.snapshot(),snapshotCosts:store.metrics(),snapshotMode:paged?'pages':'full',presentationCache:presentationCache?.snapshot()??null,finalHash,actualState,audio:audio.snapshot(),scope:'Experimental same-instance snapshot + prediction/correction with renderer detached. Final frame reconstructed at 960x720. Audio journal only; production still uses lockstep.'};
-    document.querySelector('#result').textContent=JSON.stringify(rollbackReport,null,2);kernel.dispose();presentationCache?.dispose();store.release(final);store.release(reference);store.release(initial);store.dispose();socket.send(JSON.stringify({type:'done',hash:finalHash.stateSha256}));socket.close();return;
+    globalThis.rollbackReport={passed:true,seat,frames,elapsedMs:performance.now()-start,...stats,kernel:kernel.snapshot(),presentationBoundary:replica?'independent-replica':'conservative',replicaAudit,replica:replica?.metrics()??null,snapshotCosts:store.metrics(),snapshotMode:paged?'pages':'full',presentationCache:presentationCache?.snapshot()??null,finalHash,actualState,audio:audio.snapshot(),scope:'Experimental complete-state prediction/correction; presentation boundary recorded separately. Final frame reconstructed at 960x720. Audio journal only; production still uses lockstep.'};
+    document.querySelector('#result').textContent=JSON.stringify(rollbackReport,null,2);kernel.dispose();replica?.dispose();presentationCache?.dispose();store.release(final);store.release(reference);store.release(initial);store.dispose();socket.send(JSON.stringify({type:'done',hash:finalHash.stateSha256}));socket.close();return;
    }schedule();
   }catch(e){running=false;fail(e);kernel.dispose();socket.close();}}
   globalThis.rollbackReady={initialHash,referenceHash,bytes:initial.byteLength};

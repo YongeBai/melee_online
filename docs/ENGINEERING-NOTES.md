@@ -7,6 +7,11 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
+now isolates draw-side allocations and native writes in a second private WASM
+instance. It removes per-draw gameplay snapshot/restore, but rollback remains
+below the 59.5 simulation/captured-FPS gate. Production rooms remain lockstep.
+
 Use `BROWSER-NATIVE-720P60.md` for the every-forward-frame harness. Keep local
 play, detached presentation and delayed-input rollback separate. Draw counters
 and simulation FPS are not captured-frame FPS; canvas-capture timestamps are

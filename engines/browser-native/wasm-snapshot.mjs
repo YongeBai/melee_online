@@ -3,7 +3,7 @@
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 function leb(value){const out=[];do{let byte=value&127;value>>>=7;if(value)byte|=128;out.push(byte);}while(value);return out;}
 function string(value){const bytes=encoder.encode(value);return [...leb(bytes.length),...bytes];}
-export function instrumentSnapshotWasm(bytes){
+export function instrumentSnapshotWasm(bytes,{memoryInitialPages=null}={}){
  if(!(bytes instanceof Uint8Array)||bytes.length<8||(new DataView(bytes.buffer,bytes.byteOffset).getUint32(0,true)!==0x6d736100||new DataView(bytes.buffer,bytes.byteOffset).getUint32(4,true)!==1))throw Error('Invalid WASM snapshot module');
  const sections=[];let at=8;
  const u=()=>{let value=0,shift=0,b;do{if(at>=bytes.length||shift>28)throw Error('Invalid WASM LEB');b=bytes[at++];value|=(b&127)<<shift;shift+=7;}while(b&128);return value>>>0;};
@@ -19,15 +19,16 @@ export function instrumentSnapshotWasm(bytes){
  }
  const allowed=new Set(['emit_immediate','portEmitDraw','music_request','accept_diagnostic_mute','portDispatchObject','invoke_viiiiii','invoke_vii','invoke_vi','invoke_v','_abort_js','fd_close','fd_write','fd_seek','emscripten_resize_heap','_emscripten_throw_longjmp']);
  if(!exports||!globals.length||!table||!memory||imports.some(i=>!allowed.has(i.name)||!['env','wasi_snapshot_preview1'].includes(i.module)))throw Error('Unaudited snapshot imports/state');
+ if(memoryInitialPages!==null&&(!Number.isInteger(memoryInitialPages)||memoryInitialPages<memory.initial||memoryInitialPages>memory.maximum))throw Error('Invalid replica initial memory');
  const additions=globals.flatMap(g=>[...string(g.name),3,...leb(g.index)]);
  const replacement=Uint8Array.from([...leb(exports.count+globals.length),...exports.body,...additions]);
- const parts=[bytes.slice(0,8),...sections.flatMap(s=>{const body=s.id===7?replacement:s.body;return [Uint8Array.from([s.id,...leb(body.length)]),body];})],result=new Uint8Array(parts.reduce((n,p)=>n+p.length,0));let cursor=0;for(const p of parts){result.set(p,cursor);cursor+=p.length;}
- return {bytes:result,audit:{globals,imports,table,memory,scope:'same instance, detached renderer, synchronous exported-call boundary'}};
+ const parts=[bytes.slice(0,8),...sections.flatMap(s=>{const body=s.id===7?replacement:s.id===5&&memoryInitialPages!==null?Uint8Array.from([1,1,...leb(memoryInitialPages),...leb(memory.maximum)]):s.body;return [Uint8Array.from([s.id,...leb(body.length)]),body];})],result=new Uint8Array(parts.reduce((n,p)=>n+p.length,0));let cursor=0;for(const p of parts){result.set(p,cursor);cursor+=p.length;}
+ return {bytes:result,audit:{globals,imports,table,memory,instantiationMemoryInitialPages:memoryInitialPages??memory.initial,scope:'same instance, detached renderer, synchronous exported-call boundary'}};
 }
 export async function createSnapshotRuntime(create,bytes,options={}){
- const instrumented=instrumentSnapshotWasm(bytes);let instance,rejectInstantiation;const health={aborted:false};
+ const {memoryInitialPages=null,...moduleOptions}=options,instrumented=instrumentSnapshotWasm(bytes,{memoryInitialPages});let instance,rejectInstantiation;const health={aborted:false};
  const failed=new Promise((_,reject)=>rejectInstantiation=reject);
- const module=await Promise.race([failed,create({...options,onAbort(reason){health.aborted=true;options.onAbort?.(reason);},instantiateWasm(imports,receive){WebAssembly.instantiate(instrumented.bytes,imports).then(result=>{instance=result.instance;receive(instance,result.module);}).catch(rejectInstantiation);return {};}})]);
+ const module=await Promise.race([failed,create({...moduleOptions,onAbort(reason){health.aborted=true;moduleOptions.onAbort?.(reason);},instantiateWasm(imports,receive){WebAssembly.instantiate(instrumented.bytes,imports).then(result=>{instance=result.instance;receive(instance,result.module);}).catch(rejectInstantiation);return {};}})]);
  const wasmSha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
  return {module,instance,audit:{...instrumented.audit,wasmSha256},health};
 }
