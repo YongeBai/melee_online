@@ -3,6 +3,7 @@ import {WebSocketServer} from '../../web/node_modules/ws/wrapper.mjs';import {cr
 const root=path.resolve(import.meta.dirname,'../..'),server=createNativePortServer({enableRooms:false}),token=randomBytes(24).toString('hex'),clients=[],peers=[null,null],timers=new Set(),transport={packets:0,reordered:0,delaysMs:[],lastReceived:[-1,-1]};
 const stage=process.argv.find(v=>v.startsWith('--map='))?.slice(6)??'battlefield',frames=Number(process.argv.find(v=>v.startsWith('--frames='))?.slice(9)??240),pair=(process.argv.find(v=>v.startsWith('--pair='))?.slice(7)??'Fc,Fx').split(',');
 const snapshot=process.argv.find(v=>v.startsWith('--snapshot='))?.slice(11)??'pages',gpucache=process.argv.includes('--gpucache=0')?'0':'1';
+const sparserestore=process.argv.includes('--sparserestore=0')?'0':'1',snapshotaudit=process.argv.includes('--snapshotaudit')?'1':'0';
 const replicacopy=process.argv.includes('--replicacopy=dirty')?'dirty':'full';
 const presentation=process.argv.includes('--presentation=replica')?'replica':'conservative';
 const workload=process.argv.find(v=>v.startsWith('--workload='))?.slice(11)??'scripted';
@@ -21,7 +22,7 @@ async function client(seat){
  ws.addEventListener('message',e=>{const m=JSON.parse(e.data),p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);}});
  c.cmd=(method,params={})=>new Promise((resolve,reject)=>{const n=++id,t=setTimeout(()=>{pending.delete(n);reject(Error('Timeout '+method));},60000);pending.set(n,{resolve:r=>{clearTimeout(t);resolve(r);},reject});ws.send(JSON.stringify({id:n,method,params}));});
  c.eval=async expression=>{const r=await c.cmd('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description??r.exceptionDetails.text);return r.result.value;};
- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/rollback-probe.html?'+new URLSearchParams({seat,token,frames,presentation,replicacopy,workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
+ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/rollback-probe.html?'+new URLSearchParams({seat,token,frames,sparserestore,snapshotaudit,presentation,replicacopy,workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
 }
 try{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));await client(0);await client(1);
@@ -29,6 +30,6 @@ try{
  const reports=states.map(s=>({...s.report,boot:s.boot}));if(reports[0].initialHash.stateSha256!==reports[1].initialHash.stateSha256||reports[0].finalHash.stateSha256!==reports[1].finalHash.stateSha256)throw Error('Cross-browser complete-state hash mismatch '+JSON.stringify(reports.map(r=>({initial:r.initialHash,final:r.finalHash}))));
  if(reports.some(r=>!r.kernel.corrections||!r.kernel.replayedFrames||!r.kernel.predictedFrames||r.replayPresentationCalls||r.presentations!==Math.ceil(frames/60)||r.audio.presented||!r.cameraOracle?.sameAsFresh||r.pixelOracle?.differentBytes!==0||r.pixelOracle?.cached!==r.pixelOracle?.fresh))throw Error('Correction/presentation proof incomplete');
  for(const [i,c]of clients.entries()){const s=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/corrected-'+i+'.png',Buffer.from(s.data,'base64'));}
- fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,stage,pair,frames,workload,snapshot,gpucache,transport,reports},null,2));console.log(JSON.stringify({passed:true,stage,pair,frames,hash:reports[0].finalHash.stateSha256,bytes:reports[0].finalHash.bytes,corrections:reports.map(r=>r.kernel.corrections),replayed:reports.map(r=>r.kernel.replayedFrames),renderMutatedWasm:reports.map(r=>r.renderMutatedWasm)}));
+ fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,stage,pair,frames,workload,snapshot,gpucache,sparserestore,snapshotaudit,transport,reports},null,2));console.log(JSON.stringify({passed:true,stage,pair,frames,hash:reports[0].finalHash.stateSha256,bytes:reports[0].finalHash.bytes,corrections:reports.map(r=>r.kernel.corrections),replayed:reports.map(r=>r.kernel.replayedFrames),renderMutatedWasm:reports.map(r=>r.renderMutatedWasm)}));
 }catch(error){const states=await Promise.all(clients.map(c=>c.eval?.('({ready:globalThis.rollbackReady,progress:globalThis.rollbackProgress,error:globalThis.rollbackFailure})').catch(e=>String(e))));fs.writeFileSync(output+'/failure.json',JSON.stringify({error:String(error.stack??error),states},null,2));throw error;
 }finally{for(const t of timers)clearTimeout(t);for(const c of clients){c.ws?.close();c.browser.kill();await new Promise(r=>c.browser.once('exit',r));fs.rmSync(c.profile,{recursive:true,force:true});}for(const ws of wss.clients)ws.terminate();wss.close();await new Promise(r=>server.close(r));}

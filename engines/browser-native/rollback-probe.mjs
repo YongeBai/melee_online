@@ -27,7 +27,7 @@ try{
   const replica=replicaRuntime?createRenderReplica(runtime,replicaRuntime,{sourceHost:audio,targetHost:replicaAudio,copyMode:dirty?'dirty':'full',auditDirty:true}):null;
   const replicaAudit=[];
   const paged=params.get('snapshot')!=='full';
-  const store=(paged?createPagedWasmCheckpointStore:createWasmCheckpointStore)({...runtime,host:audio,maxBytes:2*1024**3}),module=runtime.module;
+  const store=(paged?createPagedWasmCheckpointStore:createWasmCheckpointStore)({...runtime,host:audio,sparse:!!dirty&&params.get('sparserestore')!=='0',auditSparse:params.get('snapshotaudit')==='1',maxBytes:2*1024**3}),module=runtime.module;
   const stageState=()=>params.get('map')==='fountain'?[0,1].map(i=>module._portFountainPlatformRead(0,i)):params.get('map')==='story'?[0,1].map(i=>module._portRandallRead(i)):params.get('map')==='stadium'?[0,1,2,3,4,5].map(i=>module._portStadiumRead(i)):params.get('map')==='dreamland'?[0,1,2].map(i=>module._portDreamlandWindRead(i,0)):[];
   const read=()=>({players:boundary.readPlayers(),partners:[0,1].map(p=>{const o=module._Player_GetEntityAtIndex(p,1);return o?Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)):null;}),stage:stageState(),clock:[12,13,14].map(f=>module._portTournamentRead(f,0)),objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed()});
   const initial=store.capture();const initialHash=await store.hash(initial),initialState=read();store.restore(initial);

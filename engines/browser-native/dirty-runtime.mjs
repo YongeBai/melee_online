@@ -7,3 +7,23 @@ export async function loadDirtyCore(){
  const manifest=await(await fetch('./dirty-core.json')).json();if(manifest.originalSha256!=='a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234'||manifest.pageBytes!==4096||manifest.counts.stores!==110316||manifest.counts.copy!==169||manifest.counts.fill!==61)throw Error('Unaudited dirty core');
  const bytes=new Uint8Array(await(await fetch('./melee-dirty.wasm')).arrayBuffer());if(await sha(bytes)!==manifest.instrumentedSha256)throw Error('Dirty core integrity');return {bytes,manifest};
 }
+
+// Fan out audited native/host store marks before consuming the instrumentation
+// bitmap. Each consumer owns its pending set; clearing one never loses another's
+// history. Metadata is outside gameplay memory and is not checkpointed.
+const dirtyHubs=new WeakMap();
+export function subscribeDirtyPages(runtime,role){
+ const {dirty,module,instance,audit}=runtime;
+ if(!audit.instrumentedSha256||!(dirty instanceof Uint8Array)||dirty.byteLength!==524288||typeof role!=='string')throw Error('Unaudited dirty subscription');
+ const size=module.HEAPU8.length,count=size/4096;
+ let hub=dirtyHubs.get(dirty.buffer);
+ if(hub&&(hub.module!==module||hub.size!==size))throw Error('Dirty bitmap runtime identity');
+ if(!hub){hub={module,size,subscribers:new Map(),poll(){
+   if(module.HEAPU8.length!==size||module.HEAPU8.buffer!==instance.exports.memory.buffer)throw Error('Dirty subscription memory growth or stale view');
+   for(let i=0;i<count;i++)if(dirty[i]){for(const pending of hub.subscribers.values())pending[i]=1;dirty[i]=0;}
+ }};dirtyHubs.set(dirty.buffer,hub);}
+ if(hub.subscribers.has(role))throw Error('Dirty subscription already owned');
+ const pending=new Uint8Array(count).fill(1);hub.subscribers.set(role,pending);let closed=false;
+ const check=()=>{if(closed)throw Error('Dirty subscription disposed');};
+ return {read(){check();hub.poll();return pending;},clear(){check();pending.fill(0);},dispose(){if(closed)return;closed=true;hub.subscribers.delete(role);if(!hub.subscribers.size)dirtyHubs.delete(dirty.buffer);}};
+}

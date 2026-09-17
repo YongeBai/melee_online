@@ -57,3 +57,44 @@ test('SIMD page comparison checks every byte lane and the final vector',()=>{
  const live=new WebAssembly.Memory({initial:1,maximum:32768}),kernel=createSnapshotPageKernel(live);assert.ok(kernel);const bytes=new Uint8Array(live.buffer);assert.equal(kernel.equal(0,0),1);
  for(const at of [...Array.from({length:64},(_,i)=>i),...Array.from({length:64},(_,i)=>65536-64+i)]){bytes[at]=255;assert.equal(kernel.equal(0,0),0,'byte '+at);bytes[at]=0;assert.equal(kernel.equal(0,0),1);}
 });
+
+async function dirtyRuntime(){
+ const r=await runtime();r.instance.exports.memory.grow(3);r.module.HEAPU8=new Uint8Array(r.instance.exports.memory.buffer);r.dirty=new Uint8Array(524288);r.audit.wasmSha256='fixture';r.audit.instrumentedSha256='instrumented-fixture';
+ r.module.__dirtyMark=(offset,size)=>{if(size)r.dirty.fill(1,Math.floor(offset/4096),Math.ceil((offset+size)/4096));};return r;
+}
+test('sparse checkpoints match full memory/globals/journal through renderer consumption, branching and releases',async()=>{
+ const {createRenderReplica}=await import('../../engines/browser-native/render-replica.mjs');
+ const r=await dirtyRuntime(),target=await dirtyRuntime(),audio=createRollbackAudio(),renderAudio=createRollbackAudio(),full=createWasmCheckpointStore({...r,host:audio}),sparse=createPagedWasmCheckpointStore({...r,host:audio,sparse:true,auditSparse:true}),replica=createRenderReplica(r,target,{sourceHost:audio,targetHost:renderAudio,copyMode:'dirty',auditDirty:true}),history=[];
+ let seed=31;const write=(runtime,at,value)=>{runtime.module.__dirtyMark(at,1);runtime.module.HEAPU8[at]=value;};
+ for(let frame=0;frame<80;frame++){
+  seed=(Math.imul(seed,1664525)+1013904223)>>>0;write(r,seed%r.module.HEAPU8.length,frame);write(r,65535+(frame%2),frame+1);r.instance.exports.__checkpoint_global_0.value=frame;
+  audio.request({action:0,path:'track-'+frame%3,volume:frame});
+  // Presentation consumes its own dirty history between checkpoint captures.
+  replica.present(()=>({dispose(){}}),()=>{write(target,131073,255);target.instance.exports.__checkpoint_global_0.value=900;renderAudio.request({action:1});});
+  const pair=[full.capture(),sparse.capture()];history.push(pair);assert.deepEqual(await sparse.hash(pair[1]),await full.hash(pair[0]));
+  if(frame%5===4){const older=history.slice(0,frame-1).findLast(Boolean);write(r,196609,99);sparse.restore(older[1]);const actual=full.capture();assert.deepEqual(await full.hash(actual),await full.hash(older[0]));full.release(actual);replica.present(()=>({dispose(){}}),()=>assert.deepEqual(target.module.HEAPU8,r.module.HEAPU8));}
+  if(frame%4===3){const released=history[frame-1];full.release(released[0]);sparse.release(released[1]);history[frame-1]=null;}
+ }
+ assert.ok(sparse.metrics().sparseSkippedCapturePages>0);assert.ok(sparse.metrics().sparseSkippedRestorePages>0);assert.ok(sparse.metrics().restoreAudits>0);assert.equal(audio.snapshot().presented,0);
+ replica.dispose();sparse.dispose();full.dispose();
+});
+test('unchanged sparse restore copies no memory but restores globals/journal; releasing baseline forces full coverage',async()=>{
+ const r=await dirtyRuntime(),host=createRollbackAudio(),store=createPagedWasmCheckpointStore({...r,host,sparse:true,auditSparse:true}),first=store.capture();
+ r.instance.exports.__checkpoint_global_0.value=99;host.request({action:0,path:'changed',volume:10});store.restore(first);assert.equal(store.metrics().restoredBytes,0);assert.equal(r.instance.exports.__checkpoint_global_0.value,42);assert.equal(host.snapshot().journaled,0);
+ r.module.__dirtyMark(65535,2);r.module.HEAPU8[65535]=3;r.module.HEAPU8[65536]=7;const second=store.capture();store.release(second);const before=store.metrics().restoredBytes;store.restore(first);assert.equal(store.metrics().restoredBytes-before,r.module.HEAPU8.length);assert.ok(r.module.HEAPU8.every(x=>x===0));store.dispose();
+});
+test('full audits reject untracked capture and restore writes instead of silently trusting the bitmap',async()=>{
+ for(const operation of ['capture','restore']){const r=await dirtyRuntime(),store=createPagedWasmCheckpointStore({...r,sparse:true,auditSparse:true}),initial=store.capture();r.module.HEAPU8[200000]=1;
+  assert.throws(()=>operation==='capture'?store.capture():store.restore(initial),/Untracked checkpoint capture|differs from full restore/);store.dispose();}
+ const r=await dirtyRuntime(),store=createPagedWasmCheckpointStore({...r,sparse:true}),initial=store.capture();r.module.onNativeImmediate=()=>{};assert.throws(()=>store.restore(initial),/detached/);delete r.module.onNativeImmediate;r.instance.exports.__indirect_function_table.set(0,r.instance.exports.noop);assert.throws(()=>store.restore(initial),/table changed/);store.dispose();
+ const unaudited=await runtime();assert.throws(()=>createPagedWasmCheckpointStore({...unaudited,sparse:true}),/audited/);
+});
+
+test('replica synchronization broadcasts destination writes to an independent checkpoint subscriber',async()=>{
+ const {createRenderReplica}=await import('../../engines/browser-native/render-replica.mjs');
+ for(const copyMode of ['full','dirty']){
+  const source=await dirtyRuntime(),target=await dirtyRuntime(),reference=createWasmCheckpointStore(source),store=createPagedWasmCheckpointStore({...target,sparse:true,auditSparse:true}),replica=createRenderReplica(source,target,{copyMode});store.capture();
+  for(const at of [0,65535,65536,200000]){source.module.__dirtyMark(at,1);source.module.HEAPU8[at]=17;replica.present(()=>({dispose(){}}),()=>{});const a=reference.capture(),b=store.capture();assert.deepEqual(await store.hash(b),await reference.hash(a));reference.release(a);}
+  replica.dispose();store.dispose();reference.dispose();
+ }
+});

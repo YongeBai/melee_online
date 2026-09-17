@@ -7,6 +7,13 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+[Exact sparse checkpoints](BROWSER-NATIVE-SPARSE-CHECKPOINTS.md) share audited
+dirty marks through independent subscriptions. Never clear the native bitmap
+outside that hub or omit the restore writes from presentation history. Skip a
+restore page only with both an unchanged live baseline and exact page identity;
+releasing the baseline invalidates that proof. Retain full-store controls and
+full capture/restore coverage audits. Production remains lockstep.
+
 [Layout-keyed immediate resources](BROWSER-NATIVE-IMMEDIATE-POOL.md) replace the
 rejected positional plan pool. Retain only owned streams and GPU capacity, keyed
 by batch/attribute/register layout; recreate all frame metadata and state.

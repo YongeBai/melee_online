@@ -20,3 +20,11 @@ test('prediction stops at its bound, duplicate inputs are immutable, and unavail
  for(let i=1;i<13;i++)f.session.receive(i,input(i,1));f.session.reconcile();for(let i=13;i<30;i++){f.session.receive(i,input(i,1));f.session.advance(input(i,0));}
  assert.throws(()=>f.session.receive(0,input(0,1)),/too old/);assert.throws(()=>f.session.receive(100,input(1,1)),/outside/);assert.throws(()=>f.session.receive(30,{pad:[0,0,0],tap:2}),/Invalid/);f.session.dispose();assert.throws(()=>f.session.advance(input(30,0)),/closed/);
 });
+
+test('correction retains its unchanged starting checkpoint and reports replay/recapture timings separately',()=>{
+ let state=0,replaying=false;const captures=[],events=[],store={capture(){captures.push(state);return {state};},restore:s=>{state=s.state;},release(){}};
+ const session=createRollbackSession({seat:0,store,onReplay:v=>replaying=v,onTiming:e=>events.push(e),step:(pads,meta)=>{assert.equal(meta.replay,replaying);state++;}});
+ for(let i=0;i<6;i++)session.advance(input(i,0));assert.deepEqual(captures,[0,4]);
+ session.receive(0,input(0,1));session.reconcile();assert.deepEqual(captures,[0,4,4]);assert.equal(state,6);assert.equal(replaying,false);
+ assert.equal(events.filter(e=>e.phase==='restore').length,1);assert.equal(events.filter(e=>e.phase==='lookup').length,1);assert.equal(events.filter(e=>e.phase==='replay').length,6);assert.equal(events.filter(e=>e.phase==='checkpoint'&&e.replay).length,1);assert.ok(events.every(e=>e.ms>=0));session.dispose();
+});

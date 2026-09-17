@@ -1,7 +1,8 @@
+import {subscribeDirtyPages} from './dirty-runtime.mjs';
 import {createSnapshotPageKernel} from './snapshot-page-kernel.mjs';
 // Exact page sharing, not probabilistic hashes or inferred dirty regions. Every
-// linear-memory word is covered, including unused bytes. Restore writes all
-// pages; scanning them first costs more than copying/filling the target pages.
+// linear-memory word is covered, including unused bytes. Optional audited dirty
+// subscriptions skip only provably unchanged pages; the full path remains a control.
 const pageBytes=65536,encoder=new TextEncoder();
 function sameWords(a,start,b){
   let j=0;
@@ -14,14 +15,17 @@ function sameWords(a,start,b){
   return true;
 }
 
-export function createPagedWasmCheckpointStore({module,instance,audit,health={aborted:false},host={capture:()=>null,restore:()=>{}},maxBytes=1024**3}){
+export function createPagedWasmCheckpointStore({module,instance,audit,dirty=null,sparse=false,auditSparse=false,onTiming=()=>{},health={aborted:false},host={capture:()=>null,restore:()=>{}},maxBytes=1024**3}){
   const owned=new Map(),table=instance.exports.__indirect_function_table;
   const entries=Array.from({length:table.length},(_,i)=>table.get(i)),globals=audit.globals.map(g=>instance.exports[g.name]);
   if(globals.some(g=>!(g instanceof WebAssembly.Global)))throw Error('Snapshot globals not exported');
   let kernel=createSnapshotPageKernel(instance.exports.memory),closed=false;
   const backend=kernel?'wasm-simd-multimemory':'javascript',free=[];let slots=1;
   const zeroBytes=new Uint8Array(pageBytes),zero={offset:0,bytes:zeroBytes,words:new Uint32Array(zeroBytes.buffer),refs:0};
-  let retainedBytes=0,last=null;
+  if(sparse&&typeof module.__dirtyMark!=='function')throw Error('Sparse restore requires audited host marking');
+  const subscription=sparse?subscribeDirtyPages({module,instance,audit,dirty},'checkpoint'):null;
+  let retainedBytes=0,last=null,liveBase=null;
+  const dirtyPage=(marks,index)=>{for(let p=index*16;p<(index+1)*16;p++)if(marks[p])return true;return false;};
   const bytesOf=p=>kernel?new Uint8Array(kernel.memory.buffer,p.offset,pageBytes):p.bytes;
   const same=(p,offset,words)=>kernel?kernel.equal(offset,p.offset):sameWords(words,offset/4,p.words);
   function allocate(heap,offset){
@@ -34,7 +38,7 @@ export function createPagedWasmCheckpointStore({module,instance,audit,health={ab
     }catch(error){free.push(slot);throw error;}
   }
   function retire(p){if(kernel&&p!==zero)free.push(p.offset/pageBytes);}
-  const metrics={captures:0,restores:0,capturedBytes:0,restoredBytes:0,comparedBytes:0,sharedPages:0,guardCpuMs:0,captureCpuMs:0,restoreCpuMs:0,maxCaptureCpuMs:0,maxRestoreCpuMs:0,peakRetainedBytes:0};
+  const metrics={captures:0,restores:0,capturedBytes:0,restoredBytes:0,comparedBytes:0,sharedPages:0,guardCpuMs:0,captureCpuMs:0,restoreCpuMs:0,maxCaptureCpuMs:0,maxRestoreCpuMs:0,peakRetainedBytes:0,sparse,sparseSkippedCapturePages:0,sparseSkippedRestorePages:0,captureAudits:0,restoreAudits:0,restoreCopyCpuMs:0};
   function guard(){
     const start=performance.now();
     if(closed)throw Error('Checkpoint store disposed');
@@ -47,15 +51,17 @@ export function createPagedWasmCheckpointStore({module,instance,audit,health={ab
   function row(key){const r=owned.get(key);if(!r)throw Error('Unknown or released checkpoint');return r;}
   function capture(){
     const began=performance.now();guard();
-    const heap=module.HEAPU8,words=new Uint32Array(heap.buffer),previous=owned.get(last),pages=[];
+    const heap=module.HEAPU8,words=new Uint32Array(heap.buffer),previous=liveBase??owned.get(last),pages=[],marks=subscription?.read();
+    let compared=0,skipped=0;
     let added=0,shared=0,r;const created=new Set();
     try{
     for(let offset=0,index=0;offset<heap.length;offset+=pageBytes,index++){
       const old=previous?.pages[index];
-      if(old&&same(old,offset,words)){pages.push(old);shared++;}
+      if(subscription&&liveBase&&old&&!dirtyPage(marks,index)){pages.push(old);shared++;skipped++;}
+      else if(old&&(compared+=pageBytes,same(old,offset,words))){pages.push(old);shared++;}
       else{
         const size=Math.min(pageBytes,heap.length-offset);
-        if(same(zero,offset,words)){
+        if((compared+=pageBytes,same(zero,offset,words))){
           pages.push(zero);shared++;
           if(!zero.refs&&!created.has(zero)){
             if(retainedBytes+added+size>maxBytes)throw Error('Snapshot memory budget exceeded');
@@ -67,35 +73,44 @@ export function createPagedWasmCheckpointStore({module,instance,audit,health={ab
         }
       }
     }
+    if(auditSparse){for(let i=0;i<pages.length;i++)if(!same(pages[i],i*pageBytes,words))throw Error('Untracked checkpoint capture write at page '+i);metrics.captureAudits++;}
     r={pages,size:heap.length,globals:globals.map(g=>g.value),host:structuredClone(host.capture())};
     }catch(error){for(const p of created)retire(p);throw error;}
     for(const p of pages)p.refs++;
-    const key=Object.freeze({byteLength:heap.length});owned.set(key,r);last=key;retainedBytes+=added;
-    const ms=performance.now()-began;metrics.captures++;metrics.capturedBytes+=added;metrics.comparedBytes+=heap.length;metrics.sharedPages+=shared;
+    const key=Object.freeze({byteLength:heap.length});owned.set(key,r);last=key;liveBase=r;subscription?.clear();retainedBytes+=added;
+    const ms=performance.now()-began;metrics.captures++;metrics.capturedBytes+=added;metrics.comparedBytes+=compared;metrics.sparseSkippedCapturePages+=skipped;metrics.sharedPages+=shared;
     metrics.captureCpuMs+=ms;metrics.maxCaptureCpuMs=Math.max(metrics.maxCaptureCpuMs,ms);metrics.peakRetainedBytes=Math.max(metrics.peakRetainedBytes,retainedBytes);
-    return key;
+    onTiming({phase:"capture",ms,comparedBytes:compared,addedBytes:added,skippedPages:skipped});return key;
   }
   function restore(key){
     const began=performance.now();guard();const r=row(key),heap=module.HEAPU8;
     if(heap.length!==r.size)throw Error('Memory growth across checkpoint is unsupported');
-    host.restore(structuredClone(r.host));module.__dirtyMark?.(0,heap.length);let copied=0;
-    for(let i=0;i<r.pages.length;i++){
-      const p=r.pages[i],offset=i*pageBytes;
-      let size=pageBytes;
+    const marks=subscription?.read(),selected=[];const selectionStart=performance.now();
+    for(let i=0;i<r.pages.length;i++)if(!subscription||!liveBase||liveBase.pages[i]!==r.pages[i]||dirtyPage(marks,i))selected.push(i);
+    const selectionMs=performance.now()-selectionStart;metrics.sparseSkippedRestorePages+=r.pages.length-selected.length;
+    const hostStart=performance.now();host.restore(structuredClone(r.host));globals.forEach((g,i)=>g.value=r.globals[i]);const hostMs=performance.now()-hostStart;
+    let copied=0;const copyStart=performance.now();
+    for(let j=0;j<selected.length;j++){
+      const i=selected[j],p=r.pages[i],offset=i*pageBytes;let size=pageBytes;
       if(kernel){
-        while(i+1<r.pages.length&&(p===zero?r.pages[i+1]===zero:r.pages[i+1]!==zero&&r.pages[i+1].offset===p.offset+size)){i++;size+=pageBytes;}
-        if(p===zero)kernel.clearRange(offset,size);else kernel.copyRange(offset,p.offset,size);
-      }else if(p===zero)heap.fill(0,offset,offset+pageBytes);else heap.set(p.bytes,offset);
+        while(j+1<selected.length&&selected[j+1]===i+size/pageBytes&&(p===zero?r.pages[selected[j+1]]===zero:r.pages[selected[j+1]]!==zero&&r.pages[selected[j+1]].offset===p.offset+size)){j++;size+=pageBytes;}
+        module.__dirtyMark?.(offset,size);if(p===zero)kernel.clearRange(offset,size);else kernel.copyRange(offset,p.offset,size);
+      }else{module.__dirtyMark?.(offset,size);if(p===zero)heap.fill(0,offset,offset+size);else heap.set(p.bytes,offset);}
       copied+=size;
     }
-    globals.forEach((g,i)=>g.value=r.globals[i]);last=key;
-    const ms=performance.now()-began;metrics.restores++;metrics.restoredBytes+=copied;
+    const copyMs=performance.now()-copyStart;
+    if(auditSparse){const words=new Uint32Array(heap.buffer);for(let i=0;i<r.pages.length;i++)if(!same(r.pages[i],i*pageBytes,words))throw Error('Sparse restore differs from full restore at page '+i);metrics.restoreAudits++;}
+    // Broadcast restore writes to presentation, then establish this checkpoint as
+    // the new live baseline. Do not clear another consumer's pending marks.
+    if(subscription){subscription.read();subscription.clear();}liveBase=r;last=key;
+    const ms=performance.now()-began;metrics.restores++;metrics.restoredBytes+=copied;metrics.restoreCopyCpuMs+=copyMs;
     metrics.restoreCpuMs+=ms;metrics.maxRestoreCpuMs=Math.max(metrics.maxRestoreCpuMs,ms);
+    onTiming({phase:'restore',ms,copyMs,selectionMs,hostMs,copiedBytes:copied,selectedPages:selected.length});
   }
   function release(key){
     const r=owned.get(key);if(!r)return;
     for(const p of r.pages)if(--p.refs===0){retainedBytes-=pageBytes;retire(p);}
-    owned.delete(key);if(last===key)last=[...owned.keys()].at(-1)??null;
+    owned.delete(key);if(liveBase===r)liveBase=null;if(last===key)last=[...owned.keys()].at(-1)??null;
   }
   async function hash(key){
     const r=row(key),bytes=new Uint8Array(r.size);r.pages.forEach((p,i)=>bytes.set(bytesOf(p),i*pageBytes));
@@ -114,5 +129,5 @@ export function createPagedWasmCheckpointStore({module,instance,audit,health={ab
     }
     return {changedBytes,pages,globalsChanged:x.globals.map((v,i)=>v!==y.globals[i]),hostChanged:JSON.stringify(x.host)!==JSON.stringify(y.host)};
   }
-  return {capture,restore,release,hash,compare,metrics:()=>({...metrics,retainedBytes,count:owned.size,backend,storageAllocatedBytes:kernel?.memory.buffer.byteLength??retainedBytes}),dispose(){closed=true;owned.clear();last=null;retainedBytes=0;kernel=null;free.length=0;},get retainedBytes(){return retainedBytes;},get count(){return owned.size;}};
+  return {capture,restore,release,hash,compare,metrics:()=>({...metrics,retainedBytes,count:owned.size,backend,storageAllocatedBytes:kernel?.memory.buffer.byteLength??retainedBytes}),dispose(){closed=true;subscription?.dispose();owned.clear();last=null;liveBase=null;retainedBytes=0;kernel=null;free.length=0;},get retainedBytes(){return retainedBytes;},get count(){return owned.size;}};
 }

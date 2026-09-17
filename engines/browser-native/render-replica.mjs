@@ -1,3 +1,4 @@
+import {subscribeDirtyPages} from './dirty-runtime.mjs';
 // Isolate *all* native rendering writes, including libc/HSD allocators, stack,
 // object dirty flags, GX capture registers, and mutable WASM globals. The second
 // instance uses identical code/table indices and a private, unshared memory.
@@ -10,6 +11,7 @@ export function createRenderReplica(source,target,{sourceHost,targetHost,copyMod
  if(target.module.HEAPU8.length!==memoryBytes)throw Error('Replica memory size mismatch');
  if(!['full','dirty'].includes(copyMode)||copyMode==='dirty'&&(!source.audit.instrumentedSha256||!source.dirty||!target.dirty||source.audit.instrumentedSha256!==target.audit.instrumentedSha256))throw Error('Unaudited dirty replica');
  if(copyMode==='dirty'){if([source,target].some(r=>!(r.dirty instanceof Uint8Array)||r.dirty.byteLength!==524288||dirtyOwners.has(r.dirty.buffer))||source.dirty.buffer===target.dirty.buffer)throw Error('Dirty bitmap needs an exclusive owner');for(const r of [source,target])dirtyOwners.add(r.dirty.buffer);}
+ const subscriptions=copyMode==='dirty'?[source,target].map(r=>subscribeDirtyPages(r,'presentation')):null;
  let first=true;const pageBytes=4096;
  let busy=false,closed=false;const stats={frames:0,copiedBytes:0,comparedBytes:0,copyCpuMs:0,guardCpuMs:0,maxCopyCpuMs:0,replicaBytes:memoryBytes,copyMode,dirtyPages:0,fullCopies:0,coverageAudits:0,dirtySamples:[]};
  function detached(r){if(r.health?.aborted)throw Error('Aborted renderer replica');if(r.module.onNativeDraw||r.module.onNativeImmediate||r.module.onNativeObject)throw Error('Replica overwrite requires detached renderer');if(r.module.HEAPU8.length!==memoryBytes||r.module.HEAPU8.buffer!==r.instance.exports.memory.buffer)throw Error('Replica memory growth or stale views');}
@@ -19,11 +21,12 @@ export function createRenderReplica(source,target,{sourceHost,targetHost,copyMod
    if(busy||closed)throw Error('Replica scope unavailable');guard();busy=true;let renderer;
    const sourceGlobals=states[0].globals.map(g=>g.value),t=performance.now();
    try{
-    if(copyMode==='dirty'&&stats.frames<3)stats.dirtySamples.push({game:source.dirty.slice(0,memoryBytes/4096).reduce((a,b)=>a+(b!==0),0),render:target.dirty.slice(0,memoryBytes/4096).reduce((a,b)=>a+(b!==0),0)});
+    const marks=subscriptions?.map(s=>s.read());
+    if(copyMode==='dirty'&&stats.frames<3)stats.dirtySamples.push({game:marks[0].reduce((a,b)=>a+(b!==0),0),render:marks[1].reduce((a,b)=>a+(b!==0),0)});
     if(copyMode==='dirty'&&!first){
-     for(let page=0,count=memoryBytes/pageBytes;page<count;page++)if(source.dirty[page]||target.dirty[page]){const start=page;while(page+1<count&&(source.dirty[page+1]||target.dirty[page+1]))page++;const lo=start*pageBytes,hi=(page+1)*pageBytes;target.module.HEAPU8.set(source.module.HEAPU8.subarray(lo,hi),lo);stats.copiedBytes+=hi-lo;stats.dirtyPages+=page-start+1;}
-    }else{target.module.HEAPU8.set(source.module.HEAPU8);stats.copiedBytes+=memoryBytes;stats.fullCopies++;}
-    if(copyMode==='dirty'){if(auditDirty){const a=source.module.HEAPU8,b=target.module.HEAPU8;for(let i=0;i<a.length;i++)if(a[i]!==b[i])throw Error('Untracked presentation write at '+i);stats.coverageAudits++;}source.dirty.fill(0);target.dirty.fill(0);}first=false;
+     for(let page=0,count=memoryBytes/pageBytes;page<count;page++)if(marks[0][page]||marks[1][page]){const start=page;while(page+1<count&&(marks[0][page+1]||marks[1][page+1]))page++;const lo=start*pageBytes,hi=(page+1)*pageBytes;target.module.HEAPU8.set(source.module.HEAPU8.subarray(lo,hi),lo);target.dirty.fill(1,start,page+1);stats.copiedBytes+=hi-lo;stats.dirtyPages+=page-start+1;}
+    }else{target.module.HEAPU8.set(source.module.HEAPU8);if(copyMode==='dirty')target.dirty.fill(1,0,memoryBytes/pageBytes);else target.module.__dirtyMark?.(0,memoryBytes);stats.copiedBytes+=memoryBytes;stats.fullCopies++;}
+    if(copyMode==='dirty'){if(auditDirty){const a=source.module.HEAPU8,b=target.module.HEAPU8;for(let i=0;i<a.length;i++)if(a[i]!==b[i])throw Error('Untracked presentation write at '+i);stats.coverageAudits++;}subscriptions[1].read();subscriptions.forEach(s=>s.clear());}first=false;
     states[1].globals.forEach((g,i)=>g.value=sourceGlobals[i]);
     if(sourceHost||targetHost){if(!sourceHost||!targetHost)throw Error('Replica host journal pair required');targetHost.restore(structuredClone(sourceHost.capture()));}
     const ms=performance.now()-t;stats.copyCpuMs+=ms;stats.maxCopyCpuMs=Math.max(stats.maxCopyCpuMs,ms);
@@ -34,6 +37,6 @@ export function createRenderReplica(source,target,{sourceHost,targetHost,copyMod
    }
   },
   metrics:()=>({...stats,dirtyHostEvents:target.dirtyHostEvents}),
-  dispose(){if(closed)return;if(busy)throw Error('Replica still rendering');closed=true;if(copyMode==='dirty')for(const r of [source,target])dirtyOwners.delete(r.dirty.buffer);},
+  dispose(){if(closed)return;if(busy)throw Error('Replica still rendering');closed=true;if(copyMode==='dirty'){subscriptions.forEach(s=>s.dispose());for(const r of [source,target])dirtyOwners.delete(r.dirty.buffer);}},
  };
 }
