@@ -199,3 +199,18 @@ test('Marth and Roy copies import separate sword models and original dynamic hat
     for(const change of [a=>a.relocs.delete(1012),a=>a.relocs.delete(1016),a=>a.ptr(1012,1000),a=>a.d.setUint32(1200,10),a=>a.d.setUint32(1220,14),a=>a.ptr(a.spec.wrapper,2000),a=>a.ptr(1500,4096)])assert.throws(()=>convertKirbyCopy(swordFixture(code,change),code));
   }
 });
+
+function formCopyFixture(code,change=()=>{}){
+  const body=new Uint8Array(code==='Zd'?8192:70488),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(1000,2000);d.setUint32(1004,1);ptr(1008,1100);ptr(code==='Zd'?1012:1020,1200);
+  const bones=code==='Zd'?[9,15,3]:[6,3],nodeCount=code==='Zd'?20:8,chainCount=code==='Zd'?4:2;
+  for(let i=0;i<nodeCount;i++){const at=2000+i*64;for(let j=0;j<3;j++)d.setFloat32(at+32+j*4,1);if(i<nodeCount-1)ptr(at+8,at+64);}
+  d.setUint32(1200,bones.length);ptr(1204,1400);bones.forEach((bone,i)=>{const at=1400+24*i;d.setUint32(at,bone);ptr(at+4,6000);d.setUint32(at+8,chainCount);for(let j=0;j<3;j++)d.setFloat32(at+12+j*4,[1,1,.1][j]);});for(let i=0;i<chainCount*15;i++)d.setFloat32(6000+i*4,(i-10)/4);
+  if(code==='Sk'){ptr(1012,400);ptr(1016,424);for(const [article,attributes,special,states,model,joint]of [[400,0,132,600,500,4096],[424,200,332,700,516,4200]]){ptr(article,attributes);ptr(article+4,special);ptr(article+12,states);ptr(article+16,model);ptr(model,joint);d.setUint32(model+4,1);for(let j=0;j<3;j++)d.setFloat32(joint+32+j*4,1);}for(const [at,to]of [[66016,4096],[66032,66016],[70464,4200],[70480,70464]])ptr(at,to);}
+  change({d,relocs,ptr});const name=new TextEncoder().encode('ftDataKirbyCopy'+(code==='Zd'?'Zelda':'Seak')+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);[bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,1000);bytes.set(name,pub+8);return bytes;
+}
+test('Zelda copy keeps dynamics in its Article-free root and Sheik retains separate held/thrown needles',()=>{
+  for(const code of ['Zd','Sk']){const input=formCopyFixture(code),before=input.slice(),r=convertKirbyCopy(input,code);assert.deepEqual(input,before);assert.deepEqual(r.dynamics.map(d=>d.nodes),code==='Zd'?[4,4,4]:[2,2]);assert.equal(r.scene.model.tree.nodes.length,code==='Zd'?20:8);assert.equal(r.unreferencedRelocations.length,code==='Zd'?0:4);assert.deepEqual(r.articles.rows.map(r=>[r.stateCount,r.specialWords]),code==='Zd'?[]:[[5,3],[1,1]]);assert(r.pointerSlots.has(code==='Zd'?1012:1020));
+    for(const change of [a=>a.relocs.delete(code==='Zd'?1012:1020),a=>a.ptr(1204,1000),a=>a.d.setUint32(1408,0),a=>a.ptr(1800,2000),a=>code==='Zd'?a.d.setUint32(1016,1):a.ptr(70480,66016)])assert.throws(()=>convertKirbyCopy(formCopyFixture(code,change),code));
+  }
+});

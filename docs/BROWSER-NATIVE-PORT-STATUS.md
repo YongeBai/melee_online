@@ -5,6 +5,33 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Zelda and Sheik copies now import their original hats, dynamic chains,
+shared effect bank 21, and Sheik's thrown/held needle Articles. Rendered lifecycle
+tests pass 1,968/3,068 input frames plus 124 intro frames each. Sheik stores three
+needles on shield cancellation, resumes to six, fires the stored charge and
+resets on reacquisition. Zelda's twelve hat nodes and Sheik's four nodes return
+to the dynamic pool on copy loss and are allocated again on reacquisition.
+
+GPU-validated needle contact and reflection sequences pass 1,097/1,287 rendered
+frames. The copied needle volley raises target damage from 8 to about 25.19 with
+four hitlag frames at first impact. Saved firing/reflection frames check
+21,554/22,704 vertices, plus 13 shader cases and 52 pixel channels each. A
+close-range Nayru contact test observes the first hit raising damage from 8 to
+10 with three hitlag frames after a controller-driven approach to 12 units.
+All 228 unit tests and shared browser checks pass. Roy-copy and base-Cutter
+regressions pass 2,496/820 simulation frames.
+
+A copied-Nayru reflection probe transforms the donor from Zelda to Sheik using
+normal input. The original reflector transfers a needle to Kirby, reverses its
+horizontal velocity from -4 to +4 and raises damage from 3 to approximately 4.55.
+Kirby remains at zero damage; the same donor-input sequence without Nayru deals about
+17.46 damage. Original clanks remain active, so this fixture verifies reflection
+rather than requiring a return hit on the donor. The importer, callbacks and
+camera retain their native behavior. These are compatibility checks; the full
+browser-game, retail parity, presentation-FPS and latency requirements remain
+unfinished.
+[Zelda/Sheik-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-forms.json).
+
 Kirby's Marth and Roy copies now import the original hats, separate sword models,
 dynamic bones and two-model effect banks 20/48. Rendered lifecycle tests pass
 2,545 and 2,638 input frames respectively, plus 124 intro frames each. They cover

@@ -1,0 +1,951 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "e130b98",
+  "scope": "Kirby Zelda and Sheik original copy hats, dynamics, needle Articles, shared effects, charge/cancel/reacquisition, attack contact and Nayru reflection/control integration.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "ef2783eb3e0d1e3fe0b2e903f066e4ec2d342c588d7527f75cff797b92836454",
+    "wasmBytes": 2958919
+  },
+  "sourceHashes": {
+    "character-collision.c": "63a8d0d9fb4611affc5416af926004199ce72791c88b3f05d35cafc7d055292a",
+    "item-runtime.c": "a1094b2cc915bde6f4ebfb8c2e0e941166377e5d0d89c227d4600680de9366d1",
+    "constructor.html": "b9f3a803c5fd8a8d37e3f76aebcf4cb2d748bee6aab9792dd2910645ef13ab13",
+    "effect-assets.mjs": "ad356a76f9ced1078c9f89585486f244e94fd31cb28558e93dd5258937afe1f7",
+    "kirby-copy-assets.mjs": "1145de890f5539892b9858a78aec598f74238af55208ca28da0dc51b7a3a4ce2",
+    "verify-kirby.mjs": "079ae20cf966fc65a65ea41f65ddac1b2beb2ad995c5f230703ca84b6a6684da"
+  },
+  "assets": {
+    "Zd": {
+      "root": 668,
+      "hat": {
+        "joint": 31412,
+        "nodes": 20,
+        "meshes": 16
+      },
+      "dynamics": [
+        {
+          "bone": 9,
+          "nodes": 4,
+          "parameters": 0
+        },
+        {
+          "bone": 15,
+          "nodes": 4,
+          "parameters": 0
+        },
+        {
+          "bone": 3,
+          "nodes": 4,
+          "parameters": 240
+        }
+      ],
+      "typedRelocations": 324,
+      "omittedExporterRelocations": [],
+      "articles": [],
+      "effects": {
+        "bank": 21,
+        "models": 2,
+        "commands": 0,
+        "textures": 0
+      }
+    },
+    "Sk": {
+      "root": 944,
+      "hat": {
+        "joint": 27028,
+        "nodes": 8,
+        "meshes": 21
+      },
+      "dynamics": [
+        {
+          "bone": 6,
+          "nodes": 2,
+          "parameters": 0
+        },
+        {
+          "bone": 3,
+          "nodes": 2,
+          "parameters": 0
+        }
+      ],
+      "typedRelocations": 384,
+      "omittedExporterRelocations": [
+        66016,
+        66032,
+        70464,
+        70480
+      ],
+      "articles": [
+        {
+          "slot": 0,
+          "joint": 65672,
+          "states": 5,
+          "specialWords": 3
+        },
+        {
+          "slot": 1,
+          "joint": 69736,
+          "states": 1,
+          "specialWords": 1
+        }
+      ],
+      "effects": {
+        "bank": 21,
+        "models": 2,
+        "commands": 0,
+        "textures": 0
+      }
+    }
+  },
+  "commands": {
+    "zeldaFull": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Zd --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "sheikFull": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Sk --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "sheikContact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Sk --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "zeldaReflection": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Zd --input --combat --kirby-copy=reflect --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "reflectionControl": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Zd --input --combat --kirby-copy=reflect-control",
+    "zeldaContact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Zd --input --combat --kirby-copy=contact",
+    "royRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fe --input --combat --kirby-copy=swallow",
+    "cutterRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --input --kirby-move=cutter"
+  },
+  "validation": {
+    "unitTests": {
+      "passed": 228,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "sharedBrowser": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "d764dc98999e7a876397672b74a065597e8bd9bff6c12d1c61756f57a1b91147"
+    },
+    "visualInspection": "Saved 960x720 Zelda Nayru and Sheik needle images inspected; original camera path and 4:3 retained. No retail image comparison.",
+    "zeldaFull": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/zelda-full.json",
+      "sha256": "70acd7d5d8bad4d6eefeab057f0e6ae0a58b5a48bee79e7c14dc264d431bf458",
+      "completed": true,
+      "mode": "swallow",
+      "copyFrames": 1826,
+      "renderedInputFrames": 1968,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          465,
+          24,
+          25,
+          466,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          81,
+          78,
+          75
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "firstHat": [
+        19,
+        16856928,
+        16575412,
+        3,
+        4,
+        4,
+        4
+      ],
+      "secondHat": [
+        19,
+        16856672,
+        16575412,
+        3,
+        4,
+        4,
+        4
+      ],
+      "dynamicPool": [
+        276,
+        264,
+        276,
+        264
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Zd",
+          "root": 16544668,
+          "bodyCopy": false,
+          "hatNodes": 20,
+          "hatMeshes": 16,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        },
+        {
+          "code": "Sk",
+          "root": 16626256,
+          "bodyCopy": false,
+          "hatNodes": 8,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 2,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "sheikFull": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/sheik-full.json",
+      "sha256": "c3970ff74826d860e6d3aa6e5cecf62fdf8572d081900cec92b2947b8abe3c6f",
+      "completed": true,
+      "mode": "swallow",
+      "copyFrames": 2926,
+      "renderedInputFrames": 3068,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          467,
+          468,
+          470,
+          24,
+          25,
+          471,
+          472,
+          474,
+          42,
+          469,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        153,
+        152,
+        52
+      ],
+      "firstHat": [
+        7,
+        16857088,
+        16572084,
+        2,
+        2,
+        2,
+        0
+      ],
+      "secondHat": [
+        7,
+        16856192,
+        16572084,
+        2,
+        2,
+        2,
+        0
+      ],
+      "needleCharge": {
+        "partial": 3,
+        "stored": 3,
+        "full": 6,
+        "afterFire": 0,
+        "afterReacquire": 0
+      },
+      "dynamicPool": [
+        276,
+        272,
+        276,
+        272
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Sk",
+          "root": 16546000,
+          "bodyCopy": false,
+          "hatNodes": 8,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 2,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        },
+        {
+          "code": "Zd",
+          "root": 16643612,
+          "bodyCopy": false,
+          "hatNodes": 20,
+          "hatMeshes": 16,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "sheikContact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/sheik-contact-gpu.json",
+      "sha256": "9429ca21d4cb3ea512c7b0085f8ef2db17f1f6de0acd38e8e33b3de23dda73cb",
+      "completed": true,
+      "mode": "contact",
+      "copyFrames": 955,
+      "renderedInputFrames": 1097,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          467,
+          468,
+          470
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          79
+        ]
+      ],
+      "itemKinds": [
+        153,
+        152
+      ],
+      "firstHat": [
+        7,
+        15361696,
+        15230740,
+        2,
+        2,
+        2,
+        0
+      ],
+      "dynamicPool": [
+        276,
+        272,
+        null,
+        null
+      ],
+      "damage": [
+        8,
+        25.189998626708984
+      ],
+      "hitlagAtImpact": 4,
+      "copySetup": [
+        {
+          "code": "Sk",
+          "root": 15204656,
+          "bodyCopy": false,
+          "hatNodes": 8,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 2,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        },
+        {
+          "code": "Zd",
+          "root": 15302268,
+          "bodyCopy": false,
+          "hatNodes": 20,
+          "hatMeshes": 16,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        }
+      ],
+      "gpu": {
+        "renderer": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "vertices": 21554,
+        "shaderCases": 13,
+        "pixelChannelChecks": 52
+      }
+    },
+    "zeldaReflection": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/reflection-gpu.json",
+      "sha256": "45760ed0d271d24d4bca4bf1de960040a6be700a89c48d4b13958ee804b6dffa",
+      "completed": true,
+      "mode": "reflect",
+      "copyFrames": 1145,
+      "renderedInputFrames": 1287,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          465
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          355,
+          11,
+          362,
+          18,
+          341,
+          342,
+          344
+        ]
+      ],
+      "itemKinds": [
+        80,
+        79
+      ],
+      "firstHat": [
+        19,
+        15375616,
+        15244724,
+        3,
+        4,
+        4,
+        4
+      ],
+      "dynamicPool": [
+        276,
+        264,
+        null,
+        null
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "reflection": {
+        "frames": 1,
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          0,
+          8
+        ],
+        "incomingNeedle": [
+          79,
+          0,
+          22.220722198486328,
+          9.000100135803223,
+          0,
+          13862144,
+          2,
+          3,
+          14879596,
+          -4
+        ],
+        "reflectedNeedle": [
+          79,
+          0,
+          -21.779277801513672,
+          9.000100135803223,
+          0,
+          1614144,
+          3,
+          4.549999713897705,
+          14879596,
+          4
+        ]
+      },
+      "copySetup": [
+        {
+          "code": "Zd",
+          "root": 15213980,
+          "bodyCopy": false,
+          "hatNodes": 20,
+          "hatMeshes": 16,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        },
+        {
+          "code": "Sk",
+          "root": 15295568,
+          "bodyCopy": false,
+          "hatNodes": 8,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 2,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        }
+      ],
+      "gpu": {
+        "renderer": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "vertices": 22704,
+        "shaderCases": 13,
+        "pixelChannelChecks": 52
+      }
+    },
+    "reflectionControl": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/reflection-control-final.json",
+      "sha256": "6f5acd43c0febac02d1be67ba060e68d974837eb96899ca5ad2631190a833951",
+      "completed": true,
+      "mode": "reflect-control",
+      "copyFrames": 1145,
+      "renderedInputFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          76
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          355,
+          11,
+          362,
+          18,
+          341,
+          342,
+          344
+        ]
+      ],
+      "itemKinds": [
+        80,
+        79
+      ],
+      "firstHat": [
+        19,
+        15384864,
+        15243540,
+        3,
+        4,
+        4,
+        4
+      ],
+      "dynamicPool": [
+        276,
+        264,
+        null,
+        null
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "reflection": {
+        "frames": 0,
+        "beforeDamage": [
+          0,
+          8
+        ],
+        "afterDamage": [
+          17.459999084472656,
+          8
+        ],
+        "incomingNeedle": [
+          79,
+          0,
+          22.220722198486328,
+          9.000100135803223,
+          0,
+          13862016,
+          2,
+          3,
+          14879468,
+          -4
+        ]
+      },
+      "copySetup": [
+        {
+          "code": "Zd",
+          "root": 15212796,
+          "bodyCopy": false,
+          "hatNodes": 20,
+          "hatMeshes": 16,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        },
+        {
+          "code": "Sk",
+          "root": 15294384,
+          "bodyCopy": false,
+          "hatNodes": 8,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 2,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "zeldaContact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/zelda-contact.json",
+      "sha256": "344d02db0759babad1b0000ec604150ae750fd3db7926d4b03565abcda0a04ef",
+      "completed": true,
+      "mode": "contact",
+      "copyFrames": 529,
+      "renderedInputFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          465
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          78
+        ]
+      ],
+      "itemKinds": [],
+      "firstHat": [
+        19,
+        15384864,
+        15243540,
+        3,
+        4,
+        4,
+        4
+      ],
+      "dynamicPool": [
+        276,
+        264,
+        null,
+        null
+      ],
+      "damage": [
+        8,
+        10
+      ],
+      "hitlagAtImpact": 3,
+      "copySetup": [
+        {
+          "code": "Zd",
+          "root": 15212796,
+          "bodyCopy": false,
+          "hatNodes": 20,
+          "hatMeshes": 16,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        },
+        {
+          "code": "Sk",
+          "root": 15294384,
+          "bodyCopy": false,
+          "hatNodes": 8,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 2,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "royRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/roy-regression.json",
+      "sha256": "d70ddf8b9fc4918bce8d741e1de2454e2eb628823da1ebbd5f8b6320d197ed6f",
+      "completed": true,
+      "mode": "swallow",
+      "copyFrames": 2496,
+      "renderedInputFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          530,
+          531,
+          532,
+          24,
+          25,
+          534,
+          536,
+          533,
+          265
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "firstHat": [
+        26,
+        13993408,
+        14080340,
+        4,
+        2,
+        2,
+        2,
+        2
+      ],
+      "secondHat": [
+        26,
+        14164864,
+        14080340,
+        4,
+        2,
+        2,
+        2,
+        2
+      ],
+      "dynamicPool": [
+        308,
+        300,
+        308,
+        300
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Fe",
+          "root": 14046916,
+          "bodyCopy": false,
+          "hatNodes": 14,
+          "hatMeshes": 21,
+          "accessoryMeshes": 4,
+          "dynamicBoneChains": 4,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 702,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 302,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "cutterRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-forms/cutter-regression.json",
+      "sha256": "9c009a1e12fbbafdd20710e7a71a1c88626dfae7f4403c259549303671080530",
+      "completed": true,
+      "frames": 820
+    }
+  },
+  "implementation": {
+    "dynamics": "Explicit root offsets: Zelda +12, sword copies +16, other dynamic-hat copies +20. Preserve original pointer/data graph and node allocation; imported roots reject unexpected Article data.",
+    "effects": "Both forms share original bank 21 and its two Nayru model effects. No duplicate renderer bank or fabricated particle definitions.",
+    "needles": "Original C drives charge, shield cancellation, storage, firing and loss/reacquisition. New diagnostics only read stored count and held-item pointer.",
+    "reflection": "Acquire Zelda via original inhale/swallow, transform donor into Sheik via down-B, then fire its original six-needle volley. Reflection checks ownership transfer, reversed horizontal velocity and damage increase. Control omits Nayru and requires Kirby damage. Original clanks remain enabled; returned damage to the donor is not required."
+  },
+  "limits": [
+    "Original C integration and internal GPU oracle, not retail per-frame parity.",
+    "Tests cover selected charge/cancel, ground/air and reflection interactions; not exhaustive matchups, spacings or costumes.",
+    "The reflected needle in this fixture retires before hitting the donor; no reflected return-hit claim.",
+    "No presented-FPS or input-to-photon measurement; no new performance gain claimed.",
+    "Full scenes, remaining abilities/costumes, menus/audio, retail parity, networking and public static deployment remain incomplete.",
+    "Automatic hosted no-ISO startup unchanged; no game assets or binaries committed."
+  ]
+}

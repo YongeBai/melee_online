@@ -27,7 +27,7 @@ const opponent=process.argv.find(x=>x.startsWith('--opponent='))?.slice(11)??cha
 if(!/^[A-Z][a-z]$/.test(opponent))throw Error('Opponent must be a two-letter fighter archive code');
 const matchup=opponent===character?character:character+'-vs-'+opponent;
 const kirbyCopy=process.argv.find(x=>x.startsWith('--kirby-copy='))?.slice(13)??(process.argv.includes('--kirby-copy')?'swallow':null);
-if(kirbyCopy&&(character!=='Kb'||!['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx','Pk','Pc','Lk','Cl','Ss','Fc','Dk','Ms','Fe'].includes(opponent)||!process.argv.includes('--input')||!['swallow','acquire','spit','contact'].includes(kirbyCopy)))throw Error('Kirby copy requires Kb versus Mr/Lg/Dr/Ca/Gn/Ns/Pe/Fx/Pk/Pc/Lk/Cl/Ss/Fc/Dk/Ms/Fe and input');
+if(kirbyCopy&&(character!=='Kb'||!['Mr','Lg','Dr','Ca','Gn','Ns','Pe','Fx','Pk','Pc','Lk','Cl','Ss','Fc','Dk','Ms','Fe','Zd','Sk'].includes(opponent)||!process.argv.includes('--input')||!['swallow','acquire','spit','contact','reflect','reflect-control'].includes(kirbyCopy)||kirbyCopy.startsWith('reflect')&&opponent!=='Zd'))throw Error('Kirby copy requires Kb versus Mr/Lg/Dr/Ca/Gn/Ns/Pe/Fx/Pk/Pc/Lk/Cl/Ss/Fc/Dk/Ms/Fe/Zd/Sk and input');
 const kirbyMove=process.argv.find(x=>x.startsWith('--kirby-move='))?.slice(13);
 const kirbyMoves=!!kirbyMove||process.argv.includes('--kirby-moves');
 if(kirbyMoves&&(character!=='Kb'||!process.argv.includes('--input')||kirbyMove&&kirbyMove!=='cutter'))throw Error('Kirby moves require Kb and input');
@@ -203,7 +203,7 @@ try {
   if(kirbyCopy&&!probe.error&&!probe.kirbyCopy?.completed)throw Error('Incomplete Kirby copy');
   if(kirbyCopy&&renderSteps&&!probe.error&&[3,22].includes(probe.kirbyCopy.copyKind)&&!(probe.kirbyCopy.bodyRenderedFrames>0&&probe.kirbyCopy.peakBodyDraws>0))throw Error('Copied body was not drawn');
   if(kirbyCopy&&renderSteps&&!probe.error&&[18,26].includes(probe.kirbyCopy.copyKind)&&!(probe.kirbyCopy.swordRenderedFrames>0&&probe.kirbyCopy.peakSwordDraws>0))throw Error('Copied sword was not drawn');
-  if(kirbyCopy&&renderSteps&&!probe.error)for(const name of [...(kirbyCopy==='spit'?['captured']:['acquire','contact'].includes(kirbyCopy)?['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','captured']:['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','copystar','captured']),...(probe.kirbyCopy.itemKinds.includes(probe.kirbyCopy.secondaryItemKind)?['copysecondary']:[])]){
+  if(kirbyCopy&&renderSteps&&!probe.error)for(const name of [...(kirbyCopy==='spit'?['captured']:kirbyCopy==='reflect-control'?['copyhat','captured']:['acquire','contact','reflect'].includes(kirbyCopy)?['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','captured']:['copyhat',probe.kirbyCopy.projectileKind===null?'copyattack':'copyfire','copystar','captured']),...(kirbyCopy==='reflect'?['copyreflected']:[]),...(probe.kirbyCopy.itemKinds.includes(probe.kirbyCopy.secondaryItemKind)?['copysecondary']:[])]){
     if(!probe.preview?.[name])throw Error('Missing Kirby '+name);
     const shot=await command('Runtime.evaluate',{expression:"document.getElementById('native-preview-"+name+"').src",returnByValue:true});
     if(!shot.result.value?.startsWith('data:image/png;base64,'))throw Error('Missing Kirby copy screenshot');

@@ -62,6 +62,8 @@ unsigned portKirbyRead(HSD_GObj* object,unsigned field)
     case 15:return fp->dynamics_num>3?fp->dynamic_bone_sets[3].dyn_desc.count:0;
     case 16:return fp->mv.ms.specialn.cur_frame;
     case 17:return (fp->u.kb.hat.kind==Ft_Kind_Mars?((ftKb_DatAttrs*)fp->dat_attrs)->ms.charge_iterations:((ftKb_DatAttrs*)fp->dat_attrs)->fe.charge_iterations)*30;
+    case 18:return fp->u.kb.xB4;
+    case 19:return (unsigned)fp->u.kb.xB8;
     default:abort();
     }
 }

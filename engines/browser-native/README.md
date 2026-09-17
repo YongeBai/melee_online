@@ -91,6 +91,20 @@ loss and reacquisition. Its contact check requires native hitlag, unlike Fox's
 laser. Per-model draw telemetry is enabled only in copy probes; body resources
 must disappear when the original copy loader removes the body parts.
 
+Zelda and Sheik copies (`--opponent=Zd` / `Sk`) import the original hats,
+dynamic chains and shared model-effect bank 21. Zelda's root holds dynamics at
++12 without Articles; Sheik's root holds separate thrown/held needle Articles
+and dynamics at +20. Needle probes cover ground/air firing, shield cancellation,
+storing three and six needles, resuming charge, firing, copy loss and reacquisition.
+Charge diagnostics only read the original counter and held-item pointer.
+
+`--kirby-copy=reflect` starts against Zelda, acquires her copy, and transforms
+the donor into Sheik through normal down-B input. It verifies that Nayru transfers
+needle ownership to Kirby, reverses horizontal velocity and increases damage,
+while protecting Kirby. Original needle clanks remain active, so this does not
+require a reflected volley to hit the donor. `--kirby-copy=reflect-control`
+uses the same donor-input sequence without Nayru and requires damage to Kirby.
+
 Marth and Roy copies (`--opponent=Ms` / `Fe`) import the original hat,
 separate temporary sword and two-model effect banks 20/48. Their roots contain a
 sword descriptor at +12 and hat dynamics at +16, with no projectile Articles.

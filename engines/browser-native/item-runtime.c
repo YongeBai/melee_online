@@ -95,5 +95,5 @@ double portItemRead(HSD_GObj* object,unsigned field)
     if(!object||object->classifier!=HSD_GOBJ_CLASS_ITEM)abort();Item* item=object->user_data;
     switch(field){case 0:return item->kind;case 1:return item->msid;case 2:return item->pos.x;case 3:return item->pos.y;
     case 4:return item->pos.z;case 5:return (unsigned)item->owner;case 6:return item->x5D4_hitboxes[0].hit.state;
-    case 7:return item->x5D4_hitboxes[0].hit.damage;case 8:return (unsigned)item->xC8_joint;default:abort();}
+    case 7:return item->x5D4_hitboxes[0].hit.damage;case 8:return (unsigned)item->xC8_joint;case 9:return item->x40_vel.x;default:abort();}
 }
