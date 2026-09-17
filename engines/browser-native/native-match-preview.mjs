@@ -79,7 +79,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         const collected=alloc((n+extra)*4),nodes=collected+extra*4,flags=alloc(n*4),indices=alloc(model.meshes.length*4),visible=alloc(model.meshes.length*4);
         if(actor.collectNodes){if(extra)throw Error('Explicit actor nodes with extra root');actor.collectNodes(nodes,model.tree.nodes);}
         else if(module._portSceneCollect(actor.root??module._portSceneObjectRoot(actor.object),collected,n+extra)!==n+extra)throw Error('Live preview hierarchy mismatch');
-        const specs=new Uint16Array(module.HEAPU8.buffer,indices,model.meshes.length*2);
+        module.__dirtyMark?.(indices,model.meshes.length*4);const specs=new Uint16Array(module.HEAPU8.buffer,indices,model.meshes.length*2);
         model.meshes.forEach((mesh,i)=>{
           let at=model.tree.nodes[mesh.joint].display,index=0;
           while(at!==mesh.dobj){if(at===null||index++>=4096)throw Error('Preview DObj ownership');at=archive.relocations.has(at+4)?d.getUint32(at+4):null;}

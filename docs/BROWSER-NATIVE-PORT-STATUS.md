@@ -1,5 +1,10 @@
 # Native browser port — September 17, 2026
 
+The next opt-in [instrumented-write replica](BROWSER-NATIVE-DIRTY-REPLICA.md)
+reduces presentation copy volume by about 89–91% in rollback trials, while
+preserving the full-state and pixel oracles. It improves the matched A/B/A
+measurements but still fails the 59.5 FPS gate; production remains lockstep.
+
 The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
 now isolates draw-side allocations and native writes in a second private WASM
 instance. It removes per-draw gameplay snapshot/restore, but rollback remains

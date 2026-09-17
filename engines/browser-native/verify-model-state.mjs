@@ -18,7 +18,7 @@ export function createNativeModelProbe(module,model,bytes,nodes,skin,owner=0) {
   if(!view||!positions||!normals){for(const p of [view,positions,normals])if(p)module._free(p);throw Error('Native model probe allocation');}
   return {
     check(rows) {
-      module.HEAPF32.set(rows,view/4);module._portSkinViewMatrices(skin.groupCount,view,skin.matrices,positions,normals);
+      module.__dirtyMark?.(view,rows.length*4);module.HEAPF32.set(rows,view/4);module._portSkinViewMatrices(skin.groupCount,view,skin.matrices,positions,normals);
       let matrixChecks=0,normalChecks=0,reflectionChecks=0,maxPositionError=0,maxNormalError=0;
       const compare=(actual,expected,kind)=>{
         for(let i=0;i<actual.length;i++) {

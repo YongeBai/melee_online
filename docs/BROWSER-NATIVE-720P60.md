@@ -1,5 +1,10 @@
 # Direct-port every-frame 720p60 diagnostic
 
+The next opt-in [instrumented-write replica](BROWSER-NATIVE-DIRTY-REPLICA.md)
+reduces presentation copy volume by about 89–91% in rollback trials, while
+preserving the full-state and pixel oracles. It improves the matched A/B/A
+measurements but still fails the 59.5 FPS gate; production remains lockstep.
+
 This milestone adds sustained every-forward-frame measurement to the direct
 C-to-WASM port. It does not use Dolphin. Production rooms remain three-frame
 lockstep; the snapshot/replay integration is still diagnostic-only.

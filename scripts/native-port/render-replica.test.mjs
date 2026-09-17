@@ -31,3 +31,13 @@ test('a failed draw disposes native receivers before another mirror overwrite',a
  assert.throws(()=>r.present(construct,()=>{throw Error('draw fault');}),/draw fault/);assert.equal(disposed,1);
  r.present(construct,()=>42);assert.equal(disposed,2);assert.equal(r.metrics().frames,1);
 });
+test('dirty replica copies the union of game and renderer writes and detects an unmarked host write',async()=>{
+ const a=await runtime(),b=await runtime();for(const r of [a,b]){r.dirty=new Uint8Array(524288);r.audit.instrumentedSha256='test-instrumented';}
+ const replica=createRenderReplica(a,b,{copyMode:'dirty',auditDirty:true}),empty=()=>({dispose(){}});
+ assert.throws(()=>createRenderReplica(a,b,{copyMode:'dirty'}),/exclusive/);
+ a.module.HEAPU8.fill(7);replica.present(empty,()=>{});assert.equal(replica.metrics().fullCopies,1);
+ a.module.HEAPU8[5000]=19;a.dirty[1]=1;b.module.HEAPU8[9000]=33;b.dirty[2]=1;
+ replica.present(empty,()=>assert.deepEqual(b.module.HEAPU8,a.module.HEAPU8));assert.equal(replica.metrics().copiedBytes,131072+8192);assert.equal(replica.metrics().dirtyPages,2);assert.equal(replica.metrics().coverageAudits,2);
+ a.module.HEAPU8[18000]=91;assert.throws(()=>replica.present(empty,()=>assert.fail('Stale data reached renderer')),/Untracked presentation write/);
+ replica.dispose();const next=createRenderReplica(a,b,{copyMode:'dirty',auditDirty:true});replica.dispose();assert.throws(()=>createRenderReplica(a,b,{copyMode:'dirty'}),/exclusive/);next.present(empty,()=>assert.deepEqual(a.module.HEAPU8,b.module.HEAPU8));next.dispose();
+});

@@ -1,3 +1,4 @@
+import {loadDirtyCore} from './dirty-runtime.mjs';
 import {createRenderReplica} from './render-replica.mjs';
 import {createPagedWasmCheckpointStore} from './paged-snapshot.mjs';
 import {createPresentationCache} from './presentation-cache.mjs';
@@ -13,8 +14,8 @@ const params=new URLSearchParams(location.search),frames=Number(params.get('fram
 const fail=error=>{globalThis.rollbackFailure=String(error.stack??error);document.querySelector('#result').textContent=rollbackFailure;};
 try{
  if(!Number.isInteger(frames)||frames<60||frames>1800||![0,1].includes(seat))throw Error('Diagnostic configuration');
- const audio=createRollbackAudio(),bytes=new Uint8Array(await(await fetch('./melee-fighter-init.wasm')).arrayBuffer());
- const runtime=await createSnapshotRuntime(create,bytes,{onNativeMusic:r=>audio.request(r),onNativeAudioMode:()=>true});
+ const dirty=params.get('replicacopy')==='dirty'?await loadDirtyCore():null;const audio=createRollbackAudio(),bytes=dirty?.bytes??new Uint8Array(await(await fetch('./melee-fighter-init.wasm')).arrayBuffer());
+ const runtime=await createSnapshotRuntime(create,bytes,{dirtyManifest:dirty?.manifest,onNativeMusic:r=>audio.request(r),onNativeAudioMode:()=>true});
  runtime.module._portMenuDiagnosticMute();
  const presentationCache=params.get('gpucache')==='0'?null:createPresentationCache();
  const boot=await runNativeConstructor({module:runtime.module,presentationCache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
@@ -22,8 +23,8 @@ try{
   // the canvas. Remove those diagnostics so screenshots show the corrected
   // live canvas, not the pre-intro image with hidden fighters and an unset HUD.
   for(const image of document.querySelectorAll('img[id^="native-preview-"]'))image.remove();
-  const replicaAudio=params.get('presentation')==='replica'?createRollbackAudio():null,replicaRuntime=replicaAudio?await createSnapshotRuntime(create,bytes,{memoryInitialPages:runtime.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}):null;
-  const replica=replicaRuntime?createRenderReplica(runtime,replicaRuntime,{sourceHost:audio,targetHost:replicaAudio}):null;
+  const replicaAudio=params.get('presentation')==='replica'?createRollbackAudio():null,replicaRuntime=replicaAudio?await createSnapshotRuntime(create,bytes,{dirtyManifest:dirty?.manifest,memoryInitialPages:runtime.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}):null;
+  const replica=replicaRuntime?createRenderReplica(runtime,replicaRuntime,{sourceHost:audio,targetHost:replicaAudio,copyMode:dirty?'dirty':'full',auditDirty:true}):null;
   const replicaAudit=[];
   const paged=params.get('snapshot')!=='full';
   const store=(paged?createPagedWasmCheckpointStore:createWasmCheckpointStore)({...runtime,host:audio,maxBytes:2*1024**3}),module=runtime.module;

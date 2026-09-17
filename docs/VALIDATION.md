@@ -10,6 +10,11 @@ integration. It does not establish 720p60 or competitive network latency. The
 Dolphin stream measurements below are historical and apply to a different path.
 The subsequent [page-sharing and presentation-cache revision](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md)
 retains the full-copy oracle and adds exact corrected-canvas pixel comparisons.
+The [instrumented-write replica](BROWSER-NATIVE-DIRTY-REPLICA.md) is a further
+diagnostic experiment. Its dirty bitmap covers every native store and audited
+host write; never refresh its source/core hash pins without renewing that audit.
+Keep no-correction per-draw coverage checks as well as rollback regressions.
+
 The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
 now isolates draw-side allocations and native writes in a second private WASM
 instance. It removes per-draw gameplay snapshot/restore, but rollback remains

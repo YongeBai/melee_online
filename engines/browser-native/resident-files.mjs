@@ -6,7 +6,7 @@ function withStrings(module,strings,callback) {
       if(typeof string!=='string'||string.includes('\0'))throw Error('Invalid native asset string');
       const bytes=encode.encode(string+'\0'),pointer=module._malloc(bytes.length);
       if(!pointer)throw Error('Native string allocation failed');
-      pointers.push(pointer);module.HEAPU8.set(bytes,pointer);
+      pointers.push(pointer);module.__dirtyMark?.(pointer,bytes.length);module.HEAPU8.set(bytes,pointer);
     }
     return callback(...pointers);
   } finally {for(const p of pointers)module._free(p);}
@@ -23,7 +23,7 @@ export function installResidentBytes(module,name,image) {
   return withStrings(module,[name],namePointer=>{
     const pointer=module._malloc(image.length);if(!pointer)throw Error('Resident image allocation failed');
     try {
-      module.HEAPU8.set(image,pointer);
+      module.__dirtyMark?.(pointer,image.length);module.HEAPU8.set(image,pointer);
       const code=module._portFileInstall(namePointer,pointer,image.length);
       if(code!==0)throw Error('Native file install rejected '+name+': '+code);
     } finally {module._free(pointer);}

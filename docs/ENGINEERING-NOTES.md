@@ -7,6 +7,11 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+The [instrumented-write replica](BROWSER-NATIVE-DIRTY-REPLICA.md) is a further
+diagnostic experiment. Its dirty bitmap covers every native store and audited
+host write; never refresh its source/core hash pins without renewing that audit.
+Keep no-correction per-draw coverage checks as well as rollback regressions.
+
 The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
 now isolates draw-side allocations and native writes in a second private WASM
 instance. It removes per-draw gameplay snapshot/restore, but rollback remains

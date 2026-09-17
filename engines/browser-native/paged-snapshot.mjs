@@ -78,7 +78,7 @@ export function createPagedWasmCheckpointStore({module,instance,audit,health={ab
   function restore(key){
     const began=performance.now();guard();const r=row(key),heap=module.HEAPU8;
     if(heap.length!==r.size)throw Error('Memory growth across checkpoint is unsupported');
-    host.restore(structuredClone(r.host));let copied=0;
+    host.restore(structuredClone(r.host));module.__dirtyMark?.(0,heap.length);let copied=0;
     for(let i=0;i<r.pages.length;i++){
       const p=r.pages[i],offset=i*pageBytes;
       let size=pageBytes;

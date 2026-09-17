@@ -316,7 +316,7 @@ try {
           const descriptor=module._portCollisionPartRead(owner,part,11);
           if(byDescriptor.has(descriptor))throw Error('Duplicate fighter part descriptor');byDescriptor.set(descriptor,joint);
         }
-        const pointers=new Uint32Array(module.HEAPU8.buffer,target,nodes.length),base=costume.root-costume.rootOffset;
+        module.__dirtyMark?.(target,nodes.length*4);const pointers=new Uint32Array(module.HEAPU8.buffer,target,nodes.length),base=costume.root-costume.rootOffset;
         for(const [i,node]of nodes.entries()){
           const descriptor=base+node.offset,joint=byDescriptor.get(descriptor);if(!joint)throw Error('Missing fighter costume part '+i);
           pointers[i]=joint;byDescriptor.delete(descriptor);

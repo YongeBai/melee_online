@@ -230,7 +230,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       },dispose};models.add(result);return result;
     }catch(error){dispose();throw error;}
   }
-  function selectCamera(camera){snapshot=camera;module.HEAPF32.set(camera.raw.subarray(0,12),view/4);}
+  function selectCamera(camera){snapshot=camera;module.__dirtyMark?.(view,48);module.HEAPF32.set(camera.raw.subarray(0,12),view/4);}
   return {upload,selectCamera,
     prewarm(sources){
       if(snapshot)throw Error('Shader preparation must precede the first draw');

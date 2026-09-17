@@ -62,7 +62,7 @@ export function readSkinBindings(input,model) {
 export function loadSkin(module,model,bindings,{referenceVertices=true}={}) {
   const owned=[];
   const alloc=bytes=>{const p=module._malloc(bytes);if(!p)throw Error('Skin allocation failed');owned.push(p);return p;};
-  const upload=typed=>{const p=alloc(typed.byteLength);module.HEAPU8.set(new Uint8Array(typed.buffer,typed.byteOffset,typed.byteLength),p);return p;};
+  const upload=typed=>{const p=alloc(typed.byteLength);module.__dirtyMark?.(p,typed.byteLength);module.HEAPU8.set(new Uint8Array(typed.buffer,typed.byteOffset,typed.byteLength),p);return p;};
   try {
     const nodes=model.tree.nodes,n=nodes.length;
     const world=alloc(n*48),inverse=upload(bindings.inverse),has=upload(bindings.hasInverse),
