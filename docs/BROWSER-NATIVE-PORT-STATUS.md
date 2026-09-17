@@ -5,6 +5,29 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Marth and Roy copies now import the original hats, separate sword models,
+dynamic bones and two-model effect banks 20/48. Rendered lifecycle tests pass
+2,545 and 2,638 input frames respectively, plus 124 intro frames each. They cover
+partial ground/air release, full-charge automatic release, copy loss and
+reacquisition. Full charge releases at 121/211 ticks, following the original
+120/210-threshold callbacks. The native sword draws in 397/487 frames and its GPU
+resources retire when the game removes the accessory. Dynamic pools return all
+six/eight hat nodes on copy loss and allocate them again on reacquisition.
+
+GPU-validated contact tests pass 750/752 rendered frames. The partial attacks
+raise target damage from 8 to 20/19 and produce seven/six hitlag frames. Saved
+attack frames check 22,013/21,448 vertices, plus 13 shader cases and 52 pixel
+channels each. All 226 unit tests and shared browser startup checks pass.
+The Pikachu-copy simulation regression passes 1,845 frames, retaining its
+320 → 310 → 320 → 310 dynamic-pool lifecycle.
+
+The importer reads the sword at root +12 and dynamics at +16 without treating
+them as projectile Articles. Accessory binding validates the exact resident
+sword descriptor, preserving original attachment, callbacks and camera.
+These are compatibility checks; they do not establish retail parity, presented
+720p60 or input-to-photon latency. The complete browser game remains unfinished.
+[Sword-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-sword.json).
+
 Kirby's Donkey Kong copy now imports the original body costume, extra model and
 both Giant Punch effects from bank 39. Its rendered lifecycle passes 3,117 input
 frames plus 124 intro frames: partial/full ground and air punches, charge

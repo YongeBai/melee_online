@@ -147,3 +147,7 @@ test('Donkey copy retains its two original Giant Punch model effects without par
   const spec={symbol:'effKirbyDonkeyDataTable',bank:39,count:0,groups:0,models:2},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,'Dk');assert.deepEqual(input,before);assert.equal(r.bank,39);assert.equal(r.effects.length,2);assert.equal(r.cmd,null);assert.equal(r.tex,null);
   for(const slot of [0,4])assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.ptr(slot,a.cmd)),'Dk'));
 });
+
+test('Marth and Roy copies preserve separate model-only sword effect banks',()=>{
+  for(const [code,symbol,bank]of [['Ms','Mars',20],['Fe','Emblem',48]]){const input=fighterBankFixture({symbol:'effKirby'+symbol+'DataTable',bank,count:0,groups:0,models:2}),before=input.slice(),r=convertKirbyCopyEffects(input,code);assert.deepEqual(input,before);assert.equal(r.bank,bank);assert.equal(r.effects.length,2);assert.equal(r.cmd,null);assert.equal(r.tex,null);assert.throws(()=>convertKirbyCopyEffects(input,code==='Ms'?'Fe':'Ms'));}
+});

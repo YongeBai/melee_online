@@ -1,0 +1,617 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "26aface",
+  "scope": "Kirby Marth and Roy copy hats, temporary swords, dynamic bones, model effects, original charge/release and copy lifecycle integration.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "3e2d19d91578f623133a291d72cd69fa888f52d0bd7a44f7e225d69fd325bd7a",
+    "wasmBytes": 2958886
+  },
+  "sourceHashes": {
+    "character-collision.c": "e8d1c67cb60b0ce94978da2b967c2e45306c21f06df0674fcdb6e2a649dec1a9",
+    "constructor.html": "103fd6747588af2e4fbfa0cf68e8b936da8a7334de14f61c3a10ea1c297d482a",
+    "effect-assets.mjs": "3003cd673924dc89f9c2b37a1dfdff89b7b10c733a69e61a9f2df00f5257eeb5",
+    "kirby-copy-assets.mjs": "fedf7028e46a66c3c92ba9f0cf965fdf69b447d102c767884e364eb50055d92c",
+    "verify-kirby.mjs": "fdc3bcb9c5b1946bad5e8627470d320f205307e946e8ba3851a970c96f16c65d"
+  },
+  "assets": {
+    "Ms": {
+      "root": 316,
+      "hat": {
+        "joint": 24376,
+        "nodes": 12,
+        "meshes": 14
+      },
+      "sword": {
+        "joint": 57544,
+        "nodes": 3,
+        "meshes": 3
+      },
+      "dynamics": [
+        {
+          "bone": 10,
+          "nodes": 2,
+          "parameters": 0
+        },
+        {
+          "bone": 4,
+          "nodes": 2,
+          "parameters": 0
+        },
+        {
+          "bone": 7,
+          "nodes": 2,
+          "parameters": 0
+        }
+      ],
+      "typedRelocations": 259,
+      "omittedExporterRelocations": [
+        65952,
+        65968
+      ],
+      "effects": {
+        "bank": 20,
+        "models": 2,
+        "commands": 0,
+        "textures": 0
+      }
+    },
+    "Fe": {
+      "root": 324,
+      "hat": {
+        "joint": 33748,
+        "nodes": 14,
+        "meshes": 21
+      },
+      "sword": {
+        "joint": 75944,
+        "nodes": 3,
+        "meshes": 4
+      },
+      "dynamics": [
+        {
+          "bone": 3,
+          "nodes": 2,
+          "parameters": 0
+        },
+        {
+          "bone": 6,
+          "nodes": 2,
+          "parameters": 0
+        },
+        {
+          "bone": 9,
+          "nodes": 2,
+          "parameters": 0
+        },
+        {
+          "bone": 12,
+          "nodes": 2,
+          "parameters": 0
+        }
+      ],
+      "typedRelocations": 437,
+      "omittedExporterRelocations": [
+        87392,
+        87408
+      ],
+      "effects": {
+        "bank": 48,
+        "models": 2,
+        "commands": 0,
+        "textures": 0
+      }
+    }
+  },
+  "commands": {
+    "marthFull": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ms --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "royFull": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fe --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "marthContact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ms --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "royContact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fe --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "pikachuRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pk --input --combat --kirby-copy=swallow"
+  },
+  "validation": {
+    "unitTests": {
+      "passed": 226,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "sharedBrowser": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "4f6299e75202d881f3fd97379591d2f46047cce3ccd48182e3d9a4b1845a111d"
+    },
+    "visualInspection": "Saved 960x720 Marth/Roy copied-sword images inspected. Original camera path and 4:3 retained; no retail image comparison.",
+    "marthFull": {
+      "artifact": "dist/native-port/experiment-kirby-copy-sword/marth-full.json",
+      "sha256": "738e7789f0a0a4170dd4026b02b38d0cdd813fd4c649c18cf88d81527724a9ab",
+      "completed": true,
+      "copyFrames": 2403,
+      "renderedInputFrames": 2545,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          492,
+          493,
+          494,
+          24,
+          25,
+          496,
+          498,
+          495,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "firstHat": [
+        18,
+        14983456,
+        14771224,
+        3,
+        2,
+        2,
+        2
+      ],
+      "secondHat": [
+        18,
+        15027968,
+        14771224,
+        3,
+        2,
+        2,
+        2
+      ],
+      "swordCharge": {
+        "max": 120,
+        "full": 121
+      },
+      "swordRenderedFrames": 397,
+      "peakSwordDraws": 3,
+      "dynamicPool": [
+        308,
+        302,
+        308,
+        302
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Ms",
+          "root": 14747164,
+          "bodyCopy": false,
+          "hatNodes": 12,
+          "hatMeshes": 14,
+          "accessoryMeshes": 3,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 646,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 246,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "royFull": {
+      "artifact": "dist/native-port/experiment-kirby-copy-sword/roy-full.json",
+      "sha256": "d1bd5bcd6a4bdadd81f008525b2907494aa2708b2844b54e367d19b024daf12d",
+      "completed": true,
+      "copyFrames": 2496,
+      "renderedInputFrames": 2638,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          530,
+          531,
+          532,
+          24,
+          25,
+          534,
+          536,
+          533,
+          265
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "firstHat": [
+        26,
+        15642592,
+        15416276,
+        4,
+        2,
+        2,
+        2,
+        2
+      ],
+      "secondHat": [
+        26,
+        15686656,
+        15416276,
+        4,
+        2,
+        2,
+        2,
+        2
+      ],
+      "swordCharge": {
+        "max": 210,
+        "full": 211
+      },
+      "swordRenderedFrames": 487,
+      "peakSwordDraws": 4,
+      "dynamicPool": [
+        308,
+        300,
+        308,
+        300
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Fe",
+          "root": 15382852,
+          "bodyCopy": false,
+          "hatNodes": 14,
+          "hatMeshes": 21,
+          "accessoryMeshes": 4,
+          "dynamicBoneChains": 4,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 702,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 302,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "marthContact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-sword/marth-contact-gpu.json",
+      "sha256": "036a831aee9ade75e193369031cec09a1bded7e8203ee3cf6bd430d6e3e1a32a",
+      "completed": true,
+      "copyFrames": 608,
+      "renderedInputFrames": 750,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          492,
+          493,
+          494
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          80
+        ]
+      ],
+      "itemKinds": [],
+      "firstHat": [
+        18,
+        13503744,
+        13434360,
+        3,
+        2,
+        2,
+        2
+      ],
+      "swordRenderedFrames": 68,
+      "peakSwordDraws": 3,
+      "dynamicPool": [
+        308,
+        302,
+        null,
+        null
+      ],
+      "damage": [
+        8,
+        20
+      ],
+      "hitlagAtImpact": 7,
+      "copySetup": [
+        {
+          "code": "Ms",
+          "root": 13410300,
+          "bodyCopy": false,
+          "hatNodes": 12,
+          "hatMeshes": 14,
+          "accessoryMeshes": 3,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 646,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 246,
+            "unreferencedRelocations": 0
+          }
+        }
+      ],
+      "gpu": {
+        "renderer": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "vertices": 22013,
+        "shaderCases": 13,
+        "pixelChannelChecks": 52
+      }
+    },
+    "royContact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-sword/roy-contact-gpu.json",
+      "sha256": "120c9ab4b8ae0555146985b43db14d1571f50c0dd31bce57ab209bec49f79d4a",
+      "completed": true,
+      "copyFrames": 610,
+      "renderedInputFrames": 752,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          530,
+          531,
+          532
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18,
+          88
+        ]
+      ],
+      "itemKinds": [],
+      "firstHat": [
+        26,
+        14155872,
+        14080468,
+        4,
+        2,
+        2,
+        2,
+        2
+      ],
+      "swordRenderedFrames": 67,
+      "peakSwordDraws": 4,
+      "dynamicPool": [
+        308,
+        300,
+        null,
+        null
+      ],
+      "damage": [
+        8,
+        19
+      ],
+      "hitlagAtImpact": 6,
+      "copySetup": [
+        {
+          "code": "Fe",
+          "root": 14047044,
+          "bodyCopy": false,
+          "hatNodes": 14,
+          "hatMeshes": 21,
+          "accessoryMeshes": 4,
+          "dynamicBoneChains": 4,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 702,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 302,
+            "unreferencedRelocations": 0
+          }
+        }
+      ],
+      "gpu": {
+        "renderer": {
+          "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+          "vendor": "Google Inc. (AMD)",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "vertices": 21448,
+        "shaderCases": 13,
+        "pixelChannelChecks": 52
+      }
+    },
+    "pikachuRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-sword/pikachu-regression.json",
+      "sha256": "e638de75eaa75e5a45faeb3882a3794d5b000c14ba274956c572fc8fb3f42eb7",
+      "completed": true,
+      "copyFrames": 1845,
+      "renderedInputFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          429,
+          24,
+          25,
+          430,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        147,
+        148,
+        52
+      ],
+      "firstHat": [
+        12,
+        1959744,
+        13485920,
+        3,
+        3,
+        3,
+        4
+      ],
+      "secondHat": [
+        12,
+        13598496,
+        13485920,
+        3,
+        3,
+        3,
+        4
+      ],
+      "dynamicPool": [
+        320,
+        310,
+        320,
+        310
+      ],
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Pk",
+          "root": 13456344,
+          "bodyCopy": false,
+          "hatNodes": 15,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 3,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 270,
+            "models": 0,
+            "commands": 4,
+            "textures": 2,
+            "relocations": 2,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    }
+  },
+  "implementation": {
+    "root": "Hat and FtPartsDesc followed by sword joint at +12 and dynamics at +16. No projectile Articles. Only the two pinned unreachable exporter-wrapper pointers are omitted.",
+    "attachment": "Original setupStartAccessory attaches the sword to right thumb. The browser accessory adapter requires its exact resident descriptor and selects the corresponding model. Native callbacks still control visibility and lifetime.",
+    "charge": "Original C increments the charge counter and automatically releases when counter > charge_iterations * 30. Read-only diagnostics observe thresholds 120/210 and releases 121/211.",
+    "coverage": "Partial ground and air release, full ground auto-release, recovery, copy loss/reacquisition, dynamic pool recovery, original collision and hitlag. Per-model telemetry observes actual sword submissions and rejects GPU resources retained after native removal."
+  },
+  "limits": [
+    "Original C integration and internal GPU oracle, not retail per-frame parity.",
+    "Full-charge airborne release, all attack spacings/interactions and all costume colors are not exhaustively tested.",
+    "No presented-FPS or input-to-photon measurement; no new performance gain claimed.",
+    "Full scenes, remaining abilities/costumes, menus/audio, retail parity, networking and public static deployment remain incomplete.",
+    "Automatic hosted no-ISO startup unchanged; no game assets or binaries committed."
+  ]
+}

@@ -182,3 +182,20 @@ test('Donkey body copy retains the zero insertion mask and no Article slots afte
   const input=donkeyBodyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Dk');assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.deepEqual(r.textureRows,[[2,0],null,null,null,null,null]);assert.equal(r.articles.rows.length,0);assert.equal(r.joint,256);assert.equal(r.unreferencedRelocations.length,0);assert.equal(new DataView(r.image.buffer,32).getUint32(144,true),0);
   for(const change of [a=>a.d.setUint32(144,0x1800),a=>a.d.setUint32(136,1),a=>a.ptr(140,128),a=>a.ptr(100,136),a=>a.relocs.delete(148),a=>a.ptr(152,256)])assert.throws(()=>convertKirbyCopy(donkeyBodyFixture(change),'Dk'));
 });
+
+function swordFixture(code,change=()=>{}){
+  const spec=code==='Ms'?{wrapper:65952,symbol:'Mars',bones:[10,4,7]}:{wrapper:87392,symbol:'Emblem',bones:[3,6,9,12]},body=new Uint8Array(spec.wrapper+24),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(1000,2000);d.setUint32(1004,1);ptr(1008,1100);ptr(1012,4096);ptr(1016,1200);
+  for(let i=0;i<14;i++){const at=2000+i*64;for(let j=0;j<3;j++)d.setFloat32(at+32+j*4,1);if(i<13)ptr(at+8,at+64);}
+  for(let i=0;i<3;i++)d.setFloat32(4096+32+i*4,1);
+  d.setUint32(1200,spec.bones.length);ptr(1204,1220);
+  spec.bones.forEach((bone,i)=>{const at=1220+24*i;d.setUint32(at,bone);ptr(at+4,128);d.setUint32(at+8,2);for(let j=0;j<3;j++)d.setFloat32(at+12+j*4,[1,1,.1][j]);});for(let i=0;i<30;i++)d.setFloat32(128+i*4,(i-10)/4);
+  ptr(spec.wrapper,4096);ptr(spec.wrapper+16,spec.wrapper);change({d,relocs,ptr,spec});
+  const name=new TextEncoder().encode('ftDataKirbyCopy'+spec.symbol+'\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,1000);bytes.set(name,pub+8);return bytes;
+}
+test('Marth and Roy copies import separate sword models and original dynamic hat chains',()=>{
+  for(const code of ['Ms','Fe']){const input=swordFixture(code),before=input.slice(),r=convertKirbyCopy(input,code);assert.deepEqual(input,before);assert.equal(r.articles.rows.length,0);assert.equal(r.accessory.joint,4096);assert.equal(r.accessory.scene.model.tree.nodes.length,1);assert.deepEqual(r.dynamics.map(d=>d.nodes),Array(code==='Ms'?3:4).fill(2));assert(r.pointerSlots.has(1012)&&r.pointerSlots.has(1016));assert.equal(r.unreferencedRelocations.length,2);assert.equal(new DataView(r.image.buffer,32).getFloat32(128,true),-2.5);
+    for(const change of [a=>a.relocs.delete(1012),a=>a.relocs.delete(1016),a=>a.ptr(1012,1000),a=>a.d.setUint32(1200,10),a=>a.d.setUint32(1220,14),a=>a.ptr(a.spec.wrapper,2000),a=>a.ptr(1500,4096)])assert.throws(()=>convertKirbyCopy(swordFixture(code,change),code));
+  }
+});

@@ -91,6 +91,18 @@ loss and reacquisition. Its contact check requires native hitlag, unlike Fox's
 laser. Per-model draw telemetry is enabled only in copy probes; body resources
 must disappear when the original copy loader removes the body parts.
 
+Marth and Roy copies (`--opponent=Ms` / `Fe`) import the original hat,
+separate temporary sword and two-model effect banks 20/48. Their roots contain a
+sword descriptor at +12 and hat dynamics at +16, with no projectile Articles.
+The importer preserves three/four two-node dynamic chains and omits only each
+pinned exporter's unreachable scene wrapper. The original C attaches the sword
+to Kirby's right thumb, updates it during charge/release, and removes it on
+recovery. Accessory binding checks its exact resident descriptor before drawing.
+The lifecycle covers partial ground/air release, full-charge automatic release,
+copy loss/reacquisition and dynamic-pool recovery. Charge counters are read-only
+diagnostics. Copy probes count actual sword submissions and reject GPU resources
+that survive native sword removal; this is not a presentation-FPS measurement.
+
 Donkey Kong's copy (`--opponent=Dk`) uses that body-costume path with the original
 zero insertion mask, 46 active bones, 17 costume DObjs and five extra DObjs.
 Its 24-byte root has no Article slots; bytes immediately following it belong

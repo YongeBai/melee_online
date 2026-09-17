@@ -59,6 +59,9 @@ unsigned portKirbyRead(HSD_GObj* object,unsigned field)
     case 12:return fp->u.kb.hat.x1C.count;
     case 13:return fp->u.kb.xBC;
     case 14:return ((ftKb_DatAttrs*)fp->dat_attrs)->specialn_dk_swings_to_full_charge;
+    case 15:return fp->dynamics_num>3?fp->dynamic_bone_sets[3].dyn_desc.count:0;
+    case 16:return fp->mv.ms.specialn.cur_frame;
+    case 17:return (fp->u.kb.hat.kind==Ft_Kind_Mars?((ftKb_DatAttrs*)fp->dat_attrs)->ms.charge_iterations:((ftKb_DatAttrs*)fp->dat_attrs)->fe.charge_iterations)*30;
     default:abort();
     }
 }
@@ -690,7 +693,11 @@ unsigned portFighterAccessory(HSD_GObj* object,unsigned field)
     else {
         Fighter* fp=object->user_data;
         if(fp->kind==Ft_Kind_Samus&&fp->ft_data->x48_items&&fp->ft_data->x48_items[4]&&joint->id==(unsigned)*(HSD_Joint**)fp->ft_data->x48_items[4])kind=3;
-        else abort();
+        else if(fp->kind==Ft_Kind_Kirby&&(fp->u.kb.hat.kind==Ft_Kind_Mars||fp->u.kb.hat.kind==Ft_Kind_Emblem)){
+            KirbyHatStruct* hat=ft_80459B88.hats[fp->u.kb.hat.kind-1];
+            if(!hat||joint->id!=(unsigned)hat->hat_dynamics[0])abort();
+            kind=fp->u.kb.hat.kind==Ft_Kind_Mars?6:7;
+        }else abort();
     }
     return field?kind:(unsigned)joint;
 }
