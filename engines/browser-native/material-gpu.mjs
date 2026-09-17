@@ -3,7 +3,7 @@ import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
 import {createNativePixelReader,gxAlphaTestRejectsAny} from './native-pixel.mjs';
-import {readNativeModelMatrices} from './native-model.mjs';
+import {readNativeModelMatrices,createPackedModelReader} from './native-model.mjs';
 import {readNativeRenderContext,createNativeRenderContextReader,checkNativeRenderContext} from './native-render-context.mjs';
 import {inspectArchive} from './archive.mjs';
 import {snapshotShapeGeometry} from './shape-geometry.mjs';
@@ -31,10 +31,12 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     registers:new Int32Array(16),konst:new Int32Array(16),ambient:new Int32Array(8),material:new Int32Array(8),lightColor:new Int32Array(32),
     lightPosition:new Float32Array(24),lightDirection:new Float32Array(24),lightAngular:new Float32Array(24),lightDistance:new Float32Array(24),bias:new Float32Array(8)};
   function packRows(target,rows,stride){target.fill(0);for(let i=0;i<rows.length;i++)if(rows[i])target.set(rows[i],i*stride);return target;}
+  const packedModel=assetLease?.packedState?createPackedModelReader(module,(i,create)=>assetLease.modelSnapshot(i,create)):null;
+  const readModel=packedModel?()=>packedModel.read():()=>readNativeModelMatrices(module);
   const readContext=assetLease?.submissionOptimized?createNativeRenderContextReader(module):()=>readNativeRenderContext(module);
   const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
-  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
+  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=assetLease?.reuseImmediate?assetLease.immediatePlans:[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes,origin,immediateRegisters=false){
     const variant=materialShaderKey(state,attributes,{immediateRegisters});if(variants.has(variant))return variants.get(variant);
@@ -77,7 +79,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     const active=name=>!assetLease?.submissionOptimized||u(name)!==null;
     if(state.context.fog?.type){const f=state.context.fog;gl.uniform2f(u('fogAC'),f.a,f.c);gl.uniform2i(u('fogBShift'),f.b,f.shift);gl.uniform3iv(u('fogColor'),f.color);}
     gl.uniformMatrix4fv(u('projection'),false,camera.projection);gl.uniform1i(u('currentMatrix'),state.model.current??0);
-    if(active('positionRows'))gl.uniform4fv(u('positionRows'),packRows(scratch.position,state.model.positions,12));if(active('normalRows'))gl.uniform4fv(u('normalRows'),packRows(scratch.normal,state.model.normals,12));
+    if(active('positionRows'))gl.uniform4fv(u('positionRows'),(state.model.positionRows??packRows(scratch.position,state.model.positions,12)));if(active('normalRows'))gl.uniform4fv(u('normalRows'),(state.model.normalRows??packRows(scratch.normal,state.model.normals,12)));
     const {tex,post,bias}=scratch,texActive=active('textureRows'),postActive=active('postRows');if(texActive)tex.fill(0);if(postActive)post.fill(0);bias.fill(0);
     for(const m of state.textures.matrices)if(m.id<64?texActive:postActive)(m.id<64?tex:post).set(m.values,(m.id<64?m.id-30:m.id-64)*4);
     if(texActive)gl.uniform4fv(u('textureRows'),tex);if(postActive)gl.uniform4fv(u('postRows'),post);
@@ -139,7 +141,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   module.onNativeDraw=(owner,joint,display,polygon,ptr,positions=0,count=0,normals=0,normalCount=0)=>{
     const plan=nativePlans.get(owner+':'+joint+':'+polygon);
     if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
-    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readContext()};
+    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
     const shaped=(plan.mesh.flags&0x3000)===0x1000;
     if(shaped!==!!positions)throw Error('Native shape geometry missing or unexpected');
@@ -166,7 +168,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       immediateUsed++;plan.stream.vertexCount=plan.stream.indexCount=0;
       const attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
       plan.mesh={triangles:null,flags:cull<<14,attrs,vertices:[]};
-      const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readContext()};
+      const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
       checkNativeRenderContext(state.context,snapshot,state.pixel);
       const flatRegisters=!state.textures.generators.some(g=>g.source>=5&&g.source<=11);
       queue.push({owner:kind===0?'particles':kind===1?'afterimage':'text',plan,state,camera:snapshot,program:program(state,attrs,kind===0?'particles':kind===1?'afterimage':'text',flatRegisters),immediate:true,flatRegisters,kind,textured});
@@ -225,7 +227,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           if((mesh.flags&0x3000)===0x1000)throw Error('Shape rendering requires original callbacks');
           const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[mesh.joint];
           const ptr=module._portMaterialDrawState(joint,plan.display,plan.polygon,view,owner);
-          const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readContext()};
+          const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
           checkNativeRenderContext(state.context,snapshot,state.pixel);
           queue.push({owner,plan,state,camera:snapshot,program:program(state,mesh.attrs)});count++;
         }
@@ -242,7 +244,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     },
     shaderSources(){return [...programs.values()].map(p=>p.sources);},
     shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
-    begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
+    begin(camera){selectCamera(camera);queue=[];packedModel?.reset();shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
     flush({ordered=false,clip=null,clearAlpha=1,forceAlpha=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);if(clip){gl.enable(gl.SCISSOR_TEST);gl.scissor(...clip);}else gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,clearAlpha);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
@@ -273,6 +275,6 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}
       return {tevPrograms:[...tev.values()],pixelStates:[...pixels.values()],lightStates:[...lights.values()]};
-    },dispose(){delete module.onNativeDraw;delete module.onNativeImmediate;for(const p of immediatePlans){gl.deleteVertexArray(p.vao);gl.deleteBuffer(p.vertex);gl.deleteBuffer(p.indices);gl.deleteBuffer(p.registers);}for(const model of [...models])model.dispose();if(!assetLease)for(const p of programs.values())gl.deleteProgram(p.program);if(!assetLease)for(const image of images.values())gl.deleteTexture(image);module._free(view);assetLease?.release();},
+    },dispose(){delete module.onNativeDraw;delete module.onNativeImmediate;if(!assetLease?.reuseImmediate)for(const p of immediatePlans){gl.deleteVertexArray(p.vao);gl.deleteBuffer(p.vertex);gl.deleteBuffer(p.indices);gl.deleteBuffer(p.registers);}for(const model of [...models])model.dispose();if(!assetLease)for(const p of programs.values())gl.deleteProgram(p.program);if(!assetLease)for(const image of images.values())gl.deleteTexture(image);module._free(view);assetLease?.release();},
   };
 }

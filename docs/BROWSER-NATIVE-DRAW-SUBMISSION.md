@@ -162,3 +162,8 @@ not an eight-minute FPS or latency measurement. Full tests: 597 total, 587 passe
 Exact source hashes, controls including B1, both clients' metrics, CPU-profile
 breakdowns, full-state/pixel/camera checks and regression outcomes are recorded
 in [the benchmark artifact](benchmarks/browser-2026-09-17-native-draw-submission.json).
+
+Later [packed staging](BROWSER-NATIVE-PACKED-STAGING.md) has a separate
+`--packedstate=0` control. On newer checkouts, disable that option as well when
+reproducing this document's pre-staging paths; recorded source hashes remain the
+authoritative provenance for the measurements above.

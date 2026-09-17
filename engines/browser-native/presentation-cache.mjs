@@ -1,8 +1,8 @@
 import {createModelGeometryCache} from './model-geometry-cache.mjs';
 import {inspectArchive} from './archive.mjs';
 
-// Match-scoped immutable source/GPU assets only. No native owners, node arrays,
-// polygon bindings, uniforms, or WASM allocations. Retained textures own exact
+// Match-scoped source/GPU assets and exclusive frame-scoped JS/GPU staging.
+// No native owners, node arrays, polygon bindings or WASM allocations. Retained textures own exact
 // copies of their source image/palette bytes, checked before every new lease use.
 // Compare all bytes, including unaligned views and tails. No hashes or sampled
 // pages: restoring an image at the same address must still invalidate its GPU copy.
@@ -19,8 +19,10 @@ export function equalTextureBytes(bytes,prior){
   for(i=words*4;i<bytes.length;i++)if(bytes[i]!==prior[i])return false;
   return true;
 }
-export function createPresentationCache({submissionOptimized=true}={}){
-  const programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
+// Immediate GPU-plan reuse is experimental: an intermittent per-frame pixel
+// mismatch was observed with it enabled. Keep its lifetime per renderer by default.
+export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=false}={}){
+  const modelSnapshots=[],immediatePlans=[],programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
   let context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
   const stats={modelHits:0,modelMisses:0,textureHits:0,textureMisses:0,textureInvalidations:0,rendererLeases:0};
   return {
@@ -40,7 +42,9 @@ export function createPresentationCache({submissionOptimized=true}={}){
       context=gl;leases++;stats.rendererLeases++;
       let released=false;
       return {
-        programs,variants,submissionOptimized,
+        programs,variants,submissionOptimized,packedState,reuseImmediate,
+        get immediatePlans(){if(released)throw Error('Released presentation lease');return immediatePlans;},
+        modelSnapshot(index,create){if(released)throw Error('Released presentation lease');return modelSnapshots[index]??=create();},
         model(bytes,create){
           if(released)throw Error('Released presentation lease');
           if(models.has(bytes)){stats.modelHits++;return models.get(bytes);}
@@ -61,14 +65,15 @@ export function createPresentationCache({submissionOptimized=true}={}){
         release(){if(!released){released=true;leases--;}}
       };
     },
-    snapshot:()=>({...stats,submissionOptimized,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
+    snapshot:()=>({...stats,submissionOptimized,packedState,reuseImmediate,modelSnapshotSlots:modelSnapshots.length,immediatePlanSlots:immediatePlans.length,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
     dispose(){
       if(leases)throw Error('Cannot dispose leased presentation assets');
       if(closed)return;closed=true;
       for(const model of models.values())model.dispose();
       for(const p of programs.values())context.deleteProgram(p.program);
       for(const image of images.values())context.deleteTexture(image.texture);
-      models.clear();programs.clear();variants.clear();images.clear();geometry.clear();archives=new WeakMap();gpuInfo=null;
+      for(const p of immediatePlans){context.deleteVertexArray(p.vao);context.deleteBuffer(p.vertex);context.deleteBuffer(p.indices);context.deleteBuffer(p.registers);}immediatePlans.length=0;
+      modelSnapshots.length=0;models.clear();programs.clear();variants.clear();images.clear();geometry.clear();archives=new WeakMap();gpuInfo=null;
     }
   };
 }

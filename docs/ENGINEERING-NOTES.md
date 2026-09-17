@@ -7,6 +7,13 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+[Packed render staging](BROWSER-NATIVE-PACKED-STAGING.md) reuses JS matrix slots
+within an exclusive cache lease. Immediate GPU-plan reuse is experimental and
+off by default after an intermittent per-frame pixel mismatch. Never reuse a slot
+while its draw remains queued; copy/upload every current value and keep native
+bindings outside the pool. Use per-frame RGBA/camera and full-memory audits when
+changing this lifetime boundary. Production rooms remain lockstep.
+
 The [draw-submission experiment](BROWSER-NATIVE-DRAW-SUBMISSION.md) keeps exact
 texture comparisons, immutable context snapshots and shader-variant lookups.
 Use its unoptimized cache option and uncached renderer as independent controls;

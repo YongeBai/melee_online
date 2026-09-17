@@ -54,3 +54,17 @@ test('reference and widened comparisons invalidate the same restored images and 
   cache.dispose();
  }
 });
+
+test('frame staging belongs to the exclusive lease and is discarded with the cache',()=>{
+ const cache=createPresentationCache(),gl={isContextLost:()=>false};let creates=0;
+ const a=cache.acquire(gl),first=a.modelSnapshot(0,()=>{creates++;return {rows:new Float32Array(120)};});assert.equal(a.packedState,true);assert.equal(a.reuseImmediate,false);a.release();
+ assert.throws(()=>a.modelSnapshot(0,()=>null),/Released/);
+ const b=cache.acquire(gl);assert.equal(b.modelSnapshot(0,()=>{creates++;}),first);assert.equal(creates,1);assert.equal(cache.snapshot().modelSnapshotSlots,1);b.release();cache.dispose();assert.equal(cache.snapshot().modelSnapshotSlots,0);
+ const control=createPresentationCache({packedState:false}),c=control.acquire(gl);assert.equal(c.packedState,false);c.release();control.dispose();
+});
+
+test('immediate GPU staging survives lease disposal and is deleted exactly once with its context',()=>{
+ const deleted=[],gl={isContextLost:()=>false,deleteVertexArray:x=>deleted.push(x),deleteBuffer:x=>deleted.push(x)};
+ const cache=createPresentationCache({reuseImmediate:true}),a=cache.acquire(gl),plan={vao:'vao',vertex:'vertex',indices:'indices',registers:'registers'};a.immediatePlans.push(plan);a.release();assert.deepEqual(deleted,[]);assert.throws(()=>a.immediatePlans,/Released/);
+ const b=cache.acquire(gl);assert.equal(b.immediatePlans[0],plan);assert.throws(()=>cache.acquire(gl),/leased/);b.release();cache.dispose();cache.dispose();assert.deepEqual(deleted,['vao','vertex','indices','registers']);assert.equal(cache.snapshot().immediatePlanSlots,0);
+});
