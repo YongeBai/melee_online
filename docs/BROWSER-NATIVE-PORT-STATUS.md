@@ -7,6 +7,12 @@ The reported start abort was a host constructor guard that accepted only human
 slots; it now admits native CPU slots and calls the original CPU constructor.
 The CPU's own generated buttons/sticks and action changes are checked in-browser.
 
+The keyboard modal and room controls reuse the established `melee-ui.css`
+directly, including original textured layers, the yellow Back button, shaped
+tap-jump switch, glyph code entry and beveled room actions. The native adapter
+changes only canvas/compositor positioning. A further 900-frame browser probe
+and in-app visual inspection pass after restoring these styles.
+
 Original HSD joints and SIS nameplates implement the two-seat layout. Clipped
 foreground passes redraw the real native hands over transparent panel apertures;
 the original camera/projection is unchanged. Product mode hides illegal stage

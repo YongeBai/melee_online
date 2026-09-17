@@ -8,6 +8,8 @@ pitfalls from the playable implementation. Read `docs/ROLLBACK-AND-ROOMS.md` and
 - UI should look native to Melee. Preserve original menu assets, SIS glyphs,
   animated hands, stage select, and native pause. Added room controls belong
   beneath the native hands; preserve the capture gate that hides unmodified CSS.
+  Reuse the existing `scripts/engine/melee-ui.css`, keyboard model and native
+  textures in the port; do not replace them with simplified lookalike styling.
 - The player-facing native port retains the established WASD/P/O/Space controls,
   3D keyboard view and per-player tap-jump option. Default to Falco P1 versus
   level-9 Fox CPU, two native CSS cards with room controls between them, all

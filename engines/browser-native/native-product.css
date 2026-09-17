@@ -1,9 +1,15 @@
-html,body{margin:0;background:#000;color:#eee;font-family:Arial,sans-serif}#gameViewport{position:relative;width:min(100%,133.333dvh);aspect-ratio:4/3;margin:auto;background:#101323}#gameViewport>canvas{position:relative;z-index:2;display:block;width:100%;height:100%;pointer-events:none}#roomPanel,#keyboardButton,#peerKeyboard{position:absolute;z-index:1;box-sizing:border-box}#roomPanel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5%;background:linear-gradient(130deg,#292c3c,#101323);padding:5% 2%;}#roomPanel[hidden],#keyboardButton[hidden],#peerKeyboard[hidden]{display:none}#roomPanel button{border:0;background:transparent;color:#fff;cursor:pointer;max-width:100%;padding:3px}#roomPanel button:hover{filter:drop-shadow(0 0 5px #ffdf56)}#roomPanel img,#roomPanel canvas{max-width:100%;height:clamp(12px,2.2vw,25px);object-fit:contain}.room-code{display:flex;align-items:center;flex-direction:column;gap:9px;width:100%}#joinRoom label{display:flex;align-items:center;flex-direction:column;gap:8px}#joinRoom{display:flex;align-items:end;max-width:100%}#joinRoom[hidden]{display:none}#joinCode{width:7ch;text-align:center;font-size:clamp(12px,2vw,25px);background:#151621;color:#ffefba;border:1px solid #878793;text-transform:uppercase}#keyboardButton{border:0;background:#d8d8dd;cursor:pointer;padding:1px}#keyboardButton svg{width:100%;height:100%;fill:#444652;stroke:#fff;stroke-width:1.5}#peerKeyboard{font-size:clamp(7px,1vw,12px);display:flex;align-items:center;justify-content:center;color:#fff}#controls{border:0;padding:0;max-width:none;max-height:none;width:min(100vw,133.333dvh);height:min(75vw,100dvh);margin:auto;background:#080914;color:#ecebe6;overflow:hidden}#controls::backdrop{background:#000e}.controls-surface{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(0deg,#090921e8,#141430d9),url('./assets/MnSlMap-860.png') center/100% 100%}#keyboardModel{position:absolute;inset:12% 1% 20%}#keyboardModel canvas{width:100%;height:100%;display:block}.keyboard-labels{position:absolute;inset:0;pointer-events:none;overflow:visible}.tap-setting{position:absolute;z-index:2;bottom:6%;left:30%;width:40%;display:flex;align-items:center;justify-content:space-between;background:#383b4b;padding:10px;box-sizing:border-box}.tap-setting img{height:clamp(15px,2.7vw,32px);max-width:55%;object-fit:contain}#closeControls{position:absolute;left:4%;top:4%;background:none;border:0;cursor:pointer}#closeControls img{height:clamp(18px,3vw,36px)}#result{font:12px monospace;white-space:pre-wrap;max-width:960px;margin:10px auto}#menu-controls{display:none}
-
-#result{display:none}body[data-qa="true"] #result{display:block}
-
-body[data-error="true"] #result{display:block;position:fixed;inset:10%;z-index:20;overflow:auto;background:#210e12;color:white;padding:20px;white-space:pre-wrap}
-
-.room-code[hidden]{display:none}
-
-#roomNotice{position:fixed;z-index:30;inset:30% 15%;background:#202335ee;border:2px solid #aeb1c0;padding:3%;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}#roomNotice[hidden]{display:none}#roomNotice button{background:transparent;border:0;cursor:pointer}#roomNotice canvas{height:32px;max-width:100%}
+/* Reuse the established Melee UI. Only the native canvas/compositor differs. */
+@import url('./melee-ui.css');
+body { min-height: 100dvh; display: grid; place-items: center; }
+#gameViewport { display: block; width: min(100vw, 133.333dvh); height: min(75vw, 100dvh); }
+#gameViewport > canvas { position: relative; z-index: 2; display: block; width: 100%; height: 100%; pointer-events: none; }
+#keyboardButton { pointer-events: auto; z-index: 1; }
+body[data-seat="1"] #keyboardButton { border-color: #bfc3ed; background: linear-gradient(#465d8e, #16263a); }
+#roomPanel, #peerKeyboard { z-index: 1; }
+/* Projected aperture bounds are assigned inline from the original C camera. */
+#menu-controls, #result { display: none; }
+body[data-qa="true"] #result { display: block; }
+body[data-error="true"] #result { display: block; position: fixed; inset: 10%; z-index: 20; overflow: auto; background: #210e12; color: white; padding: 20px; white-space: pre-wrap; }
+#roomNotice { position: fixed; z-index: 30; inset: 30% 15%; background: #202335ee; border: 2px solid #aeb1c0; padding: 3%; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.5; }
+#roomNotice button { cursor: pointer; }
+#roomNotice canvas { height: 32px; max-width: 100%; }
