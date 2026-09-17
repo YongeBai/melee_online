@@ -30,7 +30,7 @@ export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1
 // Interactive development fixture, not complete competitive match startup.
 // Input samples enter the existing normalized HSD boundary; no game-state
 // positions, action states, damage or velocities are assigned here.
-export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,resolveObjects=null,readMatch=null,unlockInput=true}={}) {
+export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,browserInput=null,resolveObjects=null,readMatch=null,unlockInput=true}={}) {
   // The first callback can carry a timestamp from before lengthy startup work.
   // Discard such timestamps, then anchor to the first valid display callback.
   // A quarter millisecond of repaid tolerance covers observed display jitter.
@@ -65,8 +65,8 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       // frames to inflate the rendered frame rate. Hidden tabs pause explicitly.
       for(let index=0;index<steps;index++) {
         const previous=final??initial;
-        const pads=!inputProvider&&focused?(globalThis.navigator?.getGamepads?.()??[]):[];
-        const samples=(inputProvider?inputProvider(frames,previous):objects.map((_,i)=>!focused?neutralNativeSample():i===0&&keys.size?keyboardNativeSample(keys):standardNativeSample(pads[i]))).map(completeNativeSample);
+        const pads=!inputProvider&&!browserInput&&focused?(globalThis.navigator?.getGamepads?.()??[]):[];
+        const samples=(inputProvider?inputProvider(frames,previous):browserInput?browserInput.samples(objects.length):objects.map((_,i)=>!focused?neutralNativeSample():i===0&&keys.size?keyboardNativeSample(keys):standardNativeSample(pads[i]))).map(completeNativeSample);
         if(samples.length!==objects.length)throw Error('Controller sample count differs from players');
         for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);
         const before=performance.now();step();sample(stepTimes,performance.now()-before);frames++;
@@ -94,7 +94,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   // Isolated post-intro fixtures explicitly unlock input. Real scene startup
   // keeps the original gate until the Ready callback releases it.
   if(unlockInput)for(let i=0;i<objects.length;i++)module._Player_80031848(i);
-  addEventListener('keydown',input);addEventListener('keyup',input);addEventListener('blur',blur);addEventListener('focus',focus);document.addEventListener('visibilitychange',reset);
+  if(!browserInput){addEventListener('keydown',input);addEventListener('keyup',input);}addEventListener('blur',blur);addEventListener('focus',focus);document.addEventListener('visibilitychange',reset);
   raf=requestAnimationFrame(frame);
   return {snapshot,stop(){stop();onComplete(snapshot());}};
 }

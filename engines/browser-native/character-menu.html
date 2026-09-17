@@ -10,6 +10,7 @@ import {convertSisAsset} from './sis-assets.mjs';
 import {convertCardIconAsset} from './card-assets.mjs';
 import {completeNativeSample} from './native-input.mjs';
 import {installResidentFile} from './resident-files.mjs';
+const interactive=new URLSearchParams(location.search).has('interactive');
 const report={passed:false,playableMatch:false,audioPlayed:false,audioMode:null},diagnostics=[],music=[];
 try{
  const module=await create({printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=mode;return true;},onNativeMusic:r=>{music.push(r);return false;}});
@@ -18,26 +19,36 @@ try{
   const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable '+name);const bytes=new Uint8Array(await r.arrayBuffer()),asset=convert(bytes);if(name==='MnSlChr.usd'){cssBytes=bytes;cssAsset=asset;}installResidentFile(module,name,asset.image);
  }
  module._portMenuDiagnosticMute();module._portCharacterMenuInitialize();globalThis.characterModule=module;
- let preview=createNativeCharacterMenuPreview(module,document.querySelector('#picture'),cssBytes,cssAsset,{verifyVertices:true});globalThis.characterPreview=preview;
+ let preview=createNativeCharacterMenuPreview(module,document.querySelector('#picture'),cssBytes,cssAsset,{verifyVertices:!interactive});globalThis.characterPreview=preview;
  let frames=0;
  const read=()=>({frames,phase:module._portCharacterMenuNativeRead(0,0),gate:module._portCharacterMenuNativeRead(1,0),exit:module._portCharacterMenuRead(0,0),players:Array.from({length:4},(_,p)=>({character:module._portCharacterMenuRead(1,p),costume:module._portCharacterMenuRead(2,p),kind:module._portCharacterMenuRead(3,p),x:module._portCharacterMenuNativeRead(2,p),y:module._portCharacterMenuNativeRead(3,p),hand:module._portCharacterMenuNativeRead(4,p),icon:module._portCharacterMenuNativeRead(5,p),token:module._portCharacterMenuNativeRead(8,p),selected:module._portCharacterMenuNativeRead(9,p)}))});
- const step=(samples=[])=>{for(let p=0;p<4;p++){const sample=samples[p]??(p<2?[0,0,0]:null);if(sample)module._portControllerSample(p,...completeNativeSample(sample));else module._portControllerDisconnect(p);}module._portCharacterMenuStep();frames++;return read();};
- globalThis.nativeCharacterMenu={read,step,restart:(resume=false)=>{if(resume)module._portCharacterMenuResume();else module._portCharacterMenuInitialize();preview=createNativeCharacterMenuPreview(module,document.querySelector('#picture'),cssBytes,cssAsset,{verifyVertices:true});frames=0;for(let i=0;i<60;i++)step();return read();},draw:()=>preview.draw(),icons:()=>Array.from({length:25},(_,i)=>({i,character:module._portCharacterMenuNativeRead(10,i),state:module._portCharacterMenuNativeRead(11,i),x:module._portCharacterMenuNativeRead(12,i),y:module._portCharacterMenuNativeRead(13,i)})),finish:()=>{preview.dispose();const phase=module._portCharacterMenuFinish();return {phase,objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
+ const step=(samples=[])=>{for(let p=0;p<4;p++){const sample=p in samples?samples[p]:(p<2?[0,0,0]:null);if(sample)module._portControllerSample(p,...completeNativeSample(sample));else module._portControllerDisconnect(p);}module._portCharacterMenuStep();frames++;return read();};
+ globalThis.nativeCharacterMenu={read,step,restart:(resume=false)=>{if(resume)module._portCharacterMenuResume();else module._portCharacterMenuInitialize();preview=createNativeCharacterMenuPreview(module,document.querySelector('#picture'),cssBytes,cssAsset,{verifyVertices:!interactive});frames=0;preview.draw();if(!interactive)for(let i=0;i<60;i++)step();return read();},draw:()=>preview.draw(),icons:()=>Array.from({length:25},(_,i)=>({i,character:module._portCharacterMenuNativeRead(10,i),state:module._portCharacterMenuNativeRead(11,i),x:module._portCharacterMenuNativeRead(12,i),y:module._portCharacterMenuNativeRead(13,i)})),finish:()=>{preview.dispose();const phase=module._portCharacterMenuFinish();return {phase,objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
  let stageBytes,stageAsset;
  globalThis.nativeCharacterMenu.toStage=async(controller=0)=>{
   if(!stageAsset){const response=await fetch('./fixtures/MnSlMap.usd');if(!response.ok)throw Error('Hosted stage menu unavailable');stageBytes=new Uint8Array(await response.arrayBuffer());stageAsset=convertMenuAsset(stageBytes);installResidentFile(module,'MnSlMap.usd',stageAsset.image);}
-  module._portStageMenuFromCharacters(controller);const stagePreview=createNativeMenuPreview(module,document.querySelector('#picture'),stageBytes,stageAsset,{verifyVertices:true});let stageFrames=0;
+  module._portStageMenuFromCharacters(controller);const stagePreview=createNativeMenuPreview(module,document.querySelector('#picture'),stageBytes,stageAsset,{verifyVertices:!interactive});let stageFrames=0;
   const read=()=>({frames:stageFrames,cursor:[module._portStageMenuRead(0),module._portStageMenuRead(1)],stage:module._portStageMenuRead(2),exit:module._portStageMenuRead(5),phase:module._portStageMenuRead(6),hover:module._portStageMenuRead(7)});
-  const stage={read,icons:()=>Array.from({length:30},(_,i)=>({i,stage:module._portStageMenuNativeRead(2,i),x:module._portStageMenuNativeRead(3,i),y:module._portStageMenuNativeRead(4,i),unlocked:module._portStageMenuNativeRead(5,i)})),step:(samples=[])=>{for(let p=0;p<4;p++){const sample=samples[p]??(p<2?[0,0,0]:null);if(sample)module._portControllerSample(p,...completeNativeSample(sample));else module._portControllerDisconnect(p);}module._portStageMenuStep();stageFrames++;return read();},draw:()=>stagePreview.draw(),finish:()=>{stagePreview.dispose();return {stage:module._portStageMenuFinish(),objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
-  globalThis.nativeStageMenu=stage;for(let i=0;i<120;i++)stage.step();stage.draw();return read();
+  const stage={read,icons:()=>Array.from({length:30},(_,i)=>({i,stage:module._portStageMenuNativeRead(2,i),x:module._portStageMenuNativeRead(3,i),y:module._portStageMenuNativeRead(4,i),unlocked:module._portStageMenuNativeRead(5,i)})),step:(samples=[])=>{for(let p=0;p<4;p++){const sample=p in samples?samples[p]:(p<2?[0,0,0]:null);if(sample)module._portControllerSample(p,...completeNativeSample(sample));else module._portControllerDisconnect(p);}module._portStageMenuStep();stageFrames++;return read();},draw:()=>stagePreview.draw(),finish:()=>{stagePreview.dispose();return {stage:module._portStageMenuFinish(),objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
+  globalThis.nativeStageMenu=stage;stage.draw();if(!interactive)for(let i=0;i<120;i++)stage.step();stage.draw();return read();
  };
  globalThis.nativeCharacterMenu.matchSelection=()=>({players:Array.from({length:4},(_,p)=>({character:module._portMenuMatchRead(0,p),costume:module._portMenuMatchRead(1,p),kind:module._portMenuMatchRead(2,p),stocks:module._portMenuMatchRead(3,p)})),stage:module._portMenuMatchRead(4,0),seconds:module._portMenuMatchRead(5,0),items:module._portMenuMatchRead(6,0),teams:module._portMenuMatchRead(7,0),mode:module._portMenuMatchRead(8,0),timer:module._portMenuMatchRead(9,0)});
- globalThis.nativeCharacterMenu.startMatch=async(params={})=>{
+ globalThis.nativeCharacterMenu.startMatch=async(params={},options={})=>{
   const {runNativeConstructor}=await import('./constructor-runner.mjs');
-  const result=await runNativeConstructor({module,canvas:document.querySelector('#picture'),menuHandoff:true,params});
+  const result=await runNativeConstructor({module,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive});
   globalThis.nativeMenuMatchReport=result;return result;
  };
- report.initial=preview.draw();for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;
+ report.initial=preview.draw();if(!interactive)for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;
+ if(interactive){
+  const {createBrowserNativeInput}=await import('./browser-input.mjs'),{startNativeMenuLive}=await import('./native-menu-live.mjs');
+  const input=createBrowserNativeInput(),controls=document.createElement('div');controls.id='menu-controls';
+  const text=document.createElement('p');text.textContent='Native port preview — keyboard: arrows move, Z select, S cancel, X costume, Enter Start. Gamepads use their browser slots. Audio and results/rematch are unfinished.';controls.append(text);
+  for(let port=0;port<2;port++){const button=document.createElement('button');button.textContent='Keyboard: P'+(port+1);button.id='keyboard-p'+(port+1);button.addEventListener('click',()=>{input.setKeyboardPort(port);for(const b of controls.querySelectorAll('button[data-seat]'))b.setAttribute('aria-pressed',String(b===button));});button.dataset.seat=port;button.setAttribute('aria-pressed',String(port===0));controls.append(button);}
+  const restart=document.createElement('button');restart.textContent='Return to character select';restart.hidden=true;controls.append(restart);document.querySelector('#picture').after(controls);
+  globalThis.nativeMenuInput=input;
+  globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{matchParams:{gpuerrors:'deferred',...(new URLSearchParams(location.search).has('liveframes')?{liveframes:new URLSearchParams(location.search).get('liveframes')}:{})},onState:s=>{globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;}});
+  restart.addEventListener('click',()=>nativeMenuLive.restart());
+ }
 }catch(e){report.error=String(e.stack??e);}
 Object.assign(report,{diagnostics,music});globalThis.characterMenuReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
 </script>

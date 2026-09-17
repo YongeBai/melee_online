@@ -40,3 +40,22 @@ test('live input samples both ports immediately before simulation and releases o
     live.stop();assert(calls.slice(-2).every(c=>c.s.every(v=>v===0)));assert.equal(events.size,0);assert.equal(docEvents.size,0);
   }finally{live?.stop();for(const n of names){const d=saved.get(n);if(d)Object.defineProperty(globalThis,n,d);else delete globalThis[n];}}
 });
+
+test('shared browser input retains held controls across scene ownership and releases hidden or disconnected devices',async()=>{
+  const {createBrowserNativeInput}=await import('../../engines/browser-native/browser-input.mjs');
+  const target=new EventTarget(),document=new EventTarget();document.hidden=false;
+  let pads=[pad(),pad()];const input=createBrowserNativeInput({target,document,getGamepads:()=>pads});
+  const send=(type,code)=>{const e=new Event(type,{cancelable:true});e.code=code;target.dispatchEvent(e);return e;};
+  try{
+    assert(send('keydown','KeyZ').defaultPrevented);assert.equal(input.samples()[0][0],256);
+    // New scene takes the same owner, without clearing a held Zelda form toggle.
+    const nextScene=input;assert.equal(nextScene.samples()[0][0],256);
+    send('keyup','KeyZ');assert.deepEqual(nextScene.samples()[0],standardNativeSample(pads[0]));
+    input.setKeyboardPort(1);send('keydown','ArrowLeft');assert.equal(input.samples()[1][1],-1);assert.equal(input.samples()[0][1],.25);
+    target.dispatchEvent(new Event('blur'));assert(input.samples().flat().every(v=>v===0));
+    target.dispatchEvent(new Event('focus'));assert.deepEqual(input.samples()[1],standardNativeSample(pads[1]));
+    send('keydown','KeyZ');document.hidden=true;document.dispatchEvent(new Event('visibilitychange'));assert(input.samples().flat().every(v=>v===0));
+    document.hidden=false;pads=[null,null];assert(input.samples().flat().every(v=>v===0));
+    assert.throws(()=>input.setKeyboardPort(2));input.dispose();send('keydown','KeyZ');assert(input.samples().flat().every(v=>v===0));
+  }finally{input.dispose();}
+});

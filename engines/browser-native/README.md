@@ -33,6 +33,47 @@ node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-in
 node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-pause --frames=900 --hardware --defer-gpu-errors
 ```
 
+## Interactive native menu preview
+
+After building and preparing the hosted fixtures, run:
+
+```sh
+MELEE_NATIVE_PORT=3340 node scripts/native-port/serve.mjs
+```
+
+Open [the native menu preview](http://127.0.0.1:3340/character-menu.html?interactive=1).
+The original CSS and SSS now advance at 60 simulation steps per second with
+live keyboard/standard-gamepad samples. Use arrows to move, Z to select,
+S to cancel, X to change costume, and Enter for Start. Buttons below the canvas
+switch the development keyboard between the two human seats; gamepads retain
+their browser slot numbers. Select two fighters and one of the six tournament
+stages. The match then loads automatically in the same runtime and canvas.
+No player-supplied ISO is requested.
+
+The same input owner remains attached during asynchronous loading. The match
+samples it immediately before original player initialization, retaining both a
+held-A Zelda/Sheik entry and a release during loading. Match controls are arrows,
+X jump, Z attack, S special, C grab and Shift shield; I/J/K/L supply C-stick.
+The initial Ready/Go input gate remains under original game control.
+
+This is a muted development preview with two human players. Other menu modes,
+rules/name submenus, results/rematch and full lifecycle routing are unfinished.
+Holding B to leave CSS stops at the preview entry boundary; the host's return
+button reopens CSS. It does not impersonate the unported main menu. Refresh to
+start another match. The canvas remains 960×720 (native 4:3 framing).
+The no-query page retains the manual diagnostic API and vertex checks; interactive
+menus disable those per-frame readbacks and do not fast-forward menu animations.
+
+```sh
+node scripts/native-port/probe-interactive-menu.mjs
+node scripts/native-port/probe-interactive-menu.mjs --hold-a
+node scripts/native-port/probe-interactive-menu.mjs --release-a-during-load
+```
+
+These probes use actual browser key/mouse events and original hit tests; they
+never manually step simulation or assign gameplay state. Instrumented menu/match
+runs are correctness evidence, not FPS or input-to-photon measurements.
+
 ## Original costume selection
 
 The match fixture loads selected costume archives using the game's original

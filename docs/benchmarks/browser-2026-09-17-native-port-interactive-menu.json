@@ -1,0 +1,479 @@
+{
+  "date": "2026-09-17",
+  "scope": "Interactive browser input through original decompiled CSS/SSS and same-runtime live match; development preview",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "wasm": {
+    "sha256": "1e4bd1a918b63349b66c4cb853cf43046ba3f41b199ea4e3455caa192b373ed6",
+    "bytes": 3547106
+  },
+  "frontendSha256": {
+    "character-menu.html": "89d048621bf742e03143df417ae294193af87e25111af8bfc60a0c9ae16054d4",
+    "browser-input.mjs": "2aa9093cf316e76e6b7a3537d966c3bfd1896acb83f07436771945761c550717",
+    "native-menu-live.mjs": "c0467164aedc0c45d247065924fda89ad23f17768d20436c85c325ecf1de873a",
+    "native-live.mjs": "c3bef8000f20d4c31d3d9c07bdbdb7febd6d71310e2c5e37bb05906a45e180d9",
+    "constructor-runner.mjs": "fc2ca7c6e767a8f1d16a9cc7b3be9d7a544d1e5b5b139bdd05945b037fa45c02"
+  },
+  "browser": "Google Chrome 151.0.7922.137, headless, real CDP keyboard/mouse events",
+  "validation": {
+    "unitTests": 266,
+    "sharedBrowser": true,
+    "rosterVisits": 15,
+    "interactiveCases": 3,
+    "totalLiveMatchSteps": 2700,
+    "cases": [
+      {
+        "name": "Fox mirror",
+        "automaticHostedAssets": true,
+        "sameRuntime": true,
+        "menuFrames": 747,
+        "sceneTransitions": [
+          {
+            "scene": "characters",
+            "frames": 0
+          },
+          {
+            "scene": "exited",
+            "frames": 123
+          },
+          {
+            "scene": "characters",
+            "frames": 123
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 317
+          },
+          {
+            "scene": "stages",
+            "frames": 317
+          },
+          {
+            "scene": "characters",
+            "frames": 439
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 532
+          },
+          {
+            "scene": "stages",
+            "frames": 532
+          },
+          {
+            "scene": "loading-match",
+            "frames": 747
+          },
+          {
+            "scene": "match",
+            "frames": 747
+          },
+          {
+            "scene": "match-ended",
+            "frames": 747
+          }
+        ],
+        "selected": [
+          {
+            "character": 2,
+            "costume": 2
+          },
+          {
+            "character": 2,
+            "costume": 1
+          }
+        ],
+        "match": {
+          "sameRuntime": true,
+          "selectedStage": 31,
+          "characters": [
+            2,
+            2
+          ],
+          "costumes": [
+            2,
+            1
+          ],
+          "startupPassed": true
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "initialPlayers": [
+          {
+            "kind": 1,
+            "stocks": 4
+          },
+          {
+            "kind": 1,
+            "stocks": 4
+          }
+        ],
+        "rules": [
+          1,
+          0,
+          480,
+          1,
+          0,
+          -1,
+          0,
+          1,
+          1,
+          0,
+          4,
+          0
+        ],
+        "ready": {
+          "pause": [
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "clock": [
+            0,
+            480,
+            59
+          ],
+          "intro": {
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ]
+          }
+        },
+        "matchFrames": 900,
+        "resolution": [
+          960,
+          720
+        ],
+        "normalKeyboardWalkJumpAerialAttack": true,
+        "secondPlayerKeyboardMovement": true,
+        "stageCancelPreservesSelections": true,
+        "cssExitAndReenter": true,
+        "gpuReadbacks": false
+      },
+      {
+        "name": "Held-A Sheik versus Climbers",
+        "automaticHostedAssets": true,
+        "sameRuntime": true,
+        "menuFrames": 640,
+        "sceneTransitions": [
+          {
+            "scene": "characters",
+            "frames": 0
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 210
+          },
+          {
+            "scene": "stages",
+            "frames": 210
+          },
+          {
+            "scene": "characters",
+            "frames": 332
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 425
+          },
+          {
+            "scene": "stages",
+            "frames": 425
+          },
+          {
+            "scene": "loading-match",
+            "frames": 640
+          },
+          {
+            "scene": "match",
+            "frames": 640
+          },
+          {
+            "scene": "match-ended",
+            "frames": 640
+          }
+        ],
+        "selected": [
+          {
+            "character": 18,
+            "costume": 1
+          },
+          {
+            "character": 14,
+            "costume": 0
+          }
+        ],
+        "match": {
+          "sameRuntime": true,
+          "selectedStage": 31,
+          "characters": [
+            18,
+            14
+          ],
+          "costumes": [
+            1,
+            0
+          ],
+          "startupPassed": true
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Sk",
+            "costume": 1
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "code": "Zd",
+            "costume": 1
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Pp",
+            "costume": 0
+          },
+          {
+            "slot": 1,
+            "index": 1,
+            "code": "Nn",
+            "costume": 0
+          }
+        ],
+        "initialPlayers": [
+          {
+            "kind": 7,
+            "stocks": 4
+          },
+          {
+            "kind": 10,
+            "stocks": 4
+          }
+        ],
+        "rules": [
+          1,
+          0,
+          480,
+          1,
+          0,
+          -1,
+          0,
+          1,
+          1,
+          0,
+          4,
+          0
+        ],
+        "ready": {
+          "pause": [
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "clock": [
+            0,
+            480,
+            59
+          ],
+          "intro": {
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ]
+          }
+        },
+        "matchFrames": 900,
+        "resolution": [
+          960,
+          720
+        ],
+        "normalKeyboardWalkJumpAerialAttack": true,
+        "secondPlayerKeyboardMovement": true,
+        "stageCancelPreservesSelections": true,
+        "cssExitAndReenter": false,
+        "gpuReadbacks": false
+      },
+      {
+        "name": "Released-A Zelda versus Climbers",
+        "automaticHostedAssets": true,
+        "sameRuntime": true,
+        "menuFrames": 636,
+        "sceneTransitions": [
+          {
+            "scene": "characters",
+            "frames": 0
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 206
+          },
+          {
+            "scene": "stages",
+            "frames": 206
+          },
+          {
+            "scene": "characters",
+            "frames": 328
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 421
+          },
+          {
+            "scene": "stages",
+            "frames": 421
+          },
+          {
+            "scene": "loading-match",
+            "frames": 636
+          },
+          {
+            "scene": "match",
+            "frames": 636
+          },
+          {
+            "scene": "match-ended",
+            "frames": 636
+          }
+        ],
+        "selected": [
+          {
+            "character": 18,
+            "costume": 1
+          },
+          {
+            "character": 14,
+            "costume": 0
+          }
+        ],
+        "match": {
+          "sameRuntime": true,
+          "selectedStage": 31,
+          "characters": [
+            18,
+            14
+          ],
+          "costumes": [
+            1,
+            0
+          ],
+          "startupPassed": true
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Zd",
+            "costume": 1
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "code": "Sk",
+            "costume": 1
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Pp",
+            "costume": 0
+          },
+          {
+            "slot": 1,
+            "index": 1,
+            "code": "Nn",
+            "costume": 0
+          }
+        ],
+        "initialPlayers": [
+          {
+            "kind": 19,
+            "stocks": 4
+          },
+          {
+            "kind": 10,
+            "stocks": 4
+          }
+        ],
+        "rules": [
+          1,
+          0,
+          480,
+          1,
+          0,
+          -1,
+          0,
+          1,
+          1,
+          0,
+          4,
+          0
+        ],
+        "ready": {
+          "pause": [
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "clock": [
+            0,
+            480,
+            59
+          ],
+          "intro": {
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ]
+          }
+        },
+        "matchFrames": 900,
+        "resolution": [
+          960,
+          720
+        ],
+        "normalKeyboardWalkJumpAerialAttack": true,
+        "secondPlayerKeyboardMovement": true,
+        "stageCancelPreservesSelections": true,
+        "cssExitAndReenter": false,
+        "gpuReadbacks": false
+      }
+    ]
+  },
+  "limitations": [
+    "These instrumented runs test interaction correctness, not displayed FPS or input-to-photon latency.",
+    "Physical gamepad calibration and end-to-end controller latency remain unverified; normalized mapping and focus/disconnect handling have unit coverage.",
+    "Audio, rules/name submenus, main-menu routing, results/rematch and public static release integration are unfinished.",
+    "The interactive preview has two human seats and supports the six tournament stages; it is not a complete competitive release.",
+    "No controlled native-port versus Dolphin performance comparison is claimed."
+  ]
+}

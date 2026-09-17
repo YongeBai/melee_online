@@ -5,6 +5,31 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The native menu-to-match path now accepts live browser input at
+`character-menu.html?interactive=1`. A fixed 60 Hz scheduler calls the original
+menu callbacks; it does not fast-forward entry animations. Standard gamepad slots
+and a switchable P1/P2 keyboard feed the existing normalized controller boundary.
+One input owner survives asset loading and match construction, so held-A
+Zelda/Sheik selection uses the current input, including releases during loading.
+Live menus omit the diagnostic per-frame vertex readbacks.
+
+Real browser keyboard/mouse tests reach matches through original character and
+stage selection, preserve choices across stage cancellation, and exercise movement,
+jumping and aerial attacks after Ready/Go. The Fox mirror also tests held-B exit
+and returning to the character-select entry. The shared input tests cover analog
+pads, focus/visibility loss, keyboard seat changes and releases. These tests use
+no manual simulation stepping or writes to game state. They establish interactive
+routing, not physical gamepad calibration or displayed-FPS/latency certification.
+The current source passes 266 unit tests, shared browser verification and the
+15-visit original roster/menu regression.
+
+Audio, results/rematch cleanup and routing, rules/name submenus, public static
+release integration, and displayed-FPS/latency validation remain unfinished.
+The interactive entry is a development preview; the public play route is unchanged.
+[Interactive input evidence](benchmarks/browser-2026-09-17-native-port-interactive-menu.json).
+
+Previous menu-to-match milestone:
+
 The native menu now starts a match in the same WASM runtime and on the same
 canvas. Original CSS/SSS data goes directly into `fn_8016DCC0`; original player
 construction preserves the selected costumes, subcolors, controllers and rules.
@@ -29,9 +54,8 @@ draw interval is 33.4 ms. Initial/final state, transitions and workload match th
 costume core after excluding relocated pointers. This is a single-workload
 regression, not an all-stage frame-rate or input-to-photon certification.
 
-This remains a diagnostic API. Interactive menu scheduling, results/rematch
-cleanup and routing, audio, public static deployment and displayed-FPS/latency
-validation remain unfinished. The public play route is unchanged.
+This milestone initially exposed a diagnostic API; the interactive scheduling
+above extends that path. Results/rematch, audio and release validation remain open.
 [Menu-to-match evidence](benchmarks/browser-2026-09-17-native-port-menu-match.json).
 
 Earlier milestones below retain their historical scope and pending-work notes.
