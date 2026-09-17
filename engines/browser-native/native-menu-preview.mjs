@@ -3,7 +3,7 @@ import {readModelMeshes} from './mesh-assets.mjs';
 import {createMaterialRenderer} from './material-gpu.mjs';
 import {createNativeCamera} from './native-camera.mjs';
 import {verifyGpuMaterialShader} from './verify-material-shader.mjs';
-export function createNativeMenuPreview(module,canvas,bytes,converted,{verifyVertices=false}={}){
+export function createNativeMenuPreview(module,canvas,bytes,converted,{verifyVertices=false,textOwners=()=>[]}={}){
  const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});if(!gl)throw Error('Native menu requires WebGL2');
  const renderer=createMaterialRenderer(gl,module,{verifyVertices}),camera=createNativeCamera(module,{read:p=>module._portStageMenuCameraSnapshot(p)}),list=module._malloc(128*12),resources=[];
  const archive=inspectArchive(bytes),base=module._portStageMenuRead(4)-converted.rows[8].joint,cache=new Map();
@@ -38,6 +38,7 @@ export function createNativeMenuPreview(module,canvas,bytes,converted,{verifyVer
    if(c.fov!==d.getFloat32(p+48)||c.aspect!==d.getFloat32(p+52)||c.near!==d.getFloat32(p+40)||c.far!==d.getFloat32(p+44))throw Error('Menu camera differs from original descriptor');
    renderer.begin(c);
    for(let pass=0;pass<3;pass++){module._portStageMenuRenderBegin();for(const r of ordered)module._portNativeDrawObject(r.owner,pass,1);}
+   for(const owner of textOwners())module._portNativeDrawText(owner,2);
    const result=renderer.flush({ordered:true});
    return {...result,objects:ordered.length,gpu,shaderChecks,camera:{eye:[...c.eye],interest:[...c.interest],fov:c.fov,aspect:c.aspect,near:c.near,far:c.far}};
   }

@@ -1,0 +1,250 @@
+{
+  "date": "2026-09-16",
+  "scope": "Native SIS prerequisite for character select; diagnostic, not a complete playable CSS flow.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "wasm": {
+    "sha256": "7f849afb43f8a1e6d33156ca83844252dbaa7f6dc1d1f13e2ca1583dbbc50af6",
+    "bytes": 2981178
+  },
+  "gpu": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+  "implemented": [
+    "Original SIS interpreter, dynamic string writer, glyph layout/kerning and GX drawing via immediate WebGL backend",
+    "Typed automatic hosted USA SIS import; only pointer table changes endian",
+    "21 unaligned packed operand reads use console byte order, four fractional style stores preserve retail signed-word to low-byte conversion",
+    "Original SDK GXInitTexObj filtering/LOD defaults for callers without explicit LOD initialization"
+  ],
+  "text": {
+    "archiveEntries": 85,
+    "customGlyphs": 7,
+    "commandCount": 3355,
+    "archiveGlyphVertices": 9136,
+    "dynamicGlyphVertices": 92,
+    "totalGpuVertices": 152590,
+    "packedOperandChecks": [
+      {
+        "name": "two glyphs",
+        "width": 64,
+        "height": 32,
+        "actual": [
+          64,
+          32
+        ]
+      },
+      {
+        "name": "unsigned scale",
+        "width": 24,
+        "height": 48,
+        "actual": [
+          24,
+          48
+        ]
+      },
+      {
+        "name": "signed spacing",
+        "width": 61.5,
+        "height": 32,
+        "actual": [
+          61.5,
+          32
+        ]
+      },
+      {
+        "name": "nested scale restoration",
+        "width": 128,
+        "height": 48,
+        "actual": [
+          128,
+          48
+        ]
+      }
+    ],
+    "styleStack": {
+      "values": [
+        -2.5,
+        1.25,
+        0.5,
+        1.5
+      ],
+      "returnAddress": 305441741
+    },
+    "textureDefaults": [
+      {
+        "width": 32,
+        "height": 32,
+        "format": 0,
+        "mip": 0,
+        "minFilter": 1,
+        "magFilter": 1,
+        "biasClamp": 0,
+        "edgeLod": 1,
+        "anisotropy": 0,
+        "minLod": 0,
+        "maxLod": 0,
+        "lodBias": 0
+      },
+      {
+        "width": 256,
+        "height": 129,
+        "format": 0,
+        "mip": 1,
+        "minFilter": 5,
+        "magFilter": 1,
+        "biasClamp": 0,
+        "edgeLod": 1,
+        "anisotropy": 0,
+        "minLod": 0,
+        "maxLod": 8,
+        "lodBias": 0
+      },
+      {
+        "width": 65,
+        "height": 128,
+        "format": 8,
+        "mip": 1,
+        "minFilter": 3,
+        "magFilter": 1,
+        "biasClamp": 0,
+        "edgeLod": 1,
+        "anisotropy": 0,
+        "minLod": 0,
+        "maxLod": 7,
+        "lodBias": 0
+      },
+      {
+        "width": 1,
+        "height": 1,
+        "format": 6,
+        "mip": 1,
+        "minFilter": 5,
+        "magFilter": 1,
+        "biasClamp": 0,
+        "edgeLod": 1,
+        "anisotropy": 0,
+        "minLod": 0,
+        "maxLod": 0,
+        "lodBias": 0
+      }
+    ],
+    "cleanup": {
+      "objects": 0,
+      "procs": 0,
+      "allocations": 0
+    },
+    "visualChecks": [
+      "Original multiline archive text and original glyphs visually inspected at 960x720",
+      "Dynamic ASCII-to-SIS text visually inspected over unchanged original stage-select camera"
+    ]
+  },
+  "regression": {
+    "unitTests": 258,
+    "compileAudit": {
+      "units": 1130,
+      "failed": 79
+    },
+    "linkAuditMissing": 147,
+    "sharedBrowserPassed": true,
+    "menu": {
+      "cases": 7,
+      "frames": 1563,
+      "cleanupAllZero": true
+    },
+    "combat": {
+      "characters": [
+        {
+          "code": "Kb",
+          "name": "Kirby",
+          "kind": 4
+        },
+        {
+          "code": "Ys",
+          "name": "Yoshi",
+          "kind": 14
+        }
+      ],
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60031.5,
+      "resolution": [
+        960,
+        720
+      ],
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.49680555584530034,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2.0999999940395355
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 3.9012777777181733,
+        "p50Ms": 3.5999999940395355,
+        "p95Ms": 5.9000000059604645,
+        "maxMs": 16.5
+      },
+      "multiStepCallbacks": 0,
+      "rafDrawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670630730757757,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.30000000000018
+      },
+      "submissionsOverFrameBudget": 0,
+      "gameplayParityWithPriorCore": {
+        "matched": true,
+        "fields": [
+          "initial",
+          "final",
+          "stateChanges",
+          "workload",
+          "match",
+          "immediateStats",
+          "particleStats",
+          "afterimageStats"
+        ],
+        "excludedFighterFields": [
+          7,
+          8
+        ],
+        "reason": "relocated camera-box and fighter-data addresses"
+      },
+      "gpuReadbacks": false,
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      }
+    }
+  },
+  "limits": {
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "retailVisualParityProven": false,
+    "performanceImprovementProven": false,
+    "competitiveReleaseComplete": false,
+    "publicPlayStillEmulator": true,
+    "pending": [
+      "CSS lifecycle, hands, roster selection and rules/player setup",
+      "Memory-card artwork and sound-bank device loading",
+      "Audio, complete menu/match/results routing and costumes",
+      "Static release integration and broad presented-frame/input-latency validation"
+    ],
+    "notes": [
+      "GPU transform feedback validates transforms of original generated geometry; it is not an independent retail screenshot comparison.",
+      "Combat draw intervals include a 33.3 ms maximum; no claim of perfectly uniform displayed cadence.",
+      "Performance run used fresh isolated headless hardware Chrome, no shader prewarming; this is a regression sample rather than an A/B speedup experiment."
+    ]
+  },
+  "commands": [
+    "node scripts/native-port/probe-sis.mjs",
+    "node scripts/native-port/probe-menu.mjs",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node --test scripts/native-port/*.test.mjs",
+    "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --record-shaders"
+  ]
+}

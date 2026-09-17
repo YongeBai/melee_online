@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8"><title>Native SIS glyph diagnostic</title>
+<style>body{margin:0;background:#111;color:white;font:14px monospace}canvas{display:block;width:960px;height:720px;margin:auto}pre{white-space:pre-wrap}</style>
+<canvas id="game" width="960" height="720"></canvas><pre id="result">Loading original menu text…</pre>
+<script type="module">
+import create from './melee-fighter-init.mjs';
+import {convertMenuAsset} from './menu-assets.mjs';
+import {convertSisAsset} from './sis-assets.mjs';
+import {installResidentFile} from './resident-files.mjs';
+import {createNativeMenuPreview} from './native-menu-preview.mjs';
+const report={passed:false,playableMatch:false,performanceMeasured:false},diagnostics=[];
+try{
+ const load=async name=>{const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset missing '+name);return new Uint8Array(await r.arrayBuffer());};
+ const menuBytes=await load('MnSlMap.usd'),menu=convertMenuAsset(menuBytes),sis=convertSisAsset(await load('SdSlChr.usd'));
+ const module=await create({printErr:s=>diagnostics.push(s),onNativeMusic:()=>false});
+ installResidentFile(module,'MnSlMap.usd',menu.image);installResidentFile(module,'SdSlChr.usd',sis.image);
+ module._portStageMenuInitialize(0);
+ for(let i=0;i<120;i++){module._portControllerSample(0,0,0,0,0,0,0,0);module._portStageMenuStep();}
+ module._portTextInitialize();
+ const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});if(!gl)throw Error('WebGL2 unavailable');
+ const texts=[],renderer=createNativeMenuPreview(module,canvas,menuBytes,menu,{verifyVertices:true,textOwners:()=>texts.map(p=>module._portTextOwner(p))});
+ const info=gl.getExtension('WEBGL_debug_renderer_info');report.gpu=gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER);
+ const make=index=>{const p=module._portTextCreate(index,-23,-13,0,.1,450);if(!p)throw Error('Original text allocation');texts.push(p);return p;};
+ function clear(){while(texts.length)module._portTextDestroy(texts.pop());}
+ function draw(){return renderer.draw();}
+ const textureDefaults=[];
+ for(const [width,height,format,mip,minFilter,maxLod] of [[32,32,0,0,1,0],[256,129,0,1,5,8],[65,128,8,1,3,7],[1,1,6,1,5,0]]){
+  const ptr=module._portTextureDefaultState(width,height,format,mip),v=new DataView(module.HEAPU8.buffer,ptr+16,96);
+  const t={width,height,format,mip,minFilter:v.getUint32(32,true),magFilter:v.getUint32(36,true),biasClamp:v.getUint32(40,true),edgeLod:v.getUint32(44,true),anisotropy:v.getUint32(48,true),minLod:v.getFloat32(64,true),maxLod:v.getFloat32(68,true),lodBias:v.getFloat32(72,true)};
+  if(t.minFilter!==minFilter||t.magFilter!==1||t.minLod!==0||t.maxLod!==maxLod||t.lodBias!==0||t.edgeLod!==1||t.biasClamp!==0||t.anisotropy!==0)throw Error('SDK texture defaults');textureDefaults.push(t);
+ }
+ const t=make(2),out=module._malloc(16),bytes=module._malloc(128),checks=[];
+ // These unaligned streams exercise original measurement's signed spacing,
+ // unsigned scaling, glyph byte order, half-space and nested style pops.
+ const cases=[
+  {name:'two glyphs',stream:[0x20,0,0x20,1,0],width:64,height:32},
+  {name:'unsigned scale',stream:[14,0,128,1,128,0x20,0,26,0],width:24,height:48},
+  {name:'signed spacing',stream:[10,0xfd,128,0,0,0x20,0,0x20,1,0],width:61.5,height:32},
+  {name:'nested scale restoration',stream:[14,0,128,1,128,0x20,0,14,2,0,0,128,0x20,1,15,0x20,2,15,0x20,3,0],width:128,height:48},
+ ];
+ for(const c of cases){module.HEAPU8.set(c.stream,bytes+1);module._portTextMeasure(t,bytes+1,out);const actual=[...new Float32Array(module.HEAPU8.buffer,out,2)];if(actual[0]!==c.width||actual[1]!==c.height)throw Error(c.name+' '+actual);checks.push({...c,actual});}
+ const pc=0x1234abcd,returned=module._portTextStyleStackProbe(t,pc,out),style=[...new Float32Array(module.HEAPU8.buffer,out,4)];
+ if(returned!==pc||JSON.stringify(style)!=='[-2.5,1.25,0.5,1.5]')throw Error('Original packed style stack '+returned+' '+style);
+ clear();module._free(out);module._free(bytes);
+ const entries=[];
+ for(const entry of sis.entries){make(entry.index);entries.push({index:entry.index,...draw()});clear();}
+ // Original dynamic writer, including ASCII-to-SIS conversion and line origin.
+ const p=module._malloc(64);module.HEAPU8.set(new TextEncoder().encode('Melee 720p60 - Player 1\0'),p);
+ const dynamic=module._portTextCreateString(p,-22,-10,0,.055);module._free(p);texts.push(dynamic);const dynamicRender=draw();
+ globalThis.nativeSis={draw,show(indices){clear();for(const i of indices)make(i);return draw();},finish(){clear();renderer.dispose();module._portTextFinish();module._portControllerSample(0,0x200,0,0,0,0,0,0);module._portStageMenuStep();module._portStageMenuFinish();return {objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
+ Object.assign(report,{passed:true,checks,textureDefaults,style,returnAddress:returned,entries,dynamicRender,customGlyphs:sis.customGlyphs,entryCount:sis.entries.length});
+}catch(e){report.error=String(e.stack??e);}
+report.diagnostics=diagnostics;globalThis.sisReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
+</script>

@@ -54,6 +54,29 @@ records and declines music requests, so it does not claim audible playback.
 Console DVD/ARAM calls remain guarded. The test does not cover streaming audio,
 results routing or restoring saved preferences.
 
+## Native SIS text prerequisite
+
+`sis.html` loads the original USA character-select SIS archive automatically and
+runs its original interpreter, layout, kerning, custom glyphs and GX drawing.
+Run `node scripts/native-port/probe-sis.mjs` after building. The diagnostic draws
+all 85 archive entries over the original stage-select camera and checks GPU
+vertex transforms, packed operands, nested style restoration, return addresses,
+SDK texture defaults and cleanup. It also exercises the original dynamic string
+writer. It is not a working character-select flow or a performance benchmark.
+
+SIS command and style-stack operands remain big-endian byte streams, including
+strings created at runtime. Only archive pointers are relocated to native order.
+The reproducible C adapter uses byte reads for all 21 packed operand loads and
+signed-word conversion before four low-byte stores. Direct float-to-byte casts
+changed negative fractional spacing on WASM. GXInitTexObj now provides the SDK's
+filter/LOD defaults, which SIS uses without a separate GXInitTexObjLOD call.
+
+The renderer retains the existing pixel state for SIS, matching its original
+partial state changes; the diagnostic draws native menu models before the text.
+The overlay hook is diagnostic only. Character select must traverse text, hands
+and models in original GX link order when its lifecycle is connected. Memory-card
+artwork, sound-bank loading and complete CSS scene routing remain pending.
+
 ## Reproduce
 
 The live fixture now samples buttons, main stick, C-stick and analog shoulders

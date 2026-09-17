@@ -32,7 +32,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   function packRows(target,rows,stride){target.fill(0);for(let i=0;i<rows.length;i++)if(rows[i])target.set(rows[i],i*stride);return target;}
   const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
-  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0;const immediatePlans=[];let shaderCompilations=[];
+  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes,origin,immediateRegisters=false){
     const variant=materialShaderKey(state,attributes,{immediateRegisters});if(variants.has(variant))return variants.get(variant);
@@ -142,7 +142,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   if(module.onNativeImmediate)throw Error('Immediate draw receiver already owned');
   module.onNativeImmediate=(primitive,count,ptr,cull,textured,tev,kind)=>{
     const data=new Float32Array(module.HEAPU8.buffer,ptr,count*9),triangles=immediateTriangles(primitive,count);
-    if(!data.every(Number.isFinite)||cull>3||![0,1].includes(kind))throw Error('Invalid immediate geometry');
+    if(!data.every(Number.isFinite)||cull>3||![0,1,2].includes(kind))throw Error('Invalid immediate geometry');
     const previous=queue.at(-1),eligible=previous?.immediate&&previous.kind===kind&&previous.textured===textured&&previous.camera===snapshot&&previous.plan.mesh.flags===(cull<<14)&&previous.plan.stream.vertexCount+count<=4096;
     const merge=matchImmediateState(tev,eligible,previous?.flatRegisters===true);
     let plan=merge?previous.plan:immediatePlans[immediateUsed];
@@ -161,13 +161,13 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
       checkNativeRenderContext(state.context,snapshot,state.pixel);
       const flatRegisters=!state.textures.generators.some(g=>g.source>=5&&g.source<=11);
-      queue.push({owner:kind===0?'particles':'afterimage',plan,state,camera:snapshot,program:program(state,attrs,kind===0?'particles':'afterimage',flatRegisters),immediate:true,flatRegisters,kind,textured});
+      queue.push({owner:kind===0?'particles':kind===1?'afterimage':'text',plan,state,camera:snapshot,program:program(state,attrs,kind===0?'particles':kind===1?'afterimage':'text',flatRegisters),immediate:true,flatRegisters,kind,textured});
     }
     appendImmediateGeometry(plan.stream,data,triangles,queue.at(-1).flatRegisters?new Int32Array(module.HEAPU8.buffer,tev+16,16):null);
     plan.mesh.triangles=plan.stream.indices.subarray(0,plan.stream.indexCount);
     if(verifyVertices)for(let i=0;i<count;i++)plan.mesh.vertices.push({9:[...data.slice(i*9,i*9+3)],11:[...data.slice(i*9+3,i*9+7)],13:[...data.slice(i*9+7,i*9+9)]});
     immediateVertices+=count;
-    if(kind===0){particleDraws++;particleVertices+=count;}else{afterimageDraws++;afterimageVertices+=count;}
+    if(kind===0){particleDraws++;particleVertices+=count;}else if(kind===1){afterimageDraws++;afterimageVertices+=count;}else{textDraws++;textVertices+=count;}
   };
   function upload(model,bytes,nodes,owner,{descriptorBase=null}={}){
     const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
@@ -224,7 +224,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     },
     shaderSources(){return [...programs.values()].map(p=>p.sources);},
     shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
-    begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
+    begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
     flush({ordered=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
@@ -250,7 +250,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
         gl.drawElements(gl.TRIANGLES,draw.plan.mesh.triangles.length,gl.UNSIGNED_INT,0);draws++;
       }
       if(checkErrors&&gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
-      return {shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
+      return {shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws+textDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,textDraws,textVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}

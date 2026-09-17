@@ -40,8 +40,13 @@ void GXInitTexObj(GXTexObj* obj,void* data,u16 width,u16 height,GXTexFmt format,
     require(data&&width&&height&&width<=1024&&height<=1024&&s<=GX_MIRROR&&t<=GX_MIRROR&&mip<=1);
     Texture* v=object(obj,1);memset(v,0,sizeof(*v));
     v->u[0]=(u32)(uintptr_t)data;v->u[1]=width;v->u[2]=height;v->u[3]=format;v->u[4]=s;v->u[5]=t;v->u[6]=mip;v->u[7]=UINT32_MAX;
-    /* HSD always follows initialization with explicit GXInitTexObjLOD. */
-    v->u[23]=0;
+    /* SDK GXInitTexObj establishes usable defaults. SIS deliberately does not
+     * call GXInitTexObjLOD: linear filtering, edge LOD enabled, zero bias/min
+     * LOD, and floor(log2(max dimension)) for a mipmapped texture. */
+    v->u[8]=mip?((format>=GX_TF_C4&&format<=GX_TF_C14X2)?GX_LIN_MIP_NEAR:GX_LIN_MIP_LIN):GX_LINEAR;
+    v->u[9]=GX_LINEAR;v->u[11]=1;
+    if(mip){unsigned size=width>height?width:height,lod=0;while(size>1){size>>=1;lod++;}v->f[17]=(f32)lod;}
+    v->u[23]=1;
 }
 void GXInitTexObjCI(GXTexObj* obj,void* data,u16 width,u16 height,GXTexFmt format,GXTexWrapMode s,GXTexWrapMode t,u8 mip,u32 tlut)
 {

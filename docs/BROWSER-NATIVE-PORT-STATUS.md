@@ -5,6 +5,27 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The original SIS text engine now runs as the next prerequisite for character
+select. All 85 USA archive entries and a dynamic label render through native
+C/GX-to-WebGL, including custom glyphs. Four packed-operand cases, nested style
+restoration and return addresses pass. Two WASM portability faults were fixed:
+big-endian byte streams read through native casts, and direct float-to-byte
+conversion losing negative fractional spacing. The texture bridge now retains
+SDK defaults used by text without explicit LOD initialization. Text and archive
+cleanup leaves zero live objects, processes or tracked file allocations.
+
+This core passes 258 unit tests, shared browser checks and all seven stage-menu
+regressions. Its isolated Kirby/Yoshi workload completes 3,600 simulation steps
+and 3,600 draw submissions in 60.032 s. Mean simulation is 0.497 ms; mean draw
+submission 3.901 ms, p95 5.9 ms, maximum 16.5 ms. No catch-up callback occurs;
+the maximum draw interval is still 33.3 ms. Final gameplay fields, transitions
+and workload match the previous stage-menu core after excluding relocated
+pointers. This is a correctness milestone and regression sample, not a measured
+speedup or displayed-FPS/latency certification. CSS hands/roster/player setup,
+card-artwork and audio loading, complete scene routing and release integration
+remain pending. The public play route is unchanged.
+[SIS implementation and regression evidence](benchmarks/browser-2026-09-16-native-port-sis.json).
+
 Original stage select now constructs, animates, renders and exits in the native
 port. The six tournament choices and B cancellation pass original controller
 hit tests, confirmation animation, scene-exit results and cleanup. The test uses
@@ -16,7 +37,7 @@ hover labels required refreshing native polygon bindings after address reuse.
 All assets load automatically. Music requests are explicitly declined by the
 diagnostic, and subsequent match loading is not connected yet.
 
-The new core passes 254 unit tests, shared browser checks and the 280-tick native
+The earlier stage-select core passes 254 unit tests, shared browser checks and the 280-tick native
 pause regression. An isolated Kirby/Yoshi combat run completes 3,600 simulation
 steps and 3,600 draw submissions in 60.026 s: mean simulation 0.474 ms, mean
 submission 4.219 ms, p95 7.1 ms and maximum 16.1 ms, with no catch-up callbacks.

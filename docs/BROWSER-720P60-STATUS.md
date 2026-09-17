@@ -9,6 +9,15 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 16, latest: the native port's original SIS text engine now renders all
+85 character-select text entries and dynamic labels. Packed-byte portability
+fixes and SDK texture defaults pass browser checks; 258 unit tests pass. An
+isolated Kirby/Yoshi regression submits 3,600 frames in 60.032 s, with 0.497 ms
+mean simulation and 3.901 ms mean draw submission. A 33.3 ms maximum draw interval
+remains; displayed FPS and input-to-photon are not measured. This unblocks a CSS
+prerequisite, but the complete CSS/menu/match flow, audio and release integration
+are still unfinished. [Evidence](benchmarks/browser-2026-09-16-native-port-sis.json).
+
 September 16: the direct port now also runs original stage select, including
 six tournament selections, morph animation, native camera/fog and cleanup.
 A fresh isolated Kirby/Yoshi workload submits all 3,600 frames in 60.026 s;

@@ -63,6 +63,31 @@ export function adaptStageCallbacks(text,externalBooleanCallbacks=new Set()) {
   });
   return {text,adapters};
 }
+export function adaptSisBytecode(text) {
+  // Both archive commands and dynamically created SIS strings are byte streams.
+  // The original writers deliberately emit big-endian operands, including the
+  // style stack's return addresses. Fix readers rather than swapping assets.
+  let reads=0;
+  text=text.replace(/\*\s*\((u16|s16|s32)\s*\*\)\s*(\((?:\(u8\*\)\s*)?(?:text->string_buffer|cursor|sis_cursor)\s*\+[^)]*\)|(?:sis_cursor|cursor)\b)/g,(_,type,expression)=>{
+    reads++;return '('+type+') portSisRead'+(type==='s32'?32:16)+'('+expression+')';
+  });
+  if(reads!==21)throw Error('SIS packed operand readers changed: '+reads);
+  // Retail truncates to a signed word and then stores its low byte. Direct
+  // float-to-u8 conversion is undefined for negative spacing and >255 scales;
+  // WASM saturated -2.5's low byte to zero in the conformance probe.
+  let writes=0;
+  text=text.replace(/\(u8\) \(256\.0F \* text->x(78|80)\.(x|y)\)/g,(_,field,axis)=>{
+    writes++;return '(u8) (s32) (256.0F * text->x'+field+'.'+axis+')';
+  });
+  if(writes!==4)throw Error('SIS packed byte writers changed');
+  const marker='static inline f32 HSD_SisLib_GlyphWidth';
+  if(text.split(marker).length!==2)throw Error('SIS reader insertion changed');
+  text=text.replace(marker,'static u16 portSisRead16(const void* p) { const u8* b=p; return (u16)((u16)b[0]<<8|b[1]); }\nstatic u32 portSisRead32(const void* p) { const u8* b=p; return (u32)b[0]<<24|(u32)b[1]<<16|(u32)b[2]<<8|b[3]; }\n\n'+marker);
+  // The unused standalone orthographic branch still needs a real 16-float
+  // destination; a retail stack-padding workaround is not safe C on WASM.
+  if(text.split('Mtx projection_m;').length!==2)throw Error('SIS projection scratch changed');
+  return text.replace('Mtx projection_m;','Mtx44 projection_m;');
+}
 export function preparePortableSource(source,output) {
   const destination=path.join(output,'portable');
   const files=execFileSync('rg',['--files','src','libs/dolphin/include','libs/dolphin/src','-g','*.c','-g','*.h'],
@@ -78,6 +103,7 @@ export function preparePortableSource(source,output) {
   for(const file of files) {
     const original=fs.readFileSync(path.join(source,file),'utf8');let text=original,adapters=[];
     const replace=(from,to)=>{text=exact(text,from,to,file);};
+    if(file==='src/sysdolphin/baselib/hsd_3A76.c')text=adaptSisBytecode(text);
     if(file==='src/melee/ft/kinds/ftCommon/ftCo_0A01.c')text=adaptPartnerStickConversion(text);
     if(file==='src/melee/it/kinds/itlinkarrow.c')text=adaptLinkArrowTable(text);
     if(file==='src/melee/ft/kinds/ftYoshi/types.h')text=adaptYoshiAttributes(text);

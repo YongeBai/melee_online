@@ -187,6 +187,31 @@ unsigned portNativeDrawObject(HSD_GObj* owner,unsigned pass,unsigned callback)
 {
     return portNativeDrawObjectExtra(owner,pass,callback,NULL);
 }
+
+/* SIS retains original command interpretation, line layout, kerning and glyph
+ * drawing. Only its GX device submission uses the existing immediate backend. */
+void portNativeDrawText(HSD_GObj* owner,unsigned pass)
+{
+    extern void HSD_SisLib_803A84BC(HSD_GObj*,int);
+    extern void portRenderContextEnter(void),portRenderContextLeave(void);
+    if(drawing||capturing||!owner||owner->render_cb!=HSD_SisLib_803A84BC||pass>2)abort();
+    if(pass!=2)return;
+    portRenderContextEnter();drawing=capturing=1;memset(&state,0,sizeof(state));
+    portTextureCaptureReset();portModelCaptureReset();
+    immediate_kind=2;portImmediateBegin();HSD_StateInvalidate(-1);
+    HSD_GObj* previous=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
+    owner->render_cb(owner,pass);
+    HSD_GObj_804D7814=previous;portImmediateEnd();drawing=capturing=0;portRenderContextLeave();
+}
+const void* portTextureDefaultState(unsigned width,unsigned height,unsigned format,unsigned mip)
+{
+    extern const void* portMaterialTextureState(void);
+    static unsigned char dummy[32] __attribute__((aligned(32)));
+    if(drawing||capturing||width>1024||height>1024||mip>1)abort();
+    GXTexObj object;capturing=1;portTextureCaptureReset();
+    GXInitTexObj(&object,dummy,width,height,format,GX_CLAMP,GX_CLAMP,mip);
+    GXLoadTexObj(&object,GX_TEXMAP0);capturing=0;return portMaterialTextureState();
+}
 unsigned portMaterialPolygon(HSD_JObj* joint,unsigned display,unsigned polygon)
 {
     if(!joint||!union_type_dobj(joint))abort();HSD_DObj* d=joint->u.dobj;

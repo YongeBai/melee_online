@@ -88,3 +88,13 @@ test('pause bounds adapter preserves the original function and removes its misma
  for(const [field,value]of [['y_max','x'],['y_min','y'],['x_min','z'],['x_max','w']])assert(converted.includes('bounds->'+field+'=values.'+value));
  assert(!converted.includes('(void (*)(Camera_x2D0*))(Event) Camera_SetBounds'));assert.throws(()=>adaptPauseBounds(converted),/changed/);
 });
+
+test('SIS reader adapter changes every packed operand load, preserving byte writers',async()=>{
+ const {adaptSisBytecode}=await import('./portable-source.mjs');
+ const source=fs.readFileSync(new URL('../../engines/melee-decomp/src/sysdolphin/baselib/hsd_3A76.c',import.meta.url),'utf8'),converted=adaptSisBytecode(source);
+ assert.equal((converted.match(/portSisRead16\(/g)??[]).length,19);
+ assert.equal((converted.match(/portSisRead32\(/g)??[]).length,4);
+ assert.ok(converted.includes('Mtx44 projection_m;'));
+ assert.ok(converted.includes('text->string_buffer[text->x6C++] = (u8) (u32) cursor;'));
+ assert.throws(()=>adaptSisBytecode(converted),/readers changed/);
+});
