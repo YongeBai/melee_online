@@ -5,6 +5,27 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Donkey Kong copy now imports the original body costume, extra model and
+both Giant Punch effects from bank 39. Its rendered lifecycle passes 3,117 input
+frames plus 124 intro frames: partial/full ground and air punches, charge
+cancellation/storage, resuming charge, copy loss and reacquisition. A cancel
+request at charge 3 stores 4 of 10 because the original callback finishes the
+current swing. Full punches consume the charge; reacquisition starts at zero.
+The 723-frame rendered contact probe passes GPU validation, raising target
+damage from 8 to 22 with seven hitlag frames. The saved attack frame checks
+20,007 vertices. All 224 unit tests and shared browser checks pass. The
+Falco-copy lifecycle regression passes 2,382 rendered input frames; all four
+saved images are pixel-identical to the preceding Falco checkpoint.
+
+This reuses the Falco body renderer with the original zero insertion mask and
+46 active bones. The native loader creates 17 costume display objects and five
+extra display objects; per-model telemetry observes copied-body drawing in
+2,223 frames. The importer handles the original 24-byte root without interpreting
+following packed model data as nonexistent Articles. The default costume is
+integrated; other colors and the broader game/deployment/parity work remain
+unfinished. These are compatibility checks, not a new performance measurement.
+[Giant Punch copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-donkey.json).
+
 Kirby's Falco copy now runs the original body-costume loader, including its two
 inserted active bones, 22 costume display objects, five extra display objects,
 material animation and separate laser/Blaster Articles. Its rendered lifecycle

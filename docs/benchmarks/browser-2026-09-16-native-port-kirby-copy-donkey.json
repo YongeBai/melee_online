@@ -1,0 +1,364 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "5be41b5",
+  "scope": "Kirby Donkey Kong body-copy integration and original Giant Punch charge, cancellation, ground/air firing, copy loss/reacquisition and contact checks.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "feec1868d0e4b6689eb4aca0cb0e0ba48dd10f18aca986a94ada690c6ee8316f",
+    "wasmBytes": 2958724
+  },
+  "sourceHashes": {
+    "character-collision.c": "4b9a20c75b713385c22819ceda009e350596a83bc48f9027e5accd7e33f08522",
+    "constructor.html": "3eb6bcd147dabdcd99d95d3582db4aeb1c337122d36248023b2e4ccbf54990cf",
+    "effect-assets.mjs": "a8d491b34d4b9c51febeea7c5d41f1c99d20d1a23e40f0fcb0668562bf0913da",
+    "kirby-copy-assets.mjs": "abda7a0db9dd91cb0763549d49291e3211cd964e5389eba4a54c904e3614bda8",
+    "verify-kirby.mjs": "24ac740595a3ab65412a15f2f970b1dc040bd253a42353d1f625f4841f9aef9e"
+  },
+  "assets": {
+    "copy": {
+      "root": 200,
+      "bodyCopy": true,
+      "insertionMask": 0,
+      "extraJoint": 42868,
+      "extraNodes": 46,
+      "extraMeshes": 24,
+      "extraDisplayObjects": 5,
+      "textureRows": [
+        [
+          2,
+          0
+        ],
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "typedRelocations": 624,
+      "omittedExporterRelocations": [],
+      "articles": 0
+    },
+    "costume": {
+      "root": 57876,
+      "nodes": 46,
+      "meshes": 47,
+      "displayObjects": 17,
+      "materialAnimation": true,
+      "typedRelocations": 1115
+    },
+    "effects": {
+      "bank": 39,
+      "models": 2,
+      "commands": 0,
+      "relocations": 399
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Dk --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contactGpu": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Dk --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "falcoRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Fc --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware"
+  },
+  "validation": {
+    "unitTests": {
+      "passed": 224,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "sharedBrowser": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "c07bacaf0338237c0d5197c098e5420dd87895db8cc1ddab9a91097c27639ae9"
+    },
+    "visualInspection": "Saved 960x720 copied Giant Punch image inspected. Native camera and 4:3 retained; no retail image comparison.",
+    "browser": "Chrome 151.0.7922.137",
+    "gpu": {
+      "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+      "vendor": "Google Inc. (AMD)",
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+    },
+    "contactFiringVertices": 20007,
+    "shaderCases": 13,
+    "pixelChannelChecks": 52,
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-donkey/full.json",
+      "sha256": "a0214d67ca398a6a3d8a0fe4aff0df10195125ca6d47cd82caa931b1be61c0a1",
+      "completed": true,
+      "copyFrames": 2975,
+      "renderedInputFrames": 3117,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          455,
+          456,
+          458,
+          24,
+          25,
+          460,
+          461,
+          463,
+          457,
+          459,
+          464,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          82,
+          77
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "firstBody": [
+        15271520,
+        17,
+        5
+      ],
+      "secondBody": [
+        15271680,
+        17,
+        5
+      ],
+      "punchCharge": {
+        "partial": 3,
+        "stored": 4,
+        "max": 10,
+        "afterReacquire": 0
+      },
+      "bodyRenderedFrames": 2223,
+      "peakBodyDraws": 35,
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Dk",
+          "root": 14771368,
+          "bodyCopy": true,
+          "costumeNodes": 46,
+          "hatNodes": 46,
+          "hatMeshes": 24,
+          "dynamicBoneChains": 0,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 1283,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 399,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "contact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-donkey/contact-gpu.json",
+      "sha256": "cebb26e809d5d9511b5fb839a3980b5bb302d60f25e84bf1becdfdea1bfcb327",
+      "completed": true,
+      "copyFrames": 581,
+      "renderedInputFrames": 723,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          455,
+          456,
+          458
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          77
+        ]
+      ],
+      "itemKinds": [],
+      "firstBody": [
+        13748672,
+        17,
+        5
+      ],
+      "bodyRenderedFrames": 347,
+      "peakBodyDraws": 35,
+      "damage": [
+        8,
+        22
+      ],
+      "hitlagAtImpact": 7,
+      "copySetup": [
+        {
+          "code": "Dk",
+          "root": 13433704,
+          "bodyCopy": true,
+          "costumeNodes": 46,
+          "hatNodes": 46,
+          "hatMeshes": 24,
+          "dynamicBoneChains": 0,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 1283,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 399,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "falcoRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-donkey/falco-regression.json",
+      "sha256": "25684f20b4208657888a0a14863e441e0ed16e815f1a653c426778e392b81e24",
+      "completed": true,
+      "copyFrames": 2240,
+      "renderedInputFrames": 2382,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          520,
+          521,
+          522,
+          24,
+          25,
+          523,
+          524,
+          525,
+          42,
+          265
+        ],
+        [
+          39,
+          244,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          29,
+          18
+        ]
+      ],
+      "itemKinds": [
+        139,
+        137,
+        52
+      ],
+      "firstBody": [
+        15538080,
+        22,
+        5
+      ],
+      "secondBody": [
+        15538240,
+        22,
+        5
+      ],
+      "repeatedLaserLoops": 7,
+      "bodyRenderedFrames": 1461,
+      "peakBodyDraws": 17,
+      "damage": null,
+      "hitlagAtImpact": null,
+      "copySetup": [
+        {
+          "code": "Fc",
+          "root": 15043804,
+          "bodyCopy": true,
+          "costumeNodes": 48,
+          "hatNodes": 48,
+          "hatMeshes": 10,
+          "dynamicBoneChains": 0,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 212,
+            "models": 1,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 99,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "falcoPixelComparison": [
+      {
+        "name": "copyhat",
+        "changedPixels": 0,
+        "maxDifference": 0
+      },
+      {
+        "name": "copyfire",
+        "changedPixels": 0,
+        "maxDifference": 0
+      },
+      {
+        "name": "copystar",
+        "changedPixels": 0,
+        "maxDifference": 0
+      },
+      {
+        "name": "captured",
+        "changedPixels": 0,
+        "maxDifference": 0
+      }
+    ]
+  },
+  "limits": [
+    "Default Kirby Donkey-copy costume integrated; other copy costume colors remain unfinished.",
+    "Original C integration and internal GPU oracle, not retail per-frame parity.",
+    "GPU contact sequence preceded additional partial-charge consumption and cancel-state assertions in the final lifecycle harness; same native core and renderer.",
+    "No presented-FPS or input-to-photon latency measurement; no new performance gain claimed.",
+    "Full scenes, remaining abilities/costumes, menus/audio, retail parity, networking and public static deployment remain incomplete.",
+    "Automatic hosted no-ISO startup unchanged; no game assets or binaries committed."
+  ]
+}

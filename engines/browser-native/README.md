@@ -91,6 +91,17 @@ loss and reacquisition. Its contact check requires native hitlag, unlike Fox's
 laser. Per-model draw telemetry is enabled only in copy probes; body resources
 must disappear when the original copy loader removes the body parts.
 
+Donkey Kong's copy (`--opponent=Dk`) uses that body-costume path with the original
+zero insertion mask, 46 active bones, 17 costume DObjs and five extra DObjs.
+Its 24-byte root has no Article slots; bytes immediately following it belong
+to other asset data. `PlKbNrCpDk.dat` supplies the default copy costume, and
+effect bank 39 supplies the two original ground/air Giant Punch model effects.
+The probe uses normal B/shield/jump inputs to charge, cancel/store, resume,
+and fire partial/full ground and air punches. Cancellation takes effect at
+the original swing boundary, so a request at charge 3 can store charge 4.
+Stored charge is read from the original fighter state and must reset after
+firing and copy loss/reacquisition. No charge counter or action state is assigned.
+
 Pikachu and Pichu copies (`--opponent=Pk` / `--opponent=Pc`) retain three
 dynamic hat chains, the ground controller item and visible Thunder Jolt child,
 and shared particle bank 36. The lifecycle test checks exact pool consumption

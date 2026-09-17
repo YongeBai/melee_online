@@ -5,6 +5,8 @@ import {convertArticleEntries} from './article-assets.mjs';
 
 // Hat roots contain the joint, FtPartsDesc and up to two Articles.
 // Some copies append the original hat-bone dynamics descriptor.
+// Body copies instead embed visibility/texture selection first and reference
+// an extra model; their main model comes from a separate costume archive.
 const profiles={
   Mr:{symbol:'Mario',articles:[[1,5]],wrappers:[[0,42836,42844,42852,[0]]]},
   Lg:{symbol:'Luigi',articles:[[1,4]],wrappers:[[0,48148,48156,48164,[0]]]},
@@ -12,7 +14,8 @@ const profiles={
   Pk:{symbol:'Pikachu',dynamics:true,articles:[[2,4],[1,3]],wrappers:[[1,103488,103496,103512,[0],103504]]},
   Pc:{symbol:'Pichu',dynamics:true,articles:[[2,4],[1,3]],wrappers:[[1,115744,115752,115768,[0],115760]]},
   Fx:{symbol:'Fox',articles:[[2,10],[9,10]],wrappers:[[0,null,null,49320,[0]],[1,null,null,75392,[0]]]},
-  Fc:{symbol:'Falco',bodyCopy:true,articles:[[2,10],[9,10]],wrappers:[[0,null,null,2216,[0]],[1,null,null,28288,[0]]]},
+  Dk:{symbol:'Donkey',bodyCopy:true,bodyMask:0},
+  Fc:{symbol:'Falco',bodyCopy:true,bodyMask:0x1800,articles:[[2,10],[9,10]],wrappers:[[0,null,null,2216,[0]],[1,null,null,28288,[0]]]},
   Ss:{symbol:'Samus',articles:[[9,8]],externals:['ItmKirbySsChargeShot_TopN_matanim_joint','ItmKirbySsChargeShot_TopN_shapeanim_joint'],wrappers:[[0,52664,null,52672,[0]]]},
   Ns:{symbol:'Ness',articles:[[3,11],[1,5]],wrappers:[[0,54308,null,54320,[0,1]],[1,81960,81968,81976,[0]]]},
   Pe:{symbol:'Peach',articles:[[2,1],[1,4]],wrappers:[[0,35884,35896,35908,[0,1]]]},
@@ -24,11 +27,11 @@ export function convertKirbyCopy(input,code){
   const profile=profiles[code];if(!profile)throw Error('Kirby copy conversion pending: '+code);
   if(profile.externals)input=initializeArchiveExternals(input,profile.externals);
   const symbol='ftDataKirbyCopy'+profile.symbol,a=inspectArchive(input),d=a.data,root=a.publics.get(symbol);
-  if(root===undefined||root+(profile.bodyCopy?32:profile.dynamics?24:20)>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
+  if(root===undefined||root+(profile.bodyCopy?24+(profile.articles?.length??0)*4:profile.dynamics?24:20)>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
   const ptr=at=>{if(!a.relocations.has(at))throw Error('Missing Kirby copy pointer');const value=d.getUint32(at);if(value%4||value+4>a.dataSize)throw Error('Kirby copy pointer bounds');return value;};
   const jointSlot=root+(profile.bodyCopy?20:0),articleOffset=profile.bodyCopy?24:12;
   const joint=ptr(jointSlot),specs=profile.articles??[],entries=specs.map((_,slot)=>({slot,article:ptr(root+articleOffset+slot*4)}));
-  for(let i=specs.length;i<2;i++)if(a.relocations.has(root+articleOffset+i*4)||d.getUint32(root+articleOffset+i*4))throw Error('Unexpected copy Article/extra');
+  if(!profile.bodyCopy)for(let i=specs.length;i<2;i++)if(a.relocations.has(root+articleOffset+i*4)||d.getUint32(root+articleOffset+i*4))throw Error('Unexpected copy Article/extra');
   const scene=convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+(profile.bodyCopy?0:4),profile.bodyCopy?6:1),articles=entries.length?convertArticleEntries(input,entries,Object.fromEntries(specs.map((s,i)=>[i,s])),{arrowSlots:profile.arrowSlots??[]}):{rows:[],attachments:[]};
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),pointers=new Set(),claimed=new Map();
   function merge(image,typed,slots){
@@ -53,7 +56,7 @@ export function convertKirbyCopy(input,code){
       out.setUint32(at,value??0,true);if(value!==null)pointers.add(at);for(let i=0;i<4;i++)claimed.set(at+i,body[at+i]);return value;
     }
     const count=scalar(root+8),table=ownPointer(root+12),mask=scalar(root+16);
-    if(count!==2||table===null||mask!==0x1800)throw Error('Unsupported Falco copy body layout');
+    if(count!==2||table===null||mask!==profile.bodyMask)throw Error('Unsupported copy body layout');
     for(let costume=0;costume<6;costume++){const row=ownPointer(table+costume*4);textureRows.push(row===null?null:Array.from({length:count},(_,i)=>scalar(row+i*2,2)));}
   }
   const dynamics=[];

@@ -142,3 +142,8 @@ test('Samus copy preserves its pinned relocation-only palette without reading or
   assert.equal(d.getUint32(1180,true),0x80a8812a);assert.deepEqual(r.textures[0].slots,[1184,1120+0x80a8812a]);assert.equal(r.packedBytes,4096);
   for(const change of [a=>a.d.setUint32(1180,0x80a8812b),a=>a.d.setUint32(1164,32),a=>a.d.setUint32(1160,1),a=>a.d.setUint16(1172,1),a=>a.d.setUint32(1176,68),a=>{a.d.setUint32(1124,0);a.d.setUint32(1128,32);},a=>a.ptr(1180,0)])assert.throws(()=>convertKirbyCopyEffects(samusCopyPaletteFixture(change),'Ss'));
 });
+
+test('Donkey copy retains its two original Giant Punch model effects without particle banks',()=>{
+  const spec={symbol:'effKirbyDonkeyDataTable',bank:39,count:0,groups:0,models:2},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,'Dk');assert.deepEqual(input,before);assert.equal(r.bank,39);assert.equal(r.effects.length,2);assert.equal(r.cmd,null);assert.equal(r.tex,null);
+  for(const slot of [0,4])assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,a=>a.ptr(slot,a.cmd)),'Dk'));
+});

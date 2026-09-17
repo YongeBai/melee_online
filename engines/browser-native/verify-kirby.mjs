@@ -39,9 +39,9 @@ export function verifyKirbyMoves(module,object,report,{step,onStep=()=>{},only=n
 export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='swallow'}){
   const require=(ok,message)=>{if(!ok)throw Error('Kirby copy: '+message);};
   const read=()=>objects.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));
-  const copyKind=read()[1][11],profile={22:{item:137,blaster:139,bodyCopy:true,ground:520,air:523,contactDistance:40},13:{item:151,charge:true,ground:407,air:411,contactDistance:40},6:{item:140,bow:142,dynamicNodes:[3],ground:401,air:404,contactDistance:40},20:{item:141,bow:143,dynamicNodes:[3],ground:514,air:517,contactDistance:40},12:{item:147,child:148,dynamicNodes:[3,3,4],ground:429,air:430,contactDistance:40},23:{item:149,child:150,dynamicNodes:[3,3,2],recoil:1,ground:526,air:527,contactDistance:40},1:{item:136,blaster:138,ground:423,air:426,contactDistance:40},8:{item:145,explosion:146,ground:435,air:439,hold:110},9:{item:134,counter:135,ground:449,air:451,distance:18},2:{item:null,ground:433,air:434},25:{item:null,ground:528,air:529},0:{item:130,ground:399,air:400},17:{item:132,ground:431,air:432},21:{item:131,ground:512,air:513}}[copyKind];
+  const copyKind=read()[1][11],profile={3:{item:null,bodyCopy:true,punchCharge:true,ground:455,air:460,attackStates:[458,459,463,464],attackFrame:0},22:{item:137,blaster:139,bodyCopy:true,ground:520,air:523,contactDistance:40},13:{item:151,charge:true,ground:407,air:411,contactDistance:40},6:{item:140,bow:142,dynamicNodes:[3],ground:401,air:404,contactDistance:40},20:{item:141,bow:143,dynamicNodes:[3],ground:514,air:517,contactDistance:40},12:{item:147,child:148,dynamicNodes:[3,3,4],ground:429,air:430,contactDistance:40},23:{item:149,child:150,dynamicNodes:[3,3,2],recoil:1,ground:526,air:527,contactDistance:40},1:{item:136,blaster:138,ground:423,air:426,contactDistance:40},8:{item:145,explosion:146,ground:435,air:439,hold:110},9:{item:134,counter:135,ground:449,air:451,distance:18},2:{item:null,ground:433,air:434},25:{item:null,ground:528,air:529},0:{item:130,ground:399,air:400},17:{item:132,ground:431,air:432},21:{item:131,ground:512,air:513}}[copyKind];
   require(read()[0][11]===4&&profile,'Kirby versus a supported copy');require(['swallow','acquire','spit','contact'].includes(mode),'mode');
-  Object.assign(report,{completed:false,copyKind,projectileKind:profile.item,secondaryItemKind:profile.explosion??profile.counter??profile.child??profile.bow??null,attackStates:[profile.ground,profile.air],frames:0,states:[[],[]],trace:[],itemKinds:[],retailParityVerified:false});
+  Object.assign(report,{completed:false,copyKind,projectileKind:profile.item,secondaryItemKind:profile.explosion??profile.counter??profile.child??profile.bow??null,attackStates:profile.attackStates??[profile.ground,profile.air],attackFrame:profile.attackFrame,frames:0,states:[[],[]],trace:[],itemKinds:[],retailParityVerified:false});
   const buffer=module._malloc(128*12),stocks=read().map(s=>s[18]);let phase='approach';
   function tick(a=[0,0,0],b=[0,0,0]){
     [a,b].forEach((p,i)=>module._portStageProbePad(i,...p));step();report.frames++;
@@ -53,14 +53,14 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     const attachments=profile.bow?module._portItemAttachmentsList(buffer,128):0;require(attachments<=128,'attachment capacity');report.peakAttachments=Math.max(report.peakAttachments??0,attachments);
     const hat=Array.from({length:7},(_,i)=>module._portKirbyRead(objects[0],i));
     if(report.contactBefore&&!report.contactImpact&&s[1][13]>report.contactBefore[1][13])report.contactImpact=s.map(v=>v.slice());
-    const charge=profile.charge?Array.from({length:3},(_,i)=>module._portKirbyRead(objects[0],7+i)):null;
+    const charge=profile.charge?Array.from({length:3},(_,i)=>module._portKirbyRead(objects[0],7+i)):profile.punchCharge?[module._portKirbyRead(objects[0],13),module._portKirbyRead(objects[0],14)]:null;
     const body=profile.bodyCopy?Array.from({length:3},(_,i)=>module._portKirbyRead(objects[0],10+i)):null;report.body=body;
     report.trace.push({phase,state:s,hat,items,attachments,charge,body});report.final=s;report.hat=hat;onStep(report);return s;
   }
   const hasModel=()=>profile.bodyCopy?report.body?.[0]&&report.body[1]>0&&report.body[2]>0:report.hat[1]&&report.hat[2];
   const neutral=n=>{for(let i=0;i<n;i++)tick();};
   let attackDamage=0;const checkRecoil=()=>require(read()[0][13]===attackDamage+(profile.recoil??0),'original copied attack recoil');
-  function attack(air=false){attackDamage=read()[0][13];tick([0x200,0,0]);if(profile.charge&&!air){neutral(65);tick([0x200,0,0]);}else if(profile.bow&&!air){for(let i=1;i<180&&read()[0][0]!==profile.ground+1;i++)tick([0x200,0,0]);require(read()[0][0]===profile.ground+1,'fully charged bow loop');}else if(profile.hold&&!air)for(let i=1;i<profile.hold;i++)tick([0x200,0,0]);}
+  function attack(air=false){attackDamage=read()[0][13];tick([0x200,0,0]);if(profile.punchCharge){for(let i=0;i<120&&read()[0][0]!==profile.ground+1&&read()[0][0]!==profile.air+1;i++)tick();require(read()[0][0]===(air?profile.air:profile.ground)+1,'Giant Punch charge loop');if(!air)neutral(15);tick([0x200,0,0]);}else if(profile.charge&&!air){neutral(65);tick([0x200,0,0]);}else if(profile.bow&&!air){for(let i=1;i<180&&read()[0][0]!==profile.ground+1;i++)tick([0x200,0,0]);require(read()[0][0]===profile.ground+1,'fully charged bow loop');}else if(profile.hold&&!air)for(let i=1;i<profile.hold;i++)tick([0x200,0,0]);}
   function retireBow(){
     if(!profile.bow)return;let frames=0;
     for(;frames<600&&module._portItemsList(buffer,128);frames++)tick();
@@ -110,6 +110,7 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     }
     neutral(240);retireBow();checkRecoil();
     require(report.states[0].includes(profile.ground)&&(profile.item===null||report.itemKinds.includes(profile.item)),'original copied attack state and any required item');
+    if(profile.punchCharge)require(report.states[0].includes(458)&&module._portKirbyRead(objects[0],13)===0,'partial ground punch and consumed charge');
     if(profile.child)require(report.itemKinds.includes(profile.child),'original Thunder Jolt visible child');
     if(profile.blaster)require(report.itemKinds.includes(profile.blaster),'original copied Blaster item');
     if(profile.bow)require(report.itemKinds.includes(profile.bow)&&report.states[0].includes(profile.ground+1)&&report.states[0].includes(profile.ground+2)&&report.peakAttachments===2&&!module._portItemAttachmentsList(buffer,128),'original copied bow, charge, release and attachment retirement');
@@ -119,11 +120,23 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     if(mode==='contact'){if(copyKind===1)require(report.contactImpact?.[1][14]===0,'Fox laser does not cause hitlag');if(copyKind===22)require(report.contactImpact?.[1][14]>0,'Falco laser causes hitlag');report.contactAfter=read();require(report.contactAfter[1][13]>report.contactBefore[1][13],'copied attack damages opponent');require(report.contactAfter[0][13]===report.contactBefore[0][13]+(profile.recoil??0),'attacker damage follows original copy recoil');report.completed=true;return;}
     if(mode==='acquire'){report.completed=true;return;}
     phase='air copied neutral special';for(let i=0;i<10;i++)tick([0x400,0,0]);neutral(8);attack(true);neutral(300);retireBow();checkRecoil();require(report.states[0].includes(profile.air)&&read()[0][0]===14,'air copy and recovery');
+    if(profile.punchCharge)require(report.trace.some(t=>t.phase===phase&&t.state[0][0]===463&&t.state[0][3]===1)&&module._portKirbyRead(objects[0],13)===0,'partial airborne punch and consumed charge');
     if(profile.bow)require(report.trace.some(t=>t.phase===phase&&t.state[0][0]===profile.air+2&&t.items.some(i=>i[0]===profile.item)),'original airborne arrow release');
-    if(profile.bodyCopy){
+    if(copyKind===22){
       phase='repeat copied laser';for(let i=0;i<150;i++)tick([i%4===0?0x200:0,0,0]);neutral(240);
       const sequence=report.trace.filter(t=>t.phase===phase),loops=sequence.filter((t,i)=>t.state[0][0]===521&&(i===0||sequence[i-1].state[0][0]!==521||t.state[0][2]<sequence[i-1].state[0][2])).length;
       require(loops>=3&&sequence.some(t=>t.items.some(i=>i[0]===137))&&read()[0][0]===14&&!module._portItemsList(buffer,128),'repeated Falco shots and original recovery');report.repeatedLaserLoops=loops;
+    }
+    if(profile.punchCharge){
+      const stored=()=>module._portKirbyRead(objects[0],13),max=module._portKirbyRead(objects[0],14);
+      phase='store partial Giant Punch';tick([0x200,0,0]);for(let i=0;i<600&&stored()<3;i++)tick();
+      const partial=stored();require(partial>0&&partial<max&&read()[0][0]===456,'partial Giant Punch charge');tick([0x40,0,0]);neutral(120);
+      require(report.trace.some(t=>t.phase===phase&&t.state[0][0]===457)&&read()[0][0]===14&&stored()>=partial&&stored()<max,'shield cancellation stores Giant Punch charge');report.punchCharge={partial,stored:stored(),max};
+      phase='resume full Giant Punch';tick([0x200,0,0]);for(let i=0;i<1200&&!(read()[0][0]===14&&stored()===max);i++)tick();require(read()[0][0]===14&&stored()===max,'full Giant Punch automatically stored');
+      phase='full ground Giant Punch';tick([0x200,0,0]);neutral(240);require(report.trace.some(t=>t.phase===phase&&t.state[0][0]===459)&&read()[0][0]===14&&stored()===0,'full ground punch consumes charge');
+      phase='charge for full air Giant Punch';tick([0x200,0,0]);for(let i=0;i<1200&&!(read()[0][0]===14&&stored()===max);i++)tick();require(stored()===max&&read()[0][0]===14,'full charge for aerial punch');
+      phase='full air Giant Punch';for(let i=0;i<10;i++)tick([0x400,0,0]);neutral(8);tick([0x200,0,0]);neutral(300);require(report.trace.some(t=>t.phase===phase&&t.state[0][0]===464&&t.state[0][3]===1)&&read()[0][0]===14&&stored()===0,'full air punch consumes charge and recovers');
+      phase='store charge before copy loss';tick([0x200,0,0]);for(let i=0;i<600&&stored()<3;i++)tick();tick([0x40,0,0]);neutral(120);require(stored()>0&&read()[0][0]===14,'Giant Punch charged before copy loss');
     }
     if(profile.charge){
       phase='cancel and store Charge Shot';tick([0x200,0,0]);neutral(65);
@@ -153,6 +166,7 @@ export function verifyKirbyCopy(module,objects,report,{step,onStep=()=>{},mode='
     phase='reacquire approach';approach();phase='reacquire inhale';for(let i=0;i<150&&read()[0][0]!==359;i++)tick([0x200,0,0]);require(read()[0][0]===359,'second capture');neutral(2);
     phase='reacquire swallow';tick([0,0,-1]);neutral(140);require(report.hat[0]===copyKind&&hasModel(),'hat recreated');report.secondHat=report.hat.slice();if(profile.bodyCopy){report.secondBody=report.body.slice();require(JSON.stringify(report.secondBody.slice(1))===JSON.stringify(report.firstBody.slice(1)),'copy body parts reacquired');}
     if(profile.dynamicNodes){report.dynamicPoolAfterReacquire=module._portDynamicsPoolFree();require(JSON.stringify(report.secondHat.slice(3))===JSON.stringify(report.firstHat.slice(3))&&report.dynamicPoolAfterReacquire===report.dynamicPoolWithHat,'reacquired dynamic hat chains and pool consumption');}
+    if(profile.punchCharge){report.punchCharge.afterReacquire=module._portKirbyRead(objects[0],13);require(report.punchCharge.afterReacquire===0,'reacquired Giant Punch charge reset');}
     if(profile.charge){report.charge.afterReacquire=module._portKirbyRead(objects[0],7);require(report.charge.afterReacquire===0,'reacquired copy starts with zero charge');}
     phase='reacquired neutral special';attack();neutral(240);retireBow();checkRecoil();require(report.trace.some(t=>t.phase===phase&&(profile.item===null?t.state[0][0]===profile.ground:t.items.some(i=>i[0]===profile.item))),'reacquired attack');require(read()[0][0]===14&&report.hat[0]===copyKind&&!module._portItemsList(buffer,128),'reacquired copy retained and item retired');
     report.completed=true;

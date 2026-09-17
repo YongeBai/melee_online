@@ -57,6 +57,8 @@ unsigned portKirbyRead(HSD_GObj* object,unsigned field)
     case 10:return (unsigned)fp->u.kb.hat.x14.data;
     case 11:return fp->u.kb.hat.x14.count;
     case 12:return fp->u.kb.hat.x1C.count;
+    case 13:return fp->u.kb.xBC;
+    case 14:return ((ftKb_DatAttrs*)fp->dat_attrs)->specialn_dk_swings_to_full_charge;
     default:abort();
     }
 }

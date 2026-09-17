@@ -169,3 +169,16 @@ test('Falco body copy preserves costume visibility, texture indices, insertion m
   const input=falcoBodyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Fc'),d=new DataView(r.image.buffer,32);assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.equal(r.joint,4096);assert.equal(r.visibility.rows.length,6);assert.equal(d.getUint32(1016,true),0x1800);assert.deepEqual(r.textureRows,[[3,1],null,null,null,null,null]);assert.equal(d.getUint16(1248,true),3);assert.equal(d.getUint16(1250,true),1);assert.deepEqual(r.articles.rows.map(a=>[a.stateCount,a.specialWords]),[[2,10],[9,10]]);assert.equal(r.unreferencedRelocations.length,4);
   for(const change of [a=>a.d.setUint32(1008,3),a=>a.d.setUint32(1016,0x1000),a=>a.ptr(1012,1000),a=>a.ptr(1200,1016),a=>a.ptr(1200,4128),a=>a.ptr(1200,28326),a=>a.relocs.delete(1012),a=>a.ptr(28288,2048)])assert.throws(()=>convertKirbyCopy(falcoBodyFixture(change),'Fc'),undefined,String(change));
 });
+
+function donkeyBodyFixture(change=()=>{}){
+  const body=new Uint8Array(384),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  d.setUint32(128,1);ptr(132,0);d.setUint32(136,2);ptr(140,100);ptr(148,256);ptr(100,96);d.setUint16(96,2);
+  // Packed model payload can begin immediately after this 24-byte root.
+  d.setUint32(152,0xdeadbeef);for(let i=0;i<3;i++)d.setFloat32(256+32+i*4,1);
+  change({d,ptr,relocs});const name=new TextEncoder().encode('ftDataKirbyCopyDonkey\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,128);bytes.set(name,pub+8);return bytes;
+}
+test('Donkey body copy retains the zero insertion mask and no Article slots after its 24-byte root',()=>{
+  const input=donkeyBodyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Dk');assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.deepEqual(r.textureRows,[[2,0],null,null,null,null,null]);assert.equal(r.articles.rows.length,0);assert.equal(r.joint,256);assert.equal(r.unreferencedRelocations.length,0);assert.equal(new DataView(r.image.buffer,32).getUint32(144,true),0);
+  for(const change of [a=>a.d.setUint32(144,0x1800),a=>a.d.setUint32(136,1),a=>a.ptr(140,128),a=>a.ptr(100,136),a=>a.relocs.delete(148),a=>a.ptr(152,256)])assert.throws(()=>convertKirbyCopy(donkeyBodyFixture(change),'Dk'));
+});
