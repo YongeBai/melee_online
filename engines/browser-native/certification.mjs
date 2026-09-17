@@ -34,7 +34,7 @@ if(mode==='calibration'){
   const replica=replicaMode?createRenderReplica(runtime,replicaRuntime,{sourceHost:audio,targetHost:replicaAudio,copyMode:dirty?'dirty':'full',auditDirty:params.get("dirtyaudit")==="1"}):null;
   const frameOracleEnabled=params.get('frameoracle')==='1';
   if(frameOracleEnabled&&(!replica||mode!=='isolated'||params.get('dirtyaudit')!=='1'))throw Error('Per-frame oracle requires isolated audited replica');
-  const frameOracleCache=frameOracleEnabled?createPresentationCache({packedState:false}):null,frameOracle={enabled:frameOracleEnabled,frames:0,comparedBytes:0,differentBytes:0,cameraMismatches:0};
+  const frameOracleCache=frameOracleEnabled?createPresentationCache({packedState:false,reuseImmediate:false}):null,frameOracle={enabled:frameOracleEnabled,frames:0,comparedBytes:0,differentBytes:0,cameraMismatches:0};
   const readPixels=()=>{const gl=picture.getContext('webgl2'),b=new Uint8Array(960*720*4);gl.readPixels(0,0,960,720,gl.RGBA,gl.UNSIGNED_BYTE,b);return b;};
   const store=createPagedWasmCheckpointStore({...runtime,host:audio,maxBytes:2*1024**3});
   const initial=store.capture(),packets=[],workload={hitlagFrames:0,damageFrames:0,attackFrames:0,stockChanges:0};

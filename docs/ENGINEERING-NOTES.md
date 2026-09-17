@@ -7,9 +7,11 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+[Layout-keyed immediate resources](BROWSER-NATIVE-IMMEDIATE-POOL.md) replace the
+rejected positional plan pool. Retain only owned streams and GPU capacity, keyed
+by batch/attribute/register layout; recreate all frame metadata and state.
 [Packed render staging](BROWSER-NATIVE-PACKED-STAGING.md) reuses JS matrix slots
-within an exclusive cache lease. Immediate GPU-plan reuse is experimental and
-off by default after an intermittent per-frame pixel mismatch. Never reuse a slot
+within an exclusive cache lease. Never reuse a slot
 while its draw remains queued; copy/upload every current value and keep native
 bindings outside the pool. Use per-frame RGBA/camera and full-memory audits when
 changing this lifetime boundary. Production rooms remain lockstep.

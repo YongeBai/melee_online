@@ -1,3 +1,4 @@
+import {createImmediateResourcePool} from './immediate-geometry.mjs';
 import {createModelGeometryCache} from './model-geometry-cache.mjs';
 import {inspectArchive} from './archive.mjs';
 
@@ -19,11 +20,10 @@ export function equalTextureBytes(bytes,prior){
   for(i=words*4;i<bytes.length;i++)if(bytes[i]!==prior[i])return false;
   return true;
 }
-// Immediate GPU-plan reuse is experimental: an intermittent per-frame pixel
-// mismatch was observed with it enabled. Keep its lifetime per renderer by default.
-export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=false}={}){
-  const modelSnapshots=[],immediatePlans=[],programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
-  let context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
+// Reuse only structurally keyed resources under an exclusive frame lease.
+export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=true}={}){
+  const modelSnapshots=[],programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
+  let immediatePool=null,context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
   const stats={modelHits:0,modelMisses:0,textureHits:0,textureMisses:0,textureInvalidations:0,rendererLeases:0};
   return {
     geometry,
@@ -40,10 +40,10 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
       if(closed||gl.isContextLost()||(context&&context!==gl))throw Error('Presentation cache context unavailable');
       if(leases)throw Error('Presentation cache already leased');
       context=gl;leases++;stats.rendererLeases++;
-      let released=false;
+      let released=false;const immediate=reuseImmediate?(immediatePool??=createImmediateResourcePool(gl)).acquire():null;
       return {
         programs,variants,submissionOptimized,packedState,reuseImmediate,
-        get immediatePlans(){if(released)throw Error('Released presentation lease');return immediatePlans;},
+        immediate,
         modelSnapshot(index,create){if(released)throw Error('Released presentation lease');return modelSnapshots[index]??=create();},
         model(bytes,create){
           if(released)throw Error('Released presentation lease');
@@ -62,17 +62,17 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
           if(old){gl.deleteTexture(old.texture);stats.textureInvalidations++;}
           images.set(key,{texture,source:owned});stats.textureMisses++;return texture;
         },
-        release(){if(!released){released=true;leases--;}}
+        release(){if(!released){released=true;immediate?.release();leases--;}}
       };
     },
-    snapshot:()=>({...stats,submissionOptimized,packedState,reuseImmediate,modelSnapshotSlots:modelSnapshots.length,immediatePlanSlots:immediatePlans.length,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
+    snapshot:()=>({...stats,submissionOptimized,packedState,reuseImmediate,modelSnapshotSlots:modelSnapshots.length,immediatePlanSlots:immediatePool?.snapshot().slots??0,immediatePool:immediatePool?.snapshot()??null,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
     dispose(){
       if(leases)throw Error('Cannot dispose leased presentation assets');
       if(closed)return;closed=true;
       for(const model of models.values())model.dispose();
       for(const p of programs.values())context.deleteProgram(p.program);
       for(const image of images.values())context.deleteTexture(image.texture);
-      for(const p of immediatePlans){context.deleteVertexArray(p.vao);context.deleteBuffer(p.vertex);context.deleteBuffer(p.indices);context.deleteBuffer(p.registers);}immediatePlans.length=0;
+      immediatePool?.dispose();
       modelSnapshots.length=0;models.clear();programs.clear();variants.clear();images.clear();geometry.clear();archives=new WeakMap();gpuInfo=null;
     }
   };

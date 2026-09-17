@@ -1,5 +1,7 @@
 # Packed native render staging — September 17, 2026
 
+Historical checkpoint `f9212ba`; the later [layout-keyed resource pool](BROWSER-NATIVE-IMMEDIATE-POOL.md) replaces its rejected positional immediate experiment.
+
 The retained candidate enables packed matrix staging. Immediate-plan reuse is
 experimental and **off by default** after an intermittent per-frame pixel
 mismatch. This continues `ed3a08d`'s direct C-to-WASM port; the native core,

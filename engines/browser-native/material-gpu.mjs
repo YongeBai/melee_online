@@ -1,4 +1,4 @@
-import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry} from './immediate-geometry.mjs';
+import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry,uploadImmediateResource} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
 import {readNativeTextures,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
@@ -36,7 +36,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   const readContext=assetLease?.submissionOptimized?createNativeRenderContextReader(module):()=>readNativeRenderContext(module);
   const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
-  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=assetLease?.reuseImmediate?assetLease.immediatePlans:[];let shaderCompilations=[];
+  let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes,origin,immediateRegisters=false){
     const variant=materialShaderKey(state,attributes,{immediateRegisters});if(variants.has(variant))return variants.get(variant);
@@ -155,7 +155,14 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     if(!data.every(Number.isFinite)||cull>3||![0,1,2].includes(kind))throw Error('Invalid immediate geometry');
     const previous=queue.at(-1),eligible=previous?.immediate&&previous.kind===kind&&previous.textured===textured&&previous.camera===snapshot&&previous.plan.mesh.flags===(cull<<14)&&previous.plan.stream.vertexCount+count<=4096;
     const merge=matchImmediateState(tev,eligible,previous?.flatRegisters===true);
-    let plan=merge?previous.plan:immediatePlans[immediateUsed];
+    let state,flatRegisters,attrs;
+    if(!merge){
+      attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
+      state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
+      checkNativeRenderContext(state.context,snapshot,state.pixel);
+      flatRegisters=!state.textures.generators.some(g=>g.source>=5&&g.source<=11);
+    }
+    let plan=merge?previous.plan:assetLease?.immediate?assetLease.immediate.take({kind,textured,cull,flatRegisters}):immediatePlans[immediateUsed];
     if(!plan){
       plan={vao:gl.createVertexArray(),vertex:gl.createBuffer(),indices:gl.createBuffer(),registers:gl.createBuffer(),stream:{data:new Float32Array(0),indices:new Uint32Array(0),vertexCount:0,indexCount:0}};immediatePlans.push(plan);
       gl.bindVertexArray(plan.vao);gl.bindBuffer(gl.ARRAY_BUFFER,plan.vertex);
@@ -166,11 +173,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     }
     if(!merge){
       immediateUsed++;plan.stream.vertexCount=plan.stream.indexCount=0;
-      const attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
       plan.mesh={triangles:null,flags:cull<<14,attrs,vertices:[]};
-      const state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
-      checkNativeRenderContext(state.context,snapshot,state.pixel);
-      const flatRegisters=!state.textures.generators.some(g=>g.source>=5&&g.source<=11);
       queue.push({owner:kind===0?'particles':kind===1?'afterimage':'text',plan,state,camera:snapshot,program:program(state,attrs,kind===0?'particles':kind===1?'afterimage':'text',flatRegisters),immediate:true,flatRegisters,kind,textured});
     }
     appendImmediateGeometry(plan.stream,data,triangles,queue.at(-1).flatRegisters?new Int32Array(module.HEAPU8.buffer,tev+16,16):null);
@@ -244,7 +247,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     },
     shaderSources(){return [...programs.values()].map(p=>p.sources);},
     shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
-    begin(camera){selectCamera(camera);queue=[];packedModel?.reset();shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
+    begin(camera){selectCamera(camera);queue=[];packedModel?.reset();assetLease?.immediate?.begin();shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
     flush({ordered=false,clip=null,clearAlpha=1,forceAlpha=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);if(clip){gl.enable(gl.SCISSOR_TEST);gl.scissor(...clip);}else gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,clearAlpha);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
@@ -252,7 +255,8 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       const drawsInOrder=ordered?queue:[...queue.filter(d=>d.state.pixel.blend.type===0),...queue.filter(d=>d.state.pixel.blend.type!==0)];
       for(const draw of drawsInOrder) {
         gl.bindVertexArray(draw.plan.vao);
-        if(draw.immediate){
+        if(draw.immediate&&draw.plan.resource)uploadImmediateResource(gl,draw.plan,draw.flatRegisters);
+        else if(draw.immediate){
           const stream=draw.plan.stream;
           for(let i=8;i<12;i++)draw.flatRegisters?gl.enableVertexAttribArray(i):gl.disableVertexAttribArray(i);
           if(draw.flatRegisters){gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.registers);gl.bufferData(gl.ARRAY_BUFFER,stream.registers.subarray(0,stream.vertexCount*16),gl.DYNAMIC_DRAW);}
