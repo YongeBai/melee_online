@@ -247,3 +247,22 @@ test('Ice Climbers copy imports its ice Article at +12 and separate hammer at +1
   assert.deepEqual(input,before);assert.equal(r.articles.rows[0].stateCount,1);assert.equal(r.articles.rows[0].specialWords,13);assert.equal(r.articles.rows[0].joint,4096);assert.equal(r.articles.rows[0].animations[0].joint,6000);assert.equal(r.accessory.joint,5000);assert.equal(r.accessory.scene.model.tree.nodes.length,1);assert.equal(r.dynamics.length,0);assert.equal(r.unreferencedRelocations.length,6);assert.equal(d.getUint32(1012,true),400);assert.equal(d.getUint32(1016,true),5000);assert.equal(d.getFloat32(180,true),3.5);
   for(const change of [a=>a.relocs.delete(1012),a=>a.relocs.delete(1016),a=>a.ptr(1012,5000),a=>a.ptr(1016,1000),a=>a.ptr(65216,2000),a=>a.ptr(46228,5000),a=>a.ptr(1500,5000)])assert.throws(()=>convertKirbyCopy(iceCopyFixture(change),'Pp'));
 });
+
+function shadowCopyFixture(change=()=>{}){
+  const body=new Uint8Array(44680),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  d.setUint32(1000,1);ptr(1004,1100);d.setUint32(1008,2);ptr(1012,1200);d.setUint32(1016,0x7f0);ptr(1020,6000);ptr(1024,400);ptr(1028,1400);
+  ptr(1200,1248);d.setUint16(1248,2);ptr(400,0);ptr(404,132);ptr(412,600);ptr(416,500);ptr(500,4096);d.setUint32(504,1);
+  for(let i=0;i<16;i++)d.setFloat32(132+i*4,(i-6)/4);
+  for(let i=0;i<10;i++){ptr(600+i*16,i===0?21000:20000);ptr(604+i*16,i===0?23000:22000);}
+  for(let i=0;i<53;i++){const at=6000+64*i;for(let j=0;j<3;j++)d.setFloat32(at+32+j*4,1);if(i<52)ptr(at+8,at+64);}
+  for(let j=0;j<3;j++)d.setFloat32(4096+32+j*4,1);
+  d.setUint32(1400,1);ptr(1404,1440);d.setUint32(1440,28);ptr(1444,10000);d.setUint32(1448,7);for(let i=0;i<105;i++)d.setFloat32(10000+i*4,(i-10)/4);
+  for(const[at,to]of [[44632,20000],[44636,21000],[44644,22000],[44648,23000],[44656,4096],[44660,44632],[44664,44644],[44672,44656]])ptr(at,to);
+  change({d,ptr,relocs});const name=new TextEncoder().encode('ftDataKirbyCopyMewtwo\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,1000);bytes.set(name,pub+8);return bytes;
+}
+test('Mewtwo copy retains replacement body, seven-node tail and ten-state Shadow Ball animation order',()=>{
+  const input=shadowCopyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Mt'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.equal(r.scene.model.tree.nodes.length,53);assert.deepEqual(r.textureRows,[[2,0],null,null,null,null,null]);assert.deepEqual(r.dynamics.map(x=>[x.bone,x.nodes]),[[28,7]]);assert.equal(r.articles.rows[0].stateCount,10);assert.equal(r.articles.rows[0].specialWords,16);assert.deepEqual(r.articles.rows[0].animations.slice(0,2).map(x=>[x.joint,x.material]),[[21000,23000],[20000,22000]]);assert.equal(d.getFloat32(10000,true),-2.5);assert.equal(d.getUint32(1016,true),0x7f0);assert.equal(r.unreferencedRelocations.length,8);
+  for(const change of [a=>a.d.setUint32(1016,0x7f1),a=>a.relocs.delete(1024),a=>a.relocs.delete(1028),a=>a.ptr(1444,6000),a=>a.d.setUint32(1448,26),a=>a.ptr(44632,21000),a=>a.ptr(44664,44632),a=>a.ptr(1500,6000)])assert.throws(()=>convertKirbyCopy(shadowCopyFixture(change),'Mt'));
+});

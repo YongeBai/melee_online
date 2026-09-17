@@ -1,0 +1,383 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "99cb35f",
+  "scope": "Kirby Mewtwo body copy, original tail dynamics, ten-state Shadow Ball, stored charge and ground/air lifecycle.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "cd7342c8e3156406d761495be52a6fa81a794bb0c28e0efe9d1908e063b9e247",
+    "wasmBytes": 2959206
+  },
+  "sourceHashes": {
+    "character-collision.c": "11471a3217d8f8a3321cfdbe585be7d8bd4c712c6bc9902a763bcc32882d4e44",
+    "constructor.html": "c4b17f57001fefe477311aa1f19e4a6a615ef2fa4285bded64a8d1d58152398c",
+    "kirby-copy-assets.mjs": "9e6c1749d3d4100f4274a773aedf4f2405a1395cee71bfd33ed3eaff26ccc471",
+    "verify-kirby.mjs": "24ac3d72f9c06950b4c7e4951711f358b4e05feea3ecbe85025cbba69eae061b"
+  },
+  "assets": {
+    "copy": {
+      "root": 1296,
+      "dataSize": 100384,
+      "relocations": 1308,
+      "joint": 94740,
+      "nodes": 53,
+      "meshes": 31,
+      "typed": 1300,
+      "omitted": [
+        [
+          44632,
+          31760
+        ],
+        [
+          44636,
+          42464
+        ],
+        [
+          44644,
+          33120
+        ],
+        [
+          44648,
+          44500
+        ],
+        [
+          44656,
+          9160
+        ],
+        [
+          44660,
+          44632
+        ],
+        [
+          44664,
+          44644
+        ],
+        [
+          44672,
+          44656
+        ]
+      ],
+      "dynamics": [
+        {
+          "bone": 28,
+          "nodes": 7,
+          "position": [
+            1,
+            1,
+            0.04363323003053665
+          ],
+          "parameters": 0
+        }
+      ],
+      "articles": [
+        {
+          "article": 1272,
+          "joint": 9160,
+          "stateCount": 10,
+          "specialWords": 16
+        }
+      ],
+      "textureRows": [
+        [
+          2,
+          0
+        ],
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "costume": {
+      "dataSize": 166032,
+      "relocations": 1274,
+      "publics": [
+        [
+          "PlyKirbyMt_Share_joint",
+          66484
+        ],
+        [
+          "PlyKirbyMt_Share_matanim_joint",
+          97696
+        ]
+      ],
+      "externals": []
+    }
+  },
+  "validation": {
+    "tests": {
+      "passed": 233,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "shared": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "3731fcdb6b4d3e3a69900a814912381793a2ddab185ad767a84d5a42fe278b77"
+    },
+    "simulation": {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/simulation.json",
+      "sha256": "195fa12be54dd081c8c041386b9224e157ae419a7a7b1964d56cd49d36da0d52",
+      "completed": true,
+      "frames": 3471,
+      "renderedFrames": 0,
+      "introFrames": 0
+    },
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/full.json",
+      "sha256": "d0185534a360e4b963e6eabeb7093f0058b3f122ca7073f79c0a8c414a420330",
+      "completed": true,
+      "frames": 3471,
+      "renderedFrames": 3613,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          500,
+          501,
+          504,
+          24,
+          25,
+          505,
+          506,
+          509,
+          503,
+          502,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292
+        ]
+      ],
+      "itemKinds": [
+        144,
+        52
+      ],
+      "shadowCharge": {
+        "partial": 3,
+        "stored": 3,
+        "max": 7,
+        "afterReacquire": 0
+      },
+      "dynamicPool": [
+        312,
+        305,
+        312,
+        305
+      ],
+      "bodyPartCounts": [
+        15,
+        5
+      ],
+      "bodyRenderedFrames": 2689,
+      "peakBodyDraws": 39,
+      "copySetup": [
+        {
+          "code": "Mt",
+          "root": 14695984,
+          "bodyCopy": true,
+          "costumeNodes": 53,
+          "hatNodes": 53,
+          "hatMeshes": 31,
+          "dynamicBoneChains": 1,
+          "articles": 1
+        }
+      ]
+    },
+    "contact-gpu": {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/contact-gpu.json",
+      "sha256": "573dea28557f96f082dbdd4e9fa62fa942c8da3af65e4e6163d09b8a4d2ae4c4",
+      "completed": true,
+      "frames": 911,
+      "renderedFrames": 1053,
+      "introFrames": 0,
+      "damageBefore": 8,
+      "damageAfter": 16,
+      "impactHitlag": 5,
+      "vertexChecks": {
+        "vertices": 20183,
+        "positionComponents": 60549,
+        "normalComponents": 60549,
+        "maxScaledPositionError": 0.0000024583379928477415,
+        "maxNormalError": 1.2883257460849507e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0004005643897609473,
+        "byOwner": {
+          "1607680": {
+            "vertices": 458,
+            "ndcMin": [
+              -135.4320711307064,
+              -98.35982797476925,
+              -0.008029475068740423
+            ],
+            "ndcMax": [
+              178.49641848599666,
+              105.1928630153884,
+              0.011677122032557457
+            ]
+          },
+          "1609568": {
+            "vertices": 8608,
+            "ndcMin": [
+              -1.8358383827811007,
+              -1.3628418011752585,
+              -0.0009587270920636
+            ],
+            "ndcMax": [
+              1.6365319239075296,
+              1.3518513536092271,
+              -0.0006096974623159143
+            ]
+          },
+          "1614016": {
+            "vertices": 4088,
+            "ndcMin": [
+              -0.6922924087379707,
+              -0.32804540067613464,
+              -0.0007906693198164092
+            ],
+            "ndcMax": [
+              -0.38162300766275115,
+              0.13001675461253445,
+              -0.0007358537818471273
+            ]
+          },
+          "11844256": {
+            "vertices": 6609,
+            "ndcMin": [
+              0.34487388921165163,
+              -0.3250112028727284,
+              -0.0007748115377407673
+            ],
+            "ndcMax": [
+              0.947285842296274,
+              0.2542540145045284,
+              -0.0007204313069760026
+            ]
+          },
+          "13640320": {
+            "vertices": 310,
+            "ndcMin": [
+              -0.2558848827889494,
+              -0.3267814908655768,
+              -0.0007569109758870308
+            ],
+            "ndcMax": [
+              -0.07705230009979437,
+              -0.10908262021780148,
+              -0.0007426867240142532
+            ]
+          },
+          "13837312": {
+            "vertices": 110,
+            "ndcMin": [
+              -1.5682648803635184,
+              -0.3354738950969281,
+              -0.0009091477658786655
+            ],
+            "ndcMax": [
+              -0.7434704617972668,
+              0.1134884862254753,
+              -0.0006468847585913919
+            ]
+          }
+        }
+      },
+      "shader": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      },
+      "finalGpuErrorCheck": true
+    },
+    "falco-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/falco-regression.json",
+      "sha256": "1ba34b775cbace41263b51e8c28ccae845cc15909ac1b625dcac4904c5e264cb",
+      "completed": true,
+      "frames": 2240,
+      "renderedFrames": 2382,
+      "introFrames": 124
+    },
+    "bowser-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/bowser-regression.json",
+      "sha256": "c4b37f560d1997178db319c53b7727ce25f863062b4da0da2c92ffdda17edc72",
+      "completed": true,
+      "frames": 3058,
+      "renderedFrames": 0,
+      "introFrames": 0
+    },
+    "mewtwo-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/mewtwo-regression.json",
+      "sha256": "a17f89c56fc78c1d55815d42d1df51b222dfa4d738509c79ea89bde77d68e7ad",
+      "completed": true,
+      "frames": 2296,
+      "renderedFrames": 0,
+      "introFrames": 0
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mt --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mt --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600"
+  },
+  "visualInspection": [
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/full-copyhat.png",
+      "sha256": "8cad2d6d096b58c58456a9414418e5d61d0736f18a91e81538b7263ba973e642"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/full-copyfire.png",
+      "sha256": "f16827bdd31f99dda6ff59ee84de45f7eb3dad50b65956bf1b3cb7b60f4fe2c6"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-mewtwo/contact-gpu-copyfire.png",
+      "sha256": "e1511b8f0e7dec541ccb19ca1899610193b7eb516ca3277e6093a04e3083faa2"
+    }
+  ],
+  "notes": [
+    "Original gameplay callbacks retained. C changes expose read-only charge diagnostics.",
+    "Initial harness incorrectly expected projectile state 9; original charge maximum 7 launches state 8 (charge + 1). Corrected the expectation, not gameplay.",
+    "Default Kirby costume only; other copied costume colors remain pending.",
+    "No separate EfKbMt archive exists; common original effects and imported Shadow Ball animations are used."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  }
+}

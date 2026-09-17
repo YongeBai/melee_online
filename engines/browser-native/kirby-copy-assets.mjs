@@ -16,6 +16,7 @@ const profiles={
   Pk:{symbol:'Pikachu',dynamics:20,articles:[[2,4],[1,3]],wrappers:[[1,103488,103496,103512,[0],103504]]},
   Pc:{symbol:'Pichu',dynamics:20,articles:[[2,4],[1,3]],wrappers:[[1,115744,115752,115768,[0],115760]]},
   Fx:{symbol:'Fox',articles:[[2,10],[9,10]],wrappers:[[0,null,null,49320,[0]],[1,null,null,75392,[0]]]},
+  Mt:{symbol:'Mewtwo',bodyCopy:true,bodyMask:0x7f0,articles:[[10,16]],dynamics:28,wrappers:[[0,44632,44644,44656,[1,0]]]},
   Dk:{symbol:'Donkey',bodyCopy:true,bodyMask:0},
   Fc:{symbol:'Falco',bodyCopy:true,bodyMask:0x1800,articles:[[2,10],[9,10]],wrappers:[[0,null,null,2216,[0]],[1,null,null,28288,[0]]]},
   Ss:{symbol:'Samus',articles:[[9,8]],externals:['ItmKirbySsChargeShot_TopN_matanim_joint','ItmKirbySsChargeShot_TopN_shapeanim_joint'],wrappers:[[0,52664,null,52672,[0]]]},

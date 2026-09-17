@@ -5,6 +5,22 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Mewtwo copy now imports the original replacement body, seven-node tail
+dynamics and ten-state Shadow Ball Article. The rendered lifecycle passes 3,613
+input frames plus 124 intro frames. It stores three charge units, resumes to the
+native maximum of seven, releases full charge on the ground and in the air, and
+resets charge on copy loss/reacquisition. Tail allocation follows
+312 → 305 → 312 → 305 free nodes. The body draws in 2,689 frames.
+
+GPU contact passes 1,053 rendered frames: target damage rises from 8 to 16 with
+five hitlag frames at first impact. The firing snapshot checks 20,183 vertices,
+13 shader cases and 52 pixel channels. All 233 unit tests and shared browser
+checks pass; Falco-copy, Bowser-copy and original Mewtwo regressions also pass.
+These are compatibility checks, not a new FPS or latency result. Copied
+Jigglypuff, Yoshi and Game & Watch packages remain, along with the broader
+playable-game and acceptance gates below.
+[Mewtwo-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-mewtwo.json).
+
 Kirby's Ice Climbers copy now imports the original hat, separate hammer, ice
 Article and particle bank 46. The accessory descriptor is explicitly read from
 root +16 while +12 remains the projectile Article; Marth/Roy retain their +12

@@ -8,7 +8,7 @@ const root=path.resolve(import.meta.dirname,'../..');
 const filename=process.argv[2];
 if(!filename)throw Error('Pass the development USA 1.02 fixture path. This is a build tool, not player setup.');
 const fd=fs.openSync(filename,'r');
-const shared=['PlCo.dat','PdPm.dat','IfAll.usd','ItCo.usd','PlKbCpMr.dat','PlKbCpLg.dat','PlKbCpDr.dat','PlKbCpCa.dat','PlKbCpGn.dat','PlKbCpNs.dat','PlKbCpPe.dat','PlKbCpFx.dat','PlKbCpPk.dat','PlKbCpPc.dat','PlKbCpLk.dat','PlKbCpCl.dat','PlKbCpSs.dat','PlKbCpFc.dat','PlKbNrCpFc.dat','PlKbCpDk.dat','PlKbNrCpDk.dat','PlKbCpMs.dat','PlKbCpFe.dat','PlKbCpZd.dat','PlKbCpSk.dat','PlKbCpKp.dat','PlKbCpPp.dat'];
+const shared=['PlCo.dat','PdPm.dat','IfAll.usd','ItCo.usd','PlKbCpMr.dat','PlKbCpLg.dat','PlKbCpDr.dat','PlKbCpCa.dat','PlKbCpGn.dat','PlKbCpNs.dat','PlKbCpPe.dat','PlKbCpFx.dat','PlKbCpPk.dat','PlKbCpPc.dat','PlKbCpLk.dat','PlKbCpCl.dat','PlKbCpSs.dat','PlKbCpFc.dat','PlKbNrCpFc.dat','PlKbCpDk.dat','PlKbNrCpDk.dat','PlKbCpMs.dat','PlKbCpFe.dat','PlKbCpZd.dat','PlKbCpSk.dat','PlKbCpKp.dat','PlKbCpPp.dat','PlKbCpMt.dat','PlKbNrCpMt.dat'];
 const effects=['EfCoData.dat','EfCaData.dat','EfDkData.dat','EfMsData.dat','EfGnData.dat','EfFeData.dat','EfFxData.dat','EfPrData.dat','EfMrData.dat','EfLgData.dat','EfPkData.dat','EfSsData.dat','EfKpData.dat','EfLkData.dat','EfYsData.dat','EfMtData.dat','EfNsData.dat','EfZdData.dat','EfPeData.dat','EfIcData.dat','EfKbData.dat','EfKbMr.dat','EfKbLg.dat','EfKbCa.dat','EfKbGn.dat','EfKbFx.dat','EfKbPk.dat','EfKbSs.dat','EfKbDk.dat','EfKbMs.dat','EfKbFe.dat','EfKbZd.dat','EfKbKp.dat','EfKbIc.dat'];
 const names=['GrNBa.dat','GrNLa.dat','GrOp.dat','GrSt.dat','GrIz.dat','GrPs.usd'];
 const fighters=Object.keys(fighterArchives).map(code=>'Pl'+code+'.dat');

@@ -32,6 +32,19 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Kirby's Mewtwo copy imports its native replacement body, seven-node tail and
+ten-state Shadow Ball. Normal input verifies partial/full charge storage,
+ground/air release, copy loss and reacquisition:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mt --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Mt --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600
+```
+
+The initial harness expected full projectile state nine; source inspection
+confirmed charge seven launches state eight. Only the test expectation changed.
+This imports the default Kirby costume; other copied costume colors remain.
+
 Kirby's Ice Climbers copy uses the native hat, LThumbNb hammer accessory, ice
 Article and particle bank 46. Test the actual Nana partner with
 `--kirby-copy-nana`; Nana is not spawned as a separate selectable character:
