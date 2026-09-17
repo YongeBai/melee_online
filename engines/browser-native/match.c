@@ -123,6 +123,22 @@ void portTournamentInitializeCostumes(unsigned left,unsigned right,unsigned stag
     gm_SetupSubColors(&data);fn_8016DCC0(&data);initialized=1;
 }
 void portTournamentInitializeStage(unsigned left,unsigned right,unsigned stage){portTournamentInitializeCostumes(left,right,stage,0,0);}
+void portTournamentInitializeMenu(void)
+{
+    extern StartMeleeData* portMenuTakeMatch(void);
+    extern unsigned portSceneExitStatus(unsigned);
+    if(initialized)abort();StartMeleeData* data=portMenuTakeMatch();
+    /* Consume the original CSS/SSS rules and players directly. Do not recreate
+     * defaults or reset selected colors, controller indices or subcolors. */
+    portInitializeVsRouting();portSceneExitStatus(1);Player_80036DD8();gm_801A3E88();
+    for(unsigned i=0;i<PAD_MAX_CONTROLLERS;i++)HSD_PadCopyStatus[i]=HSD_PadGameStatus[i];
+    fn_8016DCC0(data);initialized=1;
+}
+HSD_GObj* portTournamentConstructSelected(unsigned slot)
+{
+    if(!initialized||started||slot>=2||Player_GetEntity(slot)||Player_GetPlayerSlotType(slot)!=Gm_PKind_Human)abort();
+    Player_80031AD0(slot);return Player_GetEntity(slot);
+}
 void portTournamentInitializeKinds(unsigned left,unsigned right){portTournamentInitializeStage(left,right,St_Kind_Battle);}
 void portTournamentInitialize(void){portTournamentInitializeKinds(Ft_Kind_Captain,Ft_Kind_Captain);}
 void portTournamentBegin(void)

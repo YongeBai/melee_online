@@ -1,0 +1,1243 @@
+{
+  "date": "2026-09-17",
+  "scope": "Original native menus to live match in the same WASM runtime; incomplete competitive release",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "wasm": {
+    "sha256": "1e4bd1a918b63349b66c4cb853cf43046ba3f41b199ea4e3455caa192b373ed6",
+    "bytes": 3547106
+  },
+  "validation": {
+    "unitTests": 265,
+    "sharedBrowser": true,
+    "rosterVisits": 15,
+    "menuMatchCases": 9,
+    "totalMenuMatchSteps": 8100,
+    "cases": [
+      {
+        "name": "31",
+        "selection": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 2,
+              "costume": 1,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 31,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 86,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 125,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              1,
+              479,
+              0
+            ]
+          }
+        ],
+        "input": {
+          "moved": 130,
+          "jumped": 156,
+          "jumpState": 25,
+          "attacked": 159,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 899,
+        "stage": {
+          "name": "Battlefield",
+          "kind": 31,
+          "collisionLoaded": true,
+          "vertexChecks": 52,
+          "modelGroups": [
+            0,
+            3,
+            1,
+            6
+          ],
+          "splineCount": 0,
+          "shadowCount": 0,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": null
+      },
+      {
+        "name": "32",
+        "selection": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 2,
+              "costume": 1,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 32,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 85,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 126,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              2,
+              479,
+              1
+            ]
+          }
+        ],
+        "input": {
+          "moved": 132,
+          "jumped": 157,
+          "jumpState": 25,
+          "attacked": 160,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 897,
+        "stage": {
+          "name": "Final Destination",
+          "kind": 32,
+          "collisionLoaded": true,
+          "vertexChecks": 32,
+          "modelGroups": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "splineCount": 2,
+          "shadowCount": 3,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": null
+      },
+      {
+        "name": "28",
+        "selection": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 2,
+              "costume": 1,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 28,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 85,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 126,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              2,
+              479,
+              1
+            ]
+          }
+        ],
+        "input": {
+          "moved": 132,
+          "jumped": 157,
+          "jumpState": 25,
+          "attacked": 160,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 897,
+        "stage": {
+          "name": "Dream Land",
+          "kind": 28,
+          "collisionLoaded": true,
+          "vertexChecks": 28,
+          "modelGroups": [
+            0,
+            3,
+            7,
+            5,
+            4,
+            6,
+            1
+          ],
+          "splineCount": 0,
+          "shadowCount": 10,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": null
+      },
+      {
+        "name": "8",
+        "selection": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 2,
+              "costume": 1,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 8,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 87,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 124,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          }
+        ],
+        "input": {
+          "moved": 129,
+          "jumped": 187,
+          "jumpState": 25,
+          "attacked": 190,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 897,
+        "stage": {
+          "name": "Yoshi's Story",
+          "kind": 8,
+          "collisionLoaded": true,
+          "vertexChecks": 68,
+          "modelGroups": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "splineCount": 1,
+          "shadowCount": 0,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": null
+      },
+      {
+        "name": "2",
+        "selection": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 2,
+              "costume": 1,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 2,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 86,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 124,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          }
+        ],
+        "input": {
+          "moved": 129,
+          "jumped": 186,
+          "jumpState": 25,
+          "attacked": 190,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 894,
+        "stage": {
+          "name": "Fountain of Dreams",
+          "kind": 2,
+          "collisionLoaded": true,
+          "vertexChecks": 76,
+          "modelGroups": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "splineCount": 1,
+          "shadowCount": 6,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": {
+          "stars": false,
+          "scenery": false,
+          "reflection": "constant black",
+          "originalSimulation": true
+        }
+      },
+      {
+        "name": "3",
+        "selection": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 2,
+              "costume": 1,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 3,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Fx",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Fx",
+            "costume": 1
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 88,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 126,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              2,
+              479,
+              1
+            ]
+          }
+        ],
+        "input": {
+          "moved": 132,
+          "jumped": 189,
+          "jumpState": 25,
+          "attacked": 192,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 896,
+        "stage": {
+          "name": "Pokémon Stadium",
+          "kind": 3,
+          "collisionLoaded": true,
+          "vertexChecks": 310,
+          "modelGroups": [
+            0,
+            1,
+            2,
+            5
+          ],
+          "splineCount": 0,
+          "shadowCount": 0,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": false,
+          "callbackProfile": "Original terrain/particles; frozen transformations and static background screen"
+        },
+        "cosmetics": null
+      },
+      {
+        "name": "31-pair-15-12",
+        "selection": {
+          "players": [
+            {
+              "character": 18,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 14,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 31,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Zd",
+            "costume": 0
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "code": "Sk",
+            "costume": 0
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Pp",
+            "costume": 0
+          },
+          {
+            "slot": 1,
+            "index": 1,
+            "code": "Nn",
+            "costume": 0
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 85,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 125,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              1,
+              479,
+              0
+            ]
+          }
+        ],
+        "input": {
+          "moved": 131,
+          "jumped": 159,
+          "jumpState": 25,
+          "attacked": 162,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 898,
+        "stage": {
+          "name": "Battlefield",
+          "kind": 31,
+          "collisionLoaded": true,
+          "vertexChecks": 52,
+          "modelGroups": [
+            0,
+            3,
+            1,
+            6
+          ],
+          "splineCount": 0,
+          "shadowCount": 0,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": null
+      },
+      {
+        "name": "31-pair-15-12-held-a",
+        "selection": {
+          "players": [
+            {
+              "character": 18,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 14,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 31,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Sk",
+            "costume": 0
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "code": "Zd",
+            "costume": 0
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Pp",
+            "costume": 0
+          },
+          {
+            "slot": 1,
+            "index": 1,
+            "code": "Nn",
+            "costume": 0
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 85,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 126,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              2,
+              479,
+              1
+            ]
+          }
+        ],
+        "input": {
+          "moved": 132,
+          "jumped": 154,
+          "jumpState": 25,
+          "attacked": 157,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 896,
+        "stage": {
+          "name": "Battlefield",
+          "kind": 31,
+          "collisionLoaded": true,
+          "vertexChecks": 52,
+          "modelGroups": [
+            0,
+            3,
+            1,
+            6
+          ],
+          "splineCount": 0,
+          "shadowCount": 0,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": null
+      },
+      {
+        "name": "31-pair-15-15-held-a",
+        "selection": {
+          "players": [
+            {
+              "character": 18,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 18,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 31,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "forms": [
+          {
+            "slot": 0,
+            "index": 0,
+            "code": "Sk",
+            "costume": 2
+          },
+          {
+            "slot": 0,
+            "index": 1,
+            "code": "Zd",
+            "costume": 2
+          },
+          {
+            "slot": 1,
+            "index": 0,
+            "code": "Zd",
+            "costume": 0
+          },
+          {
+            "slot": 1,
+            "index": 1,
+            "code": "Sk",
+            "costume": 0
+          }
+        ],
+        "sameRuntime": true,
+        "transitions": [
+          {
+            "frame": 0,
+            "mask": 8,
+            "gate": 0,
+            "blocked": [
+              1,
+              1
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 87,
+            "mask": 16,
+            "gate": 0,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          },
+          {
+            "frame": 124,
+            "mask": 0,
+            "gate": 1,
+            "blocked": [
+              0,
+              0
+            ],
+            "clock": [
+              0,
+              480,
+              59
+            ]
+          }
+        ],
+        "input": {
+          "moved": 129,
+          "jumped": 152,
+          "jumpState": 25,
+          "attacked": 155,
+          "attackState": 65
+        },
+        "frames": 900,
+        "drawSubmissions": 898,
+        "stage": {
+          "name": "Battlefield",
+          "kind": 31,
+          "collisionLoaded": true,
+          "vertexChecks": 52,
+          "modelGroups": [
+            0,
+            3,
+            1,
+            6
+          ],
+          "splineCount": 0,
+          "shadowCount": 0,
+          "shadowFlagCases": 256,
+          "animationCallbackCases": 16,
+          "completeStageStartup": false,
+          "originalCallbacks": true
+        },
+        "cosmetics": null
+      }
+    ]
+  },
+  "regression": {
+    "command": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --record-shaders",
+    "frames": 3600,
+    "drawSubmissions": 3600,
+    "elapsedMs": 60033.69999998808,
+    "simulationCpu": {
+      "samples": 3600,
+      "meanMs": 0.41577777778108915,
+      "p50Ms": 0.4000000059604645,
+      "p95Ms": 0.7000000178813934,
+      "maxMs": 2
+    },
+    "drawSubmissionCpu": {
+      "samples": 3600,
+      "meanMs": 3.5184166666037506,
+      "p50Ms": 3.2999999821186066,
+      "p95Ms": 5.300000011920929,
+      "maxMs": 16.299999982118607
+    },
+    "drawIntervals": {
+      "samples": 3599,
+      "meanMs": 16.670630730757726,
+      "p50Ms": 16.69999999999709,
+      "p95Ms": 16.799999999995634,
+      "maxMs": 33.399999999999636
+    },
+    "multiStepCallbacks": 0,
+    "submissionsOverBudget": 0,
+    "gpuReadbacks": false,
+    "shaderCoverage": {
+      "programs": 34,
+      "prepared": 0,
+      "preparedUsed": 0,
+      "unpreparedUsed": 34
+    },
+    "parity": {
+      "baselineCore": "30a315bcb54d64a97562ba9695aae1dc07b44b4a6aefc8764200b1db55240185",
+      "initial": true,
+      "final": true,
+      "stateChanges": true,
+      "workload": true,
+      "excludedFields": [
+        7,
+        8
+      ],
+      "reason": "relocated pointers"
+    }
+  },
+  "limitations": [
+    "Menu cases instrument native state and capture screenshots; they are functional checks, not FPS or latency measurements.",
+    "Fountain requires the previously accepted star/scenery/black-reflection profile; initial test without it rejected the unported GX points. Moving platforms and original stage callbacks remain active.",
+    "Timed regression is one hardware-headless workload after diagnostic startup/intro. It is not a timed all-stage/roster matrix, measured speedup, displayed-FPS or input-to-photon certification. Maximum draw interval is 33.4 ms.",
+    "Current menu API is stepped by the diagnostic; full interactive menu scheduling, results/rematch cleanup and routing, audio and public static integration remain unfinished.",
+    "Original no-ISO startup, camera and 4:3 framing retained. Public play route remains the older emulator implementation."
+  ]
+}

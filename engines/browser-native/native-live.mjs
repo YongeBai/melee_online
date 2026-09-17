@@ -30,7 +30,7 @@ export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1
 // Interactive development fixture, not complete competitive match startup.
 // Input samples enter the existing normalized HSD boundary; no game-state
 // positions, action states, damage or velocities are assigned here.
-export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,resolveObjects=null,readMatch=null}={}) {
+export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,resolveObjects=null,readMatch=null,unlockInput=true}={}) {
   // The first callback can carry a timestamp from before lengthy startup work.
   // Discard such timestamps, then anchor to the first valid display callback.
   // A quarter millisecond of repaid tolerance covers observed display jitter.
@@ -91,7 +91,9 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       raf=requestAnimationFrame(frame);
     }catch(error){stop();onError(error,snapshot());}
   }
-  for(let i=0;i<objects.length;i++)module._Player_80031848(i);
+  // Isolated post-intro fixtures explicitly unlock input. Real scene startup
+  // keeps the original gate until the Ready callback releases it.
+  if(unlockInput)for(let i=0;i<objects.length;i++)module._Player_80031848(i);
   addEventListener('keydown',input);addEventListener('keyup',input);addEventListener('blur',blur);addEventListener('focus',focus);document.addEventListener('visibilitychange',reset);
   raf=requestAnimationFrame(frame);
   return {snapshot,stop(){stop();onComplete(snapshot());}};

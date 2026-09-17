@@ -5,6 +5,37 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The native menu now starts a match in the same WASM runtime and on the same
+canvas. Original CSS/SSS data goes directly into `fn_8016DCC0`; original player
+construction preserves the selected costumes, subcolors, controllers and rules.
+Ready/Go runs at the live scheduler's cadence, retaining the original input and
+clock gates. The menu path loads the selected fighter families instead of running
+the standalone fixture's all-roster startup self-test. No ISO prompt is added.
+
+Nine browser runs cover a two-color Fox mirror on all six tournament stages,
+Zelda versus Climbers, held-A Sheik versus Climbers, and a Zelda/Sheik mirror.
+Each completes 900 simulation steps and checks a fresh browser-keyboard walk,
+jump and aerial attack after Go. The held-A form switch uses the original game
+routine; all four partner/form entities remain owned by their original players.
+Fountain retains the previously measured cosmetic profile (stars/scenery off,
+black reflection), with original moving platforms and camera. Stadium retains
+frozen transformations. The final core passes 265 unit tests, shared browser
+checks and the 15-visit character-menu regression.
+
+The isolated Kirby/Yoshi regression completes 3,600 simulation steps and draw
+submissions in 60.034 seconds. Simulation averages 0.416 ms; submission averages
+3.518 ms, p95 5.3 ms and maximum 16.3 ms. No multi-step callback occurs; maximum
+draw interval is 33.4 ms. Initial/final state, transitions and workload match the
+costume core after excluding relocated pointers. This is a single-workload
+regression, not an all-stage frame-rate or input-to-photon certification.
+
+This remains a diagnostic API. Interactive menu scheduling, results/rematch
+cleanup and routing, audio, public static deployment and displayed-FPS/latency
+validation remain unfinished. The public play route is unchanged.
+[Menu-to-match evidence](benchmarks/browser-2026-09-17-native-port-menu-match.json).
+
+Earlier milestones below retain their historical scope and pending-work notes.
+
 Selected costumes now reach the original match constructors and renderer.
 The original table drives filenames, joint/material symbols and color indices;
 mirror players retain separate models, and Zelda/Sheik, Popo/Nana and Kirby's

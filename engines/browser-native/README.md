@@ -75,8 +75,8 @@ text arena, avoiding a double free.
 This is an explicitly muted diagnostic, not a public playable menu. The host
 must accept `diagnostic-muted` before bank-load/wait calls can be bypassed;
 without it they execute the original loader. No bank readiness or voice playback
-is fabricated. Actual audio, rules/name submenus, Zelda/Sheik match-entry handling,
-match construction/results routing, saved preferences and the public two-seat layout remain
+is fabricated. Actual audio, rules/name submenus, results/rematch routing,
+saved preferences and the public two-seat layout remain
 unfinished. Complete archive conversion is not proof those submenu callbacks run.
 
 The expanded CSS probe also carries original VS structures through
@@ -85,8 +85,39 @@ The expanded CSS probe also carries original VS structures through
 and produce four-stock, eight-minute, no-items settings. Canceling stage select
 restores the CSS choices. `nativeCharacterMenu.toStage()` loads its hosted archive
 and exposes `nativeStageMenu`; `matchSelection()` reads the resulting setup.
-The constructor does not consume that setup yet. Stage icon constraints are
-resolved by the first original draw before world-space hit-target inspection.
+Stage icon constraints are resolved by the first original draw before
+world-space hit-target inspection.
+
+After stage confirmation and `nativeStageMenu.finish()`,
+`nativeCharacterMenu.startMatch()` consumes the original `StartMeleeData` in
+the same WASM instance. It loads the selected packages automatically and reuses
+the menu canvas. `fn_8016DCC0` initializes players directly from that setup;
+`Player_80031AD0` constructs them without replacing their character, color,
+subcolor, handicap, stock or controller settings. The original held-A Zelda/Sheik
+entry check receives the current normalized controller sample. Both forms and
+the Climbers' partner are preloaded.
+
+`constructor-runner.mjs` shares the existing construction/render path with the
+standalone diagnostic. Menu startup skips the standalone all-roster self-test;
+it loads common data and the selected fighter families. Ready/Go runs on the
+live frame scheduler with its original input and clock gates. The separate
+post-intro fixture still unlocks input explicitly. Fountain uses the retained
+star/scenery/black-reflection cosmetic profile; moving platforms and camera
+remain original. Stadium uses the retained frozen-transformation profile.
+
+```sh
+node scripts/native-port/probe-character-menu.mjs --match --stage=31
+node scripts/native-port/probe-character-menu.mjs --match --pair=15,12 --hold-a
+```
+
+The first command selects a two-color Fox mirror and checks native Ready/Go and
+fresh browser-keyboard movement, jump and aerial attack. Stage IDs are 31/32/28/
+8/2/3 for Battlefield/Final Destination/Dream Land/Yoshi's/Fountain/Stadium.
+The second selects Zelda and Climbers, then holds A at startup to exercise the
+original Sheik entry. Without `--hold-a`, Zelda remains the initial form.
+These instrumented tests are not FPS or input-to-photon measurements. This is
+still a diagnostic API: automatic interactive menu scheduling, results/rematch,
+audio and public-route integration remain unfinished.
 
 ## Original stage-select integration
 
@@ -101,8 +132,8 @@ polygon bindings even when the model descriptor stays the same.
 Its console API `nativeMenu` supplies step/draw/read/finish for the automated
 probe. Run it with `node scripts/native-port/probe-menu.mjs` after preparing
 fixtures and building the fighter-init target. Each probe starts a fresh runtime;
-finish disposes the renderer before original scene cleanup. Complete CSS and
-menu-to-match routing are still pending.
+finish disposes the renderer before original scene cleanup. The combined CSS,
+stage and match handoff is described above; results routing remains pending.
 
 The music device boundary requires an explicit host receiver. This diagnostic
 records and declines music requests, so it does not claim audible playback.

@@ -32,6 +32,11 @@ try{
   globalThis.nativeStageMenu=stage;for(let i=0;i<120;i++)stage.step();stage.draw();return read();
  };
  globalThis.nativeCharacterMenu.matchSelection=()=>({players:Array.from({length:4},(_,p)=>({character:module._portMenuMatchRead(0,p),costume:module._portMenuMatchRead(1,p),kind:module._portMenuMatchRead(2,p),stocks:module._portMenuMatchRead(3,p)})),stage:module._portMenuMatchRead(4,0),seconds:module._portMenuMatchRead(5,0),items:module._portMenuMatchRead(6,0),teams:module._portMenuMatchRead(7,0),mode:module._portMenuMatchRead(8,0),timer:module._portMenuMatchRead(9,0)});
+ globalThis.nativeCharacterMenu.startMatch=async(params={})=>{
+  const {runNativeConstructor}=await import('./constructor-runner.mjs');
+  const result=await runNativeConstructor({module,canvas:document.querySelector('#picture'),menuHandoff:true,params});
+  globalThis.nativeMenuMatchReport=result;return result;
+ };
  report.initial=preview.draw();for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;
 }catch(e){report.error=String(e.stack??e);}
 Object.assign(report,{diagnostics,music});globalThis.characterMenuReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);

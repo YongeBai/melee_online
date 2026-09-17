@@ -6,6 +6,7 @@
 #include <melee/gm/gmvsmelee.h>
 #include <melee/gm/gm_1601.h>
 #include <melee/gm/types.h>
+#include <melee/pl/player.h>
 #include <melee/lb/lblanguage.h>
 #include <sysdolphin/baselib/controller.h>
 #include <sysdolphin/baselib/gobj.h>
@@ -27,7 +28,8 @@ extern double portStageMenuNativeRead(unsigned,unsigned);
 static SSSData selection;
 static int initialized,character_initialized;
 static VsModeData selected_vs;
-/* 0: standalone; 1: CSS confirmed; 2: SSS active; 3: SSS canceled; 4: match ready. */
+/* 0: standalone; 1: CSS confirmed; 2: SSS active; 3: SSS canceled;
+ * 4: match ready; 5: setup consumed by the match. */
 static unsigned menu_transition;
 static HSD_GObj* cursor;
 static HSD_GObj *camera,*lights,*fog;
@@ -232,7 +234,7 @@ unsigned portCharacterMenuFinish(void)
 /* Read the original scene handoff, without re-encoding C structures in JS. */
 double portMenuMatchRead(unsigned field,unsigned player)
 {
-    if(menu_transition!=4||player>=GM_MAX_PLAYERS)abort();
+    if((menu_transition!=4&&menu_transition!=5)||player>=GM_MAX_PLAYERS)abort();
     StartMeleeData* d=&selected_vs.start;
     switch(field){
     case 0:return d->players[player].ckind;case 1:return d->players[player].color;
@@ -240,6 +242,12 @@ double portMenuMatchRead(unsigned field,unsigned player)
     case 4:return d->rules.stkind;case 5:return d->rules.time_limit;
     case 6:return d->rules.item_freq;case 7:return d->rules.is_teams;
     case 8:return d->rules.match_kind;case 9:return d->rules.timer_enabled;
+    case 10:return Player_800325C8(menu_transition==5?Player_GetPlayerCharacter(player):d->players[player].ckind,0);
     default:abort();
     }
+}
+StartMeleeData* portMenuTakeMatch(void)
+{
+    if(menu_transition!=4||initialized||character_initialized)abort();
+    menu_transition=5;return &selected_vs.start;
 }
