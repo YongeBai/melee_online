@@ -1,0 +1,3701 @@
+{
+  "date": "2026-09-17",
+  "baselineCommit": "197ee1255b016ffb18bf2612743514ece4140e3d",
+  "scope": "Exact page-sharing snapshots and reusable GPU assets with renderer-detached rollback; diagnostic only, production rooms unchanged",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "wasmSha256": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+  "sourceSha256": {
+    "engines/browser-native/wasm-snapshot.mjs": "6553f5670c193ed3cd02d75738f9f32ec87545b1ff50994f1e04349d7c3b2b83",
+    "engines/browser-native/paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+    "engines/browser-native/snapshot-page-kernel.mjs": "0b7cc1da8a52598a9083d119ccf59e844b77677b3a7e7bc9b39438fb678ecb28",
+    "engines/browser-native/snapshot-page-kernel.wat": "639758333fab6fcdcebf4401be5c0eef5e09ac0896ddab849fc5d61688262190",
+    "engines/browser-native/presentation-cache.mjs": "72ce635d628b58c4065198a5a08d19d5ceb3261c4e20f8944ea8c009550a2eb1",
+    "engines/browser-native/material-gpu.mjs": "980d5651064052b04fe9b63d8f40f56dd4ec0c4a94b7ee89b5fd8c383b113d4a",
+    "engines/browser-native/native-match-preview.mjs": "05d1a0c07b02a1ed2019de6da9b77d546c4b728dc2c0cc41c2e9b52b3a8cf7d1",
+    "engines/browser-native/native-texture.mjs": "5d888492f2e3e9592703e129b62339e931a090063479447ad8a50f66c33a5fb9",
+    "engines/browser-native/constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+    "engines/browser-native/rollback-probe.mjs": "fd390bedcbf351d51d7a6d749ed0f4d549aabe53fbe302d5a171c96daee8e78f",
+    "engines/browser-native/rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+    "scripts/native-port/build-page-kernel.mjs": "abb74a9a8647c56c4dd579f76a7f560c51751044b2973ae7c13a9ab6ec9f6e67",
+    "scripts/native-port/probe-rollback.mjs": "35d6e25980ad39ec0e9b6c55675b40d69605e71bf699c9cda03212eba468c4ce"
+  },
+  "host": {
+    "cpu": "AMD Ryzen AI 9 HX PRO 370",
+    "gpu": "Radeon 890M",
+    "browser": "Google Chrome 151.0.7922.137",
+    "node": "v24.15.0"
+  },
+  "configuration": {
+    "checkpointInterval": 4,
+    "predictionWindow": 12,
+    "defaultPresentationInterval": 60,
+    "scheduleDelayMs": 16,
+    "resolution": [
+      960,
+      720
+    ],
+    "rawPixelBytesCompared": 2764800
+  },
+  "comparisons": [
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "workload": "scripted",
+      "sameCompleteStateAndPixels": true,
+      "before": {
+        "captureMeanMs": 13.680503145328858,
+        "restoreMeanMs": 3.888636366887526,
+        "presentation": {
+          "count": 6,
+          "min": 168.59999999403954,
+          "median": 198.5,
+          "max": 336.7999999821186,
+          "mean": 217.68333333730698,
+          "values": [
+            180.2000000178814,
+            336.7999999821186,
+            187.30000001192093,
+            198.5,
+            234.7000000178814,
+            168.59999999403954
+          ]
+        },
+        "peakSampledKernelSnapshotBytes": 454754304,
+        "peakReferencedPageBytes": null,
+        "allocatedPagePoolBytes": null
+      },
+      "after": {
+        "captureMeanMs": 4.539751552091622,
+        "restoreMeanMs": 3.0183673452357858,
+        "presentation": {
+          "count": 6,
+          "min": 14.5,
+          "median": 16.299999982118607,
+          "max": 21.599999994039536,
+          "mean": 16.78333332637946,
+          "values": [
+            14.899999976158142,
+            18.099999994039536,
+            14.5,
+            16.299999982118607,
+            21.599999994039536,
+            15.300000011920929
+          ]
+        },
+        "peakSampledKernelSnapshotBytes": 42205184,
+        "peakReferencedPageBytes": 43515904,
+        "allocatedPagePoolBytes": 46202880
+      }
+    },
+    {
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "workload": "combat",
+      "sameCompleteStateAndPixels": true,
+      "before": {
+        "captureMeanMs": 17.840728196120686,
+        "restoreMeanMs": 4.331932772524884,
+        "presentation": {
+          "count": 58,
+          "min": 246.2999999821186,
+          "median": 283.09999999403954,
+          "max": 367.19999998807907,
+          "mean": 290.39137930808397,
+          "values": [
+            325.40000000596046,
+            341.90000000596046,
+            280.7000000178814,
+            259.7999999821186,
+            284.09999999403954,
+            300.59999999403954,
+            260.09999999403954,
+            263.69999998807907,
+            278,
+            307.5,
+            333.40000000596046,
+            349,
+            352.19999998807907,
+            315.10000002384186,
+            321.59999999403954,
+            262.30000001192093,
+            281.89999997615814,
+            287.19999998807907,
+            304.19999998807907,
+            278.59999999403954,
+            290.59999999403954,
+            263.5,
+            267.2999999821186,
+            346,
+            257.2000000178814,
+            283.09999999403954,
+            275.90000000596046,
+            268.5,
+            256.09999999403954,
+            247.80000001192093,
+            323.09999999403954,
+            275.09999999403954,
+            246.59999999403954,
+            253.80000001192093,
+            299.69999998807907,
+            254.2999999821186,
+            302,
+            344.2000000178814,
+            285.89999997615814,
+            321.39999997615814,
+            255.80000001192093,
+            367.19999998807907,
+            279.19999998807907,
+            348.5,
+            246.5,
+            280.39999997615814,
+            271.39999997615814,
+            325.19999998807907,
+            312.60000002384186,
+            249.69999998807907,
+            261.80000001192093,
+            267.30000001192093,
+            306.60000002384186,
+            302.10000002384186,
+            322.19999998807907,
+            264.69999998807907,
+            246.2999999821186,
+            285.80000001192093
+          ]
+        },
+        "peakSampledKernelSnapshotBytes": 546177024,
+        "peakReferencedPageBytes": null,
+        "allocatedPagePoolBytes": null
+      },
+      "after": {
+        "captureMeanMs": 4.691109297739351,
+        "restoreMeanMs": 3.510000000109798,
+        "presentation": {
+          "count": 58,
+          "min": 11.5,
+          "median": 16.900000005960464,
+          "max": 41,
+          "mean": 18.010344828511105,
+          "values": [
+            22.69999998807907,
+            18,
+            23.5,
+            23.700000017881393,
+            22.5,
+            20.599999994039536,
+            16.900000005960464,
+            31.5,
+            15.900000005960464,
+            18.200000017881393,
+            13.199999988079071,
+            14.800000011920929,
+            18.600000023841858,
+            12.199999988079071,
+            14.599999994039536,
+            13.199999988079071,
+            13.600000023841858,
+            13.799999982118607,
+            18.400000005960464,
+            18.5,
+            14.5,
+            14.800000011920929,
+            21.400000005960464,
+            16.19999998807907,
+            21.30000001192093,
+            41,
+            24.400000005960464,
+            13.400000005960464,
+            18.900000005960464,
+            22.100000023841858,
+            16.900000005960464,
+            14.699999988079071,
+            19.19999998807907,
+            19.69999998807907,
+            15.400000005960464,
+            19.30000001192093,
+            25.80000001192093,
+            16.5,
+            17,
+            15,
+            14.599999994039536,
+            14.399999976158142,
+            12.700000017881393,
+            14.900000005960464,
+            11.5,
+            13.400000005960464,
+            14.099999994039536,
+            19.69999998807907,
+            17.19999998807907,
+            14,
+            13.599999994039536,
+            16.599999994039536,
+            15.5,
+            24.099999994039536,
+            22.19999998807907,
+            19.900000005960464,
+            16.69999998807907,
+            17.600000023841858
+          ]
+        },
+        "peakSampledKernelSnapshotBytes": 61472768,
+        "peakReferencedPageBytes": 61472768,
+        "allocatedPagePoolBytes": 62980096
+      }
+    }
+  ],
+  "trials": [
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "workload": "scripted",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "1c204a7ae591fbe0915be09ee64198f89808441fe91c983a1d25aa47a7d90401",
+        "memorySha256": "0698b136fa3a49cc253ec314ba19bffa2d48f3f05472444bf701d02e6e3d4dbf",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+        "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 34,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1919200,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 13883808,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [],
+        "final": [],
+        "ranges": []
+      },
+      "transport": {
+        "packets": 480,
+        "reordered": 188,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "afterPresentationRestoreSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 17,
+            "replayedFrames": 84,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42205184,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41943040
+          },
+          "snapshotCosts": {
+            "captures": 79,
+            "restores": 24,
+            "capturedBytes": 149618688,
+            "restoredBytes": 1212678144,
+            "comparedBytes": 3991732224,
+            "sharedPages": 58627,
+            "guardCpuMs": 46.29999998211861,
+            "captureCpuMs": 368.99999991059303,
+            "restoreCpuMs": 68.49999997019768,
+            "maxCaptureCpuMs": 14.099999994039536,
+            "maxRestoreCpuMs": 7.5,
+            "peakRetainedBytes": 43515904,
+            "retainedBytes": 41943040,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880,
+            "meanCaptureCpuMs": 4.670886074817633,
+            "meanRestoreCpuMs": 2.8541666654249034,
+            "meanNewSnapshotBytes": 1893907.4430379746
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 14.5,
+            "median": 14.899999976158142,
+            "max": 18.099999994039536,
+            "mean": 15.833333323399225,
+            "values": [
+              14.899999976158142,
+              18.099999994039536,
+              14.5
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "assetCache": {
+            "modelHits": 62,
+            "modelMisses": 17,
+            "textureHits": 353,
+            "textureMisses": 126,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 17,
+            "programs": 29,
+            "textures": 126,
+            "textureSourceBytes": 623718,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 18,
+              "hits": 190,
+              "verticesDecoded": 26555
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "renderMutationBytes": 6322,
+          "elapsedDiagnosticMs": 5347.4000000059605,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "afterPresentationRestoreSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 238,
+            "corrections": 18,
+            "replayedFrames": 93,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42205184,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41943040
+          },
+          "snapshotCosts": {
+            "captures": 82,
+            "restores": 25,
+            "capturedBytes": 154599424,
+            "restoredBytes": 1263206400,
+            "comparedBytes": 4143316992,
+            "sharedPages": 60864,
+            "guardCpuMs": 40.300000071525574,
+            "captureCpuMs": 361.89999997615814,
+            "restoreCpuMs": 79.39999994635582,
+            "maxCaptureCpuMs": 13.800000011920929,
+            "maxRestoreCpuMs": 7.199999988079071,
+            "peakRetainedBytes": 43515904,
+            "retainedBytes": 41943040,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880,
+            "meanCaptureCpuMs": 4.413414633855587,
+            "meanRestoreCpuMs": 3.1759999978542326,
+            "meanNewSnapshotBytes": 1885358.8292682928
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 15.300000011920929,
+            "median": 16.299999982118607,
+            "max": 21.599999994039536,
+            "mean": 17.73333332935969,
+            "values": [
+              16.299999982118607,
+              21.599999994039536,
+              15.300000011920929
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "assetCache": {
+            "modelHits": 62,
+            "modelMisses": 17,
+            "textureHits": 353,
+            "textureMisses": 126,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 17,
+            "programs": 29,
+            "textures": 126,
+            "textureSourceBytes": 623718,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 18,
+              "hits": 190,
+              "verticesDecoded": 26555
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "renderMutationBytes": 6322,
+          "elapsedDiagnosticMs": 4981.9000000059605,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Fc-Fx-optimized/corrected-0.png",
+            "sha256": "74983c480ea2b7e7e33efb2a75b3bf4e7d8a1fac844603927b5e1b06244ad9c7"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Fc-Fx-optimized/corrected-1.png",
+            "sha256": "74983c480ea2b7e7e33efb2a75b3bf4e7d8a1fac844603927b5e1b06244ad9c7"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "story",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "workload": "scripted",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "3955c23e29a6cbcf4183b471a6ec2022f0c0df632d9c5def5e59a69ac6a81feb",
+        "memorySha256": "15aac42cf6591ed64dd3c75e1a59ef6ce36a5d1a6575a5c47c2893e4e99d2d52",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+        "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 8,
+        "damageFrames": 0,
+        "attackFrames": 4,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1923808,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 15828864,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [
+          -51.36943054199219,
+          -38.5
+        ],
+        "final": [
+          33.793251037597656,
+          -38.5
+        ],
+        "ranges": [
+          {
+            "min": -40.72410583496094,
+            "max": 33.793251037597656
+          },
+          {
+            "min": -38.5,
+            "max": -38.499996185302734
+          }
+        ]
+      },
+      "transport": {
+        "packets": 480,
+        "reordered": 187,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+          "afterPresentationRestoreSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 236,
+            "corrections": 17,
+            "replayedFrames": 83,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 47841280,
+            "retainedSnapshots": 4,
+            "retainedBytes": 44957696
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 24,
+            "capturedBytes": 167444480,
+            "restoredBytes": 1456472064,
+            "comparedBytes": 4733534208,
+            "sharedPages": 69674,
+            "guardCpuMs": 44.69999998807907,
+            "captureCpuMs": 421.70000022649765,
+            "restoreCpuMs": 88.10000002384186,
+            "maxCaptureCpuMs": 17,
+            "maxRestoreCpuMs": 9.200000017881393,
+            "peakRetainedBytes": 47841280,
+            "retainedBytes": 44957696,
+            "count": 7,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184,
+            "meanCaptureCpuMs": 5.406410259314073,
+            "meanRestoreCpuMs": 3.670833334326744,
+            "meanNewSnapshotBytes": 2146724.1025641025
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 20.19999998807907,
+            "median": 23.099999994039536,
+            "max": 25.5,
+            "mean": 22.933333327372868,
+            "values": [
+              23.099999994039536,
+              20.19999998807907,
+              25.5
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43",
+            "fresh": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43"
+          },
+          "assetCache": {
+            "modelHits": 66,
+            "modelMisses": 18,
+            "textureHits": 467,
+            "textureMisses": 163,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 18,
+            "programs": 32,
+            "textures": 163,
+            "textureSourceBytes": 1246544,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 19,
+              "hits": 194,
+              "verticesDecoded": 28754
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.5498374700546265,
+              24.83981704711914,
+              143.14468383789062
+            ],
+            "interest": [
+              -1.7742576599121094,
+              12.03598690032959,
+              0
+            ],
+            "fov": 20,
+            "aspect": 1.2173333168029785,
+            "draws": 350
+          },
+          "renderMutationBytes": 6142,
+          "elapsedDiagnosticMs": 5343.0999999940395,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+          "afterPresentationRestoreSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 237,
+            "corrections": 19,
+            "replayedFrames": 96,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 47316992,
+            "retainedSnapshots": 5,
+            "retainedBytes": 46989312
+          },
+          "snapshotCosts": {
+            "captures": 81,
+            "restores": 26,
+            "capturedBytes": 172883968,
+            "restoredBytes": 1577844736,
+            "comparedBytes": 4915593216,
+            "sharedPages": 72369,
+            "guardCpuMs": 41.800000071525574,
+            "captureCpuMs": 414.99999994039536,
+            "restoreCpuMs": 86.49999997019768,
+            "maxCaptureCpuMs": 14.900000005960464,
+            "maxRestoreCpuMs": 8.799999982118607,
+            "peakRetainedBytes": 48562176,
+            "retainedBytes": 46989312,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184,
+            "meanCaptureCpuMs": 5.123456789387597,
+            "meanRestoreCpuMs": 3.3269230757768335,
+            "meanNewSnapshotBytes": 2134369.975308642
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 15,
+            "median": 22,
+            "max": 28.099999994039536,
+            "mean": 21.69999999801318,
+            "values": [
+              22,
+              28.099999994039536,
+              15
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43",
+            "fresh": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43"
+          },
+          "assetCache": {
+            "modelHits": 66,
+            "modelMisses": 18,
+            "textureHits": 467,
+            "textureMisses": 163,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 18,
+            "programs": 32,
+            "textures": 163,
+            "textureSourceBytes": 1246544,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 19,
+              "hits": 194,
+              "verticesDecoded": 28754
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.5498374700546265,
+              24.83981704711914,
+              143.14468383789062
+            ],
+            "interest": [
+              -1.7742576599121094,
+              12.03598690032959,
+              0
+            ],
+            "fov": 20,
+            "aspect": 1.2173333168029785,
+            "draws": 350
+          },
+          "renderMutationBytes": 6142,
+          "elapsedDiagnosticMs": 5145.200000017881,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-story-Fc-Fx-optimized/corrected-0.png",
+            "sha256": "327511ecb5bf9df2e805a8b0f5de3373ab31b06d06ae5154e02812d09bf84a34"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-story-Fc-Fx-optimized/corrected-1.png",
+            "sha256": "327511ecb5bf9df2e805a8b0f5de3373ab31b06d06ae5154e02812d09bf84a34"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "stadium",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "workload": "scripted",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "8a0babae0d433b8d2d5db2b16bbfdb23316cb58e0ef2352e8b268b8ad280a042",
+        "memorySha256": "27f71f5848c56bd32e122db18bbb9a96018e6c9d5a01fd6ff54b933cd8eb22f1",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+        "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 8,
+        "damageFrames": 0,
+        "attackFrames": 4,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1924192,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 17223968,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [
+          0,
+          5,
+          3600,
+          41,
+          80,
+          0
+        ],
+        "final": [
+          0,
+          5,
+          3600,
+          281,
+          80,
+          0
+        ],
+        "ranges": [
+          {
+            "min": 0,
+            "max": 0
+          },
+          {
+            "min": 5,
+            "max": 5
+          },
+          {
+            "min": 3600,
+            "max": 3600
+          },
+          {
+            "min": 71,
+            "max": 281
+          },
+          {
+            "min": 80,
+            "max": 80
+          },
+          {
+            "min": 0,
+            "max": 0
+          }
+        ]
+      },
+      "transport": {
+        "packets": 480,
+        "reordered": 184,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+          "afterPresentationRestoreSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 18,
+            "replayedFrames": 89,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 50331648,
+            "retainedSnapshots": 5,
+            "retainedBytes": 49610752
+          },
+          "snapshotCosts": {
+            "captures": 80,
+            "restores": 25,
+            "capturedBytes": 170262528,
+            "restoredBytes": 1517158400,
+            "comparedBytes": 4854906880,
+            "sharedPages": 71483,
+            "guardCpuMs": 37.000000178813934,
+            "captureCpuMs": 442.4000000655651,
+            "restoreCpuMs": 88.70000004768372,
+            "maxCaptureCpuMs": 13.400000005960464,
+            "maxRestoreCpuMs": 10.199999988079071,
+            "peakRetainedBytes": 51183616,
+            "retainedBytes": 49610752,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 54591488,
+            "meanCaptureCpuMs": 5.530000000819564,
+            "meanRestoreCpuMs": 3.5480000019073485,
+            "meanNewSnapshotBytes": 2128281.6
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 14.800000011920929,
+            "median": 17.299999982118607,
+            "max": 17.799999982118607,
+            "mean": 16.633333325386047,
+            "values": [
+              14.800000011920929,
+              17.799999982118607,
+              17.299999982118607
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac",
+            "fresh": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac"
+          },
+          "assetCache": {
+            "modelHits": 62,
+            "modelMisses": 17,
+            "textureHits": 463,
+            "textureMisses": 158,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 17,
+            "programs": 33,
+            "textures": 158,
+            "textureSourceBytes": 1170156,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 18,
+              "hits": 190,
+              "verticesDecoded": 28009
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.0259143114089966,
+              25.855648040771484,
+              86.34040832519531
+            ],
+            "interest": [
+              -1.4996124505996704,
+              15.240766525268555,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 271
+          },
+          "renderMutationBytes": 5993,
+          "elapsedDiagnosticMs": 5486.5,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+          "afterPresentationRestoreSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 233,
+            "corrections": 17,
+            "replayedFrames": 88,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 49807360,
+            "retainedSnapshots": 5,
+            "retainedBytes": 49610752
+          },
+          "snapshotCosts": {
+            "captures": 81,
+            "restores": 24,
+            "capturedBytes": 171900928,
+            "restoredBytes": 1456472064,
+            "comparedBytes": 4915593216,
+            "sharedPages": 72384,
+            "guardCpuMs": 43.89999979734421,
+            "captureCpuMs": 442.19999998807907,
+            "restoreCpuMs": 81.30000001192093,
+            "maxCaptureCpuMs": 11.599999994039536,
+            "maxRestoreCpuMs": 7.5,
+            "peakRetainedBytes": 51183616,
+            "retainedBytes": 49610752,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 54591488,
+            "meanCaptureCpuMs": 5.459259259112088,
+            "meanRestoreCpuMs": 3.3875000004967055,
+            "meanNewSnapshotBytes": 2122233.6790123456
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 17.099999994039536,
+            "median": 17.5,
+            "max": 19.5,
+            "mean": 18.033333331346512,
+            "values": [
+              17.099999994039536,
+              19.5,
+              17.5
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac",
+            "fresh": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac"
+          },
+          "assetCache": {
+            "modelHits": 62,
+            "modelMisses": 17,
+            "textureHits": 463,
+            "textureMisses": 158,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 17,
+            "programs": 33,
+            "textures": 158,
+            "textureSourceBytes": 1170156,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 18,
+              "hits": 190,
+              "verticesDecoded": 28009
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.0259143114089966,
+              25.855648040771484,
+              86.34040832519531
+            ],
+            "interest": [
+              -1.4996124505996704,
+              15.240766525268555,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 271
+          },
+          "renderMutationBytes": 5993,
+          "elapsedDiagnosticMs": 5074.299999982119,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-stadium-Fc-Fx-optimized/corrected-0.png",
+            "sha256": "24c17569c9d3a569b6ebcb3ea0d5761fe029bb448eace2c9a8c666dd938ae5c9"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-stadium-Fc-Fx-optimized/corrected-1.png",
+            "sha256": "24c17569c9d3a569b6ebcb3ea0d5761fe029bb448eace2c9a8c666dd938ae5c9"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "dreamland",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "workload": "scripted",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "6c882a54bb0d130d36efc3df0624be2885354c723b3a6b0734438765d5d0f969",
+        "memorySha256": "df065b24abe5f8b125cd8eae954bbfeb2f6ee65fd5d592a422a8d0ced314ae59",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          1,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+        "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          1,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 34,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1925984,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 14497184,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [
+          0,
+          0,
+          580
+        ],
+        "final": [
+          0,
+          0,
+          340
+        ],
+        "ranges": [
+          {
+            "min": 0,
+            "max": 0
+          },
+          {
+            "min": 0,
+            "max": 0
+          },
+          {
+            "min": 340,
+            "max": 550
+          }
+        ]
+      },
+      "transport": {
+        "packets": 480,
+        "reordered": 185,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+          "afterPresentationRestoreSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 239,
+            "corrections": 18,
+            "replayedFrames": 90,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43843584,
+            "retainedSnapshots": 6,
+            "retainedBytes": 44892160
+          },
+          "snapshotCosts": {
+            "captures": 79,
+            "restores": 25,
+            "capturedBytes": 151257088,
+            "restoredBytes": 1263206400,
+            "comparedBytes": 3991732224,
+            "sharedPages": 58602,
+            "guardCpuMs": 53.300000101327896,
+            "captureCpuMs": 383.40000000596046,
+            "restoreCpuMs": 81.30000004172325,
+            "maxCaptureCpuMs": 13,
+            "maxRestoreCpuMs": 7.899999976158142,
+            "peakRetainedBytes": 46530560,
+            "retainedBytes": 44892160,
+            "count": 9,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184,
+            "meanCaptureCpuMs": 4.853164557037474,
+            "meanRestoreCpuMs": 3.25200000166893,
+            "meanNewSnapshotBytes": 1914646.6835443038
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 16.30000001192093,
+            "median": 19.30000001192093,
+            "max": 29.900000005960464,
+            "mean": 21.83333334326744,
+            "values": [
+              19.30000001192093,
+              29.900000005960464,
+              16.30000001192093
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277",
+            "fresh": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277"
+          },
+          "assetCache": {
+            "modelHits": 70,
+            "modelMisses": 19,
+            "textureHits": 413,
+            "textureMisses": 141,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 19,
+            "programs": 32,
+            "textures": 141,
+            "textureSourceBytes": 1156692,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 21,
+              "hits": 326,
+              "verticesDecoded": 16581
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              1.3618351221084595,
+              16.934423446655273,
+              238.098388671875
+            ],
+            "interest": [
+              -14.723745346069336,
+              9.44859790802002,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 216
+          },
+          "renderMutationBytes": 6024,
+          "elapsedDiagnosticMs": 5363.899999976158,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+          "afterPresentationRestoreSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 234,
+            "corrections": 19,
+            "replayedFrames": 91,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43646976,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43319296
+          },
+          "snapshotCosts": {
+            "captures": 81,
+            "restores": 26,
+            "capturedBytes": 153878528,
+            "restoredBytes": 1313734656,
+            "comparedBytes": 4092788736,
+            "sharedPages": 60104,
+            "guardCpuMs": 48.39999979734421,
+            "captureCpuMs": 422.00000005960464,
+            "restoreCpuMs": 85.30000004172325,
+            "maxCaptureCpuMs": 12.5,
+            "maxRestoreCpuMs": 7.5,
+            "peakRetainedBytes": 44957696,
+            "retainedBytes": 43319296,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880,
+            "meanCaptureCpuMs": 5.209876543945736,
+            "meanRestoreCpuMs": 3.280769232373971,
+            "meanNewSnapshotBytes": 1899734.913580247
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 15,
+            "median": 15.900000005960464,
+            "max": 16.700000017881393,
+            "mean": 15.866666674613953,
+            "values": [
+              15.900000005960464,
+              16.700000017881393,
+              15
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277",
+            "fresh": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277"
+          },
+          "assetCache": {
+            "modelHits": 70,
+            "modelMisses": 19,
+            "textureHits": 413,
+            "textureMisses": 141,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 19,
+            "programs": 32,
+            "textures": 141,
+            "textureSourceBytes": 1156692,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 21,
+              "hits": 326,
+              "verticesDecoded": 16581
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              1.3618351221084595,
+              16.934423446655273,
+              238.098388671875
+            ],
+            "interest": [
+              -14.723745346069336,
+              9.44859790802002,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 216
+          },
+          "renderMutationBytes": 6024,
+          "elapsedDiagnosticMs": 4981.4000000059605,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-dreamland-Fc-Fx-optimized/corrected-0.png",
+            "sha256": "acdf3c0b455ac699b27ba3ea8524e89ec09878fd6af114e38ad34dc5188d3f9f"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-dreamland-Fc-Fx-optimized/corrected-1.png",
+            "sha256": "acdf3c0b455ac699b27ba3ea8524e89ec09878fd6af114e38ad34dc5188d3f9f"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "destination",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "workload": "scripted",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "927b2519794b047bc55d95afc5acd6fd48d6eceab59f7338812178e721d2c756",
+        "memorySha256": "6baeae4ef84388d5be95d28d7cf090f41b408224263d211d700db63ca62a3de7",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+        "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 34,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 12544512,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 14360288,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [],
+        "final": [],
+        "ranges": []
+      },
+      "transport": {
+        "packets": 480,
+        "reordered": 189,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+          "afterPresentationRestoreSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 17,
+            "replayedFrames": 89,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 45088768,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43843584
+          },
+          "snapshotCosts": {
+            "captures": 80,
+            "restores": 24,
+            "capturedBytes": 165675008,
+            "restoredBytes": 1212678144,
+            "comparedBytes": 4042260480,
+            "sharedPages": 59153,
+            "guardCpuMs": 47.499999940395355,
+            "captureCpuMs": 382.7999999821186,
+            "restoreCpuMs": 71.7999999821186,
+            "maxCaptureCpuMs": 15.900000005960464,
+            "maxRestoreCpuMs": 7.799999982118607,
+            "peakRetainedBytes": 45481984,
+            "retainedBytes": 43843584,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880,
+            "meanCaptureCpuMs": 4.784999999776483,
+            "meanRestoreCpuMs": 2.9916666659216085,
+            "meanNewSnapshotBytes": 2070937.6
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 16.80000001192093,
+            "median": 18,
+            "max": 28.299999982118607,
+            "mean": 21.033333331346512,
+            "values": [
+              18,
+              28.299999982118607,
+              16.80000001192093
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0",
+            "fresh": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0"
+          },
+          "assetCache": {
+            "modelHits": 82,
+            "modelMisses": 22,
+            "textureHits": 317,
+            "textureMisses": 117,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 22,
+            "programs": 26,
+            "textures": 117,
+            "textureSourceBytes": 637414,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 210,
+              "verticesDecoded": 30918
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.851180911064148,
+              29.70431900024414,
+              130.90716552734375
+            ],
+            "interest": [
+              -2.153271198272705,
+              14.212993621826172,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 200
+          },
+          "renderMutationBytes": 6454,
+          "elapsedDiagnosticMs": 5163.9000000059605,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+          "afterPresentationRestoreSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 231,
+            "corrections": 20,
+            "replayedFrames": 97,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 44040192,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43843584
+          },
+          "snapshotCosts": {
+            "captures": 81,
+            "restores": 27,
+            "capturedBytes": 167247872,
+            "restoredBytes": 1364262912,
+            "comparedBytes": 4092788736,
+            "sharedPages": 59900,
+            "guardCpuMs": 54.700000166893005,
+            "captureCpuMs": 366.90000009536743,
+            "restoreCpuMs": 82.00000002980232,
+            "maxCaptureCpuMs": 10.400000005960464,
+            "maxRestoreCpuMs": 7.0999999940395355,
+            "peakRetainedBytes": 45481984,
+            "retainedBytes": 43843584,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880,
+            "meanCaptureCpuMs": 4.529629630807006,
+            "meanRestoreCpuMs": 3.0370370381408267,
+            "meanNewSnapshotBytes": 2064788.5432098766
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 17.299999982118607,
+            "median": 19.900000005960464,
+            "max": 29.299999982118607,
+            "mean": 22.16666665673256,
+            "values": [
+              17.299999982118607,
+              29.299999982118607,
+              19.900000005960464
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0",
+            "fresh": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0"
+          },
+          "assetCache": {
+            "modelHits": 82,
+            "modelMisses": 22,
+            "textureHits": 317,
+            "textureMisses": 117,
+            "textureInvalidations": 0,
+            "rendererLeases": 5,
+            "models": 22,
+            "programs": 26,
+            "textures": 117,
+            "textureSourceBytes": 637414,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 210,
+              "verticesDecoded": 30918
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.851180911064148,
+              29.70431900024414,
+              130.90716552734375
+            ],
+            "interest": [
+              -2.153271198272705,
+              14.212993621826172,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 200
+          },
+          "renderMutationBytes": 6454,
+          "elapsedDiagnosticMs": 4982.699999988079,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-destination-Fc-Fx-optimized/corrected-0.png",
+            "sha256": "ce9ad548a1c05b1e474ad59551c1b883b82c4d7582dd2873c9f53ee4ad1649b0"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-destination-Fc-Fx-optimized/corrected-1.png",
+            "sha256": "ce9ad548a1c05b1e474ad59551c1b883b82c4d7582dd2873c9f53ee4ad1649b0"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "workload": "scripted",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "7651eaab1778a9a0ec6eb0da34ecd5edae2d6196a5927904daeb5265a4ca110f",
+        "memorySha256": "a0bc16d391df5a0037557bd2ac5e7191465f0af44526c29294989e6608cfce1a",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+        "memorySha256": "0fa3b9315c3eae4815bf2dfc59e4393fcdfac8f53e01852481bbb36098444cf9",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 360,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 17810112,
+          "code": "Pp",
+          "costume": 0
+        },
+        {
+          "slot": 0,
+          "index": 1,
+          "owner": 18718560,
+          "code": "Nn",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 19492320,
+          "code": "Pe",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [
+          20,
+          28
+        ],
+        "final": [
+          20,
+          19.42059326171875
+        ],
+        "ranges": [
+          {
+            "min": 20,
+            "max": 20
+          },
+          {
+            "min": 19.42059326171875,
+            "max": 28
+          }
+        ]
+      },
+      "transport": {
+        "packets": 3600,
+        "reordered": 1408,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+          "afterPresentationRestoreSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1787,
+            "corrections": 124,
+            "replayedFrames": 606,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 60882944,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58327040
+          },
+          "snapshotCosts": {
+            "captures": 561,
+            "restores": 157,
+            "capturedBytes": 1153564672,
+            "restoredBytes": 9527754752,
+            "comparedBytes": 34045034496,
+            "sharedPages": 501885,
+            "guardCpuMs": 308.899999499321,
+            "captureCpuMs": 2939.100000411272,
+            "restoreCpuMs": 599.3999997079372,
+            "maxCaptureCpuMs": 15.800000011920929,
+            "maxRestoreCpuMs": 9.599999994039536,
+            "peakRetainedBytes": 60882944,
+            "retainedBytes": 58327040,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 62980096,
+            "meanCaptureCpuMs": 5.2390374338881855,
+            "meanRestoreCpuMs": 3.817834393044186,
+            "meanNewSnapshotBytes": 2056265.0124777183
+          },
+          "presentationCpuMs": {
+            "count": 29,
+            "min": 14,
+            "median": 17.80000001192093,
+            "max": 63,
+            "mean": 20.53448275759302,
+            "values": [
+              34.900000005960464,
+              63,
+              22.099999994039536,
+              21.30000001192093,
+              16.099999994039536,
+              23.599999994039536,
+              17.599999994039536,
+              19.400000005960464,
+              19.599999994039536,
+              15.400000005960464,
+              17.400000005960464,
+              16.400000005960464,
+              15.5,
+              17.69999998807907,
+              17.30000001192093,
+              21.19999998807907,
+              17.80000001192093,
+              18.599999994039536,
+              17.19999998807907,
+              15.5,
+              19.30000001192093,
+              17.599999994039536,
+              18.69999998807907,
+              23.5,
+              14,
+              20.5,
+              16.099999994039536,
+              17.69999998807907,
+              20.5
+            ]
+          },
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "ab65e9a246fa68202810dc0fa6c3a8b2fa749a41548f8525d28a2912f7832713",
+            "fresh": "ab65e9a246fa68202810dc0fa6c3a8b2fa749a41548f8525d28a2912f7832713"
+          },
+          "assetCache": {
+            "modelHits": 502,
+            "modelMisses": 18,
+            "textureHits": 4423,
+            "textureMisses": 207,
+            "textureInvalidations": 0,
+            "rendererLeases": 31,
+            "models": 18,
+            "programs": 42,
+            "textures": 207,
+            "textureSourceBytes": 1470350,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 19,
+              "hits": 656,
+              "verticesDecoded": 29262
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              2.5883209705352783,
+              100.63968658447266,
+              193.9479217529297
+            ],
+            "interest": [
+              3.0037317276000977,
+              54.23046875,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 290
+          },
+          "renderMutationBytes": 7270,
+          "elapsedDiagnosticMs": 35225.70000001788,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+          "afterPresentationRestoreSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1747,
+            "corrections": 120,
+            "replayedFrames": 568,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 60882944,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58327040
+          },
+          "snapshotCosts": {
+            "captures": 557,
+            "restores": 153,
+            "capturedBytes": 1146552320,
+            "restoredBytes": 9285009408,
+            "comparedBytes": 33802289152,
+            "sharedPages": 498288,
+            "guardCpuMs": 287.7999998033047,
+            "captureCpuMs": 2852.099999845028,
+            "restoreCpuMs": 596.7999998033047,
+            "maxCaptureCpuMs": 14,
+            "maxRestoreCpuMs": 10.899999976158142,
+            "peakRetainedBytes": 60882944,
+            "retainedBytes": 58327040,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 62980096,
+            "meanCaptureCpuMs": 5.120466786077249,
+            "meanRestoreCpuMs": 3.9006535934856514,
+            "meanNewSnapshotBytes": 2058442.2262118491
+          },
+          "presentationCpuMs": {
+            "count": 29,
+            "min": 15.400000005960464,
+            "median": 19.299999982118607,
+            "max": 45.400000005960464,
+            "mean": 21.544827585590298,
+            "values": [
+              36.39999997615814,
+              45.400000005960464,
+              28.80000001192093,
+              23.5,
+              17.099999994039536,
+              24.400000005960464,
+              17.700000017881393,
+              19,
+              22.399999976158142,
+              19.299999982118607,
+              16,
+              17.200000017881393,
+              16.5,
+              22.200000017881393,
+              15.400000005960464,
+              18,
+              16.69999998807907,
+              23.200000017881393,
+              17.69999998807907,
+              17.599999994039536,
+              23.19999998807907,
+              18.700000017881393,
+              18,
+              19.69999998807907,
+              24.900000005960464,
+              26.299999982118607,
+              21,
+              18.80000001192093,
+              19.69999998807907
+            ]
+          },
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "ab65e9a246fa68202810dc0fa6c3a8b2fa749a41548f8525d28a2912f7832713",
+            "fresh": "ab65e9a246fa68202810dc0fa6c3a8b2fa749a41548f8525d28a2912f7832713"
+          },
+          "assetCache": {
+            "modelHits": 502,
+            "modelMisses": 18,
+            "textureHits": 4423,
+            "textureMisses": 207,
+            "textureInvalidations": 0,
+            "rendererLeases": 31,
+            "models": 18,
+            "programs": 42,
+            "textures": 207,
+            "textureSourceBytes": 1470350,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 19,
+              "hits": 656,
+              "verticesDecoded": 29262
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              2.5883209705352783,
+              100.63968658447266,
+              193.9479217529297
+            ],
+            "interest": [
+              3.0037317276000977,
+              54.23046875,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 290
+          },
+          "renderMutationBytes": 7270,
+          "elapsedDiagnosticMs": 34765.29999998212,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe-optimized/corrected-0.png",
+            "sha256": "a092365e46b2d7ce3ce8d97cb060ddbb26d8430f78612da57ae188e0152688e4"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe-optimized/corrected-1.png",
+            "sha256": "a092365e46b2d7ce3ce8d97cb060ddbb26d8430f78612da57ae188e0152688e4"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "workload": "combat",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "7651eaab1778a9a0ec6eb0da34ecd5edae2d6196a5927904daeb5265a4ca110f",
+        "memorySha256": "a0bc16d391df5a0037557bd2ac5e7191465f0af44526c29294989e6608cfce1a",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+        "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 190,
+        "damageFrames": 1617,
+        "attackFrames": 907,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 17810112,
+          "code": "Pp",
+          "costume": 0
+        },
+        {
+          "slot": 0,
+          "index": 1,
+          "owner": 18718560,
+          "code": "Nn",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 19492320,
+          "code": "Pe",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [
+          20,
+          28
+        ],
+        "final": [
+          25,
+          28
+        ],
+        "ranges": [
+          {
+            "min": -1,
+            "max": 25
+          },
+          {
+            "min": 28,
+            "max": 28
+          }
+        ]
+      },
+      "transport": {
+        "packets": 3600,
+        "reordered": 1410,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "afterPresentationRestoreSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1494,
+            "corrections": 165,
+            "replayedFrames": 863,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61407232,
+            "retainedSnapshots": 4,
+            "retainedBytes": 56623104
+          },
+          "snapshotCosts": {
+            "captures": 600,
+            "restores": 198,
+            "capturedBytes": 1278345216,
+            "restoredBytes": 12015894528,
+            "comparedBytes": 36411801600,
+            "sharedPages": 536095,
+            "guardCpuMs": 278.6999992132187,
+            "captureCpuMs": 2815.7999991178513,
+            "restoreCpuMs": 673.4000000059605,
+            "maxCaptureCpuMs": 17.30000001192093,
+            "maxRestoreCpuMs": 9.599999994039536,
+            "peakRetainedBytes": 61407232,
+            "retainedBytes": 56623104,
+            "count": 7,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 62980096,
+            "meanCaptureCpuMs": 4.692999998529752,
+            "meanRestoreCpuMs": 3.4010101010402045,
+            "meanNewSnapshotBytes": 2130575.36
+          },
+          "presentationCpuMs": {
+            "count": 29,
+            "min": 12.199999988079071,
+            "median": 18.200000017881393,
+            "max": 41,
+            "mean": 18.975862071431916,
+            "values": [
+              22.69999998807907,
+              18,
+              23.5,
+              23.700000017881393,
+              22.5,
+              20.599999994039536,
+              16.900000005960464,
+              31.5,
+              15.900000005960464,
+              18.200000017881393,
+              13.199999988079071,
+              14.800000011920929,
+              18.600000023841858,
+              12.199999988079071,
+              14.599999994039536,
+              13.199999988079071,
+              13.600000023841858,
+              13.799999982118607,
+              18.400000005960464,
+              18.5,
+              14.5,
+              14.800000011920929,
+              21.400000005960464,
+              16.19999998807907,
+              21.30000001192093,
+              41,
+              24.400000005960464,
+              13.400000005960464,
+              18.900000005960464
+            ]
+          },
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4",
+            "fresh": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4"
+          },
+          "assetCache": {
+            "modelHits": 459,
+            "modelMisses": 16,
+            "textureHits": 4248,
+            "textureMisses": 201,
+            "textureInvalidations": 0,
+            "rendererLeases": 31,
+            "models": 16,
+            "programs": 37,
+            "textures": 201,
+            "textureSourceBytes": 1529742,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 17,
+              "hits": 613,
+              "verticesDecoded": 28641
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -7.035985946655273,
+              22.28489112854004,
+              83.0000228881836
+            ],
+            "interest": [
+              -7.19099760055542,
+              11.128376960754395,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 272
+          },
+          "renderMutationBytes": 7148,
+          "elapsedDiagnosticMs": 35487.60000002384,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "afterPresentationRestoreSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1786,
+            "corrections": 149,
+            "replayedFrames": 943,
+            "maxReplay": 12,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61472768,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58654720
+          },
+          "snapshotCosts": {
+            "captures": 626,
+            "restores": 182,
+            "capturedBytes": 1331101696,
+            "restoredBytes": 11044913152,
+            "comparedBytes": 37989646336,
+            "sharedPages": 559366,
+            "guardCpuMs": 288.4999995827675,
+            "captureCpuMs": 2935.499999910593,
+            "restoreCpuMs": 660.4000000357628,
+            "maxCaptureCpuMs": 16.599999994039536,
+            "maxRestoreCpuMs": 12.700000017881393,
+            "peakRetainedBytes": 61472768,
+            "retainedBytes": 58654720,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 62980096,
+            "meanCaptureCpuMs": 4.689297124457816,
+            "meanRestoreCpuMs": 3.6285714287679274,
+            "meanNewSnapshotBytes": 2126360.536741214
+          },
+          "presentationCpuMs": {
+            "count": 29,
+            "min": 11.5,
+            "median": 16.599999994039536,
+            "max": 25.80000001192093,
+            "mean": 17.044827585590298,
+            "values": [
+              22.100000023841858,
+              16.900000005960464,
+              14.699999988079071,
+              19.19999998807907,
+              19.69999998807907,
+              15.400000005960464,
+              19.30000001192093,
+              25.80000001192093,
+              16.5,
+              17,
+              15,
+              14.599999994039536,
+              14.399999976158142,
+              12.700000017881393,
+              14.900000005960464,
+              11.5,
+              13.400000005960464,
+              14.099999994039536,
+              19.69999998807907,
+              17.19999998807907,
+              14,
+              13.599999994039536,
+              16.599999994039536,
+              15.5,
+              24.099999994039536,
+              22.19999998807907,
+              19.900000005960464,
+              16.69999998807907,
+              17.600000023841858
+            ]
+          },
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4",
+            "fresh": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4"
+          },
+          "assetCache": {
+            "modelHits": 459,
+            "modelMisses": 16,
+            "textureHits": 4248,
+            "textureMisses": 201,
+            "textureInvalidations": 0,
+            "rendererLeases": 31,
+            "models": 16,
+            "programs": 37,
+            "textures": 201,
+            "textureSourceBytes": 1529742,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 17,
+              "hits": 613,
+              "verticesDecoded": 28641
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -7.035985946655273,
+              22.28489112854004,
+              83.0000228881836
+            ],
+            "interest": [
+              -7.19099760055542,
+              11.128376960754395,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 272
+          },
+          "renderMutationBytes": 7148,
+          "elapsedDiagnosticMs": 34794.19999998808,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe-combat-optimized/corrected-0.png",
+            "sha256": "0f07655fdc67ba21a24c6d896d48e624a4736269c914402a41cc5b06739bac37"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe-combat-optimized/corrected-1.png",
+            "sha256": "0f07655fdc67ba21a24c6d896d48e624a4736269c914402a41cc5b06739bac37"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Ca",
+        "Ca"
+      ],
+      "frames": 600,
+      "workload": "combat",
+      "snapshot": "pages",
+      "gpuCache": true,
+      "initialHash": {
+        "stateSha256": "d489497869ec083c94c1a4a203a3f9dede399d9e18fe3cb2766ae8869d9c56aa",
+        "memorySha256": "611fe51f4623011604420bf82d078d471ec15886cac1ab2e02457074477d6e74",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+        "memorySha256": "850d2dd8a14e3e034609f9cf5f8a7aff81d81d0d86f772f4815e5e7a1ff6339f",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 51,
+        "damageFrames": 508,
+        "attackFrames": 325,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1918816,
+          "code": "Ca",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 1927328,
+          "code": "Ca",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [],
+        "final": [],
+        "ranges": []
+      },
+      "transport": {
+        "packets": 1200,
+        "reordered": 489,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+          "afterPresentationRestoreSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+          "kernel": {
+            "frame": 600,
+            "confirmed": 599,
+            "pendingCorrection": null,
+            "forwardFrames": 600,
+            "predictedFrames": 599,
+            "corrections": 56,
+            "replayedFrames": 353,
+            "maxReplay": 12,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 28966912,
+            "retainedSnapshots": 5,
+            "retainedBytes": 26673152
+          },
+          "snapshotCosts": {
+            "captures": 222,
+            "restores": 69,
+            "capturedBytes": 354222080,
+            "restoredBytes": 3486449664,
+            "comparedBytes": 11217272832,
+            "sharedPages": 165758,
+            "guardCpuMs": 100.80000007152557,
+            "captureCpuMs": 852.0999997854233,
+            "restoreCpuMs": 156.80000001192093,
+            "maxCaptureCpuMs": 11.700000017881393,
+            "maxRestoreCpuMs": 10.5,
+            "peakRetainedBytes": 28966912,
+            "retainedBytes": 26673152,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 29425664,
+            "meanCaptureCpuMs": 3.8382882873217263,
+            "meanRestoreCpuMs": 2.272463768288709,
+            "meanNewSnapshotBytes": 1595594.954954955
+          },
+          "presentationCpuMs": {
+            "count": 9,
+            "min": 10.700000017881393,
+            "median": 12.700000017881393,
+            "max": 18.30000001192093,
+            "mean": 13.244444446431267,
+            "values": [
+              18.30000001192093,
+              12.900000005960464,
+              10.700000017881393,
+              12.700000017881393,
+              15.399999976158142,
+              13.199999988079071,
+              12.5,
+              12.300000011920929,
+              11.199999988079071
+            ]
+          },
+          "presentationCount": 10,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "88df27c283acc54990f68e8e40523ca75430a8d8d5c9e4f0e429b9bc40b8f707",
+            "fresh": "88df27c283acc54990f68e8e40523ca75430a8d8d5c9e4f0e429b9bc40b8f707"
+          },
+          "assetCache": {
+            "modelHits": 137,
+            "modelMisses": 14,
+            "textureHits": 805,
+            "textureMisses": 129,
+            "textureInvalidations": 0,
+            "rendererLeases": 11,
+            "models": 14,
+            "programs": 31,
+            "textures": 129,
+            "textureSourceBytes": 694406,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 15,
+              "hits": 271,
+              "verticesDecoded": 20306
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.32403564453125,
+              26.86067771911621,
+              182.2964324951172
+            ],
+            "interest": [
+              15.45451545715332,
+              9.173103332519531,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 225
+          },
+          "renderMutationBytes": 4766,
+          "elapsedDiagnosticMs": 11771.40000000596,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+          "afterPresentationRestoreSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+          "kernel": {
+            "frame": 600,
+            "confirmed": 599,
+            "pendingCorrection": null,
+            "forwardFrames": 600,
+            "predictedFrames": 535,
+            "corrections": 55,
+            "replayedFrames": 280,
+            "maxReplay": 11,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 27918336,
+            "retainedSnapshots": 4,
+            "retainedBytes": 25165824
+          },
+          "snapshotCosts": {
+            "captures": 202,
+            "restores": 68,
+            "capturedBytes": 322830336,
+            "restoredBytes": 3435921408,
+            "comparedBytes": 10206707712,
+            "sharedPages": 150817,
+            "guardCpuMs": 98.10000002384186,
+            "captureCpuMs": 831.6999998390675,
+            "restoreCpuMs": 159.70000013709068,
+            "maxCaptureCpuMs": 11.800000011920929,
+            "maxRestoreCpuMs": 9,
+            "peakRetainedBytes": 27918336,
+            "retainedBytes": 25165824,
+            "count": 7,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 29425664,
+            "meanCaptureCpuMs": 4.117326731876571,
+            "meanRestoreCpuMs": 2.3485294137807453,
+            "meanNewSnapshotBytes": 1598169.9801980199
+          },
+          "presentationCpuMs": {
+            "count": 9,
+            "min": 10.199999988079071,
+            "median": 14.199999988079071,
+            "max": 19.5,
+            "mean": 14.544444445106718,
+            "values": [
+              19.5,
+              13.400000005960464,
+              11.600000023841858,
+              13.699999988079071,
+              14.199999988079071,
+              15.799999982118607,
+              14.700000017881393,
+              17.80000001192093,
+              10.199999988079071
+            ]
+          },
+          "presentationCount": 10,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "88df27c283acc54990f68e8e40523ca75430a8d8d5c9e4f0e429b9bc40b8f707",
+            "fresh": "88df27c283acc54990f68e8e40523ca75430a8d8d5c9e4f0e429b9bc40b8f707"
+          },
+          "assetCache": {
+            "modelHits": 137,
+            "modelMisses": 14,
+            "textureHits": 805,
+            "textureMisses": 129,
+            "textureInvalidations": 0,
+            "rendererLeases": 11,
+            "models": 14,
+            "programs": 31,
+            "textures": 129,
+            "textureSourceBytes": 694406,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 15,
+              "hits": 271,
+              "verticesDecoded": 20306
+            }
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.32403564453125,
+              26.86067771911621,
+              182.2964324951172
+            ],
+            "interest": [
+              15.45451545715332,
+              9.173103332519531,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 225
+          },
+          "renderMutationBytes": 4766,
+          "elapsedDiagnosticMs": 11546.200000017881,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Ca-Ca-combat-optimized/corrected-0.png",
+            "sha256": "8dc87daf85fb92b7eb8eca1d4e7432460bfcbbda535c97968280976ae4deda14"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Ca-Ca-combat-optimized/corrected-1.png",
+            "sha256": "8dc87daf85fb92b7eb8eca1d4e7432460bfcbbda535c97968280976ae4deda14"
+          }
+        ]
+      }
+    }
+  ],
+  "controls": [
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "workload": "scripted",
+      "snapshot": "full",
+      "gpuCache": false,
+      "initialHash": {
+        "stateSha256": "1c204a7ae591fbe0915be09ee64198f89808441fe91c983a1d25aa47a7d90401",
+        "memorySha256": "0698b136fa3a49cc253ec314ba19bffa2d48f3f05472444bf701d02e6e3d4dbf",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+        "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 34,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1919200,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 13883808,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [],
+        "final": [],
+        "ranges": []
+      },
+      "transport": {
+        "packets": 480,
+        "reordered": 168,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "afterPresentationRestoreSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 183,
+            "corrections": 14,
+            "replayedFrames": 64,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 5,
+            "retainedBytes": 404226048
+          },
+          "snapshotCosts": {
+            "captures": 76,
+            "restores": 21,
+            "capturedBytes": 3840147456,
+            "restoredBytes": 1061093376,
+            "captureCpuMs": 1036.8000000715256,
+            "restoreCpuMs": 81.90000003576279,
+            "maxCaptureCpuMs": 17.600000023841858,
+            "maxRestoreCpuMs": 9,
+            "retainedBytes": 404226048,
+            "count": 8,
+            "meanCaptureCpuMs": 13.64210526409902,
+            "meanRestoreCpuMs": 3.9000000017029897,
+            "meanNewSnapshotBytes": 50528256
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 180.2000000178814,
+            "median": 187.30000001192093,
+            "max": 336.7999999821186,
+            "mean": 234.76666667064032,
+            "values": [
+              180.2000000178814,
+              336.7999999821186,
+              187.30000001192093
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "assetCache": null,
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "renderMutationBytes": 6322,
+          "elapsedDiagnosticMs": 6807.300000011921,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "afterPresentationRestoreSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 224,
+            "corrections": 16,
+            "replayedFrames": 95,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 5,
+            "retainedBytes": 404226048
+          },
+          "snapshotCosts": {
+            "captures": 83,
+            "restores": 23,
+            "capturedBytes": 4193845248,
+            "restoredBytes": 1162149888,
+            "captureCpuMs": 1138.4000000357628,
+            "restoreCpuMs": 89.20000010728836,
+            "maxCaptureCpuMs": 23.700000017881393,
+            "maxRestoreCpuMs": 8.5,
+            "retainedBytes": 404226048,
+            "count": 8,
+            "meanCaptureCpuMs": 13.715662651033286,
+            "meanRestoreCpuMs": 3.878260874229929,
+            "meanNewSnapshotBytes": 50528256
+          },
+          "presentationCpuMs": {
+            "count": 3,
+            "min": 168.59999999403954,
+            "median": 198.5,
+            "max": 234.7000000178814,
+            "mean": 200.60000000397363,
+            "values": [
+              198.5,
+              234.7000000178814,
+              168.59999999403954
+            ]
+          },
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "assetCache": null,
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "renderMutationBytes": 6322,
+          "elapsedDiagnosticMs": 6502.9000000059605,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Fc-Fx-full-gpu0/corrected-0.png",
+            "sha256": "b28153af96c408e57024c4fb6d7e2bc76e749eddf4358e44093a49baaaaf1e2e"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Fc-Fx-full-gpu0/corrected-1.png",
+            "sha256": "b28153af96c408e57024c4fb6d7e2bc76e749eddf4358e44093a49baaaaf1e2e"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "workload": "combat",
+      "snapshot": "full",
+      "gpuCache": false,
+      "initialHash": {
+        "stateSha256": "7651eaab1778a9a0ec6eb0da34ecd5edae2d6196a5927904daeb5265a4ca110f",
+        "memorySha256": "a0bc16d391df5a0037557bd2ac5e7191465f0af44526c29294989e6608cfce1a",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+        "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 190,
+        "damageFrames": 1617,
+        "attackFrames": 907,
+        "stockChanges": 0
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 17810112,
+          "code": "Pp",
+          "costume": 0
+        },
+        {
+          "slot": 0,
+          "index": 1,
+          "owner": 18718560,
+          "code": "Nn",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 19492320,
+          "code": "Pe",
+          "costume": 0
+        }
+      ],
+      "stageMotion": {
+        "initial": [
+          20,
+          28
+        ],
+        "final": [
+          25,
+          28
+        ],
+        "ranges": [
+          {
+            "min": -1,
+            "max": 25
+          },
+          {
+            "min": 28,
+            "max": 28
+          }
+        ]
+      },
+      "transport": {
+        "packets": 3600,
+        "reordered": 1264,
+        "delaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "clients": [
+        {
+          "seat": 0,
+          "correctedStateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "afterPresentationRestoreSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1340,
+            "corrections": 159,
+            "replayedFrames": 809,
+            "maxReplay": 11,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 546177024,
+            "retainedSnapshots": 4,
+            "retainedBytes": 424804352
+          },
+          "snapshotCosts": {
+            "captures": 588,
+            "restores": 192,
+            "capturedBytes": 35683565568,
+            "restoredBytes": 11651776512,
+            "captureCpuMs": 10491.199999809265,
+            "restoreCpuMs": 825.5999998748302,
+            "maxCaptureCpuMs": 32.599999994039536,
+            "maxRestoreCpuMs": 8.199999988079071,
+            "retainedBytes": 424804352,
+            "count": 7,
+            "meanCaptureCpuMs": 17.84217687042392,
+            "meanRestoreCpuMs": 4.299999999348074,
+            "meanNewSnapshotBytes": 60686336
+          },
+          "presentationCpuMs": {
+            "count": 29,
+            "min": 256.09999999403954,
+            "median": 283.09999999403954,
+            "max": 352.19999998807907,
+            "mean": 292.9482758600136,
+            "values": [
+              325.40000000596046,
+              341.90000000596046,
+              280.7000000178814,
+              259.7999999821186,
+              284.09999999403954,
+              300.59999999403954,
+              260.09999999403954,
+              263.69999998807907,
+              278,
+              307.5,
+              333.40000000596046,
+              349,
+              352.19999998807907,
+              315.10000002384186,
+              321.59999999403954,
+              262.30000001192093,
+              281.89999997615814,
+              287.19999998807907,
+              304.19999998807907,
+              278.59999999403954,
+              290.59999999403954,
+              263.5,
+              267.2999999821186,
+              346,
+              257.2000000178814,
+              283.09999999403954,
+              275.90000000596046,
+              268.5,
+              256.09999999403954
+            ]
+          },
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4",
+            "fresh": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4"
+          },
+          "assetCache": null,
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -7.035985946655273,
+              22.28489112854004,
+              83.0000228881836
+            ],
+            "interest": [
+              -7.19099760055542,
+              11.128376960754395,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 272
+          },
+          "renderMutationBytes": 7148,
+          "elapsedDiagnosticMs": 51567.40000000596,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        },
+        {
+          "seat": 1,
+          "correctedStateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "afterPresentationRestoreSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1694,
+            "corrections": 132,
+            "replayedFrames": 752,
+            "maxReplay": 12,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 546177024,
+            "retainedSnapshots": 6,
+            "retainedBytes": 546177024
+          },
+          "snapshotCosts": {
+            "captures": 593,
+            "restores": 165,
+            "capturedBytes": 35986997248,
+            "restoredBytes": 10013245440,
+            "captureCpuMs": 10578.699999809265,
+            "restoreCpuMs": 720.8999999165535,
+            "maxCaptureCpuMs": 32.39999997615814,
+            "maxRestoreCpuMs": 8.200000017881393,
+            "retainedBytes": 546177024,
+            "count": 9,
+            "meanCaptureCpuMs": 17.839291736609216,
+            "meanRestoreCpuMs": 4.369090908585172,
+            "meanNewSnapshotBytes": 60686336
+          },
+          "presentationCpuMs": {
+            "count": 29,
+            "min": 246.2999999821186,
+            "median": 280.39999997615814,
+            "max": 367.19999998807907,
+            "mean": 287.8344827561543,
+            "values": [
+              247.80000001192093,
+              323.09999999403954,
+              275.09999999403954,
+              246.59999999403954,
+              253.80000001192093,
+              299.69999998807907,
+              254.2999999821186,
+              302,
+              344.2000000178814,
+              285.89999997615814,
+              321.39999997615814,
+              255.80000001192093,
+              367.19999998807907,
+              279.19999998807907,
+              348.5,
+              246.5,
+              280.39999997615814,
+              271.39999997615814,
+              325.19999998807907,
+              312.60000002384186,
+              249.69999998807907,
+              261.80000001192093,
+              267.30000001192093,
+              306.60000002384186,
+              302.10000002384186,
+              322.19999998807907,
+              264.69999998807907,
+              246.2999999821186,
+              285.80000001192093
+            ]
+          },
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4",
+            "fresh": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4"
+          },
+          "assetCache": null,
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -7.035985946655273,
+              22.28489112854004,
+              83.0000228881836
+            ],
+            "interest": [
+              -7.19099760055542,
+              11.128376960754395,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 272
+          },
+          "renderMutationBytes": 7148,
+          "elapsedDiagnosticMs": 51085,
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          }
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "scope": "Existing renderer equivalence; not retail pixel parity",
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe-combat-full-gpu0/corrected-0.png",
+            "sha256": "0f07655fdc67ba21a24c6d896d48e624a4736269c914402a41cc5b06739bac37"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe-combat-full-gpu0/corrected-1.png",
+            "sha256": "0f07655fdc67ba21a24c6d896d48e624a4736269c914402a41cc5b06739bac37"
+          }
+        ]
+      }
+    }
+  ],
+  "regressions": {
+    "room600": {
+      "passed": true,
+      "scope": "Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification."
+    },
+    "resultsRematch": {
+      "passed": true,
+      "scope": "Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.",
+      "results": [
+        {
+          "outcome": 2,
+          "frames": 805,
+          "winnerCount": 1,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 0,
+              "percent": 0,
+              "score": -16777202,
+              "winner": false
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        },
+        {
+          "outcome": 2,
+          "frames": 805,
+          "winnerCount": 1,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 0,
+              "percent": 0,
+              "score": -16777202,
+              "winner": false
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        },
+        {
+          "outcome": 1,
+          "frames": 28800,
+          "winnerCount": 2,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        },
+        {
+          "outcome": 1,
+          "frames": 28800,
+          "winnerCount": 2,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        }
+      ],
+      "legalStages": [
+        2,
+        3,
+        8,
+        28,
+        31,
+        32
+      ]
+    },
+    "repositoryTests": {
+      "total": 580,
+      "passed": 570,
+      "skipped": 10,
+      "failed": 0
+    }
+  },
+  "rejectedExperiments": [
+    {
+      "change": "JavaScript page comparison before copy/restore",
+      "reason": "Memory retention fell, but full-memory scans made restore approximately 10 ms instead of the roughly 4 ms full-copy baseline."
+    },
+    {
+      "change": "SIMD comparison before every restore",
+      "reason": "Exact convergence held, but scanning unchanged pages before restoring did not beat writing/filling the target state. The retained implementation writes all target pages and coalesces ranges."
+    }
+  ],
+  "limits": [
+    "The diagnostic presents once per 60 simulation frames. It does not measure sustained distinct 60 FPS or input-to-photon latency.",
+    "Presentation timing includes reconstruction of native bindings, draw, disposal and restore. It excludes the pre-draw checkpoint capture, simulation, final fresh-renderer oracle and initial Ready/Go/cache warmup.",
+    "Referenced snapshot page bytes and allocated pool capacity exclude the live game heap, GPU resources, JavaScript metadata and transient complete-memory hash buffers. Full-copy controls record the kernel-sampled retained peak, not a complete process-memory high-water mark.",
+    "Every byte remains covered; mutable globals, audio journal and table/memory/abort guards are retained. No approximate hashes or inferred dirty regions determine sharing.",
+    "Native render-side writes are still discarded after diagnostic drawing and require a gameplay-dependency audit.",
+    "No production room prediction integration, confirmed-event audio/SFX, speculative-ending commitment, reconnect recovery, or exhaustive roster/hardware/WAN validation.",
+    "No game data, supplied binaries, saved-state contents or extracted assets are committed. The embedded helper bytecode is generated from this repository’s own small WAT source."
+  ]
+}

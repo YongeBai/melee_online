@@ -8,11 +8,17 @@ proof of a future revision.
 ## Direct browser port update (September 17)
 
 The experimental rollback boundary is documented in `BROWSER-NATIVE-ROLLBACK.md`.
+Its next revision uses exact shared pages plus a separate cache of immutable GPU
+assets; see `BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md`. Keep live native bindings
+and scratch allocations outside that cache, exclude mutable shape buffers, and
+compare all source image/palette bytes before reusing a texture after restore.
+The corrected canvas must match a fresh uncached renderer at the same boundary.
+Page sharing is exact comparison, not a license to omit unobserved memory regions.
 Never restore WASM memory underneath an attached renderer: its JS ownership maps
 retain pointers to allocations in that same heap. Full memory also omits mutable
 WASM globals unless explicitly exported/captured; the present runtime has four.
 The diagnostic captures both plus a deterministic host journal, guards table and
-memory-size stability, and destroys/reconstructs presentation owners around
+memory-size stability, and destroys/reconstructs native presentation bindings around
 restores. Native draw calls mutate WASM, so its draw/discard boundary still needs
 a gameplay-dependency audit. Successful complete-state convergence in the probe
 does not turn production lockstep into rollback or certify 720p60. Constructor

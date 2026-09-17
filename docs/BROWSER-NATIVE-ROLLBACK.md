@@ -1,5 +1,10 @@
 # Browser-native snapshot and correction boundary
 
+The initial `197ee12` measurements below are retained as the baseline. See
+[the subsequent exact-page and presentation-cache optimization](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md)
+for the current diagnostic and its measured before/after costs. Production
+rooms remain on lockstep.
+
 The production native preview still uses three-frame input lockstep. The new
 `rollback-probe.html` is an explicitly labelled development diagnostic. It runs
 local input immediately, predicts missing remote input by holding the most recent

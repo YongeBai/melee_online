@@ -43,6 +43,13 @@ export function readNativeTextures(module) {
 
 // Decode the runtime image/palette selection, not a stale archive descriptor.
 // Call while the owning native archive is alive; returned pixels own their data.
+export function nativeTextureSourceBytes(module,t){
+  let size=0;
+  for(let level=0;level<=(t.mipmap?Math.floor(t.maxLod):0);level++)size+=textureByteLength(Math.max(1,t.width>>level),Math.max(1,t.height>>level),t.format);
+  const ranges=[[t.address,size],...(t.paletteAddress?[[t.paletteAddress,t.paletteEntries*2]]:[])];
+  return ranges.map(([at,n])=>{if(!Number.isSafeInteger(at)||at<=0||at+n>module.HEAPU8.length)throw Error('Native image memory bounds');return module.HEAPU8.subarray(at,at+n);});
+}
+
 export function decodeNativeTexture(module,t) {
   const heap=module.HEAPU8,bounds=(at,size)=>{if(!Number.isSafeInteger(at)||at<=0||at+size>heap.length)throw Error('Native image memory bounds');return heap.subarray(at,at+size);};
   const palette=t.paletteAddress?{format:t.paletteFormat,data:bounds(t.paletteAddress,t.paletteEntries*2)}:null;

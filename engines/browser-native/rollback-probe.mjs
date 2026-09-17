@@ -1,3 +1,5 @@
+import {createPagedWasmCheckpointStore} from './paged-snapshot.mjs';
+import {createPresentationCache} from './presentation-cache.mjs';
 import {combatWorkload} from './combat-workload.mjs';
 import {completeNativeSample} from './native-input.mjs';
 import create from './melee-fighter-init.mjs';
@@ -5,6 +7,7 @@ import {runNativeConstructor} from './constructor-runner.mjs';
 import {createSnapshotRuntime,createWasmCheckpointStore} from './wasm-snapshot.mjs';
 import {createRollbackSession} from './rollback-session.mjs';
 import {createRollbackAudio} from './rollback-audio.mjs';
+const picture=document.querySelector('#picture');
 const params=new URLSearchParams(location.search),frames=Number(params.get('frames')??240),seat=Number(params.get('seat')??0);
 const fail=error=>{globalThis.rollbackFailure=String(error.stack??error);document.querySelector('#result').textContent=rollbackFailure;};
 try{
@@ -12,12 +15,14 @@ try{
  const audio=createRollbackAudio(),bytes=new Uint8Array(await(await fetch('./melee-fighter-init.wasm')).arrayBuffer());
  const runtime=await createSnapshotRuntime(create,bytes,{onNativeMusic:r=>audio.request(r),onNativeAudioMode:()=>true});
  runtime.module._portMenuDiagnosticMute();
- const boot=await runNativeConstructor({module:runtime.module,canvas:document.querySelector('#picture'),params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
+ const presentationCache=params.get('gpucache')==='0'?null:createPresentationCache();
+ const boot=await runNativeConstructor({module:runtime.module,presentationCache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
   // The standalone constructor inserts settled/Ready/Go still images before
   // the canvas. Remove those diagnostics so screenshots show the corrected
   // live canvas, not the pre-intro image with hidden fighters and an unset HUD.
   for(const image of document.querySelectorAll('img[id^="native-preview-"]'))image.remove();
-  const store=createWasmCheckpointStore({...runtime,host:audio,maxBytes:2*1024**3}),module=runtime.module;
+  const paged=params.get('snapshot')!=='full';
+  const store=(paged?createPagedWasmCheckpointStore:createWasmCheckpointStore)({...runtime,host:audio,maxBytes:2*1024**3}),module=runtime.module;
   const stageState=()=>params.get('map')==='fountain'?[0,1].map(i=>module._portFountainPlatformRead(0,i)):params.get('map')==='story'?[0,1].map(i=>module._portRandallRead(i)):params.get('map')==='stadium'?[0,1,2,3,4,5].map(i=>module._portStadiumRead(i)):params.get('map')==='dreamland'?[0,1,2].map(i=>module._portDreamlandWindRead(i,0)):[];
   const read=()=>({players:boundary.readPlayers(),partners:[0,1].map(p=>{const o=module._Player_GetEntityAtIndex(p,1);return o?Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)):null;}),stage:stageState(),clock:[12,13,14].map(f=>module._portTournamentRead(f,0)),objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed()});
   const initial=store.capture();const initialHash=await store.hash(initial),initialState=read();store.restore(initial);
@@ -29,10 +34,11 @@ try{
   const trace=[];let previous=boundary.readPlayers();for(let frame=0;frame<frames;frame++){if(combat)packets[frame]=combatWorkload(frame,previous).map(pad=>({pad:completeNativeSample(pad),tap:1}));step([input(frame,0),input(frame,1)]);const current=boundary.readPlayers();workload.hitlagFrames+=current.some(p=>p[14]>0);workload.damageFrames+=current.some(p=>p[13]>0);workload.attackFrames+=current.some(p=>p[0]>=44&&p[0]<=69);workload.stockChanges+=current.filter((p,i)=>p[18]!==previous[i][18]).length;previous=current;if(frame%30===29)trace.push(read());}if(combat&&(!workload.hitlagFrames||!workload.damageFrames))throw Error('Combat rollback workload did not reach contact');
   const expectedState=read(),reference=store.capture(),referenceHash=await store.hash(reference);store.restore(initial);
   const stats={replayPresentationCalls:0,presentations:0,presentationFrames:[],presentationCpuMs:[],replaying:false,referenceTrace:trace,workload,initialHash,referenceHash,initialState,expectedState,wasmAudit:runtime.audit,audio:audio.snapshot()};
+  function pixels(){const gl=picture.getContext('webgl2'),bytes=new Uint8Array(gl.drawingBufferWidth*gl.drawingBufferHeight*4);gl.readPixels(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight,gl.RGBA,gl.UNSIGNED_BYTE,bytes);return bytes;}
   function present(frame){
    if(stats.replaying){stats.replayPresentationCalls++;throw Error('Presentation during replay');}
    const before=store.capture(),start=performance.now();let preview;
-   try{preview=boundary.createPreview();const drawn=preview.draw();preview.validateGpu();stats.presentations++;stats.presentationFrames.push(frame);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};}
+   try{preview=boundary.createPreview(presentationCache);const drawn=preview.draw();preview.validateGpu();stats.presentations++;stats.presentationFrames.push(frame);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};}
    finally{preview?.dispose();store.restore(before);store.release(before);stats.presentationCpuMs.push(performance.now()-start);}
   }
   const kernel=createRollbackSession({seat,store,step,onReplay:v=>{stats.replaying=v;}});
@@ -49,13 +55,22 @@ try{
     if(JSON.stringify(finalHash)!==JSON.stringify(referenceHash))throw Error('Corrected full-state hash mismatch '+JSON.stringify({referenceHash,finalHash,diff:store.compare(reference,final),expectedState,actualState}));
     // Rendering after correction is isolated: renderer-owned allocations and C
     // render cache mutations are discarded only after disposing every JS owner.
-    if(stats.replaying)stats.replayPresentationCalls++;let preview;
-    try{preview=boundary.createPreview();const drawn=preview.draw();preview.validateGpu();stats.presentations++;stats.presentationFrames.push(frames);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};}finally{preview?.dispose();}
+    if(stats.replaying)stats.replayPresentationCalls++;let preview,correctedPixels;
+    try{preview=boundary.createPreview(presentationCache);const drawn=preview.draw();preview.validateGpu();correctedPixels=pixels();stats.presentations++;stats.presentationFrames.push(frames);stats.render={resolution:drawn.resolution,eye:drawn.eye,interest:drawn.interest,fov:drawn.fov,aspect:drawn.aspect,draws:drawn.materialDraws?.draws??null};}finally{preview?.dispose();}
     const rendered=store.capture();stats.afterPresentationHash=await store.hash(rendered);stats.renderMutation=store.compare(final,rendered);store.release(rendered);store.restore(final);const restored=store.capture();stats.afterPresentationRestoreHash=await store.hash(restored);store.release(restored);
     if(stats.afterPresentationRestoreHash.stateSha256!==finalHash.stateSha256)throw Error('Renderer-detached restore failed');
+    // Independent fresh GPU resources at the identical restored C boundary.
+    // This oracle is excluded from presentation timing and progress counts.
+    let oracle,oraclePixels;
+    try{oracle=boundary.createPreview(null);oracle.draw();oracle.validateGpu();oraclePixels=pixels();}finally{oracle?.dispose();}
+    const different=correctedPixels.reduce((n,v,i)=>n+(v!==oraclePixels[i]),0);
+    const pixelHash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
+    stats.pixelOracle={differentBytes:different,bytes:correctedPixels.length,cached:await pixelHash(correctedPixels),fresh:await pixelHash(oraclePixels)};
+    if(different)throw Error('Retained GPU assets differ from fresh reconstruction '+JSON.stringify(stats.pixelOracle));
+    store.restore(final);
     stats.renderMutatedWasm=stats.afterPresentationHash.stateSha256!==finalHash.stateSha256;
-    globalThis.rollbackReport={passed:true,seat,frames,elapsedMs:performance.now()-start,...stats,kernel:kernel.snapshot(),snapshotCosts:store.metrics(),finalHash,actualState,audio:audio.snapshot(),scope:'Experimental same-instance snapshot + prediction/correction with renderer detached. Final frame reconstructed at 960x720. Audio journal only; production still uses lockstep.'};
-    document.querySelector('#result').textContent=JSON.stringify(rollbackReport,null,2);kernel.dispose();store.release(final);store.release(reference);store.release(initial);socket.send(JSON.stringify({type:'done',hash:finalHash.stateSha256}));socket.close();return;
+    globalThis.rollbackReport={passed:true,seat,frames,elapsedMs:performance.now()-start,...stats,kernel:kernel.snapshot(),snapshotCosts:store.metrics(),snapshotMode:paged?'pages':'full',presentationCache:presentationCache?.snapshot()??null,finalHash,actualState,audio:audio.snapshot(),scope:'Experimental same-instance snapshot + prediction/correction with renderer detached. Final frame reconstructed at 960x720. Audio journal only; production still uses lockstep.'};
+    document.querySelector('#result').textContent=JSON.stringify(rollbackReport,null,2);kernel.dispose();presentationCache?.dispose();store.release(final);store.release(reference);store.release(initial);store.dispose();socket.send(JSON.stringify({type:'done',hash:finalHash.stateSha256}));socket.close();return;
    }schedule();
   }catch(e){running=false;fail(e);kernel.dispose();socket.close();}}
   globalThis.rollbackReady={initialHash,referenceHash,bytes:initial.byteLength};

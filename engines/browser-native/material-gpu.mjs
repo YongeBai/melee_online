@@ -1,7 +1,7 @@
 import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
-import {readNativeTextures,decodeNativeTexture} from './native-texture.mjs';
+import {readNativeTextures,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
 import {createNativePixelReader,gxAlphaTestRejectsAny} from './native-pixel.mjs';
 import {readNativeModelMatrices} from './native-model.mjs';
 import {readNativeRenderContext,checkNativeRenderContext} from './native-render-context.mjs';
@@ -21,9 +21,10 @@ export function nativePositionRoundoffBound(matrix,row,point) {
 // Resource/program caches are persistent; draw-state capture is still a debug
 // oracle. Original fighter callbacks now select draws; complete camera/GX-link
 // ordering and mutable-image invalidation remain work for the playable renderer.
-export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true}={}) {
-  const programs=new Map(),variants=new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
-  if(!view)throw Error('Native material view allocation');
+export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true,presentationCache=null}={}) {
+  const assetLease=presentationCache?.acquire(gl);
+  const programs=assetLease?.programs??new Map(),variants=new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
+  if(!view){assetLease?.release();throw Error('Native material view allocation');}
   // WebGL copies uniform arguments during the call. Reuse scratch storage;
   // queued native-state snapshots still own their data until their draw.
   const scratch={position:new Float32Array(120),normal:new Float32Array(120),tex:new Float32Array(120),post:new Float32Array(240),
@@ -51,6 +52,10 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   }
   function image(t){
     const key=JSON.stringify(t);if(images.has(key))return images.get(key);
+    const texture=assetLease?assetLease.texture(key,nativeTextureSourceBytes(module,t),()=>createImage(t)):createImage(t);
+    images.set(key,texture);return texture;
+  }
+  function createImage(t){
     const levels=decodeNativeTexture(module,t),texture=gl.createTexture();
     try {
       gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
@@ -61,7 +66,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       gl.texParameterf(gl.TEXTURE_2D,gl.TEXTURE_MIN_LOD,t.lod.min);gl.texParameterf(gl.TEXTURE_2D,gl.TEXTURE_MAX_LOD,t.lod.max);
       const wrap=[gl.CLAMP_TO_EDGE,gl.REPEAT,gl.MIRRORED_REPEAT];gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,wrap[t.wrapS]);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,wrap[t.wrapT]);
       if(anisotropy)gl.texParameterf(gl.TEXTURE_2D,anisotropy.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(2**t.anisotropy,gl.getParameter(anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
-      images.set(key,texture);return texture;
+      return texture;
     }catch(error){gl.deleteTexture(texture);throw error;}
   }
   function apply(state,p,camera){
@@ -170,7 +175,11 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     if(kind===0){particleDraws++;particleVertices+=count;}else if(kind===1){afterimageDraws++;afterimageVertices+=count;}else{textDraws++;textVertices+=count;}
   };
   function upload(model,bytes,nodes,owner,{descriptorBase=null}={}){
-    const archive=inspectArchive(bytes),d=archive.data,buffers=[],vaos=[],plans=[],nativeKeys=[];
+    const archive=inspectArchive(bytes),d=archive.data,nativeKeys=[];
+    // Shape buffers are mutable. Keep their original per-renderer lifetime.
+    const cached=!!assetLease&&!model.meshes.some(mesh=>(mesh.flags&0x3000)===0x1000);
+    if(cached&&bytes.buffer===module.HEAPU8.buffer)throw Error('GPU cache source cannot alias rewindable memory');
+    let geometry,plans=[];
     const indexOf=(first,target)=>{for(let i=0,at=first;at!==null&&i<4096;i++,at=archive.relocations.has(at+4)?d.getUint32(at+4):null)if(at===target)return i;throw Error('Native draw ownership');};
     function refreshBindings(){
       // Native pools can reuse the owner/root addresses while replacing child
@@ -179,10 +188,11 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       for(const key of nativeKeys)nativePlans.delete(key);nativeKeys.length=0;
       for(const plan of plans){const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[plan.mesh.joint],polygon=descriptorBase===null?module._portMaterialPolygon(joint,plan.display,plan.polygon):module._portMaterialPolygonDescriptor(joint,descriptorBase+plan.mesh.pobj),key=owner+':'+joint+':'+polygon;if(nativePlans.has(key))throw Error('Duplicate native polygon ownership');nativePlans.set(key,plan);nativeKeys.push(key);}
     }
-    function dispose(){for(const key of nativeKeys)nativePlans.delete(key);for(const b of buffers)gl.deleteBuffer(b);for(const v of vaos)gl.deleteVertexArray(v);models.delete(result);}
-    let result;
-    try {
-      for(const mesh of model.meshes) {
+    function dispose(){for(const key of nativeKeys)nativePlans.delete(key);if(!cached)geometry?.dispose();models.delete(result);}
+    function createGeometry(){
+      const buffers=[],vaos=[],built=[];
+      const dispose=()=>{for(const b of buffers)gl.deleteBuffer(b);for(const v of vaos)gl.deleteVertexArray(v);};
+      try{for(const mesh of model.meshes) {
         if(mesh.draws.some(d=>[0xa8,0xb0,0xb8].includes(d.primitive)))throw Error('Native line/point rendering not integrated');
         const vao=gl.createVertexArray();vaos.push(vao);gl.bindVertexArray(vao);
         const attributes=[];
@@ -193,13 +203,17 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
         attr(5,4,v=>v[11]??[1,1,1,1]);attr(6,4,v=>v[12]??[1,1,1,1]);
         for(let i=0;i<8;i++)attr(7+i,3,v=>[v[13+i]?.[0]??0,v[13+i]?.[1]??0,v[1+i]?.[0]??0]);
         buffer(gl.ELEMENT_ARRAY_BUFFER,Uint32Array.from(mesh.triangles));
-        plans.push({mesh,vao,attributes,archive,display:indexOf(model.tree.nodes[mesh.joint].display,mesh.dobj),polygon:indexOf(d.getUint32(mesh.dobj+12),mesh.pobj)});
-      }
+        built.push({mesh,vao,attributes,archive,display:indexOf(model.tree.nodes[mesh.joint].display,mesh.dobj),polygon:indexOf(d.getUint32(mesh.dobj+12),mesh.pobj)});
+      }return {plans:built,dispose};}catch(error){dispose();throw error;}
+    }
+    let result;
+    try {
+      geometry=cached?assetLease.model(bytes,createGeometry):createGeometry();plans=geometry.plans;
       refreshBindings();
       result={refreshBindings,
         // Probe-only lookup: attachment models share their parent's GObj, so
         // an owner-level callback count cannot prove that each model drew.
-        queuedDrawCount(){return queue.reduce((n,draw)=>n+(plans.includes(draw.plan)?1:0),0);},
+        queuedDrawCount(){return queue.reduce((n,draw)=>n+(draw.owner===owner&&plans.includes(draw.plan)?1:0),0);},
         enqueue(flags,visibility,show=true){
         let count=0;if(!show)return count;
         for(const [i,plan] of plans.entries()) {
@@ -255,6 +269,6 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}
       return {tevPrograms:[...tev.values()],pixelStates:[...pixels.values()],lightStates:[...lights.values()]};
-    },dispose(){delete module.onNativeDraw;delete module.onNativeImmediate;for(const p of immediatePlans){gl.deleteVertexArray(p.vao);gl.deleteBuffer(p.vertex);gl.deleteBuffer(p.indices);gl.deleteBuffer(p.registers);}for(const model of [...models])model.dispose();for(const p of programs.values())gl.deleteProgram(p.program);for(const image of images.values())gl.deleteTexture(image);module._free(view);},
+    },dispose(){delete module.onNativeDraw;delete module.onNativeImmediate;for(const p of immediatePlans){gl.deleteVertexArray(p.vao);gl.deleteBuffer(p.vertex);gl.deleteBuffer(p.indices);gl.deleteBuffer(p.registers);}for(const model of [...models])model.dispose();if(!assetLease)for(const p of programs.values())gl.deleteProgram(p.program);if(!assetLease)for(const image of images.values())gl.deleteTexture(image);module._free(view);assetLease?.release();},
   };
 }

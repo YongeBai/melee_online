@@ -8,6 +8,8 @@ browser processes, with corrected 960×720 canvases visually checked. It exclude
 the live renderer from checkpoints and has no audible output or production room
 integration. It does not establish 720p60 or competitive network latency. The
 Dolphin stream measurements below are historical and apply to a different path.
+The subsequent [page-sharing and presentation-cache revision](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md)
+retains the full-copy oracle and adds exact corrected-canvas pixel comparisons.
 
 Tested on the user's Linux machine in the Codex in-app Chromium browser at
 localhost:3000, with the supplied USA 1.02 disc.

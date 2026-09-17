@@ -15,17 +15,17 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. Full scene startup and teardown remain development work.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true,traceAttachments=false,cacheModels=true}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true,traceAttachments=false,cacheModels=true,presentationCache=null}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
   const info=gl.getExtension('WEBGL_debug_renderer_info'),gpuInfo={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};
-  const geometry=createModelGeometryCache({enabled:cacheModels});
-  const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks}):null,resources=[];
+  const geometry=presentationCache?.geometry??createModelGeometryCache({enabled:cacheModels});
+  const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks,presentationCache}):null,resources=[];
   const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
   if(hud&&(!hudList||!callbacks))throw Error('HUD requires original callbacks and object buffer');
   function releaseResource(r){for(const a of r.accessories){a.accessoryGpu?.dispose();if(a.accessoryNodes)module._free(a.accessoryNodes);}r.materialGpu?.dispose();r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}
-  function dispose(){geometry.clear();delete module.onNativeObject;if(itemList)module._free(itemList);if(effectList)module._free(effectList);for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources)releaseResource(r);materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
+  function dispose(){if(!presentationCache)geometry.clear();delete module.onNativeObject;if(itemList)module._free(itemList);if(effectList)module._free(effectList);for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources)releaseResource(r);materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
   function drawHud(){
     if(!hud)return null;
     const count=module._portHudObjects(hudList,32),objects=Array.from(new Uint32Array(module.HEAPU8.buffer,hudList,count*3)),active=new Set();

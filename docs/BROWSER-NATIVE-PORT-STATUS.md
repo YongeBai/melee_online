@@ -6,8 +6,12 @@ input, and restores/replays corrections. Six-stage tests with two browser
 processes and 15–130 ms input delay/jitter converge to their on-time references
 and to each other by complete-state SHA-256. A combat trial includes real damage
 and hitlag; an Ice Climbers/Fountain trial retains Nana and moving platforms.
-This is a correctness prototype: checkpoints are 50.5–60.7 MB, the renderer is
-detached for every restore, and rebuilding it is too expensive for 60 FPS.
+This is a correctness prototype. The original full-copy baseline uses 50.5–60.7
+MB per checkpoint. The current diagnostic shares exact memory pages and keeps
+immutable GPU assets across restoration while rebuilding native bindings;
+see [the measured optimization and its limits](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md).
+It checks the corrected canvas against a fresh renderer byte for byte. It has
+not established sustained distinct 60 FPS.
 The actual room transport still uses lockstep. Audio commitment, speculative
 endings, reconnect recovery, and safe persistent renderer ownership remain.
 See [the snapshot boundary and limitations](BROWSER-NATIVE-ROLLBACK.md) and
