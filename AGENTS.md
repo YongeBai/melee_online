@@ -8,6 +8,11 @@ pitfalls from the playable implementation. Read `docs/ROLLBACK-AND-ROOMS.md` and
 - UI should look native to Melee. Preserve original menu assets, SIS glyphs,
   animated hands, stage select, and native pause. Added room controls belong
   beneath the native hands; preserve the capture gate that hides unmodified CSS.
+- The player-facing native port retains the established WASD/P/O/Space controls,
+  3D keyboard view and per-player tap-jump option. Default to Falco P1 versus
+  level-9 Fox CPU, two native CSS cards with room controls between them, all
+  characters, six tournament stages, four stocks/eight minutes/no items/singles.
+  Keep unused modes inaccessible; diagnostic bindings must not replace this flow.
 - No-ISO startup is an invariant: every playable browser build, including
   performance experiments, must automatically load the hosted game. Never
   replace this flow with a player-supplied ISO/file-picker requirement. The

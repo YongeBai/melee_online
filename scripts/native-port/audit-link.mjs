@@ -1,3 +1,4 @@
+import {portableRecipeHash} from './portable-recipe.mjs';
 // Probe live dependencies at actual initialization entry points. Never emit a
 // runnable module with unresolved imports or pretend that a link proves parity.
 import fs from 'node:fs';
@@ -12,7 +13,7 @@ if(execFileSync('git',['rev-parse','HEAD'],{cwd:upstream,encoding:'utf8'}).trim(
   throw Error('Expected pinned upstream');
 const audit=JSON.parse(fs.readFileSync(path.join(out,'report.json')));
 if(audit.sourceCommit!==source.commit)throw Error('Compile audit is stale');
-if(audit.portableSource?.recipeSha256!==createHash('sha256').update(fs.readFileSync(new URL('./portable-source.mjs',import.meta.url))).digest('hex'))
+if(audit.portableSource?.recipeSha256!==portableRecipeHash())
   throw Error('Re-run compile audit after portable-source changes');
 if(!audit.overrides)throw Error('Re-run the compile audit to record platform overrides');
 for(const {file,sha256} of audit.overrides)if(createHash('sha256').update(fs.readFileSync(path.join(root,'dist/native-port/include',file))).digest('hex')!==sha256)

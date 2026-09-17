@@ -5,7 +5,7 @@ import {createNativeCamera} from './native-camera.mjs';
 // Consume the original CSS camera mask, GX links and callbacks. SIS participates
 // in the same ordered stream as models so hands retain their native layering.
 export function createNativeCharacterMenuPreview(module,canvas,bytes,converted,{verifyVertices=false}={}){
- const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});if(!gl)throw Error('Native menu requires WebGL2');
+ const gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});if(!gl)throw Error('Native menu requires WebGL2');
  const renderer=createMaterialRenderer(gl,module,{verifyVertices}),camera=createNativeCamera(module,{read:p=>module._portCharacterMenuCameraSnapshot(p)}),list=module._malloc(256*16),resources=[],cache=new Map();
  const archive=inspectArchive(bytes);let base;
  const info=gl.getExtension('WEBGL_debug_renderer_info'),gpu={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR)};
@@ -32,7 +32,19 @@ export function createNativeCharacterMenuPreview(module,canvas,bytes,converted,{
   if(c.fov!==d.getFloat32(p+48)||c.aspect!==d.getFloat32(p+52)||c.near!==d.getFloat32(p+40)||c.far!==d.getFloat32(p+44))throw Error('CSS camera differs from original descriptor');
   renderer.begin(c);
   for(let pass=0;pass<3;pass++){module._portCharacterMenuRenderBegin();for(const r of ordered){if(r.text)module._portNativeDrawText(r.owner,pass);else module._portNativeDrawObject(r.owner,pass,1);}}
-  return {...renderer.flush({ordered:true}),objects:ordered.length,textObjects:ordered.filter(r=>r.text).length,gpu,camera:{eye:[...c.eye],interest:[...c.interest],fov:c.fov,aspect:c.aspect,near:c.near,far:c.far}};
+  const result=renderer.flush({ordered:true});
+  if(module._portMenuProduct()){
+   const mul=(m,v)=>[0,1,2,3].map(r=>v.reduce((n,x,k)=>n+m[k*4+r]*x,0));
+   const project=(x,y)=>{const v=mul(c.projection,mul(c.view,[x,y,0,1]));return [(v[0]/v[3]+1)/2,(1-v[1]/v[3])/2];};
+   const regions=[[-14.91,-2.32,29.82,-22.61],[-20.04,-21.22,2.98,-2.61],[24.71,-21.22,2.98,-2.61]].map(([x,y,w,h])=>{const a=project(x,y),b=project(x+w,y+h);return {left:a[0],top:a[1],width:b[0]-a[0],height:b[1]-a[1]};});
+   for(const rect of regions){
+    renderer.begin(c);
+    for(let pass=0;pass<3;pass++){module._portCharacterMenuRenderBegin();for(let i=0;i<2;i++)module._portNativeDrawObject(module._portCharacterMenuHand(i),pass,1);}
+    renderer.flush({ordered:true,clearAlpha:0,forceAlpha:true,clip:[Math.round(rect.left*canvas.width),Math.round((1-rect.top-rect.height)*canvas.height),Math.round(rect.width*canvas.width),Math.round(rect.height*canvas.height)]});
+   }
+   gl.disable(gl.SCISSOR_TEST);globalThis.nativeMenuApertures=regions;globalThis.nativeMenuHandPoint=(x,y)=>project(x+5,y-.75);canvas.style.visibility="visible";
+  }
+  return {...result,objects:ordered.length,textObjects:ordered.filter(r=>r.text).length,gpu,camera:{eye:[...c.eye],interest:[...c.interest],fov:c.fov,aspect:c.aspect,near:c.near,far:c.far}};
  }
  function dispose(){for(const r of resources){r.gpu?.dispose();module._free(r.nodes);}module._free(list);camera.dispose();renderer.dispose();}
  return {draw,dispose};

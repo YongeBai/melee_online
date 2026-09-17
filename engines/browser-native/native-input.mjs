@@ -29,3 +29,12 @@ export function completeNativeSample(sample){
   if(!Number.isInteger(result[0])||result[0]<0||result[0]>0x1f7f||(result[0]&~0x1f7f)||result.slice(1).some((v,i)=>!Number.isFinite(v)||Math.abs(v)>1||(i>=4&&v<0)))throw Error('Invalid normalized controller sample');
   return result;
 }
+
+// Established Melee Online bindings. Keep the old diagnostic map above for
+// replay fixtures; player-facing input uses this map.
+export const meleeKeyboardCodes=new Set(['KeyW','KeyA','KeyS','KeyD','KeyP','KeyO','Space','KeyI','KeyL','KeyU','KeyK','KeyM','Comma','Period','ShiftLeft','Enter','Escape']);
+export function meleeKeyboardSample(keys){
+ let buttons=0;for(const [key,bit] of [['KeyP',0x100],['KeyO',0x200],['Space',0x400],['KeyI',0x40],['KeyL',0x20],['KeyU',0x10],['Enter',0x1000],['Escape',0x1000]])if(keys.has(key))buttons|=bit;
+ const x=+keys.has('KeyD')-+keys.has('KeyA'),y=+keys.has('KeyW')-+keys.has('KeyS'),scale=(keys.has('ShiftLeft')?.5:1)/(x&&y?Math.SQRT2:1);
+ return [buttons,x*scale,y*scale,+keys.has('Period')-+keys.has('KeyM'),+keys.has('KeyK')-+keys.has('Comma'),+keys.has('KeyI'),+keys.has('KeyL')];
+}

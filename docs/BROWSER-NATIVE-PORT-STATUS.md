@@ -1,5 +1,43 @@
 # Native browser port — September 17, 2026
 
+The player-facing native preview now restores the established controls, 3D
+keyboard view, per-player tap jump, two native CSS cards, room-code controls,
+Falco P1 / level-9 Fox CPU defaults, and tournament-only rules/stages.
+The reported start abort was a host constructor guard that accepted only human
+slots; it now admits native CPU slots and calls the original CPU constructor.
+The CPU's own generated buttons/sticks and action changes are checked in-browser.
+
+Original HSD joints and SIS nameplates implement the two-seat layout. Clipped
+foreground passes redraw the real native hands over transparent panel apertures;
+the original camera/projection is unchanged. Product mode hides illegal stage
+icons, restricts native random stage selection to the six legal stages and
+blocks unsupported menu exits. Diagnostic menus remain available without the
+interactive query. Original moving stage gameplay and frozen Stadium are retained.
+
+Two independent Chrome processes have joined by code, refreshed the guest while
+retaining room/seat, readied independently, selected Battlefield, and completed
+600 synchronized native simulation frames with identical measured fighter fields.
+This is a three-frame **input-lockstep prototype**, not rollback. All game work
+stays in the browsers; the local Node service only authenticates seats and relays
+inputs. Refresh currently returns both players to CSS, rather than restoring an
+in-progress match. A deployed relay/signaling path is still required for online
+play; CPU play can boot from static assets without that service.
+
+The solo probes exercise 900 native frames each, actual W stick jumps with tap
+jump enabled/disabled, Space jumps and attacks, original autonomous CPU activity,
+keyboard-view input isolation, and the six-stage menu. The current source passes 271 unit tests. Unit coverage includes
+binding compatibility, local gamepad-to-network-seat assignment, immutable input
+ordering, owner-only CPU/kick, token revocation and coordinated reloads.
+[Product and room evidence](benchmarks/browser-2026-09-17-native-port-product.json).
+
+Audio, native results/rematch lifecycle, rollback/recovery, broader retail parity,
+public release integration and displayed-FPS/input-to-photon certification remain
+unfinished. This is still a development preview, not completion of competitive
+720p60 acceptance. The public play route has not been replaced.
+
+## Earlier interactive-menu checkpoint
+
+
 The direct port is now an implemented, reproducible development target:
 [build and architecture](../engines/browser-native/README.md). It links original
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is

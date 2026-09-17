@@ -25,8 +25,14 @@ extern void portRuntimeSetSceneDestructors(GObjFunc);
 extern unsigned portRuntimeStep(void);
 extern unsigned portSceneExitStatus(unsigned);
 extern double portStageMenuNativeRead(unsigned,unsigned);
+extern void portCharacterMenuProductInitialize(void),portCharacterMenuProductLayout(void),portCharacterMenuProductRules(void),portStageMenuProductLayout(void);
 static SSSData selection;
 static int initialized,character_initialized;
+static unsigned product_profile,product_cpu=1;
+extern void portCharacterMenuProductOpponent(unsigned);
+void portMenuSetCPU(unsigned cpu){if(!character_initialized||!product_profile||cpu>1)abort();portCharacterMenuProductOpponent(cpu);product_cpu=cpu;}
+unsigned portMenuProduct(void){return product_profile;}
+void portMenuConfigure(unsigned product,unsigned cpu){if(initialized||character_initialized||product>1||cpu>1)abort();product_profile=product;product_cpu=cpu;}
 static VsModeData selected_vs;
 /* 0: standalone; 1: CSS confirmed; 2: SSS active; 3: SSS canceled;
  * 4: match ready; 5: setup consumed by the match. */
@@ -43,7 +49,7 @@ static unsigned stage_menu_initialize(unsigned controller,int from_character)
     if(from_character){GameModeState state={0};state.info.enter_data=&selection;gmVsMelee_EnterSss(&state,&selected_vs);}
     selection.unk_stage=controller+1;
     selection.force_stage_id=-1;
-    mnStageSel_Scene_OnEnter(&selection);
+    mnStageSel_Scene_OnEnter(&selection);portStageMenuProductLayout();
     for(HSD_GObj* g=HSD_GObjPLinkHead[3];g;g=g->next)if(g->obj_kind==HSD_GObj_CameraKind){if(camera)abort();camera=g;}
     for(HSD_GObj* g=HSD_GObjGXLinkHead[0];g;g=g->next_gx){
         if(g->obj_kind==HSD_GObj_LightKind){if(lights)abort();lights=g;}
@@ -73,7 +79,7 @@ unsigned portStageMenuObjects(unsigned* output,unsigned capacity)
 void portStageMenuRenderBegin(void)
 {
     extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
-    if(!initialized)abort();portRenderContextBegin(camera->hsd_obj,lights->hsd_obj);
+    if(!initialized)abort();portStageMenuProductLayout();portRenderContextBegin(camera->hsd_obj,lights->hsd_obj);
     fog->render_cb(fog,0);
 }
 void portStageMenuCameraSnapshot(float* output)
@@ -151,8 +157,14 @@ static unsigned character_menu_initialize(int resume)
     menu_transition=0;character_selection.match_type=VS_MELEE;
     character_selection.unk_0x0=1;character_selection.ko_counts=character_ko_counts;
     for(unsigned i=0;i<2;i++)character_selection.vs.start.players[i].slot_type=Gm_PKind_Human;
+    if(product_profile){
+        if(!resume){character_selection.vs.start.players[0].ckind=CKind_Falco;character_selection.vs.start.players[1].ckind=CKind_Fox;}
+        character_selection.vs.start.players[1].slot_type=product_cpu?Gm_PKind_Cpu:Gm_PKind_Human;
+        character_selection.vs.start.players[1].cpu_level=9;
+        for(unsigned i=2;i<4;i++)character_selection.vs.start.players[i].slot_type=Gm_PKind_NA;
+    }
     HSD_SisLib_803A6048(0x10000);
-    mnCharSel_Scene_OnEnter(&character_selection);character_initialized=1;return 1;
+    mnCharSel_Scene_OnEnter(&character_selection);portCharacterMenuProductInitialize();character_initialized=1;return 1;
 }
 
 unsigned portCharacterMenuInitialize(void){return character_menu_initialize(0);}
@@ -183,7 +195,7 @@ unsigned portCharacterMenuObjects(unsigned* out,unsigned capacity)
 void portCharacterMenuRenderBegin(void)
 {
     extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
-    HSD_LObj* light=NULL;HSD_Fog* f=NULL;
+    portCharacterMenuProductLayout();HSD_LObj* light=NULL;HSD_Fog* f=NULL;
     for(HSD_GObj* g=HSD_GObjGXLinkHead[0];g;g=g->next_gx){
         if(g->obj_kind==HSD_GObj_LightKind){if(light)abort();light=g->hsd_obj;}
         else if(g->obj_kind==HSD_GObj_FogKind){if(f)abort();f=g->hsd_obj;}
@@ -203,7 +215,7 @@ unsigned portCharacterMenuStep(void)
 {
     if(!character_initialized||portSceneExitStatus(0))abort();
     for(unsigned i=0;i<4;i++)HSD_PadCopyStatus[i]=HSD_PadGameStatus[i];
-    mnCharSel_Scene_OnFrame();return portRuntimeStep();
+    portCharacterMenuProductRules();mnCharSel_Scene_OnFrame();unsigned result=portRuntimeStep();portCharacterMenuProductRules();return result;
 }
 double portCharacterMenuRead(unsigned field,unsigned player)
 {
@@ -212,7 +224,7 @@ double portCharacterMenuRead(unsigned field,unsigned player)
     case 0:return portSceneExitStatus(0);
     case 1:return character_selection.vs.start.players[player].ckind;
     case 2:return character_selection.vs.start.players[player].color;
-    case 3:return character_selection.vs.start.players[player].slot_type;
+    case 3:return character_selection.vs.start.players[player].slot_type;case 4:return character_selection.vs.start.players[player].cpu_level;
     default:abort();
     }
 }
@@ -242,6 +254,7 @@ double portMenuMatchRead(unsigned field,unsigned player)
     case 4:return d->rules.stkind;case 5:return d->rules.time_limit;
     case 6:return d->rules.item_freq;case 7:return d->rules.is_teams;
     case 8:return d->rules.match_kind;case 9:return d->rules.timer_enabled;
+    case 11:return d->players[player].cpu_level;
     case 10:return Player_800325C8(menu_transition==5?Player_GetPlayerCharacter(player):d->players[player].ckind,0);
     default:abort();
     }

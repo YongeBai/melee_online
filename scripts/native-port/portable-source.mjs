@@ -1,9 +1,11 @@
+import {portableRecipeHash} from './portable-recipe.mjs';
 // Keep the pinned checkout pristine. Typed adapters reconcile known decomp
 // declarations with C's callback ABI without pointer casts or warning suppression.
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
+const menuProduct=fs.readFileSync(new URL('../../engines/browser-native/menu-product.inc',import.meta.url),'utf8'),stageProduct=fs.readFileSync(new URL('../../engines/browser-native/stage-menu-product.inc',import.meta.url),'utf8');
 const digest=text=>createHash('sha256').update(text).digest('hex');
 export function adaptPauseBounds(text){
   const signature='void Camera_SetUpPauseCamera(s8 pauserSlot, s8 pauserId, s32 arg2)',cast='(void (*)(Camera_x2D0*))(Event) Camera_SetBounds';
@@ -156,15 +158,26 @@ export function preparePortableSource(source,output) {
       replace('    interpretShapeAnimDisplayList(pobj, vertex_buffer, normal_buffer);', '    if (!port_shape_capture) interpretShapeAnimDisplayList(pobj, vertex_buffer, normal_buffer);');
       replace('void HSD_PObjClearMtxMark(void* obj, u32 mark)', 'void portShapeEvaluate(HSD_PObj* pobj, float (**vertices)[3], float (**normals)[3])\n{\n    HSD_ASSERT(0, !port_shape_capture && pobj_type(pobj) == POBJ_SHAPEANIM);\n    port_shape_capture = 1; drawShapeAnim(pobj); port_shape_capture = 0;\n    *vertices = vertex_buffer; *normals = normal_buffer;\n}\n\nvoid HSD_PObjClearMtxMark(void* obj, u32 mark)');
     }
+    if(['src/melee/ft/kinds/ftCommon/ftCo_Jump.c','src/melee/ft/kinds/ftCommon/ftCo_JumpAerial.c','src/melee/ft/kinds/ftCommon/ftCo_JumpAerialF1.c'].includes(file)) {
+      text='#include <melee/ft/forward.h>\nextern int portTapJumpAllowed(Fighter*);\n'+text;
+      const count=[...text.matchAll(/fp->input\.lstick\[0\]\.y >=\s*p_ftCommonData->(?:relaxed_)?tap_jump_threshold/g)].length;
+      if(count!==(file.endsWith('/ftCo_Jump.c')?2:1))throw Error('Tap jump branch coverage changed');
+      text=text.replace(/fp->input\.lstick\[0\]\.y >=(\s*p_ftCommonData->(?:relaxed_)?tap_jump_threshold)/g,'portTapJumpAllowed(fp) && fp->input.lstick[0].y >=$1');
+    }
     if(file==='src/melee/mn/mncharsel.c') {
+      text='extern unsigned portMenuProduct(void);\n'+text;
+      text=text.replace('if (cursor->xC < -25.5f && cursor->x10 > 22.0f)', 'if (!portMenuProduct() && cursor->xC < -25.5f && cursor->x10 > 22.0f)');
+      text=text.replaceAll('mnCharSel_804D6CF6 = 2;', 'if(!portMenuProduct())mnCharSel_804D6CF6 = 2;').replaceAll('mnCharSel_804D6CF6 = 3;', 'if(!portMenuProduct())mnCharSel_804D6CF6 = 3;').replaceAll('mnCharSel_804D6CF6 = 4;', 'if(!portMenuProduct())mnCharSel_804D6CF6 = 4;');
       // Read-only inspection of original CSS hit targets, hands and door state.
       const marker='void mnCharSel_Scene_OnEnter(void* arg0)';
-      replace(marker,"double portCharacterMenuNativeRead(unsigned field,unsigned index)\n{\n    if(field==0)return mnCharSel_804D6CF6;\n    if(field==1)return mnCharSel_804D6CF2;\n    if(field>=10){\n        HSD_ASSERT(0,index<25);CSSIcon* icon=&icons[index];\n        switch(field){case 10:return icon->char_kind;case 11:return icon->state;\n        case 12:return (icon->bound_l+icon->bound_r)*0.5f;\n        case 13:return (icon->bound_u+icon->bound_d)*0.5f;default:HSD_ASSERT(0,0);}\n    }\n    HSD_ASSERT(0,index<4 && mnCharSel_804A0BC0[index]);\n    struct CSSCursorData* c=mnCharSel_804A0BC0[index];CSSDoor* door=&mnCharSel_803F0DFC.doors[index];\n    switch(field){case 2:return c->xC;case 3:return c->x10;case 4:return c->x5;\n    case 5:return door->sel_icon;case 6:return door->costume;case 7:return door->p_kind;\n    case 8:return mnCharSel_804A0BD0[index]->x5;case 9:return door->selected_since_load;}\n    HSD_ASSERT(0,0);return 0;\n}\n\n"+marker);
+      replace(marker,"double portCharacterMenuNativeRead(unsigned field,unsigned index)\n{\n    if(field==0)return mnCharSel_804D6CF6;\n    if(field==1)return mnCharSel_804D6CF2;\n    if(field>=10){\n        HSD_ASSERT(0,index<25);CSSIcon* icon=&icons[index];\n        switch(field){case 10:return icon->char_kind;case 11:return icon->state;\n        case 12:return (icon->bound_l+icon->bound_r)*0.5f;\n        case 13:return (icon->bound_u+icon->bound_d)*0.5f;default:HSD_ASSERT(0,0);}\n    }\n    HSD_ASSERT(0,index<4 && mnCharSel_804A0BC0[index]);\n    struct CSSCursorData* c=mnCharSel_804A0BC0[index];CSSDoor* door=&mnCharSel_803F0DFC.doors[index];\n    switch(field){case 2:return c->xC;case 3:return c->x10;case 4:return c->x5;\n    case 5:return door->sel_icon;case 6:return door->costume;case 7:return door->p_kind;\n    case 8:return mnCharSel_804A0BD0[index]->x5;case 9:return door->selected_since_load;}\n    HSD_ASSERT(0,0);return 0;\n}\n\n"+menuProduct+"\n"+marker);
     }
     if(file==='src/melee/mn/mnstagesel.c') {
+      text='extern unsigned portMenuProduct(void);\n'+text;
+      replace('int mnStageSel_802599EC(void)\n{','int mnStageSel_802599EC(void)\n{\n    if(portMenuProduct()){const int ids[6]={2,3,8,28,31,32};int stage=ids[HSD_Randi(6)];for(int i=0;i<29;i++)if(mnStageSel_803F06D0[i].stkind==stage)return i;}');
       // Read-only inspection of original selection state and icon hit targets.
       const marker='void mnStageSel_Scene_OnEnter(void* arg0)';
-      replace(marker,'double portStageMenuNativeRead(unsigned field, unsigned index)\n{\n    Vec3 position;\n    if(field==0)return mnStageSel_804D6CAF;\n    if(field==1)return mnStageSel_804D6CAE;\n    HSD_ASSERT(0, index < 30);\n    if(field==2)return mnStageSel_803F06D0[index].stkind;\n    if(field==5)return mnStageSel_803F06D0[index].x8;\n    HSD_ASSERT(0, mnStageSel_803F06D0[index].x0);\n    lb_8000B1CC(mnStageSel_803F06D0[index].x0, NULL, &position);\n    if(field==3)return position.x;\n    if(field==4)return position.y;\n    HSD_ASSERT(0, 0); return 0;\n}\n\n'+marker);
+      replace(marker,'double portStageMenuNativeRead(unsigned field, unsigned index)\n{\n    Vec3 position;\n    if(field==0)return mnStageSel_804D6CAF;\n    if(field==1)return mnStageSel_804D6CAE;\n    HSD_ASSERT(0, index < 30);\n    if(field==2)return mnStageSel_803F06D0[index].stkind;\n    if(field==5)return mnStageSel_803F06D0[index].x8;\n    HSD_ASSERT(0, mnStageSel_803F06D0[index].x0);\n    lb_8000B1CC(mnStageSel_803F06D0[index].x0, NULL, &position);\n    if(field==3)return position.x;\n    if(field==4)return position.y;\n    HSD_ASSERT(0, 0); return 0;\n}\n\n'+stageProduct+'\n'+marker);
     }
     if(file==='src/melee/gm/gmscene.c') {
       const marker='/* 479D58 */ static struct gm_80479D58_t gm_80479D58;';
@@ -534,7 +547,7 @@ static inline int portCommandSigned12(const void* words) {
 }
 #endif
 `);
-  const manifest={recipeSha256:digest(fs.readFileSync(new URL(import.meta.url))),files:files.length,patches,
+  const manifest={recipeSha256:portableRecipeHash(),files:files.length,patches,
     callbackDiagnosticSuppressed:false,functionPointerCasts:false,
     commandLayouts:{records:commandLayout.records.length+2,fields:commandLayout.fields.length,
       sha256:digest(JSON.stringify(commandLayout.fields)),representation:'native numeric u32 with original MSB field positions'}};

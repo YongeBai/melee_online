@@ -1,0 +1,770 @@
+{
+  "date": "2026-09-17",
+  "wasmSha256": "23c35480c756da2ba902be3c68d7716deefd4ea3a92e5ec91c0b0587054e197d",
+  "upstream": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "unitTests": 271,
+  "solo": [
+    {
+      "case": "tap-off",
+      "passed": true,
+      "tapJumpEnabled": false,
+      "defaults": [
+        {
+          "character": 20,
+          "costume": 0,
+          "kind": 0,
+          "cpuLevel": 9,
+          "x": -31,
+          "y": -21.5,
+          "hand": 0,
+          "icon": 9,
+          "token": 0,
+          "selected": 0
+        },
+        {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": 14.799999237060547,
+          "y": -21.5,
+          "hand": 0,
+          "icon": 10,
+          "token": 0,
+          "selected": 0
+        }
+      ],
+      "cpu": {
+        "samples": 868,
+        "active": 130,
+        "buttons": 47,
+        "actions": [
+          323,
+          324,
+          29,
+          42,
+          39,
+          41,
+          14,
+          244,
+          64,
+          15,
+          60,
+          44,
+          20,
+          214,
+          215,
+          216,
+          219,
+          18,
+          24,
+          25,
+          27,
+          245,
+          246,
+          69
+        ],
+        "lastFrame": 900
+      },
+      "flow": {
+        "scene": "match-ended",
+        "frames": 445,
+        "draws": 438,
+        "busy": false,
+        "controller": 0,
+        "transitions": [
+          {
+            "scene": "characters",
+            "frames": 0
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 218
+          },
+          {
+            "scene": "stages",
+            "frames": 218
+          },
+          {
+            "scene": "loading-match",
+            "frames": 445
+          },
+          {
+            "scene": "match",
+            "frames": 445
+          },
+          {
+            "scene": "match-ended",
+            "frames": 445
+          }
+        ],
+        "state": null
+      },
+      "rules": [
+        1,
+        0,
+        480,
+        1,
+        0,
+        -1,
+        0,
+        1,
+        1,
+        0,
+        4,
+        0
+      ],
+      "live": {
+        "frames": 900,
+        "draws": 895,
+        "elapsedMs": 15035.700000017881,
+        "stepCpu": {
+          "samples": 900,
+          "meanMs": 0.4367777778373824,
+          "p50Ms": 0.4000000059604645,
+          "p95Ms": 0.699999988079071,
+          "maxMs": 4.299999982118607
+        },
+        "drawSubmissionCpu": {
+          "samples": 895,
+          "meanMs": 5.55005586636799,
+          "p50Ms": 5,
+          "p95Ms": 8.5,
+          "maxMs": 88.7999999821186
+        },
+        "rafDrawIntervals": {
+          "samples": 894,
+          "meanMs": 16.77785234899329,
+          "p50Ms": 16.69999999999891,
+          "p95Ms": 16.700000000000728,
+          "maxMs": 83.29999999999927
+        },
+        "workload": {
+          "framesWithAttack": 199,
+          "framesWithHitlag": 50,
+          "framesWithDamage": 313,
+          "stockChanges": [
+            {
+              "frame": 384,
+              "slot": 0,
+              "stocks": 3
+            }
+          ],
+          "windows": [
+            {
+              "firstFrame": 1,
+              "frames": 600,
+              "hitlag": 24,
+              "attack": 146
+            },
+            {
+              "firstFrame": 601,
+              "frames": 300,
+              "hitlag": 26,
+              "attack": 53
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "-tap-on",
+      "passed": true,
+      "tapJumpEnabled": true,
+      "defaults": [
+        {
+          "character": 20,
+          "costume": 0,
+          "kind": 0,
+          "cpuLevel": 9,
+          "x": -31,
+          "y": -21.5,
+          "hand": 0,
+          "icon": 9,
+          "token": 0,
+          "selected": 0
+        },
+        {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": 14.799999237060547,
+          "y": -21.5,
+          "hand": 0,
+          "icon": 10,
+          "token": 0,
+          "selected": 0
+        }
+      ],
+      "cpu": {
+        "samples": 873,
+        "active": 228,
+        "buttons": 45,
+        "actions": [
+          323,
+          324,
+          29,
+          42,
+          39,
+          41,
+          14,
+          244,
+          24,
+          25,
+          27,
+          65,
+          70,
+          44,
+          45,
+          212,
+          213,
+          222,
+          360,
+          361,
+          363,
+          15,
+          16,
+          18
+        ],
+        "lastFrame": 900
+      },
+      "flow": {
+        "scene": "match-ended",
+        "frames": 455,
+        "draws": 441,
+        "busy": false,
+        "controller": 0,
+        "transitions": [
+          {
+            "scene": "characters",
+            "frames": 0
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 226
+          },
+          {
+            "scene": "stages",
+            "frames": 226
+          },
+          {
+            "scene": "loading-match",
+            "frames": 455
+          },
+          {
+            "scene": "match",
+            "frames": 455
+          },
+          {
+            "scene": "match-ended",
+            "frames": 455
+          }
+        ],
+        "state": null
+      },
+      "rules": [
+        1,
+        0,
+        480,
+        1,
+        0,
+        -1,
+        0,
+        1,
+        1,
+        0,
+        4,
+        0
+      ],
+      "live": {
+        "frames": 900,
+        "draws": 895,
+        "elapsedMs": 15038.800000011921,
+        "stepCpu": {
+          "samples": 900,
+          "meanMs": 0.5213333334194289,
+          "p50Ms": 0.5,
+          "p95Ms": 0.9000000059604645,
+          "maxMs": 4.0999999940395355
+        },
+        "drawSubmissionCpu": {
+          "samples": 895,
+          "meanMs": 6.455642457947385,
+          "p50Ms": 5.700000017881393,
+          "p95Ms": 10.099999994039536,
+          "maxMs": 68.90000000596046
+        },
+        "rafDrawIntervals": {
+          "samples": 894,
+          "meanMs": 16.77785234899329,
+          "p50Ms": 16.69999999999891,
+          "p95Ms": 16.700000000000728,
+          "maxMs": 66.69999999999891
+        },
+        "workload": {
+          "framesWithAttack": 135,
+          "framesWithHitlag": 27,
+          "framesWithDamage": 253,
+          "stockChanges": [
+            {
+              "frame": 425,
+              "slot": 0,
+              "stocks": 3
+            }
+          ],
+          "windows": [
+            {
+              "firstFrame": 1,
+              "frames": 600,
+              "hitlag": 21,
+              "attack": 108
+            },
+            {
+              "firstFrame": 601,
+              "frames": 300,
+              "hitlag": 6,
+              "attack": 27
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "-static-only",
+      "passed": true,
+      "tapJumpEnabled": false,
+      "defaults": [
+        {
+          "character": 20,
+          "costume": 0,
+          "kind": 0,
+          "cpuLevel": 9,
+          "x": -31,
+          "y": -21.5,
+          "hand": 0,
+          "icon": 9,
+          "token": 0,
+          "selected": 0
+        },
+        {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": 14.799999237060547,
+          "y": -21.5,
+          "hand": 0,
+          "icon": 10,
+          "token": 0,
+          "selected": 0
+        }
+      ],
+      "cpu": {
+        "samples": 872,
+        "active": 142,
+        "buttons": 31,
+        "actions": [
+          323,
+          324,
+          29,
+          42,
+          39,
+          41,
+          14,
+          244,
+          44,
+          45,
+          47,
+          48,
+          49,
+          182,
+          233,
+          15,
+          20,
+          214,
+          215,
+          217,
+          216,
+          220,
+          16,
+          18,
+          24,
+          25,
+          27
+        ],
+        "lastFrame": 900
+      },
+      "flow": {
+        "scene": "match-ended",
+        "frames": 490,
+        "draws": 482,
+        "busy": false,
+        "controller": 0,
+        "transitions": [
+          {
+            "scene": "characters",
+            "frames": 0
+          },
+          {
+            "scene": "loading-stage",
+            "frames": 259
+          },
+          {
+            "scene": "stages",
+            "frames": 259
+          },
+          {
+            "scene": "loading-match",
+            "frames": 490
+          },
+          {
+            "scene": "match",
+            "frames": 490
+          },
+          {
+            "scene": "match-ended",
+            "frames": 490
+          }
+        ],
+        "state": null
+      },
+      "rules": [
+        1,
+        0,
+        480,
+        1,
+        0,
+        -1,
+        0,
+        1,
+        1,
+        0,
+        4,
+        0
+      ],
+      "live": {
+        "frames": 900,
+        "draws": 897,
+        "elapsedMs": 15030.200000017881,
+        "stepCpu": {
+          "samples": 900,
+          "meanMs": 0.4041111112634341,
+          "p50Ms": 0.4000000059604645,
+          "p95Ms": 0.699999988079071,
+          "maxMs": 3.699999988079071
+        },
+        "drawSubmissionCpu": {
+          "samples": 897,
+          "meanMs": 5.491415830426657,
+          "p50Ms": 4.9000000059604645,
+          "p95Ms": 8.299999982118607,
+          "maxMs": 61.400000005960464
+        },
+        "rafDrawIntervals": {
+          "samples": 896,
+          "meanMs": 16.740401785714287,
+          "p50Ms": 16.69999999999891,
+          "p95Ms": 16.700000000000728,
+          "maxMs": 50.100000000000364
+        },
+        "workload": {
+          "framesWithAttack": 153,
+          "framesWithHitlag": 41,
+          "framesWithDamage": 392,
+          "stockChanges": [
+            {
+              "frame": 491,
+              "slot": 0,
+              "stocks": 3
+            }
+          ],
+          "windows": [
+            {
+              "firstFrame": 1,
+              "frames": 600,
+              "hitlag": 41,
+              "attack": 137
+            },
+            {
+              "firstFrame": 601,
+              "frames": 300,
+              "hitlag": 0,
+              "attack": 16
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "network": {
+    "passed": true,
+    "scope": "Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.",
+    "initial": [
+      {
+        "room": {
+          "code": "RLHKNA",
+          "seat": 0,
+          "epoch": 2,
+          "phase": "characters:0",
+          "phaseReady": true,
+          "nextFrame": 91,
+          "buffered": 3,
+          "lastSent": {
+            "frame": 93,
+            "pad": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "mode": "lockstep-3"
+        },
+        "menu": {
+          "frames": 91,
+          "phase": 0,
+          "gate": 0,
+          "exit": 0,
+          "players": [
+            {
+              "character": 20,
+              "costume": 0,
+              "kind": 0,
+              "cpuLevel": 9,
+              "x": -31,
+              "y": -21.5,
+              "hand": 0,
+              "icon": 9,
+              "token": 0,
+              "selected": 0
+            },
+            {
+              "character": 2,
+              "costume": 0,
+              "kind": 0,
+              "cpuLevel": 9,
+              "x": 14.799999237060547,
+              "y": -21.5,
+              "hand": 0,
+              "icon": 10,
+              "token": 0,
+              "selected": 0
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "cpuLevel": 9,
+              "x": -1,
+              "y": -21.5,
+              "hand": 3,
+              "icon": 25,
+              "token": 0,
+              "selected": 0
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "cpuLevel": 9,
+              "x": 14,
+              "y": -21.5,
+              "hand": 3,
+              "icon": 25,
+              "token": 0,
+              "selected": 0
+            }
+          ]
+        }
+      },
+      {
+        "room": {
+          "code": "RLHKNA",
+          "seat": 1,
+          "epoch": 2,
+          "phase": "characters:0",
+          "phaseReady": true,
+          "nextFrame": 91,
+          "buffered": 3,
+          "lastSent": {
+            "frame": 93,
+            "pad": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "mode": "lockstep-3"
+        },
+        "menu": {
+          "frames": 91,
+          "phase": 0,
+          "gate": 0,
+          "exit": 0,
+          "players": [
+            {
+              "character": 20,
+              "costume": 0,
+              "kind": 0,
+              "cpuLevel": 9,
+              "x": -31,
+              "y": -21.5,
+              "hand": 0,
+              "icon": 9,
+              "token": 0,
+              "selected": 0
+            },
+            {
+              "character": 2,
+              "costume": 0,
+              "kind": 0,
+              "cpuLevel": 9,
+              "x": 14.799999237060547,
+              "y": -21.5,
+              "hand": 0,
+              "icon": 10,
+              "token": 0,
+              "selected": 0
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "cpuLevel": 9,
+              "x": -1,
+              "y": -21.5,
+              "hand": 3,
+              "icon": 25,
+              "token": 0,
+              "selected": 0
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "cpuLevel": 9,
+              "x": 14,
+              "y": -21.5,
+              "hand": 3,
+              "icon": 25,
+              "token": 0,
+              "selected": 0
+            }
+          ]
+        }
+      }
+    ],
+    "frames": [
+      600,
+      600
+    ],
+    "finalFighters": [
+      [
+        [
+          14,
+          3,
+          175,
+          0,
+          27.5,
+          0.00009999999747378752,
+          0,
+          9323072,
+          19858752,
+          15,
+          1,
+          22,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        [
+          14,
+          3,
+          10,
+          0,
+          -18.80000114440918,
+          54.40010070800781,
+          0,
+          9323180,
+          21431968,
+          15,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          -1,
+          60,
+          4
+        ]
+      ],
+      [
+        [
+          14,
+          3,
+          175,
+          0,
+          27.5,
+          0.00009999999747378752,
+          0,
+          9323072,
+          19858752,
+          15,
+          1,
+          22,
+          0,
+          0,
+          0,
+          0,
+          1,
+          60,
+          4
+        ],
+        [
+          14,
+          3,
+          10,
+          0,
+          -18.80000114440918,
+          54.40010070800781,
+          0,
+          9323180,
+          21431968,
+          15,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          -1,
+          60,
+          4
+        ]
+      ]
+    ],
+    "identicalFinalFighterFields": true
+  },
+  "limitations": [
+    "Instrumented browser correctness probes, not distinct presented FPS or input-to-photon latency.",
+    "Three-frame input lockstep on localhost; no rollback or WAN certification.",
+    "Guest refresh preserves room/seat but restarts both games at character select.",
+    "Audio, native results/rematch, full retail parity and public deployment are unfinished."
+  ]
+}

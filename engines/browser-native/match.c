@@ -136,7 +136,7 @@ void portTournamentInitializeMenu(void)
 }
 HSD_GObj* portTournamentConstructSelected(unsigned slot)
 {
-    if(!initialized||started||slot>=2||Player_GetEntity(slot)||Player_GetPlayerSlotType(slot)!=Gm_PKind_Human)abort();
+    if(!initialized||started||slot>=2||Player_GetEntity(slot)||(Player_GetPlayerSlotType(slot)!=Gm_PKind_Human&&Player_GetPlayerSlotType(slot)!=Gm_PKind_Cpu))abort();
     Player_80031AD0(slot);return Player_GetEntity(slot);
 }
 void portTournamentInitializeKinds(unsigned left,unsigned right){portTournamentInitializeStage(left,right,St_Kind_Battle);}

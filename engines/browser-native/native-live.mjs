@@ -30,7 +30,7 @@ export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1
 // Interactive development fixture, not complete competitive match startup.
 // Input samples enter the existing normalized HSD boundary; no game-state
 // positions, action states, damage or velocities are assigned here.
-export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,browserInput=null,resolveObjects=null,readMatch=null,unlockInput=true}={}) {
+export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,browserInput=null,resolveObjects=null,readMatch=null,unlockInput=true,network=null}={}) {
   // The first callback can carry a timestamp from before lengthy startup work.
   // Discard such timestamps, then anchor to the first valid display callback.
   // A quarter millisecond of repaid tolerance covers observed display jitter.
@@ -63,13 +63,14 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       if(lastCallback!==null&&now-lastCallback>25)cadence.rafGapsOver25Ms++;lastCallback=now;
       // Bound work per callback while retaining debt: never skip simulation
       // frames to inflate the rendered frame rate. Hidden tabs pause explicitly.
-      for(let index=0;index<steps;index++) {
+      let advanced=0;for(let index=0;index<steps;index++) {
         const previous=final??initial;
         const pads=!inputProvider&&!browserInput&&focused?(globalThis.navigator?.getGamepads?.()??[]):[];
-        const samples=(inputProvider?inputProvider(frames,previous):browserInput?browserInput.samples(objects.length):objects.map((_,i)=>!focused?neutralNativeSample():i===0&&keys.size?keyboardNativeSample(keys):standardNativeSample(pads[i]))).map(completeNativeSample);
+        let samples=(inputProvider?inputProvider(frames,previous):browserInput?browserInput.samples(objects.length):objects.map((_,i)=>!focused?neutralNativeSample():i===0&&keys.size?keyboardNativeSample(keys):standardNativeSample(pads[i]))).map(completeNativeSample);
+        if(network?.active){samples=network.take(samples,module);if(!samples){clock.reset();break;}}
         if(samples.length!==objects.length)throw Error('Controller sample count differs from players');
         for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);
-        const before=performance.now();step();sample(stepTimes,performance.now()-before);frames++;
+        const before=performance.now();step();sample(stepTimes,performance.now()-before);frames++;advanced++;
         final=readState();
         if(!final.flat().every(Number.isFinite))throw Error('Nonfinite interactive fighter state');
         if(final.some(isNormalAttackState))workload.framesWithAttack++;
@@ -86,7 +87,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         jump ||= final[0][3]===1&&final[0][5]>initial[0][5]+1;
         attack ||= isNormalAttackState(final[0]);
       }
-      if(steps){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
+      if(advanced){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
       if(frameLimit&&frames>=frameLimit){stop();onComplete(snapshot());return;}
       raf=requestAnimationFrame(frame);
     }catch(error){stop();onError(error,snapshot());}
@@ -95,6 +96,6 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   // keeps the original gate until the Ready callback releases it.
   if(unlockInput)for(let i=0;i<objects.length;i++)module._Player_80031848(i);
   if(!browserInput){addEventListener('keydown',input);addEventListener('keyup',input);}addEventListener('blur',blur);addEventListener('focus',focus);document.addEventListener('visibilitychange',reset);
-  raf=requestAnimationFrame(frame);
+  network?.begin('match');raf=requestAnimationFrame(frame);
   return {snapshot,stop(){stop();onComplete(snapshot());}};
 }

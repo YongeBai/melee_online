@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><title>Native character-select bring-up</title>
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Melee Online</title>
 <canvas id="picture" width="960" height="720"></canvas>
 <pre id="result">Loading original character-select assets…</pre>
 <script type="module">
@@ -13,15 +13,17 @@ import {installResidentFile} from './resident-files.mjs';
 const interactive=new URLSearchParams(location.search).has('interactive');
 const report={passed:false,playableMatch:false,audioPlayed:false,audioMode:null},diagnostics=[],music=[];
 try{
+ let network=null,productUI=null;
+ if(interactive){const {connectNativeRoom,createLocalNativeRoom}=await import('./native-room.mjs');try{network=await connectNativeRoom({onState:n=>productUI?.setNetwork(n),onError:e=>{globalThis.nativeRoomError=String(e);productUI?.connectionError(e);}});}catch(e){network=createLocalNativeRoom(e.message);report.roomUnavailable=e.message;}globalThis.nativeRoom=network;}
  const module=await create({printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=mode;return true;},onNativeMusic:r=>{music.push(r);return false;}});
  let cssBytes,cssAsset;
  for(const [name,convert] of [['MnSlChr.usd',b=>convertMenuAsset(b,{menu:'character'})],['MnExtAll.usd',convertExtraMenuAsset],['SdSlChr.usd',convertSisAsset],['LbMcGame.usd',convertCardIconAsset],['NtMemAc.usd',convertCardNoticeAsset]]){
   const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable '+name);const bytes=new Uint8Array(await r.arrayBuffer()),asset=convert(bytes);if(name==='MnSlChr.usd'){cssBytes=bytes;cssAsset=asset;}installResidentFile(module,name,asset.image);
  }
- module._portMenuDiagnosticMute();module._portCharacterMenuInitialize();globalThis.characterModule=module;
+ module._portMenuDiagnosticMute();if(interactive)module._portMenuConfigure(1,network.cpu?1:0);module._portCharacterMenuInitialize();globalThis.characterModule=module;
  let preview=createNativeCharacterMenuPreview(module,document.querySelector('#picture'),cssBytes,cssAsset,{verifyVertices:!interactive});globalThis.characterPreview=preview;
  let frames=0;
- const read=()=>({frames,phase:module._portCharacterMenuNativeRead(0,0),gate:module._portCharacterMenuNativeRead(1,0),exit:module._portCharacterMenuRead(0,0),players:Array.from({length:4},(_,p)=>({character:module._portCharacterMenuRead(1,p),costume:module._portCharacterMenuRead(2,p),kind:module._portCharacterMenuRead(3,p),x:module._portCharacterMenuNativeRead(2,p),y:module._portCharacterMenuNativeRead(3,p),hand:module._portCharacterMenuNativeRead(4,p),icon:module._portCharacterMenuNativeRead(5,p),token:module._portCharacterMenuNativeRead(8,p),selected:module._portCharacterMenuNativeRead(9,p)}))});
+ const read=()=>({frames,phase:module._portCharacterMenuNativeRead(0,0),gate:module._portCharacterMenuNativeRead(1,0),exit:module._portCharacterMenuRead(0,0),players:Array.from({length:4},(_,p)=>({character:module._portCharacterMenuRead(1,p),costume:module._portCharacterMenuRead(2,p),kind:module._portCharacterMenuRead(3,p),cpuLevel:module._portCharacterMenuRead(4,p),x:module._portCharacterMenuNativeRead(2,p),y:module._portCharacterMenuNativeRead(3,p),hand:module._portCharacterMenuNativeRead(4,p),icon:module._portCharacterMenuNativeRead(5,p),token:module._portCharacterMenuNativeRead(8,p),selected:module._portCharacterMenuNativeRead(9,p)}))});
  const step=(samples=[])=>{for(let p=0;p<4;p++){const sample=p in samples?samples[p]:(p<2?[0,0,0]:null);if(sample)module._portControllerSample(p,...completeNativeSample(sample));else module._portControllerDisconnect(p);}module._portCharacterMenuStep();frames++;return read();};
  globalThis.nativeCharacterMenu={read,step,restart:(resume=false)=>{if(resume)module._portCharacterMenuResume();else module._portCharacterMenuInitialize();preview=createNativeCharacterMenuPreview(module,document.querySelector('#picture'),cssBytes,cssAsset,{verifyVertices:!interactive});frames=0;preview.draw();if(!interactive)for(let i=0;i<60;i++)step();return read();},draw:()=>preview.draw(),icons:()=>Array.from({length:25},(_,i)=>({i,character:module._portCharacterMenuNativeRead(10,i),state:module._portCharacterMenuNativeRead(11,i),x:module._portCharacterMenuNativeRead(12,i),y:module._portCharacterMenuNativeRead(13,i)})),finish:()=>{preview.dispose();const phase=module._portCharacterMenuFinish();return {phase,objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
  let stageBytes,stageAsset;
@@ -35,20 +37,20 @@ try{
  globalThis.nativeCharacterMenu.matchSelection=()=>({players:Array.from({length:4},(_,p)=>({character:module._portMenuMatchRead(0,p),costume:module._portMenuMatchRead(1,p),kind:module._portMenuMatchRead(2,p),stocks:module._portMenuMatchRead(3,p)})),stage:module._portMenuMatchRead(4,0),seconds:module._portMenuMatchRead(5,0),items:module._portMenuMatchRead(6,0),teams:module._portMenuMatchRead(7,0),mode:module._portMenuMatchRead(8,0),timer:module._portMenuMatchRead(9,0)});
  globalThis.nativeCharacterMenu.startMatch=async(params={},options={})=>{
   const {runNativeConstructor}=await import('./constructor-runner.mjs');
-  const result=await runNativeConstructor({module,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive});
+  const result=await runNativeConstructor({module,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive,network:options.network});
   globalThis.nativeMenuMatchReport=result;return result;
  };
  report.initial=preview.draw();if(!interactive)for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;
  if(interactive){
   const {createBrowserNativeInput}=await import('./browser-input.mjs'),{startNativeMenuLive}=await import('./native-menu-live.mjs');
-  const input=createBrowserNativeInput(),controls=document.createElement('div');controls.id='menu-controls';
-  const text=document.createElement('p');text.textContent='Native port preview — keyboard: arrows move, Z select, S cancel, X costume, Enter Start. Gamepads use their browser slots. Audio and results/rematch are unfinished.';controls.append(text);
+  const input=createBrowserNativeInput({layout:"melee"});const {createNativeProductUI}=await import("./native-product-ui.mjs");productUI=createNativeProductUI({module,input,menu:nativeCharacterMenu,canvas:document.querySelector("#picture")});globalThis.nativeProductUI=productUI;input.setNetworkSeat(network.seat);productUI.setNetwork(network);const controls=document.createElement('div');controls.id='menu-controls';
+  const text=document.createElement('p');text.textContent='WASD move · P attack/select · O special/cancel · Space jump · I/L shield · U grab · Enter Start · Esc pause';controls.append(text);
   for(let port=0;port<2;port++){const button=document.createElement('button');button.textContent='Keyboard: P'+(port+1);button.id='keyboard-p'+(port+1);button.addEventListener('click',()=>{input.setKeyboardPort(port);for(const b of controls.querySelectorAll('button[data-seat]'))b.setAttribute('aria-pressed',String(b===button));});button.dataset.seat=port;button.setAttribute('aria-pressed',String(port===0));controls.append(button);}
   const restart=document.createElement('button');restart.textContent='Return to character select';restart.hidden=true;controls.append(restart);document.querySelector('#picture').after(controls);
   globalThis.nativeMenuInput=input;
-  globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{matchParams:{gpuerrors:'deferred',...(new URLSearchParams(location.search).has('liveframes')?{liveframes:new URLSearchParams(location.search).get('liveframes')}:{})},onState:s=>{globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;}});
+  globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{network,module,matchParams:{gpuerrors:'deferred',...(new URLSearchParams(location.search).has('liveframes')?{liveframes:new URLSearchParams(location.search).get('liveframes')}:{})},onState:s=>{productUI.update(s);globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;document.body.dataset.error='true';}});
   restart.addEventListener('click',()=>nativeMenuLive.restart());
  }
-}catch(e){report.error=String(e.stack??e);}
+}catch(e){report.error=String(e.stack??e);document.body.dataset.error='true';}
 Object.assign(report,{diagnostics,music});globalThis.characterMenuReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
 </script>

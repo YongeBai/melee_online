@@ -5,7 +5,25 @@ build, before the input-latency and auto L-cancel experiments. Refer to source
 and validation reports rather than treating an old screenshot or benchmark as
 proof of a future revision.
 
-## What is actually running
+## Direct browser port update (September 17)
+
+The development native port now runs the decompiled C directly in browser WASM.
+Its current scope and limitations are in `BROWSER-NATIVE-PORT-STATUS.md`; the
+server-streamed implementation described below is the historical/public path.
+The native product profile uses typed original HSD objects for the two-card
+layout, an alpha canvas plus clipped native-hand foreground passes, and the
+established controls. Never regress to diagnostic keys or four visible slots.
+A CPU slot must be accepted by the host constructor before calling original
+player initialization. Gate tap jump at the original jump predicates rather
+than zeroing stick Y; CPU and Nana must retain native jumps.
+
+Portable-source provenance includes both injected menu include files. Re-run
+compile audit and audit-link before building when changing either include.
+`prepare-menu-ui.mjs` copies existing extracted UI fixtures into ignored output;
+it does not add an ISO requirement to browser startup. The optional room relay
+transports inputs only. Its three-frame lockstep must not be described as rollback.
+
+## What was running at the earlier checkpoint
 
 `/play/` uses one authoritative Linux headless Dolphin process per room. Browsers
 send controller changes and receive H.264/PCM. Rollback saves and restores the

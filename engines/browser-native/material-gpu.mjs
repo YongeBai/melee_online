@@ -225,8 +225,8 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     shaderSources(){return [...programs.values()].map(p=>p.sources);},
     shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
     begin(camera){selectCamera(camera);queue=[];shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
-    flush({ordered=false}={}){
-      gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
+    flush({ordered=false,clip=null,clearAlpha=1,forceAlpha=false}={}){
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);if(clip){gl.enable(gl.SCISSOR_TEST);gl.scissor(...clip);}else gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,clearAlpha);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
       // actor order stable, completing opaque draws before blended draws.
       const drawsInOrder=ordered?queue:[...queue.filter(d=>d.state.pixel.blend.type===0),...queue.filter(d=>d.state.pixel.blend.type!==0)];
@@ -243,7 +243,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[0]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.positions);
           if(draw.shape.normals){gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[2]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.normals);}
         }
-        apply(draw.state,draw.program,draw.camera);pixelState(draw.state.pixel);
+        apply(draw.state,draw.program,draw.camera);pixelState(draw.state.pixel);if(forceAlpha)gl.colorMask(true,true,true,true);
         const cull=draw.plan.mesh.flags&0xc000;
         if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);
         if(verifyVertices)verifyDrawVertices(draw);

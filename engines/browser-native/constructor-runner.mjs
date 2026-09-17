@@ -158,7 +158,7 @@ try {
     installResidentFile(module,'NativeStatus.dat',status.image);
     const statusFile=openResidentArchive(module,'NativeStatus.dat',['ScInfCnt_scene_models',...(withHud?['ScInfDmg_scene_data']:[])]);
     module._portTournamentStatusInstall(statusFile.archive);report.statusModels=status.models;
-    if(menuHandoff){if(options.browserInput)options.browserInput.samples(2).forEach((sample,p)=>module._portControllerSample(p,...sample));module._portTournamentInitializeMenu();}else module._portTournamentInitializeCostumes(kind,opponentKind,stageSpec.kind,costumeIndex,opponentCostumeIndex);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
+    if(menuHandoff){if(options.browserInput&&!options.network?.active)options.browserInput.samples(2).forEach((sample,p)=>module._portControllerSample(p,...sample));module._portTournamentInitializeMenu();}else module._portTournamentInitializeCostumes(kind,opponentKind,stageSpec.kind,costumeIndex,opponentCostumeIndex);report.rules=Array.from({length:12},(_,i)=>module._portTournamentRead(i,0));
     if(withHud){
       report.iconSelectorChecks=verifyHudIconSelector(module);
       module._portTournamentHudInitialize(statusFile.addresses[1]);
@@ -473,7 +473,7 @@ try {
       const controls=options.browserInput?document.querySelector('#menu-controls p'):document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Enter/Escape: Start. Audio and results/rematch remain incomplete.';if(!options.browserInput)canvas.before(controls);
       const limit=Number(params.get('liveframes')??0);if(!Number.isInteger(limit)||limit<0||limit>36000)throw Error('Invalid live frame limit');
       await new Promise((resolve,reject)=>{
-        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,browserInput:options.browserInput,unlockInput:!menuHandoff,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0)),...(menuHandoff?{intro:{mask:module._portTournamentRead(23,0),gate:module._portTournamentRead(17,0),blocked:[0,1].map(p=>module._portTournamentRead(24,p))}}:{})}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
+        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,network:options.network,browserInput:options.browserInput,unlockInput:!menuHandoff,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0)),...(menuHandoff?{intro:{mask:module._portTournamentRead(23,0),gate:module._portTournamentRead(17,0),blocked:[0,1].map(p=>module._portTournamentRead(24,p))}}:{})}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
           onProgress:s=>{report.live=s;document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
           onComplete:s=>{report.live=s;resolve();},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();reject(error);}});
         document.documentElement.dataset.live='ready';options.onLive?.(globalThis.nativeLive);

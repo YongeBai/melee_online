@@ -1,3 +1,4 @@
+import {portableRecipeHash} from './portable-recipe.mjs';
 // Scene-loader bring-up only. HSD class vtables retain drawing methods even
 // when loading objects. Unimplemented GX calls abort by name; none are no-ops.
 import fs from 'node:fs';
@@ -6,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 export function sceneLinkInputs(root,upstream,output,additionalFiles=[],excludedFiles=[]) {
   const auditDir=path.join(output,'audit'),report=JSON.parse(fs.readFileSync(path.join(auditDir,'link-report.json')));
-  const recipe=createHash('sha256').update(fs.readFileSync(new URL('./portable-source.mjs',import.meta.url))).digest('hex');
+  const recipe=portableRecipeHash();
   if(report.portableSource?.recipeSha256!==recipe)throw Error('Re-run native compile/link audits before scene bring-up');
   const memoryLightFunctions=new Set(['GXInitLightAttn','GXInitLightAttnA','GXGetLightAttnA','GXInitLightAttnK','GXGetLightAttnK',
     'GXInitLightSpot','GXInitLightDistAttn','GXInitLightPos','GXGetLightPos','GXInitLightDir','GXGetLightDir',

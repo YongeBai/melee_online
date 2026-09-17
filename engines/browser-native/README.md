@@ -35,44 +35,58 @@ node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks 
 
 ## Interactive native menu preview
 
-After building and preparing the hosted fixtures, run:
+Prepare the hosted fixtures and the existing extracted UI artwork, then run:
 
 ```sh
+node scripts/native-port/prepare-menu-ui.mjs --assets=/absolute/path/to/.melee-assets
 MELEE_NATIVE_PORT=3340 node scripts/native-port/serve.mjs
 ```
 
 Open [the native menu preview](http://127.0.0.1:3340/character-menu.html?interactive=1).
-The original CSS and SSS now advance at 60 simulation steps per second with
-live keyboard/standard-gamepad samples. Use arrows to move, Z to select,
-S to cancel, X to change costume, and Enter for Start. Buttons below the canvas
-switch the development keyboard between the two human seats; gamepads retain
-their browser slot numbers. Select two fighters and one of the six tournament
-stages. The match then loads automatically in the same runtime and canvas.
-No player-supplied ISO is requested.
+It defaults to Falco P1 versus original level-9 Fox CPU. Two original native
+cards leave the center for room controls; original hands render over the panel.
+Only the six tournament stages are selectable, including the random choice.
+The original rules are four stocks, eight minutes, no items and singles. Other
+modes and rules/name submenus are inaccessible in the player-facing profile.
+The no-query page retains the unrestricted diagnostic menu API.
 
-The same input owner remains attached during asynchronous loading. The match
-samples it immediately before original player initialization, retaining both a
-held-A Zelda/Sheik entry and a release during loading. Match controls are arrows,
-X jump, Z attack, S special, C grab and Shift shield; I/J/K/L supply C-stick.
-The initial Ready/Go input gate remains under original game control.
+Established controls are WASD movement, P attack/select, O special/cancel,
+Space jump, I/L shields, U grab, K/M/comma/period C-stick, Shift half-stick,
+Enter Start and Esc native pause. The keyboard icon opens the existing 3D view
+and per-player tap-jump setting. Turning tap jump off gates only native stick
+jump checks; stick Y, button jumps, CPU and Nana behavior remain intact.
+The setting persists locally. Controls work with the original animated hand or
+mouse. A connected standard gamepad maps to the local network seat; physical
+adapter calibration remains separate work.
 
-This is a muted development preview with two human players. Other menu modes,
-rules/name submenus, results/rematch and full lifecycle routing are unfinished.
-Holding B to leave CSS stops at the preview entry boundary; the host's return
-button reopens CSS. It does not impersonate the unported main menu. Refresh to
-start another match. The canvas remains 960×720 (native 4:3 framing).
-The no-query page retains the manual diagnostic API and vertex checks; interactive
-menus disable those per-frame readbacks and do not fast-forward menu animations.
+The Node preview server includes an input-only WebSocket relay. Remove CPU to
+open the room's second seat; the guest enters its code and both players Ready.
+Each browser runs native C/WASM and WebGL. Three-frame input lockstep and scene
+barriers synchronize loading; this is **not rollback or latency certification**.
+Guest refresh preserves room/seat but restarts both clients at character select.
+Owner-only kick revokes the guest token. Tokens stay private in session storage.
+If the optional room service is unavailable, static assets still start CPU play;
+no fake room code, remote opponent or player-supplied ISO is substituted.
+A production relay/signaling deployment remains separate from static Vercel assets.
+
+The same input owner survives asynchronous menu/match asset loading. Original
+Ready/Go owns the initial input and clock gates. The native canvas is 960×720,
+preserving 4:3 framing and the original camera. Audio and results/rematch remain
+unfinished. Refresh to start another match; the public play route is unchanged.
 
 ```sh
-node scripts/native-port/probe-interactive-menu.mjs
-node scripts/native-port/probe-interactive-menu.mjs --hold-a
-node scripts/native-port/probe-interactive-menu.mjs --release-a-during-load
+node scripts/native-port/probe-product-menu.mjs
+node scripts/native-port/probe-product-menu.mjs --tap-on
+node scripts/native-port/probe-product-menu.mjs --static-only
+node scripts/native-port/probe-native-rooms.mjs
+node scripts/native-port/probe-character-menu.mjs
 ```
 
-These probes use actual browser key/mouse events and original hit tests; they
-never manually step simulation or assign gameplay state. Instrumented menu/match
-runs are correctness evidence, not FPS or input-to-photon measurements.
+These browser probes use real key/mouse events and original hit tests; they do
+not manually advance simulation or assign gameplay state. The old
+`probe-interactive-menu.mjs` describes the superseded diagnostic binding profile;
+use the product probe for the current interactive entry. Instrumented correctness
+runs and CPU submission timings do not measure displayed FPS or input-to-photon.
 
 ## Original costume selection
 
