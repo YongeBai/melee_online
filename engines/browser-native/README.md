@@ -32,6 +32,19 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Kirby's Jigglypuff copy imports its native replacement body and three-node
+dynamic chain. The input probe checks partial ground/air Rollout, full ground
+charge, turns, recovery, copy loss and reacquisition:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pr --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pr --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600
+```
+
+Full-charge recovery starts near stage center and steers with normal stick
+input. The probe rejects death/rebirth states and lost copies; a late-steering
+fixture that rolled offstage was rejected without changing gameplay.
+
 Kirby's Mewtwo copy imports its native replacement body, seven-node tail and
 ten-state Shadow Ball. Normal input verifies partial/full charge storage,
 ground/air release, copy loss and reacquisition:

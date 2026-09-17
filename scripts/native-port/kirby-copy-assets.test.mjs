@@ -266,3 +266,17 @@ test('Mewtwo copy retains replacement body, seven-node tail and ten-state Shadow
   assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.equal(r.scene.model.tree.nodes.length,53);assert.deepEqual(r.textureRows,[[2,0],null,null,null,null,null]);assert.deepEqual(r.dynamics.map(x=>[x.bone,x.nodes]),[[28,7]]);assert.equal(r.articles.rows[0].stateCount,10);assert.equal(r.articles.rows[0].specialWords,16);assert.deepEqual(r.articles.rows[0].animations.slice(0,2).map(x=>[x.joint,x.material]),[[21000,23000],[20000,22000]]);assert.equal(d.getFloat32(10000,true),-2.5);assert.equal(d.getUint32(1016,true),0x7f0);assert.equal(r.unreferencedRelocations.length,8);
   for(const change of [a=>a.d.setUint32(1016,0x7f1),a=>a.relocs.delete(1024),a=>a.relocs.delete(1028),a=>a.ptr(1444,6000),a=>a.d.setUint32(1448,26),a=>a.ptr(44632,21000),a=>a.ptr(44664,44632),a=>a.ptr(1500,6000)])assert.throws(()=>convertKirbyCopy(shadowCopyFixture(change),'Mt'));
 });
+
+function rolloutCopyFixture(change=()=>{}){
+  const body=new Uint8Array(5000),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  d.setUint32(1000,1);ptr(1004,1100);d.setUint32(1008,2);ptr(1012,1200);d.setUint32(1016,15);ptr(1020,1600);ptr(1024,1400);ptr(1200,1248);d.setUint16(1248,2);
+  for(let i=0;i<50;i++){const at=1600+64*i;for(let j=0;j<3;j++)d.setFloat32(at+32+j*4,1);if(i<49)ptr(at+8,at+64);}
+  d.setUint32(1400,1);ptr(1404,1440);d.setUint32(1440,7);ptr(1444,0);d.setUint32(1448,3);for(let i=0;i<45;i++)d.setFloat32(i*4,(i-10)/4);
+  change({d,ptr,relocs});const name=new TextEncoder().encode('ftDataKirbyCopyPurin\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,1000);bytes.set(name,pub+8);return bytes;
+}
+test('Purin copy imports body visibility and three-node dynamics at +24 without an Article',()=>{
+  const input=rolloutCopyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Pr'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.equal(r.scene.model.tree.nodes.length,50);assert.deepEqual(r.textureRows,[[2,0],null,null,null,null,null]);assert.equal(r.articles.rows.length,0);assert.deepEqual(r.dynamics.map(x=>[x.bone,x.nodes,x.parameters]),[[7,3,0]]);assert.equal(d.getFloat32(0,true),-2.5);assert.equal(d.getUint32(1016,true),15);assert.equal(r.unreferencedRelocations.length,0);
+  for(const change of [a=>a.d.setUint32(1016,14),a=>a.relocs.delete(1024),a=>a.ptr(1444,1600),a=>a.d.setUint32(1448,44),a=>a.ptr(1028,1400),a=>a.ptr(1500,1600)])assert.throws(()=>convertKirbyCopy(rolloutCopyFixture(change),'Pr'));
+});

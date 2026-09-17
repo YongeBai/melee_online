@@ -1,0 +1,376 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "a7ae036",
+  "scope": "Kirby Jigglypuff replacement body, original dynamics, ground/air Rollout, full ground charge, native turns and recovery, loss/reacquisition and contact.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "cd7342c8e3156406d761495be52a6fa81a794bb0c28e0efe9d1908e063b9e247",
+    "wasmBytes": 2959206
+  },
+  "sourceHashes": {
+    "constructor.html": "e9d7611035498d6f4c8bab5b08b72bd6006ba68b6734264bf755b0bb3b2c8a4c",
+    "kirby-copy-assets.mjs": "80745aa36bee1fd0ddc3f735e04e0bca41d60d220f4e7a6f4fe90134d900969b",
+    "verify-kirby.mjs": "c264525cb7575a7104cdd82e8d1ec7979f9909118c3db66d1810e7ac355f08f5"
+  },
+  "assets": {
+    "copy": {
+      "root": 424,
+      "dataSize": 63968,
+      "relocations": 764,
+      "joint": 58804,
+      "nodes": 50,
+      "meshes": 30,
+      "typed": 764,
+      "omitted": [],
+      "dynamics": [
+        {
+          "bone": 7,
+          "nodes": 3,
+          "position": [
+            1,
+            1,
+            0.000009999999747378752
+          ],
+          "parameters": 0
+        }
+      ],
+      "articles": 0,
+      "textureRows": [
+        [
+          2,
+          0
+        ],
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "costume": {
+      "dataSize": 180528,
+      "relocations": 1192,
+      "publics": [
+        [
+          "PlyKirbyPr_Share_joint",
+          77332
+        ],
+        [
+          "PlyKirbyPr_Share_matanim_joint",
+          112208
+        ]
+      ],
+      "externals": [],
+      "nodes": 50,
+      "meshes": 49
+    }
+  },
+  "validation": {
+    "tests": {
+      "passed": 234,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "shared": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "3731fcdb6b4d3e3a69900a814912381793a2ddab185ad767a84d5a42fe278b77"
+    },
+    "simulation": {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/simulation.json",
+      "sha256": "6a7ff1f1dce76424a3a4fa3999563fe06e35f7e9216122bef9679c1550245369",
+      "completed": true,
+      "frames": 1963,
+      "renderedFrames": 0,
+      "introFrames": 0
+    },
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/full.json",
+      "sha256": "6854ac5c3c53e0e3fce0ed8120ce2b0f2dd07cbd26bdc3dd5fb97211f13f0023",
+      "completed": true,
+      "frames": 1963,
+      "renderedFrames": 2105,
+      "introFrames": 124,
+      "rollouts": [
+        {
+          "air": false,
+          "full": false,
+          "frames": 168,
+          "states": [
+            476,
+            477,
+            479,
+            480,
+            482,
+            14
+          ]
+        },
+        {
+          "air": true,
+          "full": false,
+          "frames": 153,
+          "states": [
+            484,
+            485,
+            487,
+            479,
+            480,
+            481,
+            14
+          ]
+        },
+        {
+          "air": false,
+          "full": true,
+          "frames": 186,
+          "states": [
+            475,
+            477,
+            478,
+            479,
+            480,
+            481,
+            14
+          ]
+        }
+      ],
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          476,
+          477,
+          479,
+          480,
+          482,
+          24,
+          25,
+          484,
+          485,
+          487,
+          481,
+          475,
+          478,
+          264
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "dynamicPool": [
+        317,
+        314,
+        317,
+        314
+      ],
+      "bodyPartCounts": [
+        18,
+        5
+      ],
+      "bodyRenderedFrames": 1173,
+      "peakBodyDraws": 37,
+      "copySetup": [
+        {
+          "code": "Pr",
+          "root": 14082696,
+          "bodyCopy": true,
+          "costumeNodes": 50,
+          "hatNodes": 50,
+          "hatMeshes": 30,
+          "dynamicBoneChains": 1,
+          "articles": 0
+        }
+      ]
+    },
+    "contact-gpu": {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/contact-gpu.json",
+      "sha256": "608e665cc72dfb4742d7ad382c934ad7df2789ce43d4f1433057a4f8bb88786e",
+      "completed": true,
+      "frames": 610,
+      "renderedFrames": 752,
+      "introFrames": 0,
+      "rollouts": [
+        {
+          "air": false,
+          "full": false,
+          "frames": 51,
+          "states": [
+            475,
+            477,
+            479,
+            491
+          ]
+        }
+      ],
+      "damageBefore": 8,
+      "damageAfter": 23,
+      "impactHitlag": 8,
+      "vertexChecks": {
+        "vertices": 18930,
+        "positionComponents": 56790,
+        "normalComponents": 56790,
+        "maxScaledPositionError": 0.0000024757370751012346,
+        "maxNormalError": 1.1078248385310019e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.00041363921857610084,
+        "byOwner": {
+          "1607680": {
+            "vertices": 458,
+            "ndcMin": [
+              -204.76493669486476,
+              -288.8350007957554,
+              -0.10867300398026299
+            ],
+            "ndcMax": [
+              168.33868918711025,
+              1939.5020096039416,
+              0.017662357696784207
+            ]
+          },
+          "1609568": {
+            "vertices": 8608,
+            "ndcMin": [
+              -1.643016172806965,
+              -1.1067605189348573,
+              -0.0007333416675253438
+            ],
+            "ndcMax": [
+              1.1096389270213947,
+              1.0694620261224823,
+              -0.0005082059393055011
+            ]
+          },
+          "1614016": {
+            "vertices": 4949,
+            "ndcMin": [
+              -0.2862340064579457,
+              -0.2514331219401303,
+              -0.000624602624243401
+            ],
+            "ndcMax": [
+              -0.07199311063426703,
+              -0.008216097797865616,
+              -0.0005846267128676169
+            ]
+          },
+          "11825440": {
+            "vertices": 4805,
+            "ndcMin": [
+              0.1332740288507243,
+              -0.24153884320071253,
+              -0.0006189636412798052
+            ],
+            "ndcMax": [
+              0.32896064907656075,
+              0.010539125007681265,
+              -0.0005824290521550605
+            ]
+          },
+          "13010816": {
+            "vertices": 110,
+            "ndcMin": [
+              -0.6463112635900482,
+              -0.2527293198563749,
+              -0.0006943159241199907
+            ],
+            "ndcMax": [
+              -0.2583964785617537,
+              -0.04217981184125197,
+              -0.0005370295087012498
+            ]
+          }
+        }
+      },
+      "shader": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      },
+      "finalGpuErrorCheck": true
+    },
+    "mewtwo-copy-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/mewtwo-copy-regression.json",
+      "sha256": "195fa12be54dd081c8c041386b9224e157ae419a7a7b1964d56cd49d36da0d52",
+      "completed": true,
+      "frames": 3471,
+      "renderedFrames": 0,
+      "introFrames": 0
+    },
+    "purin-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/purin-regression.json",
+      "sha256": "9e11d1354ea21b059eb26c880449e0587f028559a5e7ca24681015fe510fa631",
+      "completed": true,
+      "frames": 1714,
+      "renderedFrames": 0,
+      "introFrames": 0
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pr --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Pr --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600"
+  },
+  "visualInspection": [
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/full-copyhat.png",
+      "sha256": "755a41b7d569ea6992f4007c6979f113b455530a8d9f17854f4c10c3e32c5021"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/full-copyattack.png",
+      "sha256": "7ec490f8273c15de4ccef74744df376cc58f5ed7f21b62c83737774a530c8a3f"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-purin/contact-gpu-copyattack.png",
+      "sha256": "ba0d86a83c1602c56a41e91b3e65971e942378dfd0aa9e6681282f22ba8b9907"
+    }
+  ],
+  "notes": [
+    "No original gameplay callbacks changed. All movement, charge, release and steering use ordinary controller input.",
+    "Initial full-charge fixture steered too late and rolled offstage. Rejected the fixture, added explicit death/rebirth and retained-copy assertions, and starts full-charge testing near stage center with earlier ordinary steering.",
+    "Default Kirby costume only; other copied costume colors remain pending.",
+    "Full airborne charge, every terrain interaction and retail per-frame parity are not certified."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  }
+}

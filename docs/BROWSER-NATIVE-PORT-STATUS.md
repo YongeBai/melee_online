@@ -5,6 +5,22 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Jigglypuff copy now imports the original replacement body and three-node
+dynamic chain. Partial ground/air Rollout and full ground charge pass native
+turns and recovery, followed by copy loss/reacquisition. The full probe renders
+2,105 input frames plus 124 intro frames; dynamic allocation follows
+317 → 314 → 317 → 314 free nodes. A late-steering full-charge fixture rolled
+offstage and was rejected. The retained fixture starts near stage center,
+steers using ordinary input and explicitly rejects death/rebirth or copy loss.
+
+GPU contact passes 752 rendered frames: damage rises from 8 to 23 with eight
+hitlag frames. The attack snapshot checks 18,930 vertices, 13 shader cases and
+52 pixel channels. All 234 unit tests and shared browser checks pass; Mewtwo-copy
+and original Jigglypuff regressions pass 3,471 and 1,714 simulation frames.
+Yoshi and Game & Watch are the remaining copy packages. Complete gameplay,
+other costumes, retail parity, presented 720p60 and latency remain uncertified.
+[Jigglypuff-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-purin.json).
+
 Kirby's Mewtwo copy now imports the original replacement body, seven-node tail
 dynamics and ten-state Shadow Ball Article. The rendered lifecycle passes 3,613
 input frames plus 124 intro frames. It stores three charge units, resumes to the
@@ -17,7 +33,7 @@ five hitlag frames at first impact. The firing snapshot checks 20,183 vertices,
 13 shader cases and 52 pixel channels. All 233 unit tests and shared browser
 checks pass; Falco-copy, Bowser-copy and original Mewtwo regressions also pass.
 These are compatibility checks, not a new FPS or latency result. Copied
-Jigglypuff, Yoshi and Game & Watch packages remain, along with the broader
+Yoshi and Game & Watch packages remain, along with the broader
 playable-game and acceptance gates below.
 [Mewtwo-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-mewtwo.json).
 
