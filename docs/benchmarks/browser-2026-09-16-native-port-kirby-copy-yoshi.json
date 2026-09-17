@@ -1,0 +1,472 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "01c0665",
+  "scope": "Kirby Yoshi hat, four hat animation graphs, fighter capture shell and zero-state egg Article. Ground/air misses and fighter capture, escape, copy loss/reacquisition and GPU contact.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "e3c17bc83fd2082371648723c48ac3fd289c1dbf21b9ad845df93c2130a5b652",
+    "wasmBytes": 2959254
+  },
+  "sourceHashes": {
+    "character-collision.c": "8dc6c59a5806eb7883373d2aab2f460b5c89c0ca531081c8d51ef98ebad8ab67",
+    "constructor.html": "ffd85e5f10b059db298ac8a7df978fb30151c5e6d67225bad313555a95f344e8",
+    "kirby-copy-assets.mjs": "d232768e103e2c31c8d18dcedd9f16ee18fdf62455e6c97b30a514f502474968",
+    "verify-kirby.mjs": "96919120e71fe6b953cb0419981a0e9062b6d1f2e1f64c76dbf9f81f5bdbefd9"
+  },
+  "assets": {
+    "root": 276,
+    "dataSize": 109468,
+    "relocations": 353,
+    "joint": 20648,
+    "captureJoint": 89672,
+    "jointAnimations": [
+      {
+        "offset": 16,
+        "root": 60728,
+        "nodes": 2,
+        "tracks": 18
+      },
+      {
+        "offset": 20,
+        "root": 61792,
+        "nodes": 2,
+        "tracks": 18
+      },
+      {
+        "offset": 24,
+        "root": 58608,
+        "nodes": 2,
+        "tracks": 18
+      },
+      {
+        "offset": 28,
+        "root": 59688,
+        "nodes": 2,
+        "tracks": 18
+      }
+    ],
+    "typedPointers": 334,
+    "omitted": [
+      [
+        98080,
+        89672
+      ],
+      [
+        99664,
+        101248
+      ],
+      [
+        99796,
+        99664
+      ],
+      [
+        99808,
+        99688
+      ],
+      [
+        99840,
+        99720
+      ],
+      [
+        99844,
+        99812
+      ],
+      [
+        99876,
+        98112
+      ],
+      [
+        99900,
+        98944
+      ],
+      [
+        99924,
+        99360
+      ],
+      [
+        101000,
+        99856
+      ],
+      [
+        101008,
+        99968
+      ],
+      [
+        101024,
+        99832
+      ],
+      [
+        101028,
+        100992
+      ],
+      [
+        101040,
+        101096
+      ],
+      [
+        101104,
+        101160
+      ],
+      [
+        101176,
+        101016
+      ],
+      [
+        109440,
+        101032
+      ],
+      [
+        109456,
+        98080
+      ],
+      [
+        109460,
+        109440
+      ]
+    ],
+    "articles": [
+      {
+        "article": 252,
+        "joint": 89672,
+        "stateCount": 0,
+        "specialWords": 0
+      }
+    ]
+  },
+  "validation": {
+    "tests": {
+      "passed": 236,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "shared": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "d8c628c3a694f88d37714f38451f65911f063a44d5b3032e0af80480912ccc0a"
+    },
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/full.json",
+      "sha256": "df81cb5ebeb4ed30e944f2343063785276f63b6fa721ce2dc432b02c32939467",
+      "completed": true,
+      "frames": 3720,
+      "renderedFrames": 3862,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          413,
+          24,
+          25,
+          418,
+          414,
+          416,
+          419,
+          421,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          331,
+          332,
+          24,
+          25
+        ]
+      ],
+      "itemKinds": [
+        52
+      ],
+      "eggAccessoryFrames": 199,
+      "airEggAccessoryFrames": 199,
+      "eggRenderedFrames": 398,
+      "peakEggDraws": 1,
+      "copySetup": [
+        {
+          "code": "Ys",
+          "root": 15373844,
+          "bodyCopy": false,
+          "hatNodes": 2,
+          "hatMeshes": 14,
+          "dynamicBoneChains": 0,
+          "articles": 1
+        }
+      ]
+    },
+    "contact-gpu": {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/contact-gpu.json",
+      "sha256": "7dee6690d87db7fee715cac2c042c9b7dc63f441413858bcb53c3f8b706f7618",
+      "completed": true,
+      "frames": 1141,
+      "renderedFrames": 1283,
+      "introFrames": 124,
+      "damageBefore": 8,
+      "damageAfter": 15.279999732971191,
+      "eggAccessoryFrames": 199,
+      "eggRenderedFrames": 199,
+      "vertexChecks": {
+        "vertices": 16795,
+        "positionComponents": 50385,
+        "normalComponents": 50385,
+        "maxScaledPositionError": 0.000002355967593971328,
+        "maxNormalError": 1.2367299773163865e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0015800785910729048,
+        "byOwner": {
+          "1528768": {
+            "vertices": 28,
+            "ndcMin": [
+              -0.2404488175600763,
+              0.6735738062567096,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.3060570192123063,
+              0.7807559800284086,
+              -0.01534367160665423
+            ]
+          },
+          "1609184": {
+            "vertices": 458,
+            "ndcMin": [
+              -981.1690730052279,
+              -82.45176860307879,
+              -0.006371361890964973
+            ],
+            "ndcMax": [
+              731.2665248727652,
+              211.94480847777425,
+              0.06456619493821983
+            ]
+          },
+          "1611136": {
+            "vertices": 9348,
+            "ndcMin": [
+              -1.2528893608398,
+              -0.9033018438404973,
+              -0.000566712710828354
+            ],
+            "ndcMax": [
+              0.9336755826671144,
+              0.8429511316997722,
+              -0.00042168820663066324
+            ]
+          },
+          "1616896": {
+            "vertices": 4318,
+            "ndcMin": [
+              -0.13170473817255698,
+              -0.20051472602666234,
+              -0.000500533543781508
+            ],
+            "ndcMax": [
+              0.0647742420218648,
+              0.06798918375756254,
+              -0.0004694155641609964
+            ]
+          },
+          "1632352": {
+            "vertices": 2275,
+            "ndcMin": [
+              -0.15604696100929896,
+              -0.06898148631952322,
+              -0.0004964883143693924
+            ],
+            "ndcMax": [
+              -0.04170218742980812,
+              0.08587475803182444,
+              -0.00047809790748971247
+            ]
+          },
+          "15484896": {
+            "vertices": 4,
+            "ndcMin": [
+              -0.48961227399501855,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              -0.17018715104029894,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "15486336": {
+            "vertices": 8,
+            "ndcMin": [
+              -0.34167154423888596,
+              -0.8548822858936544,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.11001941764100844,
+              -0.6900856703647958,
+              -0.01534367160665423
+            ]
+          },
+          "15493248": {
+            "vertices": 16,
+            "ndcMin": [
+              -0.5485511042156275,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.22350276107797776,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "15544960": {
+            "vertices": 4,
+            "ndcMin": [
+              0.1871050870840508,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              0.5065302100387704,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "15547328": {
+            "vertices": 12,
+            "ndcMin": [
+              0.25550996052677916,
+              -0.8817531100781166,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.584848542244367,
+              -0.7069680445943319,
+              -0.01534367160665423
+            ]
+          },
+          "15553920": {
+            "vertices": 16,
+            "ndcMin": [
+              0.12869494233959988,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.45374326125704095,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "particles": {
+            "vertices": 308,
+            "ndcMin": [
+              -18.77691849671193,
+              -12.006254917141982,
+              -0.003858077891135736
+            ],
+            "ndcMax": [
+              49.22749658623411,
+              60.02632850716395,
+              0.0007713868076343174
+            ]
+          }
+        }
+      },
+      "shader": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      },
+      "finalGpuErrorCheck": true
+    },
+    "gamewatch-copy-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/gamewatch-copy-regression.json",
+      "sha256": "6236ab144255023f1a797520858f41d4d934f48d1a9744975a62a18a9547b8bc",
+      "completed": true,
+      "frames": 2087,
+      "renderedFrames": 0,
+      "introFrames": 0
+    },
+    "yoshi-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/yoshi-regression.json",
+      "sha256": "04a9076425a246a061fcef474c23f0d3041ef5f233a0e8adb17dddcd3487cf25",
+      "completed": true,
+      "frames": 740,
+      "renderedFrames": 0,
+      "introFrames": 0
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --input --kirby-copy=contact --stage-callbacks --render-steps --verify-vertices --hardware --probe-seconds=600"
+  },
+  "visualInspection": [
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/full-copyhat.png",
+      "sha256": "26a85734bb31cc82e7d16d6a8d6a65637900013a52c1eac0282ba7131ac90d21"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/full-copyattack.png",
+      "sha256": "cd6654bb3f46b65ebcf03c080817a16b90133c14f23275696df3f8b7ad50ce29"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/full-copyegg.png",
+      "sha256": "109c0b16e6bb54392dc669b82fb60a8b4a2ce0df39201666ca12c0ee5c03d63d"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/full-copystar.png",
+      "sha256": "b7fd3c1c4881afd169ed0a444b486c11d36afe019054bdbed8890feb7ac584bd"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-yoshi/contact-gpu-copyegg.png",
+      "sha256": "d5db5f4785ae7687400428e206a9aef81bebca3a4218e423836cf9b3ae09246b"
+    }
+  ],
+  "notes": [
+    "Original joint-animation descriptor words are converted to native endian; packed animation tracks retain their original byte coding.",
+    "Captured fighter shell shares the original Article joint. Only exact native descriptor identity selects accessory kind nine.",
+    "Unreachable exporter models are structurally validated and checked for references from the imported graph before omission.",
+    "The initial assertion expected base Yoshi capture states 276/277. The original ftmotionstates table and callbacks confirm copied Yoshi uses separate states 331/332; the assertion was corrected.",
+    "Aerial setup uses normal jump input for both fighters. The initial grounded target was outside the aerial tongue range; no game state or gameplay was modified.",
+    "Item-swallow egg spawning and exhaustive character/stage interactions are not covered by these fighter-capture tests."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  }
+}

@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Yoshi copy now imports the original hat, its four joint-animation graphs,
+the captured fighter's egg shell and the zero-state egg Article. Normal input
+checks ground/air tongue misses, ground/air fighter capture and escape, copy
+loss and reacquisition. The full probe passes 3,720 simulation frames and 3,862
+rendered input frames plus 124 intro frames. Each capture draws the native shell
+for 199 frames; the two shells total 398 rendered frames and retire normally.
+
+GPU contact passes 1,283 rendered frames plus the intro. Captured-fighter damage
+rises from 8 to 15.28. All 236 unit tests and shared browser checks pass, along
+with original Yoshi egg capture and Game & Watch-copy regressions. Original
+callbacks remain unchanged. A test initially expected base Yoshi's capture
+states; source inspection confirmed the copied move has separate states 331/332.
+[Yoshi-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-yoshi.json).
+
+This closes the remaining copied-ability asset package, not the competitive-game
+acceptance gate. Item-swallow eggs and exhaustive interactions are unverified.
+The live input bridge still lacks C-stick and analog shoulder samples; it is the
+next concrete playability gap. Full scenes/menus/audio, other costumes, broader
+retail parity, static release integration, presented 720p60 and latency remain.
+
 Kirby's Game & Watch copy now imports the original replacement body, packed
 colors, fighter/item outlines and Chef food/pan Articles. The full lifecycle
 passes 2,229 rendered input frames plus 124 intro frames, including ground/air
@@ -25,7 +45,7 @@ second row. Original callbacks remain unchanged. Rendered copy probes also
 require the complete native stage/camera passes so outline draws are exercised.
 The saved images show copied silhouettes, pan/food, and normal Kirby after loss.
 
-Yoshi is the remaining copy package. This is compatibility progress; the full
+At the preceding checkpoint Yoshi was the remaining copy package. The full
 competitive browser release, broader parity, presented 720p60 and latency gates
 remain unfinished.
 [Game & Watch-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-gamewatch.json).

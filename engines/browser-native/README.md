@@ -32,6 +32,19 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Kirby’s Yoshi copy retains four native hat-animation graphs and a captured
+fighter egg shell sharing the original zero-state Article model. The full probe
+checks misses, ground/air capture, escape, copy loss and reacquisition:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --input --kirby-copy=contact --stage-callbacks --render-steps --verify-vertices --hardware --probe-seconds=600
+```
+
+These are compatibility checks. Item-swallow eggs, other costumes and exhaustive
+interactions remain unverified. All copied-ability packages now import, but the
+complete competitive release and presented-FPS/latency gates remain unfinished.
+
 Kirby's Game & Watch copy imports its native replacement body, packed colors,
 fighter/item outlines and Chef food/pan Articles. Rendering needs the original
 stage/camera passes; the simpler diagnostic pass loop omits its outlines:

@@ -716,6 +716,7 @@ unsigned portFighterAccessory(HSD_GObj* object,unsigned field)
     else if(Fighter_804D6514&&joint->id==(unsigned)Fighter_804D6514)kind=2;
     else if(gFtDataList[Ft_Kind_Yoshi]&&gFtDataList[Ft_Kind_Yoshi]->x48_items&&joint->id==(unsigned)gFtDataList[Ft_Kind_Yoshi]->x48_items[3])kind=4;
     else if(gFtDataList[Ft_Kind_Kirby]&&gFtDataList[Ft_Kind_Kirby]->x48_items&&joint->id==(unsigned)gFtDataList[Ft_Kind_Kirby]->x48_items[4])kind=5;
+    else if(ft_80459B88.hats[Ft_Kind_Yoshi-1]&&joint->id==(unsigned)ft_80459B88.hats[Ft_Kind_Yoshi-1]->hat_dynamics[0])kind=9;
     else {
         Fighter* fp=object->user_data;
         if(fp->kind==Ft_Kind_Samus&&fp->ft_data->x48_items&&fp->ft_data->x48_items[4]&&joint->id==(unsigned)*(HSD_Joint**)fp->ft_data->x48_items[4])kind=3;

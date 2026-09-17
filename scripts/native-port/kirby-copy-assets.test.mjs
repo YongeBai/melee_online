@@ -300,3 +300,27 @@ test('Game & Watch copy retains absent extra model, packed RGBA, fighter/item ou
   assert.deepEqual(input,before);assert.equal(r.joint,null);assert.equal(r.scene,null);assert.deepEqual(r.outlinePadding,{source:1092,skippedPointerSlot:1100,expanded:4200});assert.equal(d.getUint32(1024,true),4200);assert.equal(d.getInt32(4208,true),-1);assert.equal(d.getUint32(4204,true),4016);assert(r.pointerSlots.has(4204));assert.equal(r.bodyCopy,true);assert.deepEqual(r.fighterOutline,[[[0,1,2]]]);assert.deepEqual(r.colors.diffuse,[17,34,51,255]);assert.deepEqual(r.colors.outline,[210,220,230,128]);assert.equal(d.getFloat32(0,true),Math.fround(.01));assert.deepEqual([...new Uint8Array(r.image.buffer,36,8)],[17,34,51,255,210,220,230,128]);assert.equal(d.getFloat32(1304,true),.5);assert.deepEqual(r.articles.rows.map(a=>[a.stateCount,a.specialWords]),[[2,29],[0,1]]);assert(r.pointerSlots.has(1300));assert(r.pointerSlots.has(1440));assert.equal(r.unreferencedRelocations.length,4);
   for(const change of [a=>a.ptr(1020,2000),a=>a.relocs.delete(1024),a=>a.relocs.delete(1028),a=>a.d.setFloat32(0,NaN),a=>a.ptr(4,2000),a=>a.d.setUint32(4016,125),a=>a.body[4040]=124,a=>a.body[1560]=1,a=>a.ptr(1096,1000),a=>a.relocs.delete(1100),a=>a.ptr(204,1304),a=>a.ptr(3272,2000),a=>a.ptr(4100,3000)])assert.throws(()=>convertKirbyCopy(chefCopyFixture(change),'Gw'));
 });
+
+function eggCopyFixture(change=()=>{}){
+  const body=new Uint8Array(109468),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(300,2000);d.setUint32(304,1);ptr(308,1100);ptr(312,4096);ptr(332,400);
+  ptr(400,0);ptr(416,500);ptr(500,4096);d.setUint32(504,1);
+  for(const joint of [2000,2064,4096,101032])for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  ptr(2008,2064);
+  for(let i=0;i<4;i++){
+    const joint=6000+i*256,aobj=joint+48,fobj=joint+64,data=joint+96;
+    ptr(316+i*4,joint);ptr(joint,joint+24);ptr(joint+8,aobj);
+    d.setFloat32(aobj+4,2);ptr(aobj+8,fobj);d.setUint32(fobj+4,6);body[fobj+12]=5;ptr(fobj+16,data);
+    // Constant float track: opcode, little-endian value and duration byte.
+    body[data]=1;new DataView(body.buffer).setFloat32(data+1,1.25,true);body[data+5]=2;
+  }
+  for(const [at,to]of [[98080,4096],[109440,101032],[109456,98080],[109460,109440]])ptr(at,to);
+  change({d,ptr,relocs,body});const name=new TextEncoder().encode('ftDataKirbyCopyYoshi\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,300);bytes.set(name,pub+8);return bytes;
+}
+test('Yoshi copy retains four original hat animations, shared capture shell and zero-state egg Article',()=>{
+  const input=eggCopyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Ys'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.equal(r.captureJoint,4096);assert.equal(r.articles.rows[0].joint,4096);assert.equal(r.articles.rows[0].stateCount,0);assert.equal(r.articles.rows[0].specialWords,0);assert.deepEqual(r.jointAnimations.map(a=>[a.offset,a.nodes,a.tracks]),[[16,2,1],[20,2,1],[24,2,1],[28,2,1]]);
+  assert.equal(d.getFloat32(6052,true),2);assert.equal(d.getUint32(316,true),6000);assert.deepEqual([...r.image.subarray(32+6096,32+6102)],[...input.subarray(32+6096,32+6102)]);assert.deepEqual(r.unreferencedRelocations.toSorted((a,b)=>a-b),[98080,109440,109456,109460]);
+  for(const change of [a=>a.relocs.delete(312),a=>a.ptr(312,2000),a=>a.relocs.delete(316),a=>a.ptr(6000,6000),a=>a.ptr(6008,300),a=>a.ptr(6060,2000),a=>a.relocs.add(6052),a=>a.ptr(6080,6000),a=>a.d.setFloat32(6052,NaN),a=>a.ptr(109440,2000),a=>a.ptr(98084,6000),a=>a.ptr(109464,98080),a=>a.ptr(1500,4096)])assert.throws(()=>convertKirbyCopy(eggCopyFixture(change),'Ys'));
+});

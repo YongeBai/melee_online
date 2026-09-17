@@ -2,6 +2,7 @@ import {inspectArchive,archiveRootView,nativeSubgraphImage,initializeArchiveExte
 import {convertSceneAsset} from './scene-assets.mjs';
 import {convertPartsVisibility} from './visibility-assets.mjs';
 import {convertArticleEntries} from './article-assets.mjs';
+import {readJointAnimation} from './joint-animation-assets.mjs';
 
 // Hat roots contain the joint, FtPartsDesc and up to two Articles.
 // Some copies append the original hat-bone dynamics descriptor.
@@ -26,6 +27,7 @@ const profiles={
   Pe:{symbol:'Peach',articles:[[2,1],[1,4]],wrappers:[[0,35884,35896,35908,[0,1]]]},
   Lk:{symbol:'Link',dynamics:20,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16864,[0]],[1,40268,null,40296,[0,1,2,3,4,5]]],attachmentWrappers:[[18944,0],[21024,1]]},
   Cl:{symbol:'Clink',dynamics:20,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16704,[0]],[1,40108,null,40136,[0,1,2,3,4,5]]],attachmentWrappers:[[18784,0],[20864,1]]},
+  Ys:{symbol:'Yoshi',rootBytes:40,articleOffset:32,articles:[[0,0]],captureJoint:12,animations:[16,20,24,28],orphanSceneList:{table:109456,models:[[98080,'capture'],[109440,101032]]}},
   Pp:{symbol:'Popo',accessory:16,accessoryWrapper:65216,articles:[[1,13]],wrappers:[[0,46228,null,46236,[0]]]},
   Kp:{symbol:'Koopa',dynamics:16,articles:[[1,6]]},
   Zd:{symbol:'Zelda',dynamics:12},Sk:{symbol:'Seak',dynamics:20,articles:[[5,3],[1,1]],wrappers:[[0,null,null,66016,[0]],[1,null,null,70464,[0]]]},
@@ -36,7 +38,7 @@ export function convertKirbyCopy(input,code){
   const profile=profiles[code];if(!profile)throw Error('Kirby copy conversion pending: '+code);
   if(profile.externals)input=initializeArchiveExternals(input,profile.externals);
   const symbol='ftDataKirbyCopy'+profile.symbol,a=inspectArchive(input),d=a.data,root=a.publics.get(symbol);
-  if(root===undefined||root+(profile.bodyCopy?(profile.articleOffset??24)+(profile.articles?.length??0)*4:Math.max(20,(profile.dynamics??0)+4))>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
+  if(root===undefined||root+(profile.rootBytes??(profile.bodyCopy?(profile.articleOffset??24)+(profile.articles?.length??0)*4:Math.max(20,(profile.dynamics??0)+4)))>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
   const ptr=at=>{if(!a.relocations.has(at))throw Error('Missing Kirby copy pointer');const value=d.getUint32(at);if(value%4||value+4>a.dataSize)throw Error('Kirby copy pointer bounds');return value;};
   const jointSlot=root+(profile.bodyCopy?20:0),articleOffset=profile.articleOffset??(profile.bodyCopy?24:12);
   if(profile.emptyExtra&&(a.relocations.has(jointSlot)||d.getUint32(jointSlot)))throw Error('Unexpected copy extra body model');
@@ -55,6 +57,23 @@ export function convertKirbyCopy(input,code){
   const v=new DataView(visibility.image.buffer),size=v.getUint32(4,true),visPointers=Array.from({length:v.getUint32(8,true)},(_,i)=>v.getUint32(32+size+i*4,true));
   merge(visibility.image,visibility.typedBytes,visPointers);if(entries.length)merge(articles.image,articles.typedBytes,articles.pointerSlots);
   const out=new DataView(body.buffer);for(const at of [...(joint===null?[]:[jointSlot]),...(accessory?[root+profile.accessory]:[]),...entries.map(e=>root+articleOffset+e.slot*4)]){if([0,1,2,3].some(i=>claimed.has(at+i)))throw Error('Copy root overlap');out.setUint32(at,d.getUint32(at),true);pointers.add(at);}
+  const captureJoint=profile.captureJoint?ptr(root+profile.captureJoint):null;
+  if(captureJoint!==null){if(articles.rows[0]?.joint!==captureJoint)throw Error('Copy capture model/Article mismatch');const at=root+profile.captureJoint;if([0,1,2,3].some(i=>claimed.has(at+i)))throw Error('Copy capture root overlap');out.setUint32(at,captureJoint,true);pointers.add(at);}
+  const jointAnimations=[];
+  if(profile.animations){
+    const words=new Set(),packed=new Set(),slots=new Set();
+    for(const offset of profile.animations){
+      const at=root+offset,animationRoot=ptr(at),tree=readJointAnimation(a,animationRoot);words.add(at);slots.add(at);
+      if(tree.nodes.length!==scene.model.tree.nodes.length)throw Error('Copy hat animation topology');
+      for(const p of tree.words)words.add(p);for(const p of tree.pointers)slots.add(p);
+      for(const node of tree.nodes)for(const p of node.animation?.packed??[])packed.add(p);
+      jointAnimations.push({offset,root:animationRoot,nodes:tree.nodes.length,tracks:tree.nodes.reduce((n,node)=>n+(node.animation?.tracks.length??0),0)});
+    }
+    const image=new Uint8Array(32+a.dataSize),v=new DataView(image.buffer,32),typed=new Set(packed);image.set(a.bytes.subarray(32,32+a.dataSize),32);
+    for(const p of words){if(a.relocations.has(p)&&!slots.has(p))throw Error('Copy animation scalar relocation');v.setUint32(p,d.getUint32(p),true);for(let i=0;i<4;i++)typed.add(p+i);}
+    for(const p of packed)if(words.has(p&~3)||a.relocations.has(p&~3))throw Error('Copy animation payload overlap');
+    merge(image,typed,slots);
+  }
   const textureRows=[];
   if(profile.bodyCopy){
     function scalar(at,width=4){
@@ -131,6 +150,18 @@ export function convertKirbyCopy(input,code){
   // projectile model/animations. No published copy descriptor points to it.
   const untyped=[...a.relocations].filter(p=>!pointers.has(p));
   const orphan=new Map();
+  if(profile.orphanSceneList){
+    const {table,models}=profile.orphanSceneList;
+    if(table+models.length*4+4>a.dataSize||d.getUint32(table+models.length*4)||a.relocations.has(table+models.length*4))throw Error('Copy exporter scene list terminator');
+    for(const [i,[model,sourceJoint]]of models.entries()){
+      const joint=sourceJoint==='capture'?captureJoint:sourceJoint;
+      if(joint===null||!a.relocations.has(model)||d.getUint32(model)!==joint)throw Error('Copy exporter model root');
+      for(const off of [4,8,12])if(d.getUint32(model+off)||a.relocations.has(model+off))throw Error('Copy exporter model animations');
+      const extra=convertSceneAsset(archiveRootView(a,'exporter_Share_joint',joint));
+      for(const p of extra.pointerSlots)if(!pointers.has(p))orphan.set(p,d.getUint32(p));
+      orphan.set(model,joint);orphan.set(table+i*4,model);
+    }
+  }
   if(profile.accessoryWrapper){orphan.set(profile.accessoryWrapper,accessory.joint);orphan.set(profile.accessoryWrapper+16,profile.accessoryWrapper);}
   for(const [slot,joints,materials,model,indices,shapes=null] of profile.wrappers??[]){
     const row=articles.rows[slot],anims=indices.map(i=>row.animations[i]);
@@ -150,5 +181,5 @@ export function convertKirbyCopy(input,code){
     const at=outlinePadding.expanded;imageBody=new Uint8Array(at+16);imageBody.set(body);imageBody.set(body.subarray(outlinePadding.source,outlinePadding.source+8),at);
     const v=new DataView(imageBody.buffer);v.setUint32(root+profile.fighterOutline,at,true);v.setInt32(at+8,-1,true);pointers.add(at+4);
   }
-  return {code,symbol,root,joint,outlinePadding,bodyCopy:!!profile.bodyCopy,textureRows,fighterOutline,colors,bytes:a.bytes,scene,accessory,visibility,articles,dynamics,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(imageBody,pointers,new Map([[symbol,root]]))};
+  return {code,symbol,root,joint,captureJoint,jointAnimations,outlinePadding,bodyCopy:!!profile.bodyCopy,textureRows,fighterOutline,colors,bytes:a.bytes,scene,accessory,visibility,articles,dynamics,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(imageBody,pointers,new Map([[symbol,root]]))};
 }
