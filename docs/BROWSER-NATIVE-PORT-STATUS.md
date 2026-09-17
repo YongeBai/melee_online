@@ -7,6 +7,21 @@ The reported start abort was a host constructor guard that accepted only human
 slots; it now admits native CPU slots and calls the original CPU constructor.
 The CPU's own generated buttons/sticks and action changes are checked in-browser.
 
+The native music stream boundary now plays hosted original HPS tracks through
+Web Audio. A worker decodes the music, the original C chooses menu/stage tracks,
+and playback retains loop points and pause position. Browser autoplay unlocks
+on a keyboard/pointer gesture; hidden tabs stop advancing the music position.
+All 54,930,664 PCM samples and loop starts across ten prepared tracks match
+vgmstream commit `764c84c5048932054356f2ea67a71ea7673abc83`. This establishes
+decode fidelity, not original AX mixer/resampler or sound-effect parity.
+Real browser startup checks cover the correct track and nonzero audio-graph
+output on all six legal stages. A 900-frame CPU match passed with music, and
+two room clients completed 600 frames with matching measured fighter fields.
+An initial music trial encountered an unuploaded-geometry render failure, and
+a later 900-frame repeat missed the strict CPU jump-coverage assertion. Both
+remain recorded rather than being counted as passing gameplay validation.
+[Music evidence and remaining limits](benchmarks/browser-2026-09-17-native-port-music.json).
+
 The keyboard modal and room controls reuse the established `melee-ui.css`
 directly, including original textured layers, the yellow Back button, shaped
 tap-jump switch, glyph code entry and beveled room actions. The native adapter
@@ -40,12 +55,12 @@ play; CPU play can boot from static assets without that service.
 
 The solo probes exercise 900 native frames each, actual W stick jumps with tap
 jump enabled/disabled, Space jumps and attacks, original autonomous CPU activity,
-keyboard-view input isolation, and the six-stage menu. The current source passes 271 unit tests. Unit coverage includes
+keyboard-view input isolation, and the six-stage menu. The current source passes 275 unit tests. Unit coverage includes
 binding compatibility, local gamepad-to-network-seat assignment, immutable input
 ordering, owner-only CPU/kick, token revocation and coordinated reloads.
 [Product and room evidence](benchmarks/browser-2026-09-17-native-port-product.json).
 
-Audio, native results/rematch lifecycle, rollback/recovery, broader retail parity,
+Sound effects, native results/rematch lifecycle, rollback/recovery, broader retail parity,
 public release integration and displayed-FPS/input-to-photon certification remain
 unfinished. This is still a development preview, not completion of competitive
 720p60 acceptance. The public play route has not been replaced.

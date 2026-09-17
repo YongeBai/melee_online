@@ -15,7 +15,9 @@ const report={passed:false,playableMatch:false,audioPlayed:false,audioMode:null}
 try{
  let network=null,productUI=null;
  if(interactive){const {connectNativeRoom,createLocalNativeRoom}=await import('./native-room.mjs');try{network=await connectNativeRoom({onState:n=>productUI?.setNetwork(n),onError:e=>{globalThis.nativeRoomError=String(e);productUI?.connectionError(e);}});}catch(e){network=createLocalNativeRoom(e.message);report.roomUnavailable=e.message;}globalThis.nativeRoom=network;}
- const module=await create({printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=mode;return true;},onNativeMusic:r=>{music.push(r);return false;}});
+ const nativeMusic=interactive?await(await import('./native-music.mjs')).createNativeMusic().catch(e=>{report.audioError=String(e);return null;}):null;globalThis.nativeMusic=nativeMusic;
+ Object.defineProperty(report,'audioPlayed',{enumerable:true,get:()=>nativeMusic?.snapshot().events.some(e=>e.event==='playing')??false});
+ const module=await create({printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=nativeMusic?'browser-music/sfx-muted':mode;return true;},onNativeMusic:r=>{if(r.action!==4){if(music.length===128)music.shift();music.push(r);}try{return nativeMusic?.request(r)??false;}catch(e){report.audioError=String(e);return false;}}});
  let cssBytes,cssAsset;
  for(const [name,convert] of [['MnSlChr.usd',b=>convertMenuAsset(b,{menu:'character'})],['MnExtAll.usd',convertExtraMenuAsset],['SdSlChr.usd',convertSisAsset],['LbMcGame.usd',convertCardIconAsset],['NtMemAc.usd',convertCardNoticeAsset]]){
   const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable '+name);const bytes=new Uint8Array(await r.arrayBuffer()),asset=convert(bytes);if(name==='MnSlChr.usd'){cssBytes=bytes;cssAsset=asset;}installResidentFile(module,name,asset.image);

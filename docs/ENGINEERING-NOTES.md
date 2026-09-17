@@ -26,6 +26,16 @@ CPU keyboard icon and omit its alpha aperture together, including the first
 render before the native disconnect callback runs. Human hands still render
 above the room controls and their keyboard icons.
 
+Music has a browser stream backend; SFX still uses the explicit muted boundary.
+Do not confuse accepting a queued music request with sound reaching the output:
+inspect context state and audio-graph samples after a user gesture. Decode HPS
+in a worker, cancel obsolete track loads, retain native loop points, and preserve
+the paused offset across hidden tabs. Original VS startup also calls
+`Stage_80225074(fn_8016E5C0(start))`; omitting it leaves menu music playing during
+matches. This selector can use native RNG, so verify room synchronization after
+changing its call site. The extraction and server allowlist must include music
+without adding a player-supplied file requirement.
+
 Portable-source provenance includes both injected menu include files. Re-run
 compile audit and audit-link before building when changing either include.
 `prepare-menu-ui.mjs` copies existing extracted UI fixtures into ignored output;

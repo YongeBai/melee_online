@@ -7,7 +7,7 @@ all 25 copied-ability packages, original tournament stage callbacks, camera and
 HUD. Hosted assets load automatically; a player-supplied ISO is never required.
 The local disc is used only by the development extraction tools.
 
-This is not a complete competitive release. Full menu/match routing, audio,
+This is not a complete competitive release. Full menu/match routing, sound effects,
 controller calibration, broader retail parity and static release
 integration remain unfinished. Simulation steps and GPU draw submissions are
 measured separately from distinct presented frames and input-to-photon latency.
@@ -15,6 +15,23 @@ See [current status](../../docs/BROWSER-NATIVE-PORT-STATUS.md) for the latest
 checkpoints and [TEV scope](TEV-NOTES.md) for shader validation. Later sections
 retain historical bring-up details; their pending-work statements describe those
 older checkpoints.
+
+The interactive preview plays original hosted menu/stage music through Web Audio.
+The original C selects tracks, including stage alternatives; a worker decodes
+HALPST/DSP samples without running the decoder on the gameplay thread. Playback
+starts after a keyboard/pointer gesture, preserves loop points and pause position,
+and suspends while the tab is hidden. This is music support, not complete AX/DSP
+sound-effect or mixer parity. The stream backend reports errors independently
+from game startup; it never requests a player's ISO.
+
+`prepare-fixtures.mjs` now prepares the ten menu/tournament music assets as well.
+Existing development output can be updated with
+`node scripts/native-port/prepare-music.mjs /path/to/development-fixture.iso`.
+Assets stay in ignored `dist/native-port/audio`. Run
+`node scripts/native-port/probe-product-menu.mjs --music` for actual browser
+output, transport and menu-to-match checks. `--stage=2/3/8/28/31/32` selects a
+legal stage (pass one numeric value). The independent sample/loop comparison is
+`node scripts/native-port/verify-hps-reference.mjs /path/to/vgmstream-cli`.
 
 Immutable model geometry is cached per renderer by default. This reduces repeated
 asset decoding without caching native object pointers or animated poses. Use

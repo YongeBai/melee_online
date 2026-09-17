@@ -1,15 +1,18 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn} from 'node:child_process';import {setTimeout as delay} from 'node:timers/promises';
 const root=path.resolve(import.meta.dirname,'../..'),{createNativePortServer}=await import(root+'/scripts/native-port/serve.mjs'),server=createNativePortServer({enableRooms:!process.argv.includes('--static-only')}),profile=fs.mkdtempSync(path.join(os.tmpdir(),'native-menu-'));
 const tapOn=process.argv.includes('--tap-on'),holdA=process.argv.includes('--hold-a'),releaseA=process.argv.includes('--release-a-during-load'),pair=holdA||releaseA?[15,12]:[10,10];
+const checkMusic=process.argv.includes('--music')||process.argv.includes('--music-startup');
+const stageId=Number(process.argv.find(s=>s.startsWith('--stage='))?.slice(8)??31);
+if(![2,3,8,28,31,32].includes(stageId))throw Error('Illegal stage probe');
 const pending=new Map();let browser,ws,id=0,stderr='';
 function cmd(method,params={}){return new Promise((resolve,reject)=>{const n=++id,t=setTimeout(()=>{pending.delete(n);reject(Error('timeout '+method));},30000);pending.set(n,{resolve:x=>{clearTimeout(t);resolve(x);},reject});ws.send(JSON.stringify({id:n,method,params}));});}
-try{
+try{testFlow:{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));browser=spawn('google-chrome',['--headless=new','--no-sandbox','--enable-gpu','--disable-dev-shm-usage','--window-size=1280,1100','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});browser.stderr.on('data',b=>stderr=(stderr+b).slice(-12000));
  for(let i=0;!fs.existsSync(profile+'/DevToolsActivePort');i++){if(i>100)throw Error(stderr);await delay(100);}
  const port=fs.readFileSync(profile+'/DevToolsActivePort','utf8').split('\n')[0],tabs=await(await fetch('http://127.0.0.1:'+port+'/json/list')).json();ws=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);await new Promise(r=>ws.addEventListener('open',r,{once:true}));ws.addEventListener('message',e=>{const m=JSON.parse(e.data),p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);}});
 
 
- const output=path.join(root,'dist/native-port/experiment-product-menu'+(process.argv.includes('--static-only')?'-static-only':tapOn?'-tap-on':holdA?'-held-a':releaseA?'-released-a':''));fs.mkdirSync(output,{recursive:true});
+ const output=path.join(root,'dist/native-port/experiment-product-menu'+(process.argv.includes('--static-only')?'-static-only':tapOn?'-tap-on':holdA?'-held-a':releaseA?'-released-a':'')+(process.argv.includes('--music-startup')?'-music-startup-stage-'+stageId:stageId===31?'':'-stage-'+stageId));fs.mkdirSync(output,{recursive:true});
  async function evaluate(expression){const r=await cmd('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description??r.exceptionDetails.text);return r.result.value;}
  const trace=[];
  async function waitFor(expression,timeout=30000){const start=Date.now();for(;;){const r=await evaluate('({value:('+expression+'),error:globalThis.nativeMenuLiveError??globalThis.nativeMenuMatchReport?.error})');if(r.error)throw Error(r.error);if(r.value)return r.value;if(Date.now()-start>timeout)throw Error('Timed out: '+expression+' state '+JSON.stringify(await evaluate('nativeMenuLiveState')));await delay(16);}}
@@ -21,7 +24,9 @@ try{
   for(let i=0;i<220;i++){
    const [x,y]=await evaluate(expression),dx=target[0]-x,dy=target[1]-y;
    if(Math.abs(dx)<tolerance&&Math.abs(dy)<tolerance){await keys([]);return;}
-   const next=[];if(Math.abs(dx)>=tolerance)next.push(dx>0?'KeyD':'KeyA');if(Math.abs(dy)>=tolerance)next.push(dy>0?'KeyW':'KeyS');
+   // Half-strength diagonals fall inside the original SSS per-axis deadzone.
+   // Approach one axis at a time, as a physical controller would near its target.
+   const next=[Math.abs(dx)>=Math.abs(dy)?(dx>0?'KeyD':'KeyA'):(dy>0?'KeyW':'KeyS')];
    if(Math.max(Math.abs(dx),Math.abs(dy))<3)next.push('ShiftLeft');await keys(next);await delay(16);
   }await keys([]);throw Error('Keyboard cursor did not reach '+JSON.stringify(target)+' at '+JSON.stringify(await evaluate(expression)));
  }
@@ -29,6 +34,12 @@ try{
  await waitFor('globalThis.characterMenuReport?.passed');await waitFor('nativeCharacterMenu.read().frames>90');
  await keys(['KeyO']);await delay(800);await keys([]);if(await evaluate('nativeMenuLive.snapshot().scene')!=='characters')throw Error('Product CSS exposed another game mode');
  trace.push({phase:'initial',state:await evaluate('nativeCharacterMenu.read()')});
+ if(checkMusic){
+  await waitFor('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001');trace.push({phase:'menu-music',audio:await evaluate('nativeMusic.snapshot()')});
+  // Exercise the browser stream-device transport without changing match state.
+  const paused=await evaluate('(()=>{nativeMusic.request({action:2});return nativeMusic.snapshot();})()');await delay(180);const still=await evaluate('nativeMusic.snapshot()');if(still.offsetSeconds!==paused.offsetSeconds||still.outputPeak>0.00001)throw Error('Music continued while paused');
+  await evaluate('nativeMusic.request({action:3})');await waitFor('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001');trace.push({phase:'music-pause-resume',paused,after:await evaluate('nativeMusic.snapshot()')});
+ }
  const selected=await evaluate('nativeCharacterMenu.read()');
  if(selected.players[0].character!==20||selected.players[1].character!==2||selected.players[1].kind!==1||selected.players[1].cpuLevel!==9)throw Error('Falco / CPU9 Fox defaults '+JSON.stringify(selected));
  if(process.argv.includes('--static-only')&&!(await evaluate('nativeRoom.offline&&nativeRoom.code===""')))throw Error('Static-only CPU fallback not active');
@@ -71,7 +82,7 @@ try{
  await waitFor('nativeMenuLive.snapshot().scene==="stages"');await waitFor('nativeStageMenu.read().frames>120');
  const legal=await evaluate('nativeStageMenu.icons().filter(i=>i.unlocked===2).map(i=>i.stage).sort((a,b)=>a-b)');if(JSON.stringify(legal)!=='[2,3,8,28,31,32]')throw Error('Tournament-only stages '+JSON.stringify(legal));
  const stageShot=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'stages.png'),Buffer.from(stageShot.data,'base64'));
- const target=await evaluate('nativeStageMenu.icons().find(i=>i.stage===31&&i.unlocked===2)');await steer('nativeStageMenu.read().cursor',[target.x,target.y],.6);await press('KeyP');
+ const target=await evaluate(`nativeStageMenu.icons().find(i=>i.stage===${stageId}&&i.unlocked===2)`);await steer('nativeStageMenu.read().cursor',[target.x,target.y],.6);await press('KeyP');
  await waitFor('globalThis.nativeLive?.snapshot().match?.intro?.mask&8');
  const ready=await evaluate('nativeLive.snapshot()');
  if((holdA&&ready.initial[0][11]!==7)||(releaseA&&ready.initial[0][11]!==19))throw Error('Held/released-A native form mismatch '+JSON.stringify(ready.initial));await keys([]);if(ready.match.intro.blocked.some(b=>b!==1)||ready.match.clock[0]!==0)throw Error('Ready gate');
@@ -79,7 +90,11 @@ try{
  let shot=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'ready.png'),Buffer.from(shot.data,'base64'));
  await evaluate(`(()=>{globalThis.cpuInputEvidence={samples:0,active:0,buttons:0,actions:[],lastFrame:-1};function record(){const e=cpuInputEvidence,s=nativeLive.snapshot();if(s.frames!==e.lastFrame){e.lastFrame=s.frames;const p=characterModule._Player_GetEntity(1),v=i=>characterModule._portFighterConstructRead(p,i);e.samples++;if(v(26)||v(27))e.active++;if(v(25))e.buttons++;if(!e.actions.includes(v(0)))e.actions.push(v(0));}if(s.frames<900)requestAnimationFrame(record);}requestAnimationFrame(record);})()`);
  await waitFor('nativeLive.snapshot().match.intro.gate===1');
+ if(checkMusic){
+  await waitFor('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().track!=="menu01.hps"&&nativeMusic.snapshot().outputPeak>0.001');const audio=await evaluate('nativeMusic.snapshot()');if(!({2:['izumi.hps'],3:['pstadium.hps','pokesta.hps'],8:['ystory.hps'],28:['old_kb.hps'],31:['sp_zako.hps'],32:['sp_end.hps']})[stageId].includes(audio.track))throw Error('Wrong native stage music '+audio.track);trace.push({phase:'match-music',audio});
+ }
  await waitFor('nativeLive.snapshot().final[0][0]===14');
+ if(process.argv.includes('--music-startup')){const music=await evaluate('nativeMusic.snapshot()'),match=await evaluate('nativeLive.snapshot().match');fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({passed:true,scope:'Native menu-to-stage music startup and browser stream transport only',stage:stageId,trace,music,match},null,2));console.log(JSON.stringify({passed:true,stage:stageId,track:music.track,scope:'music startup'}));break testFlow;}
  const tapStart=await evaluate('nativeLive.snapshot().frames');await keys(['KeyW']);await waitFor(`nativeLive.snapshot().frames>${tapStart+12}`);await keys([]);
  const tapJumped=await evaluate(`nativeLive.snapshot().stateChanges.some(s=>s.frame>${tapStart}&&s.state>=24&&s.state<=29)`);if(tapJumped!==tapOn)throw Error('Stick jump behavior differs from toggle: '+JSON.stringify({tapOn,tapJumped}));await waitFor('nativeLive.snapshot().final[0][0]===14&&nativeLive.snapshot().final[0][3]===0');
  const before=await evaluate('nativeLive.snapshot()');await keys(['KeyD']);await waitFor(`nativeLive.snapshot().final[0][4]>${before.final[0][4]+4}`);await keys([]);
@@ -89,6 +104,6 @@ try{
  await waitFor('globalThis.nativeMenuMatchReport');const report=await evaluate('nativeMenuMatchReport');
  if(!report.live.final.some((s,i)=>Math.abs(s[4]-report.live.initial[i][4])>1)||!report.live.stateChanges.length)throw Error('CPU match did not progress');
  if(!report.constructorCompleted||report.live.frames!==900||!report.menuHandoff?.sameRuntime)throw Error('Incomplete interactive match');
- const flow=await evaluate('nativeMenuLive.snapshot()'),cpuInputEvidence=await evaluate('cpuInputEvidence');if(cpuInputEvidence.active<20||!cpuInputEvidence.buttons||cpuInputEvidence.actions.length<4||!cpuInputEvidence.actions.includes(24)||!cpuInputEvidence.actions.includes(25))throw Error('Original CPU did not produce autonomous controller activity');
+ const flow=await evaluate('nativeMenuLive.snapshot()'),cpuInputEvidence=await evaluate('cpuInputEvidence');if(cpuInputEvidence.active<20||!cpuInputEvidence.buttons||cpuInputEvidence.actions.length<4||!cpuInputEvidence.actions.includes(24)||!cpuInputEvidence.actions.includes(25))throw Error('Original CPU did not produce required activity/jump coverage: '+JSON.stringify(cpuInputEvidence));
  fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({passed:true,tapOn,cpuInputEvidence,build:JSON.parse(fs.readFileSync(path.join(root,'dist/native-port/fighter-init-build.json'))),trace,ready,flow,report},null,2));console.log(JSON.stringify({passed:true,flow,frames:report.live.frames}));
-}finally{ws?.close();if(browser){browser.kill();await new Promise(r=>browser.once('exit',r));}await new Promise(r=>server.close(r));fs.rmSync(profile,{recursive:true,force:true});}
+}}finally{ws?.close();if(browser){browser.kill();await new Promise(r=>browser.once('exit',r));}await new Promise(r=>server.close(r));fs.rmSync(profile,{recursive:true,force:true});}

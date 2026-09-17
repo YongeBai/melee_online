@@ -1,0 +1,184 @@
+{
+  "date": "2026-09-17",
+  "scope": "Browser-native music decoding, stream transport, native six-stage selection and input-lockstep regression; not 720p60 certification.",
+  "wasmSha256": "a57b3c0a74902aba4607d0925a7fe6aadadf3305d75153e54a596a85edda22bc",
+  "reference": {
+    "passed": true,
+    "reference": "vgmstream-cli, ignore loops, PCM16 output",
+    "results": [
+      {
+        "name": "menu01.hps",
+        "samplesPerChannel": 1824051,
+        "channels": 2,
+        "loopStart": 229376,
+        "inputSha256": "4c4357edf0b5e8962d0136d4c741a49d663e293eed8ba777a8f83a509a04c38b",
+        "identical": true
+      },
+      {
+        "name": "menu02.hps",
+        "samplesPerChannel": 1767313,
+        "channels": 2,
+        "loopStart": 401408,
+        "inputSha256": "2e5e619f4e51e35b677c98e667f9e1d8809ab78efe2ce7b673ba94799ba59775",
+        "identical": true
+      },
+      {
+        "name": "menu3.hps",
+        "samplesPerChannel": 1944013,
+        "channels": 2,
+        "loopStart": 172032,
+        "inputSha256": "76bf9ae00aaee60ee2f124e53e6d73ecc80ca486cd42476f4e36aadd6bd3c339",
+        "identical": true
+      },
+      {
+        "name": "izumi.hps",
+        "samplesPerChannel": 5199068,
+        "channels": 2,
+        "loopStart": 401408,
+        "inputSha256": "b8f48d64cd62db61d01dbfd9de096115a83136ff6bef3d812ac4cffd07f574b4",
+        "identical": true
+      },
+      {
+        "name": "ystory.hps",
+        "samplesPerChannel": 3801811,
+        "channels": 2,
+        "loopStart": 458752,
+        "inputSha256": "a99e0c3b6164e6a3d0573c8b9fe87055965c7c859fc21caf1d5b351738acfb45",
+        "identical": true
+      },
+      {
+        "name": "old_kb.hps",
+        "samplesPerChannel": 2170736,
+        "channels": 2,
+        "loopStart": 114688,
+        "inputSha256": "578038f6b8640a0c91190101f96f411f4f4de5e925791452e6e5c5e33bc2ca4e",
+        "identical": true
+      },
+      {
+        "name": "pstadium.hps",
+        "samplesPerChannel": 2014386,
+        "channels": 2,
+        "loopStart": 688128,
+        "inputSha256": "66d873dd38973f3cf7e328365f32120648ca6f779ccd849226ff4c19e3c058f4",
+        "identical": true
+      },
+      {
+        "name": "pokesta.hps",
+        "samplesPerChannel": 3132074,
+        "channels": 2,
+        "loopStart": 401408,
+        "inputSha256": "00ff265d45dd8a72ecd1d80f192d3d32457e0990a5c93e699a42aac9e1ec5439",
+        "identical": true
+      },
+      {
+        "name": "sp_zako.hps",
+        "samplesPerChannel": 2751848,
+        "channels": 2,
+        "loopStart": 344064,
+        "inputSha256": "0841e18bc70bd6f2ca6c05fae2ef81404edc359305b5e9b5d190901c0fbfc3ad",
+        "identical": true
+      },
+      {
+        "name": "sp_end.hps",
+        "samplesPerChannel": 2860032,
+        "channels": 2,
+        "loopStart": 172032,
+        "inputSha256": "f0430a9a87ab0c0dae3c4b1644587ff0a92fdb91e21329d429af9f7f0dea6f42",
+        "identical": true
+      }
+    ],
+    "commit": "764c84c5048932054356f2ea67a71ea7673abc83",
+    "url": "https://github.com/vgmstream/vgmstream"
+  },
+  "unitTests": 275,
+  "stages": [
+    {
+      "stage": 2,
+      "track": "izumi.hps",
+      "contextState": "running",
+      "outputPeak": 0.19401460886001587,
+      "loopStartSeconds": 12.544,
+      "scope": "Native menu-to-stage music startup and browser stream transport only",
+      "pauseResumeChecked": true
+    },
+    {
+      "stage": 3,
+      "track": "pstadium.hps",
+      "contextState": "running",
+      "outputPeak": 0.3842649459838867,
+      "loopStartSeconds": 21.504,
+      "scope": "Native menu-to-stage music startup and browser stream transport only",
+      "pauseResumeChecked": true
+    },
+    {
+      "stage": 8,
+      "track": "ystory.hps",
+      "contextState": "running",
+      "outputPeak": 0.20113277435302734,
+      "loopStartSeconds": 14.336,
+      "scope": "Native menu-to-stage music startup and browser stream transport only",
+      "pauseResumeChecked": true
+    },
+    {
+      "stage": 28,
+      "track": "old_kb.hps",
+      "contextState": "running",
+      "outputPeak": 0.36969423294067383,
+      "loopStartSeconds": 3.584,
+      "scope": "Native menu-to-stage music startup and browser stream transport only",
+      "pauseResumeChecked": true
+    },
+    {
+      "stage": 31,
+      "track": "sp_zako.hps",
+      "contextState": "running",
+      "outputPeak": 0.1966136246919632,
+      "loopStartSeconds": 10.752,
+      "scope": "Native menu-to-stage music startup and browser stream transport only",
+      "pauseResumeChecked": true
+    },
+    {
+      "stage": 32,
+      "track": "sp_end.hps",
+      "contextState": "running",
+      "outputPeak": 0.40575116872787476,
+      "loopStartSeconds": 5.376,
+      "scope": "Native menu-to-stage music startup and browser stream transport only",
+      "pauseResumeChecked": true
+    }
+  ],
+  "solo": {
+    "passed": true,
+    "frames": 900,
+    "track": "sp_zako.hps"
+  },
+  "rooms": {
+    "passed": true,
+    "frames": [
+      600,
+      600
+    ],
+    "matchingMeasuredFighterState": true,
+    "scope": "Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification."
+  },
+  "unresolvedObservations": [
+    {
+      "trial": "Initial music experiment before stage music startup was added",
+      "error": "Original callback selected geometry not uploaded: 14372896/23266048/23254688",
+      "status": "One observed native rendering failure; root cause unresolved."
+    },
+    {
+      "trial": "Repeat 900-frame CPU match",
+      "error": "Original CPU did not produce required activity/jump coverage",
+      "status": "The strict coverage assertion remains; six-stage audio checks do not claim full gameplay coverage."
+    }
+  ],
+  "remaining": [
+    "Sound effects and original mixer/resampler parity",
+    "Native results/rematch lifecycle",
+    "Rollback and recovery",
+    "Broader retail parity and rendering failure investigation",
+    "Public release integration",
+    "Sustained distinct 720p60 presentation and input-to-photon measurements"
+  ]
+}

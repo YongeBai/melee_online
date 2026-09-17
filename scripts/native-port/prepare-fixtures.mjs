@@ -1,6 +1,7 @@
 // Development-only extraction. Browser verification loads these hosted files
 // automatically; there is no file picker or player-provided disc path.
 import fs from 'node:fs';
+import {prepareNativeMusic} from './prepare-music.mjs';
 import path from 'node:path';
 import {parseFileTable, parseHeader} from '../../web/lib/disc.ts';
 import {fighterArchives} from '../../engines/browser-native/fighter-assets.mjs';
@@ -50,5 +51,6 @@ try {
   fs.writeFileSync(path.join(output,'animation-fixtures.json'),JSON.stringify(animations,null,2)+'\n');
   fs.writeFileSync(path.join(output,'costume-fixtures.json'),JSON.stringify(costumes,null,2)+'\n');
   fs.writeFileSync(path.join(output,'model-fixtures.json'),JSON.stringify(models,null,2)+'\n');
+  prepareNativeMusic(filename);
   console.log('Prepared the original SIS font, shared fighter data, six stages and 27 playable fighter components in ignored dist/native-port.');
 } finally {fs.closeSync(fd);}

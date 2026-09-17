@@ -10,6 +10,7 @@
 #include <melee/gm/types.h>
 #include <melee/mn/types.h>
 #include <melee/gr/forward.h>
+#include <melee/gr/stage.h>
 #include <melee/pl/player.h>
 #include <melee/if/ifall.h>
 #include <melee/if/if_2F6E.h>
@@ -25,6 +26,7 @@
 #include <sysdolphin/baselib/controller.h>
 #include <stdlib.h>
 static int initialized,started;
+static StartMeleeData* menu_start;
 static int hud_initialized;
 static int damage_initialized;
 static HSD_GObj* pause_object;
@@ -132,7 +134,7 @@ void portTournamentInitializeMenu(void)
      * defaults or reset selected colors, controller indices or subcolors. */
     portInitializeVsRouting();portSceneExitStatus(1);Player_80036DD8();gm_801A3E88();
     for(unsigned i=0;i<PAD_MAX_CONTROLLERS;i++)HSD_PadCopyStatus[i]=HSD_PadGameStatus[i];
-    fn_8016DCC0(data);initialized=1;
+    fn_8016DCC0(data);menu_start=data;initialized=1;
 }
 HSD_GObj* portTournamentConstructSelected(unsigned slot)
 {
@@ -153,6 +155,8 @@ void portTournamentIntroBegin(void)
 {
     if(!initialized||started||!hud_initialized||!Player_GetEntity(0)||!Player_GetEntity(1))abort();
     portStageSelectResident(gm_GetStartMeleeRules()->stkind);
+    /* Match the original VS startup's native stage/alternate-track selector. */
+    if(menu_start&&!menu_start->rules.x1_4)Stage_80225074(fn_8016E5C0(menu_start));
     ifStatus_802F6EA4(3,-1,-1,0,(Event)fn_8016B7B4,(Event)ready_complete);
     started=1;
 }
