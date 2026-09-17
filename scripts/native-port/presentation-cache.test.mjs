@@ -22,3 +22,10 @@ test('retained textures require exact image and palette bytes even when addresse
  image[0]=8;assert.equal(lease.texture('same descriptor',[image,palette],()=>++next),3);
  assert.deepEqual(deleted,[1,2]);lease.release();cache.dispose();assert.deepEqual(deleted,[1,2,3]);
 });
+
+test('archive metadata and GPU identity are reused only within their immutable source/context lifetime',()=>{
+ const cache=createPresentationCache(),bytes=new Uint8Array(40);const v=new DataView(bytes.buffer);v.setUint32(0,40);v.setUint32(4,8);
+ const a=cache.archive(bytes);assert.equal(cache.archive(bytes),a);assert.notEqual(cache.archive(bytes.slice()),a);
+ const gl={isContextLost:()=>false};let reads=0;const info=cache.gpuInfo(gl,()=>({value:++reads}));assert.equal(cache.gpuInfo(gl,()=>++reads),info);assert.equal(reads,1);assert.throws(()=>cache.gpuInfo({...gl},()=>null),/context/);
+ cache.dispose();assert.throws(()=>cache.archive(bytes),/unavailable/);
+});

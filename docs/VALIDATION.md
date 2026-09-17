@@ -10,6 +10,11 @@ integration. It does not establish 720p60 or competitive network latency. The
 Dolphin stream measurements below are historical and apply to a different path.
 The subsequent [page-sharing and presentation-cache revision](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md)
 retains the full-copy oracle and adds exact corrected-canvas pixel comparisons.
+The [every-frame direct-port diagnostic](BROWSER-NATIVE-720P60.md) now separates
+30-second local combat from two-browser delayed-input rollback, including an
+independent browser capture observer and timing controls. The local workloads
+approach 60 captured FPS; the detached rollback path still fails the gate.
+Physical presentation and input-to-photon latency remain unmeasured.
 
 Tested on the user's Linux machine in the Codex in-app Chromium browser at
 localhost:3000, with the supplied USA 1.02 disc.

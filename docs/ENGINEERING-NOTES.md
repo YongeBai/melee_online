@@ -7,6 +7,14 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+Use `BROWSER-NATIVE-720P60.md` for the every-forward-frame harness. Keep local
+play, detached presentation and delayed-input rollback separate. Draw counters
+and simulation FPS are not captured-frame FPS; canvas-capture timestamps are
+not physical presentation or input-to-photon evidence. Discard the stream's
+possible automatic first frame and retain observer-disabled controls. Use the
+fixed 60 Hz clock even on high-refresh displays. The six-stage sparse rollback
+probe remains a correctness oracle, not a sustained presentation benchmark.
+
 The experimental rollback boundary is documented in `BROWSER-NATIVE-ROLLBACK.md`.
 Its next revision uses exact shared pages plus a separate cache of immutable GPU
 assets; see `BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md`. Keep live native bindings

@@ -1,0 +1,5764 @@
+{
+  "rejectedAttempts": [
+    {
+      "scope": "Regression launcher configuration",
+      "reason": "Initial Final Destination run supplied unsupported map key final; rejected before match startup. Rerun with destination."
+    },
+    {
+      "scope": "Observer accounting",
+      "reason": "Initial accounting could include automatic captureStream bootstrap frame. All evidence capture statistics are recalculated from raw rows excluding the first sample."
+    }
+  ],
+  "createdAt": "2026-09-17T19:43:50.592Z",
+  "baseCommit": "8e910339f6cb8d59d04f10672a62b79abb135e05",
+  "performanceCertified": false,
+  "productionRooms": "three-frame lockstep, unchanged",
+  "scope": "Direct C-to-WASM. Every forward frame drawn at 960x720 in 1280x720. Local and two-process localhost delayed-input correction measured separately. No physical scanout/input-to-photon measurement; roster/gameplay completeness not certified.",
+  "analysis": {
+    "method": "All capture statistics recomputed from raw VideoFrame rows with current capturedEvidence(), conservatively discarding the automatic/bootstrap first frame. Earlier raw reports counted that possible extra frame; values here use the corrected accounting. No simulation/render changes or synthetic frame interpolation.",
+    "sourceSha256": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e"
+  },
+  "finals": [
+    {
+      "artifact": "dist/native-port/certification-final-calibration-observer1-battlefield-Fc-Fx-combat-optimized/report.json",
+      "artifactSha256": "18364cd5253b6ed0d1b6e8fc83671f82eb50a82c2eb2543e08d26c0c46be73b6",
+      "provenance": {
+        "startedAt": "2026-09-17T19:38:15.273Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "2d0c77d0d2dd211e96c1e4c2e6381f9449baed961780d38e8467fd679bea7f15",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+          "rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "mode": "calibration",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 600,
+      "transport": {
+        "packets": 0,
+        "reordered": 0,
+        "requestedDelaysMs": []
+      },
+      "reports": [
+        {
+          "mode": "calibration",
+          "frames": 600,
+          "elapsedMs": 9995,
+          "simulationFps": 60.03001500750375,
+          "submissionCadence": {
+            "samples": 599,
+            "meanMs": 16.66577629384294,
+            "p95Ms": 16.80000001192093,
+            "maxMs": 17.100000023841858,
+            "fps": 60.00320551341154,
+            "gapsOver25Ms": 0,
+            "estimatedMissed60HzSlots": 0
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 600,
+            "rawCaptured": 600,
+            "bootstrapDiscarded": 1,
+            "captured": 599,
+            "estimatedUnobservedRequests": 1,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 599,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 598,
+              "meanMs": 16.666376254180594,
+              "p95Ms": 16.85200000000077,
+              "maxMs": 17.188000000000102,
+              "fps": 60.001045503167475,
+              "gapsOver25Ms": 0,
+              "estimatedMissed60HzSlots": 0
+            },
+            "observerWorkerCpu": {
+              "samples": 600,
+              "meanMs": 3.6858333333333335,
+              "p95Ms": 5.5999999940395355,
+              "maxMs": 13.400000005960464
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon."
+          },
+          "performanceCertified": false,
+          "scope": "WebGL test-pattern observer calibration only; no gameplay.",
+          "diagnosticPassedAfterBootstrapAccounting": null,
+          "measuredPlayersMatchReference": null
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-final-local-observer0-battlefield-Fc-Fx-combat-optimized/report.json",
+      "artifactSha256": "e0f9cd56e94ec571fd42c226a3b1e1a623aa1923f6e090c9b5451a7aa729c257",
+      "provenance": {
+        "startedAt": "2026-09-17T19:41:09.924Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "2d0c77d0d2dd211e96c1e4c2e6381f9449baed961780d38e8467fd679bea7f15",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+          "rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "mode": "local",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "transport": {
+        "packets": 0,
+        "reordered": 0,
+        "requestedDelaysMs": []
+      },
+      "reports": [
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "local",
+          "seat": 0,
+          "frames": 1800,
+          "elapsedMs": 30030.19999998808,
+          "simulationFps": 59.939660741543996,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.669093941088317,
+            "p95Ms": 18.399999976158142,
+            "maxMs": 31.899999976158142,
+            "fps": 59.99126308449555,
+            "gapsOver25Ms": 2,
+            "estimatedMissed60HzSlots": 2
+          },
+          "observation": {
+            "enabled": false,
+            "physicalPresentationMeasured": false
+          },
+          "workload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "actualWorkload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "referenceHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "d04361867b2f18b92e87ae3eda775f8411c750e82abd2f5b5969bd0b8070f8e8",
+            "memorySha256": "bf5f4acef06ed55469c106d8950b41a3f36e11bda4ebe32572d9bd8f214cedb1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": false,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.34211111068725586,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 0.8999999761581421
+            },
+            "correction": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "replaySimulation": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "advanceIncludingCorrections": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 5.038888889319367,
+              "p95Ms": 7.5,
+              "maxMs": 14.900000005960464
+            },
+            "rendererDispose": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 5.411722222318252,
+              "p95Ms": 8,
+              "maxMs": 15.699999988079071
+            }
+          },
+          "kernel": null,
+          "snapshotCosts": {
+            "captures": 3,
+            "restores": 3,
+            "capturedBytes": 33554432,
+            "restoredBytes": 151584768,
+            "comparedBytes": 151584768,
+            "sharedPages": 1802,
+            "guardCpuMs": 2.9000000059604645,
+            "captureCpuMs": 25.999999970197678,
+            "restoreCpuMs": 17.100000023841858,
+            "maxCaptureCpuMs": 15.799999982118607,
+            "maxRestoreCpuMs": 11.200000017881393,
+            "peakRetainedBytes": 33554432,
+            "retainedBytes": 33554432,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 33619968
+          },
+          "cache": {
+            "modelHits": 109,
+            "modelMisses": 21,
+            "textureHits": 177,
+            "textureMisses": 178,
+            "textureInvalidations": 0,
+            "rendererLeases": 3,
+            "models": 21,
+            "programs": 34,
+            "textures": 178,
+            "textureSourceBytes": 1024718,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 2361,
+              "verticesDecoded": 27531
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-final-local-observer1-battlefield-Fc-Fx-combat-optimized/report.json",
+      "artifactSha256": "c9b60bce0c35a1ad761bbe49ac3c5460eb44c66fe119c88a56b6348306852afb",
+      "provenance": {
+        "startedAt": "2026-09-17T19:39:08.417Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "2d0c77d0d2dd211e96c1e4c2e6381f9449baed961780d38e8467fd679bea7f15",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+          "rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "mode": "local",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "transport": {
+        "packets": 0,
+        "reordered": 0,
+        "requestedDelaysMs": []
+      },
+      "reports": [
+        {
+          "diagnosticPassed": true,
+          "performanceCertified": false,
+          "failures": [],
+          "mode": "local",
+          "seat": 0,
+          "frames": 1800,
+          "elapsedMs": 30033.09999999404,
+          "simulationFps": 59.93387296017918,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.671206225680933,
+            "p95Ms": 18.099999994039536,
+            "maxMs": 34.099999994039536,
+            "fps": 59.98366203757731,
+            "gapsOver25Ms": 1,
+            "estimatedMissed60HzSlots": 1
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 1800,
+            "rawCaptured": 1801,
+            "bootstrapDiscarded": 1,
+            "captured": 1800,
+            "estimatedUnobservedRequests": 0,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 1800,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1799,
+              "meanMs": 16.671423568649242,
+              "p95Ms": 18.10399999999936,
+              "maxMs": 34.115999999999985,
+              "fps": 59.98288003914125,
+              "gapsOver25Ms": 1,
+              "estimatedMissed60HzSlots": 1
+            },
+            "observerWorkerCpu": {
+              "samples": 1801,
+              "meanMs": 2.692781787822804,
+              "p95Ms": 3.5999999940395355,
+              "maxMs": 16.5
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon."
+          },
+          "workload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "actualWorkload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "referenceHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "d04361867b2f18b92e87ae3eda775f8411c750e82abd2f5b5969bd0b8070f8e8",
+            "memorySha256": "bf5f4acef06ed55469c106d8950b41a3f36e11bda4ebe32572d9bd8f214cedb1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": false,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.34550000028477773,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 1
+            },
+            "correction": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "replaySimulation": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "advanceIncludingCorrections": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 4.887444443868266,
+              "p95Ms": 7.5999999940395355,
+              "maxMs": 11.400000005960464
+            },
+            "rendererDispose": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 5.262833333031999,
+              "p95Ms": 8.099999994039536,
+              "maxMs": 12
+            }
+          },
+          "kernel": null,
+          "snapshotCosts": {
+            "captures": 3,
+            "restores": 3,
+            "capturedBytes": 33554432,
+            "restoredBytes": 151584768,
+            "comparedBytes": 151584768,
+            "sharedPages": 1802,
+            "guardCpuMs": 2.6999999582767487,
+            "captureCpuMs": 20.499999970197678,
+            "restoreCpuMs": 13.199999988079071,
+            "maxCaptureCpuMs": 12.5,
+            "maxRestoreCpuMs": 7.5999999940395355,
+            "peakRetainedBytes": 33554432,
+            "retainedBytes": 33554432,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 33619968
+          },
+          "cache": {
+            "modelHits": 109,
+            "modelMisses": 21,
+            "textureHits": 177,
+            "textureMisses": 178,
+            "textureInvalidations": 0,
+            "rendererLeases": 3,
+            "models": 21,
+            "programs": 34,
+            "textures": 178,
+            "textureSourceBytes": 1024718,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 2361,
+              "verticesDecoded": 27531
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": true
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-final-local-observer1-fountain-Pp-Pe-combat-optimized/report.json",
+      "artifactSha256": "50a41bfa389fbef110ca7e3394f06fedbcf4a7059b498bcd3824a81470f282e9",
+      "provenance": {
+        "startedAt": "2026-09-17T19:39:43.604Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "2d0c77d0d2dd211e96c1e4c2e6381f9449baed961780d38e8467fd679bea7f15",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+          "rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "mode": "local",
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "transport": {
+        "packets": 0,
+        "reordered": 0,
+        "requestedDelaysMs": []
+      },
+      "reports": [
+        {
+          "diagnosticPassed": true,
+          "performanceCertified": false,
+          "failures": [],
+          "mode": "local",
+          "seat": 0,
+          "frames": 1800,
+          "elapsedMs": 30023.59999999404,
+          "simulationFps": 59.95283710149207,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.662757087260765,
+            "p95Ms": 18.5,
+            "maxMs": 33.30000001192093,
+            "fps": 60.01407778815508,
+            "gapsOver25Ms": 2,
+            "estimatedMissed60HzSlots": 2
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 1800,
+            "rawCaptured": 1801,
+            "bootstrapDiscarded": 1,
+            "captured": 1800,
+            "estimatedUnobservedRequests": 0,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 1800,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1799,
+              "meanMs": 16.66313674263478,
+              "p95Ms": 18.595000000001164,
+              "maxMs": 33.29099999999926,
+              "fps": 60.01271041852344,
+              "gapsOver25Ms": 2,
+              "estimatedMissed60HzSlots": 2
+            },
+            "observerWorkerCpu": {
+              "samples": 1801,
+              "meanMs": 2.136313159322818,
+              "p95Ms": 2.9000000059604645,
+              "maxMs": 18.19999998807907
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon."
+          },
+          "workload": {
+            "hitlagFrames": 190,
+            "damageFrames": 1617,
+            "attackFrames": 907,
+            "stockChanges": 0
+          },
+          "actualWorkload": {
+            "hitlagFrames": 190,
+            "damageFrames": 1617,
+            "attackFrames": 907,
+            "stockChanges": 0
+          },
+          "referenceHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "a062588338af28c16a3ffb7c9fd23feddd625c87b72427fe32a54043f281bbab",
+            "memorySha256": "60f1502bdf229b35c0ad7124cede6ff98f5848558a0165dfc9e67d15dd274022",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": false,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                0.10567581653594971,
+                43.744266510009766,
+                158.0288848876953
+              ],
+              "interest": [
+                -0.9706051349639893,
+                27.44928741455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.5591111109654109,
+              "p95Ms": 0.9000000059604645,
+              "maxMs": 1.5
+            },
+            "correction": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "replaySimulation": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "advanceIncludingCorrections": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 6.298055555803908,
+              "p95Ms": 9.800000011920929,
+              "maxMs": 28.599999994039536
+            },
+            "rendererDispose": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 6.887833333661159,
+              "p95Ms": 10.600000023841858,
+              "maxMs": 29.600000023841858
+            }
+          },
+          "kernel": null,
+          "snapshotCosts": {
+            "captures": 3,
+            "restores": 3,
+            "capturedBytes": 48693248,
+            "restoredBytes": 182059008,
+            "comparedBytes": 182059008,
+            "sharedPages": 2036,
+            "guardCpuMs": 2.1999999582767487,
+            "captureCpuMs": 23.099999994039536,
+            "restoreCpuMs": 14.999999970197678,
+            "maxCaptureCpuMs": 13,
+            "maxRestoreCpuMs": 7.899999976158142,
+            "peakRetainedBytes": 48693248,
+            "retainedBytes": 48693248,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184
+          },
+          "cache": {
+            "modelHits": 93,
+            "modelMisses": 20,
+            "textureHits": 285,
+            "textureMisses": 237,
+            "textureInvalidations": 0,
+            "rendererLeases": 3,
+            "models": 20,
+            "programs": 40,
+            "textures": 237,
+            "textureSourceBytes": 2071438,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 22,
+              "hits": 2561,
+              "verticesDecoded": 29167
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 17810112,
+                "code": "Pp",
+                "costume": 0
+              },
+              {
+                "slot": 0,
+                "index": 1,
+                "owner": 18718560,
+                "code": "Nn",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 19492320,
+                "code": "Pe",
+                "costume": 0
+              }
+            ],
+            "stage": "fountain"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": true
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-final-rollback-observer0-battlefield-Fc-Fx-combat-optimized/report.json",
+      "artifactSha256": "bea491be9c31de4bf8208af639c37fecd004b50840cdbdeb2addeea995847baf",
+      "provenance": {
+        "startedAt": "2026-09-17T19:42:03.388Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "2d0c77d0d2dd211e96c1e4c2e6381f9449baed961780d38e8467fd679bea7f15",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+          "rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "mode": "rollback",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "transport": {
+        "packets": 3600,
+        "reordered": 1414,
+        "requestedDelaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "reports": [
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "rollback",
+          "seat": 0,
+          "frames": 1800,
+          "elapsedMs": 32882.5,
+          "simulationFps": 54.74036341519045,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 18.17581989995104,
+            "p95Ms": 26.400000005960464,
+            "maxMs": 50.70000001788139,
+            "fps": 55.01815079069383,
+            "gapsOver25Ms": 137,
+            "estimatedMissed60HzSlots": 143
+          },
+          "observation": {
+            "enabled": false,
+            "physicalPresentationMeasured": false
+          },
+          "workload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "actualWorkload": {
+            "hitlagFrames": 158,
+            "damageFrames": 1603,
+            "attackFrames": 1030,
+            "stockChanges": 2
+          },
+          "referenceHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.3960555559396744,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 1.0999999940395355
+            },
+            "correction": {
+              "samples": 157,
+              "meanMs": 8.919108279381588,
+              "p95Ms": 15.200000017881393,
+              "maxMs": 21.5
+            },
+            "replaySimulation": {
+              "samples": 1051,
+              "meanMs": 0.19438629900127452,
+              "p95Ms": 0.5,
+              "maxMs": 0.9000000059604645
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1830,
+              "meanMs": 2.2805464483349702,
+              "p95Ms": 8.900000005960464,
+              "maxMs": 21.80000001192093
+            },
+            "presentationCapture": {
+              "samples": 1800,
+              "meanMs": 4.333111110975345,
+              "p95Ms": 6.199999988079071,
+              "maxMs": 12.099999994039536
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.3636666665143437,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 5.5999999940395355
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 7.225722222228845,
+              "p95Ms": 11.5,
+              "maxMs": 28
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.09188888880941604,
+              "p95Ms": 0.20000001788139343,
+              "maxMs": 4.0999999940395355
+            },
+            "presentationRestore": {
+              "samples": 1800,
+              "meanMs": 2.8529444449808863,
+              "p95Ms": 4.299999982118607,
+              "maxMs": 7.5999999940395355
+            },
+            "forwardCallback": {
+              "samples": 1803,
+              "meanMs": 17.222961730366606,
+              "p95Ms": 25.69999998807907,
+              "maxMs": 42.30000001192093
+            }
+          },
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1600,
+            "corrections": 157,
+            "replayedFrames": 1051,
+            "maxReplay": 15,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43188224,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41025536
+          },
+          "snapshotCosts": {
+            "captures": 2420,
+            "restores": 1960,
+            "capturedBytes": 3686727680,
+            "restoredBytes": 99035381760,
+            "comparedBytes": 122278379520,
+            "sharedPages": 1809566,
+            "guardCpuMs": 1489.8999996483326,
+            "captureCpuMs": 10519.19999936223,
+            "restoreCpuMs": 5648.600001066923,
+            "maxCaptureCpuMs": 13,
+            "maxRestoreCpuMs": 8.400000005960464,
+            "peakRetainedBytes": 44498944,
+            "retainedBytes": 41025536,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          },
+          "cache": {
+            "modelHits": 24403,
+            "modelMisses": 21,
+            "textureHits": 161462,
+            "textureMisses": 178,
+            "textureInvalidations": 0,
+            "rendererLeases": 1802,
+            "models": 21,
+            "programs": 34,
+            "textures": 178,
+            "textureSourceBytes": 1024718,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 26591,
+              "verticesDecoded": 27531
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false
+        },
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "rollback",
+          "seat": 1,
+          "frames": 1800,
+          "elapsedMs": 32806.09999999404,
+          "simulationFps": 54.86784469962376,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 18.187270705934495,
+            "p95Ms": 26.900000005960464,
+            "maxMs": 49.099999994039536,
+            "fps": 54.983511059397195,
+            "gapsOver25Ms": 123,
+            "estimatedMissed60HzSlots": 132
+          },
+          "observation": {
+            "enabled": false,
+            "physicalPresentationMeasured": false
+          },
+          "workload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "actualWorkload": {
+            "hitlagFrames": 122,
+            "damageFrames": 1599,
+            "attackFrames": 937,
+            "stockChanges": 2
+          },
+          "referenceHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.39549999972184496,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 1.5
+            },
+            "correction": {
+              "samples": 158,
+              "meanMs": 8.465189873606343,
+              "p95Ms": 14.799999982118607,
+              "maxMs": 22.899999976158142
+            },
+            "replaySimulation": {
+              "samples": 990,
+              "meanMs": 0.20686868667000471,
+              "p95Ms": 0.5,
+              "maxMs": 1.300000011920929
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1820,
+              "meanMs": 2.2549450548304306,
+              "p95Ms": 8.299999982118607,
+              "maxMs": 23.099999994039536
+            },
+            "presentationCapture": {
+              "samples": 1800,
+              "meanMs": 4.401222222497066,
+              "p95Ms": 6.299999982118607,
+              "maxMs": 13.800000011920929
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.3622777777744664,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 4.800000011920929
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 7.219333333207501,
+              "p95Ms": 11.400000005960464,
+              "maxMs": 27
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.10483333321081267,
+              "p95Ms": 0.20000001788139343,
+              "maxMs": 4.9000000059604645
+            },
+            "presentationRestore": {
+              "samples": 1800,
+              "meanMs": 2.8003888892630737,
+              "p95Ms": 4.200000017881393,
+              "maxMs": 7.300000011920929
+            },
+            "forwardCallback": {
+              "samples": 1811,
+              "meanMs": 17.13009387081924,
+              "p95Ms": 25.30000001192093,
+              "maxMs": 45.599999994039536
+            }
+          },
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1630,
+            "corrections": 158,
+            "replayedFrames": 990,
+            "maxReplay": 13,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43122688,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41025536
+          },
+          "snapshotCosts": {
+            "captures": 2403,
+            "restores": 1961,
+            "capturedBytes": 3652714496,
+            "restoredBytes": 99085910016,
+            "comparedBytes": 121419399168,
+            "sharedPages": 1796978,
+            "guardCpuMs": 1442.800001859665,
+            "captureCpuMs": 10575.800000548363,
+            "restoreCpuMs": 5553.000000983477,
+            "maxCaptureCpuMs": 13.800000011920929,
+            "maxRestoreCpuMs": 7.799999982118607,
+            "peakRetainedBytes": 44564480,
+            "retainedBytes": 41025536,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          },
+          "cache": {
+            "modelHits": 24397,
+            "modelMisses": 21,
+            "textureHits": 161297,
+            "textureMisses": 178,
+            "textureInvalidations": 0,
+            "rendererLeases": 1802,
+            "models": 21,
+            "programs": 34,
+            "textures": 178,
+            "textureSourceBytes": 1024718,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 26556,
+              "verticesDecoded": 27531
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-final-rollback-observer1-battlefield-Fc-Fx-combat-optimized/report.json",
+      "artifactSha256": "5b8d97df04edcfd018b334986c5a70b778cf5700f21cd0b226ae5ddb87cfb4c6",
+      "provenance": {
+        "startedAt": "2026-09-17T19:38:26.050Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "2d0c77d0d2dd211e96c1e4c2e6381f9449baed961780d38e8467fd679bea7f15",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+          "rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "mode": "rollback",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "transport": {
+        "packets": 3600,
+        "reordered": 1307,
+        "requestedDelaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "reports": [
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "rollback",
+          "seat": 0,
+          "frames": 1800,
+          "elapsedMs": 36965.5,
+          "simulationFps": 48.69405256252452,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 20.421122846038823,
+            "p95Ms": 30.799999982118607,
+            "maxMs": 73.2000000178814,
+            "fps": 48.96890379335701,
+            "gapsOver25Ms": 322,
+            "estimatedMissed60HzSlots": 345
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 1800,
+            "rawCaptured": 1070,
+            "bootstrapDiscarded": 1,
+            "captured": 1069,
+            "estimatedUnobservedRequests": 731,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 1069,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1068,
+              "meanMs": 34.377652621722845,
+              "p95Ms": 55.10999999999967,
+              "maxMs": 85.98700000000099,
+              "fps": 29.088664400783184,
+              "gapsOver25Ms": 790,
+              "estimatedMissed60HzSlots": 1121
+            },
+            "observerWorkerCpu": {
+              "samples": 1070,
+              "meanMs": 6.2063551404765835,
+              "p95Ms": 11.5,
+              "maxMs": 43.19999998807907
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon."
+          },
+          "workload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "actualWorkload": {
+            "hitlagFrames": 161,
+            "damageFrames": 1603,
+            "attackFrames": 1010,
+            "stockChanges": 2
+          },
+          "referenceHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.45472222263614337,
+              "p95Ms": 0.7999999821186066,
+              "maxMs": 1.899999976158142
+            },
+            "correction": {
+              "samples": 137,
+              "meanMs": 9.85839416119304,
+              "p95Ms": 20.30000001192093,
+              "maxMs": 27.599999994039536
+            },
+            "replaySimulation": {
+              "samples": 948,
+              "meanMs": 0.21339662426508932,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 0.9000000059604645
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1863,
+              "meanMs": 2.4549114335882236,
+              "p95Ms": 9.599999994039536,
+              "maxMs": 27.799999982118607
+            },
+            "presentationCapture": {
+              "samples": 1800,
+              "meanMs": 4.940777777135372,
+              "p95Ms": 7.4000000059604645,
+              "maxMs": 13.200000017881393
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.40666666698124676,
+              "p95Ms": 0.6000000238418579,
+              "maxMs": 6.300000011920929
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 8.144222221987116,
+              "p95Ms": 13,
+              "maxMs": 20.30000001192093
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.11416666708058781,
+              "p95Ms": 0.20000001788139343,
+              "maxMs": 5.800000011920929
+            },
+            "presentationRestore": {
+              "samples": 1800,
+              "meanMs": 3.151555555363496,
+              "p95Ms": 5.0999999940395355,
+              "maxMs": 8.199999988079071
+            },
+            "forwardCallback": {
+              "samples": 1828,
+              "meanMs": 19.07844638956519,
+              "p95Ms": 29.299999982118607,
+              "maxMs": 52.599999994039536
+            }
+          },
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1550,
+            "corrections": 137,
+            "replayedFrames": 948,
+            "maxReplay": 15,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43515904,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41025536
+          },
+          "snapshotCosts": {
+            "captures": 2403,
+            "restores": 1940,
+            "capturedBytes": 3657760768,
+            "restoredBytes": 98024816640,
+            "comparedBytes": 121419399168,
+            "sharedPages": 1796901,
+            "guardCpuMs": 1564.7999984025955,
+            "captureCpuMs": 11941.199998617172,
+            "restoreCpuMs": 6151.299999833107,
+            "maxCaptureCpuMs": 15.599999994039536,
+            "maxRestoreCpuMs": 8.199999988079071,
+            "peakRetainedBytes": 44564480,
+            "retainedBytes": 41025536,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          },
+          "cache": {
+            "modelHits": 24403,
+            "modelMisses": 21,
+            "textureHits": 161453,
+            "textureMisses": 176,
+            "textureInvalidations": 0,
+            "rendererLeases": 1802,
+            "models": 21,
+            "programs": 34,
+            "textures": 176,
+            "textureSourceBytes": 1008334,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 26584,
+              "verticesDecoded": 27531
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false
+        },
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "rollback",
+          "seat": 1,
+          "frames": 1800,
+          "elapsedMs": 36843.5,
+          "simulationFps": 48.855293335323736,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 20.45280711506061,
+            "p95Ms": 31.400000005960464,
+            "maxMs": 87.2999999821186,
+            "fps": 48.893044087999094,
+            "gapsOver25Ms": 324,
+            "estimatedMissed60HzSlots": 345
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 1800,
+            "rawCaptured": 1040,
+            "bootstrapDiscarded": 1,
+            "captured": 1039,
+            "estimatedUnobservedRequests": 761,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 1039,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1038,
+              "meanMs": 35.425126204238936,
+              "p95Ms": 55.53500000000349,
+              "maxMs": 88.14300000000003,
+              "fps": 28.228551515515605,
+              "gapsOver25Ms": 807,
+              "estimatedMissed60HzSlots": 1164
+            },
+            "observerWorkerCpu": {
+              "samples": 1040,
+              "meanMs": 6.156730769374049,
+              "p95Ms": 11.099999994039536,
+              "maxMs": 35.19999998807907
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon."
+          },
+          "workload": {
+            "hitlagFrames": 211,
+            "damageFrames": 1603,
+            "attackFrames": 1092,
+            "stockChanges": 2
+          },
+          "actualWorkload": {
+            "hitlagFrames": 118,
+            "damageFrames": 1599,
+            "attackFrames": 933,
+            "stockChanges": 2
+          },
+          "referenceHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "f5384f5a01a63c8c9afaf19e61fbd0dbc0501e9258f84e5dfb427da554b72f1a",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.4586666666302416,
+              "p95Ms": 0.7999999821186066,
+              "maxMs": 1.7999999821186066
+            },
+            "correction": {
+              "samples": 130,
+              "meanMs": 10.078461537682093,
+              "p95Ms": 17,
+              "maxMs": 27.899999976158142
+            },
+            "replaySimulation": {
+              "samples": 881,
+              "meanMs": 0.23507377965360982,
+              "p95Ms": 0.6000000238418579,
+              "maxMs": 1.0999999940395355
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1823,
+              "meanMs": 2.4616017549232803,
+              "p95Ms": 9.799999982118607,
+              "maxMs": 28
+            },
+            "presentationCapture": {
+              "samples": 1800,
+              "meanMs": 5.017222222487132,
+              "p95Ms": 7.5,
+              "maxMs": 12
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.4146111113826434,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 8.599999994039536
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 8.169000000307957,
+              "p95Ms": 13.5,
+              "maxMs": 21.5
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.10905555518137085,
+              "p95Ms": 0.20000001788139343,
+              "maxMs": 4.699999988079071
+            },
+            "presentationRestore": {
+              "samples": 1800,
+              "meanMs": 3.185333333859841,
+              "p95Ms": 5,
+              "maxMs": 9.199999988079071
+            },
+            "forwardCallback": {
+              "samples": 1822,
+              "meanMs": 19.230625686461657,
+              "p95Ms": 29.600000023841858,
+              "maxMs": 46.80000001192093
+            }
+          },
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1459,
+            "corrections": 130,
+            "replayedFrames": 881,
+            "maxReplay": 14,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43188224,
+            "retainedSnapshots": 3,
+            "retainedBytes": 37617664
+          },
+          "snapshotCosts": {
+            "captures": 2392,
+            "restores": 1933,
+            "capturedBytes": 3632398336,
+            "restoredBytes": 97671118848,
+            "comparedBytes": 120863588352,
+            "sharedPages": 1788807,
+            "guardCpuMs": 1634.4000012278557,
+            "captureCpuMs": 11984.299999982119,
+            "restoreCpuMs": 6202.900000959635,
+            "maxCaptureCpuMs": 13.899999976158142,
+            "maxRestoreCpuMs": 9.199999988079071,
+            "peakRetainedBytes": 44564480,
+            "retainedBytes": 37617664,
+            "count": 6,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          },
+          "cache": {
+            "modelHits": 24385,
+            "modelMisses": 21,
+            "textureHits": 161233,
+            "textureMisses": 178,
+            "textureInvalidations": 0,
+            "rendererLeases": 1802,
+            "models": 21,
+            "programs": 34,
+            "textures": 178,
+            "textureSourceBytes": 1024718,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 23,
+              "hits": 26539,
+              "verticesDecoded": 27531
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-final-rollback-observer1-fountain-Pp-Pe-combat-optimized/report.json",
+      "artifactSha256": "ebd44d65e6973e7d7a59dda1f95745cc2459d9d057d12f30afe3ba501b829598",
+      "provenance": {
+        "startedAt": "2026-09-17T19:40:18.806Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "2d0c77d0d2dd211e96c1e4c2e6381f9449baed961780d38e8467fd679bea7f15",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "2d12724bc37ab535ce9fcdd706d04e83f74a3ff622787f3d86d843074005d903",
+          "rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "mode": "rollback",
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "transport": {
+        "packets": 3600,
+        "reordered": 1152,
+        "requestedDelaysMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "reports": [
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "rollback",
+          "seat": 0,
+          "frames": 1800,
+          "elapsedMs": 44368,
+          "simulationFps": 40.569780021637214,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 24.610116731514196,
+            "p95Ms": 34.900000005960464,
+            "maxMs": 67.90000000596046,
+            "fps": 40.63369592714941,
+            "gapsOver25Ms": 708,
+            "estimatedMissed60HzSlots": 743
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 1800,
+            "rawCaptured": 915,
+            "bootstrapDiscarded": 1,
+            "captured": 914,
+            "estimatedUnobservedRequests": 886,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 914,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 913,
+              "meanMs": 48.45100876232207,
+              "p95Ms": 64.75400000000081,
+              "maxMs": 110.30699999999888,
+              "fps": 20.639405154710655,
+              "gapsOver25Ms": 897,
+              "estimatedMissed60HzSlots": 1754
+            },
+            "observerWorkerCpu": {
+              "samples": 915,
+              "meanMs": 6.215300546252663,
+              "p95Ms": 9.299999982118607,
+              "maxMs": 60.80000001192093
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon."
+          },
+          "workload": {
+            "hitlagFrames": 190,
+            "damageFrames": 1617,
+            "attackFrames": 907,
+            "stockChanges": 0
+          },
+          "actualWorkload": {
+            "hitlagFrames": 150,
+            "damageFrames": 1617,
+            "attackFrames": 834,
+            "stockChanges": 0
+          },
+          "referenceHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                0.10567581653594971,
+                43.744266510009766,
+                158.0288848876953
+              ],
+              "interest": [
+                -0.9706051349639893,
+                27.44928741455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.6804444444345104,
+              "p95Ms": 1,
+              "maxMs": 1.5999999940395355
+            },
+            "correction": {
+              "samples": 148,
+              "meanMs": 10.317567567567568,
+              "p95Ms": 18.900000005960464,
+              "maxMs": 27.19999998807907
+            },
+            "replaySimulation": {
+              "samples": 802,
+              "meanMs": 0.39576059884561265,
+              "p95Ms": 0.9000000059604645,
+              "maxMs": 1.4000000059604645
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1807,
+              "meanMs": 2.9859435526653093,
+              "p95Ms": 10.700000017881393,
+              "maxMs": 27.69999998807907
+            },
+            "presentationCapture": {
+              "samples": 1800,
+              "meanMs": 5.557000000592735,
+              "p95Ms": 7.800000011920929,
+              "maxMs": 13.900000005960464
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.4121666663057274,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 7
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 10.70344444455372,
+              "p95Ms": 15.699999988079071,
+              "maxMs": 35
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.13011111110448836,
+              "p95Ms": 0.20000001788139343,
+              "maxMs": 0.4000000059604645
+            },
+            "presentationRestore": {
+              "samples": 1800,
+              "meanMs": 3.9488888887233204,
+              "p95Ms": 5.799999982118607,
+              "maxMs": 13.799999982118607
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 23.824111110981967,
+              "p95Ms": 33.79999998211861,
+              "maxMs": 68
+            }
+          },
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1286,
+            "corrections": 148,
+            "replayedFrames": 802,
+            "maxReplay": 13,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61538304,
+            "retainedSnapshots": 4,
+            "retainedBytes": 56623104
+          },
+          "snapshotCosts": {
+            "captures": 2361,
+            "restores": 1951,
+            "capturedBytes": 4818927616,
+            "restoredBytes": 118399041536,
+            "comparedBytes": 143280439296,
+            "sharedPages": 2112756,
+            "guardCpuMs": 1340.4999992251396,
+            "captureCpuMs": 13161.000000566244,
+            "restoreCpuMs": 7783.299999654293,
+            "maxCaptureCpuMs": 18.5,
+            "maxRestoreCpuMs": 13.799999982118607,
+            "peakRetainedBytes": 63438848,
+            "retainedBytes": 56623104,
+            "count": 7,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 67174400
+          },
+          "cache": {
+            "modelHits": 27352,
+            "modelMisses": 20,
+            "textureHits": 258839,
+            "textureMisses": 237,
+            "textureInvalidations": 0,
+            "rendererLeases": 1802,
+            "models": 20,
+            "programs": 40,
+            "textures": 237,
+            "textureSourceBytes": 2071438,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 22,
+              "hits": 29732,
+              "verticesDecoded": 29167
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 17810112,
+                "code": "Pp",
+                "costume": 0
+              },
+              {
+                "slot": 0,
+                "index": 1,
+                "owner": 18718560,
+                "code": "Nn",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 19492320,
+                "code": "Pe",
+                "costume": 0
+              }
+            ],
+            "stage": "fountain"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false
+        },
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "rollback",
+          "seat": 1,
+          "frames": 1800,
+          "elapsedMs": 44378.20000001788,
+          "simulationFps": 40.56045535869582,
+          "drawSubmissions": 1800,
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 24.567537520844915,
+            "p95Ms": 36.19999998807907,
+            "maxMs": 85.69999998807907,
+            "fps": 40.70412018915311,
+            "gapsOver25Ms": 653,
+            "estimatedMissed60HzSlots": 704
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 1800,
+            "rawCaptured": 953,
+            "bootstrapDiscarded": 1,
+            "captured": 952,
+            "estimatedUnobservedRequests": 848,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 952,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 951,
+              "meanMs": 46.4424973711882,
+              "p95Ms": 63.788000000000466,
+              "maxMs": 97.66799999999967,
+              "fps": 21.532003156668647,
+              "gapsOver25Ms": 898,
+              "estimatedMissed60HzSlots": 1707
+            },
+            "observerWorkerCpu": {
+              "samples": 953,
+              "meanMs": 6.023189926604034,
+              "p95Ms": 9.900000005960464,
+              "maxMs": 52
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon."
+          },
+          "workload": {
+            "hitlagFrames": 190,
+            "damageFrames": 1617,
+            "attackFrames": 907,
+            "stockChanges": 0
+          },
+          "actualWorkload": {
+            "hitlagFrames": 164,
+            "damageFrames": 1612,
+            "attackFrames": 834,
+            "stockChanges": 0
+          },
+          "referenceHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "measuredPlayersMatchReference": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                0.10567581653594971,
+                43.744266510009766,
+                158.0288848876953
+              ],
+              "interest": [
+                -0.9706051349639893,
+                27.44928741455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.6619444440305233,
+              "p95Ms": 1,
+              "maxMs": 1.9000000059604645
+            },
+            "correction": {
+              "samples": 144,
+              "meanMs": 12.893749999296334,
+              "p95Ms": 23.69999998807907,
+              "maxMs": 30.30000001192093
+            },
+            "replaySimulation": {
+              "samples": 999,
+              "meanMs": 0.3678678682258537,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 1.699999988079071
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1860,
+              "meanMs": 3.0440322577312426,
+              "p95Ms": 11.599999994039536,
+              "maxMs": 30.600000023841858
+            },
+            "presentationCapture": {
+              "samples": 1800,
+              "meanMs": 5.5403888891471755,
+              "p95Ms": 7.799999982118607,
+              "maxMs": 12.699999988079071
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.4208888884716564,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 11.700000017881393
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 10.50833333351546,
+              "p95Ms": 16,
+              "maxMs": 38.900000005960464
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.1312222219672468,
+              "p95Ms": 0.20000001788139343,
+              "maxMs": 4.4000000059604645
+            },
+            "presentationRestore": {
+              "samples": 1800,
+              "meanMs": 3.7921111114985413,
+              "p95Ms": 5.699999988079071,
+              "maxMs": 9.799999982118607
+            },
+            "forwardCallback": {
+              "samples": 1835,
+              "meanMs": 23.16098092635256,
+              "p95Ms": 34.599999994039536,
+              "maxMs": 68.5
+            }
+          },
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1696,
+            "corrections": 144,
+            "replayedFrames": 999,
+            "maxReplay": 15,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61472768,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58654720
+          },
+          "snapshotCosts": {
+            "captures": 2415,
+            "restores": 1947,
+            "capturedBytes": 4938334208,
+            "restoredBytes": 118156296192,
+            "comparedBytes": 146557501440,
+            "sharedPages": 2160938,
+            "guardCpuMs": 1474.3999999165535,
+            "captureCpuMs": 13412.999999970198,
+            "restoreCpuMs": 7465.200000733137,
+            "maxCaptureCpuMs": 15.099999994039536,
+            "maxRestoreCpuMs": 9.799999982118607,
+            "peakRetainedBytes": 63569920,
+            "retainedBytes": 58654720,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 67174400
+          },
+          "cache": {
+            "modelHits": 27351,
+            "modelMisses": 20,
+            "textureHits": 259012,
+            "textureMisses": 237,
+            "textureInvalidations": 0,
+            "rendererLeases": 1802,
+            "models": 20,
+            "programs": 40,
+            "textures": 237,
+            "textureSourceBytes": 2071438,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 22,
+              "hits": 29805,
+              "verticesDecoded": 29167
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 17810112,
+                "code": "Pp",
+                "costume": 0
+              },
+              {
+                "slot": 0,
+                "index": 1,
+                "owner": 18718560,
+                "code": "Nn",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 19492320,
+                "code": "Pe",
+                "costume": 0
+              }
+            ],
+            "stage": "fountain"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false
+        }
+      ]
+    }
+  ],
+  "experiments": [
+    {
+      "artifact": "dist/native-port/certification-control-isolated-observer1-battlefield-Fc-Fx-optimized/report.json",
+      "artifactSha256": "fbefd76d57c19dff892f94e322ecff3faade06841a8f7eb778085d33c3edf72e",
+      "provenance": null,
+      "mode": "isolated",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 600,
+      "transport": {
+        "packets": 0,
+        "reordered": 0,
+        "requestedDelaysMs": []
+      },
+      "reports": [
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "isolated",
+          "seat": 0,
+          "frames": 600,
+          "elapsedMs": 10222.799999982119,
+          "simulationFps": 58.69233478118026,
+          "drawSubmissions": 600,
+          "submissionCadence": {
+            "samples": 599,
+            "meanMs": 17.026544240360867,
+            "p95Ms": 21.69999998807907,
+            "maxMs": 40.099999994039536,
+            "fps": 58.73182402037477,
+            "gapsOver25Ms": 8,
+            "estimatedMissed60HzSlots": 8
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 600,
+            "captured": 489,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 489,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 488,
+              "meanMs": 20.897579918032797,
+              "p95Ms": 37.83899999999994,
+              "maxMs": 61.261999999999944,
+              "fps": 47.85243094761835,
+              "gapsOver25Ms": 114,
+              "estimatedMissed60HzSlots": 127
+            },
+            "observerWorkerCpu": {
+              "samples": 490,
+              "meanMs": 3.5959183671644754,
+              "p95Ms": 6.699999988079071,
+              "maxMs": 29.599999994039536
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon.",
+            "rawCaptured": 490,
+            "bootstrapDiscarded": 1,
+            "estimatedUnobservedRequests": 111
+          },
+          "workload": {
+            "hitlagFrames": 88,
+            "damageFrames": 509,
+            "attackFrames": 426,
+            "stockChanges": 0
+          },
+          "referenceHash": {
+            "stateSha256": "6eae1be4f9da92dd84f88a10e5cc0beebbc7b2b961f60823021fb6495627f8a6",
+            "memorySha256": "4542d9c71ca6bc87de40bfeedea641fb733b3fc6ef7a2d148b0362a2ff72256e",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "6eae1be4f9da92dd84f88a10e5cc0beebbc7b2b961f60823021fb6495627f8a6",
+            "memorySha256": "4542d9c71ca6bc87de40bfeedea641fb733b3fc6ef7a2d148b0362a2ff72256e",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "camera": {
+            "sameAsFresh": true,
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 600,
+              "meanMs": 0.34699999953309696,
+              "p95Ms": 0.5,
+              "maxMs": 0.9000000059604645
+            },
+            "replaySimulation": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "advanceIncludingCorrections": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationCapture": {
+              "samples": 600,
+              "meanMs": 3.9301666668057442,
+              "p95Ms": 5.199999988079071,
+              "maxMs": 7
+            },
+            "rendererRebind": {
+              "samples": 600,
+              "meanMs": 1.0803333331644536,
+              "p95Ms": 2.5,
+              "maxMs": 10.599999994039536
+            },
+            "drawSubmission": {
+              "samples": 600,
+              "meanMs": 7.44116666679581,
+              "p95Ms": 10.799999982118607,
+              "maxMs": 27.30000001192093
+            },
+            "rendererDispose": {
+              "samples": 600,
+              "meanMs": 0.0803333334128062,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.30000001192092896
+            },
+            "presentationRestore": {
+              "samples": 600,
+              "meanMs": 2.3655000002185504,
+              "p95Ms": 3.5,
+              "maxMs": 4.4000000059604645
+            },
+            "forwardCallback": {
+              "samples": 600,
+              "meanMs": 15.260333333114783,
+              "p95Ms": 20.299999982118607,
+              "maxMs": 39.79999998211861
+            }
+          },
+          "kernel": null,
+          "snapshotCosts": {
+            "captures": 603,
+            "restores": 602,
+            "capturedBytes": 1064632320,
+            "restoredBytes": 30418010112,
+            "comparedBytes": 30468538368,
+            "sharedPages": 448669,
+            "guardCpuMs": 326.40000039339066,
+            "captureCpuMs": 2376.0999999940395,
+            "restoreCpuMs": 1427.1000001728535,
+            "maxCaptureCpuMs": 11.699999988079071,
+            "maxRestoreCpuMs": 7.5999999940395355,
+            "peakRetainedBytes": 33095680,
+            "retainedBytes": 31326208,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 33619968
+          },
+          "cache": {
+            "modelHits": 8064,
+            "modelMisses": 19,
+            "textureHits": 55250,
+            "textureMisses": 165,
+            "textureInvalidations": 0,
+            "rendererLeases": 601,
+            "models": 19,
+            "programs": 31,
+            "textures": 165,
+            "textureSourceBytes": 992230,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 21,
+              "hits": 8931,
+              "verticesDecoded": 26876
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false,
+          "measuredPlayersMatchReference": true
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-archive-cache-isolated-observer1-battlefield-Fc-Fx-optimized/report.json",
+      "artifactSha256": "93acf7f2dc1b0b47d68e0f12fae7c21765a24bf73d236ea4d6e5340d2e7ff14c",
+      "provenance": {
+        "startedAt": "2026-09-17T19:24:36.670Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "04362012fd909b4783fb034d6c34db60636aa14aaab980daf0e8c6c70c6fd7f4",
+          "frame-evidence.mjs": "902ca51f9d02921f50d61ee8c476941394b67a7106db90bc3fe894f51f387a74",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "0b7cc1da8a52598a9083d119ccf59e844b77677b3a7e7bc9b39438fb678ecb28",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234"
+        }
+      },
+      "mode": "isolated",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 600,
+      "transport": {
+        "packets": 0,
+        "reordered": 0,
+        "requestedDelaysMs": []
+      },
+      "reports": [
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "isolated",
+          "seat": 0,
+          "frames": 600,
+          "elapsedMs": 10448.800000011921,
+          "simulationFps": 57.422861955374344,
+          "drawSubmissions": 600,
+          "submissionCadence": {
+            "samples": 599,
+            "meanMs": 17.402003338918064,
+            "p95Ms": 24.80000001192093,
+            "maxMs": 42.5,
+            "fps": 57.46464820884082,
+            "gapsOver25Ms": 27,
+            "estimatedMissed60HzSlots": 30
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 600,
+            "captured": 513,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 513,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 512,
+              "meanMs": 20.353689453124996,
+              "p95Ms": 41.61699999999996,
+              "maxMs": 68.98799999999983,
+              "fps": 49.13114166859145,
+              "gapsOver25Ms": 94,
+              "estimatedMissed60HzSlots": 121
+            },
+            "observerWorkerCpu": {
+              "samples": 514,
+              "meanMs": 4.2101167314015475,
+              "p95Ms": 9.099999994039536,
+              "maxMs": 30.299999982118607
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon.",
+            "rawCaptured": 514,
+            "bootstrapDiscarded": 1,
+            "estimatedUnobservedRequests": 87
+          },
+          "workload": {
+            "hitlagFrames": 88,
+            "damageFrames": 509,
+            "attackFrames": 426,
+            "stockChanges": 0
+          },
+          "referenceHash": {
+            "stateSha256": "6eae1be4f9da92dd84f88a10e5cc0beebbc7b2b961f60823021fb6495627f8a6",
+            "memorySha256": "4542d9c71ca6bc87de40bfeedea641fb733b3fc6ef7a2d148b0362a2ff72256e",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "6eae1be4f9da92dd84f88a10e5cc0beebbc7b2b961f60823021fb6495627f8a6",
+            "memorySha256": "4542d9c71ca6bc87de40bfeedea641fb733b3fc6ef7a2d148b0362a2ff72256e",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 600,
+              "meanMs": 0.41049999942382176,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 1
+            },
+            "correction": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "replaySimulation": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "advanceIncludingCorrections": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationCapture": {
+              "samples": 600,
+              "meanMs": 4.515500000019868,
+              "p95Ms": 7.0999999940395355,
+              "maxMs": 10.5
+            },
+            "rendererRebind": {
+              "samples": 600,
+              "meanMs": 0.3673333338399728,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 1.0999999940395355
+            },
+            "drawSubmission": {
+              "samples": 600,
+              "meanMs": 7.116666665673256,
+              "p95Ms": 11.400000005960464,
+              "maxMs": 25.799999982118607
+            },
+            "rendererDispose": {
+              "samples": 600,
+              "meanMs": 0.09466666718324025,
+              "p95Ms": 0.20000001788139343,
+              "maxMs": 0.4000000059604645
+            },
+            "presentationRestore": {
+              "samples": 600,
+              "meanMs": 2.5933333329856394,
+              "p95Ms": 4.199999988079071,
+              "maxMs": 6.0999999940395355
+            },
+            "forwardCallback": {
+              "samples": 600,
+              "meanMs": 15.119666666140159,
+              "p95Ms": 22.599999994039536,
+              "maxMs": 40.900000005960464
+            }
+          },
+          "kernel": null,
+          "snapshotCosts": {
+            "captures": 603,
+            "restores": 603,
+            "capturedBytes": 1064632320,
+            "restoredBytes": 30468538368,
+            "comparedBytes": 30468538368,
+            "sharedPages": 448669,
+            "guardCpuMs": 397.6999997496605,
+            "captureCpuMs": 2725.399999976158,
+            "restoreCpuMs": 1565.6999997794628,
+            "maxCaptureCpuMs": 10.5,
+            "maxRestoreCpuMs": 7.699999988079071,
+            "peakRetainedBytes": 33095680,
+            "retainedBytes": 31326208,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 33619968
+          },
+          "cache": {
+            "modelHits": 8077,
+            "modelMisses": 19,
+            "textureHits": 55339,
+            "textureMisses": 165,
+            "textureInvalidations": 0,
+            "rendererLeases": 602,
+            "models": 19,
+            "programs": 31,
+            "textures": 165,
+            "textureSourceBytes": 992230,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 21,
+              "hits": 8945,
+              "verticesDecoded": 26876
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false,
+          "measuredPlayersMatchReference": true
+        }
+      ]
+    },
+    {
+      "artifact": "dist/native-port/certification-wide-simd-isolated-observer1-battlefield-Fc-Fx-optimized/report.json",
+      "artifactSha256": "cfd7a55e53c3b27e9f854c3edea9f26700fe3df0904bd12bed33317afbd10f40",
+      "provenance": {
+        "startedAt": "2026-09-17T19:26:15.779Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "certification.mjs": "e6bbdbd7a905846673813fd6f2730371250b143deb92e19e0e9b55497f583363",
+          "frame-evidence.mjs": "902ca51f9d02921f50d61ee8c476941394b67a7106db90bc3fe894f51f387a74",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "07f1912a57e7c6cad0d436a0551614a355f6d60b1ce7ba00f951bf4edfab482f",
+          "material-gpu.mjs": "5ba887d8bc0e4a2ae843f31b46b95583e40fa0391fdfe0e2cdcb14fb8f645884",
+          "presentation-cache.mjs": "55618157870564d181057642abaca14d139be0c325b102251a32b65452a4125c",
+          "paged-snapshot.mjs": "8b4e2b431df20e2a8882f7728b5f44fd05b06d5cf17a882ab6802e970149c726",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234"
+        }
+      },
+      "mode": "isolated",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 600,
+      "transport": {
+        "packets": 0,
+        "reordered": 0,
+        "requestedDelaysMs": []
+      },
+      "reports": [
+        {
+          "diagnosticPassed": false,
+          "performanceCertified": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "mode": "isolated",
+          "seat": 0,
+          "frames": 600,
+          "elapsedMs": 10222.09999999404,
+          "simulationFps": 58.696353978179616,
+          "drawSubmissions": 600,
+          "submissionCadence": {
+            "samples": 599,
+            "meanMs": 17.03572621031078,
+            "p95Ms": 21.19999998807907,
+            "maxMs": 31.600000023841858,
+            "fps": 58.70016855487824,
+            "gapsOver25Ms": 4,
+            "estimatedMissed60HzSlots": 4
+          },
+          "observation": {
+            "enabled": true,
+            "requested": 600,
+            "captured": 553,
+            "repeatedSampledImages": 0,
+            "distinctSampledImages": 553,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 552,
+              "meanMs": 18.483710144927535,
+              "p95Ms": 37.60700000000003,
+              "maxMs": 58.603999999999814,
+              "fps": 54.10169236366374,
+              "gapsOver25Ms": 47,
+              "estimatedMissed60HzSlots": 59
+            },
+            "observerWorkerCpu": {
+              "samples": 554,
+              "meanMs": 3.0494584838190666,
+              "p95Ms": 7.200000017881393,
+              "maxMs": 28.200000017881393
+            },
+            "error": null,
+            "physicalPresentationMeasured": false,
+            "scope": "Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon.",
+            "rawCaptured": 554,
+            "bootstrapDiscarded": 1,
+            "estimatedUnobservedRequests": 47
+          },
+          "workload": {
+            "hitlagFrames": 88,
+            "damageFrames": 509,
+            "attackFrames": 426,
+            "stockChanges": 0
+          },
+          "actualWorkload": {
+            "hitlagFrames": 88,
+            "damageFrames": 509,
+            "attackFrames": 426,
+            "stockChanges": 0
+          },
+          "referenceHash": {
+            "stateSha256": "6eae1be4f9da92dd84f88a10e5cc0beebbc7b2b961f60823021fb6495627f8a6",
+            "memorySha256": "4542d9c71ca6bc87de40bfeedea641fb733b3fc6ef7a2d148b0362a2ff72256e",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "6eae1be4f9da92dd84f88a10e5cc0beebbc7b2b961f60823021fb6495627f8a6",
+            "memorySha256": "4542d9c71ca6bc87de40bfeedea641fb733b3fc6ef7a2d148b0362a2ff72256e",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                8.15030288696289,
+                26.686237335205078,
+                189.7616424560547
+              ],
+              "interest": [
+                13.652356147766113,
+                8.903631210327148,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "costs": {
+            "simulation": {
+              "samples": 600,
+              "meanMs": 0.3423333326478799,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 1
+            },
+            "correction": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "replaySimulation": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "advanceIncludingCorrections": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "presentationCapture": {
+              "samples": 600,
+              "meanMs": 3.7024999997019767,
+              "p95Ms": 5.5,
+              "maxMs": 10
+            },
+            "rendererRebind": {
+              "samples": 600,
+              "meanMs": 0.30983333349227904,
+              "p95Ms": 0.5,
+              "maxMs": 4.299999982118607
+            },
+            "drawSubmission": {
+              "samples": 600,
+              "meanMs": 6.253166667371988,
+              "p95Ms": 10.400000005960464,
+              "maxMs": 18.099999994039536
+            },
+            "rendererDispose": {
+              "samples": 600,
+              "meanMs": 0.0746666665871938,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.4000000059604645
+            },
+            "presentationRestore": {
+              "samples": 600,
+              "meanMs": 2.3585000001390775,
+              "p95Ms": 3.699999988079071,
+              "maxMs": 5.300000011920929
+            },
+            "forwardCallback": {
+              "samples": 600,
+              "meanMs": 13.098166666875283,
+              "p95Ms": 20,
+              "maxMs": 34.39999997615814
+            }
+          },
+          "kernel": null,
+          "snapshotCosts": {
+            "captures": 603,
+            "restores": 603,
+            "capturedBytes": 1064632320,
+            "restoredBytes": 30468538368,
+            "comparedBytes": 30468538368,
+            "sharedPages": 448669,
+            "guardCpuMs": 345.99999991059303,
+            "captureCpuMs": 2239.5999997854233,
+            "restoreCpuMs": 1425.400000065565,
+            "maxCaptureCpuMs": 11.700000017881393,
+            "maxRestoreCpuMs": 6.800000011920929,
+            "peakRetainedBytes": 33095680,
+            "retainedBytes": 31326208,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 33619968
+          },
+          "cache": {
+            "modelHits": 8077,
+            "modelMisses": 19,
+            "textureHits": 55339,
+            "textureMisses": 165,
+            "textureInvalidations": 0,
+            "rendererLeases": 602,
+            "models": 19,
+            "programs": 31,
+            "textures": 165,
+            "textureSourceBytes": 992230,
+            "leases": 0,
+            "geometry": {
+              "enabled": true,
+              "decodes": 21,
+              "hits": 8945,
+              "verticesDecoded": 26876
+            }
+          },
+          "gpuInfo": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "presentation": {
+            "width": 1280,
+            "height": 720,
+            "picture": [
+              960,
+              720
+            ],
+            "rect": {
+              "x": 160,
+              "y": 0,
+              "width": 960,
+              "height": 720,
+              "top": 0,
+              "right": 1120,
+              "bottom": 720,
+              "left": 160
+            }
+          },
+          "inputToPhoton": {
+            "measured": false,
+            "reason": "No physical input/display sensor; canvas capture is not photon timing."
+          },
+          "scope": "Diagnostic only; local retains normal native draw writes, isolated/rollback discard draw writes at detached snapshot boundary; audio journal only.",
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "stage": "battlefield"
+          },
+          "diagnosticPassedAfterBootstrapAccounting": false,
+          "measuredPlayersMatchReference": true
+        }
+      ]
+    }
+  ],
+  "snapshotMicrobenchmark": {
+    "scope": "Node exact-page microbenchmark after test processes finished, 900 committed nonzero 64KiB pages, 100 complete scans per run; not browser FPS",
+    "bytes": 58982400,
+    "rows": [
+      {
+        "name": "old",
+        "msPerScan": 8.88401468,
+        "equal": 90000
+      },
+      {
+        "name": "new",
+        "msPerScan": 6.737762249999999,
+        "equal": 90000
+      },
+      {
+        "name": "old",
+        "msPerScan": 8.459280259999998,
+        "equal": 90000
+      },
+      {
+        "name": "new",
+        "msPerScan": 7.19005177,
+        "equal": 90000
+      }
+    ]
+  },
+  "sixStageConvergence": [
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "artifact": "dist/native-port/experiment-rollback-battlefield-Fc-Fx-optimized/report.json",
+      "artifactSha256": "31dad8c109b9b640ce7d6ff5f7a977044207a4ed89b8f84ca80a5d518051cefb",
+      "passed": true,
+      "clients": [
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 18,
+            "replayedFrames": 90,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42205184,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41943040
+          },
+          "referenceHash": {
+            "stateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "workload": {
+            "hitlagFrames": 0,
+            "damageFrames": 0,
+            "attackFrames": 34,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "battlefield"
+          }
+        },
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 237,
+            "corrections": 18,
+            "replayedFrames": 91,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42205184,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41943040
+          },
+          "referenceHash": {
+            "stateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "workload": {
+            "hitlagFrames": 0,
+            "damageFrames": 0,
+            "attackFrames": 34,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1919200,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 13883808,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "battlefield"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "story",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "artifact": "dist/native-port/experiment-rollback-story-Fc-Fx-optimized/report.json",
+      "artifactSha256": "801a20adc5ad204fe080e6061ad272caf78f09cd4778a12e87b66ece7ab975d8",
+      "passed": true,
+      "clients": [
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 237,
+            "corrections": 18,
+            "replayedFrames": 87,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 47841280,
+            "retainedSnapshots": 5,
+            "retainedBytes": 46989312
+          },
+          "referenceHash": {
+            "stateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+            "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+            "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43",
+            "fresh": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.5498374700546265,
+              24.83981704711914,
+              143.14468383789062
+            ],
+            "interest": [
+              -1.7742576599121094,
+              12.03598690032959,
+              0
+            ],
+            "fov": 20,
+            "aspect": 1.2173333168029785,
+            "draws": 350
+          },
+          "workload": {
+            "hitlagFrames": 8,
+            "damageFrames": 0,
+            "attackFrames": 4,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1923808,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 15828864,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "story"
+          }
+        },
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 237,
+            "corrections": 20,
+            "replayedFrames": 99,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 47316992,
+            "retainedSnapshots": 5,
+            "retainedBytes": 46989312
+          },
+          "referenceHash": {
+            "stateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+            "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+            "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43",
+            "fresh": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.5498374700546265,
+              24.83981704711914,
+              143.14468383789062
+            ],
+            "interest": [
+              -1.7742576599121094,
+              12.03598690032959,
+              0
+            ],
+            "fov": 20,
+            "aspect": 1.2173333168029785,
+            "draws": 350
+          },
+          "workload": {
+            "hitlagFrames": 8,
+            "damageFrames": 0,
+            "attackFrames": 4,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1923808,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 15828864,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "story"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "stadium",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "artifact": "dist/native-port/experiment-rollback-stadium-Fc-Fx-optimized/report.json",
+      "artifactSha256": "08cfa3681bfebaabbc430818fc8fa1b9ba201860322a9841da1d5df1c8bde981",
+      "passed": true,
+      "clients": [
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 232,
+            "corrections": 16,
+            "replayedFrames": 75,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 50331648,
+            "retainedSnapshots": 4,
+            "retainedBytes": 47710208
+          },
+          "referenceHash": {
+            "stateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+            "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+            "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac",
+            "fresh": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.0259143114089966,
+              25.855648040771484,
+              86.34040832519531
+            ],
+            "interest": [
+              -1.4996124505996704,
+              15.240766525268555,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 271
+          },
+          "workload": {
+            "hitlagFrames": 8,
+            "damageFrames": 0,
+            "attackFrames": 4,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1924192,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 17223968,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "stadium"
+          }
+        },
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 239,
+            "corrections": 19,
+            "replayedFrames": 103,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 50331648,
+            "retainedSnapshots": 5,
+            "retainedBytes": 49610752
+          },
+          "referenceHash": {
+            "stateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+            "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+            "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac",
+            "fresh": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.0259143114089966,
+              25.855648040771484,
+              86.34040832519531
+            ],
+            "interest": [
+              -1.4996124505996704,
+              15.240766525268555,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 271
+          },
+          "workload": {
+            "hitlagFrames": 8,
+            "damageFrames": 0,
+            "attackFrames": 4,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1924192,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 17223968,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "stadium"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "dreamland",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "artifact": "dist/native-port/experiment-rollback-dreamland-Fc-Fx-optimized/report.json",
+      "artifactSha256": "647185d015dde4a99da49c994cdb648a436dc36edfe1cf2fd6d7919f46d8b07f",
+      "passed": true,
+      "clients": [
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 238,
+            "corrections": 18,
+            "replayedFrames": 88,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43843584,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43319296
+          },
+          "referenceHash": {
+            "stateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+            "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              1,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+            "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              1,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277",
+            "fresh": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              1.3618351221084595,
+              16.934423446655273,
+              238.098388671875
+            ],
+            "interest": [
+              -14.723745346069336,
+              9.44859790802002,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 216
+          },
+          "workload": {
+            "hitlagFrames": 0,
+            "damageFrames": 0,
+            "attackFrames": 34,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1925984,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 14497184,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "dreamland"
+          }
+        },
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 235,
+            "corrections": 18,
+            "replayedFrames": 96,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43646976,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43319296
+          },
+          "referenceHash": {
+            "stateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+            "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              1,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+            "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              1,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277",
+            "fresh": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              1.3618351221084595,
+              16.934423446655273,
+              238.098388671875
+            ],
+            "interest": [
+              -14.723745346069336,
+              9.44859790802002,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 216
+          },
+          "workload": {
+            "hitlagFrames": 0,
+            "damageFrames": 0,
+            "attackFrames": 34,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 1925984,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 14497184,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "dreamland"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "destination",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 240,
+      "artifact": "dist/native-port/experiment-rollback-destination-Fc-Fx-optimized/report.json",
+      "artifactSha256": "22050fda6c9fdab5fb25f4c9eda18810ccff8acdd993b1bb7ccecacefb49c305",
+      "passed": true,
+      "clients": [
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 235,
+            "corrections": 17,
+            "replayedFrames": 84,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 44957696,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43843584
+          },
+          "referenceHash": {
+            "stateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+            "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+            "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0",
+            "fresh": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.851180911064148,
+              29.70431900024414,
+              130.90716552734375
+            ],
+            "interest": [
+              -2.153271198272705,
+              14.212993621826172,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 200
+          },
+          "workload": {
+            "hitlagFrames": 0,
+            "damageFrames": 0,
+            "attackFrames": 34,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 12544512,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 14360288,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "destination"
+          }
+        },
+        {
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 237,
+            "corrections": 18,
+            "replayedFrames": 95,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 44040192,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43843584
+          },
+          "referenceHash": {
+            "stateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+            "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+            "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0",
+            "fresh": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.851180911064148,
+              29.70431900024414,
+              130.90716552734375
+            ],
+            "interest": [
+              -2.153271198272705,
+              14.212993621826172,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 200
+          },
+          "workload": {
+            "hitlagFrames": 0,
+            "damageFrames": 0,
+            "attackFrames": 34,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 12544512,
+                "code": "Fc",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 14360288,
+                "code": "Fx",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "destination"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "artifact": "dist/native-port/experiment-rollback-fountain-Pp-Pe-combat-optimized/report.json",
+      "artifactSha256": "72e13fe0a39a2ae6140e7960c394b1498b2d8f20dd1ef3790dfacbbfdee7f988",
+      "passed": true,
+      "clients": [
+        {
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1531,
+            "corrections": 171,
+            "replayedFrames": 894,
+            "maxReplay": 11,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61407232,
+            "retainedSnapshots": 4,
+            "retainedBytes": 56623104
+          },
+          "referenceHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4",
+            "fresh": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -7.035985946655273,
+              22.28489112854004,
+              83.0000228881836
+            ],
+            "interest": [
+              -7.19099760055542,
+              11.128376960754395,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 272
+          },
+          "workload": {
+            "hitlagFrames": 190,
+            "damageFrames": 1617,
+            "attackFrames": 907,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 17810112,
+                "code": "Pp",
+                "costume": 0
+              },
+              {
+                "slot": 0,
+                "index": 1,
+                "owner": 18718560,
+                "code": "Nn",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 19492320,
+                "code": "Pe",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "fountain"
+          }
+        },
+        {
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1777,
+            "corrections": 149,
+            "replayedFrames": 910,
+            "maxReplay": 12,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61472768,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58654720
+          },
+          "referenceHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "aea5914e8fa7f0bb0d107324a38f4d8c632331980e05cc6011894012440153dd",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4",
+            "fresh": "b24fccd03ed6e94a000372f54d2dd9bb674bc1dcd034fdba88697faa45b672d4"
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -7.035985946655273,
+              22.28489112854004,
+              83.0000228881836
+            ],
+            "interest": [
+              -7.19099760055542,
+              11.128376960754395,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 272
+          },
+          "workload": {
+            "hitlagFrames": 190,
+            "damageFrames": 1617,
+            "attackFrames": 907,
+            "stockChanges": 0
+          },
+          "boot": {
+            "fighterForms": [
+              {
+                "slot": 0,
+                "index": 0,
+                "owner": 17810112,
+                "code": "Pp",
+                "costume": 0
+              },
+              {
+                "slot": 0,
+                "index": 1,
+                "owner": 18718560,
+                "code": "Nn",
+                "costume": 0
+              },
+              {
+                "slot": 1,
+                "index": 0,
+                "owner": 19492320,
+                "code": "Pe",
+                "costume": 0
+              }
+            ],
+            "selectedCostumes": [
+              0,
+              0
+            ],
+            "stage": "fountain"
+          }
+        }
+      ]
+    }
+  ],
+  "lifecycle": [
+    {
+      "artifact": "dist/native-port/experiment-native-rooms/report.json",
+      "artifactSha256": "e13e4dafb7dedf4fadd0071de41620625b1415522a7f743e0cc4440e549c53b8",
+      "passed": true,
+      "scope": "Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.",
+      "keys": [
+        "passed",
+        "initial",
+        "final",
+        "scope"
+      ],
+      "finalFrames": [
+        600,
+        600
+      ]
+    },
+    {
+      "artifact": "dist/native-port/experiment-native-rooms-results/report.json",
+      "artifactSha256": "17374e4fda480ad13f878af2df511f9a91fd4be93f5171bdad519ea39e845aed",
+      "passed": true,
+      "scope": "Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.",
+      "keys": [
+        "passed",
+        "initial",
+        "lifecycle",
+        "restarted",
+        "returned",
+        "legalStagesAfterReturn",
+        "scope"
+      ],
+      "nativeResults": [
+        {
+          "outcome": 2,
+          "frames": 806,
+          "winnerCount": 1,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 0,
+              "percent": 0,
+              "score": -16777202,
+              "winner": false
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        },
+        {
+          "outcome": 2,
+          "frames": 806,
+          "winnerCount": 1,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 0,
+              "percent": 0,
+              "score": -16777202,
+              "winner": false
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        },
+        {
+          "outcome": 1,
+          "frames": 28800,
+          "winnerCount": 2,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        },
+        {
+          "outcome": 1,
+          "frames": 28800,
+          "winnerCount": 2,
+          "players": [
+            {
+              "character": 20,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            },
+            {
+              "character": 2,
+              "kind": 0,
+              "stocks": 4,
+              "percent": 0,
+              "score": 4,
+              "winner": true
+            }
+          ]
+        }
+      ],
+      "legalStagesAfterReturn": [
+        2,
+        3,
+        8,
+        28,
+        31,
+        32
+      ]
+    }
+  ],
+  "tests": {
+    "command": "npm test",
+    "total": 585,
+    "passed": 575,
+    "skipped": 10,
+    "failed": 0
+  },
+  "limits": [
+    "Canvas-capture timestamps are not compositor presentation timestamps or physical display photons.",
+    "96x72 RGB sample hash uniqueness is not exact full-frame identity; post-run pixel oracle checks all RGBA bytes.",
+    "Both rollback processes share CPU/GPU/memory bandwidth on one host; no WAN/two-host certification.",
+    "Detached presentation still discards native rendering writes; gameplay dependency audit and persistent rollback-safe renderer remain.",
+    "Audio commitment/SFX, speculative endings, reconnect recovery and full roster/interaction qualification remain."
+  ]
+}

@@ -19,7 +19,8 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
-  const info=gl.getExtension('WEBGL_debug_renderer_info'),gpuInfo={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};
+  const readGpuInfo=()=>{const info=gl.getExtension('WEBGL_debug_renderer_info');return {renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};};
+  const gpuInfo=presentationCache?presentationCache.gpuInfo(gl,readGpuInfo):readGpuInfo();
   const geometry=presentationCache?.geometry??createModelGeometryCache({enabled:cacheModels});
   const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks,presentationCache}):null,resources=[];
   const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
@@ -71,7 +72,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
   }
   function addActor(actor) {
       const model=geometry.read(actor.bytes);if(!model.meshes.length)return;
-      const archive=inspectArchive(actor.bytes),d=archive.data,extra=actor.extraRoot??0,n=model.tree.nodes.length;
+      const archive=presentationCache?presentationCache.archive(actor.bytes):inspectArchive(actor.bytes),d=archive.data,extra=actor.extraRoot??0,n=model.tree.nodes.length;
       const allocations=[],alloc=size=>{const p=module._malloc(size);if(!p)throw Error('Preview allocation');allocations.push(p);return p;};
       let skin,gpu,modelProbe,materialGpu;
       try {

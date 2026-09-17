@@ -1,5 +1,5 @@
 import {createPagedWasmCheckpointStore} from '../../engines/browser-native/paged-snapshot.mjs';
-import {pageKernelSourceSha256} from '../../engines/browser-native/snapshot-page-kernel.mjs';
+import {pageKernelSourceSha256,createSnapshotPageKernel} from '../../engines/browser-native/snapshot-page-kernel.mjs';
 import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {instrumentSnapshotWasm,createWasmCheckpointStore} from '../../engines/browser-native/wasm-snapshot.mjs';
@@ -51,4 +51,9 @@ test('zero pages share one immutable allocation and failed capture returns tempo
  r.module.HEAPU8[1]=9;const changed=store.capture();assert.equal(store.retainedBytes,2*65536);store.release(initial);
  r.module.HEAPU8.fill(42);store.restore(changed);assert.equal(r.module.HEAPU8[1],9);assert.equal(r.module.HEAPU8[65537],0);
  store.dispose();assert.equal(store.retainedBytes,0);
+});
+
+test('SIMD page comparison checks every byte lane and the final vector',()=>{
+ const live=new WebAssembly.Memory({initial:1,maximum:32768}),kernel=createSnapshotPageKernel(live);assert.ok(kernel);const bytes=new Uint8Array(live.buffer);assert.equal(kernel.equal(0,0),1);
+ for(const at of [...Array.from({length:64},(_,i)=>i),...Array.from({length:64},(_,i)=>65536-64+i)]){bytes[at]=255;assert.equal(kernel.equal(0,0),0,'byte '+at);bytes[at]=0;assert.equal(kernel.equal(0,0),1);}
 });

@@ -1,5 +1,14 @@
 # Native browser port — September 17, 2026
 
+The new [every-frame 720p60 diagnostic](BROWSER-NATIVE-720P60.md) measures local
+combat and delayed-input rollback separately, with a 960×720 native picture in
+a 1280×720 presentation. Local Battlefield Falco/Fox and Fountain ICs/Peach
+reach approximately 60 captured FPS over 1,800 forward frames. Two-browser
+rollback still falls substantially below target. Draw submission, independent
+captured frames, replay and complete snapshot costs are reported separately;
+there is no physical presentation or input-to-photon measurement. This remains
+diagnostic-only and is not complete tournament/roster certification.
+
 A separate development diagnostic now checkpoints the full direct-port WASM
 memory, every mutable WASM global and an audio event journal, predicts remote
 input, and restores/replays corrections. Six-stage tests with two browser

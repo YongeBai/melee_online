@@ -1,14 +1,24 @@
 import {createModelGeometryCache} from './model-geometry-cache.mjs';
+import {inspectArchive} from './archive.mjs';
 
 // Match-scoped immutable source/GPU assets only. No native owners, node arrays,
 // polygon bindings, uniforms, or WASM allocations. Retained textures own exact
 // copies of their source image/palette bytes, checked before every new lease use.
 export function createPresentationCache(){
   const programs=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
-  let context=null,leases=0,closed=false;
+  let context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
   const stats={modelHits:0,modelMisses:0,textureHits:0,textureMisses:0,textureInvalidations:0,rendererLeases:0};
   return {
     geometry,
+    archive(bytes){
+      if(closed||!(bytes instanceof Uint8Array))throw Error('Immutable archive cache unavailable');
+      if(!archives.has(bytes))archives.set(bytes,inspectArchive(bytes));
+      return archives.get(bytes);
+    },
+    gpuInfo(gl,read){
+      if(closed||gl.isContextLost()||(context&&context!==gl))throw Error('Presentation cache context unavailable');
+      context=gl;return gpuInfo??=read();
+    },
     acquire(gl){
       if(closed||gl.isContextLost()||(context&&context!==gl))throw Error('Presentation cache context unavailable');
       if(leases)throw Error('Presentation cache already leased');
@@ -43,7 +53,7 @@ export function createPresentationCache(){
       for(const model of models.values())model.dispose();
       for(const p of programs.values())context.deleteProgram(p.program);
       for(const image of images.values())context.deleteTexture(image.texture);
-      models.clear();programs.clear();images.clear();geometry.clear();
+      models.clear();programs.clear();images.clear();geometry.clear();archives=new WeakMap();gpuInfo=null;
     }
   };
 }

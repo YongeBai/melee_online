@@ -175,7 +175,8 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     if(kind===0){particleDraws++;particleVertices+=count;}else if(kind===1){afterimageDraws++;afterimageVertices+=count;}else{textDraws++;textVertices+=count;}
   };
   function upload(model,bytes,nodes,owner,{descriptorBase=null}={}){
-    const archive=inspectArchive(bytes),d=archive.data,nativeKeys=[];
+    if(assetLease&&bytes.buffer===module.HEAPU8.buffer)throw Error('GPU cache source cannot alias rewindable memory');
+    const archive=presentationCache?presentationCache.archive(bytes):inspectArchive(bytes),d=archive.data,nativeKeys=[];
     // Shape buffers are mutable. Keep their original per-renderer lifetime.
     const cached=!!assetLease&&!model.meshes.some(mesh=>(mesh.flags&0x3000)===0x1000);
     if(cached&&bytes.buffer===module.HEAPU8.buffer)throw Error('GPU cache source cannot alias rewindable memory');

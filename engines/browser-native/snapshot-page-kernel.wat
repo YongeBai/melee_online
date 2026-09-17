@@ -4,9 +4,9 @@
  (func (export "equal") (param $a i32) (param $b i32) (result i32) (local $end i32)
   (local.set $end (i32.add (local.get $a) (i32.const 65536)))
   (loop $loop
-   (if (v128.any_true (v128.xor (v128.load $live (local.get $a)) (v128.load $pages (local.get $b)))) (then (return (i32.const 0))))
-   (local.set $a (i32.add (local.get $a) (i32.const 16)))
-   (local.set $b (i32.add (local.get $b) (i32.const 16)))
+   (if (v128.any_true (v128.or (v128.or (v128.xor (v128.load $live offset=0 (local.get $a)) (v128.load $pages offset=0 (local.get $b))) (v128.xor (v128.load $live offset=16 (local.get $a)) (v128.load $pages offset=16 (local.get $b)))) (v128.or (v128.xor (v128.load $live offset=32 (local.get $a)) (v128.load $pages offset=32 (local.get $b))) (v128.xor (v128.load $live offset=48 (local.get $a)) (v128.load $pages offset=48 (local.get $b)))))) (then (return (i32.const 0))))
+   (local.set $a (i32.add (local.get $a) (i32.const 64)))
+   (local.set $b (i32.add (local.get $b) (i32.const 64)))
    (br_if $loop (i32.lt_u (local.get $a) (local.get $end))))
   (i32.const 1))
  (func (export "copyOut") (param $to i32) (param $from i32)
