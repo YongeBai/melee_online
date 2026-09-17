@@ -1,0 +1,2569 @@
+{
+  "title": "Rejected packed native draw-state ABI",
+  "date": "2026-09-17",
+  "retainedRuntimeCommit": "f0bcaaacc1157c844fe631c54a79128e7e59f890",
+  "decision": "Rejected; all packet runtime/native-core changes reverted",
+  "performanceCertified": false,
+  "productionTransport": "Three-frame lockstep, unchanged",
+  "scope": "Two localhost Chromium 151 clients on one AMD Ryzen AI 9 HX PRO 370 / Radeon 890M host; 960x720 picture within 1280x720. Captured cadence is not physical scanout or input-to-photon. 1800 forward frames per client with 15-130ms synthetic input delays. Controls use the experimental core with the packet path disabled.",
+  "experimentalSources": {
+    "dirty-runtime.mjs": "bfb5c4deeaf9f4259b822dc0308b5595e7a307f4dc2b2a81503110bf2b00fe50",
+    "dirty-host-contract.mjs": "350127e0a615627e981c321f11266da19d13a990ef41b2d55f805f092f60d575",
+    "dirty-core.json": "a355cae1c5391844cc6a2c2e3065e1b9503b35078fd95b93109232f96e5d159d",
+    "melee-dirty.wasm": "a7d201742d95dea5bdb70b201be7e03db69107742b00c328f6ff6d87506be4f7",
+    "certification.mjs": "dfe7c1fc5e7cc61f3e075bfdaa8a91bbfd73c304625a746f4fb697e0817fec87",
+    "render-replica.mjs": "cb8a9b53a326f2b485ef3f8d27223224c4484773cec913c7fc00cf411bd8e4e2",
+    "wasm-snapshot.mjs": "ef1d2e1f9586247b1b0270b689e2069147c8b18a6fbef2e90699e29dadad25ae",
+    "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+    "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+    "native-match-preview.mjs": "00a0409de2467d85efdd14391caf85396c13ba20b8357a47cf03de87bc41da05",
+    "material-gpu.mjs": "0bdcf8d19202fdc5e229a9a11e39a652aa5888843e15ca4a24374dafaeb4ed00",
+    "owned-uniform-state.mjs": "a3767ea1828dae7d936d8955a104011824a7af25160347d0bbe1b7a623da1da3",
+    "draw-packet.mjs": "c125867f0bfcf85c7875bd8677e6e2e309e96cc32f11296798d7e98a9d17e6c3",
+    "draw-uniform-buffer.mjs": "9741a025a68d0013272046982c7095501510c8daf96d0baaa6d02f55f5a77111",
+    "native-state-intern.mjs": "bd115057b334b784996d7582915c7a0c0d495866f2315f7b18c5f687997c0829",
+    "native-texture.mjs": "5d888492f2e3e9592703e129b62339e931a090063479447ad8a50f66c33a5fb9",
+    "presentation-cache.mjs": "edd61dc9da28de3d32ba876c56bad245f9b4b647471aad3eb637d67727948ad8",
+    "paged-snapshot.mjs": "29d2c6d32cdc605c6be4423bde6ffa210edbbb0e870309fbe3d7e0354fd6e235",
+    "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+    "melee-fighter-init.wasm": "59576b6286ebda1fffe4121c9de092f6b38589791f0955f2148d67240c1bad2b",
+    "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+    "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+    "constructor-runner.mjs": "530a8e609d55119e555e02f98e6e72280d8ea576baab702f65ad9b709504d298",
+    "rollback-session.mjs": "43a949c78eef22b5986dea66c071dcb1d2d5b5148a96ceb1260f52336333bc57",
+    "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+    "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+    "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+  },
+  "trials": [
+    {
+      "phase": "a1",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:24:04.874Z",
+      "rawReportSha256": "f9c839730be655326954d3b73023f693dcb4490af8e9e16b17be11392c14999b",
+      "packetEnabled": false,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate"
+          ],
+          "simulationFps": 59.65183213969723,
+          "capturedFrames": 1798,
+          "capturedCadence": {
+            "samples": 1797,
+            "meanMs": 16.666470228158055,
+            "p95Ms": 20.35699999999997,
+            "maxMs": 33.53299999999945,
+            "fps": 60.00070718696618,
+            "gapsOver25Ms": 12,
+            "estimatedMissed60HzSlots": 12
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.656475819899946,
+            "p95Ms": 20.30000001192093,
+            "maxMs": 33.39999997615814,
+            "fps": 60.03670949441015,
+            "gapsOver25Ms": 10,
+            "estimatedMissed60HzSlots": 11
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.665333333330022,
+              "p95Ms": 1.0999999940395355,
+              "maxMs": 2
+            },
+            "correction": {
+              "samples": 149,
+              "meanMs": 4.650335570909833,
+              "p95Ms": 7.699999988079071,
+              "maxMs": 8.300000011920929
+            },
+            "replaySimulation": {
+              "samples": 1111,
+              "meanMs": 0.38820882094646764,
+              "p95Ms": 0.8999999761581421,
+              "maxMs": 1.699999988079071
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1829,
+              "meanMs": 1.2586112631318869,
+              "p95Ms": 4.4000000059604645,
+              "maxMs": 9.900000005960464
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.2804444447490904,
+              "p95Ms": 0.4000000059604645,
+              "maxMs": 16.799999982118607
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.42883333327041734,
+              "p95Ms": 0.6000000238418579,
+              "maxMs": 1.2000000178813934
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 5.48194444441133,
+              "p95Ms": 7.699999988079071,
+              "maxMs": 21.099999994039536
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.06738888901140955,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.30000001192092896
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 8.469444444444445,
+              "p95Ms": 12.5,
+              "maxMs": 42.30000001192093
+            }
+          },
+          "callbackCounts": {
+            "model": 325459,
+            "immediate": 150448
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 149,
+          "replayedFrames": 1111,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367610,
+            "bytes": 1276341920,
+            "draws": 367610
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": true,
+          "failures": [],
+          "simulationFps": 59.80126047770286,
+          "capturedFrames": 1799,
+          "capturedCadence": {
+            "samples": 1798,
+            "meanMs": 16.662163515016665,
+            "p95Ms": 19.951000000000022,
+            "maxMs": 30.084999999999127,
+            "fps": 60.016215727252664,
+            "gapsOver25Ms": 5,
+            "estimatedMissed60HzSlots": 5
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.662812673710928,
+            "p95Ms": 19.900000005960464,
+            "maxMs": 30,
+            "fps": 60.01387758368725,
+            "gapsOver25Ms": 5,
+            "estimatedMissed60HzSlots": 5
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.6854444441033735,
+              "p95Ms": 1.0999999940395355,
+              "maxMs": 2.2999999821186066
+            },
+            "correction": {
+              "samples": 143,
+              "meanMs": 3.4552447564535207,
+              "p95Ms": 6.4000000059604645,
+              "maxMs": 7.5999999940395355
+            },
+            "replaySimulation": {
+              "samples": 734,
+              "meanMs": 0.43787465953047333,
+              "p95Ms": 0.9000000059604645,
+              "maxMs": 1.5
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1811,
+              "meanMs": 1.1693539479238297,
+              "p95Ms": 3.199999988079071,
+              "maxMs": 8.900000005960464
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.2851111109223631,
+              "p95Ms": 0.4000000059604645,
+              "maxMs": 15
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.43122222233149743,
+              "p95Ms": 0.6000000238418579,
+              "maxMs": 1.300000011920929
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 5.437333333161142,
+              "p95Ms": 7.5,
+              "maxMs": 26.700000017881393
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.05927777798639403,
+              "p95Ms": 0.10000002384185791,
+              "maxMs": 0.5
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 8.265722222311629,
+              "p95Ms": 12,
+              "maxMs": 46
+            }
+          },
+          "callbackCounts": {
+            "model": 325405,
+            "immediate": 150542
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 143,
+          "replayedFrames": 734,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367614,
+            "bytes": 1276355808,
+            "draws": 367614
+          }
+        }
+      ]
+    },
+    {
+      "phase": "a1",
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:24:41.400Z",
+      "rawReportSha256": "ea5cb252e5ca55e626be9c3fe21143732d06c7e83f50dd92c460e3f74fc62f2d",
+      "packetEnabled": false,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 59.45421034898451,
+          "capturedFrames": 1754,
+          "capturedCadence": {
+            "samples": 1753,
+            "meanMs": 17.13971363377069,
+            "p95Ms": 22.855999999999767,
+            "maxMs": 51.04900000000089,
+            "fps": 58.34403195801839,
+            "gapsOver25Ms": 61,
+            "estimatedMissed60HzSlots": 66
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.719399666474754,
+            "p95Ms": 21.5,
+            "maxMs": 37.29999998211861,
+            "fps": 59.81075995241447,
+            "gapsOver25Ms": 22,
+            "estimatedMissed60HzSlots": 22
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.2071111108362675,
+              "p95Ms": 1.7999999821186066,
+              "maxMs": 3.0999999940395355
+            },
+            "correction": {
+              "samples": 148,
+              "meanMs": 5.702702704112272,
+              "p95Ms": 10.5,
+              "maxMs": 13.300000011920929
+            },
+            "replaySimulation": {
+              "samples": 735,
+              "meanMs": 0.8872108838590634,
+              "p95Ms": 1.5999999940395355,
+              "maxMs": 3.5999999940395355
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1819,
+              "meanMs": 1.8954920287542516,
+              "p95Ms": 5.5999999940395355,
+              "maxMs": 15
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.5578333336777157,
+              "p95Ms": 1,
+              "maxMs": 18.900000005960464
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.46399999951322873,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 7.5
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 7.654777777989706,
+              "p95Ms": 10.899999976158142,
+              "maxMs": 54.5
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.07161111091574034,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.4000000059604645
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 11.606555555827088,
+              "p95Ms": 17.099999994039536,
+              "maxMs": 79.19999998807907
+            }
+          },
+          "callbackCounts": {
+            "model": 418393,
+            "immediate": 160756
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 148,
+          "replayedFrames": 735,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 485986,
+            "bytes": 1687343392,
+            "draws": 485986
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 59.50275530816508,
+          "capturedFrames": 1758,
+          "capturedCadence": {
+            "samples": 1757,
+            "meanMs": 17.098231644849168,
+            "p95Ms": 25.427999999999884,
+            "maxMs": 49.12199999999939,
+            "fps": 58.48558030860747,
+            "gapsOver25Ms": 91,
+            "estimatedMissed60HzSlots": 96
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.714063368534763,
+            "p95Ms": 23.400000005960464,
+            "maxMs": 44.29999998211861,
+            "fps": 59.8298557299095,
+            "gapsOver25Ms": 58,
+            "estimatedMissed60HzSlots": 61
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.2125555556350285,
+              "p95Ms": 1.7999999821186066,
+              "maxMs": 2.4000000059604645
+            },
+            "correction": {
+              "samples": 151,
+              "meanMs": 8.546357616880872,
+              "p95Ms": 14.400000005960464,
+              "maxMs": 21.5
+            },
+            "replaySimulation": {
+              "samples": 1162,
+              "meanMs": 0.8607573147074491,
+              "p95Ms": 1.5,
+              "maxMs": 2.5
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1822,
+              "meanMs": 2.153567508713605,
+              "p95Ms": 8.199999988079071,
+              "maxMs": 22.900000005960464
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.33783333318101033,
+              "p95Ms": 0.5,
+              "maxMs": 18.700000017881393
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.4631111113561524,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 1.699999988079071
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 7.44216666660375,
+              "p95Ms": 10.5,
+              "maxMs": 33.599999994039536
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.06861111122700903,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.4000000059604645
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1802,
+              "meanMs": 11.395837958244716,
+              "p95Ms": 17.69999998807907,
+              "maxMs": 57.400000005960464
+            }
+          },
+          "callbackCounts": {
+            "model": 418396,
+            "immediate": 162177
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 151,
+          "replayedFrames": 1162,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 486627,
+            "bytes": 1689568944,
+            "draws": 486627
+          }
+        }
+      ]
+    },
+    {
+      "phase": "b1",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:25:19.674Z",
+      "rawReportSha256": "8cbe566bf35e48b995da55a62c808b4dd11b2a622c0b75022efb1b3661b5b3fd",
+      "packetEnabled": true,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 59.53759137366454,
+          "capturedFrames": 1747,
+          "capturedCadence": {
+            "samples": 1746,
+            "meanMs": 17.213541809851094,
+            "p95Ms": 21.677999999999884,
+            "maxMs": 48.70900000000074,
+            "fps": 58.09379679362169,
+            "gapsOver25Ms": 60,
+            "estimatedMissed60HzSlots": 67
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.71550861590766,
+            "p95Ms": 20.599999994039536,
+            "maxMs": 32.20000001788139,
+            "fps": 59.824682752897466,
+            "gapsOver25Ms": 15,
+            "estimatedMissed60HzSlots": 15
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.6919444447755814,
+              "p95Ms": 1,
+              "maxMs": 2.0999999940395355
+            },
+            "correction": {
+              "samples": 152,
+              "meanMs": 4.2335526294222,
+              "p95Ms": 7.700000017881393,
+              "maxMs": 13.300000011920929
+            },
+            "replaySimulation": {
+              "samples": 1032,
+              "meanMs": 0.40145348783495816,
+              "p95Ms": 0.8999999761581421,
+              "maxMs": 8
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1822,
+              "meanMs": 1.2470362242372577,
+              "p95Ms": 4,
+              "maxMs": 14.099999994039536
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.27783333304855556,
+              "p95Ms": 0.4000000059604645,
+              "maxMs": 12.900000005960464
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.439833333823416,
+              "p95Ms": 0.6000000238418579,
+              "maxMs": 7.4000000059604645
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 8.665999999791383,
+              "p95Ms": 12.099999994039536,
+              "maxMs": 23.899999976158142
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.06522222199373776,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.5999999940395355
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 11.659444444113307,
+              "p95Ms": 16.400000005960464,
+              "maxMs": 37.5
+            }
+          },
+          "callbackCounts": {
+            "model": 325452,
+            "immediate": 150349
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 475801,
+            "bytes": 3410541568,
+            "decodedSections": 1345161,
+            "reusedSections": 1033844,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 311,
+          "finalHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 152,
+          "replayedFrames": 1032,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367550,
+            "bytes": 1276133600,
+            "draws": 367550
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 59.61705975281886,
+          "capturedFrames": 1743,
+          "capturedCadence": {
+            "samples": 1742,
+            "meanMs": 17.24125200918486,
+            "p95Ms": 22.36299999999983,
+            "maxMs": 47.00699999999961,
+            "fps": 58.00042824426411,
+            "gapsOver25Ms": 62,
+            "estimatedMissed60HzSlots": 67
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.70589216231571,
+            "p95Ms": 20.700000017881393,
+            "maxMs": 28.5,
+            "fps": 59.85911978144744,
+            "gapsOver25Ms": 12,
+            "estimatedMissed60HzSlots": 12
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.7053888889153799,
+              "p95Ms": 1.0999999940395355,
+              "maxMs": 1.9000000059604645
+            },
+            "correction": {
+              "samples": 145,
+              "meanMs": 4.128965518803432,
+              "p95Ms": 7.4000000059604645,
+              "maxMs": 9.5
+            },
+            "replaySimulation": {
+              "samples": 910,
+              "meanMs": 0.41010988973654233,
+              "p95Ms": 0.9000000059604645,
+              "maxMs": 1.4000000059604645
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1817,
+              "meanMs": 1.2689047881746003,
+              "p95Ms": 3.9000000059604645,
+              "maxMs": 10
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.2796111107534832,
+              "p95Ms": 0.4000000059604645,
+              "maxMs": 14.300000011920929
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.44027777797645995,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 6.399999976158142
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 8.63349999980794,
+              "p95Ms": 12.099999994039536,
+              "maxMs": 21.5
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.05811111120714082,
+              "p95Ms": 0.10000002384185791,
+              "maxMs": 0.4000000059604645
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 11.668555555393299,
+              "p95Ms": 16.600000023841858,
+              "maxMs": 39
+            }
+          },
+          "callbackCounts": {
+            "model": 325382,
+            "immediate": 150306
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 475688,
+            "bytes": 3409731584,
+            "decodedSections": 1342784,
+            "reusedSections": 1035656,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 311,
+          "finalHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 145,
+          "replayedFrames": 910,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367486,
+            "bytes": 1275911392,
+            "draws": 367486
+          }
+        }
+      ]
+    },
+    {
+      "phase": "b1",
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:25:56.797Z",
+      "rawReportSha256": "2e542973cb571dd66db501e9fb0dab7c2dc1c0bc4b39735ed9b14dc37a928570",
+      "packetEnabled": true,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 54.1602602099807,
+          "capturedFrames": 1324,
+          "capturedCadence": {
+            "samples": 1323,
+            "meanMs": 25.00452456538173,
+            "p95Ms": 47.2970000000023,
+            "maxMs": 87.78399999999965,
+            "fps": 39.992762005340474,
+            "gapsOver25Ms": 504,
+            "estimatedMissed60HzSlots": 658
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 18.411506392430304,
+            "p95Ms": 27.69999998807907,
+            "maxMs": 53.5,
+            "fps": 54.31386105436432,
+            "gapsOver25Ms": 137,
+            "estimatedMissed60HzSlots": 146
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.229777777923478,
+              "p95Ms": 1.800000011920929,
+              "maxMs": 3.9000000059604645
+            },
+            "correction": {
+              "samples": 189,
+              "meanMs": 7.26613756840822,
+              "p95Ms": 14.599999994039536,
+              "maxMs": 19.5
+            },
+            "replaySimulation": {
+              "samples": 1141,
+              "meanMs": 0.9290096408227992,
+              "p95Ms": 1.5999999940395355,
+              "maxMs": 3.800000011920929
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1808,
+              "meanMs": 2.228926991466927,
+              "p95Ms": 8.099999994039536,
+              "maxMs": 21.799999982118607
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.5959999996754858,
+              "p95Ms": 1,
+              "maxMs": 23
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.515444444368283,
+              "p95Ms": 0.7999999821186066,
+              "maxMs": 7.399999976158142
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 12.462166667034229,
+              "p95Ms": 18.69999998807907,
+              "maxMs": 48.60000002384186
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.07705555544959174,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.30000001192092896
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1806,
+              "meanMs": 16.796954595979926,
+              "p95Ms": 26.599999994039536,
+              "maxMs": 77.90000000596046
+            }
+          },
+          "callbackCounts": {
+            "model": 418432,
+            "immediate": 159997
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 578429,
+            "bytes": 4146179072,
+            "decodedSections": 1498148,
+            "reusedSections": 1393997,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 397,
+          "finalHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 189,
+          "replayedFrames": 1141,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 485673,
+            "bytes": 1686256656,
+            "draws": 485673
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 54.07224051330644,
+          "capturedFrames": 1338,
+          "capturedCadence": {
+            "samples": 1337,
+            "meanMs": 24.6736955871354,
+            "p95Ms": 44.73400000000038,
+            "maxMs": 88.3859999999986,
+            "fps": 40.52899155169079,
+            "gapsOver25Ms": 507,
+            "estimatedMissed60HzSlots": 640
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 18.353918843795487,
+            "p95Ms": 26.599999994039536,
+            "maxMs": 88.39999997615814,
+            "fps": 54.48427709148602,
+            "gapsOver25Ms": 126,
+            "estimatedMissed60HzSlots": 136
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.2468888888922003,
+              "p95Ms": 1.800000011920929,
+              "maxMs": 3
+            },
+            "correction": {
+              "samples": 153,
+              "meanMs": 7.899346405968947,
+              "p95Ms": 13.399999976158142,
+              "maxMs": 17.80000001192093
+            },
+            "replaySimulation": {
+              "samples": 1082,
+              "meanMs": 0.8555452863026458,
+              "p95Ms": 1.4000000059604645,
+              "maxMs": 2.199999988079071
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1855,
+              "meanMs": 2.109919137758707,
+              "p95Ms": 7.5999999940395355,
+              "maxMs": 19.599999994039536
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.3595555558635129,
+              "p95Ms": 0.5999999940395355,
+              "maxMs": 16.400000005960464
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5234999998079406,
+              "p95Ms": 0.7999999821186066,
+              "maxMs": 7.5999999940395355
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 12.559611111266745,
+              "p95Ms": 17.900000005960464,
+              "maxMs": 41
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.08555555558866924,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 4.5
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1819,
+              "meanMs": 16.46684991735033,
+              "p95Ms": 24.599999994039536,
+              "maxMs": 62.60000002384186
+            }
+          },
+          "callbackCounts": {
+            "model": 418392,
+            "immediate": 162437
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 580829,
+            "bytes": 4163382272,
+            "decodedSections": 1512831,
+            "reusedSections": 1391314,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 397,
+          "finalHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 153,
+          "replayedFrames": 1082,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 486765,
+            "bytes": 1690048080,
+            "draws": 486765
+          }
+        }
+      ]
+    },
+    {
+      "phase": "a2",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:26:38.488Z",
+      "rawReportSha256": "677c0044a0521cc5786f8b2b3e0e499c5d71d3e256ed5e1a0fa9bd671e0e1d29",
+      "packetEnabled": false,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 59.33348716089264,
+          "capturedFrames": 1733,
+          "capturedCadence": {
+            "samples": 1732,
+            "meanMs": 17.389730369515007,
+            "p95Ms": 24.863999999999976,
+            "maxMs": 52.072000000000116,
+            "fps": 57.50520443681205,
+            "gapsOver25Ms": 86,
+            "estimatedMissed60HzSlots": 93
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.75319622012229,
+            "p95Ms": 21.69999998807907,
+            "maxMs": 34.19999998807907,
+            "fps": 59.69010252496765,
+            "gapsOver25Ms": 27,
+            "estimatedMissed60HzSlots": 28
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.9217222229970826,
+              "p95Ms": 1.5,
+              "maxMs": 2.699999988079071
+            },
+            "correction": {
+              "samples": 146,
+              "meanMs": 5.279452054059669,
+              "p95Ms": 9.800000011920929,
+              "maxMs": 12.800000011920929
+            },
+            "replaySimulation": {
+              "samples": 841,
+              "meanMs": 0.588703925062445,
+              "p95Ms": 1.2000000476837158,
+              "maxMs": 2.300000011920929
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1827,
+              "meanMs": 1.6273125348746222,
+              "p95Ms": 4.699999988079071,
+              "maxMs": 13.200000047683716
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.5869999997814497,
+              "p95Ms": 1.100000023841858,
+              "maxMs": 15.700000047683716
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5395555550853411,
+              "p95Ms": 0.8999999761581421,
+              "maxMs": 2.299999952316284
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 7.072000000642405,
+              "p95Ms": 10.800000011920929,
+              "maxMs": 20.19999998807907
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.07533333318101035,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.5
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 11.284444444080194,
+              "p95Ms": 17.19999998807907,
+              "maxMs": 39.799999952316284
+            }
+          },
+          "callbackCounts": {
+            "model": 325441,
+            "immediate": 151016
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 146,
+          "replayedFrames": 841,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367880,
+            "bytes": 1277279360,
+            "draws": 367880
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 59.47916081503514,
+          "capturedFrames": 1760,
+          "capturedCadence": {
+            "samples": 1759,
+            "meanMs": 17.130246162592375,
+            "p95Ms": 23.361999999999966,
+            "maxMs": 53.43500000000131,
+            "fps": 58.37627728804724,
+            "gapsOver25Ms": 68,
+            "estimatedMissed60HzSlots": 77
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 16.75914396886497,
+            "p95Ms": 21.80000001192093,
+            "maxMs": 37.59999996423721,
+            "fps": 59.66891876206766,
+            "gapsOver25Ms": 37,
+            "estimatedMissed60HzSlots": 37
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.9031111115879483,
+              "p95Ms": 1.4000000357627869,
+              "maxMs": 3.5
+            },
+            "correction": {
+              "samples": 161,
+              "meanMs": 5.908695650026665,
+              "p95Ms": 11.600000023841858,
+              "maxMs": 18.399999976158142
+            },
+            "replaySimulation": {
+              "samples": 1078,
+              "meanMs": 0.5831168828625405,
+              "p95Ms": 1.300000011920929,
+              "maxMs": 2.5
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1811,
+              "meanMs": 1.7049696305915836,
+              "p95Ms": 5.199999988079071,
+              "maxMs": 19.399999976158142
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.36077777832746505,
+              "p95Ms": 0.5999999642372131,
+              "maxMs": 14.099999964237213
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.553722221520212,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 8.5
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 6.904666667017672,
+              "p95Ms": 10.700000047683716,
+              "maxMs": 25.5
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.0728333330154419,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.800000011920929
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1801,
+              "meanMs": 10.667684620383843,
+              "p95Ms": 16.599999964237213,
+              "maxMs": 43.89999997615814
+            }
+          },
+          "callbackCounts": {
+            "model": 325397,
+            "immediate": 149823
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "e5394d6716ab560568110054344a48903008035a41c97f328c9fef74e6b79d14",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 161,
+          "replayedFrames": 1078,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367252,
+            "bytes": 1275098944,
+            "draws": 367252
+          }
+        }
+      ]
+    },
+    {
+      "phase": "a2",
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:27:17.196Z",
+      "rawReportSha256": "548e7904185114950ac2aa4e8022550b5663fe62b22421430e74983cf290ef24",
+      "packetEnabled": false,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 56.5023181645113,
+          "capturedFrames": 1486,
+          "capturedCadence": {
+            "samples": 1485,
+            "meanMs": 21.28862626262629,
+            "p95Ms": 41.91400000000067,
+            "maxMs": 62.63699999999999,
+            "fps": 46.97343960401865,
+            "gapsOver25Ms": 353,
+            "estimatedMissed60HzSlots": 432
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 17.597165091724246,
+            "p95Ms": 25.19999998807907,
+            "maxMs": 43.39999997615814,
+            "fps": 56.82733524335059,
+            "gapsOver25Ms": 96,
+            "estimatedMissed60HzSlots": 99
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.4678333334790337,
+              "p95Ms": 2.199999988079071,
+              "maxMs": 3.199999988079071
+            },
+            "correction": {
+              "samples": 195,
+              "meanMs": 8.499487178753585,
+              "p95Ms": 15.399999976158142,
+              "maxMs": 20.5
+            },
+            "replaySimulation": {
+              "samples": 1230,
+              "meanMs": 1.0422764231034412,
+              "p95Ms": 1.800000011920929,
+              "maxMs": 3.100000023841858
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1814,
+              "meanMs": 2.678390298223548,
+              "p95Ms": 9.300000011920929,
+              "maxMs": 22.80000001192093
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.7013333327571551,
+              "p95Ms": 1.2999999523162842,
+              "maxMs": 30.899999976158142
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5923333337903023,
+              "p95Ms": 0.9000000357627869,
+              "maxMs": 7.700000047683716
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 9.803500000536442,
+              "p95Ms": 15.100000023841858,
+              "maxMs": 69.19999998807907
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.09600000027153227,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 5.399999976158142
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1800,
+              "meanMs": 15.038277778029443,
+              "p95Ms": 23.30000001192093,
+              "maxMs": 109.40000003576279
+            }
+          },
+          "callbackCounts": {
+            "model": 418416,
+            "immediate": 158754
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 195,
+          "replayedFrames": 1230,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 485083,
+            "bytes": 1684208176,
+            "draws": 485083
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 56.50497871641573,
+          "capturedFrames": 1530,
+          "capturedCadence": {
+            "samples": 1529,
+            "meanMs": 20.652100065402244,
+            "p95Ms": 40.577999999999975,
+            "maxMs": 92.9989999999998,
+            "fps": 48.421225775255024,
+            "gapsOver25Ms": 304,
+            "estimatedMissed60HzSlots": 377
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 17.570261256273355,
+            "p95Ms": 24.80000001192093,
+            "maxMs": 69.60000002384186,
+            "fps": 56.914350072225375,
+            "gapsOver25Ms": 83,
+            "estimatedMissed60HzSlots": 92
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.5001111108726926,
+              "p95Ms": 2.199999988079071,
+              "maxMs": 3.100000023841858
+            },
+            "correction": {
+              "samples": 150,
+              "meanMs": 8.922666664918264,
+              "p95Ms": 18.899999976158142,
+              "maxMs": 25
+            },
+            "replaySimulation": {
+              "samples": 955,
+              "meanMs": 1.0737172780860782,
+              "p95Ms": 1.800000011920929,
+              "maxMs": 3
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1832,
+              "meanMs": 2.5107532742242107,
+              "p95Ms": 8.100000023841858,
+              "maxMs": 26.100000023841858
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.4401111117667622,
+              "p95Ms": 0.699999988079071,
+              "maxMs": 35.60000002384186
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5996111108197106,
+              "p95Ms": 0.9000000357627869,
+              "maxMs": 5.400000035762787
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 9.835444444782205,
+              "p95Ms": 14.899999976158142,
+              "maxMs": 66.09999996423721
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.10427777816851934,
+              "p95Ms": 0.20000004768371582,
+              "maxMs": 0.7999999523162842
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1809,
+              "meanMs": 14.592150359472694,
+              "p95Ms": 22.30000001192093,
+              "maxMs": 109.89999997615814
+            }
+          },
+          "callbackCounts": {
+            "model": 418391,
+            "immediate": 162148
+          },
+          "packet": {
+            "frames": 0
+          },
+          "packetSlots": 0,
+          "finalHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "90a5274d7a7635812173ff654fca8307fb02659996b7fb875e7a2758befcd064",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 150,
+          "replayedFrames": 955,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 486633,
+            "bytes": 1689589776,
+            "draws": 486633
+          }
+        }
+      ]
+    },
+    {
+      "phase": "b2",
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:27:58.802Z",
+      "rawReportSha256": "966e67759c9111cdd17bf25f33375324ceee353a7ca358dcb62dd239f1d4b88d",
+      "packetEnabled": true,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 56.89594679598941,
+          "capturedFrames": 1530,
+          "capturedCadence": {
+            "samples": 1529,
+            "meanMs": 20.55744604316548,
+            "p95Ms": 39.63899999999967,
+            "maxMs": 62.94900000000007,
+            "fps": 48.64417486006051,
+            "gapsOver25Ms": 298,
+            "estimatedMissed60HzSlots": 355
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 17.48243468595651,
+            "p95Ms": 23.599999964237213,
+            "maxMs": 57.40000003576279,
+            "fps": 57.20027089838302,
+            "gapsOver25Ms": 57,
+            "estimatedMissed60HzSlots": 65
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.8494444446431266,
+              "p95Ms": 1.300000011920929,
+              "maxMs": 2.5
+            },
+            "correction": {
+              "samples": 148,
+              "meanMs": 5.010135133926933,
+              "p95Ms": 8.900000035762787,
+              "maxMs": 12.300000011920929
+            },
+            "replaySimulation": {
+              "samples": 986,
+              "meanMs": 0.49127789074460587,
+              "p95Ms": 1,
+              "maxMs": 2.200000047683716
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1839,
+              "meanMs": 1.489777052415461,
+              "p95Ms": 4.5,
+              "maxMs": 12.900000035762787
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.5523888888623979,
+              "p95Ms": 1,
+              "maxMs": 15.5
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5434444453981188,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 8
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 11.066611110534932,
+              "p95Ms": 15.899999976158142,
+              "maxMs": 31.100000023841858
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.07494444403383467,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.6000000238418579
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1814,
+              "meanMs": 14.705181918537209,
+              "p95Ms": 21.100000023841858,
+              "maxMs": 44.40000003576279
+            }
+          },
+          "callbackCounts": {
+            "model": 325441,
+            "immediate": 150613
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 476054,
+            "bytes": 3412355072,
+            "decodedSections": 1346810,
+            "reusedSections": 1033460,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 311,
+          "finalHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 148,
+          "replayedFrames": 986,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367669,
+            "bytes": 1276546768,
+            "draws": 367669
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 56.98456667985754,
+          "capturedFrames": 1483,
+          "capturedCadence": {
+            "samples": 1482,
+            "meanMs": 21.217311066126847,
+            "p95Ms": 41.186000000000604,
+            "maxMs": 67.2180000000003,
+            "fps": 47.13132577843411,
+            "gapsOver25Ms": 350,
+            "estimatedMissed60HzSlots": 417
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 17.48788215678026,
+            "p95Ms": 24.30000001192093,
+            "maxMs": 53.19999998807907,
+            "fps": 57.18245302861263,
+            "gapsOver25Ms": 65,
+            "estimatedMissed60HzSlots": 73
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 0.8607777782612377,
+              "p95Ms": 1.300000011920929,
+              "maxMs": 3.300000011920929
+            },
+            "correction": {
+              "samples": 143,
+              "meanMs": 5.7405594403927145,
+              "p95Ms": 10.099999964237213,
+              "maxMs": 12.100000023841858
+            },
+            "replaySimulation": {
+              "samples": 1043,
+              "meanMs": 0.49089165896263015,
+              "p95Ms": 1,
+              "maxMs": 2.699999988079071
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1822,
+              "meanMs": 1.5928100985111966,
+              "p95Ms": 5.199999988079071,
+              "maxMs": 14.400000035762787
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.3314999994304445,
+              "p95Ms": 0.5,
+              "maxMs": 15.400000035762787
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5142222223679225,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 6.300000011920929
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 11.125166666805745,
+              "p95Ms": 16.5,
+              "maxMs": 37.90000003576279
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.08088888847165637,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 5.900000035762787
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1808,
+              "meanMs": 14.720298672012524,
+              "p95Ms": 22.100000023841858,
+              "maxMs": 46.60000002384186
+            }
+          },
+          "callbackCounts": {
+            "model": 325418,
+            "immediate": 150080
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 475498,
+            "bytes": 3408369664,
+            "decodedSections": 1339958,
+            "reusedSections": 1037532,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 311,
+          "finalHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "9911933f39036cff582328b1d53a7efbf567a4a02cde764491741d92efcc0aec",
+            "memorySha256": "4265be5789b3357b1248b747cc3f83bf1d3a5f7197ad82fa6b9cd194ca18bd99",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 143,
+          "replayedFrames": 1043,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 367406,
+            "bytes": 1275633632,
+            "draws": 367406
+          }
+        }
+      ]
+    },
+    {
+      "phase": "b2",
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "frames": 1800,
+      "startedAt": "2026-09-17T23:28:37.862Z",
+      "rawReportSha256": "b34d9014d253d75c758e9df702a9e1300da17e80e17779983641bae13967a18e",
+      "packetEnabled": true,
+      "packetAudit": false,
+      "drawTiming": false,
+      "clients": [
+        {
+          "seat": 0,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 51.837196644369875,
+          "capturedFrames": 1269,
+          "capturedCadence": {
+            "samples": 1268,
+            "meanMs": 27.116358832807574,
+            "p95Ms": 50.778000000002066,
+            "maxMs": 91.74200000000201,
+            "fps": 36.87810764585837,
+            "gapsOver25Ms": 581,
+            "estimatedMissed60HzSlots": 795
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 19.128793774312438,
+            "p95Ms": 29.100000023841858,
+            "maxMs": 91.69999998807907,
+            "fps": 52.27721161084783,
+            "gapsOver25Ms": 187,
+            "estimatedMissed60HzSlots": 209
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.3258333337306976,
+              "p95Ms": 1.9000000357627869,
+              "maxMs": 3
+            },
+            "correction": {
+              "samples": 169,
+              "meanMs": 8.344378699212385,
+              "p95Ms": 15.700000047683716,
+              "maxMs": 24.600000023841858
+            },
+            "replaySimulation": {
+              "samples": 1076,
+              "meanMs": 1.0105018588579278,
+              "p95Ms": 1.7999999523162842,
+              "maxMs": 11.300000011920929
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1866,
+              "meanMs": 2.3040192935372215,
+              "p95Ms": 8.199999988079071,
+              "maxMs": 25.80000001192093
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.37922222163942126,
+              "p95Ms": 0.6000000238418579,
+              "maxMs": 16.80000001192093
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5313333331545194,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 7.5
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 13.347888888882267,
+              "p95Ms": 20,
+              "maxMs": 50.30000001192093
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.08377777768505944,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 6.700000047683716
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1822,
+              "meanMs": 17.470362239820897,
+              "p95Ms": 27.100000023841858,
+              "maxMs": 61.30000001192093
+            }
+          },
+          "callbackCounts": {
+            "model": 418431,
+            "immediate": 159964
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 578395,
+            "bytes": 4145935360,
+            "decodedSections": 1495811,
+            "reusedSections": 1396164,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 397,
+          "finalHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 169,
+          "replayedFrames": 1076,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 485716,
+            "bytes": 1686405952,
+            "draws": 485716
+          }
+        },
+        {
+          "seat": 1,
+          "diagnosticPassed": false,
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 52.014402210016236,
+          "capturedFrames": 1253,
+          "capturedCadence": {
+            "samples": 1252,
+            "meanMs": 27.52281150159744,
+            "p95Ms": 49.2450000000008,
+            "maxMs": 80.64300000000003,
+            "fps": 36.333497395132014,
+            "gapsOver25Ms": 600,
+            "estimatedMissed60HzSlots": 805
+          },
+          "submissionCadence": {
+            "samples": 1799,
+            "meanMs": 19.174541411895497,
+            "p95Ms": 29.399999976158142,
+            "maxMs": 55.19999998807907,
+            "fps": 52.15248586751703,
+            "gapsOver25Ms": 192,
+            "estimatedMissed60HzSlots": 201
+          },
+          "costs": {
+            "simulation": {
+              "samples": 1800,
+              "meanMs": 1.3395000000132455,
+              "p95Ms": 2,
+              "maxMs": 2.899999976158142
+            },
+            "correction": {
+              "samples": 148,
+              "meanMs": 9.006081079309052,
+              "p95Ms": 17.69999998807907,
+              "maxMs": 23.69999998807907
+            },
+            "replaySimulation": {
+              "samples": 1032,
+              "meanMs": 0.9914728676279386,
+              "p95Ms": 1.7000000476837158,
+              "maxMs": 7.099999964237213
+            },
+            "advanceIncludingCorrections": {
+              "samples": 1821,
+              "meanMs": 2.3380010976102703,
+              "p95Ms": 8.599999964237213,
+              "maxMs": 26.700000047683716
+            },
+            "presentationCopy": {
+              "samples": 1800,
+              "meanMs": 0.3855555554562145,
+              "p95Ms": 0.6000000238418579,
+              "maxMs": 22.5
+            },
+            "presentationCapture": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "rendererRebind": {
+              "samples": 1800,
+              "meanMs": 0.5236111112104522,
+              "p95Ms": 0.800000011920929,
+              "maxMs": 7.699999988079071
+            },
+            "drawSubmission": {
+              "samples": 1800,
+              "meanMs": 13.478833333419429,
+              "p95Ms": 19.899999976158142,
+              "maxMs": 54.59999996423721
+            },
+            "rendererDispose": {
+              "samples": 1800,
+              "meanMs": 0.08272222207652198,
+              "p95Ms": 0.19999998807907104,
+              "maxMs": 0.5
+            },
+            "presentationRestore": {
+              "samples": 0,
+              "meanMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0
+            },
+            "forwardCallback": {
+              "samples": 1820,
+              "meanMs": 17.617307693290186,
+              "p95Ms": 27.30000001192093,
+              "maxMs": 82.59999996423721
+            }
+          },
+          "callbackCounts": {
+            "model": 418397,
+            "immediate": 162404
+          },
+          "packet": {
+            "frames": 1800,
+            "captures": 580801,
+            "bytes": 4163181568,
+            "decodedSections": 1512475,
+            "reusedSections": 1391530,
+            "fieldAudits": 0,
+            "shaderAudits": 0,
+            "uboAudits": 0,
+            "nativePackMs": 0,
+            "ownedCopyMs": 0,
+            "decodeMs": 0
+          },
+          "packetSlots": 397,
+          "finalHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "referenceHash": {
+            "stateSha256": "db2872a22faf0cdc8be9a376644bde67e6bf6f561c841eb9ea6c3dc4bc4ee4de",
+            "memorySha256": "9c20499c0270a6ebad820b82f12d5168d41f6d5480654382770f81b9b6f8d2eb",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "stateMatches": true,
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "cameraMatches": true,
+          "audioJournalMatches": true,
+          "corrections": 148,
+          "replayedFrames": 1032,
+          "ubo": {
+            "frames": 1800,
+            "uploads": 1800,
+            "binds": 486780,
+            "bytes": 1690100160,
+            "draws": 486780
+          }
+        }
+      ]
+    }
+  ],
+  "initialOracle": {
+    "frames": 60,
+    "rawReportSha256": "f5e99aa82ed47858c588155d7cbeeb096b8bbeab81e652fff7eb5ea24c8d95b5",
+    "packet": {
+      "frames": 60,
+      "captures": 14102,
+      "bytes": 101083136,
+      "decodedSections": 35388,
+      "reusedSections": 35122,
+      "fieldAudits": 14102,
+      "shaderAudits": 14102,
+      "uboAudits": 14102,
+      "nativePackMs": 0,
+      "ownedCopyMs": 0,
+      "decodeMs": 0
+    },
+    "callbackCounts": {
+      "model": 10930,
+      "immediate": 3172
+    },
+    "frameOracle": {
+      "enabled": true,
+      "frames": 60,
+      "comparedBytes": 165888000,
+      "differentBytes": 0,
+      "cameraMismatches": 0
+    },
+    "fullMemoryAudits": 120,
+    "stateMatches": true
+  },
+  "diagnosis": {
+    "auditAccidentallyEnabled": false,
+    "nativeScratch": "One 7183-byte malloc per renderer, aligned to 7168 usable bytes; not per draw. Replica creates a renderer each forward frame.",
+    "ownedPackets": "311 retained slots on Battlefield, 397 on Fountain; every model and immediate callback copied all six blocks, including unused rows, and compared blocks before reuse.",
+    "lostExistingOptimization": "Packet model reader used renderer-local model staging rather than the existing cross-frame cache slots. A source-level fix was drafted but never synchronized, built or measured; it was reverted with the rejected experiment.",
+    "causalLimit": "No substage profile completed. The implementation adds native packing, an owned copy, exact comparisons and repeated model staging allocations, but their individual contribution to the measured slowdown is not isolated.",
+    "stopped": "After B2, before profiles or broad heavy/oracle/stage suites. Those validations were not run for this rejected candidate."
+  },
+  "restoredBaseline": {
+    "commit": "f0bcaaacc1157c844fe631c54a79128e7e59f890",
+    "verifiedRuntimeSources": 26,
+    "allSourceBuiltServedHashesMatch": true,
+    "nativeCoreSha256": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+    "instrumentedCoreSha256": "06e91f842dbc82a0f206acd789a14809b4133a336d97b792cc46b0e7cbd58c73",
+    "nativeCoreRebuiltReproducibly": true,
+    "tests": {
+      "total": 621,
+      "passed": 611,
+      "failed": 0,
+      "skipped": 10,
+      "logSha256": "403b9e012289526abfc5d88ca536239d9d139ab0793071db45b40776bad6f938"
+    }
+  }
+}
