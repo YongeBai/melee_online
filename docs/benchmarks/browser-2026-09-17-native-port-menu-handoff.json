@@ -1,0 +1,355 @@
+{
+  "date": "2026-09-17",
+  "scope": "Character select to stage select handoff and original tournament rules conversion",
+  "wasm": {
+    "sha256": "8f052869e64b396751a8fa2b19dc7e6efd06318354b23398eae56c4fcb5ecb62",
+    "bytes": 3546267
+  },
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "validation": {
+    "rosterCases": 15,
+    "handoffs": [
+      {
+        "case": "roster-0",
+        "stage": 31,
+        "frames": 214,
+        "match": {
+          "players": [
+            {
+              "character": 22,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 8,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 31,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "finished": {
+          "stage": 31,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "case": "roster-1",
+        "stage": 32,
+        "frames": 215,
+        "match": {
+          "players": [
+            {
+              "character": 7,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 5,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 32,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "finished": {
+          "stage": 32,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "case": "roster-2",
+        "stage": 28,
+        "frames": 219,
+        "match": {
+          "players": [
+            {
+              "character": 12,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 17,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 28,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "finished": {
+          "stage": 28,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "case": "roster-3",
+        "stage": 8,
+        "frames": 230,
+        "match": {
+          "players": [
+            {
+              "character": 1,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 0,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 8,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "finished": {
+          "stage": 8,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "case": "roster-4",
+        "stage": 2,
+        "frames": 230,
+        "match": {
+          "players": [
+            {
+              "character": 25,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 20,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 2,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "finished": {
+          "stage": 2,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "case": "roster-5",
+        "stage": 3,
+        "frames": 222,
+        "match": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 11,
+              "costume": 0,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 3,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "finished": {
+          "stage": 3,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "case": "mirror-costume",
+        "stage": 32,
+        "frames": 215,
+        "match": {
+          "players": [
+            {
+              "character": 2,
+              "costume": 2,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 2,
+              "costume": 1,
+              "kind": 0,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            },
+            {
+              "character": 26,
+              "costume": 0,
+              "kind": 3,
+              "stocks": 4
+            }
+          ],
+          "stage": 32,
+          "seconds": 480,
+          "items": -1,
+          "teams": 0,
+          "mode": 1,
+          "timer": 1
+        },
+        "finished": {
+          "stage": 32,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      }
+    ],
+    "stageCancelRestoresCharactersAndCostumes": true,
+    "sharedBrowser": true,
+    "sceneObjectsAfterExit": 0,
+    "sceneProcsAfterExit": 0,
+    "persistentArchiveAllocations": 4
+  },
+  "implementation": {
+    "nativeFunctions": [
+      "gmVsMelee_ExitCss",
+      "gmVsMelee_EnterSss",
+      "gmVsMelee_ExitSss",
+      "gm_80167BC8"
+    ],
+    "data": "VS structs remain in native memory; JS reads the finalized result without re-encoding layouts.",
+    "renderDependency": "Stage icon constraints need their first original draw before querying world-space steering targets; the diagnostic now renders before reading targets."
+  },
+  "limits": {
+    "matchConstructionConnected": false,
+    "actualAudio": false,
+    "publicPlayUnchanged": true,
+    "presentedFpsMeasured": false,
+    "performanceMeasuredOnThisFollowupCore": false,
+    "priorPerformanceEvidence": "browser-2026-09-17-native-port-character-menu.json"
+  }
+}

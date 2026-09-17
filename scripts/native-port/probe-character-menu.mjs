@@ -41,7 +41,28 @@ try{
   }+')('+JSON.stringify(entry)+')');
   const shot=await cmd('Page.captureScreenshot',{format:'png',clip:{x:8,y:8,width:960,height:720,scale:1}});fs.writeFileSync(path.join(output,entry.name+'.png'),Buffer.from(shot.data,'base64'));
   const finished=await evaluate('nativeCharacterMenu.finish()');if(finished.objects||finished.procs||finished.allocations!==4||finished.phase!==(entry.cancel?2:1))throw Error('CSS cleanup '+JSON.stringify(finished));
-  rows.push({...entry,proof,finished});console.log(JSON.stringify({name:entry.name,frames:proof.final.frames,characters:proof.final.players.slice(0,2).map(p=>p.character),finished}));
+  let handoff;
+  if(index<6||entry.costume){
+   await evaluate('nativeCharacterMenu.toStage(0)');
+   if(index===0){
+    await evaluate('nativeStageMenu.step([[512,0,0]])');const canceled=await evaluate('nativeStageMenu.finish()');if(canceled.stage!==0||canceled.objects||canceled.procs||canceled.allocations!==4)throw Error('SSS cancel cleanup');
+    const resumed=await evaluate('nativeCharacterMenu.restart(true)');
+    for(let p=0;p<2;p++)if(resumed.players[p].character!==proof.final.players[p].character||resumed.players[p].costume!==proof.final.players[p].costume)throw Error('SSS cancel loses CSS selection');
+    await evaluate('(()=>{const m=nativeCharacterMenu;m.step([[4096,0,0]]);for(let i=0;i<180&&!m.read().exit;i++)m.step();if(!m.read().exit)throw Error("resumed Start");return m.finish();})()');
+    await evaluate('nativeCharacterMenu.toStage(0)');
+   }
+   const stage=[31,32,28,8,2,3][index%6];
+   handoff=await evaluate('('+function(stage){
+    const m=nativeStageMenu,target=m.icons().find(i=>i.stage===stage&&i.unlocked===2);if(!target)throw Error('unlocked tournament stage');
+    const axis=d=>Math.abs(d)<.02?0:Math.sign(d)*Math.min(1,(Math.abs(d)/.03+30)/80);
+    for(let i=0;i<100;i++){const s=m.read(),dx=target.x-s.cursor[0],dy=target.y-s.cursor[1];if(Math.abs(dx)<.025&&Math.abs(dy)<.025&&s.hover===target.i)break;m.step([[0,axis(dx),axis(dy)]]);}
+    if(m.read().hover!==target.i)throw Error('native stage hit test '+JSON.stringify({target,state:m.read()}));const hover=m.draw();m.step([[256,0,0]]);for(let i=0;i<180&&!m.read().exit;i++)m.step();if(!m.read().exit)throw Error('stage confirm');const final=m.read(),render=m.draw(),finished=m.finish();return {hover,render,final,finished,match:nativeCharacterMenu.matchSelection()};
+   }+')('+stage+')');
+   if(handoff.finished.stage!==stage||handoff.finished.objects||handoff.finished.procs||handoff.finished.allocations!==4)throw Error('SSS handoff cleanup');
+   const match=handoff.match;if(match.stage!==stage||match.seconds!==480||match.items!==-1||match.teams!==0||match.mode!==1||match.timer!==1)throw Error('Tournament rules handoff '+JSON.stringify(match));
+   for(let p=0;p<2;p++)if(match.players[p].character!==proof.final.players[p].character||match.players[p].costume!==proof.final.players[p].costume||match.players[p].stocks!==4||match.players[p].kind!==0)throw Error('Player handoff '+p);
+  }
+  rows.push({...entry,proof,finished,handoff});console.log(JSON.stringify({name:entry.name,frames:proof.final.frames,characters:proof.final.players.slice(0,2).map(p=>p.character),finished}));
  }
  fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({passed:true,build:JSON.parse(fs.readFileSync(path.join(root,'dist/native-port/fighter-init-build.json'))),initial,rows},null,2));
 }finally{ws?.close();if(browser){browser.kill();await new Promise(r=>browser.once('exit',r));}await new Promise(r=>server.close(r));fs.rmSync(profile,{recursive:true,force:true});}

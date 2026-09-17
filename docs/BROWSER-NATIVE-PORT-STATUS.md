@@ -5,6 +5,18 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Character select now hands the original native VS data to stage select. Seven
+handoffs cover all six tournament stages and a mirror with different costumes;
+stage cancellation returns to the same character/costume choices. The original
+rules conversion produces four stocks, 480 seconds, no items and singles.
+Scene cleanup remains empty apart from persistent card assets. The follow-up
+core passes shared browser checks and the expanded 15-case roster test. It has
+not received a separate performance sample; the numbers below belong to the
+preceding character-select core. Consuming the finalized setup in the native
+match constructor, alternate costume assets, audio and full match/results
+routing remain unfinished.
+[Scene handoff evidence](benchmarks/browser-2026-09-17-native-port-menu-handoff.json).
+
 The original character-select scene now loads and runs in an explicitly muted
 native diagnostic. Its full 25-tile roster, hands, tokens, SIS text, original
 camera and GX ordering render at 960×720. Controller tests select every tile,

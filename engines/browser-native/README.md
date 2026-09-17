@@ -55,8 +55,17 @@ This is an explicitly muted diagnostic, not a public playable menu. The host
 must accept `diagnostic-muted` before bank-load/wait calls can be bypassed;
 without it they execute the original loader. No bank readiness or voice playback
 is fabricated. Actual audio, rules/name submenus, Zelda/Sheik match-entry handling,
-full scene routing, saved preferences and the public two-seat layout remain
+match construction/results routing, saved preferences and the public two-seat layout remain
 unfinished. Complete archive conversion is not proof those submenu callbacks run.
+
+The expanded CSS probe also carries original VS structures through
+`gmVsMelee_ExitCss`, `gmVsMelee_EnterSss`, `gmVsMelee_ExitSss` and
+`gm_80167BC8`. All six tournament stages preserve selected characters/costumes
+and produce four-stock, eight-minute, no-items settings. Canceling stage select
+restores the CSS choices. `nativeCharacterMenu.toStage()` loads its hosted archive
+and exposes `nativeStageMenu`; `matchSelection()` reads the resulting setup.
+The constructor does not consume that setup yet. Stage icon constraints are
+resolved by the first original draw before world-space hit-target inspection.
 
 ## Original stage-select integration
 

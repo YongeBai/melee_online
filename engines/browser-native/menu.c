@@ -3,6 +3,9 @@
 #include <melee/mn/mnstagesel.h>
 #include <melee/mn/types.h>
 #include <melee/gm/gm_unsplit.h>
+#include <melee/gm/gmvsmelee.h>
+#include <melee/gm/gm_1601.h>
+#include <melee/gm/types.h>
 #include <melee/lb/lblanguage.h>
 #include <sysdolphin/baselib/controller.h>
 #include <sysdolphin/baselib/gobj.h>
@@ -22,16 +25,21 @@ extern unsigned portRuntimeStep(void);
 extern unsigned portSceneExitStatus(unsigned);
 extern double portStageMenuNativeRead(unsigned,unsigned);
 static SSSData selection;
-static int initialized;
+static int initialized,character_initialized;
+static VsModeData selected_vs;
+/* 0: standalone; 1: CSS confirmed; 2: SSS active; 3: SSS canceled; 4: match ready. */
+static unsigned menu_transition;
 static HSD_GObj* cursor;
 static HSD_GObj *camera,*lights,*fog;
 static void destroy_lights(HSD_Obj* obj){HSD_LObjRemoveAll((HSD_LObj*)obj);}
-unsigned portStageMenuInitialize(unsigned controller)
+static unsigned stage_menu_initialize(unsigned controller,int from_character)
 {
-    if(initialized||controller>=4||portSceneInitialize()<0)abort();
+    if(initialized||character_initialized||controller>=4||portSceneInitialize()<0)abort();
     portRuntimeSetSceneDestructors(destroy_lights);
     portInitializeVsRouting();portSceneExitStatus(1);lbLang_SetSavedLanguage(1);gm_8016468C();
-    memset(&selection,0,sizeof(selection));selection.unk_stage=controller+1;
+    memset(&selection,0,sizeof(selection));
+    if(from_character){GameModeState state={0};state.info.enter_data=&selection;gmVsMelee_EnterSss(&state,&selected_vs);}
+    selection.unk_stage=controller+1;
     selection.force_stage_id=-1;
     mnStageSel_Scene_OnEnter(&selection);
     for(HSD_GObj* g=HSD_GObjPLinkHead[3];g;g=g->next)if(g->obj_kind==HSD_GObj_CameraKind){if(camera)abort();camera=g;}
@@ -44,6 +52,11 @@ unsigned portStageMenuInitialize(unsigned controller)
         for(HSD_GObjProc* p=g->proc;p;p=p->child)
             if(p->on_invoke==fn_8025A310){if(cursor)abort();cursor=g;}
     if(!cursor||!cursor->hsd_obj||!camera||!lights||!fog)abort();initialized=1;return (unsigned)cursor;
+}
+unsigned portStageMenuInitialize(unsigned controller){menu_transition=0;return stage_menu_initialize(controller,0);}
+unsigned portStageMenuFromCharacters(unsigned controller)
+{
+    if(menu_transition!=1)abort();unsigned result=stage_menu_initialize(controller,1);menu_transition=2;return result;
 }
 unsigned portStageMenuObjects(unsigned* output,unsigned capacity)
 {
@@ -96,6 +109,12 @@ unsigned portStageMenuFinish(void)
     /* Model callbacks are gone before releasing their archive backing store. */
     for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
     mnStageSel_Scene_OnExit(NULL);initialized=0;cursor=camera=lights=fog=NULL;
+    if(menu_transition==2){
+        if(selection.start_game){
+            GameModeState state={0};state.info.exit_data=&selection;
+            gmVsMelee_ExitSss(&state,&selected_vs,0);gm_80167BC8(&selected_vs);menu_transition=4;
+        }else menu_transition=3;
+    }
     return selection.start_game?selection.vs.start.rules.stkind:0;
 }
 double portShapeBlend(HSD_PObj* polygon,unsigned index)
@@ -117,8 +136,7 @@ extern GameRules gmMainLib_DefaultGameRules;
 extern struct GamePrefs gmMainLib_DefaultGamePrefs;
 static CSSData character_selection;
 static u8 character_ko_counts[GM_MAX_PLAYERS];
-static int character_initialized;
-unsigned portCharacterMenuInitialize(void)
+static unsigned character_menu_initialize(int resume)
 {
     if(initialized||character_initialized||portSceneInitialize()<0)abort();
     portRuntimeSetSceneDestructors(destroy_lights);portInitializeVsRouting();portSceneExitStatus(1);
@@ -127,12 +145,16 @@ unsigned portCharacterMenuInitialize(void)
     gmMainLib_GetGamePrefs()->item_freq=255;gmMainLib_GetGamePrefs()->item_mask=0;
     GameRules* rules=gmMainLib_GetGameRules();rules->mode=1;rules->stock_count=4;rules->stock_time_limit=8;
     lbLang_SetSavedLanguage(1);gm_8016468C();gm_80164F18();
-    gm_InitVsMode(&character_selection.vs);character_selection.match_type=VS_MELEE;
+    if(resume)character_selection.vs=selected_vs;else gm_InitVsMode(&character_selection.vs);
+    menu_transition=0;character_selection.match_type=VS_MELEE;
     character_selection.unk_0x0=1;character_selection.ko_counts=character_ko_counts;
     for(unsigned i=0;i<2;i++)character_selection.vs.start.players[i].slot_type=Gm_PKind_Human;
     HSD_SisLib_803A6048(0x10000);
     mnCharSel_Scene_OnEnter(&character_selection);character_initialized=1;return 1;
 }
+
+unsigned portCharacterMenuInitialize(void){return character_menu_initialize(0);}
+unsigned portCharacterMenuResume(void){if(menu_transition!=3)abort();return character_menu_initialize(1);}
 
 #include <sysdolphin/baselib/fog.h>
 extern void HSD_SisLib_803A84BC(HSD_GObj*,int);
@@ -202,5 +224,22 @@ unsigned portCharacterMenuFinish(void)
     /* Remove text/context owners now; original OnExit frees the SIS arena once. */
     HSD_SisLib_803A5E70();
     for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
-    mnCharSel_Scene_OnExit(NULL);character_initialized=0;return character_selection.pending_scene_change;
+    mnCharSel_Scene_OnExit(NULL);character_initialized=0;
+    if(phase==1){GameModeState state={0};state.info.exit_data=&character_selection;gmVsMelee_ExitCss(&state,&selected_vs);menu_transition=1;}else menu_transition=0;
+    return character_selection.pending_scene_change;
+}
+
+/* Read the original scene handoff, without re-encoding C structures in JS. */
+double portMenuMatchRead(unsigned field,unsigned player)
+{
+    if(menu_transition!=4||player>=GM_MAX_PLAYERS)abort();
+    StartMeleeData* d=&selected_vs.start;
+    switch(field){
+    case 0:return d->players[player].ckind;case 1:return d->players[player].color;
+    case 2:return d->players[player].slot_type;case 3:return d->players[player].stocks;
+    case 4:return d->rules.stkind;case 5:return d->rules.time_limit;
+    case 6:return d->rules.item_freq;case 7:return d->rules.is_teams;
+    case 8:return d->rules.match_kind;case 9:return d->rules.timer_enabled;
+    default:abort();
+    }
 }
