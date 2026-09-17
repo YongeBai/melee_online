@@ -214,3 +214,20 @@ test('Zelda copy keeps dynamics in its Article-free root and Sheik retains separ
     for(const change of [a=>a.relocs.delete(code==='Zd'?1012:1020),a=>a.ptr(1204,1000),a=>a.d.setUint32(1408,0),a=>a.ptr(1800,2000),a=>code==='Zd'?a.d.setUint32(1016,1):a.ptr(70480,66016)])assert.throws(()=>convertKirbyCopy(formCopyFixture(code,change),code));
   }
 });
+
+function flameCopyFixture(change=()=>{}){
+  const body=new Uint8Array(4096),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  ptr(480,2000);d.setUint32(484,1);ptr(488,408);ptr(492,456);ptr(496,144);
+  d.setUint32(144,1);ptr(148,120);d.setUint32(120,3);ptr(124,0);d.setUint32(128,2);
+  for(let i=0;i<30;i++)d.setFloat32(i*4,(i-10)/4);
+  ptr(456,164);ptr(460,296);ptr(468,440);ptr(472,424);
+  for(let i=0;i<6;i++)d.setFloat32(296+i*4,(i+1)/2);
+  for(let i=0;i<5;i++){const at=2000+64*i;for(let j=0;j<3;j++)d.setFloat32(at+32+j*4,1);if(i<4)ptr(at+8,at+64);}
+  change({d,ptr,relocs});const name=new TextEncoder().encode('ftDataKirbyCopyKoopa\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,480);bytes.set(name,pub+8);return bytes;
+}
+test('Bowser copy keeps a particle-only flame Article beside its dynamic hat descriptor',()=>{
+  const input=flameCopyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Kp'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.deepEqual(r.dynamics.map(x=>[x.bone,x.nodes]),[[3,2]]);assert.equal(d.getFloat32(0,true),-2.5);assert.equal(r.articles.rows[0].joint,null);assert.equal(r.articles.rows[0].stateCount,1);assert.equal(r.articles.rows[0].specialWords,6);assert.equal(d.getFloat32(316,true),3);assert.equal(r.unreferencedRelocations.length,0);
+  for(const change of [a=>a.relocs.delete(492),a=>a.relocs.delete(496),a=>a.ptr(148,480),a=>a.d.setUint32(128,0),a=>a.ptr(124,2000),a=>a.ptr(1200,2000),a=>a.ptr(460,480)])assert.throws(()=>convertKirbyCopy(flameCopyFixture(change),'Kp'));
+});

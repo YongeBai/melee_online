@@ -32,6 +32,17 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Kirby's Bowser copy loads its native dynamic hat, flame Article and separate
+particle bank. Ground/air breath, fuel depletion/recharge, copy loss and
+reacquisition use original C and normal controller input. Run:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Kp --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Kp --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600
+```
+
+These integration probes do not measure presented FPS or input-to-photon latency.
+
 Kirby's base package imports four native Articles (Cutter beam, Hammer, loose
 star and swallowed-fighter star), the separate capture joint, and effect bank 5
 with nineteen particle commands, six texture groups and nine model effects.

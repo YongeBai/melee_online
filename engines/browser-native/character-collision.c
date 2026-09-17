@@ -67,6 +67,23 @@ unsigned portKirbyRead(HSD_GObj* object,unsigned field)
     default:abort();
     }
 }
+/* Read-only original Fire Breath fuel/scale and its data-file limits. */
+float portKirbyFlameRead(HSD_GObj* object,unsigned field)
+{
+    if(!object||!object->user_data)abort();Fighter* fp=object->user_data;
+    if(fp->kind!=Ft_Kind_Kirby)abort();ftKb_DatAttrs* a=fp->dat_attrs;
+    switch(field){
+    case 0:return fp->u.kb.x84;
+    case 1:return fp->u.kb.x88;
+    case 2:return a->specialn_kp_max_fuel;
+    case 3:return a->specialn_kp_spew_flame_velocity;
+    case 4:return a->specialn_kp_flame_scale;
+    case 5:return a->specialn_kp_lowest_charge_graphic_size;
+    case 6:return a->specialn_kp_fuel_recharge_rate;
+    case 7:return a->specialn_kp_flame_size_recharge_rate;
+    default:abort();
+    }
+}
 unsigned portKirbyCostumeRoot(unsigned kind)
 {
     if(kind>=Ft_Kind_Max||!ftKb_Init_803C9FC8[kind])abort();

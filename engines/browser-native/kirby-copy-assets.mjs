@@ -22,6 +22,7 @@ const profiles={
   Pe:{symbol:'Peach',articles:[[2,1],[1,4]],wrappers:[[0,35884,35896,35908,[0,1]]]},
   Lk:{symbol:'Link',dynamics:20,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16864,[0]],[1,40268,null,40296,[0,1,2,3,4,5]]],attachmentWrappers:[[18944,0],[21024,1]]},
   Cl:{symbol:'Clink',dynamics:20,articles:[[1,9],[6,1]],arrowSlots:[0],wrappers:[[0,null,null,16704,[0]],[1,40108,null,40136,[0,1,2,3,4,5]]],attachmentWrappers:[[18784,0],[20864,1]]},
+  Kp:{symbol:'Koopa',dynamics:16,articles:[[1,6]]},
   Zd:{symbol:'Zelda',dynamics:12},Sk:{symbol:'Seak',dynamics:20,articles:[[5,3],[1,1]],wrappers:[[0,null,null,66016,[0]],[1,null,null,70464,[0]]]},
   Ca:{symbol:'Captain'},Gn:{symbol:'Ganon'},
   Ms:{symbol:'Mars',accessory:true,accessoryWrapper:65952,dynamics:16},Fe:{symbol:'Emblem',accessory:true,accessoryWrapper:87392,dynamics:16},

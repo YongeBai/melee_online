@@ -5,6 +5,25 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Bowser copy imports the native five-node/nine-mesh hat, two dynamic
+nodes, one particle-only Flame Article and effect bank 41 (four commands, one
+texture group). Original C drives the flame's collision, lifetime and ownership.
+The controller lifecycle runs ground/air breath, sustained depletion, release,
+recharge, taunt loss and reacquisition. Fuel/scale reach their original minima
+40/60 from maxima 360/380; release returns both to full in 489 simulation ticks,
+including recovery and item retirement. The hat pool follows
+318 → 316 → 318 → 316. New C diagnostics only read the original floats.
+
+The full rendered lifecycle passes 3,200 input frames plus 124 intro frames.
+GPU contact validation passes 1,049 rendered frames: Fire Breath raises Bowser
+from 8 to approximately 26.54 damage, with three hitlag frames at first impact.
+The saved contact frame checks 21,499 vertices, 13 shader cases and 52 pixel
+channels. All 230 unit tests and shared browser checks pass. The Sheik-copy
+and base-Bowser regressions pass 2,926 and 1,311 simulation frames. These are
+compatibility checks; no new performance gain, presented-FPS or latency result
+is claimed.
+[Bowser-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-bowser.json).
+
 Kirby's Zelda and Sheik copies now import their original hats, dynamic chains,
 shared effect bank 21, and Sheik's thrown/held needle Articles. Rendered lifecycle
 tests pass 1,968/3,068 input frames plus 124 intro frames each. Sheik stores three

@@ -1,0 +1,479 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "facf2f2",
+  "scope": "Kirby Bowser copy assets and original ground/air Fire Breath, fuel lifecycle, hit detection, dynamic hat ownership and GPU integration.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "54317e9ff4b2eca55135ded73363391568a2acec9e827d2b5d8fd098a586cbec",
+    "wasmBytes": 2959089
+  },
+  "sourceHashes": {
+    "character-collision.c": "76a84b63d42d0bdd8a3c23d1c18270928fa7fd6bba67886b78511318ee76c613",
+    "constructor.html": "d73c9c4d7be1da01ef992916b217b8c4b651322c1d220047702845138b078a00",
+    "kirby-copy-assets.mjs": "ffc2f70c1d5c1453078e92444eb90aa9fb3c1c788bb3182c8bc60a420a74e741",
+    "effect-assets.mjs": "ef41a8bd0d72feffb79be89dd1664813164174fac3409faaad2b5c50e8ed0afd",
+    "verify-kirby.mjs": "780643eed8cb3eb372fc3c41b9069bd976a463d9edb721d995d37dcfa5ddf236"
+  },
+  "assets": {
+    "copy": {
+      "root": 480,
+      "dataSize": 37824,
+      "relocations": 159,
+      "externals": [],
+      "joint": 21120,
+      "nodes": 5,
+      "meshes": 9,
+      "dynamics": [
+        {
+          "bone": 3,
+          "nodes": 2,
+          "parameters": 0
+        }
+      ],
+      "articles": [
+        {
+          "article": 456,
+          "stateCount": 1,
+          "specialWords": 6,
+          "joint": null
+        }
+      ],
+      "typed": 159,
+      "omitted": 0
+    },
+    "effect": {
+      "bank": 41,
+      "commands": 4,
+      "textures": 1,
+      "models": 0,
+      "typed": 2,
+      "omitted": 0
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Kp --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Kp --input --combat --kirby-copy=contact --render-steps --verify-vertices --hardware --probe-seconds=600",
+    "sheikRegression": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Sk --input --combat --kirby-copy=swallow",
+    "bowserRegression": "node scripts/native-port/probe-constructor.mjs --character=Kp --input --koopa-moves"
+  },
+  "validation": {
+    "tests": {
+      "passed": 230,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "shared": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "3a76a3dea3e665982294207af7f39b3f720edb0eb337723ea4954e30f39b9701"
+    },
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-bowser/full.json",
+      "sha256": "519c1be3cab8b78a231f451a21265455242b187d9f5c52a8c134ab8a9093bae5",
+      "completed": true,
+      "frames": 3058,
+      "renderedFrames": 3200,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          443,
+          444,
+          445,
+          24,
+          25,
+          446,
+          447,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        154,
+        52
+      ],
+      "dynamicPool": [
+        318,
+        316,
+        318,
+        316
+      ],
+      "flameFuel": {
+        "initial": [
+          360,
+          380,
+          360,
+          40,
+          380,
+          60,
+          0.699999988079071,
+          0.699999988079071
+        ],
+        "depleted": [
+          40,
+          60,
+          360,
+          40,
+          380,
+          60,
+          0.699999988079071,
+          0.699999988079071
+        ],
+        "recharged": [
+          360,
+          380,
+          360,
+          40,
+          380,
+          60,
+          0.699999988079071,
+          0.699999988079071
+        ],
+        "recoveryFrames": 489,
+        "reacquired": [
+          360,
+          380,
+          360,
+          40,
+          380,
+          60,
+          0.699999988079071,
+          0.699999988079071
+        ]
+      },
+      "flameItemFrames": 799,
+      "peakItems": 10,
+      "copySetup": [
+        {
+          "code": "Kp",
+          "root": 14998272,
+          "bodyCopy": false,
+          "hatNodes": 5,
+          "hatMeshes": 9,
+          "dynamicBoneChains": 1,
+          "articles": 1,
+          "effects": {
+            "passed": true,
+            "checks": 533,
+            "models": 0,
+            "commands": 4,
+            "textures": 1,
+            "relocations": 2,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "contact": {
+      "artifact": "dist/native-port/experiment-kirby-copy-bowser/contact-gpu.json",
+      "sha256": "2668800ed9198fff3bfbea41457252d086d1f4b5f4bb50c037894cbc4bd1e923",
+      "completed": true,
+      "frames": 907,
+      "renderedFrames": 1049,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          443,
+          444,
+          445
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18,
+          75,
+          84
+        ]
+      ],
+      "itemKinds": [
+        154
+      ],
+      "dynamicPool": [
+        318,
+        316,
+        null,
+        null
+      ],
+      "flameItemFrames": 124,
+      "peakItems": 10,
+      "contact": {
+        "before": [
+          0,
+          8
+        ],
+        "after": [
+          0,
+          26.540000915527344
+        ],
+        "firstImpactHitlag": 3
+      },
+      "copySetup": [
+        {
+          "code": "Kp",
+          "root": 13663456,
+          "bodyCopy": false,
+          "hatNodes": 5,
+          "hatMeshes": 9,
+          "dynamicBoneChains": 1,
+          "articles": 1,
+          "effects": {
+            "passed": true,
+            "checks": 533,
+            "models": 0,
+            "commands": 4,
+            "textures": 1,
+            "relocations": 2,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "sheikRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-bowser/sheik-regression.json",
+      "sha256": "c3348c8a19a20840198a09d1c7f3481caf9f4d60bab83de005df26d7c0f809c2",
+      "completed": true,
+      "frames": 2926,
+      "renderedFrames": 0,
+      "introFrames": 0,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          467,
+          468,
+          470,
+          24,
+          25,
+          471,
+          472,
+          474,
+          42,
+          469,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        153,
+        152,
+        52
+      ],
+      "dynamicPool": [
+        276,
+        272,
+        276,
+        272
+      ],
+      "needleCharge": {
+        "partial": 3,
+        "stored": 3,
+        "full": 6,
+        "afterFire": 0,
+        "afterReacquire": 0
+      },
+      "flameItemFrames": 0,
+      "peakItems": 6,
+      "copySetup": [
+        {
+          "code": "Sk",
+          "root": 15204528,
+          "bodyCopy": false,
+          "hatNodes": 8,
+          "hatMeshes": 21,
+          "dynamicBoneChains": 2,
+          "articles": 2,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        },
+        {
+          "code": "Zd",
+          "root": 15302140,
+          "bodyCopy": false,
+          "hatNodes": 20,
+          "hatMeshes": 16,
+          "dynamicBoneChains": 3,
+          "articles": 0,
+          "effects": {
+            "passed": true,
+            "checks": 2418,
+            "models": 2,
+            "commands": 0,
+            "textures": 0,
+            "relocations": 784,
+            "unreferencedRelocations": 0
+          }
+        }
+      ]
+    },
+    "bowserRegression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-bowser/bowser-regression.json",
+      "sha256": "b8d1fed1719587a995b9a1f8df6ca5b9b8f7d87c55acacb8474112628c2267a7",
+      "completed": true,
+      "frames": 1311,
+      "renderedFrames": 0,
+      "introFrames": 0,
+      "states": [
+        {
+          "name": "ground Flame Breath",
+          "states": [
+            341,
+            342,
+            343,
+            14
+          ]
+        },
+        {
+          "name": "air Flame Breath",
+          "states": [
+            24,
+            25,
+            344,
+            345,
+            342,
+            343,
+            14
+          ]
+        },
+        {
+          "name": "ground Whirling Fortress",
+          "states": [
+            359,
+            14
+          ]
+        },
+        {
+          "name": "air Whirling Fortress",
+          "states": [
+            24,
+            25,
+            360,
+            35,
+            43,
+            14
+          ]
+        },
+        {
+          "name": "Bowser Bomb",
+          "states": [
+            361,
+            362,
+            363,
+            14
+          ]
+        },
+        {
+          "name": "ground Koopa Klaw miss",
+          "states": [
+            347,
+            14
+          ]
+        },
+        {
+          "name": "air Koopa Klaw miss",
+          "states": [
+            24,
+            25,
+            353,
+            347,
+            29,
+            42,
+            14
+          ]
+        }
+      ],
+      "copySetup": []
+    },
+    "gpu": {
+      "renderer": {
+        "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+        "vendor": "Google Inc. (AMD)",
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+      },
+      "resolution": [
+        960,
+        720
+      ],
+      "vertices": 21499,
+      "shaderCases": 13,
+      "pixelChannels": 52
+    },
+    "visual": "Inspect final full-copyfire and full-copyhat snapshots at 960x720, with original 4:3 framing. Contact GPU run preceded a snapshot-only change to capture sustained breath instead of the first startup puff; no simulation/native core/renderer change."
+  },
+  "implementation": {
+    "gameplay": "Original linked C remains unchanged. A read-only diagnostic exposes original fuel, scale, limits and recharge rates as floats. No replacement gameplay or forced object positions.",
+    "assets": "Hat root +12 is the one-state/six-word flame Article, +16 is its dynamic descriptor. All 159 relocations typed, none omitted. Effect bank 41 retains four commands and one texture group.",
+    "lifecycle": "Controller holds B through native minimum fuel/scale, releases to recovery and full recharge, taunts to remove copy, inhales/swallow again and attacks with restored copy."
+  },
+  "limits": [
+    "Selected integration paths, not exhaustive retail trace or matchup parity.",
+    "No new performance gain, presented-FPS or input-to-photon measurement.",
+    "Remaining copies, full scenes/menus/audio, other costumes, retail parity, networking and public static deployment remain incomplete.",
+    "Automatic hosted no-ISO startup and original camera unchanged. No game data or binaries committed."
+  ]
+}

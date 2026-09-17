@@ -155,3 +155,8 @@ test('Marth and Roy copies preserve separate model-only sword effect banks',()=>
 test('Zelda and Sheik copies share original model effect bank 21',()=>{
   for(const code of ['Zd','Sk']){const input=fighterBankFixture({symbol:'effKirbyZeldaDataTable',bank:21,count:0,groups:0,models:2}),before=input.slice(),r=convertKirbyCopyEffects(input,code);assert.deepEqual(input,before);assert.equal(r.bank,21);assert.equal(r.effects.length,2);assert.equal(r.cmd,null);assert.equal(r.tex,null);}
 });
+
+test('Bowser copy retains the separate four-command particle bank without model effects',()=>{
+  const spec={symbol:'effKirbyKoopaDataTable',bank:41,count:4,groups:1,models:0},input=fighterBankFixture(spec),before=input.slice(),r=convertKirbyCopyEffects(input,'Kp');assert.deepEqual(input,before);assert.equal(r.bank,41);assert.equal(r.commands.length,4);assert.equal(r.textures.length,1);assert.equal(r.effects.length,0);
+  for(const change of [a=>a.d.setUint16(a.cmd+2,12),a=>a.d.setUint32(a.cmd+8,9),a=>a.d.setUint32(a.tex,2),a=>a.ptr(12,512)])assert.throws(()=>convertKirbyCopyEffects(fighterBankFixture(spec,change),'Kp'));
+});
