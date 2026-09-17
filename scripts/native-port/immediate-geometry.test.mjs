@@ -28,11 +28,11 @@ test('batching keeps primitive boundaries, winding, vertex order and stream owne
   assert.throws(()=>appendImmediateGeometry(stream,new Float32Array(36),Uint32Array.of(4)),/index/);
 });
 test('immediate state matching is exact, bounded and invalidated by draw barriers',()=>{
-  const sizes=[548,724,80,244,158],addresses=[64];for(let i=1;i<5;i++)addresses.push(addresses[i-1]+sizes[i-1]*4);
-  const module={HEAPU8:new Uint8Array(8192),_portMaterialTextureState:()=>addresses[1],_portMaterialPixelState:()=>addresses[2],_portMaterialModelState:()=>addresses[3],_portRenderContextState:()=>addresses[4]};
+  const sizes=[548,724,80,244,158,5],addresses=[64];for(let i=1;i<6;i++)addresses.push(addresses[i-1]+sizes[i-1]*4);
+  const module={HEAPU8:new Uint8Array(8192),_portMaterialTextureState:()=>addresses[1],_portMaterialPixelState:()=>addresses[2],_portMaterialModelState:()=>addresses[3],_portRenderContextState:()=>addresses[4],_portFogState:()=>addresses[5]};
   const match=createImmediateStateMatcher(module);assert.equal(match(addresses[0],true),false);assert.equal(match(addresses[0],true),true);
   // Includes unused fields and counters: no state is assumed irrelevant.
-  for(let block=0;block<5;block++)for(let i=0;i<sizes[block];i++){
+  for(let block=0;block<6;block++)for(let i=0;i<sizes[block];i++){
     const words=new Uint32Array(module.HEAPU8.buffer,addresses[block],sizes[block]);words[i]++;
     assert.equal(match(addresses[0],true),false);assert.equal(match(addresses[0],true),true);
   }
@@ -49,7 +49,7 @@ test('per-vertex TEV registers keep signed values and vary only across primitive
   appendImmediateGeometry(stream,new Float32Array(27),immediateTriangles(0x90,3),b);
   for(let i=0;i<7;i++)assert.deepEqual([...stream.registers.subarray(i*16,i*16+16)],[...(i<4?a:b)]);
   a.fill(0);b.fill(0);assert.equal(stream.registers[0],1023);assert.equal(stream.registers[64],-1023);
-  const module={HEAPU8:new Uint8Array(8192),_portMaterialTextureState:()=>2304,_portMaterialPixelState:()=>5248,_portMaterialModelState:()=>5632,_portRenderContextState:()=>6656};
+  const module={HEAPU8:new Uint8Array(8192),_portMaterialTextureState:()=>2304,_portMaterialPixelState:()=>5248,_portMaterialModelState:()=>5632,_portRenderContextState:()=>6656,_portFogState:()=>7300};
   const match=createImmediateStateMatcher(module),tev=new Int32Array(module.HEAPU8.buffer,64,548);
   assert.equal(match(64,false,true),false);tev[4]=-1024;tev[19]=1023;
   assert.equal(match(64,true,true),true);assert.equal(match(64,true,false),false);

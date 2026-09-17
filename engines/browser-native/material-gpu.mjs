@@ -6,6 +6,8 @@ import {createNativePixelReader,gxAlphaTestRejectsAny} from './native-pixel.mjs'
 import {readNativeModelMatrices} from './native-model.mjs';
 import {readNativeRenderContext,checkNativeRenderContext} from './native-render-context.mjs';
 import {inspectArchive} from './archive.mjs';
+import {snapshotShapeGeometry} from './shape-geometry.mjs';
+import {verifyShapeSamples} from './verify-shape.mjs';
 
 // Forward error for four float32 products and three additions. This remains
 // valid when the GPU fuses operations. Scaling only by the result incorrectly
@@ -64,6 +66,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   }
   function apply(state,p,camera){
     gl.useProgram(p.program);const u=name=>p.uniform(name);
+    if(state.context.fog?.type){const f=state.context.fog;gl.uniform2f(u('fogAC'),f.a,f.c);gl.uniform2i(u('fogBShift'),f.b,f.shift);gl.uniform3iv(u('fogColor'),f.color);}
     gl.uniformMatrix4fv(u('projection'),false,camera.projection);gl.uniform1i(u('currentMatrix'),state.model.current??0);
     gl.uniform4fv(u('positionRows'),packRows(scratch.position,state.model.positions,12));gl.uniform4fv(u('normalRows'),packRows(scratch.normal,state.model.normals,12));
     const {tex,post,bias}=scratch;tex.fill(0);post.fill(0);bias.fill(0);
@@ -97,7 +100,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     }
   }
   function verifyDrawVertices(draw){
-    const vertices=draw.plan.mesh.vertices,feedback=gl.createTransformFeedback(),buffer=gl.createBuffer();
+    const vertices=draw.shape?.vertices??draw.plan.mesh.vertices,feedback=gl.createTransformFeedback(),buffer=gl.createBuffer();
     try {
       gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK,feedback);gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER,buffer);gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER,vertices.length*68,gl.STREAM_READ);gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER,0,buffer);gl.enable(gl.RASTERIZER_DISCARD);gl.beginTransformFeedback(gl.POINTS);gl.drawArrays(gl.POINTS,0,vertices.length);gl.endTransformFeedback();gl.disable(gl.RASTERIZER_DISCARD);
       const values=new Float32Array(vertices.length*17);gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER,0,values);
@@ -125,12 +128,16 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     } finally {gl.disable(gl.RASTERIZER_DISCARD);gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER,0,null);gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK,null);gl.deleteBuffer(buffer);gl.deleteTransformFeedback(feedback);}
   }
   if(module.onNativeDraw)throw Error('Native draw receiver already owned');
-  module.onNativeDraw=(owner,joint,display,polygon,ptr)=>{
+  module.onNativeDraw=(owner,joint,display,polygon,ptr,positions=0,count=0,normals=0,normalCount=0)=>{
     const plan=nativePlans.get(owner+':'+joint+':'+polygon);
     if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
     const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
     checkNativeRenderContext(state.context,snapshot,state.pixel);
-    queue.push({owner,plan,state,camera:snapshot,program:program(state,plan.mesh.attrs,'model')});
+    const shaped=(plan.mesh.flags&0x3000)===0x1000;
+    if(shaped!==!!positions)throw Error('Native shape geometry missing or unexpected');
+    const shape=shaped?snapshotShapeGeometry(module,plan.mesh,positions,count,normals,normalCount,{reference:verifyVertices}):null;
+    if(shaped&&verifyVertices)shape.reference=verifyShapeSamples(module,plan.archive,plan.mesh,polygon,positions,count,normals,normalCount);
+    queue.push({owner,plan,state,shape,camera:snapshot,program:program(state,plan.mesh.attrs,'model')});
   };
   if(module.onNativeImmediate)throw Error('Immediate draw receiver already owned');
   module.onNativeImmediate=(primitive,count,ptr,cull,textured,tev,kind)=>{
@@ -178,14 +185,15 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       for(const mesh of model.meshes) {
         if(mesh.draws.some(d=>[0xa8,0xb0,0xb8].includes(d.primitive)))throw Error('Native line/point rendering not integrated');
         const vao=gl.createVertexArray();vaos.push(vao);gl.bindVertexArray(vao);
-        function buffer(target,data){const b=gl.createBuffer();buffers.push(b);gl.bindBuffer(target,b);gl.bufferData(target,data,gl.STATIC_DRAW);}
-        function attr(loc,size,fn){buffer(gl.ARRAY_BUFFER,Float32Array.from(mesh.vertices.flatMap(fn)));gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,0,0);}
+        const attributes=[];
+        function buffer(target,data){const b=gl.createBuffer();buffers.push(b);gl.bindBuffer(target,b);gl.bufferData(target,data,gl.STATIC_DRAW);return b;}
+        function attr(loc,size,fn){attributes[loc]=buffer(gl.ARRAY_BUFFER,Float32Array.from(mesh.vertices.flatMap(fn)));gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,0,0);}
         attr(0,3,v=>[v[9][0],v[9][1],v[9][2]??0]);attr(1,1,v=>[v[0]?.[0]??0]);
         for(let i=0;i<3;i++)attr(2+i,3,v=>Array.from({length:3},(_,c)=>(v[10]??v[25])?.[i*3+c]??0));
         attr(5,4,v=>v[11]??[1,1,1,1]);attr(6,4,v=>v[12]??[1,1,1,1]);
         for(let i=0;i<8;i++)attr(7+i,3,v=>[v[13+i]?.[0]??0,v[13+i]?.[1]??0,v[1+i]?.[0]??0]);
         buffer(gl.ELEMENT_ARRAY_BUFFER,Uint32Array.from(mesh.triangles));
-        plans.push({mesh,vao,display:indexOf(model.tree.nodes[mesh.joint].display,mesh.dobj),polygon:indexOf(d.getUint32(mesh.dobj+12),mesh.pobj)});
+        plans.push({mesh,vao,attributes,archive,display:indexOf(model.tree.nodes[mesh.joint].display,mesh.dobj),polygon:indexOf(d.getUint32(mesh.dobj+12),mesh.pobj)});
       }
       refreshBindings();
       result={refreshBindings,
@@ -196,6 +204,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
         let count=0;if(!show)return count;
         for(const [i,plan] of plans.entries()) {
           const {mesh}=plan;if((flags[mesh.joint]&16)||!visibility[i])continue;
+          if((mesh.flags&0x3000)===0x1000)throw Error('Shape rendering requires original callbacks');
           const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[mesh.joint];
           const ptr=module._portMaterialDrawState(joint,plan.display,plan.polygon,view,owner);
           const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readNativeModelMatrices(module),context:readNativeRenderContext(module)};
@@ -230,6 +239,10 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.vertex);gl.bufferData(gl.ARRAY_BUFFER,stream.data.subarray(0,stream.vertexCount*9),gl.DYNAMIC_DRAW);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,draw.plan.indices);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,draw.plan.mesh.triangles,gl.DYNAMIC_DRAW);
         }
+        if(draw.shape){
+          gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[0]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.positions);
+          if(draw.shape.normals){gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[2]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.normals);}
+        }
         apply(draw.state,draw.program,draw.camera);pixelState(draw.state.pixel);
         const cull=draw.plan.mesh.flags&0xc000;
         if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);
@@ -237,7 +250,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
         gl.drawElements(gl.TRIANGLES,draw.plan.mesh.triangles.length,gl.UNSIGNED_INT,0);draws++;
       }
       if(checkErrors&&gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
-      return {vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
+      return {shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}

@@ -42,11 +42,12 @@ function alphaTest(a) {
 }
 // Only shader-generating state belongs in this key. Matrices, light values,
 // colors, alpha references and texture resources are uploaded as uniforms.
-export function materialShaderKey({tev,textures,pixel},attributes,{immediateRegisters=false}={}) {
+export function materialShaderKey({tev,textures,pixel,context},attributes,{immediateRegisters=false}={}) {
   const a=pixel.alphaTest;
-  return JSON.stringify([tev.stages,textures.generators,textures.textures.map(t=>t.id),pixel.channelCount,pixel.channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b),immediateRegisters]);
+  return JSON.stringify([tev.stages,textures.generators,textures.textures.map(t=>t.id),pixel.channelCount,pixel.channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b),immediateRegisters,context?.fog?.type??0]);
 }
-export function generateMaterialShaders({tev,textures,pixel},attributes,{immediateRegisters=false}={}) {
+export function generateMaterialShaders({tev,textures,pixel,context},attributes,{immediateRegisters=false}={}) {
+  const fogType=context?.fog?.type??0;if(![0,2].includes(fogType))throw Error('Unsupported shader fog');
   const has=id=>attributes.some(a=>a.attr===id),gens=textures.generators;
   // Immediate geometry supplies only UV0. Keep other layouts on the ordinary
   // uniform path instead of stealing an attribute location they might use.
@@ -116,9 +117,15 @@ in vec4 raster0,raster1;
 ${gens.map(g=>`in vec3 texcoord${g.id};`).join('\n')}
 ${samplers.map(i=>`uniform sampler2D image${i};`).join('\n')}
 uniform float lodBias[8];uniform ivec2 alphaReference;out vec4 fragmentColor;
+${fogType?'uniform vec2 fogAC;uniform ivec2 fogBShift;uniform ivec3 fogColor;':''}
 ${generateTevFunction(tev.stages,{registerInput:immediateRegisters?'flat':'uniform'})}
 void main(){ivec4 texels[${n}],rasters[${n}];${samples.join('\n')}
 ivec4 color=nativeTev(texels,rasters)&ivec4(255);
-if(!${alphaTest(pixel.alphaTest)})discard;fragmentColor=vec4(color)/255.0;}`;
+if(!${alphaTest(pixel.alphaTest)})discard;
+${fogType?`int zCoord=clamp(int(gl_FragCoord.z*16777216.0),0,16777215);
+float ze=(fogAC.x*16777216.0)/float(fogBShift.x-(zCoord>>fogBShift.y));
+int ifog=int(round(clamp(ze-fogAC.y,0.0,1.0)*256.0));
+color.rgb=(color.rgb*(256-ifog)+fogColor*ifog)>>8;`:''}
+fragmentColor=vec4(color)/255.0;}`;
   return {vertex,fragment};
 }

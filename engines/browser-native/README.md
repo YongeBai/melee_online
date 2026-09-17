@@ -33,6 +33,27 @@ node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-in
 node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-pause --frames=900 --hardware --defer-gpu-errors
 ```
 
+## Original stage-select integration
+
+The native stage-select diagnostic now loads `MnSlMap.usd` automatically and
+runs original OnEnter/OnFrame/OnExit callbacks. It draws the original camera,
+lights, fog, stage icons, hover labels, confirmation and vertex morph animation.
+The six tournament choices and B cancellation are tested through controller
+samples. Hover-label destruction and address reuse require refreshing live
+polygon bindings even when the model descriptor stays the same.
+
+`menu.html` is a diagnostic page, not a replacement for the public play route.
+Its console API `nativeMenu` supplies step/draw/read/finish for the automated
+probe. Run it with `node scripts/native-port/probe-menu.mjs` after preparing
+fixtures and building the fighter-init target. Each probe starts a fresh runtime;
+finish disposes the renderer before original scene cleanup. Complete CSS and
+menu-to-match routing are still pending.
+
+The music device boundary requires an explicit host receiver. This diagnostic
+records and declines music requests, so it does not claim audible playback.
+Console DVD/ARAM calls remain guarded. The test does not cover streaming audio,
+results routing or restoring saved preferences.
+
 ## Reproduce
 
 The live fixture now samples buttons, main stick, C-stick and analog shoulders

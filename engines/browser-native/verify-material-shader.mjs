@@ -2,7 +2,7 @@ import {generateMaterialShaders} from './material-shader.mjs';
 
 // Independent, hand-computed pixel cases exercise the full vertex-lighting /
 // texgen / sampling / TEV chain. The combiner has its larger integer oracle too.
-export function verifyGpuMaterialShader(gl) {
+export function verifyGpuMaterialShader(gl,{fog=false}={}) {
   const stage=texture=>{const s=Array(32).fill(0);s[0]=s[1]=texture?0:255;s[2]=4;s[3]=texture?3:4;return s;};
   const channel={enabled:0,ambientSource:0,materialSource:0,lights:0,diffuse:2,attenuation:2};
   const base=()=>({tev:{stages:[stage(false)],registers:Array.from({length:4},()=>[0,0,0,0]),konst:Array.from({length:4},()=>[0,0,0,0])},textures:{generators:[],textures:[],matrices:[]},pixel:{channelCount:1,channels:[{...channel},null,{...channel},null],colors:[{ambient:[0,0,0,0],material:[64,128,192,255]},{ambient:[0,0,0,0],material:[0,0,0,0]}],alphaTest:{compare0:7,reference0:0,operation:0,compare1:7,reference1:0}}});
@@ -10,6 +10,12 @@ export function verifyGpuMaterialShader(gl) {
   // With mat=255, nonzero accumulators below 128 lose one unit.
   const cases=[];
   cases.push({name:'unlit material',state:base(),expected:[64,128,192,255]});
+  if(fog)for(const [name,c,expected]of [['before fog start',1.25,[64,128,192,199]],['half fog',.5,[32,64,108,199]],['full fog',-.25,[0,0,25,199]]]){
+    const state=base();state.pixel.colors[0].material[3]=199;
+    // At depth .5: (.25 * 2^24) / (2^23 - (2^23 >> 1)) = 1.
+    state.context={fog:{type:2,a:.25,c,b:8388608,shift:1,color:[0,0,25]}};
+    cases.push({name,state,expected});
+  }
   for(const [name,normal,diffuse,ambient,light,expected] of [
     ['diffuse toward light',[0,0,1],2,[32,32,32],[100,60,20],[132,91,51,255]],
     ['clamped diffuse away',[0,0,-1],2,[32,32,32],[100,60,20],[31,31,31,255]],
@@ -50,6 +56,7 @@ export function verifyGpuMaterialShader(gl) {
         const lp=new Float32Array(24),ld=new Float32Array(24),a=new Float32Array(24),k=new Float32Array(24),color=new Int32Array(32);lp.set(c.mode==='bump'?[1000000,1000000,0]:c.specular?[1000000,0,1000000]:[0,0,1000000]);ld.set([0,0,1]);a.set(c.specular?[0,0,1]:[1,0,0]);k.set(c.specular?[25,0,-24]:[1,0,0]);color.set([...(c.light??[0,0,0]),255]);
         for(const [n,v] of [['lightPosition',lp],['lightDirection',ld],['lightAngular',a],['lightDistance',k]])gl.uniform3fv(u(n),v);gl.uniform4iv(u('lightColor'),color);
         gl.uniform4iv(u('tevRegisters'),c.state.tev.registers.flat());gl.uniform4iv(u('tevKonst'),c.state.tev.konst.flat());gl.uniform1i(u('image0'),0);gl.uniform1fv(u('lodBias'),new Float32Array(8));gl.uniform2iv(u('alphaReference'),[c.state.pixel.alphaTest.reference0,c.state.pixel.alphaTest.reference1]);
+        if(c.state.context?.fog){const f=c.state.context.fog;gl.uniform2f(u('fogAC'),f.a,f.c);gl.uniform2i(u('fogBShift'),f.b,f.shift);gl.uniform3iv(u('fogColor'),f.color);}
         gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);const actual=new Uint8Array(4);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,actual);
         if(actual.some((v,i)=>v!==c.expected[i])||gl.getError()!==gl.NO_ERROR)throw Error(`Native material pixel ${c.name}: ${actual}, expected ${c.expected}`);
       }finally{if(p)gl.deleteProgram(p);if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);}

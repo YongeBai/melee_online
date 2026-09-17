@@ -17,10 +17,17 @@ void portRenderContextEnter(void){if(setting_context||portMaterialCaptureActive(
 void portRenderContextLeave(void){if(!setting_context||portMaterialCaptureActive())abort();setting_context=0;}
 static void require(int value){if(!value||(!setting_context&&!portMaterialCaptureActive()))abort();}
 const PortRenderContext* portRenderContextState(void){return &state;}
-/* This target has no active stage fog yet. Preserve explicit disabling and
- * fail closed if a stage requests a fog equation the shader cannot reproduce. */
+static u32 fog_registers[5];
+const u32* portFogState(void){return fog_registers;}
+void portFogRegister(u32 value)
+{unsigned id=value>>24;if(id<0xEE||id>0xF2)abort();fog_registers[id-0xEE]=value&0xFFFFFF;}
+extern void portSdkSetFog(GXFogType,f32,f32,f32,f32,GXColor);
+/* Preserve original SDK coefficient quantization. Other equations/range
+ * adjustment remain explicit failures until their shader paths are verified. */
 void GXSetFog(GXFogType type,f32 start,f32 end,f32 near,f32 far,GXColor color)
-{if(type!=GX_FOG_NONE||!isfinite(start)||!isfinite(end)||!isfinite(near)||!isfinite(far))abort();}
+{if((type!=GX_FOG_NONE&&type!=GX_FOG_LIN)||!isfinite(start)||!isfinite(end)||!isfinite(near)||!isfinite(far)||far<near||near<0)abort();portSdkSetFog(type,start,end,near,far,color);}
+void GXSetFogRangeAdj(GXBool enable,u16 center,GXFogAdjTable* table)
+{if(enable)abort();}
 void GXSetViewport(f32 x,f32 y,f32 width,f32 height,f32 near,f32 far)
 {require(setting_context&&isfinite(x)&&isfinite(y)&&width>0&&height>0&&near>=0&&far<=1);float v[6]={x,y,width,height,near,far};memcpy(state.viewport,v,sizeof(v));state.camera_mask|=1;}
 void GXSetScissor(u32 x,u32 y,u32 width,u32 height)
@@ -44,7 +51,7 @@ void GXLoadLightObjImm(GXLightObj* object,GXLightID id)
 void portRenderContextBegin(HSD_CObj* camera,HSD_LObj* lights)
 {
     if(setting_context||portMaterialCaptureActive()||!camera||!lights)abort();
-    memset(&state,0,sizeof(state));setting_context=1;
+    memset(&state,0,sizeof(state));memset(fog_registers,0,sizeof(fog_registers));setting_context=1;
     if(!portCObjSetCurrentOffscreen(camera))abort();
     HSD_LObj_803668EC(lights);HSD_LObjSetupInit(camera);
     if(state.camera_mask!=7)abort();setting_context=0;

@@ -13,7 +13,13 @@ export function readNativeRenderContext(module) {
     if(color.some(x=>x>255))throw Error('Native light color range');
     return {color,angular:floats(at+4,3),distance:floats(at+7,3),position:floats(at+10,3),direction:floats(at+13,3)};
   });
-  return {lightMask:w[0],lightLoads:w[1],projectionType:w[2],viewport:floats(4,6),scissor:Array.from(w.subarray(10,14)),projection:floats(14,16),lights};
+  const fogPtr=module._portFogState();if(!fogPtr||fogPtr%4||fogPtr+20>module.HEAPU8.length)throw Error('Native fog bounds');
+  const regs=Array.from(new Uint32Array(module.HEAPU8.buffer,fogPtr,5));
+  const fogType=(regs[3]>>>21)&7;if(![0,2].includes(fogType)||regs[3]&(1<<20))throw Error('Unsupported native fog equation');
+  const f20=x=>{const b=new ArrayBuffer(4),v=new DataView(b);v.setUint32(0,(x&0xfffff)*4096);return v.getFloat32(0);};
+  const fog={type:fogType,a:f20(regs[0]),c:f20(regs[3]),b:regs[1],shift:regs[2]&31,color:[regs[4]>>>16,(regs[4]>>>8)&255,regs[4]&255],registers:regs};
+  if(regs.some(v=>v>0xffffff)||!Number.isFinite(fog.a)||!Number.isFinite(fog.c))throw Error('Invalid native fog registers');
+  return {lightMask:w[0],lightLoads:w[1],projectionType:w[2],viewport:floats(4,6),scissor:Array.from(w.subarray(10,14)),projection:floats(14,16),lights,fog};
 }
 export function checkNativeRenderContext(context,camera,pixel) {
   if(context.projectionType!==0||context.projection.some((x,i)=>x!==camera.raw[12+i]))throw Error('Native offscreen projection differs from gameplay camera');

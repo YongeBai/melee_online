@@ -40,3 +40,12 @@ test('immediate register transport has a distinct shader layout and retains TEV 
   assert.throws(()=>generateMaterialShaders(state,attributes,options),/layout/);
   state.textures.generators=[{id:0,source:5}];assert.throws(()=>generateMaterialShaders(state,attrs,options),/layout/);
 });
+test('fog equation changes shader identity but coefficients remain uniforms',()=>{
+ const base=fixture(),fog=structuredClone(base);fog.context={fog:{type:2,a:.5,c:1}};
+ assert.notEqual(materialShaderKey(base,attributes),materialShaderKey(fog,attributes));
+ assert.notDeepEqual(generateMaterialShaders(base,attributes),generateMaterialShaders(fog,attributes));
+ const changed=structuredClone(fog);changed.context.fog.a=2;changed.context.fog.c=3;
+ assert.equal(materialShaderKey(fog,attributes),materialShaderKey(changed,attributes));
+ assert.deepEqual(generateMaterialShaders(fog,attributes),generateMaterialShaders(changed,attributes));
+ changed.context.fog.type=4;assert.throws(()=>generateMaterialShaders(changed,attributes),/fog/);
+});

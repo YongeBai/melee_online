@@ -355,6 +355,12 @@ void portControllerSample(unsigned slot,unsigned buttons,float x,float y,float c
     memset(p,0,sizeof(*p));p->button=buttons;p->last_button=previous;
     p->trigger=buttons&~previous;p->release=previous&~buttons;p->nml_stickX=x;p->nml_stickY=y;
     p->nml_subStickX=cx;p->nml_subStickY=cy;p->nml_analogL=left;p->nml_analogR=right;
+    /* Menus use calibrated integer channels. Invert the original gmmain
+     * scale (80 for sticks, 140 for shoulders); retain gameplay's normalized
+     * samples exactly, with no extra deadzone or quantization there. */
+    p->stickX=(s8)roundf(x*80);p->stickY=(s8)roundf(y*80);
+    p->subStickX=(s8)roundf(cx*80);p->subStickY=(s8)roundf(cy*80);
+    p->analogL=(u8)roundf(left*140);p->analogR=(u8)roundf(right*140);
     /* Native pause artwork reads master status; gameplay uses game/copy status.
      * Browser input is sampled synchronously, so both see this same sample. */
     HSD_PadMasterStatus[slot]=*p;

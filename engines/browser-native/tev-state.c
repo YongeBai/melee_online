@@ -126,18 +126,24 @@ void ftCo_800C2600(HSD_GObj* owner,u32 pass)
 }
 static HSD_DObj* drawing_display;
 static unsigned emitted;
-EM_JS(void,portEmitDraw,(unsigned owner,unsigned joint,unsigned display,unsigned polygon,unsigned tev),{
+EM_JS(void,portEmitDraw,(unsigned owner,unsigned joint,unsigned display,unsigned polygon,unsigned tev,unsigned positions,unsigned position_count,unsigned normals,unsigned normal_count),{
     if(typeof Module['onNativeDraw']!=='function')throw Error('Native draw receiver is absent');
-    Module['onNativeDraw'](owner,joint,display,polygon,tev);
+    Module['onNativeDraw'](owner,joint,display,polygon,tev,positions,position_count,normals,normal_count);
 });
 static void native_polygon(HSD_PObj* polygon,Mtx view,Mtx position,u32 mode)
 {
     require(drawing&&drawing_display&&polygon&&view&&position);
     if((polygon->flags&(POBJ_CULLFRONT|POBJ_CULLBACK))==(POBJ_CULLFRONT|POBJ_CULLBACK))return;
-    if(pobj_type(polygon)==POBJ_SHAPEANIM){fprintf(stderr,"Native shape geometry submission is not integrated\n");abort();}
     portModelCaptureReset();HSD_PObjClearMtxMark(NULL,0);
     HSD_POBJ_METHOD(polygon)->setup_mtx(polygon,view,position,mode);
-    portEmitDraw((unsigned)HSD_GObj_804D7814,(unsigned)HSD_JObjGetCurrent(),(unsigned)drawing_display,(unsigned)polygon,(unsigned)&state);
+    float (*vertices)[3]=NULL,(*normals)[3]=NULL;unsigned vn=0,nn=0;
+    if(pobj_type(polygon)==POBJ_SHAPEANIM){
+        extern void portShapeEvaluate(HSD_PObj*,float(**)[3],float(**)[3]);
+        HSD_ShapeSet* s=polygon->u.shape_set;
+        if(!s||!s->vertex_desc||(s->normal_desc&&s->normal_desc->attr!=GX_VA_NRM))abort();
+        portShapeEvaluate(polygon,&vertices,&normals);vn=s->nb_vertex_index;nn=s->nb_normal_index;
+    }
+    portEmitDraw((unsigned)HSD_GObj_804D7814,(unsigned)HSD_JObjGetCurrent(),(unsigned)drawing_display,(unsigned)polygon,(unsigned)&state,(unsigned)vertices,vn,(unsigned)normals,nn);
     emitted++;
 }
 static void native_display(HSD_DObj* display,Mtx view,Mtx position,u32 mode)

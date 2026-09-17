@@ -123,6 +123,22 @@ export function preparePortableSource(source,output) {
       replace('((volatile f32*) &sp1C)[-1] = (f32) ((f64) line_len * guess);','line_len_sqrt = (f32) ((f64) line_len * guess);');
       replace('line_len = ((volatile f32*) &sp1C)[-1];','line_len = line_len_sqrt;');
     }
+    if(file==='src/sysdolphin/baselib/pobj.c') {
+      // Keep the original CPU interpolation; the browser consumes its arrays
+      // before the GameCube-only immediate display-list submission.
+      replace('static void drawShapeAnim(HSD_PObj* pobj)', 'static int port_shape_capture;\nstatic void drawShapeAnim(HSD_PObj* pobj)');
+      replace('    interpretShapeAnimDisplayList(pobj, vertex_buffer, normal_buffer);', '    if (!port_shape_capture) interpretShapeAnimDisplayList(pobj, vertex_buffer, normal_buffer);');
+      replace('void HSD_PObjClearMtxMark(void* obj, u32 mark)', 'void portShapeEvaluate(HSD_PObj* pobj, float (**vertices)[3], float (**normals)[3])\n{\n    HSD_ASSERT(0, !port_shape_capture && pobj_type(pobj) == POBJ_SHAPEANIM);\n    port_shape_capture = 1; drawShapeAnim(pobj); port_shape_capture = 0;\n    *vertices = vertex_buffer; *normals = normal_buffer;\n}\n\nvoid HSD_PObjClearMtxMark(void* obj, u32 mark)');
+    }
+    if(file==='src/melee/mn/mnstagesel.c') {
+      // Read-only inspection of original selection state and icon hit targets.
+      const marker='void mnStageSel_Scene_OnEnter(void* arg0)';
+      replace(marker,'double portStageMenuNativeRead(unsigned field, unsigned index)\n{\n    Vec3 position;\n    if(field==0)return mnStageSel_804D6CAF;\n    if(field==1)return mnStageSel_804D6CAE;\n    HSD_ASSERT(0, index < 30);\n    if(field==2)return mnStageSel_803F06D0[index].stkind;\n    if(field==5)return mnStageSel_803F06D0[index].x8;\n    HSD_ASSERT(0, mnStageSel_803F06D0[index].x0);\n    lb_8000B1CC(mnStageSel_803F06D0[index].x0, NULL, &position);\n    if(field==3)return position.x;\n    if(field==4)return position.y;\n    HSD_ASSERT(0, 0); return 0;\n}\n\n'+marker);
+    }
+    if(file==='src/melee/gm/gmscene.c') {
+      const marker='/* 479D58 */ static struct gm_80479D58_t gm_80479D58;';
+      replace(marker,marker+'\nunsigned portSceneExitStatus(unsigned reset) { if(reset)gm_80479D58.unk_C=0; return gm_80479D58.unk_C; }\n');
+    }
     if(file==='src/melee/gm/gm_1A3F.c') {
       // Browser scene bring-up owns the top-level nonblocking bootstrap. Set
       // the original routing context before running original VS callbacks;

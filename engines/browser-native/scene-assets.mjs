@@ -2,12 +2,14 @@ import {inspectArchive,nativeArchiveImage} from './archive.mjs';
 import {readModelMeshes} from './mesh-assets.mjs';
 import {readModelMaterials} from './material-assets.mjs';
 import {readSkinBindings} from './skin-assets.mjs';
+import {readShapeSet} from './shape-assets.mjs';
 import {readFigaTree} from './animation-assets.mjs';
 // Convert known HSD descriptors only. GX display lists, texture pixels, packed
-// colors and vertex-array payloads remain byte-for-byte big endian for GX.
-export function convertSceneAsset(input) {
+// colors and ordinary vertex arrays remain byte-for-byte big endian for GX.
+// Opt-in shape samples are CPU-read by HSD and require native scalar order.
+export function convertSceneAsset(input,{shapes=false}={}) {
   const archive=inspectArchive(input),d=archive.data,model=readModelMeshes(input),assets=readModelMaterials(input,model);
-  readSkinBindings(input,model); // Validate every reference and weight first.
+  readSkinBindings(input,shapes?{...model,meshes:model.meshes.filter(m=>(m.flags&0x3000)!==0x1000)}:model); // Validate every reference and weight first.
   if(archive.externs.size)throw Error('Scene extern references require explicit linking');
   if(model.tree.nodes.some(n=>n.className!==null||n.constraints!==null||(n.flags&0x20)))
     throw Error('Custom, constrained or particle joints require a typed importer');
@@ -74,6 +76,11 @@ export function convertSceneAsset(input) {
     }
     for(const palette of assets.palettes.values()) {
       claim(palette.offset,16);word(palette.offset+4);word(palette.offset+8);half(palette.offset+12);
+    }
+    if(shapes)for(const mesh of model.meshes)if((mesh.flags&0x3000)===0x1000){
+      if(mesh.binding===null)throw Error('Missing shape set');const shape=readShapeSet(archive,mesh.binding);
+      for(const at of shape.words){descriptorSlots.add(at);if(shape.pointers.has(at))pointerSlots.add(at);else word(at);}
+      for(const at of shape.halves)half(at);
     }
     let inverseSum=0,materialSum=0,textureSum=0;
     for(const node of model.tree.nodes)if(node.inverseBind!==null)

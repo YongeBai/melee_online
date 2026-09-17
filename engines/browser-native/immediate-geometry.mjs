@@ -10,14 +10,14 @@ export function immediateTriangles(primitive,count) {
   return Uint32Array.from(out);
 }
 
-// Compare the five captured GX blocks, including masks and diagnostic counters.
+// Compare the six captured GX blocks (including fog), including masks and diagnostic counters.
 // Only TEV register values transported per vertex may differ. Sizes
 // match the static assertions in tev/texture/pixel/model-state and render-context.
 export function createImmediateStateMatcher(module) {
-  const sizes=[548,724,80,244,158],saved=sizes.map(n=>new Uint32Array(n));
+  const sizes=[548,724,80,244,158,5],saved=sizes.map(n=>new Uint32Array(n));
   let initialized=false;
   return (tev,eligible,vertexRegisters=false)=>{
-    const addresses=[tev,module._portMaterialTextureState(),module._portMaterialPixelState(),module._portMaterialModelState(),module._portRenderContextState()];
+    const addresses=[tev,module._portMaterialTextureState(),module._portMaterialPixelState(),module._portMaterialModelState(),module._portRenderContextState(),module._portFogState()];
     const heap=module.HEAPU8,views=addresses.map((p,i)=>{
       if(!p||p%4||p+sizes[i]*4>heap.length)throw Error('Immediate state snapshot bounds');
       return new Uint32Array(heap.buffer,p,sizes[i]);

@@ -10,6 +10,7 @@ if(!filename)throw Error('Pass the development USA 1.02 fixture path. This is a 
 const fd=fs.openSync(filename,'r');
 const shared=['PlCo.dat','PdPm.dat','GmPause.usd','IfAll.usd','ItCo.usd','PlKbCpMr.dat','PlKbCpLg.dat','PlKbCpDr.dat','PlKbCpCa.dat','PlKbCpGn.dat','PlKbCpNs.dat','PlKbCpPe.dat','PlKbCpFx.dat','PlKbCpPk.dat','PlKbCpPc.dat','PlKbCpLk.dat','PlKbCpCl.dat','PlKbCpSs.dat','PlKbCpFc.dat','PlKbNrCpFc.dat','PlKbCpDk.dat','PlKbNrCpDk.dat','PlKbCpMs.dat','PlKbCpFe.dat','PlKbCpZd.dat','PlKbCpSk.dat','PlKbCpKp.dat','PlKbCpPp.dat','PlKbCpMt.dat','PlKbNrCpMt.dat','PlKbCpPr.dat','PlKbNrCpPr.dat','PlKbCpGw.dat','PlKbNrCpGw.dat','PlKbCpYs.dat'];
 const effects=['EfCoData.dat','EfCaData.dat','EfDkData.dat','EfMsData.dat','EfGnData.dat','EfFeData.dat','EfFxData.dat','EfPrData.dat','EfMrData.dat','EfLgData.dat','EfPkData.dat','EfSsData.dat','EfKpData.dat','EfLkData.dat','EfYsData.dat','EfMtData.dat','EfNsData.dat','EfZdData.dat','EfPeData.dat','EfIcData.dat','EfKbData.dat','EfKbMr.dat','EfKbLg.dat','EfKbCa.dat','EfKbGn.dat','EfKbFx.dat','EfKbPk.dat','EfKbSs.dat','EfKbDk.dat','EfKbMs.dat','EfKbFe.dat','EfKbZd.dat','EfKbKp.dat','EfKbIc.dat'];
+const menus=['MnSlMap.usd','MnSlChr.usd'];
 const names=['GrNBa.dat','GrNLa.dat','GrOp.dat','GrSt.dat','GrIz.dat','GrPs.usd'];
 const fighters=Object.keys(fighterArchives).map(code=>'Pl'+code+'.dat');
 const animations=Object.keys(fighterArchives).map(code=>'Pl'+code+'AJ.dat');
@@ -25,7 +26,7 @@ try {
   const header=parseHeader(read(0,0x440).buffer,total);
   const files=parseFileTable(read(header.fstOffset,header.fstSize).buffer,total);
   fs.mkdirSync(path.join(output,'fixtures'),{recursive:true});
-  for(const name of [...shared,...effects,...names,...fighters,...animations,...models]) {
+  for(const name of [...menus,...shared,...effects,...names,...fighters,...animations,...models]) {
     const file=files.find(f=>f.path===name);
     if(!file)throw Error('Development asset missing: '+name);
     fs.writeFileSync(path.join(output,'fixtures',name),read(file.offset,file.size));
@@ -40,6 +41,7 @@ try {
   }
   if(!font)throw Error('Original SIS font lies outside the executable sections');
   fs.writeFileSync(path.join(output,'fixtures','sis-font.bin'),font);
+  fs.writeFileSync(path.join(output,'menu-fixtures.json'),JSON.stringify(menus,null,2)+'\n');
   fs.writeFileSync(path.join(output,'shared-fixtures.json'),JSON.stringify(shared,null,2)+'\n');
   fs.writeFileSync(path.join(output,'effect-fixtures.json'),JSON.stringify(effects,null,2)+'\n');
   fs.writeFileSync(path.join(output,'stage-fixtures.json'),JSON.stringify(names,null,2)+'\n');

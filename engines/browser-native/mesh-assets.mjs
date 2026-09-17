@@ -75,7 +75,10 @@ export function readModelMeshes(input) {
             const width=a.type===1?a.width:a.type===2?1:2;
             if(cursor+width>end)throw Error('Truncated primitive vertex');
             let at=cursor;
-            if(a.type>=2)at=a.data+(a.type===2?d.getUint8(cursor):d.getUint16(cursor))*a.stride;
+            if(a.type>=2){
+              const index=a.type===2?d.getUint8(cursor):d.getUint16(cursor);at=a.data+index*a.stride;
+              if((flags&0x3000)===0x1000&&(a.attr===9||a.attr===10))(vertex.shapeIndices??={})[a.attr]=index;
+            }
             vertex[a.attr]=decode(at,a);cursor+=width;
           }
           vertices.push(vertex);

@@ -1,0 +1,519 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "d13fde9",
+  "core": {
+    "wasmSha256": "ea80a17f8c642bbaac21f7baae01a7801776e8d61142ff67f5ff34a7be8aca9e",
+    "wasmBytes": 2978431
+  },
+  "scope": "Original native stage-select callbacks, animated geometry, camera, fog, stage selection and cleanup. Diagnostic integration; no complete playable/menu-to-match path.",
+  "implementation": {
+    "hostedStartup": true,
+    "originalSceneCallbacks": [
+      "mnStageSel_Scene_OnEnter",
+      "mnStageSel_Scene_OnFrame",
+      "mnStageSel_Scene_OnExit"
+    ],
+    "shape": "Original drawShapeAnim CPU interpolation retained; typed endian conversion and per-draw snapshots submit the resulting arrays. Big-endian source oracle validates all consumed positions/normals.",
+    "fog": "Original SDK GXSetFog coefficient/register quantization; linear perspective fog with integer RGB blend. Range adjustment and other fog equations remain rejected.",
+    "menuOwnership": "Refresh root/child/polygon bindings as native hover labels destroy and reuse GObj/root addresses. Preserve original GX-link order.",
+    "input": "Menus receive calibrated integer channels using the original 80/140 scales; normalized gameplay samples remain unchanged.",
+    "music": "Explicit device callback; diagnostic records and declines playback. Audio is not certified."
+  },
+  "validation": {
+    "units": 254,
+    "unitFailures": 0,
+    "sharedBrowserPassed": true,
+    "compileAudit": {
+      "units": 1130,
+      "knownFailures": 79
+    },
+    "linkAuditMissing": 147,
+    "menu": {
+      "rows": [
+        {
+          "name": "battlefield",
+          "stage": 31,
+          "ticks": 230,
+          "renders": 8,
+          "vertexChecks": 14361,
+          "shapeSampleComponents": 4104,
+          "blendRange": [
+            2.4000000953674316,
+            4.416296482086182
+          ],
+          "pixelChannelChecks": 64,
+          "initial": {
+            "frames": 120,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 0,
+            "phase": 0,
+            "hover": 30
+          },
+          "final": {
+            "frames": 230,
+            "cursor": [
+              1.2899999618530273,
+              -9.100000381469727
+            ],
+            "stage": 31,
+            "exit": 1,
+            "phase": 2,
+            "hover": 24
+          },
+          "cleanup": {
+            "stage": 31,
+            "objects": 0,
+            "procs": 0,
+            "allocations": 0
+          }
+        },
+        {
+          "name": "final-destination",
+          "stage": 32,
+          "ticks": 231,
+          "renders": 8,
+          "vertexChecks": 14340,
+          "shapeSampleComponents": 4104,
+          "blendRange": [
+            2.4000000953674316,
+            4.469527721405029
+          ],
+          "pixelChannelChecks": 64,
+          "initial": {
+            "frames": 120,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 0,
+            "phase": 0,
+            "hover": 30
+          },
+          "final": {
+            "frames": 231,
+            "cursor": [
+              6.599999904632568,
+              -9.100000381469727
+            ],
+            "stage": 32,
+            "exit": 1,
+            "phase": 2,
+            "hover": 25
+          },
+          "cleanup": {
+            "stage": 32,
+            "objects": 0,
+            "procs": 0,
+            "allocations": 0
+          }
+        },
+        {
+          "name": "dream-land",
+          "stage": 28,
+          "ticks": 235,
+          "renders": 8,
+          "vertexChecks": 13981,
+          "shapeSampleComponents": 4104,
+          "blendRange": [
+            2.4000000953674316,
+            4.574264049530029
+          ],
+          "pixelChannelChecks": 64,
+          "initial": {
+            "frames": 120,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 0,
+            "phase": 0,
+            "hover": 30
+          },
+          "final": {
+            "frames": 235,
+            "cursor": [
+              12.300000190734863,
+              -9.100000381469727
+            ],
+            "stage": 28,
+            "exit": 1,
+            "phase": 2,
+            "hover": 26
+          },
+          "cleanup": {
+            "stage": 28,
+            "objects": 0,
+            "procs": 0,
+            "allocations": 0
+          }
+        },
+        {
+          "name": "yoshis-story",
+          "stage": 8,
+          "ticks": 246,
+          "renders": 8,
+          "vertexChecks": 14389,
+          "shapeSampleComponents": 4104,
+          "blendRange": [
+            2.4000000953674316,
+            4.827968120574951
+          ],
+          "pixelChannelChecks": 64,
+          "initial": {
+            "frames": 120,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 0,
+            "phase": 0,
+            "hover": 30
+          },
+          "final": {
+            "frames": 246,
+            "cursor": [
+              3.299999952316284,
+              15.710000038146973
+            ],
+            "stage": 8,
+            "exit": 1,
+            "phase": 2,
+            "hover": 6
+          },
+          "cleanup": {
+            "stage": 8,
+            "objects": 0,
+            "procs": 0,
+            "allocations": 0
+          }
+        },
+        {
+          "name": "fountain",
+          "stage": 2,
+          "ticks": 246,
+          "renders": 8,
+          "vertexChecks": 14281,
+          "shapeSampleComponents": 4104,
+          "blendRange": [
+            2.4000000953674316,
+            4.827968120574951
+          ],
+          "pixelChannelChecks": 64,
+          "initial": {
+            "frames": 120,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 0,
+            "phase": 0,
+            "hover": 30
+          },
+          "final": {
+            "frames": 246,
+            "cursor": [
+              9.899999618530273,
+              15.710000038146973
+            ],
+            "stage": 2,
+            "exit": 1,
+            "phase": 2,
+            "hover": 8
+          },
+          "cleanup": {
+            "stage": 2,
+            "objects": 0,
+            "procs": 0,
+            "allocations": 0
+          }
+        },
+        {
+          "name": "stadium",
+          "stage": 3,
+          "ticks": 238,
+          "renders": 8,
+          "vertexChecks": 14227,
+          "shapeSampleComponents": 4104,
+          "blendRange": [
+            2.4000000953674316,
+            4.649792194366455
+          ],
+          "pixelChannelChecks": 64,
+          "initial": {
+            "frames": 120,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 0,
+            "phase": 0,
+            "hover": 30
+          },
+          "final": {
+            "frames": 238,
+            "cursor": [
+              15.210000038146973,
+              3.7100000381469727
+            ],
+            "stage": 3,
+            "exit": 1,
+            "phase": 2,
+            "hover": 18
+          },
+          "cleanup": {
+            "stage": 3,
+            "objects": 0,
+            "procs": 0,
+            "allocations": 0
+          }
+        },
+        {
+          "name": "cancel",
+          "stage": 0,
+          "ticks": 137,
+          "renders": 1,
+          "vertexChecks": 1667,
+          "shapeSampleComponents": 513,
+          "blendRange": [
+            2.4000000953674316,
+            2.4000000953674316
+          ],
+          "pixelChannelChecks": 64,
+          "initial": {
+            "frames": 120,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 0,
+            "phase": 0,
+            "hover": 30
+          },
+          "final": {
+            "frames": 137,
+            "cursor": [
+              0,
+              -13
+            ],
+            "stage": 0,
+            "exit": 1,
+            "phase": 0,
+            "hover": 30
+          },
+          "cleanup": {
+            "stage": 0,
+            "objects": 0,
+            "procs": 0,
+            "allocations": 0
+          }
+        }
+      ],
+      "totalTicks": 1563,
+      "totalRenders": 49,
+      "totalGpuVertices": 87246,
+      "totalSourceShapeComponents": 25137,
+      "wrongPlayerIgnored": true,
+      "nativeStickDeadzonePreserved": true,
+      "originalCamera": {
+        "eye": [
+          0,
+          0,
+          106
+        ],
+        "interest": [
+          0,
+          0,
+          0
+        ],
+        "fov": 24.999998092651367,
+        "aspect": 1.2166670560836792,
+        "near": 0.5,
+        "far": 5000
+      },
+      "gpu": {
+        "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+        "vendor": "Google Inc. (AMD)"
+      }
+    },
+    "pause": {
+      "ticks": 280,
+      "renders": 422,
+      "introFrames": 124,
+      "cycles": [
+        {
+          "slot": 0,
+          "frozenFrames": 58
+        },
+        {
+          "slot": 1,
+          "frozenFrames": 58
+        }
+      ],
+      "passed": true
+    },
+    "combat": {
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60025.69999998808,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.4739166667809089,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7999999821186066,
+        "maxMs": 3.2000000178813934
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 4.218944444656372,
+        "p50Ms": 3.800000011920929,
+        "p95Ms": 7.0999999940395355,
+        "maxMs": 16.099999994039536
+      },
+      "identicalPriorGameplayFieldsTransitionsCombatWindows": true,
+      "excludedPointerFields": {
+        "7": "cameraBox",
+        "8": "ft_data"
+      },
+      "controlledSpeedupClaim": false,
+      "command": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --record-shaders",
+      "multipleStepCallbacks": 0,
+      "slowDraws": 0
+    },
+    "combatOther": {
+      "frames": 3600,
+      "draws": 3594,
+      "elapsedMs": 60026.90000000596,
+      "multiStepCallbacks": 4,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5297777777827448,
+        "p50Ms": 0.5,
+        "p95Ms": 0.8999999761581421,
+        "maxMs": 3
+      },
+      "drawSubmissionCpu": {
+        "samples": 3594,
+        "meanMs": 4.746021146617071,
+        "p50Ms": 4.200000017881393,
+        "p95Ms": 7.600000023841858,
+        "maxMs": 42.599999994039536
+      },
+      "slowSubmissions": [
+        {
+          "frame": 417,
+          "costMs": 22.5,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 418,
+          "costMs": 20.400000005960464,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 424,
+          "costMs": 25.599999994039536,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 426,
+          "costMs": 17.5,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 427,
+          "costMs": 42.599999994039536,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 431,
+          "costMs": 24.19999998807907,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 435,
+          "costMs": 24.400000005960464,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 1825,
+          "costMs": 17,
+          "shaderCompilations": [
+            {
+              "program": 31,
+              "origin": "model",
+              "cpuMs": 5.4000000059604645
+            },
+            {
+              "program": 32,
+              "origin": "model",
+              "cpuMs": 5.300000011920929
+            }
+          ]
+        }
+      ],
+      "interpretation": "A short burst of slow draws coincided with other validation work in this session. Cause is not established; retain as a failing draw-cadence sample. An otherwise equivalent isolated repeat submitted all frames."
+    }
+  },
+  "commands": [
+    "node --test scripts/native-port/*.test.mjs",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node scripts/native-port/probe-menu.mjs",
+    "node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --stage-callbacks --render-steps --hardware",
+    "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors"
+  ],
+  "artifacts": {
+    "dist/native-port/experiment-stage-menu/report.json": "4ba96501fd31cd9a8f60e69f5b41f684b8fdf7f7db6cf3e584e4ce4dbc86aff7",
+    "dist/native-port/experiment-stage-menu/pause-regression.json": "aba10cf94c0541077f4b65a1de11e870a796520f7d355a68e581d09a5bcace55",
+    "dist/native-port/experiment-stage-menu/combat-regression.json": "0a7a5abd08ccaa39abab42cfe1d331af076a545fff49e35f43aa6961ef578e23",
+    "dist/native-port/experiment-stage-menu/combat-isolated.json": "dff71bcc26da275b021a63c95b0d9d28b74f67946887a513d7541412131f570d",
+    "dist/native-port/experiment-stage-menu/combat-before-fog-batch.json": "ce838001f81e6148f6fd0242ac1990aa5356490f4567ba8c90c1cdaa9b1341bf"
+  },
+  "limits": [
+    "Original stage select draws and exits to an original selected stage ID; the diagnostic does not load the subsequent match scene.",
+    "Character select, streaming audio/SFX, complete scene/match/results routing, other costumes and static public-release integration remain unfinished.",
+    "No physical controller or input-to-photon measurement; no distinct presented-frame FPS claim.",
+    "GPU snapshots and source shape comparisons cover this stage-select workload, not exhaustive retail visual/gameplay parity.",
+    "The six selection tests cover choosing tournament stages, not new gameplay-performance coverage on six stages."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  },
+  "sourceHashes": {
+    "engines/browser-native/menu-assets.mjs": "d9d72b2e90acdc68bd84994a766ceffbc1a7ac35703629adfc81cade75b5e260",
+    "engines/browser-native/menu.c": "169abd42c88a98b9fd0b49777e239fb25068329868738e8037a578fcbcaf71a0",
+    "engines/browser-native/menu.html": "852bb3166ca87a6edc3a6a9774db74d914a6edcedca92b69bcb1188b11cb0d56",
+    "engines/browser-native/music.c": "db0822514f8c915b47af9da1912da49574d1311904c1a77f326cc42019625173",
+    "engines/browser-native/native-menu-preview.mjs": "44d338337f68a2f6dd20aeb9ea2cc48476e26b7ab657c23d2b86e4353ec4a525",
+    "engines/browser-native/shape-assets.mjs": "af1cec514f8ff9442cac95377dbe921e03d922be42fe47f8d0dc430abc42e8a0",
+    "engines/browser-native/shape-geometry.mjs": "77c72df1f459b9b5698a9d1d3f68978e03e28fe8a6d765b33336acc4517efde2",
+    "engines/browser-native/verify-shape.mjs": "694325d6e9d613b01e9253190e55dc31cb41e9d951f95c0d24dd0e13edae5ec6",
+    "engines/browser-native/scene-assets.mjs": "923895d5de9bd4a814f890c22f2849d571ee8c5ed4201e11176fd27a15e5fcd0",
+    "engines/browser-native/mesh-assets.mjs": "78de01a34aa9758339e58116741d88cec4e4f96d325cfbfb3ed2359802f9b64f",
+    "engines/browser-native/material-gpu.mjs": "0356d3da125fe50a4c8123568b2dcf67b326346a2357b6343524a3bad669c0ef",
+    "engines/browser-native/material-shader.mjs": "62b7dc46ac9d7ebf416c88e893c290504969a35fce877b0ec589c51657ea1c2a",
+    "engines/browser-native/native-render-context.mjs": "dc46c3e3f1942e6929749aa06f7239c40546521f5710057cb78ec52861690d14",
+    "engines/browser-native/render-context.c": "14c3282d20aa74a61e87e6fbacdc6ae5f600c76ceee4f2f7bdc6804b07d9fd38",
+    "engines/browser-native/tev-state.c": "bd40967743aa3c72172f40211f901642f954178ba77747b84397a3b2848ef4e6",
+    "engines/browser-native/immediate-geometry.mjs": "46807e6282544f1702ff5c5b08f0e249bf8e442bb7fa41d9c98144333e528b84",
+    "engines/browser-native/stage-map.c": "c691cedb40af957399d9996686eff69d49b92370eca5da90dfe24b0412cb64a6",
+    "engines/browser-native/verify-material-shader.mjs": "21f1c579c62c54433bba50a9ed66d0439ed3f5f9cc856d66baecb1d5e983e8f7",
+    "scripts/native-port/portable-source.mjs": "e20dc9caac049e5dd8f0e8b731890aaca868f5437b026121d9e8608c1c241053",
+    "scripts/native-port/probe-menu.mjs": "b11885e39d991e721ae6c002020b17601b3171dddb9a8c7e098b2bf4d21a5c81",
+    "scripts/native-port/build.mjs": "3c3f81d6237bec5af1dc3e549eab68753d8ba29e0772de1c19891235f35d3ad9",
+    "scripts/native-port/game-link.mjs": "04f4e8aed24d919c5b5cc3d1ea1ccda27302ab944f4376f2df41c6a4f278c661"
+  }
+}

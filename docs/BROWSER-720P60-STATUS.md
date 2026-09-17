@@ -9,6 +9,15 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 16: the direct port now also runs original stage select, including
+six tournament selections, morph animation, native camera/fog and cleanup.
+A fresh isolated Kirby/Yoshi workload submits all 3,600 frames in 60.026 s;
+mean simulation is 0.474 ms and mean draw submission 4.219 ms. Another run
+submitted 3,594/3,600 frames during a slow burst, so the timing result is not
+unconditional. Character select, audio, complete scene routing and static
+release integration remain pending. None of these samples measures distinct
+presentations or physical input latency. See the [current native-port status](BROWSER-NATIVE-PORT-STATUS.md).
+
 September 15: the user selected the direct decompiled-C browser port as the next
 approach. Its [first implemented milestone](BROWSER-NATIVE-PORT-STATUS.md) runs
 original collision/archive/RNG code and loads all six tournament collision

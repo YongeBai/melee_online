@@ -84,6 +84,8 @@
     "VISetBlack",
     "VISetPostRetraceCallback",
     "VISetPreRetraceCallback",
-    "VIWaitForRetrace"
+    "VIWaitForRetrace",
+    "OSCreateAlarm",
+    "OSSetAlarm"
   ]
 }

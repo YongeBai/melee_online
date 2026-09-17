@@ -5,6 +5,30 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Original stage select now constructs, animates, renders and exits in the native
+port. The six tournament choices and B cancellation pass original controller
+hit tests, confirmation animation, scene-exit results and cleanup. The test uses
+1,563 scheduler ticks and 49 GPU snapshots: 87,246 vertices, 25,137 source-derived
+morph components and 64 shader pixel-channel checks per menu instance pass.
+The original menu camera is preserved. Its background uses original HSD morph
+interpolation and the original SDK's quantized linear-fog coefficients. Dynamic
+hover labels required refreshing native polygon bindings after address reuse.
+All assets load automatically. Music requests are explicitly declined by the
+diagnostic, and subsequent match loading is not connected yet.
+
+The new core passes 254 unit tests, shared browser checks and the 280-tick native
+pause regression. An isolated Kirby/Yoshi combat run completes 3,600 simulation
+steps and 3,600 draw submissions in 60.026 s: mean simulation 0.474 ms, mean
+submission 4.219 ms, p95 7.1 ms and maximum 16.1 ms, with no catch-up callbacks.
+An earlier same-core sample submitted 3,594 of 3,600 frames during a burst of slow
+draws; that result is retained rather than treated as a passing cadence sample.
+Both runs preserve the prior final gameplay fields, transitions and combat
+windows, excluding relocated pointers. These are submission measurements, not
+distinct displayed FPS or input-to-photon latency. Character select, audio,
+complete menu/match/results routing, costumes and release integration remain
+unfinished. The public play route still uses the existing emulator path.
+[Stage-select implementation and regression evidence](benchmarks/browser-2026-09-16-native-port-stage-menu.json).
+
 Native pause/resume is now integrated in the development match. The original
 USA pause artwork loads automatically; Enter/Escape and gamepad Start reach the
 original VS routines. Both player owners pass debounce, held-Start, wrong-player

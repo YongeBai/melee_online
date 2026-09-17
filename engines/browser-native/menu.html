@@ -1,0 +1,27 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Melee native stage-select diagnostic</title>
+<style>body{margin:0;background:#111;color:white;font:14px monospace}canvas{display:block;width:960px;height:720px;margin:auto}pre{white-space:pre-wrap}</style>
+<canvas id="game" width="960" height="720"></canvas>
+<pre id="result">Loading hosted native menu…</pre>
+<script type="module">
+import create from './melee-fighter-init.mjs';
+import {convertMenuAsset} from './menu-assets.mjs';
+import {installResidentFile} from './resident-files.mjs';
+import {createNativeMenuPreview} from './native-menu-preview.mjs';
+const music=[],diagnostics=[],report={passed:false,audibleMusic:false,playableMatch:false};
+try{
+ const response=await fetch('./fixtures/MnSlMap.usd');if(!response.ok)throw Error('Hosted menu unavailable');
+ const bytes=new Uint8Array(await response.arrayBuffer()),asset=convertMenuAsset(bytes),module=await create({printErr:s=>diagnostics.push(s),onNativeMusic:r=>{music.push(r);return false;}});
+ installResidentFile(module,'MnSlMap.usd',asset.image);module._portStageMenuInitialize(0);
+ const preview=createNativeMenuPreview(module,document.querySelector('canvas'),bytes,asset,{verifyVertices:new URLSearchParams(location.search).has('verifyvertices')});
+ let frames=0;
+ function read(){return {frames,cursor:[module._portStageMenuRead(0),module._portStageMenuRead(1)],stage:module._portStageMenuRead(2),exit:module._portStageMenuRead(5),phase:module._portStageMenuRead(6),hover:module._portStageMenuRead(7)};}
+ function icons(){return Array.from({length:30},(_,i)=>({i,stage:module._portStageMenuNativeRead(2,i),x:module._portStageMenuNativeRead(3,i),y:module._portStageMenuNativeRead(4,i),unlocked:module._portStageMenuNativeRead(5,i)}));}
+ function step(samples=[[0,0,0,0,0,0,0]]){for(let i=0;i<4;i++)module._portControllerSample(i,...(samples[i]??[0,0,0,0,0,0,0]));module._portStageMenuStep();frames++;}
+ function draw(){report.render=preview.draw();report.frames=frames;report.cursor=[module._portStageMenuRead(0),module._portStageMenuRead(1)];return report;}
+ globalThis.nativeMenu={step,draw,read,icons,finish(){preview.dispose();return {stage:module._portStageMenuFinish(),objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
+ for(let i=0;i<120;i++)step();draw();Object.assign(report,{passed:true,music,diagnostics});
+}catch(e){Object.assign(report,{error:String(e.stack??e),music,diagnostics});}
+ globalThis.menuReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
+</script>
