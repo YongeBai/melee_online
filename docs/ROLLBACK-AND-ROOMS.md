@@ -1,5 +1,12 @@
 # Two-player rooms and server-side rollback
 
+For the direct C-to-WASM browser port, see
+[the native snapshot/correction prototype](BROWSER-NATIVE-ROLLBACK.md).
+That diagnostic runs local prediction and full-state correction in two browsers;
+its production room route still uses three-frame lockstep. The server-side
+Dolphin architecture below describes the historical/public implementation and
+must not be used as evidence of browser-native rollback performance.
+
 The default `/play/` path now creates a private two-seat room. Share the six-character
 code; the second browser enters it at character select. The room owner is always
 P1 (controller port 1), and the joining player is P2 (controller port 2), including

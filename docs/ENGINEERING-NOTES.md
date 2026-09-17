@@ -7,6 +7,18 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+The experimental rollback boundary is documented in `BROWSER-NATIVE-ROLLBACK.md`.
+Never restore WASM memory underneath an attached renderer: its JS ownership maps
+retain pointers to allocations in that same heap. Full memory also omits mutable
+WASM globals unless explicitly exported/captured; the present runtime has four.
+The diagnostic captures both plus a deterministic host journal, guards table and
+memory-size stability, and destroys/reconstructs presentation owners around
+restores. Native draw calls mutate WASM, so its draw/discard boundary still needs
+a gameplay-dependency audit. Successful complete-state convergence in the probe
+does not turn production lockstep into rollback or certify 720p60. Constructor
+still images precede the live canvas; remove them in this diagnostic before
+capturing a corrected-frame screenshot.
+
 The development native port now runs the decompiled C directly in browser WASM.
 Its current scope and limitations are in `BROWSER-NATIVE-PORT-STATUS.md`; the
 server-streamed implementation described below is the historical/public path.

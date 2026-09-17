@@ -276,7 +276,7 @@ try {
     if(damageHud){module._portTournamentDamageInitialize();report.hud.damage=true;}
     if(tournament&&!intro){module._portTournamentBegin();module._portTournamentStep();report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));}
     const step=()=>{tournament?module._portTournamentStep():module._portRuntimeStep();if([code,opponentCode].some(c=>c==='Sk'||c==='Zd')){object=module._Player_GetEntity(0);if(opponent)opponent=module._Player_GetEntity(1);}};
-    let preview,canvas;
+    let preview,canvas,previewFactory;
     const saveShaders=()=>{report.shaderCoverage=preview?.shaderCoverage();if(params.has('recordshaders'))globalThis.nativeShaderSources=preview.shaderSources();};
     function recordHud(drawn){
       if(drawn.materialDraws?.afterimageDraws){
@@ -354,7 +354,7 @@ try {
           else itemModels.set(base+row.joint,{name:character+' '+row.label,bytes});
         }
       }
-      preview=createNativeMatchPreview(module,canvas,previewActors,{cacheModels:params.get('cachemodels')!=='0',traceAttachments:params.has('kirbycopy'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});
+      previewFactory=()=>createNativeMatchPreview(module,canvas,previewActors,{cacheModels:params.get('cachemodels')!=='0',traceAttachments:params.has('kirbycopy'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'});preview=previewFactory();
       if(params.has('prewarmshaders')){
         const build=await (await fetch('./fighter-init-build.json')).json();
         const hashes=await Promise.all(shaderIdentityFiles.map(async name=>{const bytes=await (await fetch('./'+name)).arrayBuffer(),hash=await crypto.subtle.digest('SHA-256',bytes);return [name,Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')];}));
@@ -376,6 +376,12 @@ try {
           const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);report.intro[name]=drawn;
         }
       }});report.match=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
+    }
+    if(options.onMatchBoundary){
+      if(!tournament||!intro||live||menuHandoff)throw Error('Checkpoint diagnostic requires a settled standalone tournament');
+      preview?.dispose();preview=null;
+      const boundary={module,step,readPlayers:()=>[0,1].map(p=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(module._Player_GetEntity(p),i))),createPreview:previewFactory};
+      await options.onMatchBoundary(boundary);report.checkpointBoundary=true;return report;
     }
     if(stageCallbacks&&!live&&!params.has('input')&&!params.has('workloadsteps')){
       report.stage.transitions=[];report.stage.peakStageParticles=0;let previous='';

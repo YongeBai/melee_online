@@ -1,0 +1,2682 @@
+{
+  "date": "2026-09-17",
+  "scope": "Experimental direct C-to-WASM snapshot/local-prediction/correction boundary; production remains three-frame lockstep",
+  "baselineCommit": "3d99cea0a9ee6726f57cb9121e49d662e926214b",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "compiler": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 5.0.7 (263db4cffa6f9fc2ec514a70abac81362ea41849)",
+  "wasmSha256": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+  "host": {
+    "cpu": "AMD Ryzen AI 9 HX PRO 370",
+    "gpu": "Radeon 890M",
+    "browser": "Google Chrome 151.0.7922.137",
+    "node": "v24.15.0"
+  },
+  "sourceSha256": {
+    "engines/browser-native/wasm-snapshot.mjs": "6553f5670c193ed3cd02d75738f9f32ec87545b1ff50994f1e04349d7c3b2b83",
+    "engines/browser-native/rollback-session.mjs": "ce3feb4cca6773086c48b03a0e1ab286e1240901b81f1bc350eb9d5f3c58edee",
+    "engines/browser-native/rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+    "engines/browser-native/rollback-probe.mjs": "cbeadf702f17526abcdde8bb4d33850cf36ad8fc2973b911d9d6d4fb89fa48a4",
+    "engines/browser-native/rollback-probe.html": "1e42ac920c37a6d76cf2aef283bd02a8f73a388fdeedf2e741546247e4566f2a",
+    "engines/browser-native/constructor-runner.mjs": "16504229d795be094462cd481544d8192d702196f52eb6902460b7726f9a1ccd",
+    "scripts/native-port/probe-rollback.mjs": "182769d1a5d6c8ff157cb0b2512e97e813c6ef5d7c12ada6b28ee09cda4cf05b",
+    "scripts/native-port/wasm-snapshot.test.mjs": "fb8a874b137329cee4006f58171dc23ae0f15c066715d6039977f47519b2c7fa",
+    "scripts/native-port/rollback-session.test.mjs": "0ebde0f6e43a74f4293855d161d58758587d86938277f0386c0e78fe940ad930"
+  },
+  "snapshotBoundary": {
+    "linearMemory": "Every byte of the complete WASM linear memory, including allocator metadata and stack",
+    "mutableGlobals": 4,
+    "host": "Deterministic muted music request state and journal",
+    "sameInstanceOnly": true,
+    "rendererDetached": true,
+    "functionTable": "Fixed; every entry checked on capture/restore",
+    "memoryGrowth": "Rejected across a checkpoint",
+    "abortedRuntime": "Rejected",
+    "audioPresented": false,
+    "speculativeMatchEnd": "Rejected",
+    "memoryBudgetBytes": 2147483648
+  },
+  "configuration": {
+    "checkpointInterval": 4,
+    "predictionWindow": 12,
+    "scheduleDelayMs": 16,
+    "presentEveryForwardFrames": 60
+  },
+  "trials": [
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "workload": "scripted",
+      "frames": 240,
+      "scope": "Same-instance detached-renderer correction; two separate browsers; not playable room rollback or FPS certification",
+      "transport": {
+        "packets": 480,
+        "reordered": 169,
+        "injectedDelayMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 34,
+        "stockChanges": 0
+      },
+      "initialState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 0,
+            "y": 0.00009999999747378752,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 0,
+            "y": 54.40010070800781,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [],
+        "clock": [
+          1,
+          479,
+          0
+        ],
+        "objects": 27,
+        "procs": 60
+      },
+      "correctedState": {
+        "players": [
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": 32.9976692199707,
+            "y": 0.00009999999747378752,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": -14.5897216796875,
+            "y": 0.00009999999747378752,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [],
+        "clock": [
+          241,
+          475,
+          0
+        ],
+        "objects": 30,
+        "procs": 72
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1919200,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 13883808,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "clients": [
+        {
+          "seat": 0,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 189,
+            "corrections": 14,
+            "replayedFrames": 76,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 6,
+            "retainedBytes": 454754304
+          },
+          "snapshotCosts": {
+            "captures": 79,
+            "restores": 20,
+            "capturedBytes": 3991732224,
+            "restoredBytes": 1010565120,
+            "captureCpuMs": 1195.1000000834465,
+            "restoreCpuMs": 82.39999994635582,
+            "maxCaptureCpuMs": 23.200000017881393,
+            "maxRestoreCpuMs": 8.699999988079071,
+            "retainedBytes": 454754304,
+            "count": 9,
+            "meanCaptureCpuMs": 15.127848102322108,
+            "meanRestoreCpuMs": 4.119999997317791
+          },
+          "elapsedProbeMs": 6494.300000011921,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 194.90000000596046,
+            "max": 234.69999998807907,
+            "mean": 212.43333332737288
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "renderMutation": {
+            "changedBytes": 6322,
+            "changedPages": 24,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "afterPresentationRestoreSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1"
+        },
+        {
+          "seat": 1,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 218,
+            "corrections": 15,
+            "replayedFrames": 87,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 4,
+            "retainedBytes": 353697792
+          },
+          "snapshotCosts": {
+            "captures": 81,
+            "restores": 21,
+            "capturedBytes": 4092788736,
+            "restoredBytes": 1061093376,
+            "captureCpuMs": 1245.699999988079,
+            "restoreCpuMs": 84.50000002980232,
+            "maxCaptureCpuMs": 24.30000001192093,
+            "maxRestoreCpuMs": 8.900000005960464,
+            "retainedBytes": 353697792,
+            "count": 7,
+            "meanCaptureCpuMs": 15.37901234553184,
+            "meanRestoreCpuMs": 4.023809525228682
+          },
+          "elapsedProbeMs": 6462.5999999940395,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 197.7999999821186,
+            "max": 213.30000001192093,
+            "mean": 206.0333333313465
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              3.477607488632202,
+              48.32766342163086,
+              273.18682861328125
+            ],
+            "interest": [
+              8.820296287536621,
+              29.57503318786621,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 226
+          },
+          "renderMutation": {
+            "changedBytes": 6322,
+            "changedPages": 24,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+          "afterPresentationRestoreSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1"
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "visibleFightersAndHud": true,
+        "canvas": [
+          960,
+          720
+        ],
+        "pixelParityCertified": false,
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Fc-Fx/corrected-0.png",
+            "sha256": "62734b975b2cce99ce5ba50640d6f45f9ba13aa9ad681677854f1a2a45dc69b0"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Fc-Fx/corrected-1.png",
+            "sha256": "62734b975b2cce99ce5ba50640d6f45f9ba13aa9ad681677854f1a2a45dc69b0"
+          }
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "282bfd1aef8faa1ddb2c4b07a8c50884c48a584628f1bd7e881c94ef90e1cbb1",
+        "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "initialHash": {
+        "stateSha256": "1c204a7ae591fbe0915be09ee64198f89808441fe91c983a1d25aa47a7d90401",
+        "memorySha256": "0698b136fa3a49cc253ec314ba19bffa2d48f3f05472444bf701d02e6e3d4dbf",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "stageSampleRanges": []
+    },
+    {
+      "stage": "story",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "workload": "scripted",
+      "frames": 240,
+      "scope": "Same-instance detached-renderer correction; two separate browsers; not playable room rollback or FPS certification",
+      "transport": {
+        "packets": 480,
+        "reordered": 168,
+        "injectedDelayMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 8,
+        "damageFrames": 0,
+        "attackFrames": 4,
+        "stockChanges": 0
+      },
+      "initialState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": -42,
+            "y": 23.450098037719727,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 42,
+            "y": 23.450098037719727,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [
+          -51.36943054199219,
+          -38.5
+        ],
+        "clock": [
+          1,
+          479,
+          0
+        ],
+        "objects": 28,
+        "procs": 69
+      },
+      "correctedState": {
+        "players": [
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": -15.362876892089844,
+            "y": 0.00009999999747378752,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": 11.800321578979492,
+            "y": 0.00009999999747378752,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [
+          33.793251037597656,
+          -38.5
+        ],
+        "clock": [
+          241,
+          475,
+          0
+        ],
+        "objects": 31,
+        "procs": 81
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1923808,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 15828864,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "clients": [
+        {
+          "seat": 0,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 195,
+            "corrections": 15,
+            "replayedFrames": 72,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 485490688,
+            "retainedSnapshots": 6,
+            "retainedBytes": 546177024
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 21,
+            "capturedBytes": 4733534208,
+            "restoredBytes": 1274413056,
+            "captureCpuMs": 1669.1000001430511,
+            "restoreCpuMs": 111.39999994635582,
+            "maxCaptureCpuMs": 36.20000001788139,
+            "maxRestoreCpuMs": 11.099999994039536,
+            "retainedBytes": 546177024,
+            "count": 9,
+            "meanCaptureCpuMs": 21.398717950551937,
+            "meanRestoreCpuMs": 5.30476190220742
+          },
+          "elapsedProbeMs": 7409.699999988079,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 243.30000001192093,
+            "max": 301,
+            "mean": 275.3000000019868
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.5498374700546265,
+              24.83981704711914,
+              143.14468383789062
+            ],
+            "interest": [
+              -1.7742576599121094,
+              12.03598690032959,
+              0
+            ],
+            "fov": 20,
+            "aspect": 1.2173333168029785,
+            "draws": 350
+          },
+          "renderMutation": {
+            "changedBytes": 6142,
+            "changedPages": 24,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+          "afterPresentationRestoreSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5"
+        },
+        {
+          "seat": 1,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 214,
+            "corrections": 17,
+            "replayedFrames": 81,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 546177024,
+            "retainedSnapshots": 4,
+            "retainedBytes": 424804352
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 23,
+            "capturedBytes": 4733534208,
+            "restoredBytes": 1395785728,
+            "captureCpuMs": 1650.200000166893,
+            "restoreCpuMs": 100,
+            "maxCaptureCpuMs": 35,
+            "maxRestoreCpuMs": 10.199999988079071,
+            "retainedBytes": 424804352,
+            "count": 7,
+            "meanCaptureCpuMs": 21.15641025854991,
+            "meanRestoreCpuMs": 4.3478260869565215
+          },
+          "elapsedProbeMs": 7180.4000000059605,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 290.69999998807907,
+            "max": 302.2000000178814,
+            "mean": 295.06666667262715
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.5498374700546265,
+              24.83981704711914,
+              143.14468383789062
+            ],
+            "interest": [
+              -1.7742576599121094,
+              12.03598690032959,
+              0
+            ],
+            "fov": 20,
+            "aspect": 1.2173333168029785,
+            "draws": 350
+          },
+          "renderMutation": {
+            "changedBytes": 6142,
+            "changedPages": 24,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+          "afterPresentationRestoreSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5"
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "visibleFightersAndHud": true,
+        "canvas": [
+          960,
+          720
+        ],
+        "pixelParityCertified": false,
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-story-Fc-Fx/corrected-0.png",
+            "sha256": "cb920228654a8261165db8cb8b45edf1394ff2129454600bcd37220aed15b085"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-story-Fc-Fx/corrected-1.png",
+            "sha256": "cb920228654a8261165db8cb8b45edf1394ff2129454600bcd37220aed15b085"
+          }
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "6976e5f9abce32040baadbb8655b5dff3467203d81957539086252595d06f3f5",
+        "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "initialHash": {
+        "stateSha256": "3955c23e29a6cbcf4183b471a6ec2022f0c0df632d9c5def5e59a69ac6a81feb",
+        "memorySha256": "15aac42cf6591ed64dd3c75e1a59ef6ce36a5d1a6575a5c47c2893e4e99d2d52",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "stageSampleRanges": [
+        {
+          "index": 0,
+          "min": -40.72410583496094,
+          "max": 33.793251037597656
+        },
+        {
+          "index": 1,
+          "min": -38.5,
+          "max": -38.499996185302734
+        }
+      ]
+    },
+    {
+      "stage": "stadium",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "workload": "scripted",
+      "frames": 240,
+      "scope": "Same-instance detached-renderer correction; two separate browsers; not playable room rollback or FPS certification",
+      "transport": {
+        "packets": 480,
+        "reordered": 171,
+        "injectedDelayMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 8,
+        "damageFrames": 0,
+        "attackFrames": 4,
+        "stockChanges": 0
+      },
+      "initialState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": -39.999996185302734,
+            "y": 25.000099182128906,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 40,
+            "y": 25.000099182128906,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [
+          0,
+          5,
+          3600,
+          41,
+          80,
+          0
+        ],
+        "clock": [
+          1,
+          479,
+          0
+        ],
+        "objects": 27,
+        "procs": 59
+      },
+      "correctedState": {
+        "players": [
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": -13.362875938415527,
+            "y": 0.00009999999747378752,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": 10.295693397521973,
+            "y": 0.00009999999747378752,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [
+          0,
+          5,
+          3600,
+          281,
+          80,
+          0
+        ],
+        "clock": [
+          241,
+          475,
+          0
+        ],
+        "objects": 30,
+        "procs": 71
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1924192,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 17223968,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "clients": [
+        {
+          "seat": 0,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 181,
+            "corrections": 13,
+            "replayedFrames": 59,
+            "maxReplay": 7,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 485490688,
+            "retainedSnapshots": 6,
+            "retainedBytes": 546177024
+          },
+          "snapshotCosts": {
+            "captures": 75,
+            "restores": 19,
+            "capturedBytes": 4551475200,
+            "restoredBytes": 1153040384,
+            "captureCpuMs": 1482.3000000715256,
+            "restoreCpuMs": 107.30000001192093,
+            "maxCaptureCpuMs": 28.400000005960464,
+            "maxRestoreCpuMs": 12.700000017881393,
+            "retainedBytes": 546177024,
+            "count": 9,
+            "meanCaptureCpuMs": 19.764000000953676,
+            "meanRestoreCpuMs": 5.647368421680049
+          },
+          "elapsedProbeMs": 7611.5999999940395,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 270.69999998807907,
+            "max": 302.40000000596046,
+            "mean": 289.39999999602634
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.0259143114089966,
+              25.855648040771484,
+              86.34040832519531
+            ],
+            "interest": [
+              -1.4996124505996704,
+              15.240766525268555,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 271
+          },
+          "renderMutation": {
+            "changedBytes": 5993,
+            "changedPages": 24,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+          "afterPresentationRestoreSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16"
+        },
+        {
+          "seat": 1,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 227,
+            "corrections": 17,
+            "replayedFrames": 83,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 546177024,
+            "retainedSnapshots": 4,
+            "retainedBytes": 424804352
+          },
+          "snapshotCosts": {
+            "captures": 80,
+            "restores": 23,
+            "capturedBytes": 4854906880,
+            "restoredBytes": 1395785728,
+            "captureCpuMs": 1553.400000244379,
+            "restoreCpuMs": 112.1999998986721,
+            "maxCaptureCpuMs": 28.69999998807907,
+            "maxRestoreCpuMs": 9,
+            "retainedBytes": 424804352,
+            "count": 7,
+            "meanCaptureCpuMs": 19.417500003054737,
+            "meanRestoreCpuMs": 4.878260865159657
+          },
+          "elapsedProbeMs": 7085,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 236,
+            "max": 316.5,
+            "mean": 272.79999999205273
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.0259143114089966,
+              25.855648040771484,
+              86.34040832519531
+            ],
+            "interest": [
+              -1.4996124505996704,
+              15.240766525268555,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 271
+          },
+          "renderMutation": {
+            "changedBytes": 5993,
+            "changedPages": 24,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+          "afterPresentationRestoreSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16"
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "visibleFightersAndHud": true,
+        "canvas": [
+          960,
+          720
+        ],
+        "pixelParityCertified": false,
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-stadium-Fc-Fx/corrected-0.png",
+            "sha256": "27f01f099e68ae31290c249ba4e452396764497f078fdf74813554072aa9b069"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-stadium-Fc-Fx/corrected-1.png",
+            "sha256": "27f01f099e68ae31290c249ba4e452396764497f078fdf74813554072aa9b069"
+          }
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "48cb9c4882024f9d43d362e117b921c49839ad6eaeea884215c2f11a177c7c16",
+        "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "initialHash": {
+        "stateSha256": "8a0babae0d433b8d2d5db2b16bbfdb23316cb58e0ef2352e8b268b8ad280a042",
+        "memorySha256": "27f71f5848c56bd32e122db18bbb9a96018e6c9d5a01fd6ff54b933cd8eb22f1",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "stageSampleRanges": [
+        {
+          "index": 0,
+          "min": 0,
+          "max": 0
+        },
+        {
+          "index": 1,
+          "min": 5,
+          "max": 5
+        },
+        {
+          "index": 2,
+          "min": 3600,
+          "max": 3600
+        },
+        {
+          "index": 3,
+          "min": 71,
+          "max": 281
+        },
+        {
+          "index": 4,
+          "min": 80,
+          "max": 80
+        },
+        {
+          "index": 5,
+          "min": 0,
+          "max": 0
+        }
+      ]
+    },
+    {
+      "stage": "dreamland",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "workload": "scripted",
+      "frames": 240,
+      "scope": "Same-instance detached-renderer correction; two separate browsers; not playable room rollback or FPS certification",
+      "transport": {
+        "packets": 480,
+        "reordered": 169,
+        "injectedDelayMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 34,
+        "stockChanges": 0
+      },
+      "initialState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 0,
+            "y": 0.008899999782443047,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": -46.599998474121094,
+            "y": 30.14219856262207,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [
+          0,
+          0,
+          580
+        ],
+        "clock": [
+          1,
+          479,
+          0
+        ],
+        "objects": 31,
+        "procs": 72
+      },
+      "correctedState": {
+        "players": [
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": 32.99767303466797,
+            "y": 0.008899999782443047,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": -64.76275634765625,
+            "y": 0.008899999782443047,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [
+          0,
+          0,
+          340
+        ],
+        "clock": [
+          241,
+          475,
+          0
+        ],
+        "objects": 34,
+        "procs": 84
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1925984,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 14497184,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "clients": [
+        {
+          "seat": 0,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 219,
+            "corrections": 17,
+            "replayedFrames": 72,
+            "maxReplay": 7,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 404226048,
+            "retainedSnapshots": 6,
+            "retainedBytes": 454754304
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 23,
+            "capturedBytes": 3941203968,
+            "restoredBytes": 1162149888,
+            "captureCpuMs": 1294.500000089407,
+            "restoreCpuMs": 103.89999997615814,
+            "maxCaptureCpuMs": 28.30000001192093,
+            "maxRestoreCpuMs": 8.5,
+            "retainedBytes": 454754304,
+            "count": 9,
+            "meanCaptureCpuMs": 16.59615384730009,
+            "meanRestoreCpuMs": 4.517391303311223
+          },
+          "elapsedProbeMs": 6746.5,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 184.80000001192093,
+            "max": 235.90000000596046,
+            "mean": 215.30000000198683
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              1.3618351221084595,
+              16.934423446655273,
+              238.098388671875
+            ],
+            "interest": [
+              -14.723745346069336,
+              9.44859790802002,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 216
+          },
+          "renderMutation": {
+            "changedBytes": 6024,
+            "changedPages": 25,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+          "afterPresentationRestoreSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e"
+        },
+        {
+          "seat": 1,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 225,
+            "corrections": 16,
+            "replayedFrames": 78,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 404226048,
+            "retainedSnapshots": 4,
+            "retainedBytes": 353697792
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 22,
+            "capturedBytes": 3941203968,
+            "restoredBytes": 1111621632,
+            "captureCpuMs": 1356.3000000417233,
+            "restoreCpuMs": 104.60000002384186,
+            "maxCaptureCpuMs": 26.400000005960464,
+            "maxRestoreCpuMs": 10.200000017881393,
+            "retainedBytes": 353697792,
+            "count": 7,
+            "meanCaptureCpuMs": 17.388461538996452,
+            "meanRestoreCpuMs": 4.7545454556291755
+          },
+          "elapsedProbeMs": 6570,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 193.69999998807907,
+            "max": 201.80000001192093,
+            "mean": 198.43333332737288
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              1.3618351221084595,
+              16.934423446655273,
+              238.098388671875
+            ],
+            "interest": [
+              -14.723745346069336,
+              9.44859790802002,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 216
+          },
+          "renderMutation": {
+            "changedBytes": 6024,
+            "changedPages": 25,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+          "afterPresentationRestoreSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e"
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "visibleFightersAndHud": true,
+        "canvas": [
+          960,
+          720
+        ],
+        "pixelParityCertified": false,
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-dreamland-Fc-Fx/corrected-0.png",
+            "sha256": "57771a23d98264c9ae2c377459a7a81e88f4b0115c198846a2fe9c13dbf2d327"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-dreamland-Fc-Fx/corrected-1.png",
+            "sha256": "57771a23d98264c9ae2c377459a7a81e88f4b0115c198846a2fe9c13dbf2d327"
+          }
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "801bd6c268aa4a2b338774370d37e02557c678816e858fedd6f1194c9632245e",
+        "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          1,
+          1102816,
+          1168352
+        ]
+      },
+      "initialHash": {
+        "stateSha256": "6c882a54bb0d130d36efc3df0624be2885354c723b3a6b0734438765d5d0f969",
+        "memorySha256": "df065b24abe5f8b125cd8eae954bbfeb2f6ee65fd5d592a422a8d0ced314ae59",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          1,
+          1102816,
+          1168352
+        ]
+      },
+      "stageSampleRanges": [
+        {
+          "index": 0,
+          "min": 0,
+          "max": 0
+        },
+        {
+          "index": 1,
+          "min": 0,
+          "max": 0
+        },
+        {
+          "index": 2,
+          "min": 340,
+          "max": 550
+        }
+      ]
+    },
+    {
+      "stage": "destination",
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "workload": "scripted",
+      "frames": 240,
+      "scope": "Same-instance detached-renderer correction; two separate browsers; not playable room rollback or FPS certification",
+      "transport": {
+        "packets": 480,
+        "reordered": 167,
+        "injectedDelayMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 34,
+        "stockChanges": 0
+      },
+      "initialState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": -60,
+            "y": 0.00009999999747378752,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 60,
+            "y": 0.00009999999747378752,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [],
+        "clock": [
+          1,
+          479,
+          0
+        ],
+        "objects": 32,
+        "procs": 75
+      },
+      "correctedState": {
+        "players": [
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": -27.002334594726562,
+            "y": 0.00009999999747378752,
+            "kind": 22,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 42,
+            "airborne": 0,
+            "x": 22.652406692504883,
+            "y": 0.00009999999747378752,
+            "kind": 1,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [],
+        "clock": [
+          241,
+          475,
+          0
+        ],
+        "objects": 35,
+        "procs": 87
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 12544512,
+          "code": "Fc",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 14360288,
+          "code": "Fx",
+          "costume": 0
+        }
+      ],
+      "clients": [
+        {
+          "seat": 0,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 224,
+            "corrections": 14,
+            "replayedFrames": 97,
+            "maxReplay": 11,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 6,
+            "retainedBytes": 454754304
+          },
+          "snapshotCosts": {
+            "captures": 86,
+            "restores": 20,
+            "capturedBytes": 4345430016,
+            "restoredBytes": 1010565120,
+            "captureCpuMs": 1400.9999999701977,
+            "restoreCpuMs": 102.2000000178814,
+            "maxCaptureCpuMs": 24.399999976158142,
+            "maxRestoreCpuMs": 11,
+            "retainedBytes": 454754304,
+            "count": 9,
+            "meanCaptureCpuMs": 16.290697674072067,
+            "meanRestoreCpuMs": 5.11000000089407
+          },
+          "elapsedProbeMs": 7110.800000011921,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 212.2000000178814,
+            "max": 245.5,
+            "mean": 229.56666667262712
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.851180911064148,
+              29.70431900024414,
+              130.90716552734375
+            ],
+            "interest": [
+              -2.153271198272705,
+              14.212993621826172,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 200
+          },
+          "renderMutation": {
+            "changedBytes": 6454,
+            "changedPages": 25,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+          "afterPresentationRestoreSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544"
+        },
+        {
+          "seat": 1,
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 161,
+            "corrections": 13,
+            "replayedFrames": 66,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 4,
+            "retainedBytes": 353697792
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 19,
+            "capturedBytes": 3941203968,
+            "restoredBytes": 960036864,
+            "captureCpuMs": 1355.5999999940395,
+            "restoreCpuMs": 79.39999988675117,
+            "maxCaptureCpuMs": 27.80000001192093,
+            "maxRestoreCpuMs": 8.099999994039536,
+            "retainedBytes": 353697792,
+            "count": 7,
+            "meanCaptureCpuMs": 17.379487179410763,
+            "meanRestoreCpuMs": 4.178947362460588
+          },
+          "elapsedProbeMs": 6811,
+          "presentationCount": 4,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 3,
+            "min": 235.30000001192093,
+            "max": 285.5,
+            "mean": 266.3000000019868
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.851180911064148,
+              29.70431900024414,
+              130.90716552734375
+            ],
+            "interest": [
+              -2.153271198272705,
+              14.212993621826172,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 200
+          },
+          "renderMutation": {
+            "changedBytes": 6454,
+            "changedPages": 25,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+          "afterPresentationRestoreSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544"
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "visibleFightersAndHud": true,
+        "canvas": [
+          960,
+          720
+        ],
+        "pixelParityCertified": false,
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-destination-Fc-Fx/corrected-0.png",
+            "sha256": "71d7b20a6e5d2707af234dd3148c099a503e1f268e9332efd611d2734e2af9b9"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-destination-Fc-Fx/corrected-1.png",
+            "sha256": "71d7b20a6e5d2707af234dd3148c099a503e1f268e9332efd611d2734e2af9b9"
+          }
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "7c7ead3dca434936c2758f5abe6142eda1db6f9ba75c8e88481708e8e1d91544",
+        "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "initialHash": {
+        "stateSha256": "927b2519794b047bc55d95afc5acd6fd48d6eceab59f7338812178e721d2c756",
+        "memorySha256": "6baeae4ef84388d5be95d28d7cf090f41b408224263d211d700db63ca62a3de7",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "stageSampleRanges": []
+    },
+    {
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "workload": "scripted",
+      "frames": 1800,
+      "scope": "Same-instance detached-renderer correction; two separate browsers; not playable room rollback or FPS certification",
+      "transport": {
+        "packets": 3600,
+        "reordered": 1262,
+        "injectedDelayMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 0,
+        "damageFrames": 0,
+        "attackFrames": 360,
+        "stockChanges": 0
+      },
+      "initialState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": -36.25,
+            "y": 16.125099182128906,
+            "kind": 10,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 41.25,
+            "y": 22.125099182128906,
+            "kind": 9,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": -39.834861755371094,
+            "y": 16.125099182128906,
+            "kind": 11,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          null
+        ],
+        "stage": [
+          20,
+          28
+        ],
+        "clock": [
+          1,
+          479,
+          0
+        ],
+        "objects": 32,
+        "procs": 83
+      },
+      "correctedState": {
+        "players": [
+          {
+            "action": 342,
+            "airborne": 1,
+            "x": -12.805937767028809,
+            "y": 78.95010375976562,
+            "kind": 10,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 367,
+            "airborne": 1,
+            "x": 18.873064041137695,
+            "y": 22.92287254333496,
+            "kind": 9,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          {
+            "action": 342,
+            "airborne": 1,
+            "x": -12.805928230285645,
+            "y": 84.57689666748047,
+            "kind": 11,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          null
+        ],
+        "stage": [
+          20,
+          19.42059326171875
+        ],
+        "clock": [
+          1801,
+          449,
+          0
+        ],
+        "objects": 35,
+        "procs": 113
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 17810112,
+          "code": "Pp",
+          "costume": 0
+        },
+        {
+          "slot": 0,
+          "index": 1,
+          "owner": 18718560,
+          "code": "Nn",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 19492320,
+          "code": "Pe",
+          "costume": 0
+        }
+      ],
+      "clients": [
+        {
+          "seat": 0,
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1574,
+            "corrections": 100,
+            "replayedFrames": 530,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 546177024,
+            "retainedSnapshots": 5,
+            "retainedBytes": 485490688
+          },
+          "snapshotCosts": {
+            "captures": 561,
+            "restores": 132,
+            "capturedBytes": 34045034496,
+            "restoredBytes": 8010596352,
+            "captureCpuMs": 11460.30000013113,
+            "restoreCpuMs": 672.3000000119209,
+            "maxCaptureCpuMs": 35.89999997615814,
+            "maxRestoreCpuMs": 10.400000005960464,
+            "retainedBytes": 485490688,
+            "count": 8,
+            "meanCaptureCpuMs": 20.42834224622305,
+            "meanRestoreCpuMs": 5.093181818272129
+          },
+          "elapsedProbeMs": 52725.20000001788,
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 29,
+            "min": 248.09999999403954,
+            "max": 419.69999998807907,
+            "mean": 324.1241379287736
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              2.5883209705352783,
+              100.63968658447266,
+              193.9479217529297
+            ],
+            "interest": [
+              3.0037317276000977,
+              54.23046875,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 290
+          },
+          "renderMutation": {
+            "changedBytes": 7270,
+            "changedPages": 28,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+          "afterPresentationRestoreSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209"
+        },
+        {
+          "seat": 1,
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1332,
+            "corrections": 88,
+            "replayedFrames": 392,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 546177024,
+            "retainedSnapshots": 5,
+            "retainedBytes": 485490688
+          },
+          "snapshotCosts": {
+            "captures": 534,
+            "restores": 120,
+            "capturedBytes": 32406503424,
+            "restoredBytes": 7282360320,
+            "captureCpuMs": 10828.499999791384,
+            "restoreCpuMs": 641.7999997735023,
+            "maxCaptureCpuMs": 35.599999994039536,
+            "maxRestoreCpuMs": 11.099999994039536,
+            "retainedBytes": 485490688,
+            "count": 8,
+            "meanCaptureCpuMs": 20.27808988724978,
+            "meanRestoreCpuMs": 5.348333331445853
+          },
+          "elapsedProbeMs": 52601.5,
+          "presentationCount": 30,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 29,
+            "min": 262.80000001192093,
+            "max": 442.80000001192093,
+            "mean": 350.48275862480034
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              2.5883209705352783,
+              100.63968658447266,
+              193.9479217529297
+            ],
+            "interest": [
+              3.0037317276000977,
+              54.23046875,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 290
+          },
+          "renderMutation": {
+            "changedBytes": 7270,
+            "changedPages": 28,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+          "afterPresentationRestoreSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209"
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "visibleFightersAndHud": true,
+        "canvas": [
+          960,
+          720
+        ],
+        "pixelParityCertified": false,
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe/corrected-0.png",
+            "sha256": "a092365e46b2d7ce3ce8d97cb060ddbb26d8430f78612da57ae188e0152688e4"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-fountain-Pp-Pe/corrected-1.png",
+            "sha256": "a092365e46b2d7ce3ce8d97cb060ddbb26d8430f78612da57ae188e0152688e4"
+          }
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "516f947d1421d4bd25822ae866b6dc462e2926187c1d10b62f338c5528dde209",
+        "memorySha256": "0fa3b9315c3eae4815bf2dfc59e4393fcdfac8f53e01852481bbb36098444cf9",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "initialHash": {
+        "stateSha256": "7651eaab1778a9a0ec6eb0da34ecd5edae2d6196a5927904daeb5265a4ca110f",
+        "memorySha256": "a0bc16d391df5a0037557bd2ac5e7191465f0af44526c29294989e6608cfce1a",
+        "bytes": 60686336,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "stageSampleRanges": [
+        {
+          "index": 0,
+          "min": 20,
+          "max": 20
+        },
+        {
+          "index": 1,
+          "min": 19.42059326171875,
+          "max": 28
+        }
+      ]
+    },
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Ca",
+        "Ca"
+      ],
+      "workload": "combat",
+      "frames": 600,
+      "scope": "Same-instance detached-renderer correction; two separate browsers; not playable room rollback or FPS certification",
+      "transport": {
+        "packets": 1200,
+        "reordered": 426,
+        "injectedDelayMs": [
+          15,
+          25,
+          40,
+          65,
+          85,
+          105,
+          130
+        ]
+      },
+      "referenceWorkload": {
+        "hitlagFrames": 51,
+        "damageFrames": 508,
+        "attackFrames": 325,
+        "stockChanges": 0
+      },
+      "initialState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 0,
+            "y": 0.00009999999747378752,
+            "kind": 2,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 0,
+            "y": 54.40010070800781,
+            "kind": 2,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [],
+        "clock": [
+          1,
+          479,
+          0
+        ],
+        "objects": 27,
+        "procs": 60
+      },
+      "correctedState": {
+        "players": [
+          {
+            "action": 14,
+            "airborne": 0,
+            "x": 10.11693286895752,
+            "y": 0.00009999999747378752,
+            "kind": 2,
+            "damage": 0,
+            "hitlag": 0,
+            "stocks": 4
+          },
+          {
+            "action": 180,
+            "airborne": 0,
+            "x": 21.774168014526367,
+            "y": 0.00009999999747378752,
+            "kind": 2,
+            "damage": 18.700000762939453,
+            "hitlag": 0,
+            "stocks": 4
+          }
+        ],
+        "partners": [
+          null,
+          null
+        ],
+        "stage": [],
+        "clock": [
+          601,
+          469,
+          0
+        ],
+        "objects": 27,
+        "procs": 60
+      },
+      "fighterForms": [
+        {
+          "slot": 0,
+          "index": 0,
+          "owner": 1918816,
+          "code": "Ca",
+          "costume": 0
+        },
+        {
+          "slot": 1,
+          "index": 0,
+          "owner": 1927328,
+          "code": "Ca",
+          "costume": 0
+        }
+      ],
+      "clients": [
+        {
+          "seat": 0,
+          "kernel": {
+            "frame": 600,
+            "confirmed": 599,
+            "pendingCorrection": null,
+            "forwardFrames": 600,
+            "predictedFrames": 497,
+            "corrections": 48,
+            "replayedFrames": 281,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 5,
+            "retainedBytes": 404226048
+          },
+          "snapshotCosts": {
+            "captures": 206,
+            "restores": 60,
+            "capturedBytes": 10408820736,
+            "restoredBytes": 3031695360,
+            "captureCpuMs": 3456.6999999582767,
+            "restoreCpuMs": 251.09999987483025,
+            "maxCaptureCpuMs": 31.30000001192093,
+            "maxRestoreCpuMs": 10.599999994039536,
+            "retainedBytes": 404226048,
+            "count": 8,
+            "meanCaptureCpuMs": 16.780097087176102,
+            "meanRestoreCpuMs": 4.184999997913837
+          },
+          "elapsedProbeMs": 16306,
+          "presentationCount": 10,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 9,
+            "min": 201.19999998807907,
+            "max": 278,
+            "mean": 236.55555555886693
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.32403564453125,
+              26.86067771911621,
+              182.2964324951172
+            ],
+            "interest": [
+              15.45451545715332,
+              9.173103332519531,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 225
+          },
+          "renderMutation": {
+            "changedBytes": 4766,
+            "changedPages": 22,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+          "afterPresentationRestoreSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4"
+        },
+        {
+          "seat": 1,
+          "kernel": {
+            "frame": 600,
+            "confirmed": 599,
+            "pendingCorrection": null,
+            "forwardFrames": 600,
+            "predictedFrames": 531,
+            "corrections": 46,
+            "replayedFrames": 271,
+            "maxReplay": 12,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 454754304,
+            "retainedSnapshots": 5,
+            "retainedBytes": 404226048
+          },
+          "snapshotCosts": {
+            "captures": 205,
+            "restores": 58,
+            "capturedBytes": 10358292480,
+            "restoredBytes": 2930638848,
+            "captureCpuMs": 3498.500000178814,
+            "restoreCpuMs": 269.19999998807907,
+            "maxCaptureCpuMs": 31.400000005960464,
+            "maxRestoreCpuMs": 12.5,
+            "retainedBytes": 404226048,
+            "count": 8,
+            "meanCaptureCpuMs": 17.065853659408848,
+            "meanRestoreCpuMs": 4.641379310139294
+          },
+          "elapsedProbeMs": 16388.40000000596,
+          "presentationCount": 10,
+          "replayPresentationCalls": 0,
+          "intermediatePresentationCpuMs": {
+            "samples": 9,
+            "min": 178.90000000596046,
+            "max": 368,
+            "mean": 226.06666665938167
+          },
+          "render": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.32403564453125,
+              26.86067771911621,
+              182.2964324951172
+            ],
+            "interest": [
+              15.45451545715332,
+              9.173103332519531,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "draws": 225
+          },
+          "renderMutation": {
+            "changedBytes": 4766,
+            "changedPages": 22,
+            "globalsChanged": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "hostChanged": false
+          },
+          "audio": {
+            "state": {
+              "active": false,
+              "paused": false,
+              "track": null,
+              "volume": 0
+            },
+            "journaled": 0,
+            "presented": 0
+          },
+          "correctedStateSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+          "afterPresentationRestoreSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4"
+        }
+      ],
+      "visualReview": {
+        "correctedCanvasReviewed": true,
+        "visibleFightersAndHud": true,
+        "canvas": [
+          960,
+          720
+        ],
+        "pixelParityCertified": false,
+        "screenshots": [
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Ca-Ca-combat/corrected-0.png",
+            "sha256": "8dc87daf85fb92b7eb8eca1d4e7432460bfcbbda535c97968280976ae4deda14"
+          },
+          {
+            "path": "dist/native-port/experiment-rollback-battlefield-Ca-Ca-combat/corrected-1.png",
+            "sha256": "8dc87daf85fb92b7eb8eca1d4e7432460bfcbbda535c97968280976ae4deda14"
+          }
+        ]
+      },
+      "referenceHash": {
+        "stateSha256": "1390f1c9df2c25792af77337050bf4963ba4c213aae80f89be1365a798731db4",
+        "memorySha256": "850d2dd8a14e3e034609f9cf5f8a7aff81d81d0d86f772f4815e5e7a1ff6339f",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "initialHash": {
+        "stateSha256": "d489497869ec083c94c1a4a203a3f9dede399d9e18fe3cb2766ae8869d9c56aa",
+        "memorySha256": "611fe51f4623011604420bf82d078d471ec15886cac1ab2e02457074477d6e74",
+        "bytes": 50528256,
+        "globals": [
+          1168352,
+          0,
+          1102816,
+          1168352
+        ]
+      },
+      "stageSampleRanges": []
+    }
+  ],
+  "regressions": {
+    "nativePortUnitTests": {
+      "passed": 285,
+      "failed": 0
+    },
+    "productionRooms": {
+      "passed": true,
+      "frames": 600,
+      "scope": "Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification."
+    },
+    "productionResults": {
+      "passed": true,
+      "scope": "Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.",
+      "lifecycle": [
+        {
+          "results": {
+            "outcome": 2,
+            "frames": 806,
+            "winnerCount": 1,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 0,
+                "percent": 0,
+                "score": -16777202,
+                "winner": false
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0
+          },
+          "scene": "results"
+        },
+        {
+          "results": {
+            "outcome": 2,
+            "frames": 806,
+            "winnerCount": 1,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 0,
+                "percent": 0,
+                "score": -16777202,
+                "winner": false
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0
+          },
+          "scene": "results"
+        },
+        {
+          "results": {
+            "outcome": 1,
+            "frames": 28800,
+            "winnerCount": 2,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0
+          },
+          "scene": "results"
+        },
+        {
+          "results": {
+            "outcome": 1,
+            "frames": 28800,
+            "winnerCount": 2,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0
+          },
+          "scene": "results"
+        }
+      ],
+      "legalStagesAfterReturn": [
+        2,
+        3,
+        8,
+        28,
+        31,
+        32
+      ]
+    },
+    "broaderCpuGameplay": {
+      "passed": false,
+      "error": "Original callback selected geometry not uploaded: 14381344/23274144/23272864",
+      "scope": "Separate 900-frame product-menu regression reached gameplay then failed in the existing renderer; not caused or resolved by snapshot correctness checks"
+    },
+    "repositoryTests": {
+      "total": 572,
+      "passed": 562,
+      "failed": 0,
+      "skipped": 10
+    }
+  },
+  "limits": [
+    "Full checkpoints are 50.5–60.7 MB, including resident data; sampled retained bytes include diagnostic reference/initial/final checkpoints as well as the correction ring.",
+    "Capture costs include a complete function-table audit; intermediate presentation timings include renderer reconstruction, draw, disposal and restoring its pre-draw checkpoint.",
+    "Timing includes deliberate 16-ms scheduling waits and only one presentation per 60 forward frames. It does not establish displayed 60 FPS or input-to-photon latency.",
+    "Native drawing mutates WASM; discarding those mutations after drawing still needs an audit for game-relevant render dependencies.",
+    "Corrected canvas screenshots show fighters/HUD, but no retail pixel-parity comparison or exhaustive roster/move/interaction coverage was performed.",
+    "No connection to production room inputs, confirmed-event audio, speculative result commitment, or reconnect recovery.",
+    "The local test-only relay injects delay/reordering over WebSocket; no actual WAN or packet-loss/retransmission test.",
+    "No extracted assets, game data, binaries or snapshot contents are included in this report."
+  ]
+}

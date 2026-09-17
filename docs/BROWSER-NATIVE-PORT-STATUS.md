@@ -1,5 +1,18 @@
 # Native browser port — September 17, 2026
 
+A separate development diagnostic now checkpoints the full direct-port WASM
+memory, every mutable WASM global and an audio event journal, predicts remote
+input, and restores/replays corrections. Six-stage tests with two browser
+processes and 15–130 ms input delay/jitter converge to their on-time references
+and to each other by complete-state SHA-256. A combat trial includes real damage
+and hitlag; an Ice Climbers/Fountain trial retains Nana and moving platforms.
+This is a correctness prototype: checkpoints are 50.5–60.7 MB, the renderer is
+detached for every restore, and rebuilding it is too expensive for 60 FPS.
+The actual room transport still uses lockstep. Audio commitment, speculative
+endings, reconnect recovery, and safe persistent renderer ownership remain.
+See [the snapshot boundary and limitations](BROWSER-NATIVE-ROLLBACK.md) and
+[measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).
+
 The player-facing native preview now restores the established controls, 3D
 keyboard view, per-player tap jump, two native CSS cards, room-code controls,
 Falco P1 / level-9 Fox CPU defaults, and tournament-only rules/stages.
