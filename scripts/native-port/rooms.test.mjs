@@ -48,3 +48,28 @@ test('static-only hosting keeps CPU gameplay without a counterfeit room code',as
  assert.equal(local.code,'');assert.equal(local.cpu,true);assert.equal(local.active,false);assert.equal(local.offline,true);
  const samples=[[256,1,0,0,0,0,0],[0,0,0,0,0,0,0]];assert.equal(local.take(samples),samples);assert.doesNotThrow(()=>local.begin('match'));assert.throws(()=>local.join('ABCDEF'),/unavailable/);assert.throws(()=>local.cpuMode(false),/unavailable/);
 });
+
+test('results require consensus, two rematch votes and one coordinated fresh epoch',async t=>{
+ const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token);
+ a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);
+ const guest=await post('/native-rooms/join',{code:owner.code}),b=await socket(guest.token),epoch=guest.epoch;
+ const selection={stage:31,players:[{character:20,costume:0,kind:0},{character:2,costume:0,kind:0}]};
+ const results={outcome:2,frames:1000,winnerCount:1,players:[{character:20,kind:0,stocks:0,percent:0,score:-4,winner:false},{character:2,kind:0,stocks:4,percent:0,score:0,winner:true}]};
+ a.send({type:'result-action',epoch,action:'rematch'});await a.take(m=>m.type==='error');
+ for(const c of [a,b])c.send({type:'phase',epoch,key:'match:0'});
+ await a.take(m=>m.type==='phase-ready');await b.take(m=>m.type==='phase-ready');
+ const end=c=>c.send({type:'ended',epoch,key:'match:0',value:{selection,results}});
+ end(a);a.send({type:'result-action',epoch,action:'rematch'});await a.take(m=>m.type==='error');end(b);
+ await a.take(m=>m.type==='state'&&m.phase==='results');await b.take(m=>m.type==='state'&&m.phase==='results');
+ a.send({type:'result-action',epoch,action:'rematch'});const voted=await a.take(m=>m.type==='state'&&m.rematchVotes[0]);assert.equal(voted.epoch,epoch);assert.deepEqual(voted.rematchVotes,[true,false]);
+ b.send({type:'result-action',epoch,action:'rematch'});const next=await a.take(m=>m.type==='state'&&m.epoch===epoch+1);assert.equal(next.returnTo.action,'rematch');assert.equal(next.returnTo.stage,31);assert.equal(next.code,owner.code);
+ const resumed=await post('/native-rooms/resume',{token:guest.token,epoch:next.epoch,syncedReload:true});assert.equal(resumed.epoch,next.epoch);assert.equal(resumed.seat,1);assert.deepEqual(resumed.returnTo,next.returnTo);
+ // Old votes cannot restart a new epoch.
+ a.send({type:'result-action',epoch,action:'characters'});
+ const check=await post('/native-rooms/resume',{token:owner.token,epoch:next.epoch,syncedReload:true});assert.equal(check.epoch,next.epoch);
+ for(const c of [a,b])c.send({type:'phase',epoch:next.epoch,key:'match:0'});await a.take(m=>m.type==='phase-ready'&&m.epoch===next.epoch);
+ a.send({type:'ended',epoch:next.epoch,key:'match:0',value:{selection,results}});
+ b.send({type:'ended',epoch:next.epoch,key:'match:0',value:{selection,results:{...results,frames:1001}}});
+ for(const c of [a,b])assert.match((await c.take(m=>m.type==='error')).message,/diverged/);
+ a.send({type:'result-action',epoch:next.epoch,action:'rematch'});await a.take(m=>m.type==='error');
+});

@@ -2,7 +2,7 @@ import {createNativeFrameClock} from './native-live.mjs';
 
 // Original C menus own selection, animation and exit decisions. This layer only
 // supplies wall-clock pacing and routes completed scenes to their next owner.
-export function startNativeMenuLive(menu,input,{onState=()=>{},onError=()=>{},matchParams={},network=null,module=null}={}) {
+export function startNativeMenuLive(menu,input,{onState=()=>{},onResults=()=>{},onError=()=>{},matchParams={},network=null,module=null}={}) {
   const clock=createNativeFrameClock(performance.now(),60,{align:true,toleranceMs:.25});
   let scene='characters',active=menu,raf=0,stopped=false,busy=false,frames=0,draws=0,controller=0;
   const transitions=[];
@@ -24,7 +24,7 @@ export function startNativeMenuLive(menu,input,{onState=()=>{},onError=()=>{},ma
       // The match scheduler takes over after loading; keep the input owner alive
       // so held buttons and key-up events are sampled at native initialization.
       stop();const report=await promise;
-      if(report.error)throw Error(report.error);busy=false;publish('match-ended');input.dispose();return;
+      if(report.error)throw Error(report.error);busy=false;publish(report.results?'results':'match-ended');input.dispose();if(report.results)await onResults(report);return;
     }
     network?.begin(scene);busy=false;clock.reset();raf=requestAnimationFrame(frame);
   }

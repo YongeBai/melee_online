@@ -30,14 +30,14 @@ export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1
 // Interactive development fixture, not complete competitive match startup.
 // Input samples enter the existing normalized HSD boundary; no game-state
 // positions, action states, damage or velocities are assigned here.
-export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,browserInput=null,resolveObjects=null,readMatch=null,unlockInput=true,network=null}={}) {
+export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,browserInput=null,resolveObjects=null,readMatch=null,shouldFinish=()=>false,unlockInput=true,network=null}={}) {
   // The first callback can carry a timestamp from before lengthy startup work.
   // Discard such timestamps, then anchor to the first valid display callback.
   // A quarter millisecond of repaid tolerance covers observed display jitter.
   preview.resetImmediateStats?.();
   const slowDraws=[],shaderCompilations=[];
   const stateChanges=[],inputChanges=[],keys=new Set(),clock=createNativeFrameClock(performance.now(),60,{align:true,toleranceMs:.25}),stepTimes=[],drawTimes=[],intervals=[];
-  let raf=0,stopped=false,frames=0,draws=0,started=performance.now(),lastDraw=null,lastCallback=null,lastRender=null;
+  let raf=0,stopped=false,completionReason=null,frames=0,draws=0,started=performance.now(),lastDraw=null,lastCallback=null,lastRender=null;
   const cadence={callbacks:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
   const readState=()=>{const current=resolveObjects?resolveObjects():objects;if(current.length!==objects.length||current.some(o=>!o))throw Error('Native player ownership changed unexpectedly');return current.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));};
   const initial=readState();
@@ -51,11 +51,12 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   const cursors=new Map();
   function sample(values,value){const index=cursors.get(values)??0;if(values.length<3600)values.push(value);else values[index%3600]=value;cursors.set(values,index+1);}
   function distribution(values){const v=[...values].sort((a,b)=>a-b);return {samples:v.length,meanMs:v.reduce((a,b)=>a+b,0)/(v.length||1),p50Ms:v[Math.floor((v.length-1)*.5)]??0,p95Ms:v[Math.floor((v.length-1)*.95)]??0,maxMs:v.at(-1)??0};}
-  function snapshot(){return {match:readMatch?.()??null,frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard and standard gamepad samples',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,modelCache:lastRender?.modelCache??null,shaderCoverage:preview.shaderCoverage?.()??null};}
+  function snapshot(){return {completionReason,match:readMatch?.()??null,frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard and standard gamepad samples',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,modelCache:lastRender?.modelCache??null,shaderCoverage:preview.shaderCoverage?.()??null};}
   function stop(){if(stopped)return;stopped=true;cancelAnimationFrame(raf);removeEventListener('keydown',input);removeEventListener('keyup',input);removeEventListener('blur',blur);removeEventListener('focus',focus);document.removeEventListener('visibilitychange',reset);keys.clear();for(let i=0;i<objects.length;i++)module._portControllerSample(i,...neutralNativeSample());}
   function frame(now){
     if(stopped)return;
     try {
+      if(shouldFinish()){completionReason="match-end";stop();onComplete(snapshot());return;}
       if(document.hidden){reset();raf=requestAnimationFrame(frame);return;}
       const steps=clock.take(now,frameLimit?Math.min(4,frameLimit-frames):4);
       cadence.callbacks++;if(!steps)cadence.zeroStepCallbacks++;if(steps>1)cadence.multiStepCallbacks++;
@@ -71,6 +72,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         if(samples.length!==objects.length)throw Error('Controller sample count differs from players');
         for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);
         const before=performance.now();step();sample(stepTimes,performance.now()-before);frames++;advanced++;
+        if(shouldFinish()){completionReason="match-end";stop();onComplete(snapshot());return;}
         final=readState();
         if(!final.flat().every(Number.isFinite))throw Error('Nonfinite interactive fighter state');
         if(final.some(isNormalAttackState))workload.framesWithAttack++;
@@ -88,7 +90,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         attack ||= isNormalAttackState(final[0]);
       }
       if(advanced){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
-      if(frameLimit&&frames>=frameLimit){stop();onComplete(snapshot());return;}
+      if(frameLimit&&frames>=frameLimit){completionReason="frame-limit";stop();onComplete(snapshot());return;}
       raf=requestAnimationFrame(frame);
     }catch(error){stop();onError(error,snapshot());}
   }
@@ -97,5 +99,5 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   if(unlockInput)for(let i=0;i<objects.length;i++)module._Player_80031848(i);
   if(!browserInput){addEventListener('keydown',input);addEventListener('keyup',input);}addEventListener('blur',blur);addEventListener('focus',focus);document.addEventListener('visibilitychange',reset);
   network?.begin('match');raf=requestAnimationFrame(frame);
-  return {snapshot,stop(){stop();onComplete(snapshot());}};
+  return {snapshot,stop(){if(stopped)return;completionReason="manual";stop();onComplete(snapshot());}};
 }

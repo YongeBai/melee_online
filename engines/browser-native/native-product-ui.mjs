@@ -1,6 +1,6 @@
 import {createKeyboardModel} from './keyboard-model.js';
 const glyphs=new Map();
-async function lettering(canvas,value){
+export async function lettering(canvas,value){
  if(canvas.dataset.text===value)return;canvas.dataset.text=value;canvas.setAttribute('aria-label',value);
  const images=await Promise.all([...value].map(c=>{if(c===' ')return null;if(!glyphs.has(c))glyphs.set(c,new Promise(resolve=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>resolve(null);i.src='./assets/glyph-'+c.charCodeAt(0)+'.png';}));return glyphs.get(c);}));
  if(canvas.dataset.text!==value)return;canvas.width=images.reduce((n,i)=>n+(i?.width??12),0)||1;canvas.height=32;const ctx=canvas.getContext('2d');let x=0;for(const i of images){if(i)ctx.drawImage(i,x,0);x+=i?.width??12;}

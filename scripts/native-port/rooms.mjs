@@ -1,3 +1,4 @@
+import {returnTicket,validateResults} from '../../engines/browser-native/native-results.mjs';
 // CPU-only room relay. Game simulation and rendering remain in each browser.
 import {randomBytes} from 'node:crypto';
 import {WebSocketServer} from '../../web/node_modules/ws/wrapper.mjs';
@@ -10,10 +11,10 @@ function validateInput(input){const p=input?.pad;if(!Array.isArray(p)||p.length!
 export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000}={}){
  const rooms=new Map(),sessions=new Map(),wss=new WebSocketServer({noServer:true,maxPayload:8192});
  function send(ws,m){if(ws?.readyState===1)ws.send(JSON.stringify(m));}
- function view(r,seat){return {type:'state',code:r.code,seat,cpu:r.cpu,epoch:r.epoch,connected:r.players.map(p=>p?.ws?.readyState===1),hasGuest:!!r.players[1],ready:[...r.ready],phase:r.phase,selected:r.selected};}
+ function view(r,seat){return {type:'state',code:r.code,seat,cpu:r.cpu,epoch:r.epoch,connected:r.players.map(p=>p?.ws?.readyState===1),hasGuest:!!r.players[1],ready:[...r.ready],phase:r.phase,selected:r.selected,returnTo:r.returnTo??null,rematchVotes:r.rematchVotes??[false,false]};}
  function state(r){r.players.forEach((p,i)=>send(p?.ws,view(r,i)));}
- function reset(r){r.epoch++;r.ready=[false,false];r.phase='characters';r.barriers.clear();r.inputs.clear();r.lastFrame=-1;r.phaseKey=null;r.sequence=-1;state(r);}
- function create(){if(rooms.size>=maxRooms)throw Error('Room service is full');let id;do{id=code();}while(rooms.has(id));const r={code:id,cpu:true,epoch:0,players:[null,null],ready:[false,false],phase:'characters',selected:[{character:20,costume:0},{character:2,costume:0}],barriers:new Map(),inputs:new Map(),lastFrame:-1,phaseKey:null,sequence:-1,touched:Date.now()};rooms.set(id,r);return r;}
+ function reset(r,returnTo=null){r.returnTo=returnTo;r.ended=[null,null];r.rematchVotes=[false,false];r.epoch++;r.ready=[false,false];r.phase='characters';r.barriers.clear();r.inputs.clear();r.lastFrame=-1;r.phaseKey=null;r.sequence=-1;state(r);}
+ function create(){if(rooms.size>=maxRooms)throw Error('Room service is full');let id;do{id=code();}while(rooms.has(id));const r={code:id,cpu:true,epoch:0,players:[null,null],ready:[false,false],phase:'characters',selected:[{character:20,costume:0},{character:2,costume:0}],barriers:new Map(),inputs:new Map(),lastFrame:-1,phaseKey:null,sequence:-1,touched:Date.now(),ended:[null,null],rematchVotes:[false,false]};rooms.set(id,r);return r;}
  function reserve(r,seat){const key=token();r.players[seat]={token:key,ws:null};sessions.set(key,{r,seat});return {token:key,...view(r,seat)};}
  function removeGuest(r){const p=r.players[1];if(p){sessions.delete(p.token);send(p.ws,{type:'removed'});p.ws?.close();r.players[1]=null;}reset(r);}
  function action(session,m){const {r,seat}=session;r.touched=Date.now();
@@ -31,8 +32,25 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000}={}){
    r.sequence=sequence;r.phase=m.key.split(':')[0];r.phaseKey=m.key;r.inputs.clear();r.lastFrame=-1;r.ready=[false,false];
    for(let frame=0;frame<3;frame++){r.players.forEach(p=>send(p.ws,{type:'frame',key:m.key,epoch:r.epoch,frame,inputs:[neutral(),neutral()]}));r.lastFrame=frame;}
    for(const p of r.players)send(p.ws,{type:'phase-ready',key:m.key,epoch:r.epoch});state(r);
+  }else if(m.type==='ended'){
+   if(m.epoch!==r.epoch)return;
+   if(!r.players[1]||r.cpu||r.phase!=='match'||m.key!==r.phaseKey)throw Error('Results require an active match');
+   const value={results:validateResults(m.value?.results),selection:returnTicket('rematch',m.value?.selection)};
+   if(value.selection.players.some(p=>p.kind!==0))throw Error('Room results require human players');
+   if(r.ended[seat]&&JSON.stringify(r.ended[seat])!==JSON.stringify(value))throw Error('Conflicting match results');
+   r.ended[seat]=value;
+   if(r.ended.every(Boolean)){
+    if(JSON.stringify(r.ended[0])!==JSON.stringify(r.ended[1])){for(const p of r.players)send(p.ws,{type:'error',message:'Native match results diverged; rematch stopped'});return;}
+    r.phase='results';r.inputs.clear();state(r);
+   }
+  }else if(m.type==='result-action'){
+   if(m.epoch!==r.epoch)return;
+   if(r.phase!=='results'||!r.ended.every(Boolean)||!r.players.every(p=>p?.ws?.readyState===1))throw Error('Both matching results and connected players are required');
+   if(!['rematch','characters'].includes(m.action))throw Error('Invalid result action');
+   if(m.action==='characters')reset(r,returnTicket('characters',r.ended[0].selection));
+   else {r.rematchVotes[seat]=true;if(r.rematchVotes.every(Boolean))reset(r,returnTicket('rematch',r.ended[0].selection));else state(r);}
   }else if(m.type==='input'){
-   if(m.epoch!==r.epoch||m.key!==r.phaseKey||r.cpu||!r.players[1])return;
+   if(r.phase==='results'||m.epoch!==r.epoch||m.key!==r.phaseKey||r.cpu||!r.players[1])return;
    if(!Number.isSafeInteger(m.frame)||m.frame<=r.lastFrame||m.frame>r.lastFrame+120)throw Error('Input outside live window');
    const value=validateInput(m.value),entry=r.inputs.get(m.frame)??[null,null];
    if(entry[seat]&&JSON.stringify(entry[seat])!==JSON.stringify(value))throw Error('Conflicting immutable input');entry[seat]=value;r.inputs.set(m.frame,entry);

@@ -1,0 +1,452 @@
+{
+  "date": "2026-09-17",
+  "scope": "Browser-native tournament results/rematch lifecycle; not competitive 720p60 certification",
+  "wasmSha256": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+  "unitTests": {
+    "passed": 279,
+    "failed": 0
+  },
+  "originalCallbacks": [
+    "gm_Scene_Vs_OnExit",
+    "mnCharSel_Scene_OnEnter",
+    "mnStageSel_Scene_OnFrame",
+    "mnStageSel_Scene_OnExit"
+  ],
+  "solo": {
+    "staticHostingWithoutRelay": true,
+    "passed": true,
+    "firstEnding": {
+      "outcome": 2,
+      "frames": 804,
+      "winnerCount": 1,
+      "players": [
+        {
+          "character": 20,
+          "kind": 0,
+          "stocks": 0,
+          "percent": 0,
+          "score": -16777202,
+          "winner": false
+        },
+        {
+          "character": 2,
+          "kind": 1,
+          "stocks": 4,
+          "percent": 0,
+          "score": 4,
+          "winner": true
+        }
+      ]
+    },
+    "rematch": {
+      "selection": {
+        "players": [
+          {
+            "character": 20,
+            "costume": 0,
+            "kind": 0,
+            "stocks": 4
+          },
+          {
+            "character": 2,
+            "costume": 0,
+            "kind": 1,
+            "stocks": 4
+          },
+          {
+            "character": 26,
+            "costume": 0,
+            "kind": 3,
+            "stocks": 4
+          },
+          {
+            "character": 26,
+            "costume": 0,
+            "kind": 3,
+            "stocks": 4
+          }
+        ],
+        "stage": 31,
+        "seconds": 480,
+        "items": -1,
+        "teams": 0,
+        "mode": 1,
+        "timer": 1
+      },
+      "stocks": [
+        4,
+        4
+      ],
+      "tapJump": 0,
+      "music": {
+        "status": "playing",
+        "contextState": "running",
+        "outputPeak": 0.1966136246919632
+      }
+    },
+    "returnToCSS": {
+      "cpu": true,
+      "keyboardHidden": true,
+      "players": [
+        {
+          "character": 20,
+          "costume": 0,
+          "kind": 0,
+          "cpuLevel": 9,
+          "x": -31,
+          "y": -21.5,
+          "hand": 0,
+          "icon": 9,
+          "token": 0,
+          "selected": 0
+        },
+        {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": -16,
+          "y": -21.5,
+          "hand": 3,
+          "icon": 10,
+          "token": 0,
+          "selected": 0
+        }
+      ]
+    },
+    "controls": "Enter rematch and O Character Select exercised with keyboard events"
+  },
+  "rooms": {
+    "passed": true,
+    "elimination": {
+      "outcome": 2,
+      "frames": 805,
+      "winnerCount": 1,
+      "players": [
+        {
+          "character": 20,
+          "kind": 0,
+          "stocks": 0,
+          "percent": 0,
+          "score": -16777202,
+          "winner": false
+        },
+        {
+          "character": 2,
+          "kind": 0,
+          "stocks": 4,
+          "percent": 0,
+          "score": 4,
+          "winner": true
+        }
+      ]
+    },
+    "timeout": {
+      "outcome": 1,
+      "frames": 28800,
+      "winnerCount": 2,
+      "players": [
+        {
+          "character": 20,
+          "kind": 0,
+          "stocks": 4,
+          "percent": 0,
+          "score": 4,
+          "winner": true
+        },
+        {
+          "character": 2,
+          "kind": 0,
+          "stocks": 4,
+          "percent": 0,
+          "score": 4,
+          "winner": true
+        }
+      ]
+    },
+    "matchingResults": true,
+    "rematchRequiresTwoVotes": true,
+    "rematch": [
+      {
+        "seat": 0,
+        "epoch": 3,
+        "stocks": [
+          4,
+          4
+        ],
+        "timeLimit": 480,
+        "stage": 31,
+        "players": [
+          {
+            "character": 20,
+            "costume": 1,
+            "kind": 0,
+            "stocks": 4
+          },
+          {
+            "character": 2,
+            "costume": 1,
+            "kind": 0,
+            "stocks": 4
+          }
+        ],
+        "music": {
+          "status": "playing",
+          "contextState": "running",
+          "outputPeak": 0.10695501416921616
+        }
+      },
+      {
+        "seat": 1,
+        "epoch": 3,
+        "stocks": [
+          4,
+          4
+        ],
+        "timeLimit": 480,
+        "stage": 31,
+        "players": [
+          {
+            "character": 20,
+            "costume": 1,
+            "kind": 0,
+            "stocks": 4
+          },
+          {
+            "character": 2,
+            "costume": 1,
+            "kind": 0,
+            "stocks": 4
+          }
+        ],
+        "music": {
+          "status": "playing",
+          "contextState": "running",
+          "outputPeak": 0.20690330862998962
+        }
+      }
+    ],
+    "returnToCSS": [
+      {
+        "seat": 0,
+        "epoch": 4,
+        "players": [
+          {
+            "character": 20,
+            "costume": 1,
+            "kind": 0,
+            "cpuLevel": 9,
+            "x": -31,
+            "y": -21.5,
+            "hand": 0,
+            "icon": 9,
+            "token": 0,
+            "selected": 0
+          },
+          {
+            "character": 2,
+            "costume": 1,
+            "kind": 0,
+            "cpuLevel": 9,
+            "x": 14.799999237060547,
+            "y": -21.5,
+            "hand": 0,
+            "icon": 10,
+            "token": 0,
+            "selected": 0
+          }
+        ]
+      },
+      {
+        "seat": 1,
+        "epoch": 4,
+        "players": [
+          {
+            "character": 20,
+            "costume": 1,
+            "kind": 0,
+            "cpuLevel": 9,
+            "x": -31,
+            "y": -21.5,
+            "hand": 0,
+            "icon": 9,
+            "token": 0,
+            "selected": 0
+          },
+          {
+            "character": 2,
+            "costume": 1,
+            "kind": 0,
+            "cpuLevel": 9,
+            "x": 14.799999237060547,
+            "y": -21.5,
+            "hand": 0,
+            "icon": 10,
+            "token": 0,
+            "selected": 0
+          }
+        ]
+      }
+    ],
+    "legalStagesAfterReturn": [
+      2,
+      3,
+      8,
+      28,
+      31,
+      32
+    ],
+    "returnedThroughStageSelectAndCancelled": true,
+    "scope": "Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification."
+  },
+  "regression": {
+    "twoBrowsers": {
+      "frames": [
+        600,
+        600
+      ],
+      "matchingMeasuredFighterFields": true,
+      "completionReasons": [
+        "frame-limit",
+        "frame-limit"
+      ]
+    },
+    "cpu": {
+      "frames": 900,
+      "completionReason": "frame-limit",
+      "originalCPUInputEvidence": {
+        "samples": 873,
+        "active": 260,
+        "buttons": 53,
+        "actions": [
+          323,
+          324,
+          29,
+          42,
+          39,
+          41,
+          14,
+          244,
+          15,
+          16,
+          24,
+          25,
+          85,
+          27,
+          68,
+          64,
+          57,
+          44,
+          45,
+          182,
+          233,
+          47,
+          48,
+          49,
+          20,
+          214,
+          215,
+          216,
+          220,
+          40,
+          360,
+          361,
+          363
+        ],
+        "lastFrame": 900
+      },
+      "music": {
+        "track": "sp_zako.hps",
+        "status": "playing",
+        "error": null,
+        "contextState": "running",
+        "offsetSeconds": 1.8986666666666672,
+        "loopStartSeconds": 10.752,
+        "outputPeak": 0.16158004105091095,
+        "events": [
+          {
+            "event": "requested",
+            "track": "menu01.hps",
+            "time": 2559.2999999821186
+          },
+          {
+            "event": "decoded",
+            "track": "menu01.hps",
+            "time": 2845.399999976158
+          },
+          {
+            "event": "playing",
+            "track": "menu01.hps",
+            "time": 4278.5999999940395
+          },
+          {
+            "event": "paused",
+            "track": "menu01.hps",
+            "time": 5075.5
+          },
+          {
+            "event": "playing",
+            "track": "menu01.hps",
+            "time": 5257.199999988079
+          },
+          {
+            "event": "requested",
+            "track": "sp_zako.hps",
+            "time": 17236.69999998808
+          },
+          {
+            "event": "decoded",
+            "track": "sp_zako.hps",
+            "time": 17430.19999998808
+          },
+          {
+            "event": "playing",
+            "track": "sp_zako.hps",
+            "time": 17430.29999998212
+          }
+        ],
+        "soundEffects": false
+      }
+    }
+  },
+  "observedFailures": [
+    {
+      "test": "First existing --music 900-frame regression",
+      "failure": "Stage music playing/nonzero-output wait timed out; match reached its 900-frame limit without a game exception.",
+      "resolution": "Diagnostic error output now includes audio status and native requests. The repeat passed all original assertions. Initial failure did not retain audio snapshot, so root cause remains unconfirmed; do not count that attempt as passing."
+    },
+    {
+      "test": "Second extra --music-startup probe",
+      "failure": "CPU token cursor/selection assertion timed out before match; actual character 6 vs expected 18.",
+      "resolution": "Retained diagnostic state. A browser harness steering/timing issue is suspected, but not established; no native input or hit-test changes were made."
+    }
+  ],
+  "limitations": [
+    "Temporary results dialog reuses original UI textures/glyphs; full original animated results scene and victory audio unfinished.",
+    "Timeout proof executes all 28800 original simulation frames with neutral inputs but accelerates without relay/presentation; not an eight-minute real-time network soak.",
+    "Lifecycle browser coverage is Falco/Fox on Battlefield, including costume 1 for both humans; not all characters/stages end-to-end certification.",
+    "No rollback, WAN latency, physical-gamepad, input-to-photon or distinct 720p60 presentation certification.",
+    "Previously recorded unuploaded-geometry failure remains unresolved; no rendering failure occurred in these lifecycle runs.",
+    "Public route/static deployment integration and SFX remain unfinished."
+  ],
+  "environment": {
+    "browser": "Google Chrome 151.0.7922.137",
+    "node": "v24.15.0"
+  },
+  "extraMusicStartupProbes": {
+    "first": "Passed Battlefield music startup with original sp_zako.hps.",
+    "second": "Did not reach match: scripted CPU token steering selected Link (6) while expecting Zelda (18). Menu music was playing with nonzero output; no native exception. This attempt is not counted as music startup evidence."
+  },
+  "reproduce": [
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node --test scripts/native-port/*.test.mjs",
+    "node scripts/native-port/probe-native-rooms.mjs --results",
+    "node scripts/native-port/probe-product-menu.mjs --results --static-only",
+    "node scripts/native-port/probe-native-rooms.mjs",
+    "node scripts/native-port/probe-product-menu.mjs --music"
+  ],
+  "visualReview": [
+    "Inspected generated elimination results screenshot: temporary label, native winner, stock/damage rows and rematch/character select controls.",
+    "Reloaded own port3340 preview and inspected original two-card CSS, Falco/Fox CPU9, preserved camera framing and CPU hand/icon absence."
+  ]
+}

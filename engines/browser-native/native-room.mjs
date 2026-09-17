@@ -18,6 +18,7 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
   snapshot(){return {code:state.code,seat:state.seat,epoch:state.epoch,phase:key,phaseReady,nextFrame,buffered:frames.size,lastSent,mode:network.active?'lockstep-3':'solo'};},
   async join(code){const result=await post('/native-rooms/join',{code});reloading=true;try{send({type:'leave'});}catch{}initial=result;persist(result,true);reloading=true;reload();},
   setTapJump(value){if(value!==0&&value!==1)throw Error('Invalid tap jump setting');localTapJump=value;},
+  endMatch(value){send({type:'ended',epoch:state.epoch,key,value});},chooseResult(action){send({type:'result-action',epoch:state.epoch,action});},
   cpuMode(enabled){send({type:'cpu',enabled});},ready(){if(!state.ready[state.seat])send({type:'ready'});},kick(){send({type:'kick'});},
   newRoom(){reloading=true;try{send({type:'leave'});}catch{}storage.removeItem(storageKey);closed=true;ws.close();reload();},
   leave(){reloading=true;try{send({type:'leave'});}finally{storage.removeItem(storageKey);closed=true;ws.close();reload();}},

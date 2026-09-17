@@ -7,6 +7,31 @@ The reported start abort was a host constructor guard that accepted only human
 slots; it now admits native CPU slots and calls the original CPU constructor.
 The CPU's own generated buttons/sticks and action changes are checked in-browser.
 
+Completed tournament matches now stop at the original VS scene-exit boundary.
+The original `gm_Scene_Vs_OnExit` computes standings; a clearly labelled temporary
+results dialog displays the native winner/draw, stocks and damage. Rematch
+starts a fresh WASM instance, restores both characters/costumes and the selected
+legal stage, and enters through original CSS/SSS and Ready/Go. Character Select
+returns through the original two-seat menu. No timer, stock or outcome writes
+are used to create an ending. The full animated native results presentation and
+victory audio remain unfinished.
+
+Rooms require matching results from both clients and two rematch votes. Either
+player can return both to CSS. One coordinated epoch/reload preserves room code
+and seats; stale votes cannot restart a newer match. This checks result agreement,
+not a complete gameplay-state hash. Static-only CPU play uses a validated local
+return ticket and does not require the relay. Post-return music requests attempt
+normal browser audio resume, falling back to the existing gesture unlock if the
+browser blocks autoplay.
+[Results and rematch evidence](benchmarks/browser-2026-09-17-native-port-results.json).
+The focused lifecycle runs passed, along with 600-frame two-browser and repeated
+900-frame CPU regressions. One earlier music-enabled regression timed out waiting
+for stage audio, and an extra startup probe selected Link while its scripted
+cursor expected Zelda. These failed attempts remain recorded; their intermittent
+causes are not established. The timeout lifecycle probe executes all 28,800 native
+frames without changing the clock, but accelerates them without presentation or
+input relay, so it is not a real-time eight-minute network/performance test.
+
 The native music stream boundary now plays hosted original HPS tracks through
 Web Audio. A worker decodes the music, the original C chooses menu/stage tracks,
 and playback retains loop points and pause position. Browser autoplay unlocks
@@ -55,12 +80,12 @@ play; CPU play can boot from static assets without that service.
 
 The solo probes exercise 900 native frames each, actual W stick jumps with tap
 jump enabled/disabled, Space jumps and attacks, original autonomous CPU activity,
-keyboard-view input isolation, and the six-stage menu. The current source passes 275 unit tests. Unit coverage includes
+keyboard-view input isolation, and the six-stage menu. The current source passes 279 unit tests. Unit coverage includes
 binding compatibility, local gamepad-to-network-seat assignment, immutable input
 ordering, owner-only CPU/kick, token revocation and coordinated reloads.
 [Product and room evidence](benchmarks/browser-2026-09-17-native-port-product.json).
 
-Sound effects, native results/rematch lifecycle, rollback/recovery, broader retail parity,
+Sound effects, full native results presentation, rollback/recovery, broader retail parity,
 public release integration and displayed-FPS/input-to-photon certification remain
 unfinished. This is still a development preview, not completion of competitive
 720p60 acceptance. The public play route has not been replaced.

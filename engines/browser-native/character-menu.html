@@ -2,6 +2,8 @@
 <canvas id="picture" width="960" height="720"></canvas>
 <pre id="result">Loading original character-select assets…</pre>
 <script type="module">
+import {consumeReturn,returnTicket} from './native-results.mjs';
+import {showNativeResults} from './native-results-ui.mjs';
 import create from './melee-fighter-init.mjs';
 import {createNativeMenuPreview} from './native-menu-preview.mjs';
 import {createNativeCharacterMenuPreview} from './native-character-menu-preview.mjs';
@@ -15,14 +17,15 @@ const report={passed:false,playableMatch:false,audioPlayed:false,audioMode:null}
 try{
  let network=null,productUI=null;
  if(interactive){const {connectNativeRoom,createLocalNativeRoom}=await import('./native-room.mjs');try{network=await connectNativeRoom({onState:n=>productUI?.setNetwork(n),onError:e=>{globalThis.nativeRoomError=String(e);productUI?.connectionError(e);}});}catch(e){network=createLocalNativeRoom(e.message);report.roomUnavailable=e.message;}globalThis.nativeRoom=network;}
- const nativeMusic=interactive?await(await import('./native-music.mjs')).createNativeMusic().catch(e=>{report.audioError=String(e);return null;}):null;globalThis.nativeMusic=nativeMusic;
+ let returning=interactive?(network.active?network.state.returnTo:consumeReturn()):null;if(returning){try{returning=returnTicket(returning.action,returning);if(returning.players[1].kind!==(network.cpu?1:0))returning=null;}catch{returning=null;}}
+ const nativeMusic=interactive?await(await import('./native-music.mjs')).createNativeMusic({resumeAfterNavigation:!!returning}).catch(e=>{report.audioError=String(e);return null;}):null;globalThis.nativeMusic=nativeMusic;
  Object.defineProperty(report,'audioPlayed',{enumerable:true,get:()=>nativeMusic?.snapshot().events.some(e=>e.event==='playing')??false});
  const module=await create({printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=nativeMusic?'browser-music/sfx-muted':mode;return true;},onNativeMusic:r=>{if(r.action!==4){if(music.length===128)music.shift();music.push(r);}try{return nativeMusic?.request(r)??false;}catch(e){report.audioError=String(e);return false;}}});
  let cssBytes,cssAsset;
  for(const [name,convert] of [['MnSlChr.usd',b=>convertMenuAsset(b,{menu:'character'})],['MnExtAll.usd',convertExtraMenuAsset],['SdSlChr.usd',convertSisAsset],['LbMcGame.usd',convertCardIconAsset],['NtMemAc.usd',convertCardNoticeAsset]]){
   const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable '+name);const bytes=new Uint8Array(await r.arrayBuffer()),asset=convert(bytes);if(name==='MnSlChr.usd'){cssBytes=bytes;cssAsset=asset;}installResidentFile(module,name,asset.image);
  }
- module._portMenuDiagnosticMute();if(interactive)module._portMenuConfigure(1,network.cpu?1:0);module._portCharacterMenuInitialize();globalThis.characterModule=module;
+ module._portMenuDiagnosticMute();if(interactive){module._portMenuConfigure(1,network.cpu?1:0);if(returning)for(const [i,p] of returning.players.entries())if(!module._portMenuRestorePlayer(i,p.character,p.costume)){returning=null;break;}}module._portCharacterMenuInitialize();globalThis.characterModule=module;
  let preview=createNativeCharacterMenuPreview(module,document.querySelector('#picture'),cssBytes,cssAsset,{verifyVertices:!interactive});globalThis.characterPreview=preview;
  let frames=0;
  const read=()=>({frames,phase:module._portCharacterMenuNativeRead(0,0),gate:module._portCharacterMenuNativeRead(1,0),exit:module._portCharacterMenuRead(0,0),players:Array.from({length:4},(_,p)=>({character:module._portCharacterMenuRead(1,p),costume:module._portCharacterMenuRead(2,p),kind:module._portCharacterMenuRead(3,p),cpuLevel:module._portCharacterMenuRead(4,p),x:module._portCharacterMenuNativeRead(2,p),y:module._portCharacterMenuNativeRead(3,p),hand:module._portCharacterMenuNativeRead(4,p),icon:module._portCharacterMenuNativeRead(5,p),token:module._portCharacterMenuNativeRead(8,p),selected:module._portCharacterMenuNativeRead(9,p)}))});
@@ -31,7 +34,7 @@ try{
  let stageBytes,stageAsset;
  globalThis.nativeCharacterMenu.toStage=async(controller=0)=>{
   if(!stageAsset){const response=await fetch('./fixtures/MnSlMap.usd');if(!response.ok)throw Error('Hosted stage menu unavailable');stageBytes=new Uint8Array(await response.arrayBuffer());stageAsset=convertMenuAsset(stageBytes);installResidentFile(module,'MnSlMap.usd',stageAsset.image);}
-  module._portStageMenuFromCharacters(controller);const stagePreview=createNativeMenuPreview(module,document.querySelector('#picture'),stageBytes,stageAsset,{verifyVertices:!interactive});let stageFrames=0;
+  module._portStageMenuFromCharacters(controller);if(returning?.action==='rematch'){module._portStageMenuRematch(returning.stage);returning=null;}const stagePreview=createNativeMenuPreview(module,document.querySelector('#picture'),stageBytes,stageAsset,{verifyVertices:!interactive});let stageFrames=0;
   const read=()=>({frames:stageFrames,cursor:[module._portStageMenuRead(0),module._portStageMenuRead(1)],stage:module._portStageMenuRead(2),exit:module._portStageMenuRead(5),phase:module._portStageMenuRead(6),hover:module._portStageMenuRead(7)});
   const stage={read,icons:()=>Array.from({length:30},(_,i)=>({i,stage:module._portStageMenuNativeRead(2,i),x:module._portStageMenuNativeRead(3,i),y:module._portStageMenuNativeRead(4,i),unlocked:module._portStageMenuNativeRead(5,i)})),step:(samples=[])=>{for(let p=0;p<4;p++){const sample=p in samples?samples[p]:(p<2?[0,0,0]:null);if(sample)module._portControllerSample(p,...completeNativeSample(sample));else module._portControllerDisconnect(p);}module._portStageMenuStep();stageFrames++;return read();},draw:()=>stagePreview.draw(),finish:()=>{stagePreview.dispose();return {stage:module._portStageMenuFinish(),objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed(),allocations:module._portFileAllocations()};}};
   globalThis.nativeStageMenu=stage;stage.draw();if(!interactive)for(let i=0;i<120;i++)stage.step();stage.draw();return read();
@@ -39,8 +42,9 @@ try{
  globalThis.nativeCharacterMenu.matchSelection=()=>({players:Array.from({length:4},(_,p)=>({character:module._portMenuMatchRead(0,p),costume:module._portMenuMatchRead(1,p),kind:module._portMenuMatchRead(2,p),stocks:module._portMenuMatchRead(3,p)})),stage:module._portMenuMatchRead(4,0),seconds:module._portMenuMatchRead(5,0),items:module._portMenuMatchRead(6,0),teams:module._portMenuMatchRead(7,0),mode:module._portMenuMatchRead(8,0),timer:module._portMenuMatchRead(9,0)});
  globalThis.nativeCharacterMenu.startMatch=async(params={},options={})=>{
   const {runNativeConstructor}=await import('./constructor-runner.mjs');
+  const selection=nativeCharacterMenu.matchSelection();
   const result=await runNativeConstructor({module,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive,network:options.network});
-  globalThis.nativeMenuMatchReport=result;return result;
+  result.selection=selection;globalThis.nativeMenuMatchReport=result;return result;
  };
  report.initial=preview.draw();if(!interactive)for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;
  if(interactive){
@@ -50,7 +54,7 @@ try{
   for(let port=0;port<2;port++){const button=document.createElement('button');button.textContent='Keyboard: P'+(port+1);button.id='keyboard-p'+(port+1);button.addEventListener('click',()=>{input.setKeyboardPort(port);for(const b of controls.querySelectorAll('button[data-seat]'))b.setAttribute('aria-pressed',String(b===button));});button.dataset.seat=port;button.setAttribute('aria-pressed',String(port===0));controls.append(button);}
   const restart=document.createElement('button');restart.textContent='Return to character select';restart.hidden=true;controls.append(restart);document.querySelector('#picture').after(controls);
   globalThis.nativeMenuInput=input;
-  globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{network,module,matchParams:{gpuerrors:'deferred',...(new URLSearchParams(location.search).has('liveframes')?{liveframes:new URLSearchParams(location.search).get('liveframes')}:{})},onState:s=>{productUI.update(s);globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;document.body.dataset.error='true';}});
+  globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{network,module,matchParams:{gpuerrors:'deferred',...(new URLSearchParams(location.search).has('liveframes')?{liveframes:new URLSearchParams(location.search).get('liveframes')}:{})},onResults:report=>{globalThis.nativeResultsUI=showNativeResults({results:report.results,selection:report.selection,network});},onState:s=>{if(returning?.action==='rematch'&&s.scene==='characters'&&s.state.frames>=60&&s.state.gate===0){if(network.active)network.ready();else input.pulse(0x1000);}productUI.update(s);globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;document.body.dataset.error='true';}});
   restart.addEventListener('click',()=>nativeMenuLive.restart());
  }
 }catch(e){report.error=String(e.stack??e);document.body.dataset.error='true';}

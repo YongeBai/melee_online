@@ -13,5 +13,6 @@ test('music cancels stale decodes and preserves pause/loop positions across visi
   await events.get('keydown')();assert.equal(sources.length,1);assert.equal(music.snapshot().status,'playing');context.currentTime=13;music.request({action:2});assert.equal(music.snapshot().offsetSeconds,4);context.currentTime=20;assert.equal(music.snapshot().offsetSeconds,4);
   music.request({action:3});assert.equal(sources.at(-1).offset,4);context.currentTime=22;document.hidden=true;events.get('visibilitychange')();assert.equal(music.snapshot().offsetSeconds,6);context.currentTime=30;document.hidden=false;events.get('visibilitychange')();assert.equal(sources.at(-1).offset,6);
   music.dispose();assert.equal(context.state,'closed');assert.equal(music.request({action:0,path:'audio/menu01.hps',volume:254}),false);
+  music=await createNativeMusic({resumeAfterNavigation:true});start();await Promise.resolve();workers.at(-1).onmessage({data:{audio}});assert.equal(music.snapshot().contextState,'running');assert.equal(music.snapshot().status,'playing');
  }finally{music?.dispose();for(const [name,descriptor] of saved)if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];}
 });

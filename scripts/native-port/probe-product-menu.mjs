@@ -1,6 +1,7 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn} from 'node:child_process';import {setTimeout as delay} from 'node:timers/promises';
 const root=path.resolve(import.meta.dirname,'../..'),{createNativePortServer}=await import(root+'/scripts/native-port/serve.mjs'),server=createNativePortServer({enableRooms:!process.argv.includes('--static-only')}),profile=fs.mkdtempSync(path.join(os.tmpdir(),'native-menu-'));
 const tapOn=process.argv.includes('--tap-on'),holdA=process.argv.includes('--hold-a'),releaseA=process.argv.includes('--release-a-during-load'),pair=holdA||releaseA?[15,12]:[10,10];
+const resultsMode=process.argv.includes('--results');
 const checkMusic=process.argv.includes('--music')||process.argv.includes('--music-startup');
 const stageId=Number(process.argv.find(s=>s.startsWith('--stage='))?.slice(8)??31);
 if(![2,3,8,28,31,32].includes(stageId))throw Error('Illegal stage probe');
@@ -12,10 +13,10 @@ try{testFlow:{
  const port=fs.readFileSync(profile+'/DevToolsActivePort','utf8').split('\n')[0],tabs=await(await fetch('http://127.0.0.1:'+port+'/json/list')).json();ws=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);await new Promise(r=>ws.addEventListener('open',r,{once:true}));ws.addEventListener('message',e=>{const m=JSON.parse(e.data),p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);}});
 
 
- const output=path.join(root,'dist/native-port/experiment-product-menu'+(process.argv.includes('--static-only')?'-static-only':tapOn?'-tap-on':holdA?'-held-a':releaseA?'-released-a':'')+(process.argv.includes('--music-startup')?'-music-startup-stage-'+stageId:stageId===31?'':'-stage-'+stageId));fs.mkdirSync(output,{recursive:true});
+ const output=path.join(root,'dist/native-port/experiment-product-menu'+(resultsMode?'-results':'')+(process.argv.includes('--static-only')?'-static-only':tapOn?'-tap-on':holdA?'-held-a':releaseA?'-released-a':'')+(process.argv.includes('--music-startup')?'-music-startup-stage-'+stageId:stageId===31?'':'-stage-'+stageId));fs.mkdirSync(output,{recursive:true});
  async function evaluate(expression){const r=await cmd('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description??r.exceptionDetails.text);return r.result.value;}
  const trace=[];
- async function waitFor(expression,timeout=30000){const start=Date.now();for(;;){const r=await evaluate('({value:('+expression+'),error:globalThis.nativeMenuLiveError??globalThis.nativeMenuMatchReport?.error})');if(r.error)throw Error(r.error);if(r.value)return r.value;if(Date.now()-start>timeout)throw Error('Timed out: '+expression+' state '+JSON.stringify(await evaluate('nativeMenuLiveState')));await delay(16);}}
+ async function waitFor(expression,timeout=30000){const start=Date.now();for(;;){const r=await evaluate('({value:('+expression+'),error:globalThis.nativeMenuLiveError??globalThis.nativeMenuMatchReport?.error})');if(r.error)throw Error(r.error);if(r.value)return r.value;if(Date.now()-start>timeout)throw Error('Timed out: '+expression+' state '+JSON.stringify(await evaluate('({flow:globalThis.nativeMenuLiveState,audio:globalThis.nativeMusic?.snapshot(),music:globalThis.characterMenuReport?.music})')));await delay(16);}}
  const held=new Set();
  async function keys(next){for(const code of held)if(!next.includes(code)){await cmd('Input.dispatchKeyEvent',{type:'keyUp',code,key:code});held.delete(code);}for(const code of next)if(!held.has(code)){await cmd('Input.dispatchKeyEvent',{type:'keyDown',code,key:code});held.add(code);}}
  async function press(code){await keys([code]);await delay(65);await keys([]);await delay(65);}
@@ -30,7 +31,7 @@ try{testFlow:{
    if(Math.max(Math.abs(dx),Math.abs(dy))<3)next.push('ShiftLeft');await keys(next);await delay(16);
   }await keys([]);throw Error('Keyboard cursor did not reach '+JSON.stringify(target)+' at '+JSON.stringify(await evaluate(expression)));
  }
- await cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1&liveframes=900'});
+ await cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(resultsMode?'':'&liveframes=900')});
  await waitFor('globalThis.characterMenuReport?.passed');await waitFor('nativeCharacterMenu.read().frames>90');
  await keys(['KeyO']);await delay(800);await keys([]);if(await evaluate('nativeMenuLive.snapshot().scene')!=='characters')throw Error('Product CSS exposed another game mode');
  trace.push({phase:'initial',state:await evaluate('nativeCharacterMenu.read()')});
@@ -95,6 +96,21 @@ try{testFlow:{
  }
  await waitFor('nativeLive.snapshot().final[0][0]===14');
  if(process.argv.includes('--music-startup')){const music=await evaluate('nativeMusic.snapshot()'),match=await evaluate('nativeLive.snapshot().match');fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({passed:true,scope:'Native menu-to-stage music startup and browser stream transport only',stage:stageId,trace,music,match},null,2));console.log(JSON.stringify({passed:true,stage:stageId,track:music.track,scope:'music startup'}));break testFlow;}
+ if(resultsMode){
+  const startSelection=await evaluate('nativeCharacterMenu.matchSelection()');
+  await keys(['KeyD']);await waitFor('globalThis.nativeMenuMatchReport?.results',90000);await keys([]);
+  const ended=await evaluate('({results:nativeMenuMatchReport.results,scene:nativeMenuLive.snapshot().scene,selection:nativeMenuMatchReport.selection})');if(ended.scene!=='results'||ended.results.outcome!==2)throw Error('CPU elimination did not reach results');
+  const shot=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/results.png',Buffer.from(shot.data,'base64'));
+  await press('Enter');await waitFor('globalThis.nativeLive?.snapshot().match?.intro?.gate===1&&!globalThis.nativeMenuMatchReport',90000);
+  await waitFor('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001');
+  const rematch=await evaluate('({selection:nativeCharacterMenu.matchSelection(),stocks:[0,1].map(p=>characterModule._portTournamentRead(10,p)),audio:nativeMusic.snapshot(),tap:characterModule._portTapJumpGet(0)})');
+  if(JSON.stringify(startSelection)!==JSON.stringify(rematch.selection)||rematch.stocks.some(s=>s!==4)||rematch.tap!==0)throw Error('CPU rematch did not retain rules, selection, or tap jump');
+  await keys(['KeyD']);await waitFor('globalThis.nativeMenuMatchReport?.results',90000);await keys([]);await press('KeyO');
+  await waitFor('globalThis.nativeCharacterMenu?.read().frames>90&&nativeMenuLive.snapshot().scene==="characters"&&!globalThis.nativeMenuMatchReport',90000);
+  const returned=await evaluate('({menu:nativeCharacterMenu.read(),cpu:nativeRoom.cpu,keyboardHidden:document.querySelector("#peerKeyboard").hidden})');
+  if(!returned.cpu||!returned.keyboardHidden||returned.menu.players[0].character!==startSelection.players[0].character||returned.menu.players[1].character!==startSelection.players[1].character)throw Error('CPU return selection/presentation');
+  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,scope:'CPU elimination to results, keyboard rematch with fresh rules and return to character select',ended,rematch,returned},null,2));console.log(JSON.stringify({passed:true,results:true,solo:true,audio:rematch.audio.status}));break testFlow;
+ }
  const tapStart=await evaluate('nativeLive.snapshot().frames');await keys(['KeyW']);await waitFor(`nativeLive.snapshot().frames>${tapStart+12}`);await keys([]);
  const tapJumped=await evaluate(`nativeLive.snapshot().stateChanges.some(s=>s.frame>${tapStart}&&s.state>=24&&s.state<=29)`);if(tapJumped!==tapOn)throw Error('Stick jump behavior differs from toggle: '+JSON.stringify({tapOn,tapJumped}));await waitFor('nativeLive.snapshot().final[0][0]===14&&nativeLive.snapshot().final[0][3]===0');
  const before=await evaluate('nativeLive.snapshot()');await keys(['KeyD']);await waitFor(`nativeLive.snapshot().final[0][4]>${before.final[0][4]+4}`);await keys([]);

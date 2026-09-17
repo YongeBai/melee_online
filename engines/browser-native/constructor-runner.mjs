@@ -1,3 +1,4 @@
+import {readNativeResults} from './native-results.mjs';
 import {convertPeachCommonItems} from './common-item-assets.mjs';
 import {verifyPeachMoves,verifyPeachPulls,verifyPeachContact} from './verify-peach.mjs';
 import {verifyKirbyMoves,verifyKirbyCopy} from './verify-kirby.mjs';
@@ -470,15 +471,16 @@ try {
       if(report.hud.afterCombat.some(p=>p.display!==Math.min(999,Math.floor(p.damage))))throw Error('HUD damage differs from settled fighter damage');
     }
     if(live){
-      const controls=options.browserInput?document.querySelector('#menu-controls p'):document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Enter/Escape: Start. Audio and results/rematch remain incomplete.';if(!options.browserInput)canvas.before(controls);
+      if(!options.browserInput){const controls=document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Enter/Escape: Start.';canvas.before(controls);}
       const limit=Number(params.get('liveframes')??0);if(!Number.isInteger(limit)||limit<0||limit>36000)throw Error('Invalid live frame limit');
       await new Promise((resolve,reject)=>{
-        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,network:options.network,browserInput:options.browserInput,unlockInput:!menuHandoff,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0)),...(menuHandoff?{intro:{mask:module._portTournamentRead(23,0),gate:module._portTournamentRead(17,0),blocked:[0,1].map(p=>module._portTournamentRead(24,p))}}:{})}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
+        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,network:options.network,browserInput:options.browserInput,unlockInput:!menuHandoff,shouldFinish:()=>tournament&&module._portTournamentRead(25,0)!==0,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0)),...(menuHandoff?{intro:{mask:module._portTournamentRead(23,0),gate:module._portTournamentRead(17,0),blocked:[0,1].map(p=>module._portTournamentRead(24,p))}}:{})}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
           onProgress:s=>{report.live=s;document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
           onComplete:s=>{report.live=s;resolve();},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();reject(error);}});
         document.documentElement.dataset.live='ready';options.onLive?.(globalThis.nativeLive);
       });
       if(tournament)report.matchFinal=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
+      if(report.live.completionReason==='match-end')report.results=readNativeResults(module);
       report.finalGpuErrorCheck=preview.validateGpu();saveShaders();preview.dispose();
     }else if(preview){report.preview.final=preview.draw();}
     if(params.has('input')){

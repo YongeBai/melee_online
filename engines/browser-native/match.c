@@ -27,6 +27,8 @@
 #include <stdlib.h>
 static int initialized,started;
 static StartMeleeData* menu_start;
+static struct MatchExitInfo match_exit;
+static int results_ready;
 static int hud_initialized;
 static int damage_initialized;
 static HSD_GObj* pause_object;
@@ -187,6 +189,25 @@ double portTournamentRead(unsigned field,unsigned slot)
     case 22:return gm_GetCurrentGameMode();
     case 23:{unsigned mask=0;for(unsigned i=0;i<8;i++)if(ifStatus_803F9628[i].x0)mask|=1u<<i;return mask;}
     case 24:{HSD_GObj* g=Player_GetEntity(slot);if(!g)abort();return ((Fighter*)g->user_data)->x221D_b4;}
+    case 25:{extern unsigned portSceneExitStatus(unsigned);return portSceneExitStatus(0);}
+    default:abort();
+    }
+}
+void portTournamentFinish(void)
+{
+    extern unsigned portSceneExitStatus(unsigned);
+    if(!started||gmVs_GetSceneState()->unk_0!=3||!portSceneExitStatus(0))abort();
+    if(results_ready)return;
+    gm_Scene_Vs_OnExit(&match_exit);results_ready=1;
+}
+double portTournamentResultRead(unsigned field,unsigned slot)
+{
+    if(!results_ready||slot>=2)abort();MatchEnd* end=&match_exit.match_end;
+    struct MatchPlayerData* p=&end->player_standings[slot];
+    switch(field){
+    case 0:return end->outcome;case 1:return end->frame_count;case 2:return end->n_winners;
+    case 3:return p->ckind;case 4:return p->pkind;case 5:return p->stocks;case 6:return p->percent;case 7:return p->score;
+    case 8:for(unsigned i=0;i<end->n_winners;i++)if(end->winners[i]==slot)return 1;return 0;
     default:abort();
     }
 }

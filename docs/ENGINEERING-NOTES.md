@@ -36,6 +36,18 @@ matches. This selector can use native RNG, so verify room synchronization after
 changing its call site. The extraction and server allowlist must include music
 without adding a player-supplied file requirement.
 
+Post-match routing stops at the original scene-exit flag, then calls
+`gm_Scene_Vs_OnExit` once to read native rankings. Frame-limit/manual probe stops
+must never fabricate results. The temporary results dialog is explicitly labelled;
+do not describe it as the original animated results scene. Rematch reloads a fresh
+WASM instance rather than reusing match statics. Restore only playable characters,
+valid native costumes and the six legal stages; rules remain fixed. Apply forced
+rematch stage selection after SSS initialization so its original objects and
+archive cleanup exist. Room return requires matching end reports and two rematch
+votes, with one epoch change; Character Select can be requested by either player.
+A post-return AudioContext resume attempt must still obey browser autoplay policy
+and report actual audio-graph output, not merely an accepted music request.
+
 Portable-source provenance includes both injected menu include files. Re-run
 compile audit and audit-link before building when changing either include.
 `prepare-menu-ui.mjs` copies existing extracted UI fixtures into ignored output;

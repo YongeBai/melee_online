@@ -29,6 +29,14 @@ extern void portCharacterMenuProductInitialize(void),portCharacterMenuProductLay
 static SSSData selection;
 static int initialized,character_initialized;
 static unsigned product_profile,product_cpu=1;
+static int restored_character[2]={-1,-1};
+static unsigned restored_costume[2];
+unsigned portMenuRestorePlayer(unsigned slot,unsigned character,unsigned costume)
+{
+    if(!product_profile||initialized||character_initialized)abort();
+    if(slot>=2||character>=26||costume>=gm_GetNumCostumesForCKind(character))return 0;
+    restored_character[slot]=character;restored_costume[slot]=costume;return 1;
+}
 extern void portCharacterMenuProductOpponent(unsigned);
 void portMenuSetCPU(unsigned cpu){if(!character_initialized||!product_profile||cpu>1)abort();portCharacterMenuProductOpponent(cpu);product_cpu=cpu;}
 unsigned portMenuProduct(void){return product_profile;}
@@ -62,6 +70,11 @@ static unsigned stage_menu_initialize(unsigned controller,int from_character)
     if(!cursor||!cursor->hsd_obj||!camera||!lights||!fog)abort();initialized=1;return (unsigned)cursor;
 }
 unsigned portStageMenuInitialize(unsigned controller){menu_transition=0;return stage_menu_initialize(controller,0);}
+void portStageMenuRematch(unsigned stage)
+{
+    if(!product_profile||!initialized||menu_transition!=2||(stage!=2&&stage!=3&&stage!=8&&stage!=28&&stage!=31&&stage!=32))abort();
+    selection.force_stage_id=stage;
+}
 unsigned portStageMenuFromCharacters(unsigned controller)
 {
     if(menu_transition!=1)abort();unsigned result=stage_menu_initialize(controller,1);menu_transition=2;return result;
@@ -159,6 +172,7 @@ static unsigned character_menu_initialize(int resume)
     for(unsigned i=0;i<2;i++)character_selection.vs.start.players[i].slot_type=Gm_PKind_Human;
     if(product_profile){
         if(!resume){character_selection.vs.start.players[0].ckind=CKind_Falco;character_selection.vs.start.players[1].ckind=CKind_Fox;}
+        if(!resume)for(unsigned i=0;i<2;i++)if(restored_character[i]>=0){character_selection.vs.start.players[i].ckind=restored_character[i];character_selection.vs.start.players[i].color=restored_costume[i];}
         character_selection.vs.start.players[1].slot_type=product_cpu?Gm_PKind_Cpu:Gm_PKind_Human;
         character_selection.vs.start.players[1].cpu_level=9;
         for(unsigned i=2;i<4;i++)character_selection.vs.start.players[i].slot_type=Gm_PKind_NA;

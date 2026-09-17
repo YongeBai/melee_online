@@ -1,11 +1,11 @@
 // Original C chooses the track and transport; this owns only browser playback.
 // Decode off the gameplay thread, and never claim autoplay worked while locked.
-export async function createNativeMusic(){
+export async function createNativeMusic({resumeAfterNavigation=false}={}){
  const response=await fetch('./music-fixtures.json');if(!response.ok)throw Error('Hosted music manifest unavailable');const manifest=await response.json();
  let context,gain,analyser,node,worker,buffer,track=null,loopStart=null,offset=0,began=0,paused=false,unlocked=false,disposed=false,generation=0,error=null,status='idle';
  const events=[],listeners=new AbortController();
  function log(event){if(events.length===64)events.shift();events.push({event,track,time:performance.now()});}
- function setup(){if(context)return;context=new AudioContext({latencyHint:'interactive'});gain=context.createGain();analyser=context.createAnalyser();analyser.fftSize=256;gain.connect(analyser);analyser.connect(context.destination);}
+ function setup(){if(context)return;context=new AudioContext({latencyHint:'interactive'});gain=context.createGain();analyser=context.createAnalyser();analyser.fftSize=256;gain.connect(analyser);analyser.connect(context.destination);if(resumeAfterNavigation)void unlock();}
  function position(){let p=offset+(node?context.currentTime-began:0);if(buffer&&loopStart!==null&&p>=buffer.duration)p=loopStart+(p-loopStart)%(buffer.duration-loopStart);return p;}
  function halt(){if(!node)return;offset=position();const old=node;node=null;old.onended=null;old.stop();old.disconnect();}
  function play(){if(!buffer||paused||document.hidden||!unlocked||context.state!=='running'||node||disposed)return;node=context.createBufferSource();node.buffer=buffer;node.loop=loopStart!==null;if(node.loop){node.loopStart=loopStart;node.loopEnd=buffer.duration;}node.connect(gain);began=context.currentTime;node.onended=()=>{node?.disconnect();node=null;buffer=null;status='ended';log('ended');};node.start(0,offset);status='playing';log('playing');}

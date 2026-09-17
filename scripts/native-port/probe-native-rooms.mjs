@@ -1,7 +1,8 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn} from 'node:child_process';import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const root=path.resolve(import.meta.dirname,'../..'),server=createNativePortServer(),clients=[];
-const output=path.join(root,'dist/native-port/experiment-native-rooms');fs.mkdirSync(output,{recursive:true});
+const resultsMode=process.argv.includes('--results');
+const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':''));fs.mkdirSync(output,{recursive:true});
 async function client(){
  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'native-room-')),browser=spawn('google-chrome',['--headless=new','--no-sandbox','--enable-gpu','--disable-dev-shm-usage','--window-size=1280,1100','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});let stderr='';browser.stderr.on('data',b=>stderr=(stderr+b).slice(-12000));
  const c={profile,browser};clients.push(c);
@@ -14,7 +15,7 @@ async function client(){
  c.click=async selector=>{const pos=await c.eval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e||e.hidden||e.disabled)throw Error('Button unavailable');const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);for(const type of ['mousePressed','mouseReleased'])await c.cmd('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...pos});};
  const held=new Set();c.keys=async next=>{for(const code of held)if(!next.includes(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyUp',code,key:code});held.delete(code);}for(const code of next)if(!held.has(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyDown',code,key:code});held.add(code);}};
  c.press=async code=>{await c.keys([code]);await delay(100);await c.keys([]);await delay(100);};
- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1&liveframes=600'});await c.wait('globalThis.characterMenuReport?.passed');return c;
+ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(resultsMode?'':'&liveframes=600')});await c.wait('globalThis.characterMenuReport?.passed');return c;
 }
 try{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const a=await client(),b=await client();
@@ -30,12 +31,43 @@ try{
  // Each local keyboard controls its own native hand on both machines.
  const x=initial[0].menu.players[1].x;await b.keys(['KeyA']);await b.wait(`nativeCharacterMenu.read().players[1].x<${x-3}`);await b.keys([]);await delay(100);
  const peerX=await a.eval('nativeCharacterMenu.read().players[1].x'),guestX=await b.eval('nativeCharacterMenu.read().players[1].x');if(Math.abs(peerX-guestX)>.01)throw Error('Remote cursor differs');
+ if(resultsMode){await a.press('Space');await b.press('Space');await delay(150);}
+ const selectedCostumes=await a.eval('nativeCharacterMenu.read().players.slice(0,2).map(p=>p.costume)');if(resultsMode&&selectedCostumes.some(c=>c===0))throw Error('Costume input was not exercised');
  await a.click('#readyRoom');await a.wait('nativeRoom.state.ready[0]');if(await a.eval('nativeMenuLive.snapshot().scene')!=='characters')throw Error('One Ready started match');await b.click('#readyRoom');
  await a.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');await b.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');
  const target=await a.eval('nativeStageMenu.icons().find(i=>i.stage===31&&i.unlocked===2)');
  for(let i=0;i<100;i++){const cursor=await a.eval('nativeStageMenu.read()');if(cursor.hover===target.i){await a.keys([]);break;}const [x,y]=cursor.cursor,dx=target.x-x,dy=target.y-y;const keys=[Math.abs(dx)>.7?(dx>0?'KeyD':'KeyA'):(dy>0?'KeyW':'KeyS')];if(Math.max(Math.abs(dx),Math.abs(dy))<6)keys.push('ShiftLeft');await a.keys(keys);await delay(25);await a.keys([]);await delay(100);if(i===99)throw Error('Could not steer stage cursor to '+JSON.stringify(target));}
  await delay(100);await a.press('KeyP');
  await a.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1');await b.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1');
+ if(resultsMode){
+  const lifecycle=[];
+  async function ended(outcome){
+   await Promise.all([a,b].map(c=>c.wait('globalThis.nativeMenuMatchReport?.results&&nativeRoom.state.phase==="results"',90000)));
+   const reports=await Promise.all([a,b].map(c=>c.eval('({results:nativeMenuMatchReport.results,selection:nativeMenuMatchReport.selection,room:nativeRoom.snapshot(),scene:nativeMenuLive.snapshot().scene})')));
+   if(reports.some(r=>r.results.outcome!==outcome||r.scene!=='results'))throw Error('Wrong result outcome '+JSON.stringify(reports));
+   if(JSON.stringify(reports[0].results)!==JSON.stringify(reports[1].results))throw Error('Result divergence');
+   for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/result-'+outcome+'-'+i+'.png',Buffer.from(shot.data,'base64'));}
+   lifecycle.push(...reports);return reports;
+  }
+  await a.keys(['KeyD']);const elimination=await ended(2);await a.keys([]);
+  if(elimination[0].results.players[0].stocks!==0||!elimination[0].results.players[1].winner)throw Error('Elimination standings');
+  await a.click('#rematchButton');await delay(200);if(await a.eval('nativeMenuLive.snapshot().scene')!=='results')throw Error('One vote restarted room');await b.click('#rematchButton');
+  await Promise.all([a,b].map(c=>c.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1&&nativeRoom.snapshot().epoch>'+elimination[0].room.epoch,90000)));
+  await Promise.all([a,b].map(c=>c.wait('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001')));
+  const restarted=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),selection:nativeCharacterMenu.matchSelection(),stocks:[0,1].map(p=>characterModule._portTournamentRead(10,p)),audio:nativeMusic.snapshot(),limit:characterModule._portTournamentRead(2,0)})')));
+  if(restarted.some(r=>JSON.stringify(r.selection.players.slice(0,2).map(p=>p.costume))!==JSON.stringify(selectedCostumes)||r.selection.stage!==31||r.stocks.some(n=>n!==4)||r.limit!==480||r.room.code!==code))throw Error('Fresh rematch rules/room');
+  // Diagnostic acceleration executes every original simulation step. It does
+  // not edit the timer/stocks/outcome and is not a presentation or latency test.
+  for(const c of [a,b])await c.eval('(()=>{let n=0;while(!characterModule._portTournamentRead(25,0)&&n<30000){for(let p=0;p<2;p++)characterModule._portControllerSample(p,0,0,0,0,0,0,0);characterModule._portTournamentStep();n++;}return n;})()');
+  const timeout=await ended(1);if(timeout[0].results.frames!==28800)throw Error('Timeout was not eight native minutes');
+  await b.click('#charactersButton');await Promise.all([a,b].map(c=>c.wait('nativeRoom.snapshot().epoch>'+timeout[0].room.epoch+'&&nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90')));
+  const returned=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),menu:nativeCharacterMenu.read()})')));
+  if(returned.some(r=>r.room.code!==code||r.menu.players[0].character!==20||r.menu.players[1].character!==2)||returned[0].room.seat!==0||returned[1].room.seat!==1)throw Error('CSS restoration');
+  await a.click('#readyRoom');await b.click('#readyRoom');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>90')));
+  const legal=await a.eval('nativeStageMenu.icons().filter(i=>i.unlocked===2).map(i=>i.stage).sort((a,b)=>a-b)');if(JSON.stringify(legal)!=='[2,3,8,28,31,32]')throw Error('Return flow exposed non-tournament stages');
+  await a.press('KeyO');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90')));
+  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,lifecycle,restarted,returned,legalStagesAfterReturn:legal,scope:'Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.'},null,2));console.log(JSON.stringify({passed:true,results:true,elimination:elimination[0].results,timeout:timeout[0].results}));
+ }else{
  await a.keys(['KeyD','KeyP']);await b.keys(['KeyA','KeyP']);await delay(400);await a.keys([]);await b.keys([]);
  await a.press('Space');await b.press('Space');await a.press('KeyO');await b.press('KeyO');
  for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/player-'+i+'.png',Buffer.from(shot.data,'base64'));}
@@ -44,5 +76,6 @@ try{
  if(final.some(v=>v.report.live.frames!==600))throw Error('Incomplete match');
  if(JSON.stringify(final[0].report.live.final)!==JSON.stringify(final[1].report.live.final))throw Error('Native fighter state diverged: '+JSON.stringify(final.map(v=>v.report.live.final)));
  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,final,scope:'Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.'},null,2));console.log(JSON.stringify({passed:true,code,frames:600,matchingFighterState:true}));
+}
 }catch(e){fs.writeFileSync(output+'/failure.json',JSON.stringify({error:e.stack,states:await Promise.all(clients.map(c=>c.eval?.('({room:globalThis.nativeRoom?.snapshot(),menu:globalThis.nativeMenuLive?.snapshot(),error:globalThis.nativeRoomError})').catch(e=>String(e))))},null,2));throw e;
 }finally{for(const c of clients){c.ws?.close();c.browser.kill();await new Promise(r=>c.browser.once('exit',r));fs.rmSync(c.profile,{recursive:true,force:true});}await new Promise(r=>server.close(r));}

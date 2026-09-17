@@ -13,3 +13,13 @@ body[data-error="true"] #result { display: block; position: fixed; inset: 10%; z
 #roomNotice { position: fixed; z-index: 30; inset: 30% 15%; background: #202335ee; border: 2px solid #aeb1c0; padding: 3%; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.5; }
 #roomNotice button { cursor: pointer; }
 #roomNotice canvas { height: 32px; max-width: 100%; }
+#nativeResults { color: #eee; border: 2px solid #aeb1c0; background: #141d30; width: min(640px, 88vw); padding: 0; }
+#nativeResults::backdrop { background: #000b; }
+#nativeResults .controls-surface { position: relative; min-height: 0; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+#nativeResults h1, #nativeResults p { margin: 0; }
+#nativeResults canvas { height: 32px; max-width: 100%; }
+#nativeResults table { width: 100%; border-collapse: collapse; text-align: center; }
+#nativeResults td, #nativeResults th { padding: 10px; border-bottom: 1px solid #7c8393; }
+#nativeResults .room-action { width: 85%; min-height: 46px; }
+#nativeResults .results-preview, #nativeResults .results-help { font: 14px sans-serif; color: #bcc3d5; }
+#nativeResults button:disabled { opacity: .5; }
