@@ -7,6 +7,13 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+[Exact draw-state staging](BROWSER-NATIVE-DRAW-STATE.md) interns only fully
+compared, pointer-free TEV instruction rows and immutable owned uniform versions.
+Copy dynamic registers every draw; reset all GL knowledge at every flush. Keep
+the original `exactstate=0` path and strict every-frame pixel/camera/memory
+oracles. Generic uniform comparison and texture object pools were slower and
+removed. A Battlefield diagnostic pass is not full 720p60 certification.
+
 [Exact sparse checkpoints](BROWSER-NATIVE-SPARSE-CHECKPOINTS.md) share audited
 dirty marks through independent subscriptions. Never clear the native bitmap
 outside that hub or omit the restore writes from presentation history. Skip a

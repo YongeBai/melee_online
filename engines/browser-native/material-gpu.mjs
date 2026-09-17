@@ -1,3 +1,4 @@
+import {createOwnedUniformState} from './owned-uniform-state.mjs';
 import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry,uploadImmediateResource} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
@@ -23,6 +24,7 @@ export function nativePositionRoundoffBound(matrix,row,point) {
 // ordering and mutable-image invalidation remain work for the playable renderer.
 export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true,presentationCache=null}={}) {
   const assetLease=presentationCache?.acquire(gl);
+  const ownedUniforms=assetLease?.exactState?createOwnedUniformState():null;let lastPixelKey=-1,lastCull=-1;
   const programs=assetLease?.programs??new Map(),variants=assetLease?.submissionOptimized?assetLease.variants:new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
   if(!view){assetLease?.release();throw Error('Native material view allocation');}
   // WebGL copies uniform arguments during the call. Reuse scratch storage;
@@ -34,12 +36,16 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   const packedModel=assetLease?.packedState?createPackedModelReader(module,(i,create)=>assetLease.modelSnapshot(i,create)):null;
   const readModel=packedModel?()=>packedModel.read():()=>readNativeModelMatrices(module);
   const readContext=assetLease?.submissionOptimized?createNativeRenderContextReader(module):()=>readNativeRenderContext(module);
+  const drawTiming={};
+  function timed(name,fn,arg){if(!assetLease?.profileDraw)return fn(arg);const t=performance.now();try{return fn(arg);}finally{const row=drawTiming[name]??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-t;}}
+  const readTev=assetLease?.exactState?p=>assetLease.tevInterner.read(module,p):p=>readNativeTevState(module,p),readTextures=()=>readNativeTextures(module);
+  function captureState(ptr){return {tev:timed('tev',readTev,ptr),textures:timed('textures',readTextures),pixel:timed('pixel',readPixel),model:timed('model',readModel),context:timed('context',readContext)};}
   const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module);
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes,origin,immediateRegisters=false){
-    const variant=materialShaderKey(state,attributes,{immediateRegisters});if(variants.has(variant))return variants.get(variant);
+    const keyStart=assetLease?.profileDraw?performance.now():0;const variant=(assetLease?.exactState?assetLease.shaderKey:materialShaderKey)(state,attributes,{immediateRegisters});if(assetLease?.profileDraw){const row=drawTiming.shaderKey??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-keyStart;}if(variants.has(variant))return variants.get(variant);
     const result=compileProgram(generateMaterialShaders(state,attributes,{immediateRegisters}),origin);result.used=true;variants.set(variant,result);return result;
   }
   function compileProgram(sources,origin){
@@ -53,7 +59,8 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       programs.set(key,result);shaderCompilations.push({program:programs.size,origin,cpuMs:performance.now()-compilationStart});return result;
     } catch(error){if(p)gl.deleteProgram(p);throw error;}finally{if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);}
   }
-  function image(t){
+  function image(t){return timed('textureLookup',lookupImage,t);}
+  function lookupImage(t){
     const key=JSON.stringify(t);if(images.has(key))return images.get(key);
     const texture=assetLease?assetLease.texture(key,nativeTextureSourceBytes(module,t),()=>createImage(t)):createImage(t);
     images.set(key,texture);return texture;
@@ -72,7 +79,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       return texture;
     }catch(error){gl.deleteTexture(texture);throw error;}
   }
-  function apply(state,p,camera){
+  function applyOriginal(state,p,camera){
     gl.useProgram(p.program);const u=name=>p.uniform(name);
     // A null location is absent from this linked program, including its transform
     // feedback outputs. Preserve the old path for independent uncached oracles.
@@ -80,8 +87,9 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     if(state.context.fog?.type){const f=state.context.fog;gl.uniform2f(u('fogAC'),f.a,f.c);gl.uniform2i(u('fogBShift'),f.b,f.shift);gl.uniform3iv(u('fogColor'),f.color);}
     gl.uniformMatrix4fv(u('projection'),false,camera.projection);gl.uniform1i(u('currentMatrix'),state.model.current??0);
     if(active('positionRows'))gl.uniform4fv(u('positionRows'),(state.model.positionRows??packRows(scratch.position,state.model.positions,12)));if(active('normalRows'))gl.uniform4fv(u('normalRows'),(state.model.normalRows??packRows(scratch.normal,state.model.normals,12)));
-    const {tex,post,bias}=scratch,texActive=active('textureRows'),postActive=active('postRows');if(texActive)tex.fill(0);if(postActive)post.fill(0);bias.fill(0);
+    const matrixPackStart=assetLease?.profileDraw?performance.now():0;const {tex,post,bias}=scratch,texActive=active('textureRows'),postActive=active('postRows');if(texActive)tex.fill(0);if(postActive)post.fill(0);bias.fill(0);
     for(const m of state.textures.matrices)if(m.id<64?texActive:postActive)(m.id<64?tex:post).set(m.values,(m.id<64?m.id-30:m.id-64)*4);
+    if(assetLease?.profileDraw){const row=drawTiming.textureMatrixPacking??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-matrixPackStart;}
     if(texActive)gl.uniform4fv(u('textureRows'),tex);if(postActive)gl.uniform4fv(u('postRows'),post);
     if(active('tevRegisters'))gl.uniform4iv(u('tevRegisters'),packRows(scratch.registers,state.tev.registers,4));if(active('tevKonst'))gl.uniform4iv(u('tevKonst'),packRows(scratch.konst,state.tev.konst,4));
     if(active('ambientColor')){for(let i=0;i<2;i++)scratch.ambient.set(state.pixel.colors[i].ambient,i*4);gl.uniform4iv(u('ambientColor'),scratch.ambient);}
@@ -93,10 +101,36 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     for(const t of state.textures.textures){gl.activeTexture(gl.TEXTURE0+t.id);gl.bindTexture(gl.TEXTURE_2D,image(t));gl.uniform1i(u('image'+t.id),t.id);bias[t.id]=t.lod.bias;}
     gl.uniform1fv(u('lodBias'),bias);gl.uniform2iv(u('alphaReference'),[state.pixel.alphaTest.reference0,state.pixel.alphaTest.reference1]);
   }
+  function apply(state,p,camera){
+    if(!ownedUniforms)return applyOriginal(state,p,camera);
+    const row=ownedUniforms.select(gl,p.program),u=name=>p.uniform(name);
+    // A null location is absent from this linked program, including its transform
+    // feedback outputs. Preserve the old path for independent uncached oracles.
+    const active=name=>!assetLease?.submissionOptimized||u(name)!==null;
+    if(state.context.fog?.type&&row.fog!==state.context.fog){row.fog=state.context.fog;const f=state.context.fog;gl.uniform2f(u('fogAC'),f.a,f.c);gl.uniform2i(u('fogBShift'),f.b,f.shift);gl.uniform3iv(u('fogColor'),f.color);}
+    if(ownedUniforms.projection(row,camera.projection))gl.uniformMatrix4fv(u('projection'),false,camera.projection);if(row.currentMatrix!==(state.model.current??0)){row.currentMatrix=state.model.current??0;gl.uniform1i(u('currentMatrix'),row.currentMatrix);}
+    if(active('positionRows'))gl.uniform4fv(u('positionRows'),(state.model.positionRows??packRows(scratch.position,state.model.positions,12)));if(active('normalRows'))gl.uniform4fv(u('normalRows'),(state.model.normalRows??packRows(scratch.normal,state.model.normals,12)));
+    const matrixPackStart=assetLease?.profileDraw?performance.now():0;const {tex,post,bias}=scratch,texActive=active('textureRows'),postActive=active('postRows');if(texActive)tex.fill(0);if(postActive)post.fill(0);bias.fill(0);
+    for(const m of state.textures.matrices)if(m.id<64?texActive:postActive)(m.id<64?tex:post).set(m.values,(m.id<64?m.id-30:m.id-64)*4);
+    if(assetLease?.profileDraw){const row=drawTiming.textureMatrixPacking??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-matrixPackStart;}
+    if(texActive)gl.uniform4fv(u('textureRows'),tex);if(postActive)gl.uniform4fv(u('postRows'),post);
+    if(active('tevRegisters'))gl.uniform4iv(u('tevRegisters'),packRows(scratch.registers,state.tev.registers,4));if(active('tevKonst'))gl.uniform4iv(u('tevKonst'),packRows(scratch.konst,state.tev.konst,4));
+    if(active('ambientColor')){for(let i=0;i<2;i++)scratch.ambient.set(state.pixel.colors[i].ambient,i*4);gl.uniform4iv(u('ambientColor'),scratch.ambient);}
+    if(active('materialColor')){for(let i=0;i<2;i++)scratch.material.set(state.pixel.colors[i].material,i*4);gl.uniform4iv(u('materialColor'),scratch.material);}
+    if(ownedUniforms.lighting(row,state.context.lights)){
+      const packed=ownedUniforms.packLights(state.context.lights);
+      if(active('lightColor'))gl.uniform4iv(u('lightColor'),packed.lightColor);
+      for(const name of ['lightPosition','lightDirection','lightAngular','lightDistance'])if(active(name))gl.uniform3fv(u(name),packed[name]);
+    }
+    for(const t of state.textures.textures){gl.activeTexture(gl.TEXTURE0+t.id);gl.bindTexture(gl.TEXTURE_2D,image(t));if(!(row.images&(1<<t.id))){gl.uniform1i(u('image'+t.id),t.id);row.images|=1<<t.id;}bias[t.id]=t.lod.bias;}
+    gl.uniform1fv(u('lodBias'),bias);gl.uniform2iv(u('alphaReference'),[state.pixel.alphaTest.reference0,state.pixel.alphaTest.reference1]);
+  }
   function pixelState(pixel){
     const compare=[gl.NEVER,gl.LESS,gl.EQUAL,gl.LEQUAL,gl.GREATER,gl.NOTEQUAL,gl.GEQUAL,gl.ALWAYS];
     if(pixel.destinationAlpha.enabled||pixel.dither||pixel.blend.type===2)throw Error('Native material destination alpha/dither/logic integration pending');
     if(pixel.depth.beforeTexture&&pixel.depth.update&&gxAlphaTestRejectsAny(pixel.alphaTest))throw Error('Native early depth with alpha rejection requires ordered depth pass');
+    const key=pixel.depth.enabled|(pixel.depth.compare<<1)|(pixel.depth.update<<4)|(pixel.colorUpdate<<5)|(pixel.alphaUpdate<<6)|(pixel.blend.type<<7)|(pixel.blend.source<<9)|(pixel.blend.destination<<12);
+    if(ownedUniforms&&key===lastPixelKey)return;lastPixelKey=key;
     pixel.depth.enabled?gl.enable(gl.DEPTH_TEST):gl.disable(gl.DEPTH_TEST);gl.depthFunc(compare[pixel.depth.compare]);gl.depthMask(!!pixel.depth.update);
     gl.colorMask(!!pixel.colorUpdate,!!pixel.colorUpdate,!!pixel.colorUpdate,!!pixel.alphaUpdate);gl.disable(gl.DITHER);
     if(pixel.blend.type===0)gl.disable(gl.BLEND);
@@ -141,7 +175,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   module.onNativeDraw=(owner,joint,display,polygon,ptr,positions=0,count=0,normals=0,normalCount=0)=>{
     const plan=nativePlans.get(owner+':'+joint+':'+polygon);
     if(!plan)throw Error('Original callback selected geometry not uploaded: '+owner+'/'+joint+'/'+polygon);
-    const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
+    const state=captureState(ptr);
     checkNativeRenderContext(state.context,snapshot,state.pixel);
     const shaped=(plan.mesh.flags&0x3000)===0x1000;
     if(shaped!==!!positions)throw Error('Native shape geometry missing or unexpected');
@@ -158,7 +192,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     let state,flatRegisters,attrs;
     if(!merge){
       attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
-      state={tev:readNativeTevState(module,tev),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
+      state=captureState(tev);
       checkNativeRenderContext(state.context,snapshot,state.pixel);
       flatRegisters=!state.textures.generators.some(g=>g.source>=5&&g.source<=11);
     }
@@ -230,7 +264,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           if((mesh.flags&0x3000)===0x1000)throw Error('Shape rendering requires original callbacks');
           const joint=new Uint32Array(module.HEAPU8.buffer,nodes,model.tree.nodes.length)[mesh.joint];
           const ptr=module._portMaterialDrawState(joint,plan.display,plan.polygon,view,owner);
-          const state={tev:readNativeTevState(module,ptr),textures:readNativeTextures(module),pixel:readPixel(),model:readModel(),context:readContext()};
+          const state=captureState(ptr);
           checkNativeRenderContext(state.context,snapshot,state.pixel);
           queue.push({owner,plan,state,camera:snapshot,program:program(state,mesh.attrs)});count++;
         }
@@ -247,11 +281,12 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     },
     shaderSources(){return [...programs.values()].map(p=>p.sources);},
     shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
-    begin(camera){selectCamera(camera);queue=[];packedModel?.reset();assetLease?.immediate?.begin();shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
+    begin(camera){for(const key of Object.keys(drawTiming))delete drawTiming[key];selectCamera(camera);queue=[];packedModel?.reset();assetLease?.immediate?.begin();shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
     flush({ordered=false,clip=null,clearAlpha=1,forceAlpha=false}={}){
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);if(clip){gl.enable(gl.SCISSOR_TEST);gl.scissor(...clip);}else gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,clearAlpha);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
       // actor order stable, completing opaque draws before blended draws.
+      ownedUniforms?.begin();lastPixelKey=lastCull=-1;
       const drawsInOrder=ordered?queue:[...queue.filter(d=>d.state.pixel.blend.type===0),...queue.filter(d=>d.state.pixel.blend.type!==0)];
       for(const draw of drawsInOrder) {
         gl.bindVertexArray(draw.plan.vao);
@@ -267,14 +302,14 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[0]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.positions);
           if(draw.shape.normals){gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[2]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.normals);}
         }
-        apply(draw.state,draw.program,draw.camera);pixelState(draw.state.pixel);if(forceAlpha)gl.colorMask(true,true,true,true);
+        const applyStart=assetLease?.profileDraw?performance.now():0;apply(draw.state,draw.program,draw.camera);if(assetLease?.profileDraw){const row=drawTiming.uniformsTextures??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-applyStart;}timed('pixelGL',pixelState,draw.state.pixel);if(forceAlpha)gl.colorMask(true,true,true,true);
         const cull=draw.plan.mesh.flags&0xc000;
-        if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);
+        if(!ownedUniforms||lastCull!==cull){if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);lastCull=cull;}
         if(verifyVertices)verifyDrawVertices(draw);
         gl.drawElements(gl.TRIANGLES,draw.plan.mesh.triangles.length,gl.UNSIGNED_INT,0);draws++;
       }
       if(checkErrors&&gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
-      return {shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws+textDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,textDraws,textVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
+      return {drawTiming:assetLease?.profileDraw?structuredClone(drawTiming):null,exactGL:ownedUniforms?.snapshot()??null,shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws+textDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,textDraws,textVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}

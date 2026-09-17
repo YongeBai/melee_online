@@ -1,3 +1,4 @@
+import {createTevStageInterner,createInternedShaderKey} from './native-state-intern.mjs';
 import {createImmediateResourcePool} from './immediate-geometry.mjs';
 import {createModelGeometryCache} from './model-geometry-cache.mjs';
 import {inspectArchive} from './archive.mjs';
@@ -21,8 +22,8 @@ export function equalTextureBytes(bytes,prior){
   return true;
 }
 // Reuse only structurally keyed resources under an exclusive frame lease.
-export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=true}={}){
-  const modelSnapshots=[],programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
+export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=true,exactState=true,profileDraw=false}={}){
+  const tevInterner=createTevStageInterner(),shaderKey=createInternedShaderKey(),modelSnapshots=[],programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
   let immediatePool=null,context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
   const stats={modelHits:0,modelMisses:0,textureHits:0,textureMisses:0,textureInvalidations:0,rendererLeases:0};
   return {
@@ -42,7 +43,7 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
       context=gl;leases++;stats.rendererLeases++;
       let released=false;const immediate=reuseImmediate?(immediatePool??=createImmediateResourcePool(gl)).acquire():null;
       return {
-        programs,variants,submissionOptimized,packedState,reuseImmediate,
+        tevInterner,shaderKey,programs,variants,submissionOptimized,packedState,reuseImmediate,exactState,profileDraw,
         immediate,
         modelSnapshot(index,create){if(released)throw Error('Released presentation lease');return modelSnapshots[index]??=create();},
         model(bytes,create){
@@ -65,7 +66,7 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
         release(){if(!released){released=true;immediate?.release();leases--;}}
       };
     },
-    snapshot:()=>({...stats,submissionOptimized,packedState,reuseImmediate,modelSnapshotSlots:modelSnapshots.length,immediatePlanSlots:immediatePool?.snapshot().slots??0,immediatePool:immediatePool?.snapshot()??null,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
+    snapshot:()=>({...stats,tevInterner:tevInterner.snapshot(),exactState,profileDraw,submissionOptimized,packedState,reuseImmediate,modelSnapshotSlots:modelSnapshots.length,immediatePlanSlots:immediatePool?.snapshot().slots??0,immediatePool:immediatePool?.snapshot()??null,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
     dispose(){
       if(leases)throw Error('Cannot dispose leased presentation assets');
       if(closed)return;closed=true;
