@@ -33,6 +33,31 @@ node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-in
 node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-pause --frames=900 --hardware --defer-gpu-errors
 ```
 
+## Original character-select integration
+
+`character-menu.html` automatically loads the original USA CSS, extra-menu,
+SIS and card archives. Original OnEnter/OnFrame/OnExit callbacks own roster hit
+tests, hands, tokens, character/costume selection, confirmation and cancellation.
+Models and SIS render in the original camera's GX link/pass order. The host
+exposes disconnected ports separately from neutral controller samples.
+
+Run `node scripts/native-port/probe-character-menu.mjs` after preparing fixtures
+and building. It selects all 25 roster tiles (Zelda retains the shared tile),
+checks a mirror match's distinct costumes and X costume change, rejected Start
+without selections, the native deadzone, disconnected hands and held-B cancel.
+Fifteen visits reuse one runtime; every scene leaves zero GObjs and processes.
+Four tracked allocations remain: the two original resident card archives and
+headers. Card work areas are also intentionally persistent. Scene cleanup resets
+SIS objects before deleting model owners; the original OnExit alone frees the
+text arena, avoiding a double free.
+
+This is an explicitly muted diagnostic, not a public playable menu. The host
+must accept `diagnostic-muted` before bank-load/wait calls can be bypassed;
+without it they execute the original loader. No bank readiness or voice playback
+is fabricated. Actual audio, rules/name submenus, Zelda/Sheik match-entry handling,
+full scene routing, saved preferences and the public two-seat layout remain
+unfinished. Complete archive conversion is not proof those submenu callbacks run.
+
 ## Original stage-select integration
 
 The native stage-select diagnostic now loads `MnSlMap.usd` automatically and

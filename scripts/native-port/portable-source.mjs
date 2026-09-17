@@ -156,6 +156,11 @@ export function preparePortableSource(source,output) {
       replace('    interpretShapeAnimDisplayList(pobj, vertex_buffer, normal_buffer);', '    if (!port_shape_capture) interpretShapeAnimDisplayList(pobj, vertex_buffer, normal_buffer);');
       replace('void HSD_PObjClearMtxMark(void* obj, u32 mark)', 'void portShapeEvaluate(HSD_PObj* pobj, float (**vertices)[3], float (**normals)[3])\n{\n    HSD_ASSERT(0, !port_shape_capture && pobj_type(pobj) == POBJ_SHAPEANIM);\n    port_shape_capture = 1; drawShapeAnim(pobj); port_shape_capture = 0;\n    *vertices = vertex_buffer; *normals = normal_buffer;\n}\n\nvoid HSD_PObjClearMtxMark(void* obj, u32 mark)');
     }
+    if(file==='src/melee/mn/mncharsel.c') {
+      // Read-only inspection of original CSS hit targets, hands and door state.
+      const marker='void mnCharSel_Scene_OnEnter(void* arg0)';
+      replace(marker,"double portCharacterMenuNativeRead(unsigned field,unsigned index)\n{\n    if(field==0)return mnCharSel_804D6CF6;\n    if(field==1)return mnCharSel_804D6CF2;\n    if(field>=10){\n        HSD_ASSERT(0,index<25);CSSIcon* icon=&icons[index];\n        switch(field){case 10:return icon->char_kind;case 11:return icon->state;\n        case 12:return (icon->bound_l+icon->bound_r)*0.5f;\n        case 13:return (icon->bound_u+icon->bound_d)*0.5f;default:HSD_ASSERT(0,0);}\n    }\n    HSD_ASSERT(0,index<4 && mnCharSel_804A0BC0[index]);\n    struct CSSCursorData* c=mnCharSel_804A0BC0[index];CSSDoor* door=&mnCharSel_803F0DFC.doors[index];\n    switch(field){case 2:return c->xC;case 3:return c->x10;case 4:return c->x5;\n    case 5:return door->sel_icon;case 6:return door->costume;case 7:return door->p_kind;\n    case 8:return mnCharSel_804A0BD0[index]->x5;case 9:return door->selected_since_load;}\n    HSD_ASSERT(0,0);return 0;\n}\n\n"+marker);
+    }
     if(file==='src/melee/mn/mnstagesel.c') {
       // Read-only inspection of original selection state and icon hit targets.
       const marker='void mnStageSel_Scene_OnEnter(void* arg0)';

@@ -1,0 +1,429 @@
+{
+  "date": "2026-09-17",
+  "scope": "Original character-select lifecycle and controller selection; muted development diagnostic, not a complete competitive release.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "wasm": {
+    "sha256": "27080dc64ce38fd7ed29eb9c3b6ac1fe13a38760af3e2405ca5d65d6e157e8e2",
+    "bytes": 3545574
+  },
+  "gpu": {
+    "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+    "vendor": "Google Inc. (AMD)"
+  },
+  "implemented": [
+    "Automatic typed hosted CSS, extra-menu, SIS, card icon and card notice imports",
+    "Original CSS callbacks, hands/tokens, full 25-tile roster, costume selection, Start and B cancellation",
+    "Original camera and GX pass/link order including SIS; disconnected controller status",
+    "Explicit diagnostic mute only; original bank loader remains the default outside opted-in menu diagnostics"
+  ],
+  "characterSelect": {
+    "cases": 15,
+    "frames": 2504,
+    "gpuSnapshots": 43,
+    "gpuVertices": 351156,
+    "selectedCharacterIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "camera": {
+      "eye": [
+        0,
+        0,
+        129.99996948242188
+      ],
+      "interest": [
+        0,
+        0,
+        0
+      ],
+      "fov": 24.999998092651367,
+      "aspect": 1.2166670560836792,
+      "near": 0.10000000149011612,
+      "far": 5000
+    },
+    "casesSummary": [
+      {
+        "name": "roster-0",
+        "frames": 161,
+        "characters": [
+          22,
+          8
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-1",
+        "frames": 161,
+        "characters": [
+          7,
+          5
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-2",
+        "frames": 158,
+        "characters": [
+          12,
+          17
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-3",
+        "frames": 162,
+        "characters": [
+          1,
+          0
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-4",
+        "frames": 253,
+        "characters": [
+          25,
+          20
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-5",
+        "frames": 157,
+        "characters": [
+          2,
+          11
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-6",
+        "frames": 154,
+        "characters": [
+          14,
+          4
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-7",
+        "frames": 158,
+        "characters": [
+          16,
+          18
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-8",
+        "frames": 253,
+        "characters": [
+          6,
+          21
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-9",
+        "frames": 152,
+        "characters": [
+          24,
+          13
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-10",
+        "frames": 150,
+        "characters": [
+          15,
+          10
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-11",
+        "frames": 157,
+        "characters": [
+          3,
+          9
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "roster-12",
+        "frames": 168,
+        "characters": [
+          23,
+          22
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "mirror-costume",
+        "frames": 158,
+        "characters": [
+          2,
+          2
+        ],
+        "costumes": [
+          2,
+          1
+        ],
+        "finished": {
+          "phase": 1,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      },
+      {
+        "name": "cancel",
+        "frames": 102,
+        "characters": [
+          26,
+          26
+        ],
+        "costumes": [
+          0,
+          0
+        ],
+        "finished": {
+          "phase": 2,
+          "objects": 0,
+          "procs": 0,
+          "allocations": 4
+        }
+      }
+    ],
+    "persistentAllocations": "Four tracked allocations are two original card archive buffers and headers; original card work areas also remain resident. Fifteen menu visits reuse one runtime with zero GObjs and procs after every exit.",
+    "sheik": "Shared Zelda tile only; hold-A match-entry behavior is not part of this CSS test."
+  },
+  "validation": {
+    "unitTests": 262,
+    "sharedBrowser": true,
+    "stageMenuCases": 7,
+    "combat": {
+      "frames": 3600,
+      "drawSubmissions": 3600,
+      "elapsedMs": 60029,
+      "simulation": {
+        "samples": 3600,
+        "meanMs": 0.39983333342605165,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7000000178813934,
+        "maxMs": 1.9000000059604645
+      },
+      "drawSubmission": {
+        "samples": 3600,
+        "meanMs": 3.4313888884004617,
+        "p50Ms": 3.199999988079071,
+        "p95Ms": 5.5,
+        "maxMs": 13.299999982118607
+      },
+      "drawIntervals": {
+        "samples": 3599,
+        "meanMs": 16.670658516253702,
+        "p50Ms": 16.69999999999709,
+        "p95Ms": 16.700000000004366,
+        "maxMs": 33.29999999999927
+      },
+      "multiStepCallbacks": 0,
+      "submissionsOverFrameBudget": 0,
+      "gameplayParityWithPriorCore": {
+        "matched": true,
+        "fields": [
+          "initial",
+          "final",
+          "stateChanges",
+          "workload",
+          "match",
+          "immediateStats",
+          "particleStats",
+          "afterimageStats"
+        ],
+        "excludedFighterFields": [
+          7,
+          8
+        ],
+        "reason": "Relocated camera-box and fighter-data addresses"
+      },
+      "gpuReadbacks": false,
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      }
+    }
+  },
+  "limits": {
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "performanceImprovementProven": false,
+    "competitiveReleaseComplete": false,
+    "publicPlayStillEmulator": true,
+    "pending": [
+      "Actual browser music and SFX",
+      "Rules/name submenus and saved preferences",
+      "Complete CSS/stage/match/results routing and public two-seat UI integration",
+      "All costume match assets and Zelda/Sheik entry behavior",
+      "Broad sustained presentation and input-latency validation"
+    ],
+    "notes": [
+      "GPU transform feedback is not independent retail screenshot parity.",
+      "Headless hardware Chrome isolated combat regression; not an A/B speedup experiment.",
+      "Draw interval maximum remains 33.3 ms; no uniform displayed cadence claim."
+    ]
+  },
+  "commands": [
+    "node scripts/native-port/probe-character-menu.mjs",
+    "node scripts/native-port/probe-menu.mjs",
+    "node scripts/native-port/verify-browser.mjs --fighter-init",
+    "node --test scripts/native-port/*.test.mjs",
+    "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --record-shaders"
+  ]
+}

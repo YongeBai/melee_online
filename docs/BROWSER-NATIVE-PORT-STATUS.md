@@ -1,9 +1,34 @@
-# Native browser port — September 16, 2026
+# Native browser port — September 17, 2026
 
 The direct port is now an implemented, reproducible development target:
 [build and architecture](../engines/browser-native/README.md). It links original
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
+
+The original character-select scene now loads and runs in an explicitly muted
+native diagnostic. Its full 25-tile roster, hands, tokens, SIS text, original
+camera and GX ordering render at 960×720. Controller tests select every tile,
+handle a mirror match's costume collision and X costume change, reject Start
+without selections, respect the native deadzone, hide disconnected hands, and
+complete Start/held-B exits. Fifteen visits in one runtime cover 2,504 ticks and
+43 GPU snapshots (351,156 checked vertices). Every visit leaves zero scene
+objects/processes; only the two original resident card archives and headers
+remain tracked. Card work areas also remain resident as in the original code.
+The cleanup test caught and fixed a host double-free of the SIS text arena.
+
+This core passes 262 unit tests, shared browser checks and all seven stage-menu
+regressions. An isolated Kirby/Yoshi run completes 3,600 simulation steps and
+3,600 draw submissions in 60.029 s: mean simulation 0.400 ms; mean submission
+3.431 ms, p95 5.5 ms, maximum 13.3 ms. Gameplay fields, transitions and workload
+match the prior core after excluding relocated pointers. No catch-up callback
+or submission over 16.67 ms occurs, but the maximum draw interval is still
+33.3 ms. These are regression measurements, not an A/B gain or displayed-FPS
+certification. Audio, rules/name submenus, full scene routing, other costumes,
+Zelda/Sheik match-entry handling, public UI/release integration and measured
+input-to-photon latency remain pending. The public play route is unchanged.
+[Character-select evidence](benchmarks/browser-2026-09-17-native-port-character-menu.json).
+
+Earlier milestones below retain their historical scope and pending-work notes.
 
 The original SIS text engine now runs as the next prerequisite for character
 select. All 85 USA archive entries and a dynamic label render through native

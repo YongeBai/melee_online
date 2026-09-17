@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
+export function sceneLinkInputs(root,upstream,output,additionalFiles=[],excludedFiles=[]) {
   const auditDir=path.join(output,'audit'),report=JSON.parse(fs.readFileSync(path.join(auditDir,'link-report.json')));
   const recipe=createHash('sha256').update(fs.readFileSync(new URL('./portable-source.mjs',import.meta.url))).digest('hex');
   if(report.portableSource?.recipeSha256!==recipe)throw Error('Re-run native compile/link audits before scene bring-up');
@@ -28,7 +28,7 @@ export function sceneLinkInputs(root,upstream,output,additionalFiles=[]) {
   fs.writeFileSync(guards,'#include <dolphin/gx.h>\n#include <stdio.h>\n#include <stdlib.h>\n'+definitions.join('\n')+'\n');
   const failed=new Set(JSON.parse(fs.readFileSync(path.join(auditDir,'report.json'))).failures.map(f=>f.file));
   const objects=execFileSync('rg',['--files','src/sysdolphin','-g','*.c'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort()
-    .filter(file=>!failed.has(file)).map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
+    .filter(file=>!failed.has(file)&&!excludedFiles.includes(file)).map(file=>path.join(auditDir,file.replaceAll('/','_')+'.o'));
   const library=path.join(auditDir,'scene-hsd.a');fs.rmSync(library,{force:true});
   execFileSync(path.join(root,'.browser-tools/emsdk/upstream/emscripten/emar'),['rcs',library,...objects]);
   // The animation loader needs character filenames; callers can additionally

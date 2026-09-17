@@ -460,3 +460,10 @@ double portStadiumRead(unsigned field)
     if(field==6)return ((Ground*)Ground_GetMapGObj(1)->user_data)->u.display.xF4!=NULL;
     abort();
 }
+/* A disconnected port is different from a connected neutral controller. Native
+ * character-select uses this status to hide its hand and handle unplugging. */
+void portControllerDisconnect(unsigned slot)
+{
+    if(slot>=4)abort();memset(&HSD_PadGameStatus[slot],0,sizeof(HSD_PadStatus));
+    HSD_PadGameStatus[slot].err=-1;HSD_PadMasterStatus[slot]=HSD_PadGameStatus[slot];
+}

@@ -105,3 +105,102 @@ double portShapeBlend(HSD_PObj* polygon,unsigned index)
     if(s->flags&SHAPESET_ADDITIVE){if(index>=s->nb_shape)abort();return s->blend.bp[index];}
     if(index)abort();return s->blend.bl;
 }
+
+/* Browser entry into original character select. The scene still owns every
+ * hand/roster callback and selection transition; platform calls stay guarded. */
+#include <melee/mn/mncharsel.h>
+#include <melee/gm/gmmain_lib.h>
+#include <melee/gm/gm_1601.h>
+#include <melee/gm/types.h>
+#include <sysdolphin/baselib/sislib.h>
+extern GameRules gmMainLib_DefaultGameRules;
+extern struct GamePrefs gmMainLib_DefaultGamePrefs;
+static CSSData character_selection;
+static u8 character_ko_counts[GM_MAX_PLAYERS];
+static int character_initialized;
+unsigned portCharacterMenuInitialize(void)
+{
+    if(initialized||character_initialized||portSceneInitialize()<0)abort();
+    portRuntimeSetSceneDestructors(destroy_lights);portInitializeVsRouting();portSceneExitStatus(1);
+    *gmMainLib_GetGameRules()=gmMainLib_DefaultGameRules;
+    *gmMainLib_GetGamePrefs()=gmMainLib_DefaultGamePrefs;
+    gmMainLib_GetGamePrefs()->item_freq=255;gmMainLib_GetGamePrefs()->item_mask=0;
+    GameRules* rules=gmMainLib_GetGameRules();rules->mode=1;rules->stock_count=4;rules->stock_time_limit=8;
+    lbLang_SetSavedLanguage(1);gm_8016468C();gm_80164F18();
+    gm_InitVsMode(&character_selection.vs);character_selection.match_type=VS_MELEE;
+    character_selection.unk_0x0=1;character_selection.ko_counts=character_ko_counts;
+    for(unsigned i=0;i<2;i++)character_selection.vs.start.players[i].slot_type=Gm_PKind_Human;
+    HSD_SisLib_803A6048(0x10000);
+    mnCharSel_Scene_OnEnter(&character_selection);character_initialized=1;return 1;
+}
+
+#include <sysdolphin/baselib/fog.h>
+extern void HSD_SisLib_803A84BC(HSD_GObj*,int);
+static HSD_GObj* character_camera(void)
+{
+    HSD_GObj* result=NULL;
+    for(HSD_GObj* g=HSD_GObjPLinkHead[3];g;g=g->next)if(g->obj_kind==HSD_GObj_CameraKind){if(result)abort();result=g;}
+    if(!character_initialized||!result||result->gxlink_prios!=0x1F)abort();return result;
+}
+unsigned portCharacterMenuObjects(unsigned* out,unsigned capacity)
+{
+    HSD_GObj* cam=character_camera();unsigned count=0;
+    for(unsigned link=1;link<5;link++)if(cam->gxlink_prios&(1ULL<<link))
+        for(HSD_GObj* g=HSD_GObjGXLinkHead[link];g;g=g->next_gx){
+            if(!g->render_cb)continue;if(count>=capacity)abort();
+            unsigned text=g->render_cb==HSD_SisLib_803A84BC;
+            HSD_JObj* j=text?NULL:g->hsd_obj;
+            if(!text&&(g->obj_kind!=HSD_GObj_JObjKind||!j))abort();
+            out[count*4]=(unsigned)g;out[count*4+1]=(unsigned)j;
+            out[count*4+2]=j?j->id:0;out[count*4+3]=text;count++;
+        }
+    return count;
+}
+void portCharacterMenuRenderBegin(void)
+{
+    extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
+    HSD_LObj* light=NULL;HSD_Fog* f=NULL;
+    for(HSD_GObj* g=HSD_GObjGXLinkHead[0];g;g=g->next_gx){
+        if(g->obj_kind==HSD_GObj_LightKind){if(light)abort();light=g->hsd_obj;}
+        else if(g->obj_kind==HSD_GObj_FogKind){if(f)abort();f=g->hsd_obj;}
+        else abort();
+    }
+    if(!light||!f)abort();portRenderContextBegin(character_camera()->hsd_obj,light);HSD_FogSet(f);
+}
+void portCharacterMenuCameraSnapshot(float* out)
+{
+    HSD_CObj* c=character_camera()->hsd_obj;if(!out||HSD_CObjGetProjectionType(c)!=PROJ_PERSPECTIVE)abort();
+    HSD_CObjGetViewingMtx(c,(float(*)[4])out);
+    MTXPerspective((float(*)[4])(out+12),HSD_CObjGetFov(c),HSD_CObjGetAspect(c),HSD_CObjGetNear(c),HSD_CObjGetFar(c));
+    HSD_CObjGetEyePosition(c,(Vec3*)(out+28));HSD_CObjGetInterest(c,(Vec3*)(out+31));
+    out[34]=HSD_CObjGetFov(c);out[35]=HSD_CObjGetAspect(c);out[36]=HSD_CObjGetNear(c);out[37]=HSD_CObjGetFar(c);
+}
+unsigned portCharacterMenuStep(void)
+{
+    if(!character_initialized||portSceneExitStatus(0))abort();
+    for(unsigned i=0;i<4;i++)HSD_PadCopyStatus[i]=HSD_PadGameStatus[i];
+    mnCharSel_Scene_OnFrame();return portRuntimeStep();
+}
+double portCharacterMenuRead(unsigned field,unsigned player)
+{
+    if(!character_initialized||player>=4)abort();
+    switch(field){
+    case 0:return portSceneExitStatus(0);
+    case 1:return character_selection.vs.start.players[player].ckind;
+    case 2:return character_selection.vs.start.players[player].color;
+    case 3:return character_selection.vs.start.players[player].slot_type;
+    default:abort();
+    }
+}
+unsigned portCharacterMenuFinish(void)
+{
+    extern double portCharacterMenuNativeRead(unsigned,unsigned);
+    if(!character_initialized||!portSceneExitStatus(0))abort();
+    unsigned phase=portCharacterMenuNativeRead(0,0);
+    /* Confirm/cancel OnExit reads the scene result, not destroyed model data. */
+    if(phase!=1&&phase!=2)abort();
+    /* Remove text/context owners now; original OnExit frees the SIS arena once. */
+    HSD_SisLib_803A5E70();
+    for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
+    mnCharSel_Scene_OnExit(NULL);character_initialized=0;return character_selection.pending_scene_change;
+}
