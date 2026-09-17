@@ -18,6 +18,7 @@ const profiles={
   Fx:{symbol:'Fox',articles:[[2,10],[9,10]],wrappers:[[0,null,null,49320,[0]],[1,null,null,75392,[0]]]},
   Mt:{symbol:'Mewtwo',bodyCopy:true,bodyMask:0x7f0,articles:[[10,16]],dynamics:28,wrappers:[[0,44632,44644,44656,[1,0]]]},
   Pr:{symbol:'Purin',bodyCopy:true,bodyMask:15,dynamics:24},
+  Gw:{symbol:'Gamewatch',bodyCopy:true,bodyMask:0,emptyExtra:true,articleOffset:32,articles:[[2,29],[0,1]],outlineSlots:[0,1],fighterOutline:24,colors:28,wrappers:[[0,null,null,2152,[0]],[1,null,null,3272,[]]]},
   Dk:{symbol:'Donkey',bodyCopy:true,bodyMask:0},
   Fc:{symbol:'Falco',bodyCopy:true,bodyMask:0x1800,articles:[[2,10],[9,10]],wrappers:[[0,null,null,2216,[0]],[1,null,null,28288,[0]]]},
   Ss:{symbol:'Samus',articles:[[9,8]],externals:['ItmKirbySsChargeShot_TopN_matanim_joint','ItmKirbySsChargeShot_TopN_shapeanim_joint'],wrappers:[[0,52664,null,52672,[0]]]},
@@ -35,24 +36,25 @@ export function convertKirbyCopy(input,code){
   const profile=profiles[code];if(!profile)throw Error('Kirby copy conversion pending: '+code);
   if(profile.externals)input=initializeArchiveExternals(input,profile.externals);
   const symbol='ftDataKirbyCopy'+profile.symbol,a=inspectArchive(input),d=a.data,root=a.publics.get(symbol);
-  if(root===undefined||root+(profile.bodyCopy?24+(profile.articles?.length??0)*4:Math.max(20,(profile.dynamics??0)+4))>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
+  if(root===undefined||root+(profile.bodyCopy?(profile.articleOffset??24)+(profile.articles?.length??0)*4:Math.max(20,(profile.dynamics??0)+4))>a.dataSize||a.externs.size)throw Error('Invalid Kirby copy archive');
   const ptr=at=>{if(!a.relocations.has(at))throw Error('Missing Kirby copy pointer');const value=d.getUint32(at);if(value%4||value+4>a.dataSize)throw Error('Kirby copy pointer bounds');return value;};
-  const jointSlot=root+(profile.bodyCopy?20:0),articleOffset=profile.bodyCopy?24:12;
-  const joint=ptr(jointSlot),specs=profile.articles??[],entries=specs.map((_,slot)=>({slot,article:ptr(root+articleOffset+slot*4)}));
+  const jointSlot=root+(profile.bodyCopy?20:0),articleOffset=profile.articleOffset??(profile.bodyCopy?24:12);
+  if(profile.emptyExtra&&(a.relocations.has(jointSlot)||d.getUint32(jointSlot)))throw Error('Unexpected copy extra body model');
+  const joint=profile.emptyExtra?null:ptr(jointSlot),specs=profile.articles??[],entries=specs.map((_,slot)=>({slot,article:ptr(root+articleOffset+slot*4)}));
   if(!profile.bodyCopy)for(let i=specs.length;i<2;i++)if(articleOffset+i*4!==profile.dynamics&&articleOffset+i*4!==profile.accessory&&(a.relocations.has(root+articleOffset+i*4)||d.getUint32(root+articleOffset+i*4)))throw Error('Unexpected copy Article/extra');
-  const scene=convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+(profile.bodyCopy?0:4),profile.bodyCopy?6:1),articles=entries.length?convertArticleEntries(input,entries,Object.fromEntries(specs.map((s,i)=>[i,s])),{arrowSlots:profile.arrowSlots??[]}):{rows:[],attachments:[]};
+  const scene=joint===null?null:convertSceneAsset(archiveRootView(a,'hat_Share_joint',joint)),visibility=convertPartsVisibility(input,root+(profile.bodyCopy?0:4),profile.bodyCopy?6:1),articles=entries.length?convertArticleEntries(input,entries,Object.fromEntries(specs.map((s,i)=>[i,s])),{arrowSlots:profile.arrowSlots??[],outlineSlots:profile.outlineSlots??[]}):{rows:[],attachments:[]};
   const accessory=profile.accessory?{joint:ptr(root+profile.accessory),scene:convertSceneAsset(archiveRootView(a,'accessory_Share_joint',ptr(root+profile.accessory)))}:null;
   const body=Uint8Array.from(a.bytes.subarray(32,32+a.dataSize)),pointers=new Set(),claimed=new Map();
   function merge(image,typed,slots){
     for(const at of typed){if(at<0||at>=a.dataSize)throw Error('Copy typed byte bounds');const value=image[32+at];if(claimed.has(at)&&claimed.get(at)!==value)throw Error('Conflicting Kirby copy descriptors');claimed.set(at,value);body[at]=value;}
     for(const at of slots)if(at<a.dataSize){if(![0,1,2,3].every(i=>typed.has(at+i)))throw Error('Untyped copy pointer');pointers.add(at);}
   }
-  const sceneTyped=new Set([...scene.pointerSlots].flatMap(p=>[p,p+1,p+2,p+3]));for(const [at,n]of scene.writes)for(let i=0;i<n;i++)sceneTyped.add(at+i);
-  merge(scene.image,sceneTyped,scene.pointerSlots);
+  if(scene){const sceneTyped=new Set([...scene.pointerSlots].flatMap(p=>[p,p+1,p+2,p+3]));for(const [at,n]of scene.writes)for(let i=0;i<n;i++)sceneTyped.add(at+i);
+  merge(scene.image,sceneTyped,scene.pointerSlots);}
   if(accessory){const s=accessory.scene,typed=new Set([...s.pointerSlots].flatMap(p=>[p,p+1,p+2,p+3]));for(const [at,n]of s.writes)for(let i=0;i<n;i++)typed.add(at+i);merge(s.image,typed,s.pointerSlots);}
   const v=new DataView(visibility.image.buffer),size=v.getUint32(4,true),visPointers=Array.from({length:v.getUint32(8,true)},(_,i)=>v.getUint32(32+size+i*4,true));
   merge(visibility.image,visibility.typedBytes,visPointers);if(entries.length)merge(articles.image,articles.typedBytes,articles.pointerSlots);
-  const out=new DataView(body.buffer);for(const at of [jointSlot,...(accessory?[root+profile.accessory]:[]),...entries.map(e=>root+articleOffset+e.slot*4)]){if([0,1,2,3].some(i=>claimed.has(at+i)))throw Error('Copy root overlap');out.setUint32(at,d.getUint32(at),true);pointers.add(at);}
+  const out=new DataView(body.buffer);for(const at of [...(joint===null?[]:[jointSlot]),...(accessory?[root+profile.accessory]:[]),...entries.map(e=>root+articleOffset+e.slot*4)]){if([0,1,2,3].some(i=>claimed.has(at+i)))throw Error('Copy root overlap');out.setUint32(at,d.getUint32(at),true);pointers.add(at);}
   const textureRows=[];
   if(profile.bodyCopy){
     function scalar(at,width=4){
@@ -68,6 +70,39 @@ export function convertKirbyCopy(input,code){
     const count=scalar(root+8),table=ownPointer(root+12),mask=scalar(root+16);
     if(count!==2||table===null||mask!==profile.bodyMask)throw Error('Unsupported copy body layout');
     for(let costume=0;costume<6;costume++){const row=ownPointer(table+costume*4);textureRows.push(row===null?null:Array.from({length:count},(_,i)=>scalar(row+i*2,2)));}
+  }
+  let fighterOutline=null,colors=null,outlinePadding=null;
+  if(profile.fighterOutline){
+    const own=new Map();
+    function word(at,pointer=false){
+      const type=pointer?'pointer':'scalar';
+      if(!Number.isInteger(at)||at<0||at%4||at+4>a.dataSize)throw Error('Copy outline bounds');
+      if(own.has(at)){if(own.get(at)!==type)throw Error('Copy outline type conflict');return d.getUint32(at);}
+      if([0,1,2,3].some(i=>claimed.has(at+i))||pointers.has(at))throw Error('Copy outline overlap');
+      const value=pointer?ptr(at):d.getUint32(at);if(!pointer&&a.relocations.has(at))throw Error('Copy outline scalar relocation');
+      out.setUint32(at,value,true);if(pointer)pointers.add(at);own.set(at,type);for(let i=0;i<4;i++)claimed.set(at+i,body[at+i]);return value;
+    }
+    const lookup=word(root+profile.fighterOutline,true),count=d.getUint32(root);fighterOutline=[];
+    // Retail Kirby has two normal visibility groups but this copy supplies one
+    // outline row. Its next row aliases the first visibility-table pointer.
+    // A relocated MEM1 pointer is a negative signed variant count on PPC, so
+    // the original loops skip it. A low WASM pointer would instead overrun.
+    // Preserve the skipped row explicitly without altering either callback.
+    if(count!==1||lookup+8!==d.getUint32(root+4)||!a.relocations.has(lookup+8))throw Error('Unsupported copy outline alias');
+    outlinePadding={source:lookup,skippedPointerSlot:lookup+8,expanded:(a.dataSize+3)&~3};
+    for(let i=0;i<count;i++){
+      const at=lookup+i*8,n=word(at),entries=word(at+4,true);if(n>128)throw Error('Copy outline variants');const variants=[];
+      for(let j=0;j<n;j++){
+        const row=entries+j*8,size=word(row),indices=word(row+4,true);if(size>124||indices+size>a.dataSize)throw Error('Copy outline display count');const values=[];
+        for(let k=0;k<size;k++){const p=indices+k;if(claimed.has(p)||a.relocations.has(p&~3)||d.getUint8(p)>=124)throw Error('Copy outline packed overlap/index');claimed.set(p,body[p]);values.push(d.getUint8(p));}variants.push(values);
+      }fighterOutline.push(variants);
+    }
+    const color=word(root+profile.colors,true);word(color);const scale=d.getFloat32(color);if(!Number.isFinite(scale)||scale<=0)throw Error('Copy outline scale');
+    if(color+12>a.dataSize)throw Error('Copy colors bounds');
+    // RGBA words are copied through u32 lvalues by native C. Preserve their
+    // byte order; only the leading model-depth float changes endianness.
+    for(let p=color+4;p<color+12;p++){if(claimed.has(p)||a.relocations.has(p&~3))throw Error('Copy color overlap');claimed.set(p,body[p]);}
+    colors={scale,diffuse:[...body.subarray(color+4,color+8)],outline:[...body.subarray(color+8,color+12)]};
   }
   const dynamics=[];
   if(profile.dynamics){
@@ -110,5 +145,10 @@ export function convertKirbyCopy(input,code){
     orphan.set(model,attachment.joint);orphan.set(model+16,model);
   }
   if(untyped.length!==orphan.size||untyped.some(p=>!orphan.has(p)||d.getUint32(p)!==orphan.get(p))||[...pointers].some(p=>orphan.has(d.getUint32(p))))throw Error('Unexpected projectile copy orphan scene: '+JSON.stringify({untyped:untyped.map(p=>[p,d.getUint32(p)]),expected:[...orphan],reachable:[...pointers].filter(p=>orphan.has(d.getUint32(p)))}));
-  return {code,symbol,root,joint,bodyCopy:!!profile.bodyCopy,textureRows,bytes:a.bytes,scene,accessory,visibility,articles,dynamics,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(body,pointers,new Map([[symbol,root]]))};
+  let imageBody=body;
+  if(outlinePadding){
+    const at=outlinePadding.expanded;imageBody=new Uint8Array(at+16);imageBody.set(body);imageBody.set(body.subarray(outlinePadding.source,outlinePadding.source+8),at);
+    const v=new DataView(imageBody.buffer);v.setUint32(root+profile.fighterOutline,at,true);v.setInt32(at+8,-1,true);pointers.add(at+4);
+  }
+  return {code,symbol,root,joint,outlinePadding,bodyCopy:!!profile.bodyCopy,textureRows,fighterOutline,colors,bytes:a.bytes,scene,accessory,visibility,articles,dynamics,pointerSlots:pointers,unreferencedRelocations:untyped,image:nativeSubgraphImage(imageBody,pointers,new Map([[symbol,root]]))};
 }

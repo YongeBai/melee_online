@@ -53,10 +53,11 @@ export function convertFighterArticles(input,name) {
 }
 // Copy-ability archives embed Articles directly, without an ftData x48 table.
 // This entry point accepts explicit, independently known descriptor extents.
-export function convertArticleEntries(input,entries,profiles,{arrowSlots=[]}={}) {
+export function convertArticleEntries(input,entries,profiles,{arrowSlots=[],outlineSlots=[]}={}) {
   if(!Array.isArray(entries)||!entries.length||entries.some(e=>!Array.isArray(profiles[e.slot])||profiles[e.slot].length!==2||profiles[e.slot].some(n=>!Number.isInteger(n)||n<0||n>64)))throw Error('Invalid explicit Article profile');
   if(!Array.isArray(arrowSlots)||new Set(arrowSlots).size!==arrowSlots.length||arrowSlots.some(slot=>!Number.isInteger(slot)||!entries.some(e=>e.slot===slot)||profiles[slot][1]!==9))throw Error('Invalid arrow Article profile');
-  return convertArticles(input,null,{entries,profiles,arrowSlots});
+  if(!Array.isArray(outlineSlots)||new Set(outlineSlots).size!==outlineSlots.length||outlineSlots.some(slot=>!Number.isInteger(slot)||!entries.some(e=>e.slot===slot)||![1,29].includes(profiles[slot][1])))throw Error('Invalid outline Article profile');
+  return convertArticles(input,null,{entries,profiles,arrowSlots,outlineSlots});
 }
 function convertArticles(input,name,custom) {
   const code=/^Pl([A-Za-z]{2})\.dat$/.exec(name)?.[1];
@@ -103,11 +104,12 @@ function convertArticles(input,name,custom) {
     attachments.push({joint,label,nodes:scene.model.tree.nodes.length});
   }
   for(const model of models.rows) {
+    const outlineItem=code==='Gw'||custom?.outlineSlots.includes(model.slot);
     const [stateCount,specialWords]=(custom?.profiles??fighterArticleProfiles[code].articles)[model.slot];
     const special=pointer(model.article+4),states=pointer(model.article+12);
     if((specialWords>0?special===null:special!==null)||stateCount>0&&states===null||stateCount===0&&states!==null)throw Error('Missing complete article data');
     if(specialWords)bounds(special,specialWords*4);if(stateCount)bounds(states,stateCount*16);
-    for(let j=code==='Gw'?1:0;j<specialWords;j++)scalar(special+j*4,4,!(['Pp','Nn'].includes(code)&&(model.slot===0&&j>=11||model.slot===2&&[0,1,6,7,8].includes(j))||code==='Pe'&&(model.slot===1&&j>0||[2,3].includes(model.slot))||code==='Sk'&&model.slot===3&&j===0||code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
+    for(let j=outlineItem?1:0;j<specialWords;j++)scalar(special+j*4,4,!(['Pp','Nn'].includes(code)&&(model.slot===0&&j>=11||model.slot===2&&[0,1,6,7,8].includes(j))||code==='Pe'&&(model.slot===1&&j>0||[2,3].includes(model.slot))||code==='Sk'&&model.slot===3&&j===0||code==='Ns'&&(model.slot===9||model.slot===10&&(j<3||j>=16))||code==='Mt'&&model.slot===1&&j===8||code==='Ss'&&(model.slot===1&&j===1||model.slot===3&&[3,13].includes(j))));
     if(['Pp','Nn'].includes(code)&&model.slot===2)for(const off of [0x24,0x28]){const joint=pointer(special+off);if(joint!==null)attachment(joint,'climbers rope '+off);else if(code==='Pp')throw Error('Missing Popo rope model');}
     if(code==='Sk'&&model.slot===3)for(const off of [0x64,0x68])attachment(pointer(special+off),'chain '+off);
     if(code==='Ns'&&model.slot===10){
@@ -116,7 +118,7 @@ function convertArticles(input,name,custom) {
       for(const off of [0x50,0x54])attachment(pointer(special+off),'yo-yo '+off);
       materialAnimation(pointer(special+0x58));scalar(special+0x5C);
     }
-    if(code==='Gw'){
+    if(outlineItem){
       // it_266F_ItemVars: two u16 counts plus packed joint-index arrays.
       // Chef's remaining 28 floats are three common fields and five entries.
       const outline=pointer(special);if(outline===null)throw Error('Missing Game & Watch item outline');

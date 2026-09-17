@@ -5,6 +5,31 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+Kirby's Game & Watch copy now imports the original replacement body, packed
+colors, fighter/item outlines and Chef food/pan Articles. The full lifecycle
+passes 2,229 rendered input frames plus 124 intro frames, including ground/air
+Chef, pan attachment/retirement, copy loss and reacquisition. GPU contact passes
+1,073 rendered input frames plus the intro: damage rises from 8 to 12 with four
+hitlag frames. The firing snapshot validates 32,414 vertices, 13 shader cases
+and 52 pixel channels. All 235 unit tests and shared browser checks pass;
+Mewtwo-copy, Jigglypuff-copy and original Game & Watch regressions pass
+3,471 / 1,963 / 3,144 simulation frames.
+
+Rendering exposed a PPC-address dependency that simulation missed. The copy
+outline supplies one row, while normal Kirby visibility visits two. The retail
+second row overlaps a relocated pointer: its negative signed value skips the
+variant loop. WASM's positive pointer caused an out-of-bounds access. After
+checking the supplied development executable's original callback and visibility
+loop, the importer now verifies the alias and supplies an explicit skipped
+second row. Original callbacks remain unchanged. Rendered copy probes also
+require the complete native stage/camera passes so outline draws are exercised.
+The saved images show copied silhouettes, pan/food, and normal Kirby after loss.
+
+Yoshi is the remaining copy package. This is compatibility progress; the full
+competitive browser release, broader parity, presented 720p60 and latency gates
+remain unfinished.
+[Game & Watch-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-gamewatch.json).
+
 Kirby's Jigglypuff copy now imports the original replacement body and three-node
 dynamic chain. Partial ground/air Rollout and full ground charge pass native
 turns and recovery, followed by copy loss/reacquisition. The full probe renders
@@ -17,7 +42,7 @@ GPU contact passes 752 rendered frames: damage rises from 8 to 23 with eight
 hitlag frames. The attack snapshot checks 18,930 vertices, 13 shader cases and
 52 pixel channels. All 234 unit tests and shared browser checks pass; Mewtwo-copy
 and original Jigglypuff regressions pass 3,471 and 1,714 simulation frames.
-Yoshi and Game & Watch are the remaining copy packages. Complete gameplay,
+Yoshi remains the unimplemented copy package. Complete gameplay,
 other costumes, retail parity, presented 720p60 and latency remain uncertified.
 [Jigglypuff-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-purin.json).
 
@@ -33,7 +58,7 @@ five hitlag frames at first impact. The firing snapshot checks 20,183 vertices,
 13 shader cases and 52 pixel channels. All 233 unit tests and shared browser
 checks pass; Falco-copy, Bowser-copy and original Mewtwo regressions also pass.
 These are compatibility checks, not a new FPS or latency result. Copied
-Yoshi and Game & Watch packages remain, along with the broader
+Yoshi's package remains, along with the broader
 playable-game and acceptance gates below.
 [Mewtwo-copy evidence](benchmarks/browser-2026-09-16-native-port-kirby-copy-mewtwo.json).
 

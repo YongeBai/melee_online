@@ -280,3 +280,23 @@ test('Purin copy imports body visibility and three-node dynamics at +24 without 
   assert.deepEqual(input,before);assert.equal(r.bodyCopy,true);assert.equal(r.scene.model.tree.nodes.length,50);assert.deepEqual(r.textureRows,[[2,0],null,null,null,null,null]);assert.equal(r.articles.rows.length,0);assert.deepEqual(r.dynamics.map(x=>[x.bone,x.nodes,x.parameters]),[[7,3,0]]);assert.equal(d.getFloat32(0,true),-2.5);assert.equal(d.getUint32(1016,true),15);assert.equal(r.unreferencedRelocations.length,0);
   for(const change of [a=>a.d.setUint32(1016,14),a=>a.relocs.delete(1024),a=>a.ptr(1444,1600),a=>a.d.setUint32(1448,44),a=>a.ptr(1028,1400),a=>a.ptr(1500,1600)])assert.throws(()=>convertKirbyCopy(rolloutCopyFixture(change),'Pr'));
 });
+
+function chefCopyFixture(change=()=>{}){
+  const body=new Uint8Array(4200),d=new DataView(body.buffer),relocs=new Set(),ptr=(at,to)=>{d.setUint32(at,to);relocs.add(at);};
+  d.setUint32(1000,1);ptr(1004,1100);d.setUint32(1008,2);ptr(1012,1200);ptr(1200,1248);d.setUint16(1248,2);ptr(1024,1092);ptr(1100,3800);ptr(1028,0);ptr(1032,200);ptr(1036,224);
+  d.setFloat32(0,.01);body.set([17,34,51,255,210,220,230,128],4);
+  d.setUint32(1092,1);ptr(1096,4016);d.setUint32(4016,3);ptr(4020,4040);body.set([0,1,2],4040);
+  ptr(200,400);ptr(204,1300);ptr(212,1600);ptr(216,2300);ptr(2300,2000);d.setUint32(2304,1);
+  ptr(224,700);ptr(228,1440);ptr(240,2400);ptr(2400,3000);d.setUint32(2404,1);
+  for(const joint of [2000,3000])for(let i=0;i<3;i++)d.setFloat32(joint+32+i*4,1);
+  ptr(1300,1500);ptr(1440,1520);for(let i=1;i<29;i++)d.setFloat32(1300+i*4,i/2);
+  for(const outline of [1500,1520]){d.setUint16(outline,1);ptr(outline+4,1560);d.setUint16(outline+8,1);ptr(outline+12,1564);}
+  for(const[at,to]of [[2152,2000],[2168,2152],[3272,3000],[3288,3272]])ptr(at,to);
+  change({d,ptr,relocs,body});const name=new TextEncoder().encode('ftDataKirbyCopyGamewatch\0'),pub=32+body.length+relocs.size*4,bytes=new Uint8Array(pub+8+name.length),out=new DataView(bytes.buffer);
+  [bytes.length,body.length,relocs.size,1,0].forEach((n,i)=>out.setUint32(i*4,n));bytes.set(body,32);[...relocs].forEach((p,i)=>out.setUint32(32+body.length+i*4,p));out.setUint32(pub,1000);bytes.set(name,pub+8);return bytes;
+}
+test('Game & Watch copy retains absent extra model, packed RGBA, fighter/item outlines and separate Chef/pan Articles',()=>{
+  const input=chefCopyFixture(),before=input.slice(),r=convertKirbyCopy(input,'Gw'),d=new DataView(r.image.buffer,32);
+  assert.deepEqual(input,before);assert.equal(r.joint,null);assert.equal(r.scene,null);assert.deepEqual(r.outlinePadding,{source:1092,skippedPointerSlot:1100,expanded:4200});assert.equal(d.getUint32(1024,true),4200);assert.equal(d.getInt32(4208,true),-1);assert.equal(d.getUint32(4204,true),4016);assert(r.pointerSlots.has(4204));assert.equal(r.bodyCopy,true);assert.deepEqual(r.fighterOutline,[[[0,1,2]]]);assert.deepEqual(r.colors.diffuse,[17,34,51,255]);assert.deepEqual(r.colors.outline,[210,220,230,128]);assert.equal(d.getFloat32(0,true),Math.fround(.01));assert.deepEqual([...new Uint8Array(r.image.buffer,36,8)],[17,34,51,255,210,220,230,128]);assert.equal(d.getFloat32(1304,true),.5);assert.deepEqual(r.articles.rows.map(a=>[a.stateCount,a.specialWords]),[[2,29],[0,1]]);assert(r.pointerSlots.has(1300));assert(r.pointerSlots.has(1440));assert.equal(r.unreferencedRelocations.length,4);
+  for(const change of [a=>a.ptr(1020,2000),a=>a.relocs.delete(1024),a=>a.relocs.delete(1028),a=>a.d.setFloat32(0,NaN),a=>a.ptr(4,2000),a=>a.d.setUint32(4016,125),a=>a.body[4040]=124,a=>a.body[1560]=1,a=>a.ptr(1096,1000),a=>a.relocs.delete(1100),a=>a.ptr(204,1304),a=>a.ptr(3272,2000),a=>a.ptr(4100,3000)])assert.throws(()=>convertKirbyCopy(chefCopyFixture(change),'Gw'));
+});

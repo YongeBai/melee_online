@@ -32,6 +32,23 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+Kirby's Game & Watch copy imports its native replacement body, packed colors,
+fighter/item outlines and Chef food/pan Articles. Rendering needs the original
+stage/camera passes; the simpler diagnostic pass loop omits its outlines:
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Gw --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Gw --input --kirby-copy=contact --stage-callbacks --render-steps --verify-vertices --hardware --probe-seconds=600
+```
+
+The copy has no extra body joint. Its outline lookup has one row, but the normal
+Kirby visibility path visits two. In the retail archive the second row overlaps
+a relocated MEM1 pointer, which is negative as a signed variant count and skips
+the loop. A low WASM pointer instead overran the display list. The importer
+verifies that exact alias and supplies a second negative-count/null row, leaving
+the native callbacks unchanged. The source control flow was checked against the
+development disc's `ftKb_UnkIntBoolFunc0` and `ftParts_80074D7C` instructions.
+
 Kirby's Jigglypuff copy imports its native replacement body and three-node
 dynamic chain. The input probe checks partial ground/air Rollout, full ground
 charge, turns, recovery, copy loss and reacquisition:

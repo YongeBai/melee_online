@@ -70,6 +70,7 @@ unsigned portKirbyRead(HSD_GObj* object,unsigned field)
     case 23:return fp->u.kb.x9C;
     case 24:return ((ftKb_DatAttrs*)fp->dat_attrs)->specialn_mt_charge_time;
     case 25:return (unsigned)fp->u.kb.x98;
+    case 26:return (unsigned)fp->u.kb.xDC;
     default:abort();
     }
 }

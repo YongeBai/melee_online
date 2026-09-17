@@ -1,0 +1,522 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "bfe24d3",
+  "scope": "Kirby Game & Watch replacement body, original outline/color data, Chef food/pan Articles, ground/air lifecycle and GPU contact.",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "core": {
+    "wasmSha256": "a21adb183e720f45448a72c34ff29d917485141fb88cbf8f8c33dd738f6a3eb0",
+    "wasmBytes": 2959217
+  },
+  "sourceHashes": {
+    "article-assets.mjs": "35756866595a1289c64ac2c6cbe21ba30ba8f589986dd0fe1193c5d3e4a32629",
+    "character-collision.c": "58453ccd06d95f0654b4bb9b680b80b260caed560fb3bf18e9b130cbd30b5e46",
+    "constructor.html": "ad1d356b402800af834e3d290772786d98388b756056bf4bd86664394702decb",
+    "kirby-copy-assets.mjs": "bd6b9934e23eebb7c46ec84d37895fd35f662c82d7938eb7086e440bc04bcce5",
+    "verify-kirby.mjs": "017420eedfd75c0831450214fb34b4111abbc0d4d0faad17dedd68d47bbcbed0"
+  },
+  "assets": {
+    "copy": {
+      "root": 788,
+      "dataSize": 3296,
+      "relocations": 84,
+      "joint": null,
+      "typedSourcePointers": 80,
+      "appendedPointers": 1,
+      "omitted": [
+        [
+          2152,
+          1640
+        ],
+        [
+          2168,
+          2152
+        ],
+        [
+          3272,
+          3016
+        ],
+        [
+          3288,
+          3272
+        ]
+      ],
+      "articles": [
+        {
+          "article": 724,
+          "joint": 1640,
+          "stateCount": 2,
+          "specialWords": 29
+        },
+        {
+          "article": 764,
+          "joint": 3016,
+          "stateCount": 0,
+          "specialWords": 1
+        }
+      ],
+      "textureRows": [
+        [
+          1,
+          0
+        ],
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "fighterOutline": [
+        [
+          [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ]
+        ]
+      ],
+      "colors": {
+        "scale": 0.009999999776482582,
+        "diffuse": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "outline": [
+          255,
+          255,
+          255,
+          128
+        ]
+      },
+      "outlinePadding": {
+        "source": 544,
+        "skippedPointerSlot": 552,
+        "expanded": 3296
+      },
+      "expandedDataSize": 3312
+    },
+    "costume": {
+      "dataSize": 102816,
+      "relocations": 1505,
+      "publics": [
+        [
+          "PlyKirbyGw_Share_joint",
+          63924
+        ],
+        [
+          "PlyKirbyGw_Share_matanim_joint",
+          77664
+        ]
+      ],
+      "externals": [],
+      "nodes": 46,
+      "meshes": 79
+    }
+  },
+  "outlinePortability": {
+    "retailNormalGroups": 2,
+    "copyGroups": 1,
+    "sourceOutline": 544,
+    "secondRowAliasesVisibilityPointer": 552,
+    "retailSignedCount": "A relocated MEM1 pointer is negative, so the signed inner variant loop performs zero iterations.",
+    "wasmFailure": "Low relocated pointer became a large positive count, producing an out-of-bounds HSD_DObjSetFlags access during copied-outline drawing.",
+    "fix": "Relocate the outline lookup to two explicit rows: preserve the first row and use count -1/null for the skipped second row. Original visibility callbacks remain unchanged.",
+    "retailFunctions": [
+      {
+        "name": "ftKb_UnkIntBoolFunc0",
+        "address": "0x800ef87c",
+        "bytes": 320,
+        "sha256": "16bce056933b0e2a52993fe703bfcf7cac4961e80111c86b98b6e307e528189d"
+      },
+      {
+        "name": "ftParts_80074D7C",
+        "address": "0x80074d7c",
+        "bytes": 220,
+        "sha256": "7fb36b9e80f88ee59f72072c285f16b4f97ddf548c5ffe040708413cab93bc3a"
+      }
+    ],
+    "inspection": "Read-only supplied USA 1.02 development DOL, disassembled with PowerPC binutils; no game bytes committed."
+  },
+  "validation": {
+    "tests": {
+      "passed": 235,
+      "failed": 0,
+      "command": "node --test scripts/native-port/*.test.mjs"
+    },
+    "shared": {
+      "passed": true,
+      "artifact": "dist/native-port/fighter-init-browser-verification.json",
+      "sha256": "6e123b26d356902763471ae1339bee4a7066d82c640425804b2bb74162261692"
+    },
+    "full": {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/full.json",
+      "sha256": "51fd95a1b0a987868f2e3adcab09aea950c2390d9823a3542ada02e1e6305ffe",
+      "completed": true,
+      "frames": 2087,
+      "renderedFrames": 2229,
+      "introFrames": 124,
+      "states": [
+        [
+          14,
+          15,
+          16,
+          18,
+          353,
+          356,
+          358,
+          359,
+          367,
+          510,
+          24,
+          25,
+          511,
+          265
+        ],
+        [
+          39,
+          244,
+          29,
+          42,
+          14,
+          15,
+          288,
+          289,
+          291,
+          292,
+          18
+        ]
+      ],
+      "itemKinds": [
+        156,
+        155,
+        52
+      ],
+      "bodyPartCounts": [
+        21,
+        0
+      ],
+      "bodyRenderedFrames": 1309,
+      "peakBodyDraws": 102,
+      "copySetup": [
+        {
+          "code": "Gw",
+          "root": 14897684,
+          "bodyCopy": true,
+          "costumeNodes": 46,
+          "hatNodes": 0,
+          "hatMeshes": 0,
+          "dynamicBoneChains": 0,
+          "articles": 2
+        }
+      ]
+    },
+    "contact-gpu": {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/contact-gpu.json",
+      "sha256": "1c8beb56439e1d3d381a8489aa277de63e54169b71d0ff0e99cc3a6088749807",
+      "completed": true,
+      "frames": 931,
+      "renderedFrames": 1073,
+      "introFrames": 124,
+      "damageBefore": 8,
+      "damageAfter": 12,
+      "impactHitlag": 4,
+      "vertexChecks": {
+        "vertices": 32414,
+        "positionComponents": 97242,
+        "normalComponents": 97242,
+        "maxScaledPositionError": 0.000004843389045317565,
+        "maxNormalError": 8.126468231672845e-8,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0015308427690225433,
+        "byOwner": {
+          "1642720": {
+            "vertices": 28,
+            "ndcMin": [
+              -0.2404488175600763,
+              0.6735738062567096,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.3060570192123063,
+              0.7807559800284086,
+              -0.01534367160665423
+            ]
+          },
+          "11550848": {
+            "vertices": 458,
+            "ndcMin": [
+              -243.6723329505332,
+              -317.78001822722183,
+              -0.01628556068602915
+            ],
+            "ndcMax": [
+              44.51231295279575,
+              128.8340120632136,
+              0.015642904094188375
+            ]
+          },
+          "11552800": {
+            "vertices": 9348,
+            "ndcMin": [
+              -1.8208661893553804,
+              -1.246960892261354,
+              -0.0008497714276299248
+            ],
+            "ndcMax": [
+              1.3094512614504186,
+              1.211094067942811,
+              -0.0005622497230773195
+            ]
+          },
+          "11558560": {
+            "vertices": 10006,
+            "ndcMin": [
+              -0.47032699809299255,
+              -0.28901010086109286,
+              -0.000706178104400078
+            ],
+            "ndcMax": [
+              -0.1629023396388942,
+              0.002043184741380937,
+              -0.0006597342220355899
+            ]
+          },
+          "13039040": {
+            "vertices": 11781,
+            "ndcMin": [
+              0.18932237083943906,
+              -0.27687005095364176,
+              -0.0006825148052526158
+            ],
+            "ndcMax": [
+              0.46195727062695086,
+              0.030946104148897004,
+              -0.0006753635822558228
+            ]
+          },
+          "15010176": {
+            "vertices": 4,
+            "ndcMin": [
+              -0.48961227399501855,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              -0.17018715104029894,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "15010560": {
+            "vertices": 8,
+            "ndcMin": [
+              -0.34167154423888596,
+              -0.8548822858936544,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.11001941764100844,
+              -0.6900856703647958,
+              -0.01534367160665423
+            ]
+          },
+          "15017472": {
+            "vertices": 16,
+            "ndcMin": [
+              -0.5485511042156275,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.22350276107797776,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "15070240": {
+            "vertices": 4,
+            "ndcMin": [
+              0.1871050870840508,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              0.5065302100387704,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "15071552": {
+            "vertices": 8,
+            "ndcMin": [
+              0.33557451038974423,
+              -0.854851482082921,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.5672266289142189,
+              -0.6900548665540625,
+              -0.01534367160665423
+            ]
+          },
+          "15078144": {
+            "vertices": 16,
+            "ndcMin": [
+              0.12869494233959988,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.45374326125704095,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "15167040": {
+            "vertices": 110,
+            "ndcMin": [
+              -0.7503796879923557,
+              -0.2973105326745541,
+              -0.0007988232202100096
+            ],
+            "ndcMax": [
+              -0.30641835850889465,
+              -0.05448672034824148,
+              -0.0005980027088639322
+            ]
+          },
+          "15210336": {
+            "vertices": 118,
+            "ndcMin": [
+              -0.16724269372409406,
+              -0.019821846803938812,
+              -0.0006860173402154495
+            ],
+            "ndcMax": [
+              -0.05313870332912957,
+              0.09939601531321261,
+              -0.000683801887358805
+            ]
+          },
+          "15241024": {
+            "vertices": 189,
+            "ndcMin": [
+              -0.22974615702527973,
+              -0.13350585239457136,
+              -0.0007017843254740484
+            ],
+            "ndcMax": [
+              -0.029503068759585065,
+              0.03538632900355678,
+              -0.0006730416818690962
+            ]
+          },
+          "particles": {
+            "vertices": 320,
+            "ndcMin": [
+              -19.409102401870538,
+              -64.4723188629303,
+              -0.0031596253502551006
+            ],
+            "ndcMax": [
+              23.585587243825934,
+              272.25049696419126,
+              0.015588607045789956
+            ]
+          }
+        }
+      },
+      "shader": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      },
+      "finalGpuErrorCheck": true
+    },
+    "mewtwo-copy-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/mewtwo-copy-regression.json",
+      "sha256": "195fa12be54dd081c8c041386b9224e157ae419a7a7b1964d56cd49d36da0d52",
+      "completed": true,
+      "frames": 3471,
+      "renderedFrames": 0,
+      "introFrames": 0
+    },
+    "purin-copy-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/purin-copy-regression.json",
+      "sha256": "6a7ff1f1dce76424a3a4fa3999563fe06e35f7e9216122bef9679c1550245369",
+      "completed": true,
+      "frames": 1963,
+      "renderedFrames": 0,
+      "introFrames": 0
+    },
+    "gamewatch-regression": {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/gamewatch-regression.json",
+      "sha256": "94ede09d3b5e1ac146e4da87519359e690f3ab161bba0cfdda93cbb3816ea990",
+      "completed": true,
+      "frames": 3144,
+      "renderedFrames": 0,
+      "introFrames": 0
+    }
+  },
+  "commands": {
+    "full": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Gw --input --kirby-copy=swallow --stage-callbacks --render-steps --hardware",
+    "contact": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Gw --input --kirby-copy=contact --stage-callbacks --render-steps --verify-vertices --hardware --probe-seconds=600"
+  },
+  "visualInspection": [
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/full-copyhat.png",
+      "sha256": "288a580eee2b3ad22c967553aaf5242aa8fb84754206e2481bd83e449a9ac07c"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/full-copyfire.png",
+      "sha256": "37b8c8efa0456c12ebefe15926245fbe5bc32afa83f9afe2f70f1c94c5b3a093"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/full-copysecondary.png",
+      "sha256": "26f0e6258f0c40c84c5a699548507fe63bc5f7c64a85f1a8c44dd0dfef738d96"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/full-copystar.png",
+      "sha256": "a9ceb72ebd012851ffbed3c90ef09a817aebd385b05a7b4e6a2156862644d247"
+    },
+    {
+      "artifact": "dist/native-port/experiment-kirby-copy-gamewatch/contact-gpu-copyfire.png",
+      "sha256": "8455755041bf108456e5a383f04e55821dd0fcd2ae898ca413d3c752dd335c28"
+    }
+  ],
+  "notes": [
+    "RGBA bytes retain their order; the model-depth float is converted to native endian.",
+    "The copied pan has a zero-animation-state Article; native state table entry uses animation -1.",
+    "Rendered probes require original stage/camera callbacks. The simpler diagnostic path omitted outline passes and was rejected by the body-draw assertion.",
+    "Default Kirby costume only; other copied costume colors remain pending."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  }
+}
