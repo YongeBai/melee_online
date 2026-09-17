@@ -1,34 +1,26 @@
 # Browser-native Melee port
 
-This is the direct C-to-WebAssembly port, separate from Dolphin WASM. The development
-match fixtures run original VS stock/timer logic and native HSD
-model draws through WebGL. It is not a complete competitive release; see the
-[current status](../../docs/BROWSER-NATIVE-PORT-STATUS.md) and lifecycle probe below.
-The earlier subsystem milestones described here execute original collision,
-archive and RNG routines and load six tournament stages' collision subgraphs.
+This development target links original decompiled gameplay and HSD code directly
+into WebAssembly and renders through WebGL, without Dolphin or PPC dispatch.
+Current fixtures cover all 26 selected fighters (27 components including Nana),
+all 25 copied-ability packages, original tournament stage callbacks, camera and
+HUD. Hosted assets load automatically; a player-supplied ISO is never required.
+The local disc is used only by the development extraction tools.
 
-The next milestone also runs the original OS/HSD allocator and object scheduler,
-loads all 27 playable fighter components' common attributes, and executes original
-gravity/friction and FObj/AObj animation code. Chrome has decoded and replayed all
-5,508 clips in the 27 fighter animation archives. These are subsystem checks;
-selected SDK math and a limited animated bone hierarchy also run natively. The
-complete roster and full game scenes remain pending.
-The separate scene bring-up target now uses original HSD class ownership,
-reference resolution, matrix updates, destruction and Melee's `lbAnim` attachment.
-It drives the diagnostic GPU view, but the original GX material/draw boundary and
-complete roster creation are still incomplete. Captain Falcon now completes the
-original player-owned constructor; the final section describes its limited probe.
+This is not a complete competitive release. Native menus/pause/audio, other
+costumes, controller calibration, broader retail parity and static release
+integration remain unfinished. Simulation steps and GPU draw submissions are
+measured separately from distinct presented frames and input-to-photon latency.
+See [current status](../../docs/BROWSER-NATIVE-PORT-STATUS.md) for the latest
+checkpoints and [TEV scope](TEV-NOTES.md) for shader validation. Later sections
+retain historical bring-up details; their pending-work statements describe those
+older checkpoints.
 
-Original HSD material setup can now be captured at its GX TEV boundary. The
-straight-line WebGL combiner passes signed-integer readback checks for the 33
-programs used by 1,753 default-fighter material instances, plus synthetic cases.
-See [TEV scope and provenance](TEV-NOTES.md). The live match-object diagnostic
-now connects original matrix palettes, texture generation, lighting, combiners
-and ordinary pixel-engine state to actual draws. Complete native draw callbacks,
-effects, HUD and match startup remain. After a fighter build and
-`probe-constructor.mjs --render`,
-run `node scripts/native-port/verify-gpu.mjs --tev` for live captured programs.
-The scene GPU regression also checks all 27 components' material programs.
+Immutable model geometry is cached per renderer by default. This reduces repeated
+asset decoding without caching native object pointers or animated poses. Use
+`--no-cache-models` with the constructor probe for the comparison control.
+Measured average submission time was unchanged; paired runs had fewer submissions
+over 16.67 ms. See the status evidence before interpreting this as an FPS gain.
 
 ## Reproduce
 

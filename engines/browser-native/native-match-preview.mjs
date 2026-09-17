@@ -1,6 +1,6 @@
 import {verifyGpuMaterialShader} from './verify-material-shader.mjs';
 import {createMaterialRenderer} from './material-gpu.mjs';
-import {readModelMeshes} from './mesh-assets.mjs';
+import {createModelGeometryCache} from './model-geometry-cache.mjs';
 import {readModelMaterials} from './material-assets.mjs';
 import {inspectArchive} from './archive.mjs';
 import {readSkinBindings,loadSkin} from './skin-assets.mjs';
@@ -14,17 +14,18 @@ import {readNativePixel} from './native-pixel.mjs';
 import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
-// and camera. The native-material path is still missing full draw callbacks.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true,traceAttachments=false}={}) {
+// and camera. Full scene startup and teardown remain development work.
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true,traceAttachments=false,cacheModels=true}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
   const info=gl.getExtension('WEBGL_debug_renderer_info'),gpuInfo={renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};
+  const geometry=createModelGeometryCache({enabled:cacheModels});
   const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks}):null,resources=[];
   const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
   if(hud&&(!hudList||!callbacks))throw Error('HUD requires original callbacks and object buffer');
   function releaseResource(r){for(const a of r.accessories){a.accessoryGpu?.dispose();if(a.accessoryNodes)module._free(a.accessoryNodes);}r.materialGpu?.dispose();r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}
-  function dispose(){delete module.onNativeObject;if(itemList)module._free(itemList);if(effectList)module._free(effectList);for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources)releaseResource(r);materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
+  function dispose(){geometry.clear();delete module.onNativeObject;if(itemList)module._free(itemList);if(effectList)module._free(effectList);for(const r of hudResources.values()){r.gpu.dispose();module._free(r.nodes);}if(hudList)module._free(hudList);hudCamera?.dispose();for(const r of resources)releaseResource(r);materialRenderer?.dispose();pipeline?.dispose();camera.dispose();}
   function drawHud(){
     if(!hud)return null;
     const count=module._portHudObjects(hudList,32),objects=Array.from(new Uint32Array(module.HEAPU8.buffer,hudList,count*3)),active=new Set();
@@ -35,7 +36,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
       const [owner,root,descriptor]=objects.slice(i*3,i*3+3),key=owner+':'+root+':'+descriptor;
       if(!hudResources.has(key)){
         const source=hud.models.get(descriptor);if(!source)throw Error('Unregistered original HUD model '+descriptor);
-        const model=readModelMeshes(source.bytes),n=model.tree.nodes.length,nodes=module._malloc(n*4);
+        const model=geometry.read(source.bytes),n=model.tree.nodes.length,nodes=module._malloc(n*4);
         if(!nodes)throw Error('HUD nodes allocation');
         try{if(module._portSceneCollect(root,nodes,n)!==n)throw Error('HUD hierarchy mismatch');const gpu=materialRenderer.upload(model,source.bytes,nodes,owner);hudResources.set(key,{gpu,nodes,n,name:source.name});}catch(error){module._free(nodes);throw error;}
       }else{
@@ -57,7 +58,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         if(root){
           const bytes=r.accessory.models?r.accessory.models.get(kind):r.accessory.bytes;
           if(!bytes)throw Error('Unregistered fighter accessory '+kind);
-          const model=readModelMeshes(bytes),n=model.tree.nodes.length;
+          const model=geometry.read(bytes),n=model.tree.nodes.length;
           r.accessoryNodes=module._malloc(n*4);if(!r.accessoryNodes)throw Error('Accessory node allocation');
           const count=r.accessory.collectNodes?r.accessory.collectNodes(r.accessoryNodes,n):module._portSceneCollect(root,r.accessoryNodes,n);
           if(count!==n)throw Error('Accessory hierarchy mismatch');
@@ -69,7 +70,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
     return count;
   }
   function addActor(actor) {
-      const model=readModelMeshes(actor.bytes);if(!model.meshes.length)return;
+      const model=geometry.read(actor.bytes);if(!model.meshes.length)return;
       const archive=inspectArchive(actor.bytes),d=archive.data,extra=actor.extraRoot??0,n=model.tree.nodes.length;
       const allocations=[],alloc=size=>{const p=module._malloc(size);if(!p)throw Error('Preview allocation');allocations.push(p);return p;};
       let skin,gpu,modelProbe,materialGpu;
@@ -211,7 +212,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
             stats.draws+=draws;stats.vertices+=vertices;if(draws)stats.frames++;stats.peakDraws=Math.max(stats.peakDraws,draws);
           }
           immediateStats.primitives+=materialDraws.particleDraws+materialDraws.afterimageDraws;immediateStats.submittedDraws+=materialDraws.immediateDraws;immediateStats.vertices+=materialDraws.immediateVertices;immediateStats.frames++;
-          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,attachmentDraws,accessoryDraws,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
+          return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,attachmentDraws,accessoryDraws,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},modelCache:geometry.stats,effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot,cameraValidation);
         module._portStageRenderBegin();

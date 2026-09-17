@@ -5,6 +5,26 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The renderer now caches immutable model geometry within each match. An A/B/A/B
+comparison reduced decoding from 4,587 to 22 operations per 3,600-frame workload.
+Mean draw-submission time was effectively unchanged (4.239 versus 4.244 ms),
+while submissions over 16.67 ms fell from 11 to 3 across the paired runs. Final
+states, recorded transitions and combat windows match; the full 3,720-frame
+Yoshi-copy trace and five comparison PNGs are identical with caching on/off.
+The cache stores source geometry, never live native pointers or animated poses.
+All 241 unit tests, shared browser checks, copied-body/egg regressions and GPU
+checks pass (16,795 vertices, 52 shader pixel channels, no final GPU error).
+
+With existing shader prewarming, one cached Battlefield Kirby/Yoshi workload
+completed 3,600 simulation steps and 3,600 submissions in 60.029 s. Simulation
+averaged 0.427 ms; draw submission averaged 3.611 ms, p95 5.7 ms, maximum 13.9 ms.
+All 34 used shader programs were prepared. The cached Fountain Ice Climbers
+mirror completed 3,600 steps/draws in 60.037 s, with 0.686 ms mean simulation and
+5.749 ms mean submission (p95 9.4, maximum 18.7 ms). These are headless hardware
+Chrome submission measurements, not displayed FPS or input latency. The latter
+Fountain sample is not a controlled speedup comparison.
+[Cache measurements and controls](benchmarks/browser-2026-09-16-native-port-model-cache.json).
+
 The native live controller bridge now carries both sticks and independent analog
 shoulder pressure into HSD. Native callbacks pass 889 control-test frames (1,031
 rendered input frames plus 124 intro frames): C-stick forward/up/down smashes,
@@ -24,8 +44,8 @@ Fresh hardware-Chrome 960×720 combat workloads each submit all 3,600 draws:
 Neither run needs a multi-step catch-up callback. Fountain retains its existing
 cosmetic reductions, original moving platforms and four native fighters. These
 are deterministic-workload submission measurements, not distinct presented FPS
-or input-to-photon latency. Repeated Battlefield spikes motivate a model-decoding
-cache experiment; the shield-specific cause is not established. The complete
+or input-to-photon latency. The later cache results above address redundant model decoding; a
+shield-specific cause of the earlier spikes is not established. The complete
 competitive release, native menus/pause/audio, other costumes, device calibration,
 broader parity and static release integration remain unfinished.
 [Controller and timing evidence](benchmarks/browser-2026-09-16-native-port-controller.json).

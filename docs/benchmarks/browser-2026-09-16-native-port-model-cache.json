@@ -1,0 +1,614 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "6d5e2c9",
+  "scope": "Match-scoped cache of immutable decoded model geometry, including HUD/effects/accessories. Native object lifetimes, GPU bindings, animation and draw-state handling remain unchanged.",
+  "core": {
+    "wasmSha256": "c222f9cb43c3ee2581037a92cf878ea99b918b03c9526bc7fcd030be3601dcbe",
+    "wasmBytes": 2959657
+  },
+  "retained": true,
+  "reason": "Repeated decrease in long submission frames and redundant decoding, with exact gameplay/image controls. Average submission speed did not improve measurably.",
+  "sourceHashes": {
+    "model-geometry-cache.mjs": "d6577611969c15e9a2b524ace7a7aa7e967dee8a0d2ef0196ddcb51e4d4fe7e7",
+    "native-match-preview.mjs": "2b273cda03c1f22031bc59f849495b4e8716aad2cb95acea9635a3b8f2890d59",
+    "native-live.mjs": "56e0ac9f99d5dcdefefeff6f84be90e91d8aa0129d128325d6c864d79b33fd9a",
+    "constructor.html": "5bf7c14954671ac3ab26ed4924807d5d8757d81d075bae0e08b8418aae90cf3f"
+  },
+  "profiling": {
+    "artifact": "dist/native-port/experiment-native-controller/spikes.cpuprofile",
+    "sha256": "1fb1b7e5bc5b6773547ede0a4d99d11ed911b1d77b4a158a1203177b5fcb03a2",
+    "firstFrame": 301,
+    "lastFrame": 1207,
+    "windowMs": 15085.432,
+    "inclusiveDecodedModelMs": 222.784,
+    "inclusiveArchiveInspectionMs": 131.356,
+    "inclusiveDrawMs": 3139.709,
+    "overlappingCategories": true,
+    "shieldSpecificCauseEstablished": false
+  },
+  "comparison": {
+    "order": [
+      "A1",
+      "B1",
+      "A2",
+      "B2"
+    ],
+    "controlMeanSubmissionMs": 4.238847222158478,
+    "cachedMeanSubmissionMs": 4.24426388890379,
+    "meanPercentChange": 0.12778631692589304,
+    "controlLongFrames": 11,
+    "cachedLongFrames": 3,
+    "decodesPerControl": 4587,
+    "decodesPerTreatment": 22,
+    "decodesReductionPercent": 99.52038369304557,
+    "identicalFinalStatesRecordedTransitionsAndCombatWindows": true,
+    "A1": {
+      "artifact": "dist/native-port/experiment-model-geometry-cache/A1.json",
+      "sha256": "3bef90a616cc14981b89987954a73defe341b1f87124785503529e8c2f6cc748",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60027.19999998808,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.49877777776784366,
+        "p50Ms": 0.5,
+        "p95Ms": 0.8999999761581421,
+        "maxMs": 2.800000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 4.119999999942051,
+        "p50Ms": 3.699999988079071,
+        "p95Ms": 7,
+        "maxMs": 24.700000017881393
+      },
+      "modelCache": {
+        "enabled": false,
+        "decodes": 4587,
+        "hits": 0,
+        "verticesDecoded": 49389
+      },
+      "slowDraws": [
+        {
+          "frame": 407,
+          "costMs": 24.700000017881393,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 587,
+          "costMs": 21,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 947,
+          "costMs": 18.299999982118607,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 2387,
+          "costMs": 16.900000005960464,
+          "shaderCompilations": []
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      },
+      "multiStepCallbacks": 0
+    },
+    "B1": {
+      "artifact": "dist/native-port/experiment-model-geometry-cache/B1.json",
+      "sha256": "f463bd6f850be54568e084343b76643ecbd83eccff11809c23eb7ac86d471abf",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60039.19999998808,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.6293611112236976,
+        "p50Ms": 0.5999999940395355,
+        "p95Ms": 1.100000023841858,
+        "maxMs": 3.300000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 4.696333333419429,
+        "p50Ms": 4.300000011920929,
+        "p95Ms": 7.9000000059604645,
+        "maxMs": 18.69999998807907
+      },
+      "modelCache": {
+        "enabled": true,
+        "decodes": 22,
+        "hits": 4565,
+        "verticesDecoded": 32190
+      },
+      "slowDraws": [
+        {
+          "frame": 1755,
+          "costMs": 18.69999998807907,
+          "shaderCompilations": [
+            {
+              "program": 30,
+              "origin": "model",
+              "cpuMs": 4
+            }
+          ]
+        },
+        {
+          "frame": 2747,
+          "costMs": 17.399999976158142,
+          "shaderCompilations": []
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      },
+      "multiStepCallbacks": 0
+    },
+    "A2": {
+      "artifact": "dist/native-port/experiment-model-geometry-cache/A2.json",
+      "sha256": "8afc75f2959109df1b44823c7e288d960f5abd5a991cc6e9f3e198eddc8e4f85",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60034.59999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.5178611114207241,
+        "p50Ms": 0.5,
+        "p95Ms": 0.9000000059604645,
+        "maxMs": 1.7999999821186066
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 4.357694444374905,
+        "p50Ms": 3.9000000059604645,
+        "p95Ms": 7.199999988079071,
+        "maxMs": 24.099999994039536
+      },
+      "modelCache": {
+        "enabled": false,
+        "decodes": 4587,
+        "hits": 0,
+        "verticesDecoded": 49389
+      },
+      "slowDraws": [
+        {
+          "frame": 95,
+          "costMs": 18,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 407,
+          "costMs": 24.099999994039536,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 947,
+          "costMs": 16.80000001192093,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 1487,
+          "costMs": 19,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 2927,
+          "costMs": 20.599999994039536,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 3107,
+          "costMs": 16.799999982118607,
+          "shaderCompilations": []
+        },
+        {
+          "frame": 3287,
+          "costMs": 18.100000023841858,
+          "shaderCompilations": []
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      },
+      "multiStepCallbacks": 0
+    },
+    "B2": {
+      "artifact": "dist/native-port/experiment-model-geometry-cache/B2.json",
+      "sha256": "39728525ccf08f5885108efe1fbbc45f3203b055c3dc00b58cd8fd6e1a7b7426",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60036.80000001192,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.48924999996191926,
+        "p50Ms": 0.5,
+        "p95Ms": 0.800000011920929,
+        "maxMs": 2.399999976158142
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 3.792194444388151,
+        "p50Ms": 3.4000000059604645,
+        "p95Ms": 6.5,
+        "maxMs": 18.900000005960464
+      },
+      "modelCache": {
+        "enabled": true,
+        "decodes": 22,
+        "hits": 4565,
+        "verticesDecoded": 32190
+      },
+      "slowDraws": [
+        {
+          "frame": 1825,
+          "costMs": 18.900000005960464,
+          "shaderCompilations": [
+            {
+              "program": 31,
+              "origin": "model",
+              "cpuMs": 5
+            },
+            {
+              "program": 32,
+              "origin": "model",
+              "cpuMs": 4.5999999940395355
+            }
+          ]
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 34,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 34
+      },
+      "multiStepCallbacks": 0
+    },
+    "fountain-cached": {
+      "artifact": "dist/native-port/experiment-model-geometry-cache/fountain-cached.json",
+      "sha256": "21ba6ef19b716cf7bf2b7a84804031ad67dcd2b537a227a7c6bc0de23898adb7",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60036.80000001192,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.6862222223066622,
+        "p50Ms": 0.6000000238418579,
+        "p95Ms": 1.100000023841858,
+        "maxMs": 3.300000011920929
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 5.74927777785394,
+        "p50Ms": 5.299999982118607,
+        "p95Ms": 9.400000005960464,
+        "maxMs": 18.700000017881393
+      },
+      "modelCache": {
+        "enabled": true,
+        "decodes": 25,
+        "hits": 5729,
+        "verticesDecoded": 20983
+      },
+      "slowDraws": [
+        {
+          "frame": 169,
+          "costMs": 18.700000017881393,
+          "shaderCompilations": []
+        }
+      ],
+      "shaderCoverage": {
+        "programs": 36,
+        "prepared": 0,
+        "preparedUsed": 0,
+        "unpreparedUsed": 36
+      },
+      "multiStepCallbacks": 0
+    },
+    "prepared-cached": {
+      "artifact": "dist/native-port/experiment-model-geometry-cache/prepared-cached.json",
+      "sha256": "d13d34ee70a5444956e91c7802d36443a126cd3b7ba4bb6bec5071ca30894cb3",
+      "frames": 3600,
+      "draws": 3600,
+      "elapsedMs": 60029.09999999404,
+      "stepCpu": {
+        "samples": 3600,
+        "meanMs": 0.4268333332323366,
+        "p50Ms": 0.4000000059604645,
+        "p95Ms": 0.7000000178813934,
+        "maxMs": 1.7000000178813934
+      },
+      "drawSubmissionCpu": {
+        "samples": 3600,
+        "meanMs": 3.6105277779532803,
+        "p50Ms": 3.300000011920929,
+        "p95Ms": 5.699999988079071,
+        "maxMs": 13.899999976158142
+      },
+      "modelCache": {
+        "enabled": true,
+        "decodes": 22,
+        "hits": 4565,
+        "verticesDecoded": 32190
+      },
+      "slowDraws": [],
+      "shaderCoverage": {
+        "programs": 51,
+        "prepared": 51,
+        "preparedUsed": 34,
+        "unpreparedUsed": 0
+      },
+      "multiStepCallbacks": 0
+    }
+  },
+  "validation": {
+    "unitTests": 241,
+    "unitFailures": 0,
+    "sharedBrowserPassed": true,
+    "copyTrace": {
+      "frames": 3720,
+      "rendered": 3862,
+      "intro": 124,
+      "identicalEveryRecordedFrame": true
+    },
+    "images": [
+      {
+        "name": "copyhat",
+        "controlHash": "26a85734bb31cc82e7d16d6a8d6a65637900013a52c1eac0282ba7131ac90d21",
+        "cachedHash": "26a85734bb31cc82e7d16d6a8d6a65637900013a52c1eac0282ba7131ac90d21",
+        "identical": true
+      },
+      {
+        "name": "copyattack",
+        "controlHash": "cd6654bb3f46b65ebcf03c080817a16b90133c14f23275696df3f8b7ad50ce29",
+        "cachedHash": "cd6654bb3f46b65ebcf03c080817a16b90133c14f23275696df3f8b7ad50ce29",
+        "identical": true
+      },
+      {
+        "name": "copyegg",
+        "controlHash": "109c0b16e6bb54392dc669b82fb60a8b4a2ce0df39201666ca12c0ee5c03d63d",
+        "cachedHash": "109c0b16e6bb54392dc669b82fb60a8b4a2ce0df39201666ca12c0ee5c03d63d",
+        "identical": true
+      },
+      {
+        "name": "captured",
+        "controlHash": "ce4af7121d3b3d7586d1f2dacdb1a052903de10df94ea6d8a04a66617a5acf75",
+        "cachedHash": "ce4af7121d3b3d7586d1f2dacdb1a052903de10df94ea6d8a04a66617a5acf75",
+        "identical": true
+      },
+      {
+        "name": "copystar",
+        "controlHash": "b7fd3c1c4881afd169ed0a444b486c11d36afe019054bdbed8890feb7ac584bd",
+        "cachedHash": "b7fd3c1c4881afd169ed0a444b486c11d36afe019054bdbed8890feb7ac584bd",
+        "identical": true
+      }
+    ],
+    "gamewatchCopy": {
+      "frames": 2087,
+      "rendered": 2229,
+      "intro": 124,
+      "bodyFrames": 1309
+    },
+    "gpu": {
+      "frames": 1141,
+      "rendered": 1283,
+      "intro": 124,
+      "vertexChecks": {
+        "vertices": 16795,
+        "positionComponents": 50385,
+        "normalComponents": 50385,
+        "maxScaledPositionError": 0.000002355967593971328,
+        "maxNormalError": 1.2367299773163865e-7,
+        "roundoffPositionComponents": 0,
+        "maxPositionRoundoffAllowance": 0.0015800785910729048,
+        "byOwner": {
+          "1528768": {
+            "vertices": 28,
+            "ndcMin": [
+              -0.2404488175600763,
+              0.6735738062567096,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.3060570192123063,
+              0.7807559800284086,
+              -0.01534367160665423
+            ]
+          },
+          "1609184": {
+            "vertices": 458,
+            "ndcMin": [
+              -981.1690730052279,
+              -82.45176860307879,
+              -0.006371361890964973
+            ],
+            "ndcMax": [
+              731.2665248727652,
+              211.94480847777425,
+              0.06456619493821983
+            ]
+          },
+          "1611136": {
+            "vertices": 9348,
+            "ndcMin": [
+              -1.2528893608398,
+              -0.9033018438404973,
+              -0.000566712710828354
+            ],
+            "ndcMax": [
+              0.9336755826671144,
+              0.8429511316997722,
+              -0.00042168820663066324
+            ]
+          },
+          "1616896": {
+            "vertices": 4318,
+            "ndcMin": [
+              -0.13170473817255698,
+              -0.20051472602666234,
+              -0.000500533543781508
+            ],
+            "ndcMax": [
+              0.0647742420218648,
+              0.06798918375756254,
+              -0.0004694155641609964
+            ]
+          },
+          "1632352": {
+            "vertices": 2275,
+            "ndcMin": [
+              -0.15604696100929896,
+              -0.06898148631952322,
+              -0.0004964883143693924
+            ],
+            "ndcMax": [
+              -0.04170218742980812,
+              0.08587475803182444,
+              -0.00047809790748971247
+            ]
+          },
+          "15484896": {
+            "vertices": 4,
+            "ndcMin": [
+              -0.48961227399501855,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              -0.17018715104029894,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "15486336": {
+            "vertices": 8,
+            "ndcMin": [
+              -0.34167154423888596,
+              -0.8548822858936544,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.11001941764100844,
+              -0.6900856703647958,
+              -0.01534367160665423
+            ]
+          },
+          "15493248": {
+            "vertices": 16,
+            "ndcMin": [
+              -0.5485511042156275,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              -0.22350276107797776,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "15544960": {
+            "vertices": 4,
+            "ndcMin": [
+              0.1871050870840508,
+              -0.8964472900161822,
+              -0.015331470802450542
+            ],
+            "ndcMax": [
+              0.5065302100387704,
+              -0.5855641708536594,
+              -0.015331470802450542
+            ]
+          },
+          "15547328": {
+            "vertices": 12,
+            "ndcMin": [
+              0.25550996052677916,
+              -0.8817531100781166,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.584848542244367,
+              -0.7069680445943319,
+              -0.01534367160665423
+            ]
+          },
+          "15553920": {
+            "vertices": 16,
+            "ndcMin": [
+              0.12869494233959988,
+              -0.6056153741322168,
+              -0.01534367160665423
+            ],
+            "ndcMax": [
+              0.45374326125704095,
+              -0.5067615449441295,
+              -0.01534367160665423
+            ]
+          },
+          "particles": {
+            "vertices": 308,
+            "ndcMin": [
+              -18.77691849671193,
+              -12.006254917141982,
+              -0.003858077891135736
+            ],
+            "ndcMax": [
+              49.22749658623411,
+              60.02632850716395,
+              0.0007713868076343174
+            ]
+          }
+        }
+      },
+      "shaderChecks": {
+        "passed": true,
+        "cases": [
+          "unlit material",
+          "diffuse toward light",
+          "clamped diffuse away",
+          "signed diffuse subtraction",
+          "diffuse accumulator clamp",
+          "SDK specular forces diffuse NONE",
+          "vertex material RGBA",
+          "alpha rejection",
+          "UV texgen and nearest sampling",
+          "normal reflection texgen",
+          "bump texture coordinates",
+          "vertex matrix texture coordinates",
+          "SRTG texture coordinates"
+        ],
+        "pixelChannelChecks": 52
+      },
+      "finalErrorCheck": true
+    }
+  },
+  "commands": {
+    "control": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --no-cache-models",
+    "cached": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --cache-models",
+    "prepared": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --defer-gpu-errors --cache-models --prewarm-shaders"
+  },
+  "notes": [
+    "Experimental A runs used the then-disabled default; after promotion --no-cache-models reproduces the same cache-off path. All four runs used the same WASM core and renderer code, changing only the cache option.",
+    "Original archive views are immutable. Changed contents or published model roots require a new view. The WeakMap belongs to one renderer and is cleared on disposal.",
+    "The cache stores source offsets and decoded geometry only, never native fighter pointers or live animated matrices.",
+    "The prewarmed run uses the existing source-validated shader catalog mechanism; no new shader semantics were introduced.",
+    "CPU averages vary across runs. Retention is based on repeated tail improvements and reduced decoding, not an average-FPS claim.",
+    "These headless Chrome runs count simulation and draw submissions. Distinct displayed frames, physical input-to-photon latency and complete competitive gameplay remain unverified."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  }
+}

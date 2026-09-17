@@ -31,3 +31,12 @@ test('rejects invalid indices, commands, primitive lengths and unimplemented nor
     ({v})=>v.setUint32(128,222),
   ]) {const f=fixture();mutate(f);assert.throws(()=>readModelMeshes(f.bytes));}
 });
+
+test('match geometry cache reuses only identical immutable views and clears with the match',async()=>{
+  const {createModelGeometryCache}=await import('../../engines/browser-native/model-geometry-cache.mjs');
+  const {bytes}=fixture(),before=bytes.slice(),cache=createModelGeometryCache({enabled:true}),first=cache.read(bytes);
+  assert.strictEqual(cache.read(bytes),first);assert.deepEqual(bytes,before);assert.deepEqual(cache.stats,{enabled:true,decodes:1,hits:1,verticesDecoded:3});
+  const other=bytes.slice();new DataView(other.buffer).setInt16(32+158,8);const next=cache.read(other);assert.notStrictEqual(first,next);assert.equal(next.meshes[0].vertices[1][9][0],4);assert.equal(first.meshes[0].vertices[1][9][0],1);
+  cache.clear();assert.notStrictEqual(cache.read(bytes),first);const control=createModelGeometryCache();assert.notStrictEqual(control.read(bytes),control.read(bytes));assert.deepEqual(control.stats,{enabled:false,decodes:2,hits:0,verticesDecoded:6});
+  const invalid=bytes.slice();new DataView(invalid.buffer).setUint8(224,0x20);assert.throws(()=>cache.read(invalid));assert.throws(()=>cache.read(invalid));assert.equal(cache.stats.decodes,3);
+});
