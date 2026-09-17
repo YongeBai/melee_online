@@ -1,3 +1,4 @@
+import {nativeKeyboardCodes,neutralNativeSample,keyboardNativeSample,standardNativeSample,completeNativeSample} from './native-input.mjs';
 import {isNormalAttackState} from './combat-workload.mjs';
 
 // Fixed simulation cadence. Retain backlog under load; pause explicitly when
@@ -40,17 +41,18 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   const cadence={callbacks:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
   const readState=()=>{const current=resolveObjects?resolveObjects():objects;if(current.length!==objects.length||current.some(o=>!o))throw Error('Native player ownership changed unexpectedly');return current.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));};
   const initial=readState();
-  const buttons=new Map([['KeyZ',0x100],['KeyS',0x200],['KeyX',0x400],['KeyC',0x120],['ShiftLeft',0x20],['ShiftRight',0x40]]);
-  const handled=new Set([...buttons.keys(),'ArrowLeft','ArrowRight','ArrowUp','ArrowDown']);
+  const handled=nativeKeyboardCodes;let focused=true;
   let movement=false,jump=false,attack=false,final=null;
   const workload={framesWithAttack:0,framesWithHitlag:0,framesWithDamage:0,stockChanges:[],windows:[]};
   function input(event){if(!handled.has(event.code))return;event.preventDefault();event.type==='keydown'?keys.add(event.code):keys.delete(event.code);if(inputChanges.length<256)inputChanges.push({frame:frames,type:event.type,code:event.code});}
   function reset(){keys.clear();clock.reset();lastDraw=null;lastCallback=null;}
+  function blur(){focused=false;reset();}
+  function focus(){focused=true;reset();}
   const cursors=new Map();
   function sample(values,value){const index=cursors.get(values)??0;if(values.length<3600)values.push(value);else values[index%3600]=value;cursors.set(values,index+1);}
   function distribution(values){const v=[...values].sort((a,b)=>a-b);return {samples:v.length,meanMs:v.reduce((a,b)=>a+b,0)/(v.length||1),p50Ms:v[Math.floor((v.length-1)*.5)]??0,p95Ms:v[Math.floor((v.length-1)*.95)]??0,maxMs:v.at(-1)??0};}
-  function snapshot(){return {frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard events',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,shaderCoverage:preview.shaderCoverage?.()??null};}
-  function stop(){if(stopped)return;stopped=true;cancelAnimationFrame(raf);removeEventListener('keydown',input);removeEventListener('keyup',input);removeEventListener('blur',reset);document.removeEventListener('visibilitychange',reset);keys.clear();for(let i=0;i<objects.length;i++)module._portStageProbePad(i,0,0,0);}
+  function snapshot(){return {frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard and standard gamepad samples',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,shaderCoverage:preview.shaderCoverage?.()??null};}
+  function stop(){if(stopped)return;stopped=true;cancelAnimationFrame(raf);removeEventListener('keydown',input);removeEventListener('keyup',input);removeEventListener('blur',blur);removeEventListener('focus',focus);document.removeEventListener('visibilitychange',reset);keys.clear();for(let i=0;i<objects.length;i++)module._portControllerSample(i,...neutralNativeSample());}
   function frame(now){
     if(stopped)return;
     try {
@@ -62,10 +64,11 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       // Bound work per callback while retaining debt: never skip simulation
       // frames to inflate the rendered frame rate. Hidden tabs pause explicitly.
       for(let index=0;index<steps;index++) {
-        let held=0;for(const [code,button] of buttons)if(keys.has(code))held|=button;
         const previous=final??initial;
-        const samples=inputProvider?inputProvider(frames,previous):objects.map((_,i)=>i?[0,0,0]:[held,Number(keys.has('ArrowRight'))-Number(keys.has('ArrowLeft')),Number(keys.has('ArrowUp'))-Number(keys.has('ArrowDown'))]);
-        for(let i=0;i<objects.length;i++)module._portStageProbePad(i,...samples[i]);
+        const pads=!inputProvider&&focused?(globalThis.navigator?.getGamepads?.()??[]):[];
+        const samples=(inputProvider?inputProvider(frames,previous):objects.map((_,i)=>!focused?neutralNativeSample():i===0&&keys.size?keyboardNativeSample(keys):standardNativeSample(pads[i]))).map(completeNativeSample);
+        if(samples.length!==objects.length)throw Error('Controller sample count differs from players');
+        for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);
         const before=performance.now();step();sample(stepTimes,performance.now()-before);frames++;
         final=readState();
         if(!final.flat().every(Number.isFinite))throw Error('Nonfinite interactive fighter state');
@@ -89,7 +92,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
     }catch(error){stop();onError(error,snapshot());}
   }
   for(let i=0;i<objects.length;i++)module._Player_80031848(i);
-  addEventListener('keydown',input);addEventListener('keyup',input);addEventListener('blur',reset);document.addEventListener('visibilitychange',reset);
+  addEventListener('keydown',input);addEventListener('keyup',input);addEventListener('blur',blur);addEventListener('focus',focus);document.addEventListener('visibilitychange',reset);
   raf=requestAnimationFrame(frame);
   return {snapshot,stop(){stop();onComplete(snapshot());}};
 }

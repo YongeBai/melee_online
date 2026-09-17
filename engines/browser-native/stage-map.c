@@ -346,12 +346,20 @@ double portStageMapCollisionRead(unsigned field,unsigned index)
 }
 /* Scripted normalized controller samples at the same boundary gameplay reads.
  * Raw device calibration/clamping and browser input scheduling remain separate. */
-void portStageProbePad(unsigned slot,unsigned buttons,float x,float y)
+void portControllerSample(unsigned slot,unsigned buttons,float x,float y,float cx,float cy,float left,float right)
 {
-    if(slot>=4||(buttons&~0x1f7f)||!isfinite(x)||!isfinite(y)||fabsf(x)>1||fabsf(y)>1)abort();
+    if(slot>=4||(buttons&~0x1f7f)||!isfinite(x)||!isfinite(y)||fabsf(x)>1||fabsf(y)>1||
+       !isfinite(cx)||!isfinite(cy)||fabsf(cx)>1||fabsf(cy)>1||
+       !isfinite(left)||!isfinite(right)||left<0||left>1||right<0||right>1)abort();
     HSD_PadStatus* p=&HSD_PadGameStatus[slot];unsigned previous=p->button;
     memset(p,0,sizeof(*p));p->button=buttons;p->last_button=previous;
     p->trigger=buttons&~previous;p->release=previous&~buttons;p->nml_stickX=x;p->nml_stickY=y;
+    p->nml_subStickX=cx;p->nml_subStickY=cy;p->nml_analogL=left;p->nml_analogR=right;
+}
+/* Keep three-channel deterministic fixtures on the same input boundary. */
+void portStageProbePad(unsigned slot,unsigned buttons,float x,float y)
+{
+    portControllerSample(slot,buttons,x,y,0,0,0,0);
 }
 double portStageMapRead(unsigned field,unsigned index)
 {

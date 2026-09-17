@@ -1,0 +1,448 @@
+{
+  "date": "2026-09-16",
+  "baselineCommit": "abb7862",
+  "scope": "Native HSD controller bridge carries buttons, both sticks and independent analog shoulder channels; interactive keyboard/standard-gamepad sampling immediately precedes simulation.",
+  "core": {
+    "wasmSha256": "c222f9cb43c3ee2581037a92cf878ea99b918b03c9526bc7fcd030be3601dcbe",
+    "wasmBytes": 2959657
+  },
+  "sourceHashes": {
+    "stage-map.c": "bb205cc6374d8231a7580b83452cb988878d63b3e7a73b5d65d84f1fe7f02a6a",
+    "native-input.mjs": "34b948eac610d97c585a35a4825ed10407b4a3626e72a0be575745d050b632ab",
+    "native-live.mjs": "df8bd42e8226141ab6c7b375b4216299458a6f90638e0276efeb142094a26bc1",
+    "verify-controller.mjs": "3bf21ef71386a0ea4f54f2956ebcc2501c72e0d1bdd138a3b4cafd4161d6810e",
+    "constructor.html": "e80a208ac22b9a715013aaf51330d8dd9ba774cea04447b844825e22dce684f5"
+  },
+  "validation": {
+    "unitTests": 240,
+    "unitFailures": 0,
+    "sharedBrowserPassed": true,
+    "sharedBrowserHash": "d704638fccdb133cb3eff52403b1b41d38442459c37627b50203da01c80e8081",
+    "native": {
+      "artifact": "dist/native-port/experiment-native-controller/rendered.json",
+      "sha256": "2447f69bc3d1be6700e01b21b5aaaf4a5d9984909051f26d9412e5f2515065e8",
+      "frames": 889,
+      "renderedFrames": 1031,
+      "introFrames": 124,
+      "phases": [
+        {
+          "phase": "settle",
+          "states": [
+            14
+          ]
+        },
+        {
+          "phase": "c-stick forward",
+          "states": [
+            60,
+            14
+          ]
+        },
+        {
+          "phase": "c-stick up",
+          "states": [
+            63,
+            14
+          ]
+        },
+        {
+          "phase": "c-stick down",
+          "states": [
+            64,
+            14
+          ]
+        },
+        {
+          "phase": "left soft shield",
+          "states": [
+            178,
+            179,
+            180,
+            14
+          ]
+        },
+        {
+          "phase": "right soft shield",
+          "states": [
+            178,
+            179,
+            180,
+            14
+          ]
+        },
+        {
+          "phase": "digital shield",
+          "states": [
+            182,
+            179,
+            180,
+            14
+          ]
+        },
+        {
+          "phase": "release",
+          "states": [
+            14
+          ]
+        }
+      ],
+      "leftSoftPressure": 0.35,
+      "rightSoftPressure": 0.65
+    },
+    "browserKeys": {
+      "artifact": "dist/native-port/experiment-native-controller/browser-keys.json",
+      "sha256": "251a47ce6b0af08d3f068b16dd0c86860eaa7be230e4009182a492ce55be094e",
+      "completed": true,
+      "controllerEvents": true,
+      "actions": [
+        {
+          "code": "KeyL",
+          "frame": 90,
+          "state": [
+            60,
+            62,
+            3,
+            0,
+            27.679460525512695,
+            0.00009999999747378752,
+            0,
+            1469312,
+            6135616,
+            15,
+            1,
+            2,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "code": "KeyI",
+          "frame": 157,
+          "state": [
+            63,
+            66,
+            3,
+            0,
+            44.85840606689453,
+            0.00009999999747378752,
+            0,
+            1469312,
+            6135616,
+            15,
+            1,
+            2,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "code": "KeyK",
+          "frame": 213,
+          "state": [
+            64,
+            67,
+            3,
+            0,
+            44.85840606689453,
+            0.00009999999747378752,
+            0,
+            1469312,
+            6135616,
+            15,
+            1,
+            2,
+            0,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        },
+        {
+          "code": "ShiftRight",
+          "frame": 270,
+          "state": [
+            179,
+            -1,
+            -1,
+            0,
+            44.85840606689453,
+            0.00009999999747378752,
+            0,
+            1469312,
+            6135616,
+            15,
+            1,
+            2,
+            0,
+            0,
+            0,
+            0,
+            1,
+            57.760009765625,
+            4
+          ]
+        }
+      ],
+      "simulationFrames": 900,
+      "draws": 900
+    },
+    "kirbyYoshiRegression": {
+      "artifact": "dist/native-port/experiment-native-controller/kirby-yoshi-regression.json",
+      "sha256": "015bcee9bc58eaa5cebee85aebbb5a569021d6696f1beefdcf9dcee792b95344",
+      "completed": true,
+      "frames": 3720
+    },
+    "timing": {
+      "battlefield-live": {
+        "artifact": "dist/native-port/experiment-native-controller/battlefield-live.json",
+        "sha256": "f272e5b093429d8138b0814146d1f937619770cbbe24b0a6136d5490d2fbed6b",
+        "frames": 3600,
+        "draws": 3600,
+        "elapsedMs": 60023,
+        "stepCpu": {
+          "samples": 3600,
+          "meanMs": 0.4947222225450807,
+          "p50Ms": 0.5,
+          "p95Ms": 0.800000011920929,
+          "maxMs": 2.2000000178813934
+        },
+        "drawSubmissionCpu": {
+          "samples": 3600,
+          "meanMs": 3.8467777777628767,
+          "p50Ms": 3.4000000059604645,
+          "p95Ms": 6.299999982118607,
+          "maxMs": 23.400000005960464
+        },
+        "multiStepCallbacks": 0,
+        "slowDraws": [
+          {
+            "frame": 587,
+            "costMs": 20.799999982118607,
+            "shaderCompilations": []
+          },
+          {
+            "frame": 767,
+            "costMs": 19.80000001192093,
+            "shaderCompilations": []
+          },
+          {
+            "frame": 947,
+            "costMs": 20.69999998807907,
+            "shaderCompilations": []
+          },
+          {
+            "frame": 1127,
+            "costMs": 22.5,
+            "shaderCompilations": []
+          },
+          {
+            "frame": 1307,
+            "costMs": 23.400000005960464,
+            "shaderCompilations": []
+          },
+          {
+            "frame": 1825,
+            "costMs": 17.299999982118607,
+            "shaderCompilations": [
+              {
+                "program": 31,
+                "origin": "model",
+                "cpuMs": 7.799999982118607
+              },
+              {
+                "program": 32,
+                "origin": "model",
+                "cpuMs": 4.200000017881393
+              }
+            ]
+          },
+          {
+            "frame": 2027,
+            "costMs": 17.80000001192093,
+            "shaderCompilations": []
+          },
+          {
+            "frame": 2747,
+            "costMs": 17.599999994039536,
+            "shaderCompilations": []
+          }
+        ],
+        "workloadWindows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 59,
+            "attack": 327
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 342
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 48,
+            "attack": 303
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 49,
+            "attack": 282
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 350
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 60,
+            "attack": 340
+          }
+        ],
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderCoverage": {
+          "programs": 34,
+          "prepared": 0,
+          "preparedUsed": 0,
+          "unpreparedUsed": 34
+        },
+        "cosmetics": null,
+        "presentedFpsMeasured": false
+      },
+      "fountain-climbers-live": {
+        "artifact": "dist/native-port/experiment-native-controller/fountain-climbers-live.json",
+        "sha256": "85f4c564728ce49bda6ccef0a947c34c78776febb3006b28c91cc253c3d99859",
+        "frames": 3600,
+        "draws": 3600,
+        "elapsedMs": 60055.40000000596,
+        "stepCpu": {
+          "samples": 3600,
+          "meanMs": 0.8162222220583094,
+          "p50Ms": 0.800000011920929,
+          "p95Ms": 1.2999999821186066,
+          "maxMs": 2.0999999940395355
+        },
+        "drawSubmissionCpu": {
+          "samples": 3600,
+          "meanMs": 6.301694444575244,
+          "p50Ms": 5.799999982118607,
+          "p95Ms": 10.300000011920929,
+          "maxMs": 21
+        },
+        "multiStepCallbacks": 0,
+        "slowDraws": [
+          {
+            "frame": 3274,
+            "costMs": 20.400000005960464,
+            "shaderCompilations": []
+          },
+          {
+            "frame": 3600,
+            "costMs": 21,
+            "shaderCompilations": []
+          }
+        ],
+        "workloadWindows": [
+          {
+            "firstFrame": 1,
+            "frames": 600,
+            "hitlag": 78,
+            "attack": 255
+          },
+          {
+            "firstFrame": 601,
+            "frames": 600,
+            "hitlag": 109,
+            "attack": 324
+          },
+          {
+            "firstFrame": 1201,
+            "frames": 600,
+            "hitlag": 83,
+            "attack": 293
+          },
+          {
+            "firstFrame": 1801,
+            "frames": 600,
+            "hitlag": 78,
+            "attack": 154
+          },
+          {
+            "firstFrame": 2401,
+            "frames": 600,
+            "hitlag": 41,
+            "attack": 184
+          },
+          {
+            "firstFrame": 3001,
+            "frames": 600,
+            "hitlag": 90,
+            "attack": 337
+          }
+        ],
+        "resolution": [
+          960,
+          720
+        ],
+        "shaderCoverage": {
+          "programs": 36,
+          "prepared": 0,
+          "preparedUsed": 0,
+          "unpreparedUsed": 36
+        },
+        "cosmetics": {
+          "stars": false,
+          "scenery": false,
+          "reflection": "constant black",
+          "originalSimulation": true
+        },
+        "presentedFpsMeasured": false
+      }
+    }
+  },
+  "commands": {
+    "native": "node scripts/native-port/probe-constructor.mjs --character=Ca --input --stage-callbacks --controller-input --render-steps --hardware",
+    "keys": "node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-controller --frames=900 --hardware --defer-gpu-errors",
+    "battlefield": "node scripts/native-port/probe-constructor.mjs --character=Kb --opponent=Ys --stage-callbacks --live --workload --frames=3600 --hardware --record-shaders --defer-gpu-errors",
+    "fountain": "node scripts/native-port/probe-constructor.mjs --character=Pp --map=fountain --fountain-cosmetics-off --fountain-scenery-off --stage-callbacks --live --workload --frames=3600 --hardware --record-shaders --defer-gpu-errors"
+  },
+  "notes": [
+    "C-stick directions reach original forward/up/down smash states 60/63/64 without synthesizing A presses.",
+    "Analog shoulders retain magnitude and remain distinct from digital L/R bits; original fighter code applies deadzones and combines shoulder pressure.",
+    "Keyboard grab now passes native Z directly. Main-stick keyboard diagonals stay inside the unit circle, with Alt providing half magnitude.",
+    "Standard gamepad layout follows the existing browser button layout. Browser pressed flags do not turn halfway analog travel into a hard shield; digital clicks are mapped at 99% travel.",
+    "Unit coverage includes both slots, held-input clearing on blur/disconnection/stop and rejection of malformed samples.",
+    "No physical controller was connected or latency measured. Device calibration, nonstandard GameCube adapters and native pause/menu lifecycle remain unfinished.",
+    "Timing runs use hardware-rendered headless Chrome and the deterministic combat workload, excluding startup/intro. Counted draw submissions are not proof of distinct screen presentations.",
+    "Fountain uses the existing cosmetic reductions with original moving platforms and camera; all four Ice Climbers remain active."
+  ],
+  "acceptance": {
+    "completeCompetitiveGame": false,
+    "retailParityVerified": false,
+    "presentedFpsMeasured": false,
+    "inputToPhotonMeasured": false,
+    "goalAchieved": false
+  }
+}

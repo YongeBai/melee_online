@@ -26,6 +26,8 @@ if(!/^[A-Z][a-z]$/.test(character))throw Error('Character must be a two-letter f
 const opponent=process.argv.find(x=>x.startsWith('--opponent='))?.slice(11)??character;
 if(!/^[A-Z][a-z]$/.test(opponent))throw Error('Opponent must be a two-letter fighter archive code');
 const matchup=opponent===character?character:character+'-vs-'+opponent;
+const controllerInput=process.argv.includes('--controller-input');
+if(controllerInput&&(!process.argv.includes('--input')||!process.argv.includes('--stage-callbacks')||character!=='Ca'))throw Error('Controller probe requires Ca, input and original stage callbacks');
 const kirbyCopy=process.argv.find(x=>x.startsWith('--kirby-copy='))?.slice(13)??(process.argv.includes('--kirby-copy')?'swallow':null);
 const kirbyCopyDonor=process.argv.includes('--kirby-copy-nana')?'nana':'primary';
 if(kirbyCopyDonor==='nana'&&(!kirbyCopy||opponent!=='Pp'))throw Error('Nana copy probe requires an original Popo/Nana player');
@@ -49,6 +51,7 @@ const formMove=process.argv.find(x=>x.startsWith('--form-move='))?.slice(12);
 if(formMove&&!(character==='Sk'&&formMove==='chain'||character==='Zd'&&formMove==='din'))throw Error('Single form move requires Sk chain or Zd din');
 const formMoves=!!formMove||process.argv.includes('--form-moves');
 if(formMoves&&(!['Sk','Zd'].includes(character)||!process.argv.includes('--input')))throw Error('Form moves require Sk/Zd and input');
+const liveController=process.argv.includes('--live-controller');
 const liveTransform=process.argv.includes('--live-transform');
 const transform=process.argv.includes('--transform');
 if(transform&&(!['Sk','Zd'].includes(character)||!process.argv.includes('--input')))throw Error('Transformation requires Sk/Zd and input');
@@ -99,11 +102,12 @@ if(projectiles&&(!input||!['Fx','Fc','Mr','Lg','Dr','Pk','Pc'].includes(characte
 if(projectileReflect&&!['Fx','Fc','Mr','Dr'].includes(character))throw Error('Reflector input probe requires Fox, Falco, Mario or Dr. Mario');
 const liveFrames=Number(process.argv.find(x=>x.startsWith('--frames='))?.slice(9)??(workloadSteps?3600:180));
 if(!Number.isInteger(liveFrames)||liveFrames<180||liveFrames>3600)throw Error('Probe frame limit must be 180..3600');
+if(liveController&&(!live||workload||character!=='Ca'||liveFrames<900))throw Error('Live controller requires Ca, live, no workload and at least 900 frames');
 if(liveTransform&&(!live||workload||!['Sk','Zd'].includes(character)||liveFrames<900))throw Error('Live transform requires Sk/Zd, --live, no workload and at least 900 frames');
 if(cpuProfile&&(!live||!workload||liveFrames<1800))throw Error('CPU profile requires --live --workload --frames=1800 or longer');
 const chrome=process.env.CHROME||'google-chrome',output=path.resolve(import.meta.dirname,'../../dist/native-port');
 const profile=fs.mkdtempSync(path.join(os.tmpdir(),'melee-constructor-probe-')),server=createNativePortServer(),pending=new Map();
-let liveTransformProof;
+let liveTransformProof,liveControllerProof;
 let browser,socket,sequence=0,stderr='',probe=null,partial=null,crashed=false,frames=null,consoleDiagnosticCount=0;const diagnostics=[];
 const symbols=new Map(fs.readFileSync(path.join(output,'melee-fighter-init.mjs.symbols'),'utf8').trim().split('\n').map(line=>{const split=line.indexOf(':');return [Number(line.slice(0,split)),line.slice(split+1)];}));
 function command(method,params={}){return new Promise((resolve,reject)=>{const id=++sequence,timer=setTimeout(()=>{pending.delete(id);reject(Error('CDP timeout: '+method));},5000);pending.set(id,{resolve:r=>{clearTimeout(timer);resolve(r);},reject:e=>{clearTimeout(timer);reject(e);}});socket.send(JSON.stringify({id,method,params}));});}
@@ -121,7 +125,7 @@ try {
     if(m.method==='Runtime.consoleAPICalled')for(const arg of m.params.args){const value=arg.value;if(typeof value!=='string')continue;if(value.startsWith('NATIVE_CONSTRUCTOR_RESULT '))probe=JSON.parse(value.slice(26));else if(value.startsWith('NATIVE_CONSTRUCTOR_START '))partial=JSON.parse(value.slice(25));else {consoleDiagnosticCount++;diagnostics.push(value);if(diagnostics.length>64)diagnostics.shift();}}
   });
   await command('Runtime.enable');await command('Debugger.enable');await command('Page.enable');
-  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/constructor.html'+(combat?'?step=1&stage=1&combat=1'+(control?'&control=1':'')+(camera?'&camera=1':'')+(render?'&render=1':'')+(callbacks?'&callbacks=1':'&callbacks=0')+(tournament?'&tournament=1':'')+(hud?'&hud=1':'')+(damageHud?'&damagehud=1':'')+(intro?'&intro=1':'')+(stageCallbacks?'&stagecallbacks=1':'')+(process.argv.includes('--timeout')?'&timeout=1':'')+(live?'&live=1&liveframes='+liveFrames:'')+(workload?'&workload=1':'')+(workloadSteps?'&workloadsteps='+liveFrames:'')+(renderSteps?'&rendersteps=1':''):input?'?step=1&stage=1&input=1'+(render?'&render=1':'')+(renderSteps?'&rendersteps=1':''):stage?'?step=1&stage=1':step?'?step=1':'?probe=1')+(input&&combat?'&input=1':'')+(purinContact?'&purincontact='+purinContact:'')+(purinMoves?'&purinmoves=1':'')+(marioMoves?'&mariomoves=1':'')+(pikachuMoves?'&pikachumoves=1':'')+(samusMoves?'&samusmoves=1':'')+(samusContact?'&samuscontact='+samusContact:'')+(linkContact?'&linkcontact='+linkContact:'')+(linkMoves?'&linkmoves=1':'')+(yoshiMoves?'&yoshimoves=1':'')+(gamewatchContact?'&gamewatchcontact='+gamewatchContact:'')+(nessContact?'&nesscontact='+nessContact:'')+(nessMoves?'&nessmoves=1':'')+(gamewatchMoves?'&gamewatchmoves=1':'')+(mewtwoMoves?'&mewtwomoves=1':'')+(mewtwoContact?'&mewtwocontact='+mewtwoContact:'')+(yoshiContact?'&yoshicontact='+yoshiContact:'')+(koopaMoves?'&koopamoves=1':'')+(koopaContact?'&koopacontact='+koopaContact:'')+(projectiles?'&projectiles=1':'')+(projectileCombat?'&projectilecombat=1':'')+(projectileControl?'&projectilecontrol=1':'')+(projectileShield?'&projectileshield=1':'')+(projectileReflect?'&projectilereflect=1':'')+(stageOnly?'&stageonly=1':'')+'&stageframes='+stageFrames+(deferredGpuErrors?'&gpuerrors=deferred':'')+(recordShaders?'&recordshaders=1':'')+(prewarmShaders?'&prewarmshaders=1':'')+(stadiumFireworksOff?'&stadiumfireworks=off':'')+(fountainSceneryOff?'&fountainscenery=off':'')+(fountainCosmeticsOff?'&fountaincosmetics=off':'')+'&map='+stageKey+'&character='+character+'&opponent='+opponent+(transform?'&transform=1':'')+(formMoves?'&formmoves=1':'')+(peachMoves?'&peachmoves=1':'')+(kirbyCopy?'&kirbycopy='+kirbyCopy+'&kirbycopydonor='+kirbyCopyDonor:'')+(kirbyMoves?'&kirbymoves=1':'')+(kirbyMove?'&kirbymove='+kirbyMove:'')+(climbersMoves?'&climbersmoves=1':'')+(climbersMove?'&climbersmove='+climbersMove:'')+(peachPulls?'&peachpulls=1':'')+(peachContact?'&peachcontact='+peachContact:'')+(formContact?'&formcontact='+formContact:'')+(formMove?'&formmove='+formMove:'')+(absorption?'&absorption='+absorption:'')+(process.argv.includes('--verify-vertices')?'&verifyvertices=1':'')});
+  await command('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/constructor.html'+(combat?'?step=1&stage=1&combat=1'+(control?'&control=1':'')+(camera?'&camera=1':'')+(render?'&render=1':'')+(callbacks?'&callbacks=1':'&callbacks=0')+(tournament?'&tournament=1':'')+(hud?'&hud=1':'')+(damageHud?'&damagehud=1':'')+(intro?'&intro=1':'')+(stageCallbacks?'&stagecallbacks=1':'')+(process.argv.includes('--timeout')?'&timeout=1':'')+(live?'&live=1&liveframes='+liveFrames:'')+(workload?'&workload=1':'')+(workloadSteps?'&workloadsteps='+liveFrames:'')+(renderSteps?'&rendersteps=1':''):input?'?step=1&stage=1&input=1'+(render?'&render=1':'')+(renderSteps?'&rendersteps=1':''):stage?'?step=1&stage=1':step?'?step=1':'?probe=1')+(input&&combat?'&input=1':'')+(controllerInput?'&controllerinput=1':'')+(purinContact?'&purincontact='+purinContact:'')+(purinMoves?'&purinmoves=1':'')+(marioMoves?'&mariomoves=1':'')+(pikachuMoves?'&pikachumoves=1':'')+(samusMoves?'&samusmoves=1':'')+(samusContact?'&samuscontact='+samusContact:'')+(linkContact?'&linkcontact='+linkContact:'')+(linkMoves?'&linkmoves=1':'')+(yoshiMoves?'&yoshimoves=1':'')+(gamewatchContact?'&gamewatchcontact='+gamewatchContact:'')+(nessContact?'&nesscontact='+nessContact:'')+(nessMoves?'&nessmoves=1':'')+(gamewatchMoves?'&gamewatchmoves=1':'')+(mewtwoMoves?'&mewtwomoves=1':'')+(mewtwoContact?'&mewtwocontact='+mewtwoContact:'')+(yoshiContact?'&yoshicontact='+yoshiContact:'')+(koopaMoves?'&koopamoves=1':'')+(koopaContact?'&koopacontact='+koopaContact:'')+(projectiles?'&projectiles=1':'')+(projectileCombat?'&projectilecombat=1':'')+(projectileControl?'&projectilecontrol=1':'')+(projectileShield?'&projectileshield=1':'')+(projectileReflect?'&projectilereflect=1':'')+(stageOnly?'&stageonly=1':'')+'&stageframes='+stageFrames+(deferredGpuErrors?'&gpuerrors=deferred':'')+(recordShaders?'&recordshaders=1':'')+(prewarmShaders?'&prewarmshaders=1':'')+(stadiumFireworksOff?'&stadiumfireworks=off':'')+(fountainSceneryOff?'&fountainscenery=off':'')+(fountainCosmeticsOff?'&fountaincosmetics=off':'')+'&map='+stageKey+'&character='+character+'&opponent='+opponent+(transform?'&transform=1':'')+(formMoves?'&formmoves=1':'')+(peachMoves?'&peachmoves=1':'')+(kirbyCopy?'&kirbycopy='+kirbyCopy+'&kirbycopydonor='+kirbyCopyDonor:'')+(kirbyMoves?'&kirbymoves=1':'')+(kirbyMove?'&kirbymove='+kirbyMove:'')+(climbersMoves?'&climbersmoves=1':'')+(climbersMove?'&climbersmove='+climbersMove:'')+(peachPulls?'&peachpulls=1':'')+(peachContact?'&peachcontact='+peachContact:'')+(formContact?'&formcontact='+formContact:'')+(formMove?'&formmove='+formMove:'')+(absorption?'&absorption='+absorption:'')+(process.argv.includes('--verify-vertices')?'&verifyvertices=1':'')});
   if(cpuProfile){
     let first;
     for(let i=0;i<120;i++){
@@ -141,24 +145,33 @@ try {
   if(live&&!workload){
     async function waitFor(expression){for(let i=0;i<600;i++){if(probe?.error)throw Error(probe.error);const value=await command('Runtime.evaluate',{expression,returnByValue:true});if(value.result.value)return;await delay(50);}throw Error('Interactive probe wait: '+expression);}
     await waitFor("document.documentElement.dataset.live==='ready'");
-    async function key(code,key,type){await command('Input.dispatchKeyEvent',{type,key,code});}
-    await key('KeyX','x','keyDown');
+    async function keyEvent(code,key,type){await command('Input.dispatchKeyEvent',{type,key,code});}
+    await keyEvent('KeyX','x','keyDown');
     await waitFor('globalThis.nativeLive?.snapshot().jump');
-    await key('KeyX','x','keyUp');
-    await key('KeyZ','z','keyDown');
+    await keyEvent('KeyX','x','keyUp');
+    await keyEvent('KeyZ','z','keyDown');
     await waitFor('globalThis.nativeLive?.snapshot().attack');
-    await key('KeyZ','z','keyUp');
+    await keyEvent('KeyZ','z','keyUp');
     await waitFor('globalThis.nativeLive?.snapshot().final?.[0]?.[3]===0');
-    await key('ArrowRight','ArrowRight','keyDown');
+    await keyEvent('ArrowRight','ArrowRight','keyDown');
     await waitFor('globalThis.nativeLive?.snapshot().movement');
-    await key('ArrowRight','ArrowRight','keyUp');
+    await keyEvent('ArrowRight','ArrowRight','keyUp');
+    if(liveController){
+      liveControllerProof=[];
+      for(const [code,key,states]of [['KeyL','l',[60]],['KeyI','i',[63]],['KeyK','k',[64]],['ShiftRight','Shift',[178,179]]]){
+        await waitFor('globalThis.nativeLive?.snapshot().final?.[0]?.[0]===14');await keyEvent(code,key,'keyDown');
+        await waitFor('['+states+'].includes(globalThis.nativeLive?.snapshot().final?.[0]?.[0])');
+        const result=await command('Runtime.evaluate',{expression:'globalThis.nativeLive.snapshot()',returnByValue:true});liveControllerProof.push({code,frame:result.result.value.frames,state:result.result.value.final[0]});
+        await keyEvent(code,key,'keyUp');
+      }
+    }
     if(liveTransform){
       const initialKind=character==='Sk'?7:19;liveTransformProof=[];
       for(const targetKind of [initialKind===7?19:7,initialKind]){
         await waitFor('globalThis.nativeLive?.snapshot().final?.[0]?.[0]===14');
-        await key('ArrowDown','ArrowDown','keyDown');await key('KeyS','s','keyDown');
+        await keyEvent('ArrowDown','ArrowDown','keyDown');await keyEvent('KeyS','s','keyDown');
         await waitFor('globalThis.nativeLive?.snapshot().final?.[0]?.[11]==='+targetKind);
-        await key('KeyS','s','keyUp');await key('ArrowDown','ArrowDown','keyUp');
+        await keyEvent('KeyS','s','keyUp');await keyEvent('ArrowDown','ArrowDown','keyUp');
         const result=await command('Runtime.evaluate',{expression:'globalThis.nativeLive.snapshot()',returnByValue:true});
         liveTransformProof.push({frame:result.result.value.frames,state:result.result.value.final[0]});
       }
@@ -170,8 +183,10 @@ try {
   if(!probe){if(!crashed){try{await command('Debugger.pause');for(let i=0;i<20&&!frames;i++)await delay(100);}catch(error){diagnostics.push(String(error));}}
     probe={...(partial||{}),constructorCompleted:partial?.constructorCompleted===true,error:crashed?'Browser renderer crashed':'Constructor did not finish within '+probeSeconds+' seconds',diagnostics,pausedFrames:frames,playable:false,performanceMeasured:false};}
   if(probe.error)probe.error=probe.error.replace(/wasm-function\[(\d+)\]/g,(text,id)=>text+' '+(symbols.get(Number(id))||'unknown'));
+  if(liveController&&!probe.error){if(liveControllerProof?.length!==4)throw Error('Incomplete live controller input');probe.liveController={completed:true,controllerEvents:true,actions:liveControllerProof};}
   if(liveTransform&&!probe.error){if(liveTransformProof?.length!==2)throw Error('Incomplete live transformation');probe.liveTransform={completed:true,controllerEvents:true,swaps:liveTransformProof};}
   fs.writeFileSync(path.join(output,'last-constructor-probe.json'),JSON.stringify(probe,null,2)+'\n');
+  if(controllerInput&&!probe.error&&!probe.controllerInput?.completed)throw Error('Native controller verification incomplete');
   if(intro&&!probe.error){
     if(!probe.intro?.completed)throw Error('Original Ready/Go sequence did not complete');
     if(render)for(const [name,index] of [['ready',3],['go',4]]){

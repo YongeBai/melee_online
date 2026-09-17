@@ -15,6 +15,7 @@ import {archiveRootView,inspectArchive} from './archive.mjs';
 import {initializeStageArchive} from './stage-archive.mjs';
 import {verifyNativeProjection} from './native-camera.mjs';
 import {combatWorkload,verifyCombatWorkload} from './combat-workload.mjs';
+import {verifyControllerInput} from './verify-controller.mjs';
 import {startNativeLive} from './native-live.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
@@ -466,6 +467,7 @@ try {
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
       report.input.completed=true;
+      if(params.has('controllerinput')){report.controllerInput={};verifyControllerInput(module,[object,opponent],report.controllerInput,{step,onStep:renderSteps?()=>{recordHud(preview.draw());report.renderedSteps=(report.renderedSteps??0)+1;}:undefined});}
       if(params.has('kirbycopy')){report.kirbyCopy={};verifyKirbyCopy(module,[object,opponent],report.kirbyCopy,{step,mode:params.get('kirbycopy'),donor:params.get('kirbycopydonor')??'primary',onStep:renderSteps?r=>{
         const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;
         const arrowAttachmentDraws=drawn.attachmentDraws.filter(a=>/^Kirby copy (Lk|Cl) arrow /.test(a.name)).reduce((sum,a)=>sum+a.draws,0);

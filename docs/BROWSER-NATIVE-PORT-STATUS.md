@@ -5,6 +5,31 @@ The direct port is now an implemented, reproducible development target:
 decompiled C directly into browser WASM without Dolphin or PPC dispatch. It is
 not a complete playable game yet, and there is no native-port presented-FPS result.
 
+The native live controller bridge now carries both sticks and independent analog
+shoulder pressure into HSD. Native callbacks pass 889 control-test frames (1,031
+rendered input frames plus 124 intro frames): C-stick forward/up/down smashes,
+35%/65% light shields, digital shield and release. Actual browser keyboard events
+also produce those smash states and shielding in a 900-step/900-draw live run.
+Standard-gamepad mapping and blur/disconnect/stop cleanup pass unit checks;
+physical controllers and latency have not been measured. All 240 unit tests,
+shared browser checks and the 3,720-frame Yoshi-copy regression pass.
+
+Fresh hardware-Chrome 960×720 combat workloads each submit all 3,600 draws:
+
+| Workload | Elapsed | Mean simulation | Mean draw submission | Draw p95 / max |
+| --- | ---: | ---: | ---: | ---: |
+| Battlefield Kirby/Yoshi | 60.023 s | 0.495 ms | 3.847 ms | 6.3 / 23.4 ms |
+| Fountain Ice Climbers mirror | 60.055 s | 0.816 ms | 6.302 ms | 10.3 / 21.0 ms |
+
+Neither run needs a multi-step catch-up callback. Fountain retains its existing
+cosmetic reductions, original moving platforms and four native fighters. These
+are deterministic-workload submission measurements, not distinct presented FPS
+or input-to-photon latency. Repeated Battlefield spikes motivate a model-decoding
+cache experiment; the shield-specific cause is not established. The complete
+competitive release, native menus/pause/audio, other costumes, device calibration,
+broader parity and static release integration remain unfinished.
+[Controller and timing evidence](benchmarks/browser-2026-09-16-native-port-controller.json).
+
 Kirby's Yoshi copy now imports the original hat, its four joint-animation graphs,
 the captured fighter's egg shell and the zero-state egg Article. Normal input
 checks ground/air tongue misses, ground/air fighter capture and escape, copy
@@ -21,8 +46,7 @@ states; source inspection confirmed the copied move has separate states 331/332.
 
 This closes the remaining copied-ability asset package, not the competitive-game
 acceptance gate. Item-swallow eggs and exhaustive interactions are unverified.
-The live input bridge still lacks C-stick and analog shoulder samples; it is the
-next concrete playability gap. Full scenes/menus/audio, other costumes, broader
+C-stick and analog shoulders are integrated at the later checkpoint above. Full scenes/menus/audio, other costumes, broader
 retail parity, static release integration, presented 720p60 and latency remain.
 
 Kirby's Game & Watch copy now imports the original replacement body, packed

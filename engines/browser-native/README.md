@@ -32,6 +32,19 @@ The scene GPU regression also checks all 27 components' material programs.
 
 ## Reproduce
 
+The live fixture now samples buttons, main stick, C-stick and analog shoulders
+immediately before simulation. Keyboard: arrows move, Alt halves movement, Z
+attacks, S uses special, X/V jump, C sends native Z grab, I/J/K/L aim the C-stick,
+Shift keys shield, T taunts. Standard gamepads use the existing browser button
+layout; native fighter code retains its deadzones. Full trigger travel supplies
+the digital click; partial pressure stays analog. Nonstandard GameCube adapters,
+physical calibration and native pause/menu integration remain pending.
+
+```sh
+node scripts/native-port/probe-constructor.mjs --character=Ca --input --stage-callbacks --controller-input --render-steps --hardware
+node scripts/native-port/probe-constructor.mjs --character=Ca --stage-callbacks --live --live-controller --frames=900 --hardware --defer-gpu-errors
+```
+
 Kirby’s Yoshi copy retains four native hat-animation graphs and a captured
 fighter egg shell sharing the original zero-state Article model. The full probe
 checks misses, ground/air capture, escape, copy loss and reacquisition:
