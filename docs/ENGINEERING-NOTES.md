@@ -7,6 +7,14 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+[Per-draw uniform buffers](BROWSER-NATIVE-UNIFORM-BUFFER.md) copy all dynamic
+values into versioned owned std140 records under an exclusive presentation lease.
+Validate each linked program against reflected offsets, types and strides; keep
+aligned ranges, epoch/lease guards, context boundaries and the direct-uniform
+fallback. Retain `uniformbuffer=0` and every-frame pixel/camera/memory oracles.
+The measured draw-CPU reduction is modest; Fountain still fails the repeated
+720p60 cadence gates. Production rollback remains disabled.
+
 [Exact draw-state staging](BROWSER-NATIVE-DRAW-STATE.md) interns only fully
 compared, pointer-free TEV instruction rows and immutable owned uniform versions.
 Copy dynamic registers every draw; reset all GL knowledge at every flush. Keep

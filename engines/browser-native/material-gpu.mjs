@@ -1,3 +1,4 @@
+import {uniformBufferShaders,validateDrawBlock} from './draw-uniform-buffer.mjs';
 import {createOwnedUniformState} from './owned-uniform-state.mjs';
 import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry,uploadImmediateResource} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
@@ -24,6 +25,7 @@ export function nativePositionRoundoffBound(matrix,row,point) {
 // ordering and mutable-image invalidation remain work for the playable renderer.
 export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true,presentationCache=null}={}) {
   const assetLease=presentationCache?.acquire(gl);
+  const uniformBuffer=assetLease?.drawUniformBuffer??null;
   const ownedUniforms=assetLease?.exactState?createOwnedUniformState():null;let lastPixelKey=-1,lastCull=-1;
   const programs=assetLease?.programs??new Map(),variants=assetLease?.submissionOptimized?assetLease.variants:new Map(),images=new Map(),nativePlans=new Map(),models=new Set(),view=module._malloc(48);
   if(!view){assetLease?.release();throw Error('Native material view allocation');}
@@ -45,19 +47,21 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes,origin,immediateRegisters=false){
-    const keyStart=assetLease?.profileDraw?performance.now():0;const variant=(assetLease?.exactState?assetLease.shaderKey:materialShaderKey)(state,attributes,{immediateRegisters});if(assetLease?.profileDraw){const row=drawTiming.shaderKey??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-keyStart;}if(variants.has(variant))return variants.get(variant);
+    const keyStart=assetLease?.profileDraw?performance.now():0;const variant=(uniformBuffer?'ubo-v1:':'')+(assetLease?.exactState?assetLease.shaderKey:materialShaderKey)(state,attributes,{immediateRegisters});if(assetLease?.profileDraw){const row=drawTiming.shaderKey??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-keyStart;}if(variants.has(variant))return variants.get(variant);
     const result=compileProgram(generateMaterialShaders(state,attributes,{immediateRegisters}),origin);result.used=true;variants.set(variant,result);return result;
   }
-  function compileProgram(sources,origin){
+  function compileProgram(originalSources,origin,allowUbo=true){
+    const transformed=allowUbo&&uniformBuffer?uniformBufferShaders(originalSources):null,sources=transformed??originalSources;
     const key=sources.vertex+'\n'+sources.fragment;if(programs.has(key))return programs.get(key);
     const compilationStart=performance.now();let vs,fs,p;
     try {
       vs=shader(gl.VERTEX_SHADER,sources.vertex);fs=shader(gl.FRAGMENT_SHADER,sources.fragment);p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,fs);
       gl.transformFeedbackVaryings(p,['transformedPosition','transformedNormal','raster0','raster1','verifiedTexcoord'],gl.INTERLEAVED_ATTRIBS);gl.linkProgram(p);
       if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
-      const uniforms=new Map(),result={program:p,sources,prepared:origin==='prewarm',used:false,uniform(name){if(!uniforms.has(name))uniforms.set(name,gl.getUniformLocation(p,name));return uniforms.get(name);}};
+      const block=transformed?validateDrawBlock(gl,p):null;
+      const uniforms=new Map(),result={program:p,sources:originalSources,ubo:block,prepared:origin==='prewarm',used:false,uniform(name){if(!uniforms.has(name))uniforms.set(name,gl.getUniformLocation(p,name));return uniforms.get(name);}};
       programs.set(key,result);shaderCompilations.push({program:programs.size,origin,cpuMs:performance.now()-compilationStart});return result;
-    } catch(error){if(p)gl.deleteProgram(p);throw error;}finally{if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);}
+    } catch(error){if(p)gl.deleteProgram(p);if(transformed&&!gl.isContextLost()){uniformBuffer.fallback(error.message);return compileProgram(originalSources,origin,false);}throw error;}finally{if(vs)gl.deleteShader(vs);if(fs)gl.deleteShader(fs);}
   }
   function image(t){return timed('textureLookup',lookupImage,t);}
   function lookupImage(t){
@@ -98,7 +102,9 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     for(const [name,field] of [['lightPosition','position'],['lightDirection','direction'],['lightAngular','angular'],['lightDistance','distance']]){
       if(!active(name))continue;const target=scratch[name];target.fill(0);for(let i=0;i<8;i++)if(state.context.lights[i])target.set(state.context.lights[i][field],i*3);gl.uniform3fv(u(name),target);
     }
+    const textureStart=assetLease?.profileDraw?performance.now():0;
     for(const t of state.textures.textures){gl.activeTexture(gl.TEXTURE0+t.id);gl.bindTexture(gl.TEXTURE_2D,image(t));gl.uniform1i(u('image'+t.id),t.id);bias[t.id]=t.lod.bias;}
+    if(assetLease?.profileDraw){const row=drawTiming.textureSubmit??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-textureStart;}
     gl.uniform1fv(u('lodBias'),bias);gl.uniform2iv(u('alphaReference'),[state.pixel.alphaTest.reference0,state.pixel.alphaTest.reference1]);
   }
   function apply(state,p,camera){
@@ -122,7 +128,9 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       if(active('lightColor'))gl.uniform4iv(u('lightColor'),packed.lightColor);
       for(const name of ['lightPosition','lightDirection','lightAngular','lightDistance'])if(active(name))gl.uniform3fv(u(name),packed[name]);
     }
+    const textureStart=assetLease?.profileDraw?performance.now():0;
     for(const t of state.textures.textures){gl.activeTexture(gl.TEXTURE0+t.id);gl.bindTexture(gl.TEXTURE_2D,image(t));if(!(row.images&(1<<t.id))){gl.uniform1i(u('image'+t.id),t.id);row.images|=1<<t.id;}bias[t.id]=t.lod.bias;}
+    if(assetLease?.profileDraw){const row=drawTiming.textureSubmit??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-textureStart;}
     gl.uniform1fv(u('lodBias'),bias);gl.uniform2iv(u('alphaReference'),[state.pixel.alphaTest.reference0,state.pixel.alphaTest.reference1]);
   }
   function pixelState(pixel){
@@ -279,7 +287,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       const before=programs.size,start=performance.now();for(const source of sources)compileProgram(source,'prewarm');
       return {requested:sources.length,compiled:programs.size-before,cpuMs:performance.now()-start};
     },
-    shaderSources(){return [...programs.values()].map(p=>p.sources);},
+    shaderSources(){return [...new Map([...programs.values()].map(p=>[p.sources.vertex+'\n'+p.sources.fragment,p.sources])).values()];},
     shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
     begin(camera){for(const key of Object.keys(drawTiming))delete drawTiming[key];selectCamera(camera);queue=[];packedModel?.reset();assetLease?.immediate?.begin();shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
     flush({ordered=false,clip=null,clearAlpha=1,forceAlpha=false}={}){
@@ -288,7 +296,12 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       // actor order stable, completing opaque draws before blended draws.
       ownedUniforms?.begin();lastPixelKey=lastCull=-1;
       const drawsInOrder=ordered?queue:[...queue.filter(d=>d.state.pixel.blend.type===0),...queue.filter(d=>d.state.pixel.blend.type!==0)];
-      for(const draw of drawsInOrder) {
+      const uniformBefore=uniformBuffer?.snapshot();let uniformVersion=null;
+      if(uniformBuffer&&drawsInOrder.some(d=>d.program.ubo)){
+        if(timed('uboPack',()=>uniformBuffer.prepare(drawsInOrder)))uniformVersion=timed('uboUpload',()=>uniformBuffer.upload());
+        else {uniformBuffer.fallback('frame capacity');for(const draw of drawsInOrder)if(draw.program.ubo)draw.program=compileProgram(draw.program.sources,'fallback',false);}
+      }
+      for(const [drawIndex,draw] of drawsInOrder.entries()) {
         gl.bindVertexArray(draw.plan.vao);
         if(draw.immediate&&draw.plan.resource)uploadImmediateResource(gl,draw.plan,draw.flatRegisters);
         else if(draw.immediate){
@@ -302,14 +315,20 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[0]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.positions);
           if(draw.shape.normals){gl.bindBuffer(gl.ARRAY_BUFFER,draw.plan.attributes[2]);gl.bufferSubData(gl.ARRAY_BUFFER,0,draw.shape.normals);}
         }
-        const applyStart=assetLease?.profileDraw?performance.now():0;apply(draw.state,draw.program,draw.camera);if(assetLease?.profileDraw){const row=drawTiming.uniformsTextures??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-applyStart;}timed('pixelGL',pixelState,draw.state.pixel);if(forceAlpha)gl.colorMask(true,true,true,true);
+        const applyStart=assetLease?.profileDraw?performance.now():0,textureBefore=drawTiming.textureSubmit?.ms??0;
+        if(draw.program.ubo){
+          timed('uboBind',()=>uniformBuffer.bind(drawIndex,uniformVersion));
+          const row=ownedUniforms?ownedUniforms.select(gl,draw.program.program):null;if(!ownedUniforms)gl.useProgram(draw.program.program);
+          timed('uboTextures',()=>{for(const t of draw.state.textures.textures){gl.activeTexture(gl.TEXTURE0+t.id);gl.bindTexture(gl.TEXTURE_2D,image(t));if(!row||!(row.images&(1<<t.id))){gl.uniform1i(draw.program.uniform('image'+t.id),t.id);if(row)row.images|=1<<t.id;}}});
+        }else apply(draw.state,draw.program,draw.camera);if(assetLease?.profileDraw&&!draw.program.ubo){const row=drawTiming.directUniformsPacking??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-applyStart-((drawTiming.textureSubmit?.ms??0)-textureBefore);}if(assetLease?.profileDraw){const row=drawTiming.uniformsTextures??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-applyStart;}timed('pixelGL',pixelState,draw.state.pixel);if(forceAlpha)gl.colorMask(true,true,true,true);
         const cull=draw.plan.mesh.flags&0xc000;
         if(!ownedUniforms||lastCull!==cull){if(cull){gl.enable(gl.CULL_FACE);gl.cullFace(cull===0xc000?gl.FRONT_AND_BACK:cull===0x4000?gl.FRONT:gl.BACK);}else gl.disable(gl.CULL_FACE);lastCull=cull;}
         if(verifyVertices)verifyDrawVertices(draw);
         gl.drawElements(gl.TRIANGLES,draw.plan.mesh.triangles.length,gl.UNSIGNED_INT,0);draws++;
       }
       if(checkErrors&&gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
-      return {drawTiming:assetLease?.profileDraw?structuredClone(drawTiming):null,exactGL:ownedUniforms?.snapshot()??null,shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws+textDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,textDraws,textVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
+      const uniformAfter=uniformBuffer?.snapshot(),uniformBufferFrame=uniformAfter?{uploads:uniformAfter.uploads-uniformBefore.uploads,binds:uniformAfter.binds-uniformBefore.binds,bytes:uniformAfter.uploadedBytes-uniformBefore.uploadedBytes,draws}:null;
+      return {uniformBufferFrame,drawTiming:assetLease?.profileDraw?structuredClone(drawTiming):null,exactGL:ownedUniforms?.snapshot()??null,shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws+textDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,textDraws,textVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}

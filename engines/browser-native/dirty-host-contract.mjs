@@ -12,7 +12,7 @@ export const dirtyHostContract = {
   "auxiliary-assets.mjs": "8265f19c0df82191bb9840d759dd3a0dfb62d4cb82c7f101f08f370eb7b980bf",
   "browser-input.mjs": "27ba216df2389ed8af393c4ec93356c930de9b4e47e265f38b91bde74f3be7ec",
   "card-assets.mjs": "a3d72ca890cf34108722fcd1e8d7a7172fd65fb4f056086d7fd1c94b1de758dd",
-  "certification.mjs": "3e97ac5bff1595039d14ae918742de84c386dcf790ffac113b102bee493d0fd1",
+  "certification.mjs": "77cb26329847620d39b6e9e1534f21099b28bcbf373a038b142ecb1bb8126da9",
   "character-collision-assets.mjs": "ba34511edd63075cf3b96651445f3dc04fced6b0333aa001a684f2d11d4e379e",
   "color-assets.mjs": "fa1faab885aa8c4e8ee06400965b778b386e0958b036d4ecff2a112da95bed07",
   "color-reference.mjs": "9883ce83f0d3fccaf23760155c28505fead7c24cd05331fe4b659ac4a31aafab",
@@ -45,7 +45,7 @@ export const dirtyHostContract = {
   "kirby-copy-assets.mjs": "d232768e103e2c31c8d18dcedd9f16ee18fdf62455e6c97b30a514f502474968",
   "material-animation-assets.mjs": "db487c0829b95ba0a4258f53ddcb5e7babdd2e7260865b185989d4db1b4ea1fb",
   "material-assets.mjs": "f17f6d0ec6bf87e2c539bd60a765592fd81028e46873e064db10719fd4d1e903",
-  "material-gpu.mjs": "e40bcb39cd8b7ada2dc94bf1ccac5fed626b2c82e7a71134258cc78045041151",
+  "material-gpu.mjs": "ba137831ccb279117e430907ec359def004a67ca0cbffab2706f79876aca5d70",
   "material-shader.mjs": "62b7dc46ac9d7ebf416c88e893c290504969a35fce877b0ec589c51657ea1c2a",
   "math-reference.mjs": "dfdb5039faf0664d04d8426f5d3175bda26d3ffe5b4432fd52aaa89c8fc7fade",
   "melee-dirty.wasm": "06e91f842dbc82a0f206acd789a14809b4133a336d97b792cc46b0e7cbd58c73",
@@ -76,7 +76,7 @@ export const dirtyHostContract = {
   "paged-snapshot.mjs": "29d2c6d32cdc605c6be4423bde6ffa210edbbb0e870309fbe3d7e0354fd6e235",
   "pause-assets.mjs": "fcd66dad2500a3d5a44c00e0306f0cb0dd2124bb06e7848708afbcec0e756ada",
   "player-parameters.mjs": "b789aa3cb1c5ff8a93ad0bdb1bf8937660b0d61b031910c6784bc5e309aa55a6",
-  "presentation-cache.mjs": "272b222278be9f6144f36d90c2eeb20557b00fa908e75da76895fa3dfbeef227",
+  "presentation-cache.mjs": "9705e33855e77ee81f33584e09aa890b9f52575abdedc803f8d83758304165a0",
   "purin-extra-assets.mjs": "2bdabb26cbf1403a20b6fe4e82c7950df79789233c7b5b15ca85fcedecd3a177",
   "render-replica.mjs": "cb8a9b53a326f2b485ef3f8d27223224c4484773cec913c7fc00cf411bd8e4e2",
   "resident-files.mjs": "14efd542e6621e171e6142827729c7554c770fa189a0a3314467cd41ff0a49b5",
@@ -161,5 +161,6 @@ export const dirtyHostContract = {
   "visibility-assets.mjs": "6dd829cb250b2bad19fffe1ad565571ac513bef57e0a6d209d51cfe463ca16cf",
   "wasm-snapshot.mjs": "ef1d2e1f9586247b1b0270b689e2069147c8b18a6fbef2e90699e29dadad25ae",
   "owned-uniform-state.mjs": "a3767ea1828dae7d936d8955a104011824a7af25160347d0bbe1b7a623da1da3",
-  "native-state-intern.mjs": "bd115057b334b784996d7582915c7a0c0d495866f2315f7b18c5f687997c0829"
+  "native-state-intern.mjs": "bd115057b334b784996d7582915c7a0c0d495866f2315f7b18c5f687997c0829",
+  "draw-uniform-buffer.mjs": "9741a025a68d0013272046982c7095501510c8daf96d0baaa6d02f55f5a77111"
 };
