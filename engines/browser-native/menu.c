@@ -214,6 +214,9 @@ void portCharacterMenuCameraSnapshot(float* out)
 unsigned portCharacterMenuStep(void)
 {
     if(!character_initialized||portSceneExitStatus(0))abort();
+    /* Solo Dolphin leaves port 2 unplugged. Preserve the original CSS hand
+     * lifecycle even when the browser scheduler supplies two pad samples. */
+    if(product_profile&&product_cpu){extern void portControllerDisconnect(unsigned);portControllerDisconnect(1);}
     for(unsigned i=0;i<4;i++)HSD_PadCopyStatus[i]=HSD_PadGameStatus[i];
     portCharacterMenuProductRules();mnCharSel_Scene_OnFrame();unsigned result=portRuntimeStep();portCharacterMenuProductRules();return result;
 }

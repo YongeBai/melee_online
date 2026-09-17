@@ -13,6 +13,15 @@ tap-jump switch, glyph code entry and beveled room actions. The native adapter
 changes only canvas/compositor positioning. A further 900-frame browser probe
 and in-app visual inspection pass after restoring these styles.
 
+CPU slots now leave controller port 2 disconnected, matching the solo Dolphin
+configuration. They have neither a hand nor a keyboard icon, and the CPU card
+stays opaque where the icon used to be. Switching back to human refreshes the
+original blue P2 card and restores its hand/icon. The browser probe repeats this
+switch twice, checks pixel alpha, changes the CPU character with P1's original
+token controls, restores Fox, and completes a 900-frame CPU match. These are UI
+and input-regression checks, not a new 720p60 performance measurement.
+[CPU menu regression evidence](benchmarks/browser-2026-09-17-native-port-cpu-ui.json).
+
 Original HSD joints and SIS nameplates implement the two-seat layout. Clipped
 foreground passes redraw the real native hands over transparent panel apertures;
 the original camera/projection is unchanged. Product mode hides illegal stage

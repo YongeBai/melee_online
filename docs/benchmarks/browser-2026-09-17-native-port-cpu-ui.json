@@ -1,0 +1,174 @@
+{
+  "date": "2026-09-17",
+  "scope": "Native-port CPU menu ownership and presentation regression; not performance certification.",
+  "wasmSha256": "5a2453bc23f0eb904385abfeda8c3964e3353203e9d497696af9fd0ff0adebbd",
+  "source": {
+    "repository": "https://github.com/doldecomp/melee.git",
+    "commit": "a75407433c85ac15fab45f92ff79c1481f1fa82f"
+  },
+  "unitTests": 271,
+  "solo": {
+    "frames": 900,
+    "cpuInputEvidence": {
+      "samples": 868,
+      "active": 175,
+      "buttons": 66,
+      "actions": [
+        323,
+        324,
+        29,
+        42,
+        39,
+        41,
+        14,
+        244,
+        44,
+        182,
+        233,
+        24,
+        25,
+        45,
+        47,
+        48,
+        49,
+        18,
+        20,
+        214,
+        215,
+        216,
+        220,
+        15,
+        16,
+        341,
+        342,
+        343,
+        57
+      ],
+      "lastFrame": 900
+    },
+    "presentationChecks": [
+      {
+        "p2": {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": -16,
+          "y": -21.5,
+          "hand": 3,
+          "icon": 10,
+          "token": 0,
+          "selected": 0
+        },
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "p2": {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": -16,
+          "y": -21.5,
+          "hand": 3,
+          "icon": 10,
+          "token": 0,
+          "selected": 0
+        },
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "p2": {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": -16,
+          "y": -21.5,
+          "hand": 3,
+          "icon": 10,
+          "token": 0,
+          "selected": 0
+        },
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "p2": {
+          "character": 2,
+          "costume": 0,
+          "kind": 1,
+          "cpuLevel": 9,
+          "x": -16,
+          "y": -21.5,
+          "hand": 3,
+          "icon": 10,
+          "token": 0,
+          "selected": 1
+        },
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      }
+    ],
+    "cpuCharacterChangedByP1": true
+  },
+  "rooms": {
+    "frames": [
+      600,
+      600
+    ],
+    "matchingFighterState": true,
+    "scope": "Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification."
+  },
+  "visualReview": [
+    "CPU hand and keyboard icon absent; original CPU card opaque",
+    "Human opponent has original blue P2 card, hand and keyboard icon",
+    "In-app browser preview inspected at 3340"
+  ]
+}

@@ -41,7 +41,11 @@ void portCharacterMenuProductRules(void)
 void portCharacterMenuProductOpponent(unsigned cpu)
 {
     HSD_ASSERT(0,portMenuProduct()&&cpu<=1&&mnCharSel_804D6CF6==0);
+    /* Native disconnect resets the hand to the unshifted P2 card. Restore its
+     * two-seat position once, before the original reconnect callback unhides it. */
+    if(!cpu&&mnCharSel_803F0DFC.doors[1].p_kind==1&&mnCharSel_804A0BC0[1]->x5==3)mnCharSel_804A0BC0[1]->xC+=30.8f;
     mnCharSel_803F0DFC.doors[1].p_kind=cpu?1:0;
     mnCharSel_804D6CB0->vs.start.players[1].slot_type=cpu?1:0;
     mnCharSel_804D6CB0->vs.start.players[1].cpu_level=9;
+    mnCharSel_8025DB34(1);
 }

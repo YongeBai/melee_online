@@ -32,8 +32,35 @@ try{
  const selected=await evaluate('nativeCharacterMenu.read()');
  if(selected.players[0].character!==20||selected.players[1].character!==2||selected.players[1].kind!==1||selected.players[1].cpuLevel!==9)throw Error('Falco / CPU9 Fox defaults '+JSON.stringify(selected));
  if(process.argv.includes('--static-only')&&!(await evaluate('nativeRoom.offline&&nativeRoom.code===""')))throw Error('Static-only CPU fallback not active');
+ async function cpuPresentation(){
+  await waitFor('nativeCharacterMenu.read().players[1].hand===3&&document.querySelector("#peerKeyboard").hidden');
+  const proof=await evaluate(`(()=>{nativeCharacterMenu.draw();const canvas=document.querySelector('#picture'),gl=canvas.getContext('webgl2'),r=nativeMenuApertures[2],pixel=new Uint8Array(4),alpha=[];for(const u of [.2,.5,.8])for(const v of [.2,.5,.8]){gl.readPixels(Math.floor((r.left+r.width*u)*canvas.width),Math.floor((1-r.top-r.height*v)*canvas.height),1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixel);alpha.push(pixel[3]);}return {state:nativeCharacterMenu.read(),peerDisplay:getComputedStyle(document.querySelector('#peerKeyboard')).display,keyboardVisible:!document.querySelector('#keyboardButton').hidden,alpha};})()`);
+  if(proof.peerDisplay!=='none'||!proof.keyboardVisible||proof.alpha.some(a=>a!==255))throw Error('CPU hand/icon or card transparency regression '+JSON.stringify(proof));
+  trace.push({phase:'cpu-presentation',...proof});
+ }
+ await cpuPresentation();
+ if(!process.argv.includes('--static-only')){
+  async function toggleCPU(){const point=await evaluate(`(()=>{const r=document.querySelector('#cpuRoom').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);for(const type of ['mousePressed','mouseReleased'])await cmd('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...point});}
+  for(let i=0;i<2;i++){
+   await toggleCPU();await waitFor('!nativeRoom.cpu&&nativeCharacterMenu.read().players[1].kind===0&&nativeCharacterMenu.read().players[1].hand!==3&&!document.querySelector("#peerKeyboard").hidden');
+   const human=await evaluate('nativeCharacterMenu.read()');if(human.players[1].x<10||human.players[1].x>26)throw Error('Human hand did not return to P2 card');
+   await waitFor(`nativeCharacterMenu.read().frames>${human.frames+35}`);
+   if(i===0){const shot=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'human-opponent.png'),Buffer.from(shot.data,'base64'));}
+   await toggleCPU();await cpuPresentation();
+   const restored=await evaluate('nativeCharacterMenu.read()');if(restored.players.slice(0,2).some((p,j)=>p.character!==selected.players[j].character||p.costume!==selected.players[j].costume))throw Error('CPU switch changed character/costume');
+  }
+ }
  trace.push({phase:'selected',state:selected});
  const css=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'characters.png'),Buffer.from(css.data,'base64'));
+ // P1 still owns CPU character selection through the original token hit test.
+ const cpuIcons=await evaluate('[2,18].map(character=>nativeCharacterMenu.icons().find(i=>i.character===character))');
+ let pickup=[cpuIcons[0].x-3.8,cpuIcons[0].y+2.6];
+ for(const target of [cpuIcons[1],cpuIcons[0]]){
+  await steer('(()=>{const p=nativeCharacterMenu.read().players[0];return [p.x,p.y];})()',pickup,.3);await press('KeyP');await waitFor('nativeCharacterMenu.read().players[1].token===1');
+  await steer('(()=>{const p=nativeCharacterMenu.read().players[0];return [p.x,p.y];})()',[target.x,target.y],.3);const drop=await evaluate('nativeCharacterMenu.read().players[0]');await press('KeyP');
+  await waitFor(`nativeCharacterMenu.read().players[1].token===0&&nativeCharacterMenu.read().players[1].character===${target.character}`);pickup=[drop.x-1.1,drop.y+.6];
+ }
+ trace.push({phase:'p1-selected-cpu-character-and-restored-fox',state:await evaluate('nativeCharacterMenu.read()')});await cpuPresentation();
  await steer('(()=>{const p=nativeCharacterMenu.read().players[0];return [p.x,p.y];})()',[-23.5,-21.5],.4);await press('KeyP');await waitFor('document.querySelector("#controls").open');
  const controls=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'keyboard.png'),Buffer.from(controls.data,'base64'));
  await delay(100);const position=await evaluate('nativeCharacterMenu.read().players[0].x');await keys(['KeyD']);await delay(300);await keys([]);if(await evaluate('nativeCharacterMenu.read().players[0].x')!==position)throw Error('Keyboard view leaked gameplay input');

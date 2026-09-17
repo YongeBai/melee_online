@@ -17,6 +17,15 @@ A CPU slot must be accepted by the host constructor before calling original
 player initialization. Gate tap jump at the original jump predicates rather
 than zeroing stick Y; CPU and Nana must retain native jumps.
 
+The solo Dolphin configuration leaves controller port 2 unplugged. The native
+product menu must likewise disconnect its CPU port before copying pad status;
+a connected neutral sample otherwise creates a spurious CPU hand. Keep P1's
+original CPU-token hit tests. Reconnecting P2 restores its shifted card position,
+and changing opponent kind calls the original card-refresh function. Hide the
+CPU keyboard icon and omit its alpha aperture together, including the first
+render before the native disconnect callback runs. Human hands still render
+above the room controls and their keyboard icons.
+
 Portable-source provenance includes both injected menu include files. Re-run
 compile audit and audit-link before building when changing either include.
 `prepare-menu-ui.mjs` copies existing extracted UI fixtures into ignored output;

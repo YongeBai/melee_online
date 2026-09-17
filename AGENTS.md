@@ -15,6 +15,8 @@ pitfalls from the playable implementation. Read `docs/ROLLBACK-AND-ROOMS.md` and
   level-9 Fox CPU, two native CSS cards with room controls between them, all
   characters, six tournament stages, four stocks/eight minutes/no items/singles.
   Keep unused modes inaccessible; diagnostic bindings must not replace this flow.
+  CPU opponents have no controller hand or keyboard icon. Preserve P1's native
+  CPU-token selection and restore the hand/icon when the slot becomes human.
 - No-ISO startup is an invariant: every playable browser build, including
   performance experiments, must automatically load the hosted game. Never
   replace this flow with a player-supplied ISO/file-picker requirement. The

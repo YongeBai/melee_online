@@ -30,16 +30,20 @@ export function createNativeCharacterMenuPreview(module,canvas,bytes,converted,{
  function draw(){
   const ordered=sync(),c=camera.snapshot(),d=archive.data,p=converted.camera;
   if(c.fov!==d.getFloat32(p+48)||c.aspect!==d.getFloat32(p+52)||c.near!==d.getFloat32(p+40)||c.far!==d.getFloat32(p+44))throw Error('CSS camera differs from original descriptor');
+  const product=module._portMenuProduct(),human=[0,1].map(i=>!product||module._portCharacterMenuRead(3,i)===0);
+  const hiddenHands=new Set(product?[0,1].filter(i=>!human[i]).map(i=>module._portCharacterMenuHand(i)):[]);
   renderer.begin(c);
-  for(let pass=0;pass<3;pass++){module._portCharacterMenuRenderBegin();for(const r of ordered){if(r.text)module._portNativeDrawText(r.owner,pass);else module._portNativeDrawObject(r.owner,pass,1);}}
+  for(let pass=0;pass<3;pass++){module._portCharacterMenuRenderBegin();for(const r of ordered){if(r.text)module._portNativeDrawText(r.owner,pass);else if(!hiddenHands.has(r.owner))module._portNativeDrawObject(r.owner,pass,1);}}
   const result=renderer.flush({ordered:true});
-  if(module._portMenuProduct()){
+  if(product){
    const mul=(m,v)=>[0,1,2,3].map(r=>v.reduce((n,x,k)=>n+m[k*4+r]*x,0));
    const project=(x,y)=>{const v=mul(c.projection,mul(c.view,[x,y,0,1]));return [(v[0]/v[3]+1)/2,(1-v[1]/v[3])/2];};
    const regions=[[-14.91,-2.32,29.82,-22.61],[-20.04,-21.22,2.98,-2.61],[24.71,-21.22,2.98,-2.61]].map(([x,y,w,h])=>{const a=project(x,y),b=project(x+w,y+h);return {left:a[0],top:a[1],width:b[0]-a[0],height:b[1]-a[1]};});
-   for(const rect of regions){
+   for(const [index,rect] of regions.entries()){
+    // Leave the original CPU card opaque; there is no keyboard control below it.
+    if(index&&!human[index-1])continue;
     renderer.begin(c);
-    for(let pass=0;pass<3;pass++){module._portCharacterMenuRenderBegin();for(let i=0;i<2;i++)module._portNativeDrawObject(module._portCharacterMenuHand(i),pass,1);}
+    for(let pass=0;pass<3;pass++){module._portCharacterMenuRenderBegin();for(let i=0;i<2;i++)if(human[i])module._portNativeDrawObject(module._portCharacterMenuHand(i),pass,1);}
     renderer.flush({ordered:true,clearAlpha:0,forceAlpha:true,clip:[Math.round(rect.left*canvas.width),Math.round((1-rect.top-rect.height)*canvas.height),Math.round(rect.width*canvas.width),Math.round(rect.height*canvas.height)]});
    }
    gl.disable(gl.SCISSOR_TEST);globalThis.nativeMenuApertures=regions;globalThis.nativeMenuHandPoint=(x,y)=>project(x+5,y-.75);canvas.style.visibility="visible";

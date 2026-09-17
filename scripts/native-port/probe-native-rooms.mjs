@@ -25,6 +25,8 @@ try{
  const initial=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),menu:nativeCharacterMenu.read()})')));
  if(initial.some(v=>v.room.code!==code))throw Error('Refresh changed room code');
  if(initial[0].room.seat!==0||initial[1].room.seat!==1||initial.some(v=>v.menu.players[1].kind!==0))throw Error('Incorrect human seats');
+ if(initial.some(v=>v.menu.players.slice(0,2).some(p=>p.hand===3)))throw Error('Human room hand remained hidden');
+ for(const c of [a,b])if(!await c.eval('["#keyboardButton","#peerKeyboard"].every(s=>getComputedStyle(document.querySelector(s)).display!=="none")'))throw Error('Human room keyboard icon remained hidden');
  // Each local keyboard controls its own native hand on both machines.
  const x=initial[0].menu.players[1].x;await b.keys(['KeyA']);await b.wait(`nativeCharacterMenu.read().players[1].x<${x-3}`);await b.keys([]);await delay(100);
  const peerX=await a.eval('nativeCharacterMenu.read().players[1].x'),guestX=await b.eval('nativeCharacterMenu.read().players[1].x');if(Math.abs(peerX-guestX)>.01)throw Error('Remote cursor differs');
