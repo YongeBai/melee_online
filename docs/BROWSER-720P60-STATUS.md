@@ -9,6 +9,12 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 17 texture-state follow-up: one renderer-local `DataView` reduced
+direct texture decoding from 0.569 to 0.481 ms/frame (-15.5%) in two recovered
+adjacent pairs. A 331.8-million-byte per-draw oracle and the 626-test suite pass.
+The first A/B/B/A thermally collapsed and is excluded; no displayed-FPS gain is
+claimed. [Evidence](BROWSER-NATIVE-TEXTURE-VIEW.md).
+
 September 17 renderer follow-up: caching six renderer-local immediate-state
 views, without reducing the 1,759 compared words, cut direct matcher time from
 0.412 to 0.357 ms/frame (-13.3%) in long rollback. Exact state/pixel/camera and

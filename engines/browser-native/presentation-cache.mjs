@@ -23,7 +23,7 @@ export function equalTextureBytes(bytes,prior){
   return true;
 }
 // Reuse only structurally keyed resources under an exclusive frame lease.
-export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=true,cacheImmediateViews=true,exactState=true,compactShaderKey=true,uniformBuffer=true,profileDraw=false}={}){
+export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=true,cacheImmediateViews=true,cacheTextureView=true,exactState=true,compactShaderKey=true,uniformBuffer=true,profileDraw=false}={}){
   const tevInterner=createTevStageInterner(),shaderKey=createInternedShaderKey(),modelSnapshots=[],programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
   let drawUniformBuffer=null,immediatePool=null,context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
   let dirtyTracker=null;const stats={modelHits:0,modelMisses:0,textureHits:0,textureMisses:0,textureInvalidations:0,textureStampHits:0,textureStampMisses:0,textureBytesCompared:0,rendererLeases:0};
@@ -50,7 +50,7 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
       const leasedUniformBuffer=bufferPool?Object.fromEntries(['prepare','upload','bind','fallback','snapshot'].map(name=>[name,(...args)=>{if(released)throw Error('Released presentation lease');return bufferPool[name](...args);}])):null;
       return {
         drawUniformBuffer:leasedUniformBuffer,
-        tevInterner,shaderKey,programs,variants,submissionOptimized,packedState,reuseImmediate,cacheImmediateViews,exactState,compactShaderKey,profileDraw,
+        tevInterner,shaderKey,programs,variants,submissionOptimized,packedState,reuseImmediate,cacheImmediateViews,cacheTextureView,exactState,compactShaderKey,profileDraw,
         immediate,
         modelSnapshot(index,create){if(released)throw Error('Released presentation lease');return modelSnapshots[index]??=create();},
         model(bytes,create){
@@ -75,7 +75,7 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
         release(){if(!released){released=true;immediate?.release();leases--;}}
       };
     },
-    snapshot:()=>({...stats,uniformBuffer,drawUniformBuffer:drawUniformBuffer?.snapshot()??null,tevInterner:tevInterner.snapshot(),exactState,compactShaderKey,profileDraw,submissionOptimized,packedState,reuseImmediate,cacheImmediateViews,modelSnapshotSlots:modelSnapshots.length,immediatePlanSlots:immediatePool?.snapshot().slots??0,immediatePool:immediatePool?.snapshot()??null,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
+    snapshot:()=>({...stats,uniformBuffer,drawUniformBuffer:drawUniformBuffer?.snapshot()??null,tevInterner:tevInterner.snapshot(),exactState,compactShaderKey,profileDraw,submissionOptimized,packedState,reuseImmediate,cacheImmediateViews,cacheTextureView,modelSnapshotSlots:modelSnapshots.length,immediatePlanSlots:immediatePool?.snapshot().slots??0,immediatePool:immediatePool?.snapshot()??null,models:models.size,programs:programs.size,variants:variants.size,textures:images.size,textureSourceBytes:[...images.values()].reduce((n,i)=>n+i.source.reduce((n,b)=>n+b.length,0),0),leases,geometry:geometry.stats}),
     dispose(){
       if(leases)throw Error('Cannot dispose leased presentation assets');
       if(closed)return;closed=true;

@@ -3,7 +3,7 @@ import {createOwnedUniformState} from './owned-uniform-state.mjs';
 import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry,uploadImmediateResource} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
-import {readNativeTextures,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
+import {createNativeTextureReader,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
 import {createNativePixelReader,gxAlphaTestRejectsAny} from './native-pixel.mjs';
 import {readNativeModelMatrices,createPackedModelReader} from './native-model.mjs';
 import {readNativeRenderContext,createNativeRenderContextReader,checkNativeRenderContext} from './native-render-context.mjs';
@@ -40,7 +40,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   const readContext=assetLease?.submissionOptimized?createNativeRenderContextReader(module):()=>readNativeRenderContext(module);
   const drawTiming={};
   function timed(name,fn,arg){if(!assetLease?.profileDraw)return fn(arg);const t=performance.now();try{return fn(arg);}finally{const row=drawTiming[name]??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-t;}}
-  const readTev=assetLease?.exactState?p=>assetLease.tevInterner.read(module,p):p=>readNativeTevState(module,p),readTextures=()=>readNativeTextures(module);
+  const readTev=assetLease?.exactState?p=>assetLease.tevInterner.read(module,p):p=>readNativeTevState(module,p),readTextures=createNativeTextureReader(module,{cacheView:assetLease?.cacheTextureView!==false});
   function captureState(ptr){return {tev:timed('tev',readTev,ptr),textures:timed('textures',readTextures),pixel:timed('pixel',readPixel),model:timed('model',readModel),context:timed('context',readContext)};}
   const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module,{cacheViews:assetLease?.cacheImmediateViews!==false});
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
