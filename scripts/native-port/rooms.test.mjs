@@ -65,7 +65,7 @@ test('browser room buffers authenticated rollback events and exposes immutable s
  globalThis.WebSocket=FakeSocket;globalThis.location={href:'http://room.test/character-menu.html',reload(){}};
  t.after(()=>{globalThis.fetch=original.fetch;globalThis.WebSocket=original.WebSocket;globalThis.location=original.location;});
  const storage={value:null,getItem(){return this.value;},setItem(_key,value){this.value=value;},removeItem(){this.value=null;}};
- const {connectNativeRoom}=await import('../../engines/browser-native/native-room.mjs');const room=await connectNativeRoom({storage,reload(){}});room.bindRollback(null);room.begin('match');
+ const {connectNativeRoom}=await import('../../engines/browser-native/native-room.mjs');const room=await connectNativeRoom({storage,reload(){}});assert.equal(room.tapJump,1);room.setTapJump(0);assert.equal(room.tapJump,0);room.bindRollback(null);room.begin('match');
  socket.emit({type:'peer-input',key:'match:0',epoch:4,frame:0,seat:1,value:{pad:[0,0,0,0,0,0,0],tap:1}});socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:0});
  const events=[],unbind=room.bindRollback({receive:(frame,value)=>events.push(['input',frame,value.tap]),acknowledge:frame=>events.push(['confirmed',frame])});assert.deepEqual(events,[['input',0,1],['confirmed',0]]);
  socket.emit({type:'phase-ready',key:'match:0',epoch:4});assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);
