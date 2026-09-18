@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-18",
+  "purpose": "Replace the temporary product results dialog with a 4:3 animated tournament presentation and revalidate the two-browser elimination, rematch, timeout, and character-select lifecycle.",
+  "sourceCommitBeforeCheckpoint": "75614f7745691220deca5be79c46217f25b4c724",
+  "sourceSha256": {
+    "engines/browser-native/native-results.mjs": "c4c5d7d48ded48af8e7b4248c9741dac182870eec4178c1304c1ade87d7d4051",
+    "engines/browser-native/native-results-ui.mjs": "96d63fc24d03c687338d4b0ec311976896a59027b43a3c1c09443ac75acd5eb5",
+    "engines/browser-native/native-product.css": "7ebfe10dcc4c3387f7493dfbafe41f168e32d1e337f564afd733ab807dc79965",
+    "engines/browser-native/dirty-host-contract.mjs": "2379d333ee3f8733c686c94a42dadb490115a41888249cdd29602b29a43d2d30",
+    "scripts/native-port/probe-native-rooms.mjs": "89f1c6f1581929a079fbfd715f1639f8cbe411abb9cb3ea8d93ad6cc5164eb3e",
+    "scripts/native-port/native-results.test.mjs": "bf92ab24e6a52ac52ebc370ae9ed9526a7172b157d74878bbcb22a4bc1987b36"
+  },
+  "command": "node scripts/native-port/probe-native-rooms.mjs --results",
+  "passed": true,
+  "presentation": {
+    "temporaryLabelPresent": false,
+    "nativeSisLettering": true,
+    "animatedHeaderAndStandingsPanels": true,
+    "playerPanels": 2,
+    "aspectRatio": 1.3333170062695925,
+    "expectedAspectRatio": 1.3333333333333333,
+    "inputLockedUntilReveal": true,
+    "actions": ["Rematch", "Character Select"],
+    "statistics": ["Stock", "Damage", "Result"],
+    "standings": ["Win", "Loss", "Draw"]
+  },
+  "elimination": {
+    "nativeOutcome": 2,
+    "nativeFrames": 805,
+    "winnerCount": 1,
+    "winnerSeat": 1,
+    "matchingResultsOnBothPeers": true,
+    "endingSentOnlyAfterConfirmation": true
+  },
+  "rematch": {
+    "sameRoomCode": true,
+    "freshEpoch": true,
+    "charactersAndCostumesPreserved": true,
+    "stage": 31,
+    "stocks": [4, 4],
+    "timeLimitSeconds": 480,
+    "items": -1,
+    "teams": 0
+  },
+  "timeout": {
+    "nativeOutcome": 1,
+    "nativeFrames": 28800,
+    "winnerCount": 2,
+    "matchingResultsOnBothPeers": true
+  },
+  "characterSelectReturn": {
+    "sameRoomCode": true,
+    "seatsPreserved": [0, 1],
+    "legalStages": [2, 3, 8, 28, 31, 32]
+  },
+  "screenshotSha256": {
+    "eliminationSeat0": "174e4589e7345a32c3808cb07ecfcebf6b8708d4e82cd6f2110cbda5449f3d8f",
+    "eliminationSeat1": "e0f16ab4c6b9c333e5177831c7b2fd9809ef6ba1a6b5604da0f27ff2193f97c0",
+    "timeoutSeat0": "a04261280db17d4ace80fea1a68de422623eaff013fedfcf88fc36134495999b",
+    "timeoutSeat1": "d326f83cf800bff94a3e586404497f9e2f8cfb7badea40d872b7fe829d1108e8"
+  },
+  "scope": "The standings presentation uses hosted original SIS glyphs, fixed native 4:3 framing, native-computed match results, and product animations. It does not yet recreate Melee's original GmRst 3D scene or victory fanfare. The accelerated timeout executes every original simulation step but bypasses real-time presentation, so this is lifecycle and presentation evidence rather than an FPS result."
+}

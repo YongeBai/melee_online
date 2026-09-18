@@ -55,6 +55,15 @@ exactly the measured paused interval was 59.88 FPS. The full suite is 645 tests:
 635 pass, 10 skip, 0 fail. This does not validate arbitrary-duration WAN outages. See the
 [reconnect and cadence evidence](benchmarks/browser-2026-09-18-native-room-reconnect-720p60.json).
 
+The temporary results dialog has been replaced by an animated fixed-4:3
+tournament presentation built from the hosted original SIS glyphs and native
+standings. A fresh two-browser lifecycle passed real-time elimination, one-vote
+hold, two-vote rematch, an original 28,800-frame timeout, return to character
+select, and the six-stage legal list. Both peers reported two player panels, no
+temporary label, and a measured 1.333317 aspect ratio. The original `GmRst` 3D
+scene and victory fanfare are still not ported. See the
+[results presentation evidence](benchmarks/browser-2026-09-18-native-results-presentation.json).
+
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and
 [rollback correctness measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).
