@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>Native result scene</title>
+<canvas id="picture" width="960" height="720"></canvas><pre id="result">Loading original GmRst scene…</pre>
+<script type="module">
+import create from './melee-fighter-init.mjs';
+import {convertResultSceneAsset} from './menu-assets.mjs';
+import {installResidentFile} from './resident-files.mjs';
+import {createNativeResultScenePreview} from './native-result-scene-preview.mjs';
+const report={passed:false};try{
+ const response=await fetch('./fixtures/GmRst.usd');if(!response.ok)throw Error('Hosted GmRst scene unavailable');const bytes=new Uint8Array(await response.arrayBuffer()),asset=convertResultSceneAsset(bytes),module=await create();
+ installResidentFile(module,'GmRst.usd',asset.image);module._portResultSceneInitialize();const preview=createNativeResultScenePreview(module,document.querySelector('#picture'),bytes,asset);globalThis.nativeResultScene={module,asset,preview};
+ report.initial=preview.draw();for(let i=0;i<60;i++)module._portResultSceneStep();report.after60=preview.draw();report.frames=60;report.passed=true;
+}catch(error){report.error=String(error.stack??error);document.body.dataset.error='true';}globalThis.nativeResultSceneReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
+</script>

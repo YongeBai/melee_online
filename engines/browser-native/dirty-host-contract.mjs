@@ -49,7 +49,7 @@ export const dirtyHostContract = {
   "material-shader.mjs": "62b7dc46ac9d7ebf416c88e893c290504969a35fce877b0ec589c51657ea1c2a",
   "math-reference.mjs": "dfdb5039faf0664d04d8426f5d3175bda26d3ffe5b4432fd52aaa89c8fc7fade",
   "melee-dirty.wasm": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
-  "melee-fighter-init.mjs": "79e5fc02530ca737719c4a118aa9b27b0db8e5d9943ce5452e00fee090fe8ff0",
+  "melee-fighter-init.mjs": "0d7004dc06463954360722e2156f4b895d89d25ef731c4dc7ff5b6f7bb3059ab",
   "menu-assets.mjs": "510fea17758ddc4e7aa4561d75a0108f2287d37b83d058a7a293f5ba59136eab",
   "mesh-assets.mjs": "78de01a34aa9758339e58116741d88cec4e4f96d325cfbfb3ed2359802f9b64f",
   "model-geometry-cache.mjs": "d6577611969c15e9a2b524ace7a7aa7e967dee8a0d2ef0196ddcb51e4d4fe7e7",

@@ -89,6 +89,15 @@ retain the original camera descriptors. The verified graph has five model roots,
 assets is only a prerequisite; do not claim the original `GmRst` scene until the
 runtime instantiates, animates, and visually validates it.
 
+The isolated panel bring-up now instantiates `pnlsce` through the original HSD
+archive, camera, light, JObj, and animation APIs, then submits its material state
+through the browser renderer. Preserve its descriptor exactly: the result camera
+uses a 25-degree FOV and 1.216667 projection aspect inside the 4:3 canvas. This is
+intentional native result-screen framing, not a gameplay-camera regression. The
+standalone panel still shows the archive's unconfigured four-slot/Sheik defaults;
+do not put it in the product result lifecycle until native standings configure
+slot visibility, winner art, player icons, text, and fighter victory models.
+
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.
 
