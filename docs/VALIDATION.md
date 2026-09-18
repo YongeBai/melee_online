@@ -32,6 +32,14 @@ inputs and converged exactly. This covers controlled two-way relay delay, not a
 real WAN, packet loss or physical latency; see the
 [bidirectional-delay evidence](benchmarks/browser-2026-09-18-native-room-bidirectional-delay-720p60.json).
 
+Rollback is now the default two-player room path; `?lockstep=1` retains the old
+transport only as a diagnostic fallback. A default URL with no rollback query
+repeated the 1,800-frame bidirectional-delay gate at 59.557–59.698 simulation
+FPS and 59.770 captured FPS, with 201 corrections, 434 replayed frames, exact
+convergence and no late-input rejects. A separate 900-frame CPU match completed
+without entering rollback. See the
+[default-room evidence](benchmarks/browser-2026-09-18-native-room-default-rollback-720p60.json).
+
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and
 [rollback correctness measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).

@@ -20,7 +20,7 @@ export function startNativeMenuLive(menu,input,{onState=()=>{},onResults=()=>{},
     }else if(!result.stage){menu.restart(true);active=menu;publish('characters');}
     else{
       publish('loading-match');
-      const promise=menu.startMatch(matchParams,{browserInput:input,network,onLive:()=>{busy=false;publish('match');}});
+      const params={...matchParams};if(!network?.active)delete params.rollback;const promise=menu.startMatch(params,{browserInput:input,network,onLive:()=>{busy=false;publish('match');}});
       // The match scheduler takes over after loading; keep the input owner alive
       // so held buttons and key-up events are sampled at native initialization.
       stop();const report=await promise;

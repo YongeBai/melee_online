@@ -10,7 +10,7 @@ import {createDirtyRangeTracker} from './dirty-runtime.mjs';
 
 // Correctness-first product bridge. Simulation/checkpoints stay in the menu
 // runtime; every visible frame is reconstructed in an independent WASM heap.
-// This is opt-in until measured presentation cadence reaches the product gate.
+// This is the default two-player room path after clearing the product gate.
 export async function createNativeProductRollback({source,wasmBytes,dirtyManifest=null,audio,network,step,createPreview,presentationCache=null}){
  if(!source?.module||!(wasmBytes instanceof Uint8Array)||!audio||!network?.active||typeof step!=='function'||typeof createPreview!=='function')throw Error('Incomplete product rollback boundary');
  const replicaAudio=createRollbackAudio(),target=await createSnapshotRuntime(create,wasmBytes,{dirtyManifest,memoryInitialPages:source.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}),dirty=!!dirtyManifest;
