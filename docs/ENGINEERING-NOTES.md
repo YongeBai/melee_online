@@ -16,10 +16,11 @@ Wait for the relay's shared phase-ready before advancing even the neutral input
 prefix; otherwise the faster browser consumes its prediction window during the
 other client's loading boundary. The scheduler advances at most one forward
 frame per animation callback because a second step cannot become a distinct
-browser presentation. A 1,800-frame Final Destination room submitted all 1,800
-pictures at 59.890/59.839 simulation FPS with 10.9 ms draw p95, exact confirmed
-state and six real corrections on one peer. This passes the narrow
-simulation/submission gate, not captured-frame, WAN, roster, latency or full
+browser presentation. Separate 1,800-frame Battlefield runs observed each seat
+at 59.95+ canvas-capture FPS with all 1,800 sampled pictures distinct. The same
+per-seat gate passed under sustained Falco/Fox contact, including hitlag, damage,
+up to 129 corrections and 475 replayed frames. This is browser-canvas evidence,
+not physical presentation, WAN, input-to-photon, full-roster performance or full
 tournament certification. The query remains opt-in and default rooms remain
 lockstep. See
 [the scoped evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).

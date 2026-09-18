@@ -4,6 +4,12 @@ const root=path.resolve(import.meta.dirname,'../..'),server=createNativePortServ
 const resultsMode=process.argv.includes('--results');
 const rollbackMode=process.argv.includes('--rollback'),framesArg=process.argv.find(arg=>arg.startsWith('--frames='));
 const combatMode=process.argv.includes('--combat');
+const pairArg=process.argv.find(arg=>arg.startsWith('--pair=')),pair=pairArg?.slice('--pair='.length).split(',').map(Number)??null;
+const stageArg=process.argv.find(arg=>arg.startsWith('--stage=')),selectedStage=Number(stageArg?.slice('--stage='.length)??31),legalStages=[2,3,8,28,31,32];
+const holdAArg=process.argv.find(arg=>arg.startsWith('--hold-a-seat=')),holdASeat=holdAArg===undefined?null:Number(holdAArg.slice('--hold-a-seat='.length));
+if(pair&&(pair.length!==2||pair.some(n=>!Number.isInteger(n)||n<0||n>=25)))throw Error('--pair requires two roster tile indices from 0 through 24');
+if(!legalStages.includes(selectedStage))throw Error('--stage must be a tournament stage id: '+legalStages.join(','));
+if(holdASeat!==null&&(![0,1].includes(holdASeat)||!pair||pair[holdASeat]!==15))throw Error('--hold-a-seat requires the Zelda roster tile (15) in that seat');
 const captureSeatArg=process.argv.find(arg=>arg.startsWith('--capture-seat=')),captureSeat=captureSeatArg===undefined?null:Number(captureSeatArg.slice('--capture-seat='.length));
 if(captureSeat!==null&&![0,1].includes(captureSeat))throw Error('--capture-seat must be 0 or 1');
 const captureSeats=new Set(captureSeat===null?(process.argv.includes('--capture')?[0,1]:[]):[captureSeat]),captureMode=captureSeats.size>0;
@@ -42,14 +48,30 @@ try{
  // Each local keyboard controls its own native hand on both machines.
  const x=initial[0].menu.players[1].x;await b.keys(['KeyA']);await b.wait(`nativeCharacterMenu.read().players[1].x<${x-3}`);await b.keys([]);await delay(100);
  const peerX=await a.eval('nativeCharacterMenu.read().players[1].x'),guestX=await b.eval('nativeCharacterMenu.read().players[1].x');if(Math.abs(peerX-guestX)>.01)throw Error('Remote cursor differs');
+ if(pair){
+  for(const [seat,c] of [a,b].entries()){
+   const target=await c.eval('nativeCharacterMenu.icons().find(i=>i.i==='+pair[seat]+')'),current=await c.eval('nativeCharacterMenu.read().players['+seat+']'),pickup=await c.eval('(()=>{const p=nativeCharacterMenu.read().players['+seat+'];return nativeCharacterMenu.icons().find(i=>i.character===p.character);})()');if(!target||target.state===0||!pickup)throw Error('Unavailable roster tile '+pair[seat]);if(target.character===current.character)continue;
+   async function steer(point){for(let i=0;i<220;i++){
+    const p=await c.eval('nativeCharacterMenu.read().players['+seat+']'),dx=point.x-p.x,dy=point.y-p.y;
+    if(Math.abs(dx)<(point.i===undefined?.7:.2)&&Math.abs(dy)<(point.i===undefined?.7:.2)||point.i!==undefined&&i>100&&p.icon===point.i){await c.keys([]);return;}
+    const keys=[];if(Math.abs(dx)>=.7)keys.push(dx>0?'KeyD':'KeyA');if(Math.abs(dy)>=.7)keys.push(dy>0?'KeyW':'KeyS');if(Math.max(Math.abs(dx),Math.abs(dy))<3)keys.push('ShiftLeft');await c.keys(keys);await delay(16);
+   }throw Error('Could not steer player '+seat+' to roster tile '+pair[seat]);}
+   await steer({x:pickup.x-3.8,y:pickup.y+2.6});await c.press('KeyP');await c.wait('nativeCharacterMenu.read().players['+seat+'].token==='+String(seat+1));
+   await steer(target);await c.press('KeyP');await c.wait('nativeCharacterMenu.read().players['+seat+'].token===0&&nativeCharacterMenu.read().players['+seat+'].character==='+target.character);
+  }
+  const selections=await Promise.all([a,b].map(c=>c.eval('nativeCharacterMenu.read().players.slice(0,2).map(p=>({character:p.character,costume:p.costume,selected:p.selected}))')));
+  if(JSON.stringify(selections[0])!==JSON.stringify(selections[1]))throw Error('Native character selections diverged '+JSON.stringify(selections));
+ }
  if(resultsMode){await a.press('Space');await b.press('Space');await delay(150);}
  const selectedCostumes=await a.eval('nativeCharacterMenu.read().players.slice(0,2).map(p=>p.costume)');if(resultsMode&&selectedCostumes.some(c=>c===0))throw Error('Costume input was not exercised');
  await a.click('#readyRoom');await a.wait('nativeRoom.state.ready[0]');if(await a.eval('nativeMenuLive.snapshot().scene')!=='characters')throw Error('One Ready started match');await b.click('#readyRoom');
  await a.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');await b.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');
- const target=await a.eval('nativeStageMenu.icons().find(i=>i.stage===31&&i.unlocked===2)');
+ const target=await a.eval('nativeStageMenu.icons().find(i=>i.stage==='+selectedStage+'&&i.unlocked===2)');
  for(let i=0;i<100;i++){const cursor=await a.eval('nativeStageMenu.read()');if(cursor.hover===target.i){await a.keys([]);break;}const [x,y]=cursor.cursor,dx=target.x-x,dy=target.y-y;const keys=[Math.abs(dx)>.7?(dx>0?'KeyD':'KeyA'):(dy>0?'KeyW':'KeyS')];if(Math.max(Math.abs(dx),Math.abs(dy))<6)keys.push('ShiftLeft');await a.keys(keys);await delay(25);await a.keys([]);await delay(100);if(i===99)throw Error('Could not steer stage cursor to '+JSON.stringify(target));}
- await delay(100);await a.press('KeyP');
- const matchReady=rollbackMode?'globalThis.nativeLive?.snapshot().frames>=1||globalThis.nativeMenuMatchReport':'globalThis.nativeLive?.snapshot().match?.intro?.gate===1';await a.wait(matchReady,120000);await b.wait(matchReady,120000);
+ await delay(100);
+ if(holdASeat!==null){await [a,b][holdASeat].keys(['KeyP']);if(holdASeat===1)await a.press('KeyP');}
+ else await a.press('KeyP');
+ const matchReady=rollbackMode?'globalThis.nativeLive?.snapshot().frames>=1||globalThis.nativeMenuMatchReport':'globalThis.nativeLive?.snapshot().match?.intro?.gate===1';await a.wait(matchReady,120000);await b.wait(matchReady,120000);if(holdASeat!==null)await [a,b][holdASeat].keys([]);
  if(resultsMode){
   const lifecycle=[];
   async function ended(outcome){
@@ -86,6 +108,8 @@ try{
  await a.wait('globalThis.nativeMenuMatchReport');await b.wait('globalThis.nativeMenuMatchReport');
  const final=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),report:nativeMenuMatchReport})')));
  if(final.some(v=>v.report.live.frames!==matchFrames))throw Error('Incomplete match');
+ if(final.some(v=>v.report.selection.stage!==selectedStage||pair&&v.report.selection.players.slice(0,2).some((p,i)=>p.character!==final[0].report.selection.players[i].character)))throw Error('Requested tournament selection was not retained '+JSON.stringify(final.map(v=>v.report.selection)));
+ if(holdASeat!==null&&final.some(v=>v.report.live.initial[holdASeat][11]!==7))throw Error('Held-A Zelda did not start as Sheik '+JSON.stringify(final.map(v=>v.report.live.initial[holdASeat])));
  if(rollbackMode&&final.some(v=>!v.report.rollback?.enabled||v.report.rollback.metrics?.session?.forwardFrames!==matchFrames||v.report.rollback.metrics?.session?.confirmed!==matchFrames-1))throw Error('Rollback product path was not confirmed '+JSON.stringify(final.map(v=>v.report.rollback)));
  if(combatMode&&final.some(v=>v.report.live.inputSource!=='scripted normalized controller samples'||!v.report.live.workload.framesWithAttack||!v.report.live.workload.framesWithHitlag||!v.report.live.workload.framesWithDamage||v.report.live.workload.windows.some(w=>w.frames===600&&(!w.attack||!w.hitlag))))throw Error('Combat workload did not sustain attack and contact '+JSON.stringify(final.map(v=>v.report.live.workload)));
  const captureSummaries=final.map(v=>{const live=v.report.live,o=live.observation;return {frames:live.frames,draws:live.draws,simulationFps:live.frames*1000/live.elapsedMs,drawSubmissionCpu:live.drawSubmissionCpu,observation:o&&{enabled:o.enabled,requested:o.requested,captured:o.captured,estimatedUnobservedRequests:o.estimatedUnobservedRequests,distinctSampledImages:o.distinctSampledImages,repeatedSampledImages:o.repeatedSampledImages,blackFrames:o.blackFrames,wrongSize:o.wrongSize,cadence:o.cadence,observerWorkerCpu:o.observerWorkerCpu,error:o.error}};});
@@ -93,7 +117,7 @@ try{
  if(captureMode&&captureSummaries.some(v=>v.draws!==matchFrames||(sustainedCapture&&(v.simulationFps<59.5||v.drawSubmissionCpu.p95Ms>20||v.drawSubmissionCpu.maxMs>50))))throw Error('720p60 simulation/submission gate failed '+JSON.stringify(captureSummaries));
  if([...captureSeats].some(seat=>{const o=captureSummaries[seat].observation;return !o?.enabled||o.error||o.requested!==matchFrames||o.captured!==matchFrames||o.estimatedUnobservedRequests!==0||o.distinctSampledImages!==o.captured||o.repeatedSampledImages!==0||o.blackFrames!==0||o.wrongSize!==0||(sustainedCapture&&o.cadence.fps<59.5);}))throw Error('Captured-frame product gate failed '+JSON.stringify(captureSummaries));
  if(JSON.stringify(final[0].report.live.final)!==JSON.stringify(final[1].report.live.final))throw Error('Native fighter state diverged: '+JSON.stringify(final.map(v=>v.report.live.final)));
- const scope=captureMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) '+[...captureSeats].join(',')+(combatMode?' under scripted combat.':'.')+' Not physical presentation, WAN, input-to-photon, roster or tournament certification.':rollbackMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; bounded correctness probe, not 720p60 or WAN certification.':'Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.';fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,final,scope},null,2));console.log(JSON.stringify({passed:true,code,frames:matchFrames,rollback:rollbackMode,combat:combatMode,captureSeats:[...captureSeats],matchingFighterState:true}));
+ const scope=captureMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) '+[...captureSeats].join(',')+(combatMode?' under scripted combat.':'.')+' Not physical presentation, WAN, input-to-photon, roster or tournament certification.':rollbackMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; bounded correctness probe, not 720p60 or WAN certification.':'Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.';fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,requested:{pair,stage:selectedStage,holdASeat},initial,final,scope},null,2));console.log(JSON.stringify({passed:true,code,frames:matchFrames,rollback:rollbackMode,combat:combatMode,pair,stage:selectedStage,holdASeat,captureSeats:[...captureSeats],matchingFighterState:true}));
 }
 }catch(e){fs.writeFileSync(output+'/failure.json',JSON.stringify({error:e.stack,states:await Promise.all(clients.map(c=>c.eval?.('({room:globalThis.nativeRoom?.snapshot(),menu:globalThis.nativeMenuLive?.snapshot(),error:globalThis.nativeRoomError})').catch(e=>String(e))))},null,2));throw e;
 }finally{for(const c of clients){c.ws?.close();c.browser.kill();await new Promise(r=>c.browser.once('exit',r));fs.rmSync(c.profile,{recursive:true,force:true});}await new Promise(r=>server.close(r));}
