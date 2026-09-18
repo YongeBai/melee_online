@@ -30,6 +30,14 @@ and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json)
 The separate 60-frame matrix remains the fast loading/correctness regression for
 all 25 roster tiles, held-A Sheik and all six legal stages; see
 [the roster/stage evidence](benchmarks/browser-2026-09-18-native-room-matrix.json).
+The room relay also accepts a test-only, order-preserving delivery-delay
+function. Keep its null production default on the direct send fast path, keep
+per-socket ordering when delay varies, and distinguish configured delay from
+head-of-line carryover in telemetry. A repeating 4–20 ms downstream delay run
+sustained 59.609–59.622 simulation FPS and 59.670 captured FPS while exercising
+186 corrections/444 replayed frames with exact final convergence. This does not
+model upstream delay, loss, reordering or a real WAN; see the
+[relay-delay evidence](benchmarks/browser-2026-09-18-native-room-relay-delay-720p60.json).
 
 [Cold shader preparation](BROWSER-NATIVE-SHADER-PREWARM.md) eliminates observed
 compile spikes with the existing exact-source cache, but the repeated Fountain

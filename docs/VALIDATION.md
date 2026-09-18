@@ -13,6 +13,16 @@ scanout, physical input-to-photon and exhaustive matchup timing; see the
 [stage/seat matrix](benchmarks/browser-2026-09-18-native-room-720p60.json), and
 [startup matrix](benchmarks/browser-2026-09-18-native-room-matrix.json).
 
+A separate 1,800-frame product-room run injected an order-preserving repeating
+4/8/12/16/20 ms delay into downstream peer-input and confirmation delivery.
+Both browsers sustained 59.609–59.622 simulation FPS, seat 0 captured all 1,800
+distinct 960×720 frames at 59.670 FPS, and draw p95 was 10.8/11.4 ms. The two
+peers performed 186 corrections and replayed 444 frames, confirmed frame 1799,
+rejected no late inputs and ended in exactly matching fighter state. This is a
+controlled relay-to-client adversity check, not full WAN or input-to-photon
+certification; see the
+[relay-delay evidence](benchmarks/browser-2026-09-18-native-room-relay-delay-720p60.json).
+
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and
 [rollback correctness measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).
