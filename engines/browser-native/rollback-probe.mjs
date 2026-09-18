@@ -1,4 +1,4 @@
-import {loadDirtyCore} from './dirty-runtime.mjs';
+import {loadDirtyCore,createDirtyRangeTracker} from './dirty-runtime.mjs';
 import {createRenderReplica} from './render-replica.mjs';
 import {createPagedWasmCheckpointStore} from './paged-snapshot.mjs';
 import {createPresentationCache} from './presentation-cache.mjs';
@@ -25,6 +25,7 @@ try{
   for(const image of document.querySelectorAll('img[id^="native-preview-"]'))image.remove();
   const replicaAudio=params.get('presentation')==='replica'?createRollbackAudio():null,replicaRuntime=replicaAudio?await createSnapshotRuntime(create,bytes,{dirtyManifest:dirty?.manifest,memoryInitialPages:runtime.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}):null;
   const replica=replicaRuntime?createRenderReplica(runtime,replicaRuntime,{sourceHost:audio,targetHost:replicaAudio,copyMode:dirty?'dirty':'full',auditDirty:true}):null;
+  if(replica&&dirty&&params.get('texturestamp')!=='0')presentationCache?.trackDirty(createDirtyRangeTracker(replicaRuntime));
   const replicaAudit=[];
   const paged=params.get('snapshot')!=='full';
   const store=(paged?createPagedWasmCheckpointStore:createWasmCheckpointStore)({...runtime,host:audio,sparse:!!dirty&&params.get('sparserestore')!=='0',auditSparse:params.get('snapshotaudit')==='1',maxBytes:2*1024**3}),module=runtime.module;

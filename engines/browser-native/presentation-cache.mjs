@@ -26,9 +26,12 @@ export function equalTextureBytes(bytes,prior){
 export function createPresentationCache({submissionOptimized=true,packedState=true,reuseImmediate=true,exactState=true,uniformBuffer=true,profileDraw=false}={}){
   const tevInterner=createTevStageInterner(),shaderKey=createInternedShaderKey(),modelSnapshots=[],programs=new Map(),variants=new Map(),models=new Map(),images=new Map(),geometry=createModelGeometryCache({enabled:true});
   let drawUniformBuffer=null,immediatePool=null,context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
-  const stats={modelHits:0,modelMisses:0,textureHits:0,textureMisses:0,textureInvalidations:0,rendererLeases:0};
+  let dirtyTracker=null;const stats={modelHits:0,modelMisses:0,textureHits:0,textureMisses:0,textureInvalidations:0,textureStampHits:0,textureStampMisses:0,textureBytesCompared:0,rendererLeases:0};
   return {
     geometry,
+    trackDirty(tracker){
+      if(closed||leases||dirtyTracker||typeof tracker?.stamp!=='function')throw Error('Presentation dirty tracker unavailable');dirtyTracker=tracker;
+    },
     archive(bytes){
       if(closed||!(bytes instanceof Uint8Array))throw Error('Immutable archive cache unavailable');
       if(!archives.has(bytes))archives.set(bytes,inspectArchive(bytes));
@@ -57,15 +60,17 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
         },
         texture(key,source,create){
           if(released)throw Error('Released presentation lease');
-          const old=images.get(key);
-          const equal=old&&source.length===old.source.length&&source.every((bytes,index)=>{
+          const old=images.get(key),stamp=dirtyTracker?.stamp(source)??null,stampEqual=old&&stamp&&old.stamp&&stamp.length===old.stamp.length&&stamp.every((v,i)=>v===old.stamp[i]);
+          if(stampEqual)stats.textureStampHits++;else if(stamp)stats.textureStampMisses++;
+          const equal=stampEqual||old&&source.length===old.source.length&&source.every((bytes,index)=>{
+            stats.textureBytesCompared+=bytes.length;
             const prior=old.source[index];if(submissionOptimized)return equalTextureBytes(bytes,prior);if(bytes.length!==prior.length)return false;
             for(let i=0;i<bytes.length;i++)if(bytes[i]!==prior[i])return false;return true;
           });
-          if(equal){stats.textureHits++;return old.texture;}
+          if(equal){old.stamp=stamp;stats.textureHits++;return old.texture;}
           const texture=create(),owned=source.map(bytes=>bytes.slice());
           if(old){gl.deleteTexture(old.texture);stats.textureInvalidations++;}
-          images.set(key,{texture,source:owned});stats.textureMisses++;return texture;
+          images.set(key,{texture,source:owned,stamp});stats.textureMisses++;return texture;
         },
         release(){if(!released){released=true;immediate?.release();leases--;}}
       };
@@ -77,7 +82,7 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
       for(const model of models.values())model.dispose();
       for(const p of programs.values())context.deleteProgram(p.program);
       for(const image of images.values())context.deleteTexture(image.texture);
-      immediatePool?.dispose();drawUniformBuffer?.dispose();
+      immediatePool?.dispose();drawUniformBuffer?.dispose();dirtyTracker?.dispose?.();dirtyTracker=null;
       modelSnapshots.length=0;models.clear();programs.clear();variants.clear();images.clear();geometry.clear();archives=new WeakMap();gpuInfo=null;
     }
   };

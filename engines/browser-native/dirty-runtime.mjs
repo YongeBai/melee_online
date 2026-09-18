@@ -12,18 +12,40 @@ export async function loadDirtyCore(){
 // bitmap. Each consumer owns its pending set; clearing one never loses another's
 // history. Metadata is outside gameplay memory and is not checkpointed.
 const dirtyHubs=new WeakMap();
-export function subscribeDirtyPages(runtime,role){
+function dirtyHub(runtime){
  const {dirty,module,instance,audit}=runtime;
- if(!audit.instrumentedSha256||!(dirty instanceof Uint8Array)||dirty.byteLength!==524288||typeof role!=='string')throw Error('Unaudited dirty subscription');
+ if(!audit.instrumentedSha256||!(dirty instanceof Uint8Array)||dirty.byteLength!==524288)throw Error('Unaudited dirty subscription');
  const size=module.HEAPU8.length,count=size/4096;
  let hub=dirtyHubs.get(dirty.buffer);
  if(hub&&(hub.module!==module||hub.size!==size))throw Error('Dirty bitmap runtime identity');
- if(!hub){hub={module,size,subscribers:new Map(),poll(){
+ if(!hub){hub={module,size,subscribers:new Map(),trackers:0,versions:new Float64Array(count),poll(first=0,last=count){
    if(module.HEAPU8.length!==size||module.HEAPU8.buffer!==instance.exports.memory.buffer)throw Error('Dirty subscription memory growth or stale view');
-   for(let i=0;i<count;i++)if(dirty[i]){for(const pending of hub.subscribers.values())pending[i]=1;dirty[i]=0;}
+   if(!Number.isInteger(first)||!Number.isInteger(last)||first<0||last<first||last>count)throw Error('Dirty poll range');
+   for(let i=first;i<last;i++)if(dirty[i]){if(hub.versions[i]>=Number.MAX_SAFE_INTEGER)throw Error('Dirty page version exhausted');hub.versions[i]++;for(const pending of hub.subscribers.values())pending[i]=1;dirty[i]=0;}
  }};dirtyHubs.set(dirty.buffer,hub);}
+ return {hub,size,count,dirty,module};
+}
+export function subscribeDirtyPages(runtime,role){
+ if(typeof role!=='string')throw Error('Unaudited dirty subscription');
+ const {hub,count,dirty}=dirtyHub(runtime);
  if(hub.subscribers.has(role))throw Error('Dirty subscription already owned');
  const pending=new Uint8Array(count).fill(1);hub.subscribers.set(role,pending);let closed=false;
  const check=()=>{if(closed)throw Error('Dirty subscription disposed');};
- return {read(){check();hub.poll();return pending;},clear(){check();pending.fill(0);},dispose(){if(closed)return;closed=true;hub.subscribers.delete(role);if(!hub.subscribers.size)dirtyHubs.delete(dirty.buffer);}};
+ return {read(){check();hub.poll();return pending;},clear(){check();pending.fill(0);},dispose(){if(closed)return;closed=true;hub.subscribers.delete(role);if(!hub.subscribers.size&&!hub.trackers)dirtyHubs.delete(dirty.buffer);}};
+}
+export function createDirtyRangeTracker(runtime){
+ const {hub,module,dirty}=dirtyHub(runtime);hub.trackers++;let closed=false;
+ return {
+  stamp(ranges){
+   if(closed||!Array.isArray(ranges))throw Error('Dirty range tracker unavailable');
+   const result=[];
+   for(const bytes of ranges){
+    if(!(bytes instanceof Uint8Array)||bytes.buffer!==module.HEAPU8.buffer||bytes.byteOffset<module.HEAPU8.byteOffset||bytes.byteOffset+bytes.byteLength>module.HEAPU8.byteOffset+module.HEAPU8.byteLength)throw Error('Dirty tracked range ownership');
+    if(!bytes.byteLength)continue;const first=Math.floor((bytes.byteOffset-module.HEAPU8.byteOffset)/4096),last=Math.ceil((bytes.byteOffset-module.HEAPU8.byteOffset+bytes.byteLength)/4096);hub.poll(first,last);
+    for(let page=first;page<last;page++)result.push(page,hub.versions[page]);
+   }
+   return result;
+  },
+  dispose(){if(closed)return;closed=true;hub.trackers--;if(!hub.subscribers.size&&!hub.trackers)dirtyHubs.delete(dirty.buffer);}
+ };
 }

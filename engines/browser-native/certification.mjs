@@ -1,4 +1,4 @@
-import {loadDirtyCore} from './dirty-runtime.mjs';
+import {loadDirtyCore,createDirtyRangeTracker} from './dirty-runtime.mjs';
 import {createRenderReplica} from './render-replica.mjs';
 import create from './melee-fighter-init.mjs';
 import {runNativeConstructor} from './constructor-runner.mjs';
@@ -32,6 +32,7 @@ if(mode==='calibration'){
   const replicaMode=params.get('presentation')==='replica';if(replicaMode&&!detached)throw Error('Replica requires isolated or rollback diagnostic');
   const replicaAudio=replicaMode?createRollbackAudio():null,replicaRuntime=replicaMode?await createSnapshotRuntime(create,bytes,{dirtyManifest:dirty?.manifest,memoryInitialPages:module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}):null;
   const verifyImmutableTable=params.get('tablescan')==='1',replica=replicaMode?createRenderReplica(runtime,replicaRuntime,{sourceHost:audio,targetHost:replicaAudio,copyMode:dirty?'dirty':'full',auditDirty:params.get("dirtyaudit")==="1",verifyImmutableTable}):null;
+  if(replica&&dirty&&params.get('texturestamp')!=='0')cache.trackDirty(createDirtyRangeTracker(replicaRuntime));
   const frameOracleEnabled=params.get('frameoracle')==='1';
   if(frameOracleEnabled&&(!replica||mode!=='isolated'||params.get('dirtyaudit')!=='1'))throw Error('Per-frame oracle requires isolated audited replica');
   const frameOracleCache=frameOracleEnabled?createPresentationCache({uniformBuffer:false,exactState:false,submissionOptimized:false,packedState:false,reuseImmediate:false}):null,frameOracle={enabled:frameOracleEnabled,frames:0,comparedBytes:0,differentBytes:0,cameraMismatches:0};
