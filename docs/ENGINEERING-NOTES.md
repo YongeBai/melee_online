@@ -79,6 +79,16 @@ The hosted fixture contains all 13 `ff_*` HPS files used by the 26-character
 roster, and browser validation must observe both the requested track and nonzero
 audio-graph output. This does not claim the original `GmRst` 3D scene.
 
+The original result presentation is split across `GmRst.usd`, `SdRst.usd`,
+and 26 `GmRstM??.dat` character-motion archives (Ice Climbers intentionally
+shares one archive with two public roots). `GmRst.usd` is not a menu table: its
+`pnlsce` and `flmsce` publics are complete `SceneDesc` graphs containing dynamic
+model animation lists, cameras, lights, and fog. Import those fields by type and
+retain the original camera descriptors. The verified graph has five model roots,
+141 joints, 143 meshes, and 4,857 relocation slots. Hosting and converting these
+assets is only a prerequisite; do not claim the original `GmRst` scene until the
+runtime instantiates, animates, and visually validates it.
+
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.
 

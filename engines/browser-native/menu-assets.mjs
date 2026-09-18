@@ -34,8 +34,25 @@ function menuGraph(input){
  function cameraAnimation(p){once('cameraanimation',p,p=>{animationObject(ptr(p));wanim(ptr(p+4));wanim(ptr(p+8));});}
  function lightAnimation(p){once('lightanimation',p,p=>{lightAnimation(ptr(p));animationObject(ptr(p+4));wanim(ptr(p+8));wanim(ptr(p+12));});}
  function lightList(p){list(p,p=>{light(ptr(p));list(ptr(p+4),lightAnimation);});}
+ const dynamicModels=new Map();
+ function dynamicModel(p){
+  if(dynamicModels.has(p))return dynamicModels.get(p);
+  const row={descriptor:p,joint:null,jointAnimations:[],materialAnimations:[],shapeAnimations:[]};dynamicModels.set(p,row);
+  row.joint=ptr(p);model(row.joint);
+  list(ptr(p+4),at=>{jointAnimation(at);row.jointAnimations.push(at);});
+  list(ptr(p+8),at=>{materialAnimation(at);row.materialAnimations.push(at);});
+  list(ptr(p+12),at=>{shapeJoint(at);row.shapeAnimations.push(at);});
+  return row;
+ }
+ function scene(root){
+  const rows=[];list(ptr(root),p=>rows.push(dynamicModel(p)));
+  const cameras=ptr(root+4);if(cameras===null)throw Error('Missing scene camera list');
+  const cameraRoot=ptr(cameras);camera(cameraRoot);list(ptr(cameras+4),cameraAnimation);
+  lightList(ptr(root+8));const fogs=ptr(root+12);if(fogs!==null){fog(ptr(fogs));list(ptr(fogs+4),cameraAnimation);}
+  return {root,rows,camera:cameraRoot};
+ }
  function finish(publics){return {models,pointerSlots:pointers,writes,image:nativeSubgraphImage(body,pointers,publics)};}
- return {a,d,range,word,ptr,empty,once,model,camera,light,fog,shapeJoint,jointAnimation,materialAnimation,animations,list,cameraAnimation,lightList,finish};
+ return {a,d,range,word,ptr,empty,once,model,camera,light,fog,shapeJoint,jointAnimation,materialAnimation,animations,list,cameraAnimation,lightList,dynamicModel,scene,finish};
 }
 export function convertMenuAsset(input,{menu='stage'}={}){
  const spec=profiles[menu];if(!spec)throw Error('Unsupported native menu');
@@ -83,4 +100,15 @@ export function convertCardNoticeAsset(input){
  const cameras=ptr(root+4);if(cameras===null)throw Error('Missing card-notice camera');const camera=ptr(cameras);g.camera(camera);g.list(ptr(cameras+4),g.cameraAnimation);
  g.lightList(ptr(root+8));g.empty(root+12);
  return {root,symbol,rows,camera,...g.finish(new Map([[symbol,root]]))};
+}
+
+// GmRst owns two complete SceneDesc graphs rather than the fixed StaticModelDesc
+// tables used by CSS/SSS. Retain every original dynamic animation list and the
+// native camera/light/fog descriptors so later presentation code cannot replace
+// the result camera with a browser approximation.
+export function convertResultSceneAsset(input){
+ const g=menuGraph(input),expected=['pnlsce','flmsce'];
+ if(g.a.publics.size!==expected.length||expected.some(name=>!g.a.publics.has(name)))throw Error('Missing result scene root');
+ const scenes=expected.map(symbol=>({symbol,...g.scene(g.a.publics.get(symbol))}));
+ return {scenes,rows:scenes.flatMap(scene=>scene.rows),...g.finish(new Map(expected.map(name=>[name,g.a.publics.get(name)])))};
 }

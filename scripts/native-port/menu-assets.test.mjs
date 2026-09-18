@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {convertMenuAsset} from '../../engines/browser-native/menu-assets.mjs';
+import {convertMenuAsset,convertResultSceneAsset} from '../../engines/browser-native/menu-assets.mjs';
 function fixture(mutate=()=>{}){
  const data=new Uint8Array(384),v=new DataView(data.buffer),r=[0,232,236];
  v.setUint32(0,208);v.setUint16(214,1);v.setUint32(232,272);v.setUint32(236,292);
@@ -52,4 +52,19 @@ test('extra menu imports complete quartets, light lists and original byte string
  assert.throws(()=>convertExtraMenuAsset(extra((v,r,p)=>p.pop())),/Missing extra-menu root/);
  assert.throws(()=>convertExtraMenuAsset(extra((v,r,p)=>p.push(['Unknown',0]))),/Unknown extra-menu/);
  assert.throws(()=>convertExtraMenuAsset(extra(v=>v.setUint32(240,512))),/outside data/);
+});
+function resultScene(mutate=()=>{}){
+ const data=new Uint8Array(256),v=new DataView(data.buffer),r=[];
+ const ptr=(p,t)=>{v.setUint32(p,t);r.push(p);};
+ ptr(0,32);ptr(4,64);ptr(16,32);ptr(20,64);ptr(32,40);ptr(40,192);ptr(64,80);
+ v.setUint16(86,1);v.setFloat32(120,.1);v.setFloat32(124,5000);v.setFloat32(128,25);v.setFloat32(132,4/3);
+ v.setUint32(196,9);for(const p of [224,228,232])v.setFloat32(p,1);
+ mutate(v,r);return pack(data,r,[['pnlsce',0],['flmsce',16]]);
+}
+test('result scene imports both native dynamic scene graphs without replacing their camera',()=>{
+ const input=resultScene(),before=input.slice(),m=convertResultSceneAsset(input),d=new DataView(m.image.buffer,32);
+ assert.deepEqual(input,before);assert.deepEqual(m.scenes.map(s=>s.symbol),['pnlsce','flmsce']);assert.equal(m.rows.length,2);assert.equal(m.models.length,1);
+ assert.equal(m.scenes[0].camera,80);assert.equal(m.scenes[1].camera,80);assert.equal(d.getUint16(86,true),1);assert.equal(d.getUint32(40,true),192);
+ assert.throws(()=>convertResultSceneAsset(pack(new Uint8Array(32),[],[['pnlsce',0],['other',16]])),/Missing result scene root/);
+ assert.throws(()=>convertResultSceneAsset(resultScene((v,r)=>r.splice(r.indexOf(64),1))),/Unrelocated/);
 });
