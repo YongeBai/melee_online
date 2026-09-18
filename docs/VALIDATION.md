@@ -76,6 +76,16 @@ SIS archive were structurally inspected. This does not validate native runtime
 animation or pixels yet. See the
 [result-scene asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 
+An isolated Chromium run now covers the next layer: native HSD construction and
+animation of `pnlsce`, plus actual WebGL material submission. The frame-60 image
+used one object, 115 joints, 123 meshes, 102 draws, 11 programs, and 34 original
+images under the exact descriptor camera (25-degree FOV, 1.216667 aspect). Visual
+inspection found the expected original Winner/Total/result-panel art. Cleanup
+returned object, process, and archive-allocation counts to zero. This remains a
+panel bring-up, not product parity: it shows four default slots/Sheik labels and
+does not yet include configured standings, SIS, or victory fighters. See the
+[native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
+
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and
 [rollback correctness measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).

@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-18",
+  "purpose": "Instantiate, animate, render, and clean up the original GmRst pnlsce panel in an isolated real-browser native runtime.",
+  "sourceCommitBeforeCheckpoint": "98d8a0acff279fa1992c696531cd7449593fd678",
+  "sourceSha256": {
+    "engines/browser-native/result-scene.c": "ba265a3fff60ee8d3be82017b06fc4e1ae175d93ed42af24e0c1cf650d7a9bce",
+    "engines/browser-native/native-result-scene-preview.mjs": "90d25853afac71491ce820ce0e3bd29aec5f8a6deda0185bf934ae53ec9ad858",
+    "engines/browser-native/result-scene.html": "9469e07187a242b58accb62200efc59d20116a01c18e4eaa2ab82ee07e43091b",
+    "engines/browser-native/dirty-host-contract.mjs": "a9310137f282c0850d253aec36eb69d8e12071ad6c8feaaf4d3f87a3e8be3768",
+    "scripts/native-port/build.mjs": "badfef2417c79b8892291a5df2a4002e536614f38037a60d24f04a1c371691f7",
+    "scripts/native-port/serve.mjs": "50ed2e210b61045af8d116b7164c7505b2e1e0e567e05ec001ddef25f93d77f0",
+    "scripts/native-port/probe-result-scene.mjs": "8fec5f193e5658ffe26c63ee211293e852ca1642af8839f1adb25c61db1984fe"
+  },
+  "commands": [
+    "node scripts/native-port/build.mjs --fighter-init",
+    "node scripts/native-port/probe-result-scene.mjs"
+  ],
+  "passed": true,
+  "browser": "headless Chromium with WebGL2 GPU path",
+  "frames": 60,
+  "nativeScene": {
+    "public": "pnlsce",
+    "objects": 1,
+    "joints": 115,
+    "meshes": 123,
+    "initialDraws": 123,
+    "frame60Draws": 102,
+    "materialPrograms": 11,
+    "frame60Images": 34,
+    "originalMaterialState": true
+  },
+  "camera": {
+    "eye": [0, 0, 112],
+    "interest": [0, 0, 0],
+    "fov": 24.999998092651367,
+    "aspect": 1.2166670560836792,
+    "near": 1,
+    "far": 5000,
+    "matchesOriginalDescriptor": true
+  },
+  "cleanup": {"objects": 0, "processes": 0, "archiveAllocations": 0},
+  "screenshotSha256": "8bca91338eaea7ed8bbb4f4a4e5f2a92b61aa921869c5d240d53254eb0fb8290",
+  "visualInspection": "Original Winner, Total, four result slots, rank laurels, and Ready for the Next Battle panel art rendered. The unconfigured archive defaults to four Sheik slots and is not product-ready.",
+  "scope": "This is native result-panel runtime and pixel evidence. It does not yet configure two-player standings, render SIS result text or fighter victory models, enter from the match lifecycle, establish result-screen FPS, or replace the product overlay."
+}

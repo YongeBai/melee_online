@@ -191,11 +191,19 @@ all 28 original result fixtures: the scene, SIS data, and 26 character-motion
 archives. A typed importer converted both `pnlsce` and `flmsce` with their
 original dynamic animation lists, cameras, lights, and fog: five model graphs,
 141 joints, 143 meshes, and all 4,857 relocation slots. Every hosted archive was
-fetched and inspected, including the two Ice Climbers motion roots. Runtime
-instantiation and visual validation of those models are still unfinished, so
+fetched and inspected, including the two Ice Climbers motion roots. The original
+`pnlsce` panel now also runs in an isolated browser target using native HSD
+archive relocation, camera/light construction, JObj animation, and the retained
+material renderer. At frame 60 it drew 102 passes over 115 joints/123 meshes with
+11 material programs, retained the original 25-degree/1.216667 camera, and cleaned
+up every object, process, and archive allocation. The inspected screenshot is
+recognizably Melee's result panel, but it still contains the archive's default
+four slots and Sheik labels. Native standings, two-slot visibility, SIS text,
+fighter victory models, and product lifecycle integration remain unfinished, so
 the current product screen remains the fixed-4:3 tournament presentation rather
-than a claimed native `GmRst` scene.
+than a claimed complete native `GmRst` scene.
 [Original result-asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
+[Native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
 
 Rooms require matching results from both clients and two rematch votes. Either
 player can return both to CSS. One coordinated epoch/reload preserves room code
