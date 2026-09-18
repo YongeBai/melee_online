@@ -19,8 +19,11 @@ try{
  if(interactive){const {connectNativeRoom,createLocalNativeRoom}=await import('./native-room.mjs');try{network=await connectNativeRoom({onState:n=>productUI?.setNetwork(n),onError:e=>{globalThis.nativeRoomError=String(e);productUI?.connectionError(e);}});}catch(e){network=createLocalNativeRoom(e.message);report.roomUnavailable=e.message;}globalThis.nativeRoom=network;}
  let returning=interactive?(network.active?network.state.returnTo:consumeReturn()):null;if(returning){try{returning=returnTicket(returning.action,returning);if(returning.players[1].kind!==(network.cpu?1:0))returning=null;}catch{returning=null;}}
  const nativeMusic=interactive?await(await import('./native-music.mjs')).createNativeMusic({resumeAfterNavigation:!!returning}).catch(e=>{report.audioError=String(e);return null;}):null;globalThis.nativeMusic=nativeMusic;
+ const rollbackAudio=interactive&&nativeMusic?(await import('./rollback-audio.mjs')).createRollbackAudio({present:r=>nativeMusic.request(r),presentUnframed:true}):null;globalThis.nativeRollbackAudio=rollbackAudio;
  Object.defineProperty(report,'audioPlayed',{enumerable:true,get:()=>nativeMusic?.snapshot().events.some(e=>e.event==='playing')??false});
- const module=await create({printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=nativeMusic?'browser-music/sfx-muted':mode;return true;},onNativeMusic:r=>{if(r.action!==4){if(music.length===128)music.shift();music.push(r);}try{return nativeMusic?.request(r)??false;}catch(e){report.audioError=String(e);return false;}}});
+ const moduleOptions={printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=nativeMusic?'browser-music/sfx-muted':mode;return true;},onNativeMusic:r=>{if(r.action!==4){if(music.length===128)music.shift();music.push(r);}try{return rollbackAudio?.request(r)??false;}catch(e){report.audioError=String(e);return false;}}};
+ const snapshotRuntime=interactive?await (async()=>{const {createSnapshotRuntime}=await import('./wasm-snapshot.mjs'),response=await fetch('./melee-fighter-init.wasm');if(!response.ok)throw Error('Hosted native runtime unavailable');return createSnapshotRuntime(create,new Uint8Array(await response.arrayBuffer()),moduleOptions);})():null;
+ const module=snapshotRuntime?.module??await create(moduleOptions);globalThis.nativeSnapshotRuntime=snapshotRuntime;
  let cssBytes,cssAsset;
  for(const [name,convert] of [['MnSlChr.usd',b=>convertMenuAsset(b,{menu:'character'})],['MnExtAll.usd',convertExtraMenuAsset],['SdSlChr.usd',convertSisAsset],['LbMcGame.usd',convertCardIconAsset],['NtMemAc.usd',convertCardNoticeAsset]]){
   const r=await fetch('./fixtures/'+name);if(!r.ok)throw Error('Hosted asset unavailable '+name);const bytes=new Uint8Array(await r.arrayBuffer()),asset=convert(bytes);if(name==='MnSlChr.usd'){cssBytes=bytes;cssAsset=asset;}installResidentFile(module,name,asset.image);
@@ -43,7 +46,7 @@ try{
  globalThis.nativeCharacterMenu.startMatch=async(params={},options={})=>{
   const {runNativeConstructor}=await import('./constructor-runner.mjs');
   const selection=nativeCharacterMenu.matchSelection();
-  const result=await runNativeConstructor({module,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive,network:options.network});
+  const result=await runNativeConstructor({module,runtime:snapshotRuntime,rollbackAudio,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive,network:options.network});
   result.selection=selection;globalThis.nativeMenuMatchReport=result;return result;
  };
  report.initial=preview.draw();if(!interactive)for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;

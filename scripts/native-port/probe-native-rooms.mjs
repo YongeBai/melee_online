@@ -23,7 +23,9 @@ try{
  await b.click('#joinCode');await b.cmd('Input.insertText',{text:code});await b.click('#joinRoom button');
  await a.wait('nativeRoom.active&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90');await b.wait('nativeRoom.active&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90');
  const beforeRefresh=await a.eval('nativeRoom.snapshot()');await b.cmd('Page.reload');await a.wait(`nativeRoom.snapshot().epoch>${beforeRefresh.epoch}&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90`);await b.wait(`nativeRoom.snapshot().epoch>${beforeRefresh.epoch}&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90`);
- const initial=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),menu:nativeCharacterMenu.read()})')));
+ const initial=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),menu:nativeCharacterMenu.read(),runtime:{same:nativeSnapshotRuntime?.module===characterModule,globals:nativeSnapshotRuntime?.audit?.globals?.length,wasmSha256:nativeSnapshotRuntime?.audit?.wasmSha256},audio:nativeRollbackAudio?.snapshot()})')));
+ if(initial.some(v=>!v.runtime.same||v.runtime.globals!==4||!/^[0-9a-f]{64}$/.test(v.runtime.wasmSha256??'')))throw Error('Interactive runtime is not snapshot-instrumented '+JSON.stringify(initial.map(v=>v.runtime)));
+ if(initial.some(v=>!v.audio||v.audio.presented<1||v.audio.pending!==0))throw Error('Unframed menu audio did not present immediately '+JSON.stringify(initial.map(v=>v.audio)));
  if(initial.some(v=>v.room.code!==code))throw Error('Refresh changed room code');
  if(initial[0].room.seat!==0||initial[1].room.seat!==1||initial.some(v=>v.menu.players[1].kind!==0))throw Error('Incorrect human seats');
  if(initial.some(v=>v.menu.players.slice(0,2).some(p=>p.hand===3)))throw Error('Human room hand remained hidden');
