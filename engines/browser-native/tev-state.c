@@ -13,6 +13,7 @@
 #include <sysdolphin/baselib/cobj.h>
 #include <sysdolphin/baselib/lobj.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -25,13 +26,14 @@ typedef struct {
 _Static_assert(sizeof(PortTevState)==2192,"Native TEV snapshot ABI");
 static PortTevState state;
 static int capturing;
+static u32 stage_mask;
 int portMaterialCaptureActive(void){return capturing;}
 static void require(int condition){if(!capturing||!condition){fprintf(stderr,"Invalid native TEV capture\n");abort();}}
 void portRequireMaterialCapture(int condition){require(condition);}
 void portTextureCaptureReset(void);
 void portPixelCaptureReset(void);
 void portModelCaptureReset(void);
-static s32* stage(unsigned id){require(id<16);return state.stage[id];}
+static s32* stage(unsigned id){require(id<16);if(!(stage_mask&(1u<<id))){memset(state.stage[id],0,sizeof(state.stage[id]));stage_mask|=1u<<id;}return state.stage[id];}
 void GXPixModeSync(void){require(1);state.syncs++;}
 void GXSetTevColor(GXTevRegID id,GXColor c){require(id<4);state.registers|=1u<<id;state.reg[id][0]=c.r;state.reg[id][1]=c.g;state.reg[id][2]=c.b;state.reg[id][3]=c.a;}
 void GXSetTevColorS10(GXTevRegID id,GXColorS10 c){require(id<4);state.registers|=1u<<id;state.reg[id][0]=c.r;state.reg[id][1]=c.g;state.reg[id][2]=c.b;state.reg[id][3]=c.a;}
@@ -59,7 +61,7 @@ static const PortTevState* capture(HSD_JObj* joint,unsigned index,int polygon,Mt
     }
     HSD_GObj* previous_owner=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
     HSD_JObj* previous_joint=HSD_JObjGetCurrent();HSD_JObjRef(previous_joint);HSD_JObjSetCurrent(joint);
-    memset(&state,0,sizeof(state));capturing=1;
+    memset(&state,0,offsetof(PortTevState,reg));stage_mask=0;capturing=1;
     portTextureCaptureReset();
     portPixelCaptureReset();
     portModelCaptureReset();
@@ -107,7 +109,7 @@ void portNativeDrawParticles(HSD_GObj* owner,unsigned pass)
     extern void efLib_render_callback(HSD_GObj*,int);
     extern void portRenderContextEnter(void),portRenderContextLeave(void);
     if(drawing||capturing||!owner||owner->render_cb!=efLib_render_callback||pass>2)abort();
-    portRenderContextEnter();drawing=capturing=1;memset(&state,0,sizeof(state));
+    portRenderContextEnter();drawing=capturing=1;memset(&state,0,offsetof(PortTevState,reg));stage_mask=0;
     portTextureCaptureReset();portModelCaptureReset();immediate_kind=0;portImmediateBegin();
     HSD_GObj* previous=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;
     owner->render_cb(owner,pass);
@@ -119,7 +121,7 @@ void ftCo_800C2600(HSD_GObj* owner,u32 pass)
 {
     extern void port_unlinked_ftCo_800C2600(HSD_GObj*,u32);
     if(!drawing||capturing||!owner||owner!=HSD_GObj_804D7814||pass>2)abort();
-    capturing=1;memset(&state,0,sizeof(state));
+    capturing=1;memset(&state,0,offsetof(PortTevState,reg));stage_mask=0;
     portTextureCaptureReset();portModelCaptureReset();immediate_kind=1;portImmediateBegin();
     port_unlinked_ftCo_800C2600(owner,pass);
     portImmediateEnd();capturing=0;
@@ -149,7 +151,7 @@ static void native_polygon(HSD_PObj* polygon,Mtx view,Mtx position,u32 mode)
 static void native_display(HSD_DObj* display,Mtx view,Mtx position,u32 mode)
 {
     if(!drawing||capturing||drawing_display||!display||!display->mobj||(mode&0x04000000))abort();
-    capturing=1;drawing_display=display;memset(&state,0,sizeof(state));
+    capturing=1;drawing_display=display;memset(&state,0,offsetof(PortTevState,reg));stage_mask=0;
     portTextureCaptureReset();portPixelCaptureReset();portModelCaptureReset();
     HSD_StateInvalidate(HSD_STATE_COLOR_CHANNEL|HSD_STATE_RENDER_MODE|HSD_STATE_TEV_REGISTER);
     HSD_DObjDisp(display,view,position,mode);
@@ -196,7 +198,7 @@ void portNativeDrawText(HSD_GObj* owner,unsigned pass)
     extern void portRenderContextEnter(void),portRenderContextLeave(void);
     if(drawing||capturing||!owner||owner->render_cb!=HSD_SisLib_803A84BC||pass>2)abort();
     if(pass!=2)return;
-    portRenderContextEnter();drawing=capturing=1;memset(&state,0,sizeof(state));
+    portRenderContextEnter();drawing=capturing=1;memset(&state,0,offsetof(PortTevState,reg));stage_mask=0;
     portTextureCaptureReset();portModelCaptureReset();
     immediate_kind=2;portImmediateBegin();HSD_StateInvalidate(-1);
     HSD_GObj* previous=HSD_GObj_804D7814;HSD_GObj_804D7814=owner;

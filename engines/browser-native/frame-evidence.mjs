@@ -9,29 +9,24 @@ export function capturedEvidence(rows,requested,{discardBootstrap=true}={}){
  return {requested,rawCaptured:rows.length,bootstrapDiscarded:offset,captured:measured.length,estimatedUnobservedRequests:Math.max(0,requested-measured.length),repeatedSampledImages:repeated,distinctSampledImages:new Set(measured.map(v=>v.hash)).size,blackFrames:measured.filter(v=>!v.nonblackPixels).length,wrongSize:measured.filter(v=>v.width!==960||v.height!==720).length,cadence:cadence(measured.map(v=>v.timestampMs))};
 }
 
-// Independent browser canvas-capture frames, not draw counters or monitor
+// Independent browser VideoFrame snapshots, not draw counters or monitor
 // photons. Downsampling only affects this observer; the game stays 960x720.
 // Timestamp cadence and sampled image changes are deliberately separate.
 export function observeCanvasFrames(canvas,{enabled=true}={}){
  const rows=[],costs=[];let stopped=false,error=null,requested=0,warmed=false,warmupCaptured=0,warmResolve=null;
  if(!enabled)return {async start(){},request(){},async stop(){return {enabled:false,physicalPresentationMeasured:false};}};
- if(!globalThis.MediaStreamTrackProcessor)throw Error('Video frame observer unavailable');
- const stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];
- // Retain a bounded burst while the game thread handles a correction or a
- // long submission. VideoFrame timestamps remain the cadence source, so this
- // queue cannot turn late or missing captures into synthetic 60 Hz evidence.
- const reader=new MediaStreamTrackProcessor({track,maxBufferSize:8}).readable.getReader();
+ if(!globalThis.VideoFrame)throw Error('Video frame observer unavailable');
  const worker=new Worker(new URL('./frame-evidence-worker.mjs',import.meta.url),{type:'module'});let drained;
- const drain=new Promise(r=>{drained=r;});worker.onmessage=({data})=>{if(data.row){rows.push(data.row);costs.push(data.cost);warmResolve?.();warmResolve=null;}if(data.error)error=data.error;if(data.stopped)drained();};worker.onerror=e=>{error=e.message;warmResolve?.();warmResolve=null;drained();};
- const reading=(async()=>{try{while(!stopped){const {done,value:frame}=await reader.read();if(done)break;worker.postMessage({frame,receivedMs:performance.now()},[frame]);}}catch(e){if(!stopped)error=String(e);}})();
+ const drain=new Promise(r=>{drained=r;});worker.onmessage=({data})=>{if(data.row){rows.push(data.row);costs.push(data.cost);warmResolve?.();warmResolve=null;}if(data.error){error=data.error;warmResolve?.();warmResolve=null;}if(data.stopped)drained();};worker.onerror=e=>{error=e.message;warmResolve?.();warmResolve=null;drained();};
+ function capture(count){if(stopped)throw Error('Canvas observer stopped');const now=performance.now(),frame=new VideoFrame(canvas,{timestamp:Math.round(now*1000)});if(count)requested++;worker.postMessage({frame,receivedMs:now},[frame]);}
  return {async start(){
-  if(warmed)return;const first=new Promise(resolve=>{warmResolve=resolve;});track.requestFrame();await Promise.race([first,new Promise((_,reject)=>setTimeout(()=>reject(Error('Canvas observer warmup timed out')),2000))]);
-  // Drain both the explicit request and any automatic captureStream bootstrap
-  // before frame zero so neither can be mistaken for a game presentation.
-  await new Promise(r=>setTimeout(r,50));if(error)throw Error(error);warmupCaptured=rows.length;rows.length=0;costs.length=0;warmed=true;
- },request(){requested++;track.requestFrame();},async stop(){
-  // Let the final paint/capture reach the reader. Excluded from throughput.
-  await new Promise(r=>setTimeout(r,150));stopped=true;await reader.cancel();track.stop();await reading;worker.postMessage({stop:true});await drain;worker.terminate();
-  return {enabled:true,...capturedEvidence(rows,requested,{discardBootstrap:!warmed}),warmupCaptured,observerWorkerCpu:distribution(costs),error,rows,physicalPresentationMeasured:false,scope:'Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon.'};
+  if(warmed)return;const first=new Promise(resolve=>{warmResolve=resolve;});capture(false);await Promise.race([first,new Promise((_,reject)=>setTimeout(()=>reject(Error('Canvas observer warmup timed out')),2000))]);
+  if(error)throw Error(error);warmupCaptured=rows.length;rows.length=0;costs.length=0;warmed=true;
+ },request(){capture(true);},async stop(){
+  // Drain every constructed frame before terminating the worker. This wait is
+  // outside throughput and never requests or synthesizes an additional frame.
+  const deadline=performance.now()+1000;while(rows.length<requested&&!error&&performance.now()<deadline)await new Promise(r=>setTimeout(r,10));
+  stopped=true;worker.postMessage({stop:true});await drain;worker.terminate();
+  return {enabled:true,mode:'direct-canvas-video-frame',sampleRegion:rows.every(row=>row.sampleRegion==='full-frame-downsample')?'full-frame-downsample':null,...capturedEvidence(rows,requested,{discardBootstrap:false}),warmupCaptured,observerWorkerCpu:distribution(costs),error,rows,physicalPresentationMeasured:false,scope:'Post-draw 960x720 browser VideoFrame(canvas) timestamps and full-frame 96x72 RGB sample hashes; not compositor scanout, media-track delivery, full pixel uniqueness, or input-to-photon.'};
  }};
 }

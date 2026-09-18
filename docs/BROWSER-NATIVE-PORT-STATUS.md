@@ -1,5 +1,27 @@
 # Native browser port — September 17, 2026
 
+September 18 sustained product-room checkpoint: all twelve legal-stage/observed-
+seat cases pass the 720p60 browser-canvas gate over 1,800 combat frames. The
+observer received exactly 21,600 requested 960×720 `VideoFrame(canvas)` snapshots,
+all 21,600 sampled images were distinct, and there were no repeats, black frames,
+wrong-size frames or observer errors. Observed cadence ranged from **59.882 to
+59.974 FPS**; both simulation clients in every case ranged from **59.662 to
+59.934 FPS**, and draw-submission p95 ranged from **8.5 to 13.0 ms**. Battlefield,
+Final Destination, Dream Land, Yoshi's Story, Fountain of Dreams and frozen
+Pokémon Stadium were each observed from both seats. The performance work batches
+transport corrections, separates the receive and prediction bounds, clears UBO
+staging once per frame, and resets only validity headers/active GX capture rows.
+A 120-frame Yoshi exact oracle compared 331,776,000 RGBA bytes with zero
+differences and zero camera mismatches. The 641-test repository suite passes
+(631 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
+gate, not compositor scanout, WAN behavior, physical input-to-photon latency or
+all 676 matchups. [Sustained evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
+
+The separate startup matrix covers all 25 roster tiles/26 playable starts and
+all six legal stages under the same fixed no-item 1v1 rules, but it remains a
+60-frame loading/correctness matrix rather than roster-wide sustained timing.
+[Roster/stage startup evidence](benchmarks/browser-2026-09-18-native-room-matrix.json).
+
 The opt-in product room (`?rollback=1`) now drives the real menu-to-match path
 through authenticated local prediction, complete-state correction, confirmed
 audio and a separate dirty WASM presentation replica. Exact shader preparation

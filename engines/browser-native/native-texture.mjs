@@ -30,7 +30,8 @@ function decodeNativeTextures(view) {
       if(g.type>10||g.source>20||g.normalize>1)throw Error('Native texture generator');generators.push(g);
     }
   }
-  for(let slot=0;slot<30;slot++)if(matrixMask&(1<<slot)) {
+  for(let bits=matrixMask;bits;bits&=bits-1) {
+    const slot=31-Math.clz32(bits&-bits);
     const b=244+slot*16,id=u(b),type=u(b+1),values=Array.from({length:12},(_,i)=>f(b+4+i));
     if(id!==(slot<10?30+slot*3:64+(slot-10)*3)||type>1||!values.every(Number.isFinite))throw Error('Native texture matrix');
     matrices.push({id,type,values});

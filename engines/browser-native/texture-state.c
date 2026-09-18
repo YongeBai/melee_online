@@ -2,6 +2,7 @@
  * Stack GX object handles are scoped to one material capture. No function here
  * is a permissive graphics stub: unsupported/out-of-scope calls abort. */
 #include <dolphin/gx.h>
+#include <stddef.h>
 #include <string.h>
 #include <stdint.h>
 
@@ -25,8 +26,7 @@ static u32 palette_mask;
 
 void portTextureCaptureReset(void)
 {
-    require(1);memset(&state,0,sizeof(state));memset(pending,0,sizeof(pending));
-    memset(&palette,0,sizeof(palette));memset(palettes,0,sizeof(palettes));pending_count=0;palette_mask=0;
+    require(1);memset(&state,0,offsetof(TextureState,textures));pending_count=0;palette_mask=0;
 }
 const TextureState* portMaterialTextureState(void){return &state;}
 static Texture* object(GXTexObj* handle,int create)

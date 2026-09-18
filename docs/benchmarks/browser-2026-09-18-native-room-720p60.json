@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-18",
+  "passed": true,
+  "configurationSha256": "6004c2dd6095061e1ab8151e3b667a8049a78b31fb28ad68c2acbbcebd3b7f5a",
+  "scope": "Two localhost product-room browsers using authenticated local prediction, complete-state correction, independent WASM presentation, sustained scripted combat and one independent post-draw VideoFrame(canvas) observer per case. This is browser-canvas evidence, not compositor scanout, WAN, physical input-to-photon, or exhaustive matchup certification.",
+  "configuration": {
+    "resolution": [960, 720],
+    "framesPerCase": 1800,
+    "cases": 12,
+    "legalStages": 6,
+    "observedSeats": [0, 1],
+    "cpuAffinity": "0-3,12-15",
+    "clientCpuSets": "0,1,12,13;2,3,14,15",
+    "simulationFpsFloor": 59.5,
+    "captureFpsFloor": 59.5,
+    "drawP95MsCeiling": 20,
+    "drawMaxMsCeiling": 50
+  },
+  "summary": {
+    "requestedFrames": 21600,
+    "capturedFrames": 21600,
+    "distinctSampledImages": 21600,
+    "repeatedSampledImages": 0,
+    "blackFrames": 0,
+    "wrongSizeFrames": 0,
+    "observerErrors": 0,
+    "simulationFpsRange": [59.66152030814218, 59.93387296023865],
+    "captureFpsRange": [59.8816347453283, 59.97366359408598],
+    "drawP95MsRange": [8.5, 13]
+  },
+  "rows": [
+    {"stage": "Battlefield", "seat": 0, "captureFps": 59.97046479610375, "simulationFps": [59.90176111180045, 59.8155686632882], "drawP95Ms": [9, 9.699999988079071]},
+    {"stage": "Battlefield", "seat": 1, "captureFps": 59.955674792954625, "simulationFps": [59.852762204952036, 59.93387296023865], "drawP95Ms": [9.5, 9.800000011920929]},
+    {"stage": "Final Destination", "seat": 0, "captureFps": 59.97366359408598, "simulationFps": [59.83843622220006, 59.907742077106036], "drawP95Ms": [8.800000011920929, 9.399999976158142]},
+    {"stage": "Final Destination", "seat": 1, "captureFps": 59.9638683528102, "simulationFps": [59.756988247792314, 59.91252770952029], "drawP95Ms": [8.5, 9.099999964237213]},
+    {"stage": "Dream Land", "seat": 0, "captureFps": 59.973063793471304, "simulationFps": [59.90554891784905, 59.773657085123496], "drawP95Ms": [9.700000047683716, 9.899999976158142]},
+    {"stage": "Dream Land", "seat": 1, "captureFps": 59.966266891554056, "simulationFps": [59.7115930058293, 59.93347384412828], "drawP95Ms": [9.899999976158142, 10.299999952316284]},
+    {"stage": "Yoshi's Story", "seat": 0, "captureFps": 59.8816347453283, "simulationFps": [59.808413714686424, 59.737553017172836], "drawP95Ms": [10.800000011920929, 11.100000023841858]},
+    {"stage": "Yoshi's Story", "seat": 1, "captureFps": 59.9023714546387, "simulationFps": [59.66152030814218, 59.854951500768], "drawP95Ms": [12.899999976158142, 13]},
+    {"stage": "Fountain of Dreams", "seat": 0, "captureFps": 59.96726633933007, "simulationFps": [59.89797378460595, 59.8096060872888], "drawP95Ms": [12.400000035762787, 12.5]},
+    {"stage": "Fountain of Dreams", "seat": 1, "captureFps": 59.92711477091785, "simulationFps": [59.677344490810064, 59.90176111180045], "drawP95Ms": [12.5, 12.699999988079071]},
+    {"stage": "Pokémon Stadium", "seat": 0, "captureFps": 59.959671371673295, "simulationFps": [59.92190178795541, 59.90614703630978], "drawP95Ms": [11, 11.599999964237213]},
+    {"stage": "Pokémon Stadium", "seat": 1, "captureFps": 59.92851218057836, "simulationFps": [59.79212271998642, 59.900565061973325], "drawP95Ms": [11, 11.100000023841858]}
+  ],
+  "exactOracle": {
+    "stage": "Yoshi's Story",
+    "frames": 120,
+    "comparedRgbaBytes": 331776000,
+    "differentBytes": 0,
+    "cameraMismatches": 0
+  },
+  "tests": {"total": 641, "passed": 631, "skipped": 10, "failed": 0}
+}
