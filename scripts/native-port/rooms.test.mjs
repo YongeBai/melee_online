@@ -30,8 +30,13 @@ test('native rooms protect seats, require both Ready, and relay ordered immutabl
  // A duplicate phase must not rewind inputs or readiness.
  a.send({type:'phase',epoch,key:'characters:0'});b.send({type:'phase',epoch,key:'characters:0'});
  const send=(peer,frame,pad)=>peer.send({type:'input',epoch,key:'characters:0',frame,value:{pad:[pad,0,0,0,0,0,0],tap:1}});
- send(a,4,256);send(b,4,512);send(a,3,16);send(a,3,32);await a.take(m=>m.type==='error');send(b,3,64);
- for(const peer of [a,b]){const f3=await peer.take(m=>m.type==='frame'),f4=await peer.take(m=>m.type==='frame');assert.equal(f3.frame,3);assert.deepEqual(f3.inputs.map(v=>v.pad[0]),[16,64]);assert.equal(f4.frame,4);assert.deepEqual(f4.inputs.map(v=>v.pad[0]),[256,512]);}
+ send(a,4,256);assert.deepEqual((await b.take(m=>m.type==='peer-input'&&m.frame===4)).value.pad,[256,0,0,0,0,0,0]);
+ send(b,4,512);assert.deepEqual((await a.take(m=>m.type==='peer-input'&&m.frame===4)).value.pad,[512,0,0,0,0,0,0]);
+ // Individual authenticated inputs arrive immediately even while frame 3 still
+ // prevents the authoritative confirmation horizon from advancing.
+ assert.equal(a.queue.some(m=>m.type==='confirmed-frame'&&m.frame===4),false);
+ send(a,3,16);send(a,3,32);await a.take(m=>m.type==='error');send(b,3,64);
+ for(const peer of [a,b]){const f3=await peer.take(m=>m.type==='frame'&&m.frame===3),c3=await peer.take(m=>m.type==='confirmed-frame'&&m.frame===3),f4=await peer.take(m=>m.type==='frame'&&m.frame===4),c4=await peer.take(m=>m.type==='confirmed-frame'&&m.frame===4);assert.equal(f3.frame,3);assert.equal(c3.frame,3);assert.deepEqual(f3.inputs.map(v=>v.pad[0]),[16,64]);assert.equal(f4.frame,4);assert.equal(c4.frame,4);assert.deepEqual(f4.inputs.map(v=>v.pad[0]),[256,512]);}
  a.send({type:'kick'});await b.take(m=>m.type==='removed');assert.equal((await post('/native-rooms/resume',{token:guest.token})).status,400);
  assert.equal((await post('/native-rooms/resume',{token:owner.token})).code,owner.code);
 });
@@ -47,6 +52,25 @@ test('static-only hosting keeps CPU gameplay without a counterfeit room code',as
  const {createLocalNativeRoom}=await import('../../engines/browser-native/native-room.mjs');const local=createLocalNativeRoom();
  assert.equal(local.code,'');assert.equal(local.cpu,true);assert.equal(local.active,false);assert.equal(local.offline,true);
  const samples=[[256,1,0,0,0,0,0],[0,0,0,0,0,0,0]];assert.equal(local.take(samples),samples);assert.doesNotThrow(()=>local.begin('match'));assert.throws(()=>local.join('ABCDEF'),/unavailable/);assert.throws(()=>local.cpuMode(false),/unavailable/);
+});
+
+test('browser room buffers authenticated rollback events and exposes immutable sends',async t=>{
+ const original={fetch:globalThis.fetch,WebSocket:globalThis.WebSocket,location:globalThis.location};let socket;
+ class FakeSocket{
+  static OPEN=1;constructor(){socket=this;this.readyState=1;this.sent=[];queueMicrotask(()=>this.onopen?.());}
+  send(raw){const m=JSON.parse(raw);this.sent.push(m);if(m.type==='hello')queueMicrotask(()=>this.emit({type:'state',code:'ABC234',seat:0,cpu:false,epoch:4,connected:[true,true],hasGuest:true,ready:[true,true],phase:'match',selected:[],returnTo:null,rematchVotes:[false,false]}));}
+  emit(value){this.onmessage?.({data:JSON.stringify(value)});}close(){this.readyState=3;}
+ }
+ globalThis.fetch=async()=>new Response(JSON.stringify({token:'owner-token',code:'ABC234',seat:0,cpu:false,epoch:4,connected:[true,true],hasGuest:true,ready:[true,true],phase:'match'}),{status:200,headers:{'Content-Type':'application/json'}});
+ globalThis.WebSocket=FakeSocket;globalThis.location={href:'http://room.test/character-menu.html',reload(){}};
+ t.after(()=>{globalThis.fetch=original.fetch;globalThis.WebSocket=original.WebSocket;globalThis.location=original.location;});
+ const storage={value:null,getItem(){return this.value;},setItem(_key,value){this.value=value;},removeItem(){this.value=null;}};
+ const {connectNativeRoom}=await import('../../engines/browser-native/native-room.mjs');const room=await connectNativeRoom({storage,reload(){}});room.bindRollback(null);room.begin('match');
+ socket.emit({type:'peer-input',key:'match:0',epoch:4,frame:0,seat:1,value:{pad:[0,0,0,0,0,0,0],tap:1}});socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:0});
+ const events=[],unbind=room.bindRollback({receive:(frame,value)=>events.push(['input',frame,value.tap]),acknowledge:frame=>events.push(['confirmed',frame])});assert.deepEqual(events,[['input',0,1],['confirmed',0]]);
+ socket.emit({type:'phase-ready',key:'match:0',epoch:4});assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);
+ assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);assert.throws(()=>room.sendInput(3,[0,0,0,0,0,0,0]),/Conflicting/);
+ assert.equal(room.snapshot().confirmedFrame,0);unbind();room.dispose();
 });
 
 test('results require consensus, two rematch votes and one coordinated fresh epoch',async t=>{
