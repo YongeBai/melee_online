@@ -1,0 +1,59 @@
+{
+  "title": "Renderer-local immediate-state typed-array views",
+  "date": "2026-09-17",
+  "baseCommit": "fb8dd4c",
+  "performanceCertified": false,
+  "decision": "Accept the renderer-local view cache as an exact direct-cost reduction. Do not infer a whole-frame gain because the host degraded monotonically during the long sequence.",
+  "productionTransport": "three-frame lockstep unchanged",
+  "sources": {
+    "immediate-geometry.mjs": "2d881b8790a6edae5e923c1a6b2abe2ccd2e81cbc01a64b5d7894c5c74900af2",
+    "material-gpu.mjs": "591c34e14b6932529ca508ea19e4d0f259302b4be84481d84140b0b95ae9cc92",
+    "presentation-cache.mjs": "1324729650ab2ac9931340c5128ec292a304f9a4501044a451c26f44fd1e9a75",
+    "certification.mjs": "67945d84f9890436d45ea6dad853ed48d4e635461035218a7430284bef781b88",
+    "dirty-host-contract.mjs": "45b136542bc93d69fce9381b40a51db452f9d977b3c514b48cf1ab0e7c19202e",
+    "probe-certification.mjs": "ddefae8239a9d6a036aa1f2ab14e3b1a14bdba34bc60b17770cc394451b11be3"
+  },
+  "isolated600": {
+    "frames": 600,
+    "matcherCallsPerRun": 60581,
+    "controlMeanMs": 0.3811666658023993,
+    "candidateMeanMs": 0.3148333328962326,
+    "deltaMs": -0.06633333290616672,
+    "deltaPercent": -17.40271494033573,
+    "runs": [
+      {"name":"A1 uncached views","rawReportSha256":"c2d035311fd461087f9bea8d7ac527082355dabcf7c0b2dd52029ff0236bd827","matcherMeanMs":0.3378333337108294,"drawMeanMs":6.934666666587193},
+      {"name":"B1 cached views","rawReportSha256":"01a2daa434e958ec2056e2b27ec7a26db47bd2a6d08f45ee03c8138e0bc02b02","matcherMeanMs":0.3068333331743876,"drawMeanMs":7.021166666547457},
+      {"name":"B2 cached views","rawReportSha256":"5ef7e7da2187055cbcc99828403555054b0c46e5b9eaa8e81e486b54cb925cf4","matcherMeanMs":0.3228333326180776,"drawMeanMs":7.469499999582768},
+      {"name":"A2 uncached views","rawReportSha256":"970e499f9e1a6f3913255144333af532905127789d20cb4aa93b13d2afdfb812","matcherMeanMs":0.4244999978939692,"drawMeanMs":9.43199999799331}
+    ]
+  },
+  "longFountain": {
+    "framesPerClient": 1800,
+    "pair": "Pp-Pe",
+    "controlMatcherMeanMs": 0.411666665499409,
+    "candidateMatcherMeanMs": 0.35702777773969707,
+    "matcherDeltaMs": -0.05463888775971193,
+    "matcherDeltaPercent": -13.272604351733786,
+    "runs": [
+      {"name":"A1 uncached views","rawReportSha256":"9518537c0cfeb9d40b8c63f00909da1ed6139e2eafafe7efef10e3158fd45263","simulationFps":[57.95850814802252,57.9706410909009],"matcherMeanMs":[0.3627222216129303,0.38111110899183487],"drawMeanMs":[9.435222222275204,9.510277778373824]},
+      {"name":"B1 cached views","rawReportSha256":"921a01ebd7d923407977d63c20fe0192e62de60f711ddaae2024854ed3a66a27","simulationFps":[58.741368282249006,58.7845318301682],"matcherMeanMs":[0.32677777939372593,0.3366111107667287],"drawMeanMs":[8.811722222301695,9.066666667130258]},
+      {"name":"B2 cached views","rawReportSha256":"c9a04bd64c138457718e92918f89386bca091608b1b55967a9244398e1e6ff2e","simulationFps":[57.65387177776715,57.7626596495732],"matcherMeanMs":[0.37683333198229474,0.3878888888160388],"drawMeanMs":[10.312222223149405,10.491888889008099]},
+      {"name":"A2 uncached views","rawReportSha256":"e0bfde89fd57e33b62a7d6f8fc9d1c4973f467d50cdfc7a0b8bdf1859a427a62","simulationFps":[55.3888760673898,55.51751577624781],"matcherMeanMs":[0.455444445543819,0.447388885849052],"drawMeanMs":[11.32577777809567,11.185277776916822]}
+    ],
+    "allStateMatches": true,
+    "allPixelDifferences": 0,
+    "allCameraMatches": true,
+    "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a",
+    "warning": "Whole-frame and simulation results are confounded by severe monotonic host degradation and are not used as acceptance evidence."
+  },
+  "correctness": {
+    "fountainPerDrawOracle": {"frames":120,"comparedRgbaBytes":331776000,"differentBytes":0,"cameraMismatches":0,"rawReportSha256":"f6558d69e640f55aeedce226350654cf9d24183fd7e6720d9727cdaf34b891fd"},
+    "tests": {"total":625,"passed":613,"skipped":12,"failed":0}
+  },
+  "remaining": [
+    "No repeatable whole-frame gain is established by the thermally drifting long run.",
+    "Performance runs disabled capture and do not establish displayed cadence.",
+    "Production rooms still use lockstep rather than the diagnostic rollback path.",
+    "No physical input-to-photon, WAN, reconnect/recovery, audible rollback-SFX, exhaustive roster-interaction, or complete native-results certification."
+  ]
+}

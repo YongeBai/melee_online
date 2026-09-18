@@ -40,6 +40,8 @@ test('immediate state matching is exact, bounded and invalidated by draw barrier
   const next=new Uint8Array(16384);next.set(module.HEAPU8);module.HEAPU8=next;
   assert.equal(match(addresses[0],true),true);new Uint32Array(next.buffer,addresses[3],244)[4]=0x80000000;
   assert.equal(match(addresses[0],true),false);
+  module._portMaterialTextureState=()=>addresses[1]+4096;new Uint32Array(next.buffer,addresses[1]+4096,724)[0]=17;
+  assert.equal(match(addresses[0],true),false);assert.equal(match(addresses[0],true),true);
   for(const pointer of [0,1,16384])assert.throws(()=>match(pointer,true),/bounds/);
 });
 test('per-vertex TEV registers keep signed values and vary only across primitives',()=>{

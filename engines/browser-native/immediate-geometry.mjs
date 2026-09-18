@@ -13,15 +13,15 @@ export function immediateTriangles(primitive,count) {
 // Compare the six captured GX blocks (including fog), including masks and diagnostic counters.
 // Only TEV register values transported per vertex may differ. Sizes
 // match the static assertions in tev/texture/pixel/model-state and render-context.
-export function createImmediateStateMatcher(module) {
+export function createImmediateStateMatcher(module,{cacheViews=true}={}) {
   const sizes=[548,724,80,244,158,5],saved=sizes.map(n=>new Uint32Array(n));
-  let initialized=false;
+  let initialized=false,buffer=null,cachedAddresses=[],views=[];
   return (tev,eligible,vertexRegisters=false)=>{
-    const addresses=[tev,module._portMaterialTextureState(),module._portMaterialPixelState(),module._portMaterialModelState(),module._portRenderContextState(),module._portFogState()];
-    const heap=module.HEAPU8,views=addresses.map((p,i)=>{
-      if(!p||p%4||p+sizes[i]*4>heap.length)throw Error('Immediate state snapshot bounds');
-      return new Uint32Array(heap.buffer,p,sizes[i]);
-    });
+    const heap=module.HEAPU8,addresses=[tev,module._portMaterialTextureState(),module._portMaterialPixelState(),module._portMaterialModelState(),module._portRenderContextState(),module._portFogState()];
+    if(!cacheViews||buffer!==heap.buffer||addresses.some((p,i)=>p!==cachedAddresses[i])){
+      views=addresses.map((p,i)=>{if(!p||p%4||p+sizes[i]*4>heap.length)throw Error('Immediate state snapshot bounds');return new Uint32Array(heap.buffer,p,sizes[i]);});
+      buffer=heap.buffer;cachedAddresses=addresses;
+    }
     let same=initialized&&eligible;
     if(same)outer:for(let block=0;block<views.length;block++)for(let i=0;i<sizes[block];i++){
       if(vertexRegisters&&block===0&&i>=4&&i<20)continue;
