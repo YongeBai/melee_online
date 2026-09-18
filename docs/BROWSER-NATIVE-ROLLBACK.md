@@ -126,6 +126,17 @@ handoff. No checkpoint store is created while menu/live render owners are
 attached, so this preparation does not claim production rollback or add a
 player-supplied file requirement.
 
+The live scheduler now also has an inactive correction-driver boundary for the
+authenticated room stream. The driver arms rollback-event buffering, consumes
+the relay-owned neutral frames 0–2, submits the local seat's frame 3+ input
+immutably, and advances only through `rollback-session.mjs`. Before accepting a
+native match ending, the scheduler reconciles pending input and requires that
+exact ending frame to be confirmed; a corrected speculative KO therefore cannot
+escape to results. Product matches do not construct this driver yet because the
+current renderer still owns the simulation heap. Enabling it requires the
+independent presentation/checkpoint owner and measured 60 FPS budget described
+below; the shipped path remains lockstep.
+
 ## Validation scope
 
 The committed measurements are in

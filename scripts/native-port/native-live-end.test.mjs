@@ -13,3 +13,15 @@ test('native exit stops before another draw; frame limits never impersonate resu
   }
  }finally{for(const [key,value] of saved)if(value===undefined)delete globalThis[key];else globalThis[key]=value;}
 });
+
+test('rollback live reconciles a speculative ending and only publishes a confirmed replacement',()=>{
+ const saved=new Map();for(const key of ['requestAnimationFrame','cancelAnimationFrame','addEventListener','removeEventListener','document'])saved.set(key,globalThis[key]);
+ let callback,confirmed=false,correct=false,ended=false,draws=0,result,advances=0,disposed=0;Object.assign(globalThis,{requestAnimationFrame:fn=>(callback=fn,1),cancelAnimationFrame:()=>{callback=null;},addEventListener(){},removeEventListener(){},document:{hidden:false,addEventListener(){},removeEventListener(){}}});
+ try{
+  const state=[14,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,1,60,4],module={_portFighterConstructRead:(_o,i)=>state[i],_portControllerSample(){},_Player_80031848(){}},rollback={seat:0,advance(){advances++;if(advances===1)ended=true;return true;},canFinish:()=>confirmed,reconcile(){if(correct){ended=false;correct=false;}},dispose(){disposed++;}};
+  startNativeLive(module,{draw(){draws++;return {};}},[1],{rollback,browserInput:{samples:()=>[[0,0,0],[0,0,0]]},shouldFinish:()=>ended,onComplete:r=>result=r,onError:e=>{throw e;}});
+  const start=performance.now()+1;callback(start);callback(start+100);assert.equal(advances,1);assert.equal(draws,1);assert.equal(result,undefined);
+  correct=true;callback(start+117);assert.equal(advances,1);callback(start+134);assert.equal(advances,2);assert.equal(draws,2);assert.equal(result,undefined);
+  ended=true;callback(start+151);assert.equal(advances,2);assert.equal(result,undefined);confirmed=true;callback(start+168);assert.equal(result.completionReason,'match-end');assert.equal(result.frames,2);assert.equal(draws,2);assert.equal(disposed,1);assert.equal(callback,null);
+ }finally{for(const [key,value] of saved)if(value===undefined)delete globalThis[key];else globalThis[key]=value;}
+});
