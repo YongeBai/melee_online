@@ -1,6 +1,6 @@
 # Validation — September 8–9, 2026
 
-September 18 direct-port update: the opt-in two-browser product room passes the
+September 18 direct-port update: the default two-browser product room passes the
 sustained browser-canvas 720p60 gate for every legal stage from both observed
 seats and for every roster tile plus held-A Sheik. The roster run used 26
 1,800-frame no-item 1v1 combat cases and produced exactly 46,800 requested and
@@ -39,6 +39,21 @@ FPS and 59.770 captured FPS, with 201 corrections, 434 replayed frames, exact
 convergence and no late-input rejects. A separate 900-frame CPU match completed
 without entering rollback. See the
 [default-room evidence](benchmarks/browser-2026-09-18-native-room-default-rollback-720p60.json).
+
+The direct room transport also has bounded live reconnect recovery. On socket
+loss the room stops accepting inputs until both authenticated seats are
+connected. A reconnecting browser supplies its exact epoch, phase and contiguous
+confirmation horizon; the relay replays missed data from a 512-frame journal,
+then resumes the unchanged match. Protocol tests use real WebSockets to verify
+the pause and exact replay, while the browser transport test verifies automatic
+in-place reconnect and the unsynchronized-reload fallback when a horizon cannot
+be recovered. A sustained browser run also forcibly cut seat 1 at frame 600,
+resumed the same epoch/phase in 268 ms, reached confirmed frame 1799 and
+converged exactly. It captured all 1,800 distinct frames; raw wall cadence was
+59.35 FPS because the honest outage gap was 283 ms, while cadence excluding
+exactly the measured paused interval was 59.88 FPS. The full suite is 645 tests:
+635 pass, 10 skip, 0 fail. This does not validate arbitrary-duration WAN outages. See the
+[reconnect and cadence evidence](benchmarks/browser-2026-09-18-native-room-reconnect-720p60.json).
 
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and

@@ -1,0 +1,84 @@
+{
+  "date": "2026-09-18",
+  "purpose": "Verify that bounded live-reconnect bookkeeping does not regress the normal-URL two-browser rollback path, and record focused reconnect protocol coverage.",
+  "sourceCommitBeforeCheckpoint": "51a4fb575c9740b8db426828255b1af59b9ad1bb",
+  "sourceSha256": {
+    "engines/browser-native/native-room.mjs": "05d735252d7084f9c79aa1221442352a743be0e2a0135050d8b33a2738347267",
+    "engines/browser-native/dirty-host-contract.mjs": "dca609985509db64c548df526cc6eda62ee826503a1deefbb10d872617eab17e",
+    "scripts/native-port/rooms.mjs": "8d462e994d3c2ee34d345f55308ba76e59003c3c4e861ce322f02c8eff5f96dd",
+    "scripts/native-port/rooms.test.mjs": "8fac2d8765998df6c8f7bdeea450a06a9eda171d6595ea6bd56883ac053493f5",
+    "scripts/native-port/probe-native-rooms.mjs": "7f64983c7bf3a43b33323be72e3bab3fde4f61337e618b39eb56d579fbbdb6bd"
+  },
+  "performanceCommand": "taskset -c 0-3,12-15 node scripts/native-port/probe-native-rooms.mjs --rollback --combat --frames=1800 --pair=9,10 --stage=8 --capture-seat=0 --disconnect-seat=1 --disconnect-frame=600 '--client-cpu-sets=0,1,12,13;2,3,14,15'",
+  "configuration": {
+    "normalUrl": true,
+    "productionDefault": true,
+    "frames": 1800,
+    "characters": [9, 10],
+    "stage": 8,
+    "resolution": [960, 720],
+    "items": false,
+    "relayDelayInjection": null,
+    "clientDelayInjection": null,
+    "transport": "authenticated-inputs-v3",
+    "confirmedHistoryFrames": 512,
+    "forcedDisconnect": {"seat": 1, "requestedFrame": 600}
+  },
+  "performance": {
+    "passed": true,
+    "rawWallSimulationFpsIncludingPause": [59.307095435001074, 59.32058160541668],
+    "activeSimulationFpsExcludingMeasuredPause": [59.8352087491122, 59.84893619794815],
+    "measuredRecoveryMs": 267.87744999999995,
+    "drawSubmissionCpuMs": [
+      {"mean": 7.892055555416478, "p95": 10.5, "max": 25},
+      {"mean": 7.602888887855742, "p95": 10.100000023841858, "max": 21.30000001192093}
+    ],
+    "capture": {
+      "seat": 0,
+      "requested": 1800,
+      "captured": 1800,
+      "distinctSampledImages": 1800,
+      "repeatedSampledImages": 0,
+      "blackFrames": 0,
+      "wrongSize": 0,
+      "rawWallFpsIncludingPause": 59.34630001055632,
+      "activeFpsExcludingMeasuredPause": 59.87541145020657,
+      "p95IntervalMs": 18.599999999998545,
+      "maxIntervalMs": 282.8000000000029,
+      "error": null
+    },
+    "rollback": [
+      {"seat": 0, "confirmed": 1799, "corrections": 71, "replayedFrames": 174, "maxReplay": 5, "rejectedLateInputs": 0},
+      {"seat": 1, "confirmed": 1799, "corrections": 73, "replayedFrames": 173, "maxReplay": 4, "rejectedLateInputs": 0}
+    ],
+    "matchingFinalState": true,
+    "finalStateSha256": "57b4b808cde1a3df2432f8603d14141a2eaefb0f9b9a80a210eb9453948cca75"
+  },
+  "reconnectValidation": {
+    "focusedCommand": "node --test scripts/native-port/rooms.test.mjs",
+    "focusedTests": 9,
+    "focusedPass": 9,
+    "realWebSocketCoverage": [
+      "input acceptance pauses while either authenticated seat is disconnected",
+      "the reconnecting seat reports epoch, phase key and last contiguous confirmed frame",
+      "the relay replays exact missed peer input, lockstep frame and confirmation data",
+      "phase-ready is restored only after the replay stream"
+    ],
+    "browserTransportCoverage": [
+      "unexpected socket close schedules bounded-backoff in-place reauthentication",
+      "the hello message carries the exact confirmation horizon",
+      "replayed rollback events remain contiguous",
+      "resync-required persists an unsynchronized reload so the relay creates one fresh epoch"
+    ],
+    "sustainedBrowserRecovery": {
+      "socketTermination": "relay WebSocket terminate on seat 1",
+      "epochBeforeAndAfter": 2,
+      "phaseBeforeAndAfter": "match:2",
+      "confirmedFrameBeforeAndAfterReconnect": 599,
+      "completedConfirmedFrame": 1799,
+      "matchingFinalState": true
+    },
+    "repositorySuite": {"tests": 645, "pass": 635, "skip": 10, "fail": 0}
+  },
+  "scope": "Post-draw 960x720 browser VideoFrame(canvas) cadence plus deterministic local WebSocket reconnect protocol tests. The sustained run forcibly terminates one authenticated room socket and reports both raw wall cadence, which honestly includes the 268 ms pause, and active cadence, which subtracts exactly that measured recovery interval. This is not compositor scanout, physical input-to-photon, or arbitrary-duration WAN outage certification."
+}
