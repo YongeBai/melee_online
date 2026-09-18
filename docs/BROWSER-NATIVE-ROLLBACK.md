@@ -126,16 +126,27 @@ handoff. No checkpoint store is created while menu/live render owners are
 attached, so this preparation does not claim production rollback or add a
 player-supplied file requirement.
 
-The live scheduler now also has an inactive correction-driver boundary for the
+The live scheduler now also has a correction-driver boundary for the
 authenticated room stream. The driver arms rollback-event buffering, consumes
-the relay-owned neutral frames 0–2, submits the local seat's frame 3+ input
-immutably, and advances only through `rollback-session.mjs`. Before accepting a
-native match ending, the scheduler reconciles pending input and requires that
-exact ending frame to be confirmed; a corrected speculative KO therefore cannot
-escape to results. Product matches do not construct this driver yet because the
-current renderer still owns the simulation heap. Enabling it requires the
-independent presentation/checkpoint owner and measured 60 FPS budget described
-below; the shipped path remains lockstep.
+the relay-owned neutral frames 0–2, freezes each submitted local packet while a
+prediction-window stall is pending, and advances only through
+`rollback-session.mjs`. Before accepting a native match ending, the scheduler
+reconciles pending input and requires that exact ending frame to be confirmed;
+a corrected speculative KO therefore cannot escape to results.
+
+`?rollback=1` exercises this boundary in an opt-in product room. It boots the
+audited dirty core, detaches the menu/match renderer before the first checkpoint,
+uses sparse complete-state checkpoints for simulation, and reconstructs visible
+frames in a second private WASM instance through the retained immutable GPU
+cache. A two-browser 60-frame product run converged at confirmed frame 59 after
+2 / 5 corrections in the retained run (7 / 31 replayed frames), with no late
+input rejection. Dirty replica copying was about 94 / 97 MB total instead of a
+full 61 MB per presentation. The run still took 1.14 / 1.24 seconds and draw
+submission averaged 17.1 / 17.9 ms, so it is not the 720p60 production path.
+The default remains three-frame lockstep while replica construction spikes and
+sustained cadence are reduced and certified. The bounded product measurements
+are retained in
+[the native product rollback evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
 
 ## Validation scope
 

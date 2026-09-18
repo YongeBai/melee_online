@@ -12,7 +12,7 @@ import {convertSisAsset} from './sis-assets.mjs';
 import {convertCardIconAsset} from './card-assets.mjs';
 import {completeNativeSample} from './native-input.mjs';
 import {installResidentFile} from './resident-files.mjs';
-const interactive=new URLSearchParams(location.search).has('interactive');
+const pageParams=new URLSearchParams(location.search),interactive=pageParams.has('interactive');
 const report={passed:false,playableMatch:false,audioPlayed:false,audioMode:null},diagnostics=[],music=[];
 try{
  let network=null,productUI=null;
@@ -22,7 +22,7 @@ try{
  const rollbackAudio=interactive&&nativeMusic?(await import('./rollback-audio.mjs')).createRollbackAudio({present:r=>nativeMusic.request(r),presentUnframed:true}):null;globalThis.nativeRollbackAudio=rollbackAudio;
  Object.defineProperty(report,'audioPlayed',{enumerable:true,get:()=>nativeMusic?.snapshot().events.some(e=>e.event==='playing')??false});
  const moduleOptions={printErr:s=>diagnostics.push(s),onNativeAudioMode:mode=>{report.audioMode=nativeMusic?'browser-music/sfx-muted':mode;return true;},onNativeMusic:r=>{if(r.action!==4){if(music.length===128)music.shift();music.push(r);}try{return rollbackAudio?.request(r)??false;}catch(e){report.audioError=String(e);return false;}}};
- const snapshotRuntime=interactive?await (async()=>{const {createSnapshotRuntime}=await import('./wasm-snapshot.mjs'),response=await fetch('./melee-fighter-init.wasm');if(!response.ok)throw Error('Hosted native runtime unavailable');return createSnapshotRuntime(create,new Uint8Array(await response.arrayBuffer()),moduleOptions);})():null;
+ let snapshotBytes=null,dirtyManifest=null;const snapshotRuntime=interactive?await (async()=>{const {createSnapshotRuntime}=await import('./wasm-snapshot.mjs');if(pageParams.has('rollback')){const dirty=await (await import('./dirty-runtime.mjs')).loadDirtyCore();snapshotBytes=dirty.bytes;dirtyManifest=dirty.manifest;}else{const response=await fetch('./melee-fighter-init.wasm');if(!response.ok)throw Error('Hosted native runtime unavailable');snapshotBytes=new Uint8Array(await response.arrayBuffer());}return createSnapshotRuntime(create,snapshotBytes,{...moduleOptions,dirtyManifest});})():null;
  const module=snapshotRuntime?.module??await create(moduleOptions);globalThis.nativeSnapshotRuntime=snapshotRuntime;
  let cssBytes,cssAsset;
  for(const [name,convert] of [['MnSlChr.usd',b=>convertMenuAsset(b,{menu:'character'})],['MnExtAll.usd',convertExtraMenuAsset],['SdSlChr.usd',convertSisAsset],['LbMcGame.usd',convertCardIconAsset],['NtMemAc.usd',convertCardNoticeAsset]]){
@@ -46,7 +46,7 @@ try{
  globalThis.nativeCharacterMenu.startMatch=async(params={},options={})=>{
   const {runNativeConstructor}=await import('./constructor-runner.mjs');
   const selection=nativeCharacterMenu.matchSelection();
-  const result=await runNativeConstructor({module,runtime:snapshotRuntime,rollbackAudio,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive,network:options.network});
+  const result=await runNativeConstructor({module,runtime:snapshotRuntime,wasmBytes:snapshotBytes,dirtyManifest,rollbackAudio,canvas:document.querySelector('#picture'),menuHandoff:true,params,browserInput:options.browserInput,onLive:options.onLive,network:options.network});
   result.selection=selection;globalThis.nativeMenuMatchReport=result;return result;
  };
  report.initial=preview.draw();if(!interactive)for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;
@@ -57,7 +57,7 @@ try{
   for(let port=0;port<2;port++){const button=document.createElement('button');button.textContent='Keyboard: P'+(port+1);button.id='keyboard-p'+(port+1);button.addEventListener('click',()=>{input.setKeyboardPort(port);for(const b of controls.querySelectorAll('button[data-seat]'))b.setAttribute('aria-pressed',String(b===button));});button.dataset.seat=port;button.setAttribute('aria-pressed',String(port===0));controls.append(button);}
   const restart=document.createElement('button');restart.textContent='Return to character select';restart.hidden=true;controls.append(restart);document.querySelector('#picture').after(controls);
   globalThis.nativeMenuInput=input;
-  globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{network,module,matchParams:{gpuerrors:'deferred',...(new URLSearchParams(location.search).has('liveframes')?{liveframes:new URLSearchParams(location.search).get('liveframes')}:{})},onResults:report=>{globalThis.nativeResultsUI=showNativeResults({results:report.results,selection:report.selection,network,terminalFrame:report.live.frames-1});},onState:s=>{if(returning?.action==='rematch'&&s.scene==='characters'&&s.state.frames>=60&&s.state.gate===0){if(network.active)network.ready();else input.pulse(0x1000);}productUI.update(s);globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;document.body.dataset.error='true';}});
+  globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{network,module,matchParams:{gpuerrors:'deferred',...(pageParams.has('liveframes')?{liveframes:pageParams.get('liveframes')}:{}) ,...(pageParams.has('rollback')?{rollback:1}:{})},onResults:report=>{globalThis.nativeResultsUI=showNativeResults({results:report.results,selection:report.selection,network,terminalFrame:report.live.frames-1});},onState:s=>{if(returning?.action==='rematch'&&s.scene==='characters'&&s.state.frames>=60&&s.state.gate===0){if(network.active)network.ready();else input.pulse(0x1000);}productUI.update(s);globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;document.body.dataset.error='true';}});
   restart.addEventListener('click',()=>nativeMenuLive.restart());
  }
 }catch(e){report.error=String(e.stack??e);document.body.dataset.error='true';}

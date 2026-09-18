@@ -2,7 +2,9 @@ import fs from 'node:fs';import os from 'node:os';import path from 'node:path';i
 import {createNativePortServer} from './serve.mjs';
 const root=path.resolve(import.meta.dirname,'../..'),server=createNativePortServer(),clients=[];
 const resultsMode=process.argv.includes('--results');
-const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':''));fs.mkdirSync(output,{recursive:true});
+const rollbackMode=process.argv.includes('--rollback'),matchFrames=rollbackMode?60:600;
+if(resultsMode&&rollbackMode)throw Error('Rollback room probe uses a bounded match');
+const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':rollbackMode?'-rollback':''));fs.mkdirSync(output,{recursive:true});
 async function client(){
  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'native-room-')),browser=spawn('google-chrome',['--headless=new','--no-sandbox','--enable-gpu','--disable-dev-shm-usage','--window-size=1280,1100','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});let stderr='';browser.stderr.on('data',b=>stderr=(stderr+b).slice(-12000));
  const c={profile,browser};clients.push(c);
@@ -15,7 +17,7 @@ async function client(){
  c.click=async selector=>{const pos=await c.eval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e||e.hidden||e.disabled)throw Error('Button unavailable');const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);for(const type of ['mousePressed','mouseReleased'])await c.cmd('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...pos});};
  const held=new Set();c.keys=async next=>{for(const code of held)if(!next.includes(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyUp',code,key:code});held.delete(code);}for(const code of next)if(!held.has(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyDown',code,key:code});held.add(code);}};
  c.press=async code=>{await c.keys([code]);await delay(100);await c.keys([]);await delay(100);};
- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(resultsMode?'':'&liveframes=600')});await c.wait('globalThis.characterMenuReport?.passed');return c;
+ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(resultsMode?'':'&liveframes='+matchFrames+(rollbackMode?'&rollback=1':''))});await c.wait('globalThis.characterMenuReport?.passed');return c;
 }
 try{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const a=await client(),b=await client();
@@ -40,7 +42,7 @@ try{
  const target=await a.eval('nativeStageMenu.icons().find(i=>i.stage===31&&i.unlocked===2)');
  for(let i=0;i<100;i++){const cursor=await a.eval('nativeStageMenu.read()');if(cursor.hover===target.i){await a.keys([]);break;}const [x,y]=cursor.cursor,dx=target.x-x,dy=target.y-y;const keys=[Math.abs(dx)>.7?(dx>0?'KeyD':'KeyA'):(dy>0?'KeyW':'KeyS')];if(Math.max(Math.abs(dx),Math.abs(dy))<6)keys.push('ShiftLeft');await a.keys(keys);await delay(25);await a.keys([]);await delay(100);if(i===99)throw Error('Could not steer stage cursor to '+JSON.stringify(target));}
  await delay(100);await a.press('KeyP');
- await a.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1');await b.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1');
+ const matchReady=rollbackMode?'globalThis.nativeLive?.snapshot().frames>=1||globalThis.nativeMenuMatchReport':'globalThis.nativeLive?.snapshot().match?.intro?.gate===1';await a.wait(matchReady,120000);await b.wait(matchReady,120000);
  if(resultsMode){
   const lifecycle=[];
   async function ended(outcome){
@@ -76,9 +78,10 @@ try{
  for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/player-'+i+'.png',Buffer.from(shot.data,'base64'));}
  await a.wait('globalThis.nativeMenuMatchReport');await b.wait('globalThis.nativeMenuMatchReport');
  const final=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),report:nativeMenuMatchReport})')));
- if(final.some(v=>v.report.live.frames!==600))throw Error('Incomplete match');
+ if(final.some(v=>v.report.live.frames!==matchFrames))throw Error('Incomplete match');
+ if(rollbackMode&&final.some(v=>!v.report.rollback?.enabled||v.report.rollback.metrics?.session?.forwardFrames!==matchFrames||v.report.rollback.metrics?.session?.confirmed!==matchFrames-1))throw Error('Rollback product path was not confirmed '+JSON.stringify(final.map(v=>v.report.rollback)));
  if(JSON.stringify(final[0].report.live.final)!==JSON.stringify(final[1].report.live.final))throw Error('Native fighter state diverged: '+JSON.stringify(final.map(v=>v.report.live.final)));
- fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,final,scope:'Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.'},null,2));console.log(JSON.stringify({passed:true,code,frames:600,matchingFighterState:true}));
+ const scope=rollbackMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; bounded correctness probe, not 720p60 or WAN certification.':'Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.';fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,final,scope},null,2));console.log(JSON.stringify({passed:true,code,frames:matchFrames,rollback:rollbackMode,matchingFighterState:true}));
 }
 }catch(e){fs.writeFileSync(output+'/failure.json',JSON.stringify({error:e.stack,states:await Promise.all(clients.map(c=>c.eval?.('({room:globalThis.nativeRoom?.snapshot(),menu:globalThis.nativeMenuLive?.snapshot(),error:globalThis.nativeRoomError})').catch(e=>String(e))))},null,2));throw e;
 }finally{for(const c of clients){c.ws?.close();c.browser.kill();await new Promise(r=>c.browser.once('exit',r));fs.rmSync(c.profile,{recursive:true,force:true});}await new Promise(r=>server.close(r));}

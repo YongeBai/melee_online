@@ -14,6 +14,8 @@ import {convertPauseModels} from './pause-assets.mjs';
 import {verifyNativePause} from './verify-pause.mjs';
 import {verifyControllerInput} from './verify-controller.mjs';
 import {startNativeLive} from './native-live.mjs';
+import {createNativeProductRollback} from './native-product-rollback.mjs';
+import {createPresentationCache} from './presentation-cache.mjs';
 import {createNativeMatchPreview} from './native-match-preview.mjs';
 import {verifyMatch,verifyTimeout} from './verify-match.mjs';
 import {verifyIntro} from './verify-intro.mjs';
@@ -55,7 +57,7 @@ import {sharedSpec} from './shared-spec.mjs';
 
 // Shared construction path for diagnostics and same-runtime native menu startup.
 export async function runNativeConstructor(options={}) {
-const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};
+const diagnostics=[],report={constructorAttempted:false,constructorCompleted:false,playable:false,performanceMeasured:false};let rollbackPresentationCache=null;
 const params=new URLSearchParams(options.params??location.search),menuHandoff=options.menuHandoff===true;
 if(menuHandoff){
   if(!options.module||!options.canvas)throw Error('Native menu handoff requires the existing runtime and canvas');
@@ -356,7 +358,7 @@ try {
           else itemModels.set(base+row.joint,{name:character+' '+row.label,bytes});
         }
       }
-      previewFactory=(presentationCache=options.presentationCache??null,renderModule=gameModule)=>{
+      rollbackPresentationCache=params.has('rollback')?createPresentationCache():null;previewFactory=(presentationCache=rollbackPresentationCache??options.presentationCache??null,renderModule=gameModule)=>{
         // Dynamic stage/accessory/Link callbacks above resolve this lexical
         // module. Keep all their calls and direct HEAP writes in the same
         // instance as the renderer. Never retain this scope across an await.
@@ -488,10 +490,11 @@ try {
     if(live){
       if(!options.browserInput){const controls=document.createElement('p');controls.textContent='Native port development fixture — arrows: move; X: jump; Z: attack; S: special; C: grab; Shift: shield. Enter/Escape: Start.';canvas.before(controls);}
       const limit=Number(params.get('liveframes')??0);if(!Number.isInteger(limit)||limit<0||limit>36000)throw Error('Invalid live frame limit');
+      let productRollback=null;if(params.has('rollback')){if(!menuHandoff||!options.network?.active)throw Error('Product rollback requires a two-player native room');preview.dispose();preview=null;productRollback=await createNativeProductRollback({source:options.runtime,wasmBytes:options.wasmBytes,dirtyManifest:options.dirtyManifest,audio:options.rollbackAudio,network:options.network,step,createPreview:previewFactory,presentationCache:rollbackPresentationCache});preview=productRollback.preview;report.rollback={enabled:true,presentation:'independent-wasm-replica',productionDefault:false};globalThis.nativeProductRollback=productRollback;}
       await new Promise((resolve,reject)=>{
-        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,network:options.network,browserInput:options.browserInput,unlockInput:!menuHandoff,shouldFinish:()=>tournament&&module._portTournamentRead(25,0)!==0,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0)),...(menuHandoff?{intro:{mask:module._portTournamentRead(23,0),gate:module._portTournamentRead(17,0),blocked:[0,1].map(p=>module._portTournamentRead(24,p))}}:{})}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
-          onProgress:s=>{report.live=s;document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
-          onComplete:s=>{report.live=s;resolve();},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();reject(error);}});
+        globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,network:options.network,rollback:productRollback?.driver,browserInput:options.browserInput,unlockInput:!menuHandoff,shouldFinish:()=>tournament&&module._portTournamentRead(25,0)!==0,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0)),...(menuHandoff?{intro:{mask:module._portTournamentRead(23,0),gate:module._portTournamentRead(17,0),blocked:[0,1].map(p=>module._portTournamentRead(24,p))}}:{})}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
+          onProgress:s=>{report.live=s;if(productRollback)report.rollback.metrics=productRollback.snapshot();document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
+          onComplete:s=>{report.live=s;if(productRollback)report.rollback.metrics=productRollback.snapshot();resolve();},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();reject(error);}});
         document.documentElement.dataset.live='ready';options.onLive?.(globalThis.nativeLive);
       });
       if(tournament)report.matchFinal=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
@@ -753,7 +756,7 @@ try {
     if(damageHud)report.hud.finalPlayers=[0,1].map(slot=>Array.from({length:4},(_,field)=>module._portHudPlayerRead(slot,field)));
     if(preview&&!live){report.finalGpuErrorCheck=preview.validateGpu();saveShaders();preview.dispose();}
   }
-} catch(error){report.error=String(error.stack||error);report.diagnostics=diagnostics;}
+} catch(error){rollbackPresentationCache?.dispose();report.error=String(error.stack||error);report.diagnostics=diagnostics;}
 document.querySelector('#result').textContent=JSON.stringify(report,null,2);
 document.documentElement.dataset.result=report.constructorCompleted?'constructed':'blocked';
 console.log('NATIVE_CONSTRUCTOR_RESULT '+JSON.stringify(report));
