@@ -8,18 +8,21 @@ const token=()=>randomBytes(24).toString('base64url');
 function sameOrigin(req){if(!req.headers.origin)return true;try{const origin=new URL(req.headers.origin);return ['http:','https:'].includes(origin.protocol)&&origin.host===req.headers.host;}catch{return false;}}
 const neutral=()=>({pad:[0,0,0,0,0,0,0],tap:1});
 function validateInput(input){const p=input?.pad;if(!Array.isArray(p)||p.length!==7||!Number.isInteger(p[0])||p[0]<0||(p[0]&~0x1f7f)||p.slice(1).some((v,i)=>!Number.isFinite(v)||Math.abs(v)>1||(i>=4&&v<0))||![0,1].includes(input.tap))throw Error('Invalid controller input');return {pad:[...p],tap:input.tap};}
-export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliveryDelayMs=null}={}){
+export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliveryDelayMs=null,receiveDelayMs=null}={}){
  if(deliveryDelayMs!==null&&typeof deliveryDelayMs!=='function')throw Error('Room delivery delay must be a function');
- const rooms=new Map(),sessions=new Map(),wss=new WebSocketServer({noServer:true,maxPayload:8192}),deliveryAt=new WeakMap(),deliveryPending=new WeakMap(),deliveryTimers=new Set(),deliveryStats={configured:0,scheduled:0,delivered:0,configuredDelayTotalMs:0,configuredDelayMinMs:null,configuredDelayMaxMs:0,headOfLineDelayMaxMs:0,byType:{}};
- function send(ws,m){
-  if(ws?.readyState!==1)return;if(!deliveryDelayMs){ws.send(JSON.stringify(m));return;}
-  const configuredDelay=deliveryDelayMs(m),configured=configuredDelay!==null&&configuredDelay!==undefined;
+ if(receiveDelayMs!==null&&typeof receiveDelayMs!=='function')throw Error('Room receive delay must be a function');
+ const rooms=new Map(),sessions=new Map(),wss=new WebSocketServer({noServer:true,maxPayload:8192}),delayTimers=new Set();
+ const delayState=()=>({at:new WeakMap(),pending:new WeakMap(),stats:{configured:0,scheduled:0,delivered:0,configuredDelayTotalMs:0,configuredDelayMinMs:null,configuredDelayMaxMs:0,headOfLineDelayMaxMs:0,byType:{}}}),delivery=delayState(),receive=delayState();
+ function schedule(ws,m,delayMs,state,run,fail){
+  if(!delayMs){run();return;}const configuredDelay=delayMs(m),configured=configuredDelay!==null&&configuredDelay!==undefined,{stats}=state;
   if(configured&&(!Number.isFinite(configuredDelay)||configuredDelay<0||configuredDelay>10000))throw Error('Invalid room delivery delay');
-  const ms=configured?Math.ceil(configuredDelay):0,now=Date.now(),prior=deliveryAt.get(ws)??now,pending=deliveryPending.get(ws)??0,due=pending?Math.max(now+ms,prior+1,now+1):now+ms,wait=due-now;
-  if(configured){deliveryStats.configured++;deliveryStats.configuredDelayTotalMs+=ms;deliveryStats.configuredDelayMinMs=Math.min(deliveryStats.configuredDelayMinMs??ms,ms);deliveryStats.configuredDelayMaxMs=Math.max(deliveryStats.configuredDelayMaxMs,ms);deliveryStats.byType[m.type]=(deliveryStats.byType[m.type]??0)+1;}
-  if(!wait){ws.send(JSON.stringify(m));return;}
-  deliveryAt.set(ws,due);deliveryPending.set(ws,pending+1);deliveryStats.scheduled++;deliveryStats.headOfLineDelayMaxMs=Math.max(deliveryStats.headOfLineDelayMaxMs,wait);
-  const timer=setTimeout(()=>{deliveryTimers.delete(timer);const remaining=(deliveryPending.get(ws)??1)-1;if(remaining)deliveryPending.set(ws,remaining);else deliveryPending.delete(ws);if(ws.readyState===1){ws.send(JSON.stringify(m));deliveryStats.delivered++;}},wait);deliveryTimers.add(timer);
+  const ms=configured?Math.ceil(configuredDelay):0,now=Date.now(),prior=state.at.get(ws)??now,pending=state.pending.get(ws)??0,due=pending?Math.max(now+ms,prior+1,now+1):now+ms,wait=due-now;
+  if(configured){stats.configured++;stats.configuredDelayTotalMs+=ms;stats.configuredDelayMinMs=Math.min(stats.configuredDelayMinMs??ms,ms);stats.configuredDelayMaxMs=Math.max(stats.configuredDelayMaxMs,ms);stats.byType[m.type]=(stats.byType[m.type]??0)+1;}
+  if(!wait){run();return;}state.at.set(ws,due);state.pending.set(ws,pending+1);stats.scheduled++;stats.headOfLineDelayMaxMs=Math.max(stats.headOfLineDelayMaxMs,wait);
+  const timer=setTimeout(()=>{delayTimers.delete(timer);const remaining=(state.pending.get(ws)??1)-1;if(remaining)state.pending.set(ws,remaining);else state.pending.delete(ws);try{run();stats.delivered++;}catch(e){fail?.(e);}},wait);delayTimers.add(timer);
+ }
+ function send(ws,m){
+  if(ws?.readyState!==1)return;if(!deliveryDelayMs){ws.send(JSON.stringify(m));return;}schedule(ws,m,deliveryDelayMs,delivery,()=>{if(ws.readyState===1)ws.send(JSON.stringify(m));});
  }
  function view(r,seat){return {type:'state',code:r.code,seat,cpu:r.cpu,epoch:r.epoch,connected:r.players.map(p=>p?.ws?.readyState===1),hasGuest:!!r.players[1],ready:[...r.ready],phase:r.phase,selected:r.selected,returnTo:r.returnTo??null,rematchVotes:r.rematchVotes??[false,false]};}
  function state(r){r.players.forEach((p,i)=>send(p?.ws,view(r,i)));}
@@ -71,17 +74,18 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliver
    }
   }else throw Error('Unsupported room action');
  }
- function websocket(ws){let session=null,count=0,windowAt=Date.now();const timeout=setTimeout(()=>ws.close(1008,'Authentication required'),5000);
+ function websocket(ws){let session=null,count=0,windowAt=Date.now();const timeout=setTimeout(()=>ws.close(1008,'Authentication required'),5000),fail=e=>send(ws,{type:'error',message:e.message});
+  function dispatch(m){if(session.r.players[session.seat]?.ws!==ws||!sessions.has(session.r.players[session.seat]?.token))throw Error('Room session revoked');action(session,m);}
   ws.on('message',raw=>{try{if(Date.now()-windowAt>1000){windowAt=Date.now();count=0;}if(++count>240)throw Error('Room message rate exceeded');const m=JSON.parse(raw.toString());
    if(!session){session=sessions.get(m.token);if(m.type!=='hello'||!session)throw Error('Invalid room session');const p=session.r.players[session.seat];if(p.ws&&p.ws!==ws)p.ws.close(1000,'Reconnected');p.ws=ws;clearTimeout(timeout);session.r.touched=Date.now();state(session.r);return;}
-   if(session.r.players[session.seat]?.ws!==ws||!sessions.has(session.r.players[session.seat]?.token))throw Error('Room session revoked');action(session,m);
-  }catch(e){send(ws,{type:'error',message:e.message});}});
+   if(receiveDelayMs)schedule(ws,m,receiveDelayMs,receive,()=>dispatch(m),fail);else dispatch(m);
+  }catch(e){fail(e);}});
   ws.on('close',()=>{clearTimeout(timeout);if(session){const {r,seat}=session;if(r.players[seat]?.ws===ws){r.players[seat].ws=null;r.touched=Date.now();state(r);}}});
  }
  server.on('upgrade',(req,socket,head)=>{if(new URL(req.url,'http://localhost').pathname!=='/native-room'){socket.destroy();return;}if(!sameOrigin(req)){socket.destroy();return;}wss.handleUpgrade(req,socket,head,websocket);});
- let stopped=false;function stop(){if(stopped)return;stopped=true;clearInterval(sweep);for(const timer of deliveryTimers)clearTimeout(timer);deliveryTimers.clear();for(const client of wss.clients)client.terminate();wss.close();}
+ let stopped=false;function stop(){if(stopped)return;stopped=true;clearInterval(sweep);for(const timer of delayTimers)clearTimeout(timer);delayTimers.clear();for(const client of wss.clients)client.terminate();wss.close();}
  const sweep=setInterval(()=>{for(const r of rooms.values())if(!r.players.some(p=>p?.ws?.readyState===1)&&Date.now()-r.touched>expiryMs){for(const p of r.players)if(p)sessions.delete(p.token);rooms.delete(r.code);}},5000);sweep.unref();server.on('close',stop);
- return {close:stop,deliverySnapshot(){return {...deliveryStats,byType:{...deliveryStats.byType}};},async handle(req,res){
+ const snapshot=state=>({...state.stats,byType:{...state.stats.byType}});return {close:stop,deliverySnapshot(){return snapshot(delivery);},receiveSnapshot(){return snapshot(receive);},async handle(req,res){
   if(!['/native-rooms','/native-rooms/join','/native-rooms/resume'].includes(new URL(req.url,'http://localhost').pathname))return false;
   const reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   if(req.method!=='POST'||req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host){reply(403,{error:'Same-origin POST required'});return true;}

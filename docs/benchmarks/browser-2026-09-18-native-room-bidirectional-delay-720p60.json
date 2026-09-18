@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-18",
+  "passed": true,
+  "configurationSha256": "ca3634734acd3e6f4790b0d56680708fa0097f5b2451f658efcf35d44c7c30cd",
+  "scope": "Two localhost product-room browsers with independent order-preserving 2/4/6/8/10 ms client-to-relay input and relay-to-client peer-input/confirmation delays, fixed no-item 1v1 rules, sustained normalized-controller combat, opt-in rollback correction and exact seat-0 post-draw VideoFrame(canvas) observation. This tests controlled bidirectional relay adversity, not real WAN transport, packet loss, compositor scanout or physical input-to-photon latency.",
+  "configuration": {
+    "resolution": [960, 720],
+    "frames": 1800,
+    "pair": [9, 10],
+    "stage": 8,
+    "clientToRelayDelayPatternMs": [2, 4, 6, 8, 10],
+    "relayToClientDelayPatternMs": [2, 4, 6, 8, 10],
+    "observedSeat": 0,
+    "cpuAffinity": "0-3,12-15",
+    "clientCpuSets": ["0,1,12,13", "2,3,14,15"],
+    "simulationFpsFloor": 59.5,
+    "captureFpsFloor": 59.5,
+    "drawP95MsCeiling": 20,
+    "drawMaxMsCeiling": 50
+  },
+  "sources": {
+    "scripts/native-port/rooms.mjs": "9e5a801c055bcc025dff01b96ae8835e1bcc6666886282a9169b6551509d52aa",
+    "scripts/native-port/serve.mjs": "cdab5d58cf748a403502c34315dbc9c5e08defe323aad6d8d51ed86f339f9b81",
+    "scripts/native-port/probe-native-rooms.mjs": "070e23762edbcfb355921b5b739c6a3074f75e6450d3651c80449cbddfc9394d",
+    "dist/native-port/native-product-rollback.mjs": "3ebf84933f960ac89d4c8c33c9a6920afe6306ff39f96e0798ee504527ca63e5",
+    "dist/native-port/rollback-session.mjs": "1f5e202e07286be75ef84ec8fe5bc17fc934b5156082374fc4acb4478b2d8dcf",
+    "dist/native-port/native-live.mjs": "60e3c4672ec257f3f73e9af6c880d5e30934c9cc1bb2337ac4024032698b9be3",
+    "dist/native-port/frame-evidence.mjs": "cf32885cbbd01a85a7142d3025725be38b36955a982683e13456113c2053f72d",
+    "dist/native-port/combat-workload.mjs": "af9901e70e70f216b7031d74708116d275c316dc33fdb56280b469912c4650c2"
+  },
+  "transport": {
+    "clientToRelay": {
+      "configured": 3594,
+      "scheduled": 3594,
+      "delivered": 3594,
+      "configuredDelayTotalMs": 21560,
+      "configuredDelayRangeMs": [2, 10],
+      "headOfLineDelayMaxMs": 10,
+      "byType": {"input": 3594}
+    },
+    "relayToClient": {
+      "configured": 7188,
+      "scheduledIncludingHeadOfLine": 10616,
+      "delivered": 10616,
+      "configuredDelayTotalMs": 43122,
+      "configuredDelayRangeMs": [2, 10],
+      "headOfLineDelayMaxMs": 12,
+      "byType": {"peer-input": 3594, "confirmed-frame": 3594}
+    }
+  },
+  "clients": [
+    {
+      "seat": 0,
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.915917995032686,
+      "drawSubmissionCpu": {"meanMs": 7.619000001384152, "p95Ms": 10, "maxMs": 15.400000035762787},
+      "rollback": {"confirmed": 1799, "predictedFrames": 1768, "corrections": 116, "replayedFrames": 218, "maxReplay": 4, "rejectedLateInputs": 0},
+      "observation": {"mode": "direct-canvas-video-frame", "sampleRegion": "full-frame-downsample", "requested": 1800, "captured": 1800, "distinctSampledImages": 1800, "repeatedSampledImages": 0, "estimatedUnobservedRequests": 0, "blackFrames": 0, "wrongSizeFrames": 0, "fps": 59.97786253433975, "error": null}
+    },
+    {
+      "seat": 1,
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.87506070673,
+      "drawSubmissionCpu": {"meanMs": 7.807444444662995, "p95Ms": 10.300000011920929, "maxMs": 17},
+      "rollback": {"confirmed": 1799, "predictedFrames": 1797, "corrections": 116, "replayedFrames": 234, "maxReplay": 4, "rejectedLateInputs": 0}
+    }
+  ],
+  "combat": {
+    "seat0": {"framesWithAttack": 1052, "framesWithHitlag": 216, "framesWithDamage": 1619},
+    "seat1": {"framesWithAttack": 1035, "framesWithHitlag": 210, "framesWithDamage": 1618}
+  },
+  "matchingFinalFighterState": true
+}

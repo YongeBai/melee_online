@@ -48,6 +48,14 @@ test('test-only delayed delivery preserves per-socket order and reports injectio
  assert.equal((await b.take(m=>m.type==='peer-input'&&m.frame>=3)).frame,3);assert.equal((await b.take(m=>m.type==='peer-input'&&m.frame>=3)).frame,4);
  const stats=relay.deliverySnapshot();assert.equal(stats.configured,2);assert.equal(stats.scheduled,2);assert.equal(stats.delivered,2);assert.deepEqual(stats.byType,{'peer-input':2});assert.equal(stats.configuredDelayMinMs,0);assert.equal(stats.configuredDelayMaxMs,30);assert.ok(stats.headOfLineDelayMaxMs>=30);
 });
+test('test-only delayed receipt preserves order after an overdue timer',async t=>{
+ let calls=0;const {post,socket,relay}=await fixture(t,{receiveDelayMs:m=>m.type==='input'&&m.frame>=3?[30,0][calls++%2]:null}),owner=await post('/native-rooms'),a=await socket(owner.token);
+ a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);const guest=await post('/native-rooms/join',{code:owner.code}),b=await socket(guest.token),epoch=guest.epoch;
+ for(const peer of [a,b])peer.send({type:'phase',epoch,key:'match:0'});await a.take(m=>m.type==='phase-ready');await b.take(m=>m.type==='phase-ready');
+ const value={pad:[16,0,0,0,0,0,0],tap:1};a.send({type:'input',epoch,key:'match:0',frame:3,value});const blockedUntil=Date.now()+40;while(Date.now()<blockedUntil){}a.send({type:'input',epoch,key:'match:0',frame:4,value});
+ assert.equal((await b.take(m=>m.type==='peer-input'&&m.frame>=3)).frame,3);assert.equal((await b.take(m=>m.type==='peer-input'&&m.frame>=3)).frame,4);
+ const stats=relay.receiveSnapshot();assert.equal(stats.configured,2);assert.equal(stats.scheduled,2);assert.equal(stats.delivered,2);assert.deepEqual(stats.byType,{input:2});assert.equal(stats.configuredDelayMinMs,0);assert.equal(stats.configuredDelayMaxMs,30);assert.ok(stats.headOfLineDelayMaxMs>=30);
+});
 test('refresh starts one new epoch; coordinated reload does not recurse',async t=>{
  const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token);a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);
  const guest=await post('/native-rooms/join',{code:owner.code});await socket(guest.token);

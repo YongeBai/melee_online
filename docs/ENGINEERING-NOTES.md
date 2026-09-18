@@ -38,6 +38,16 @@ sustained 59.609–59.622 simulation FPS and 59.670 captured FPS while exercisin
 186 corrections/444 replayed frames with exact final convergence. This does not
 model upstream delay, loss, reordering or a real WAN; see the
 [relay-delay evidence](benchmarks/browser-2026-09-18-native-room-relay-delay-720p60.json).
+The same scheduler now has an independent receive side, also disabled by
+default. Authenticate, parse and rate-limit before scheduling; revalidate the
+session when the delayed action executes. Pending-count ordering is required:
+a later zero-delay message must not overtake an earlier timer whose due time has
+passed while the event loop was blocked. With independent 2–10 ms patterns in
+both directions, the product path sustained 59.875–59.916 simulation FPS and
+59.978 captured FPS while exercising 232 corrections/452 replayed frames with
+exact convergence. This still does not model loss, reordering or real WAN
+behavior; see the
+[bidirectional-delay evidence](benchmarks/browser-2026-09-18-native-room-bidirectional-delay-720p60.json).
 
 [Cold shader preparation](BROWSER-NATIVE-SHADER-PREWARM.md) eliminates observed
 compile spikes with the existing exact-source cache, but the repeated Fountain
