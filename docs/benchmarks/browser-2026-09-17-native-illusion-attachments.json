@@ -1,0 +1,5940 @@
+{
+  "date": "2026-09-17",
+  "title": "Exact native Fox Illusion / Falco Phantasm attachment lifetime",
+  "baseCommit": "ebc0b65",
+  "performanceCertified": false,
+  "productionTransport": "three-frame lockstep, unchanged",
+  "scope": "Correctness regression. Native callbacks, effects, camera and 4:3 framing retained. Full-audit timings are not acceptance performance or physical input latency.",
+  "baseline": {
+    "originalCore": "a5b0eb0bbc9851bce8bc022a1cdab173bae8f6d405b8b2b039dc1f164df3a234",
+    "idleFailureFrame": 313,
+    "focusedOldCoreFails": true,
+    "logSha256": "6f986c298c489a28e2c5fe874b61d9543e6910d220abca2b04eacdfe4e54bdd8",
+    "failure": "Original it_8029CD18 draws a separate xDDC JObj omitted from attachment enumeration; strict renderer rejects unknown geometry."
+  },
+  "nativeAudit": {
+    "originalSha256": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+    "audit": {
+      "globals": [
+        {
+          "index": 0,
+          "name": "__checkpoint_global_0"
+        },
+        {
+          "index": 1,
+          "name": "__checkpoint_global_1"
+        },
+        {
+          "index": 2,
+          "name": "__checkpoint_global_2"
+        },
+        {
+          "index": 3,
+          "name": "__checkpoint_global_3"
+        }
+      ],
+      "imports": [
+        {
+          "module": "env",
+          "name": "emit_immediate"
+        },
+        {
+          "module": "env",
+          "name": "portEmitDraw"
+        },
+        {
+          "module": "env",
+          "name": "music_request"
+        },
+        {
+          "module": "env",
+          "name": "accept_diagnostic_mute"
+        },
+        {
+          "module": "env",
+          "name": "portDispatchObject"
+        },
+        {
+          "module": "env",
+          "name": "invoke_viiiiii"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vii"
+        },
+        {
+          "module": "env",
+          "name": "invoke_vi"
+        },
+        {
+          "module": "env",
+          "name": "invoke_v"
+        },
+        {
+          "module": "env",
+          "name": "_abort_js"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_close"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_write"
+        },
+        {
+          "module": "wasi_snapshot_preview1",
+          "name": "fd_seek"
+        },
+        {
+          "module": "env",
+          "name": "emscripten_resize_heap"
+        },
+        {
+          "module": "env",
+          "name": "_emscripten_throw_longjmp"
+        }
+      ],
+      "table": 10486,
+      "memory": {
+        "initial": 274,
+        "maximum": 32768
+      },
+      "instantiationMemoryInitialPages": 274,
+      "scope": "same instance, detached renderer, synchronous exported-call boundary"
+    },
+    "review": "item-runtime.c adds read-only enumeration of the native Illusion/Phantasm secondary ghost, writing the existing three-word output records within caller capacity; no new import or persistent native state."
+  },
+  "dirtyManifest": {
+    "originalSha256": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+    "instrumentedSha256": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
+    "counts": {
+      "stores": 110316,
+      "copy": 169,
+      "fill": 61
+    },
+    "pageBytes": 4096
+  },
+  "sources": {
+    "item-runtime.c": "30699dc161e959845e9a4d2c28c8eb01f55083db2576715b52ba5055e174d6d4",
+    "constructor-runner.mjs": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
+    "verify-articles.mjs": "9a9d52e37241b274ac79111552eae55d03afe3d46485fd9054f8c590deed6f20",
+    "dirty-runtime.mjs": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865",
+    "dirty-host-contract.mjs": "16172dc456e7e9a77c06de62263b70f6335229579d9637f9a0106e19af540317",
+    "rollback-probe.mjs": "1f50c883ef4c8e04893e137cf9810c4f0a880d20ffdbeb4155f5a0598df6c967"
+  },
+  "servedAudit": {
+    "pins": 163,
+    "rows": [
+      {
+        "name": "constructor-runner.mjs",
+        "source": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
+        "built": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
+        "served": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f"
+      },
+      {
+        "name": "verify-articles.mjs",
+        "source": "9a9d52e37241b274ac79111552eae55d03afe3d46485fd9054f8c590deed6f20",
+        "built": "9a9d52e37241b274ac79111552eae55d03afe3d46485fd9054f8c590deed6f20",
+        "served": "9a9d52e37241b274ac79111552eae55d03afe3d46485fd9054f8c590deed6f20"
+      },
+      {
+        "name": "rollback-probe.mjs",
+        "source": "1f50c883ef4c8e04893e137cf9810c4f0a880d20ffdbeb4155f5a0598df6c967",
+        "built": "1f50c883ef4c8e04893e137cf9810c4f0a880d20ffdbeb4155f5a0598df6c967",
+        "served": "1f50c883ef4c8e04893e137cf9810c4f0a880d20ffdbeb4155f5a0598df6c967"
+      },
+      {
+        "name": "dirty-runtime.mjs",
+        "source": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865",
+        "built": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865",
+        "served": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865"
+      },
+      {
+        "name": "dirty-host-contract.mjs",
+        "source": "16172dc456e7e9a77c06de62263b70f6335229579d9637f9a0106e19af540317",
+        "built": "16172dc456e7e9a77c06de62263b70f6335229579d9637f9a0106e19af540317",
+        "served": "16172dc456e7e9a77c06de62263b70f6335229579d9637f9a0106e19af540317"
+      },
+      {
+        "name": "native-product-ui.mjs",
+        "source": "e37cb1b55d455a1df1a4d44dfb7d053d5affdabdf579fe2854936300d0c6a91e",
+        "built": "e37cb1b55d455a1df1a4d44dfb7d053d5affdabdf579fe2854936300d0c6a91e",
+        "served": "e37cb1b55d455a1df1a4d44dfb7d053d5affdabdf579fe2854936300d0c6a91e"
+      },
+      {
+        "name": "native-character-menu-preview.mjs",
+        "source": "47f03a748b13d878c00e950a734e6e9673b5deb85ef90eb393dec6efc4c8a66c",
+        "built": "47f03a748b13d878c00e950a734e6e9673b5deb85ef90eb393dec6efc4c8a66c",
+        "served": "47f03a748b13d878c00e950a734e6e9673b5deb85ef90eb393dec6efc4c8a66c"
+      },
+      {
+        "name": "melee-fighter-init.wasm",
+        "source": null,
+        "built": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+        "served": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2"
+      },
+      {
+        "name": "melee-dirty.wasm",
+        "source": null,
+        "built": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
+        "served": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373"
+      }
+    ]
+  },
+  "focused": [
+    {
+      "character": "Fx",
+      "core": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+      "rawReportSha256": "d166f75c8187c61d5dbdeac1653348246c1b01c2276cff05728d5a4b0bc25bc8",
+      "completed": true,
+      "frames": 1290,
+      "spawns": 8,
+      "retirements": 8,
+      "reusedIdentities": 0,
+      "reusedOwners": 6,
+      "reusedRoots": 3,
+      "attachedFrames": 32,
+      "renderedAttachmentFrames": 32,
+      "phases": [
+        {
+          "repeat": 0,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 1,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 2,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 3,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 4,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 5,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 6,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 7,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        }
+      ],
+      "resources": {
+        "stageCreated": 3,
+        "stageRetired": 0,
+        "effectCreated": 20,
+        "effectRetired": 20,
+        "peakEffectModels": 2,
+        "itemCreated": 16,
+        "itemRetired": 16,
+        "peakItemModels": 2
+      }
+    },
+    {
+      "character": "Fc",
+      "core": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+      "rawReportSha256": "c776ab6dfe68f9e9af4ebf0d7a62f72b68bfab19b65b10dafb8156f461850e9e",
+      "completed": true,
+      "frames": 1290,
+      "spawns": 8,
+      "retirements": 8,
+      "reusedIdentities": 0,
+      "reusedOwners": 6,
+      "reusedRoots": 3,
+      "attachedFrames": 32,
+      "renderedAttachmentFrames": 32,
+      "phases": [
+        {
+          "repeat": 0,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 1,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 2,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 3,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 4,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 5,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 6,
+          "direction": -1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        },
+        {
+          "repeat": 7,
+          "direction": 1,
+          "states": [
+            18,
+            14,
+            347,
+            348,
+            349
+          ],
+          "peakAttachments": 1
+        }
+      ],
+      "resources": {
+        "stageCreated": 3,
+        "stageRetired": 0,
+        "effectCreated": 21,
+        "effectRetired": 21,
+        "peakEffectModels": 2,
+        "itemCreated": 16,
+        "itemRetired": 16,
+        "peakItemModels": 2
+      }
+    }
+  ],
+  "idle": [
+    {
+      "attempt": 1,
+      "frames": 1800,
+      "rawReportSha256": "14deec6b87dc8e591af587a268c63ab07fbd4e48ec6f810c427f5e7fc76f4c68",
+      "cpuChecks": [
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "frames": 1800,
+      "rawReportSha256": "67d358dac2b9759a0f348d97a1344dbd75c7b120ef5866ec4d42234c34d717f8",
+      "cpuChecks": [
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "attempt": 3,
+      "frames": 1800,
+      "rawReportSha256": "478091269b519369b6d00c4b3d93a80798dabc2171c541f2d1a6fea813104a2c",
+      "cpuChecks": [
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "hand": 3,
+          "peerDisplay": "none",
+          "keyboardVisible": true,
+          "alpha": [
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255
+          ]
+        }
+      ]
+    }
+  ],
+  "menu": {
+    "passed": true,
+    "frames": 900,
+    "rawReportSha256": "80e42f61f3a9481e044e820f8b10c10904e3634c04d4fc641f16fc594e7b42c2",
+    "cpuInputEvidence": {
+      "samples": 871,
+      "active": 149,
+      "buttons": 77,
+      "actions": [
+        323,
+        324,
+        29,
+        42,
+        39,
+        41,
+        14,
+        244,
+        44,
+        45,
+        47,
+        48,
+        49,
+        56,
+        18,
+        24,
+        25,
+        15,
+        57,
+        66,
+        71,
+        65
+      ],
+      "lastFrame": 900
+    },
+    "cpuChecks": [
+      {
+        "hand": 3,
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "hand": 3,
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "hand": 3,
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "hand": 3,
+        "peerDisplay": "none",
+        "keyboardVisible": true,
+        "alpha": [
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255,
+          255
+        ]
+      }
+    ]
+  },
+  "related": [
+    {
+      "name": "link",
+      "rawReportSha256": "54f79103940121cdb63a999cc91a5bb8f73ee506caf5b8e57baaf3c5c352f0b3",
+      "core": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+      "checks": {
+        "completed": true,
+        "frames": 2467,
+        "phases": [
+          {
+            "name": "charged arrow",
+            "frames": 310,
+            "states": [
+              344,
+              345,
+              346,
+              14
+            ],
+            "itemKinds": [
+              76,
+              64
+            ],
+            "peakItems": 2,
+            "peakLinks": 0,
+            "peakAttachments": 2,
+            "initial": [
+              14,
+              2,
+              65,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 310,
+            "final": [
+              14,
+              2,
+              74,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "air arrow",
+            "frames": 474,
+            "states": [
+              24,
+              25,
+              347,
+              349,
+              346,
+              14
+            ],
+            "itemKinds": [
+              76,
+              64
+            ],
+            "peakItems": 2,
+            "peakLinks": 0,
+            "peakAttachments": 2,
+            "initial": [
+              14,
+              2,
+              74,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 474,
+            "final": [
+              14,
+              2,
+              54,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "boomerang",
+            "frames": 341,
+            "states": [
+              350,
+              14,
+              351
+            ],
+            "itemKinds": [
+              60
+            ],
+            "peakItems": 1,
+            "peakLinks": 0,
+            "peakAttachments": 2,
+            "initial": [
+              14,
+              2,
+              54,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 341,
+            "final": [
+              14,
+              2,
+              51,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "ground hookshot",
+            "frames": 211,
+            "states": [
+              212,
+              14
+            ],
+            "itemKinds": [
+              62
+            ],
+            "peakItems": 1,
+            "peakLinks": 15,
+            "peakAttachments": 0,
+            "initial": [
+              14,
+              2,
+              51,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 211,
+            "final": [
+              14,
+              2,
+              5,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "air hookshot",
+            "frames": 249,
+            "states": [
+              24,
+              25,
+              360,
+              42,
+              14
+            ],
+            "itemKinds": [
+              62
+            ],
+            "peakItems": 1,
+            "peakLinks": 22,
+            "peakAttachments": 0,
+            "initial": [
+              14,
+              2,
+              5,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 249,
+            "final": [
+              14,
+              2,
+              37,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "ground Spin Attack",
+            "frames": 181,
+            "states": [
+              356,
+              14
+            ],
+            "itemKinds": [],
+            "peakItems": 0,
+            "peakLinks": 0,
+            "peakAttachments": 0,
+            "initial": [
+              14,
+              2,
+              37,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 181,
+            "final": [
+              14,
+              2,
+              101,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "air Spin Attack",
+            "frames": 259,
+            "states": [
+              24,
+              25,
+              357,
+              43,
+              14
+            ],
+            "itemKinds": [],
+            "peakItems": 0,
+            "peakLinks": 0,
+            "peakAttachments": 0,
+            "initial": [
+              14,
+              2,
+              101,
+              0,
+              6.300000190734863,
+              0.00009999999747378752,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 259,
+            "final": [
+              14,
+              2,
+              20,
+              0,
+              6.300000190734863,
+              54.40010070800781,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          },
+          {
+            "name": "bomb pull and throw",
+            "frames": 442,
+            "states": [
+              358,
+              14,
+              108
+            ],
+            "itemKinds": [
+              58
+            ],
+            "peakItems": 1,
+            "peakLinks": 0,
+            "peakAttachments": 0,
+            "initial": [
+              14,
+              2,
+              20,
+              0,
+              6.300000190734863,
+              54.40010070800781,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ],
+            "recordedTraceRows": 442,
+            "final": [
+              14,
+              2,
+              21,
+              0,
+              6.300000190734863,
+              54.40010070800781,
+              0,
+              1738656,
+              12256448,
+              15,
+              1,
+              6,
+              0,
+              0,
+              0,
+              0,
+              1,
+              60,
+              4
+            ]
+          }
+        ],
+        "kinds": {
+          "bomb": 58,
+          "boomerang": 60,
+          "hookshot": 62,
+          "arrow": 64,
+          "bow": 76
+        },
+        "retailParityVerified": false
+      }
+    },
+    {
+      "name": "kirby",
+      "rawReportSha256": "ce902b0225371903bb366b7d355312c420dc5b6adb4c4cd12ab1b53ab36ea860",
+      "core": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+      "checks": {
+        "completed": true,
+        "mode": "acquire",
+        "copyKind": 6,
+        "donorKind": 6,
+        "donor": "primary",
+        "projectileKind": 140,
+        "secondaryItemKind": 142,
+        "attackStates": [
+          401,
+          404
+        ],
+        "frames": 673,
+        "states": [
+          [
+            14,
+            15,
+            16,
+            18,
+            353,
+            356,
+            358,
+            359,
+            367,
+            401,
+            402,
+            403
+          ],
+          [
+            39,
+            244,
+            29,
+            42,
+            14,
+            15,
+            288,
+            289,
+            291,
+            292
+          ]
+        ],
+        "recordedTraceRows": 673,
+        "itemKinds": [
+          142,
+          140
+        ],
+        "retailParityVerified": false,
+        "peakAttachments": 2,
+        "body": null,
+        "final": [
+          [
+            14,
+            2,
+            15,
+            0,
+            18.988012313842773,
+            0.00009999999747378752,
+            0,
+            1738656,
+            12256448,
+            15,
+            1,
+            4,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            12,
+            0,
+            29.172813415527344,
+            27.20009994506836,
+            0,
+            1738764,
+            13730720,
+            15,
+            1,
+            6,
+            1,
+            8,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "hat": [
+          6,
+          15728320,
+          15535404,
+          1,
+          3,
+          0,
+          0
+        ],
+        "arrowAttachmentRenderedFrames": 46,
+        "maxArrowAttachmentDraws": 2,
+        "before": [
+          [
+            14,
+            2,
+            11,
+            0,
+            18.988012313842773,
+            0.00009999999747378752,
+            0,
+            1738656,
+            12256448,
+            15,
+            1,
+            4,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            60,
+            4
+          ],
+          [
+            14,
+            2,
+            19,
+            0,
+            0.4629630446434021,
+            0.00009999999747378752,
+            0,
+            1738764,
+            13730720,
+            15,
+            1,
+            6,
+            1,
+            0,
+            0,
+            0,
+            1,
+            60,
+            4
+          ]
+        ],
+        "dynamicPoolBefore": 316,
+        "firstHat": [
+          6,
+          15728320,
+          15535404,
+          1,
+          3,
+          0,
+          0
+        ],
+        "dynamicPoolWithHat": 313,
+        "arrowRetirementWaits": [
+          {
+            "phase": "copied neutral special",
+            "frames": 0
+          }
+        ]
+      }
+    }
+  ],
+  "certification": [
+    {
+      "stage": "battlefield",
+      "pair": "Fc-Fx",
+      "mode": "isolated",
+      "frames": 240,
+      "rawReportSha256": "f170f389c7ebe8cf401f380cd6587276878833f7d3719254a24b0a517e99f919",
+      "provenance": {
+        "startedAt": "2026-09-18T00:08:56.576Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "dirty-runtime.mjs": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865",
+          "dirty-host-contract.mjs": "222379fb6aff06f6a148ca332fe50a5b8e0ce6aa66295c3d47f266b0a190c836",
+          "dirty-core.json": "9f408bf0d2fca899db685b871a3c34c529cdee9f9e36795c62e3b45135d459d1",
+          "melee-dirty.wasm": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
+          "certification.mjs": "77cb26329847620d39b6e9e1534f21099b28bcbf373a038b142ecb1bb8126da9",
+          "render-replica.mjs": "cb8a9b53a326f2b485ef3f8d27223224c4484773cec913c7fc00cf411bd8e4e2",
+          "wasm-snapshot.mjs": "ef1d2e1f9586247b1b0270b689e2069147c8b18a6fbef2e90699e29dadad25ae",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "00a0409de2467d85efdd14391caf85396c13ba20b8357a47cf03de87bc41da05",
+          "material-gpu.mjs": "ba137831ccb279117e430907ec359def004a67ca0cbffab2706f79876aca5d70",
+          "owned-uniform-state.mjs": "a3767ea1828dae7d936d8955a104011824a7af25160347d0bbe1b7a623da1da3",
+          "draw-uniform-buffer.mjs": "9741a025a68d0013272046982c7095501510c8daf96d0baaa6d02f55f5a77111",
+          "native-state-intern.mjs": "bd115057b334b784996d7582915c7a0c0d495866f2315f7b18c5f687997c0829",
+          "native-texture.mjs": "5d888492f2e3e9592703e129b62339e931a090063479447ad8a50f66c33a5fb9",
+          "presentation-cache.mjs": "9705e33855e77ee81f33584e09aa890b9f52575abdedc803f8d83758304165a0",
+          "paged-snapshot.mjs": "29d2c6d32cdc605c6be4423bde6ffa210edbbb0e870309fbe3d7e0354fd6e235",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
+          "rollback-session.mjs": "43a949c78eef22b5986dea66c071dcb1d2d5b5148a96ceb1260f52336333bc57",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "performanceMeasurement": false,
+      "reports": [
+        {
+          "seat": 0,
+          "stateMatches": true,
+          "referenceHash": {
+            "stateSha256": "f1d6cd10a4c3131de7512133d77d3b9d1fc02173372683fb552600d5ebab36eb",
+            "memorySha256": "d17bf986c08951e74e8f5549f070755cd5a3d90a33240eda0668fa61a085639b",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "f1d6cd10a4c3131de7512133d77d3b9d1fc02173372683fb552600d5ebab36eb",
+            "memorySha256": "d17bf986c08951e74e8f5549f070755cd5a3d90a33240eda0668fa61a085639b",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "frameOracle": {
+            "enabled": true,
+            "frames": 240,
+            "comparedBytes": 663552000,
+            "differentBytes": 0,
+            "cameraMismatches": 0
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                2.5605411529541016,
+                26.69384002685547,
+                189.45547485351562
+              ],
+              "interest": [
+                4.083236217498779,
+                8.911858558654785,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                2.5605411529541016,
+                26.69384002685547,
+                189.45547485351562
+              ],
+              "interest": [
+                4.083236217498779,
+                8.911858558654785,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                2.5605411529541016,
+                26.69384002685547,
+                189.45547485351562
+              ],
+              "interest": [
+                4.083236217498779,
+                8.911858558654785,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "audioJournalMatchesReference": true,
+          "kernel": null,
+          "replica": {
+            "frames": 480,
+            "copiedBytes": 357257216,
+            "comparedBytes": 0,
+            "copyCpuMs": 29806.000000953674,
+            "guardCpuMs": 360.79999935626984,
+            "maxCopyCpuMs": 239,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 74885,
+            "fullCopies": 1,
+            "coverageAudits": 480,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 0,
+                "render": 131
+              },
+              {
+                "game": 115,
+                "render": 131
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 3,
+            "restores": 2,
+            "capturedBytes": 33030144,
+            "restoredBytes": 3670016,
+            "comparedBytes": 57606144,
+            "sharedPages": 1810,
+            "guardCpuMs": 2,
+            "captureCpuMs": 17.69999998807907,
+            "restoreCpuMs": 1.7000000476837158,
+            "maxCaptureCpuMs": 15,
+            "maxRestoreCpuMs": 1,
+            "peakRetainedBytes": 33030144,
+            "sparse": true,
+            "sparseSkippedCapturePages": 1486,
+            "sparseSkippedRestorePages": 1486,
+            "captureAudits": 0,
+            "restoreAudits": 0,
+            "restoreCopyCpuMs": 0.6000000238418579,
+            "retainedBytes": 33030144,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 33619968
+          },
+          "failures": [
+            "Less than 1800 forward frames; short probe only",
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 6.455343814301276,
+          "capturedFps": 3.325797881587688
+        }
+      ]
+    },
+    {
+      "stage": "battlefield",
+      "pair": "Fc-Fx",
+      "mode": "rollback",
+      "frames": 1800,
+      "rawReportSha256": "83ef0c0b7c7645ce578846e97ec245e1ac83ad7ce51d27370e9d7c9d7e89263e",
+      "provenance": {
+        "startedAt": "2026-09-18T00:09:39.045Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "dirty-runtime.mjs": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865",
+          "dirty-host-contract.mjs": "222379fb6aff06f6a148ca332fe50a5b8e0ce6aa66295c3d47f266b0a190c836",
+          "dirty-core.json": "9f408bf0d2fca899db685b871a3c34c529cdee9f9e36795c62e3b45135d459d1",
+          "melee-dirty.wasm": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
+          "certification.mjs": "77cb26329847620d39b6e9e1534f21099b28bcbf373a038b142ecb1bb8126da9",
+          "render-replica.mjs": "cb8a9b53a326f2b485ef3f8d27223224c4484773cec913c7fc00cf411bd8e4e2",
+          "wasm-snapshot.mjs": "ef1d2e1f9586247b1b0270b689e2069147c8b18a6fbef2e90699e29dadad25ae",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "00a0409de2467d85efdd14391caf85396c13ba20b8357a47cf03de87bc41da05",
+          "material-gpu.mjs": "ba137831ccb279117e430907ec359def004a67ca0cbffab2706f79876aca5d70",
+          "owned-uniform-state.mjs": "a3767ea1828dae7d936d8955a104011824a7af25160347d0bbe1b7a623da1da3",
+          "draw-uniform-buffer.mjs": "9741a025a68d0013272046982c7095501510c8daf96d0baaa6d02f55f5a77111",
+          "native-state-intern.mjs": "bd115057b334b784996d7582915c7a0c0d495866f2315f7b18c5f687997c0829",
+          "native-texture.mjs": "5d888492f2e3e9592703e129b62339e931a090063479447ad8a50f66c33a5fb9",
+          "presentation-cache.mjs": "9705e33855e77ee81f33584e09aa890b9f52575abdedc803f8d83758304165a0",
+          "paged-snapshot.mjs": "29d2c6d32cdc605c6be4423bde6ffa210edbbb0e870309fbe3d7e0354fd6e235",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
+          "rollback-session.mjs": "43a949c78eef22b5986dea66c071dcb1d2d5b5148a96ceb1260f52336333bc57",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "performanceMeasurement": false,
+      "reports": [
+        {
+          "seat": 0,
+          "stateMatches": true,
+          "referenceHash": {
+            "stateSha256": "3085b65d974316f0b08e2b717e7d585fb072f1992d561cbe6a7db137036be962",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "3085b65d974316f0b08e2b717e7d585fb072f1992d561cbe6a7db137036be962",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "frameOracle": {
+            "enabled": false,
+            "frames": 0,
+            "comparedBytes": 0,
+            "differentBytes": 0,
+            "cameraMismatches": 0
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "audioJournalMatchesReference": true,
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1626,
+            "corrections": 147,
+            "replayedFrames": 934,
+            "maxReplay": 13,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43450368,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41025536
+          },
+          "replica": {
+            "frames": 1800,
+            "copiedBytes": 1550897152,
+            "comparedBytes": 0,
+            "copyCpuMs": 1007.8000011444092,
+            "guardCpuMs": 1839.9999992251396,
+            "maxCopyCpuMs": 19.100000023841858,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 366301,
+            "fullCopies": 1,
+            "coverageAudits": 0,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 118,
+                "render": 131
+              },
+              {
+                "game": 118,
+                "render": 131
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 595,
+            "restores": 149,
+            "capturedBytes": 960299008,
+            "restoredBytes": 260440064,
+            "comparedBytes": 2005794816,
+            "sharedPages": 444093,
+            "guardCpuMs": 400.60000026226044,
+            "captureCpuMs": 3033.2000004053116,
+            "restoreCpuMs": 705.0000002384186,
+            "maxCaptureCpuMs": 16.400000035762787,
+            "maxRestoreCpuMs": 9.200000047683716,
+            "peakRetainedBytes": 43450368,
+            "sparse": true,
+            "sparseSkippedCapturePages": 442340,
+            "sparseSkippedRestorePages": 110905,
+            "captureAudits": 595,
+            "restoreAudits": 149,
+            "restoreCopyCpuMs": 29.99999988079071,
+            "retainedBytes": 41025536,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          },
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 58.56191458421685,
+          "capturedFps": 56.514274919066416
+        },
+        {
+          "seat": 1,
+          "stateMatches": true,
+          "referenceHash": {
+            "stateSha256": "3085b65d974316f0b08e2b717e7d585fb072f1992d561cbe6a7db137036be962",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "3085b65d974316f0b08e2b717e7d585fb072f1992d561cbe6a7db137036be962",
+            "memorySha256": "ef0417814601af186d06e90c363bd44be95261ad2ce8d313dca9c4ba2a4c092d",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "frameOracle": {
+            "enabled": false,
+            "frames": 0,
+            "comparedBytes": 0,
+            "differentBytes": 0,
+            "cameraMismatches": 0
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                16.87077522277832,
+                77.7341079711914,
+                226.02481079101562
+              ],
+              "interest": [
+                23.281646728515625,
+                36.46100616455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -6.971161365509033,
+                62.22522735595703,
+                174.38108825683594
+              ],
+              "interest": [
+                -10.454358100891113,
+                44.46083068847656,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "audioJournalMatchesReference": true,
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1718,
+            "corrections": 158,
+            "replayedFrames": 969,
+            "maxReplay": 13,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43122688,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41025536
+          },
+          "replica": {
+            "frames": 1800,
+            "copiedBytes": 1562681344,
+            "comparedBytes": 0,
+            "copyCpuMs": 621.40000218153,
+            "guardCpuMs": 1651.3999973535538,
+            "maxCopyCpuMs": 15.800000011920929,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 369178,
+            "fullCopies": 1,
+            "coverageAudits": 0,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 115,
+                "render": 131
+              },
+              {
+                "game": 115,
+                "render": 131
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 597,
+            "restores": 160,
+            "capturedBytes": 960888832,
+            "restoredBytes": 278724608,
+            "comparedBytes": 2007760896,
+            "sharedPages": 445626,
+            "guardCpuMs": 379.400000333786,
+            "captureCpuMs": 2953.2000002861023,
+            "restoreCpuMs": 795.2000002861023,
+            "maxCaptureCpuMs": 21.799999952316284,
+            "maxRestoreCpuMs": 10.5,
+            "peakRetainedBytes": 43122688,
+            "sparse": true,
+            "sparseSkippedCapturePages": 443861,
+            "sparseSkippedRestorePages": 119107,
+            "captureAudits": 597,
+            "restoreAudits": 160,
+            "restoreCopyCpuMs": 36.39999973773956,
+            "retainedBytes": 41025536,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          },
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 58.69424861572552,
+          "capturedFps": 57.46901732302834
+        }
+      ]
+    },
+    {
+      "stage": "fountain",
+      "pair": "Pp-Pe",
+      "mode": "isolated",
+      "frames": 240,
+      "rawReportSha256": "0ff0100275a4797441f141dba3d479b5c6045f1b5ab69a5024d0a75b7e827484",
+      "provenance": {
+        "startedAt": "2026-09-18T00:10:16.976Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "dirty-runtime.mjs": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865",
+          "dirty-host-contract.mjs": "222379fb6aff06f6a148ca332fe50a5b8e0ce6aa66295c3d47f266b0a190c836",
+          "dirty-core.json": "9f408bf0d2fca899db685b871a3c34c529cdee9f9e36795c62e3b45135d459d1",
+          "melee-dirty.wasm": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
+          "certification.mjs": "77cb26329847620d39b6e9e1534f21099b28bcbf373a038b142ecb1bb8126da9",
+          "render-replica.mjs": "cb8a9b53a326f2b485ef3f8d27223224c4484773cec913c7fc00cf411bd8e4e2",
+          "wasm-snapshot.mjs": "ef1d2e1f9586247b1b0270b689e2069147c8b18a6fbef2e90699e29dadad25ae",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "00a0409de2467d85efdd14391caf85396c13ba20b8357a47cf03de87bc41da05",
+          "material-gpu.mjs": "ba137831ccb279117e430907ec359def004a67ca0cbffab2706f79876aca5d70",
+          "owned-uniform-state.mjs": "a3767ea1828dae7d936d8955a104011824a7af25160347d0bbe1b7a623da1da3",
+          "draw-uniform-buffer.mjs": "9741a025a68d0013272046982c7095501510c8daf96d0baaa6d02f55f5a77111",
+          "native-state-intern.mjs": "bd115057b334b784996d7582915c7a0c0d495866f2315f7b18c5f687997c0829",
+          "native-texture.mjs": "5d888492f2e3e9592703e129b62339e931a090063479447ad8a50f66c33a5fb9",
+          "presentation-cache.mjs": "9705e33855e77ee81f33584e09aa890b9f52575abdedc803f8d83758304165a0",
+          "paged-snapshot.mjs": "29d2c6d32cdc605c6be4423bde6ffa210edbbb0e870309fbe3d7e0354fd6e235",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
+          "rollback-session.mjs": "43a949c78eef22b5986dea66c071dcb1d2d5b5148a96ceb1260f52336333bc57",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "performanceMeasurement": false,
+      "reports": [
+        {
+          "seat": 0,
+          "stateMatches": true,
+          "referenceHash": {
+            "stateSha256": "150fa7e08c83f3567b8c3c467f44c0ce69759adc648f3e99f7bedef403310d47",
+            "memorySha256": "9a6aa8ccd91be3268dcdc345735b0d511e79a05bd82479c5268d74c229ab0e58",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "150fa7e08c83f3567b8c3c467f44c0ce69759adc648f3e99f7bedef403310d47",
+            "memorySha256": "9a6aa8ccd91be3268dcdc345735b0d511e79a05bd82479c5268d74c229ab0e58",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "frameOracle": {
+            "enabled": true,
+            "frames": 240,
+            "comparedBytes": 663552000,
+            "differentBytes": 0,
+            "cameraMismatches": 0
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.271642208099365,
+                21.856475830078125,
+                83.0000228881836
+              ],
+              "interest": [
+                4.559269428253174,
+                10.764840126037598,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                0.10567581653594971,
+                43.744266510009766,
+                158.0288848876953
+              ],
+              "interest": [
+                -0.9706051349639893,
+                27.44928741455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.271642208099365,
+                21.856475830078125,
+                83.0000228881836
+              ],
+              "interest": [
+                4.559269428253174,
+                10.764840126037598,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.271642208099365,
+                21.856475830078125,
+                83.0000228881836
+              ],
+              "interest": [
+                4.559269428253174,
+                10.764840126037598,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "audioJournalMatchesReference": true,
+          "kernel": null,
+          "replica": {
+            "frames": 480,
+            "copiedBytes": 476442624,
+            "comparedBytes": 0,
+            "copyCpuMs": 36292.20000052452,
+            "guardCpuMs": 322.09999972581863,
+            "maxCopyCpuMs": 314.10000002384186,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 101503,
+            "fullCopies": 1,
+            "coverageAudits": 480,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 0,
+                "render": 169
+              },
+              {
+                "game": 177,
+                "render": 169
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 3,
+            "restores": 2,
+            "capturedBytes": 48168960,
+            "restoredBytes": 4390912,
+            "comparedBytes": 69599232,
+            "sharedPages": 2044,
+            "guardCpuMs": 2.5,
+            "captureCpuMs": 19.80000001192093,
+            "restoreCpuMs": 2.399999976158142,
+            "maxCaptureCpuMs": 16.69999998807907,
+            "maxRestoreCpuMs": 1.300000011920929,
+            "peakRetainedBytes": 48168960,
+            "sparse": true,
+            "sparseSkippedCapturePages": 1782,
+            "sparseSkippedRestorePages": 1785,
+            "captureAudits": 0,
+            "restoreAudits": 0,
+            "restoreCopyCpuMs": 0.699999988079071,
+            "retainedBytes": 48168960,
+            "count": 3,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184
+          },
+          "failures": [
+            "Less than 1800 forward frames; short probe only",
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 5.325038107308181,
+          "capturedFps": 2.761311258898099
+        }
+      ]
+    },
+    {
+      "stage": "fountain",
+      "pair": "Pp-Pe",
+      "mode": "rollback",
+      "frames": 1800,
+      "rawReportSha256": "40665a323cf0410b46337ce9e2378d38019c7d2da7f6ba257757c077b8628e7b",
+      "provenance": {
+        "startedAt": "2026-09-18T00:11:09.137Z",
+        "node": "v24.15.0",
+        "host": {
+          "platform": "linux",
+          "release": "6.17.0-1028-oem",
+          "cpu": "AMD Ryzen AI 9 HX PRO 370 w/ Radeon 890M"
+        },
+        "sources": {
+          "dirty-runtime.mjs": "1633d4f245b9ab33670649907b0ffb8bda766654c9b5054c80660a4ade48b865",
+          "dirty-host-contract.mjs": "222379fb6aff06f6a148ca332fe50a5b8e0ce6aa66295c3d47f266b0a190c836",
+          "dirty-core.json": "9f408bf0d2fca899db685b871a3c34c529cdee9f9e36795c62e3b45135d459d1",
+          "melee-dirty.wasm": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
+          "certification.mjs": "77cb26329847620d39b6e9e1534f21099b28bcbf373a038b142ecb1bb8126da9",
+          "render-replica.mjs": "cb8a9b53a326f2b485ef3f8d27223224c4484773cec913c7fc00cf411bd8e4e2",
+          "wasm-snapshot.mjs": "ef1d2e1f9586247b1b0270b689e2069147c8b18a6fbef2e90699e29dadad25ae",
+          "frame-evidence.mjs": "c51c817108547a09e51f6a980886c24f8abc4b863260b2e08582f661487f6f4e",
+          "frame-evidence-worker.mjs": "4a70a6fe28a3aa834aa3fc67a39228c09c565c01ea0323cd5171a91e8af5bcc9",
+          "native-match-preview.mjs": "00a0409de2467d85efdd14391caf85396c13ba20b8357a47cf03de87bc41da05",
+          "material-gpu.mjs": "ba137831ccb279117e430907ec359def004a67ca0cbffab2706f79876aca5d70",
+          "owned-uniform-state.mjs": "a3767ea1828dae7d936d8955a104011824a7af25160347d0bbe1b7a623da1da3",
+          "draw-uniform-buffer.mjs": "9741a025a68d0013272046982c7095501510c8daf96d0baaa6d02f55f5a77111",
+          "native-state-intern.mjs": "bd115057b334b784996d7582915c7a0c0d495866f2315f7b18c5f687997c0829",
+          "native-texture.mjs": "5d888492f2e3e9592703e129b62339e931a090063479447ad8a50f66c33a5fb9",
+          "presentation-cache.mjs": "9705e33855e77ee81f33584e09aa890b9f52575abdedc803f8d83758304165a0",
+          "paged-snapshot.mjs": "29d2c6d32cdc605c6be4423bde6ffa210edbbb0e870309fbe3d7e0354fd6e235",
+          "snapshot-page-kernel.mjs": "8da66ff9f85d0acd8ef361581b0632e8b64b9c181a68a88c951125c12c37f984",
+          "melee-fighter-init.wasm": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2",
+          "native-live.mjs": "f1ee0520c9227a82cb746b298ab893b78e1db75e721ad4b5209bf4356f2baf5e",
+          "native-camera.mjs": "937bab8ec6af9d0ddd677c4247244e90220d273e669e119fbebf548c3c205a36",
+          "constructor-runner.mjs": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
+          "rollback-session.mjs": "43a949c78eef22b5986dea66c071dcb1d2d5b5148a96ceb1260f52336333bc57",
+          "rollback-audio.mjs": "e5f67257a68f5d30a69636beddc328af389bf7e998d998774b2516823052ec6b",
+          "combat-workload.mjs": "fcdd6dfc76e819f03814142f641a675acd59b6759e27728d4399a1a831fa6d59",
+          "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd"
+        }
+      },
+      "performanceMeasurement": false,
+      "reports": [
+        {
+          "seat": 0,
+          "stateMatches": true,
+          "referenceHash": {
+            "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "frameOracle": {
+            "enabled": false,
+            "frames": 0,
+            "comparedBytes": 0,
+            "differentBytes": 0,
+            "cameraMismatches": 0
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                0.10567581653594971,
+                43.744266510009766,
+                158.0288848876953
+              ],
+              "interest": [
+                -0.9706051349639893,
+                27.44928741455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "audioJournalMatchesReference": true,
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1477,
+            "corrections": 173,
+            "replayedFrames": 1071,
+            "maxReplay": 13,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61407232,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58654720
+          },
+          "replica": {
+            "frames": 1800,
+            "copiedBytes": 2138796032,
+            "comparedBytes": 0,
+            "copyCpuMs": 1209.6000017523766,
+            "guardCpuMs": 1622.5,
+            "maxCopyCpuMs": 22,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 507351,
+            "fullCopies": 1,
+            "coverageAudits": 0,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 185,
+                "render": 169
+              },
+              {
+                "game": 544,
+                "render": 169
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 615,
+            "restores": 175,
+            "capturedBytes": 1312882688,
+            "restoredBytes": 394854400,
+            "comparedBytes": 2706243584,
+            "sharedPages": 549458,
+            "guardCpuMs": 369.7999994754791,
+            "captureCpuMs": 3955.200000822544,
+            "restoreCpuMs": 1167.1999999284744,
+            "maxCaptureCpuMs": 23.400000035762787,
+            "maxRestoreCpuMs": 14.699999988079071,
+            "peakRetainedBytes": 61407232,
+            "sparse": true,
+            "sparseSkippedCapturePages": 547560,
+            "sparseSkippedRestorePages": 156025,
+            "captureAudits": 615,
+            "restoreAudits": 175,
+            "restoreCopyCpuMs": 53.79999989271164,
+            "retainedBytes": 58654720,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 62980096
+          },
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 53.38268265772695,
+          "capturedFps": 44.29206829842913
+        },
+        {
+          "seat": 1,
+          "stateMatches": true,
+          "referenceHash": {
+            "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "finalHash": {
+            "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a",
+            "memorySha256": "0a75812a665f644e91696252bcc539bc5651c7b6b692ddbea8243c2e3b1213c4",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "comparedBytes": 2764800
+          },
+          "frameOracle": {
+            "enabled": false,
+            "frames": 0,
+            "comparedBytes": 0,
+            "differentBytes": 0,
+            "cameraMismatches": 0
+          },
+          "camera": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "first": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                0.10567581653594971,
+                43.744266510009766,
+                158.0288848876953
+              ],
+              "interest": [
+                -0.9706051349639893,
+                27.44928741455078,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "last": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -7.035985946655273,
+                22.28489112854004,
+                83.0000228881836
+              ],
+              "interest": [
+                -7.19099760055542,
+                11.128376960754395,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785,
+              "near": 0.10000000149011612,
+              "far": 16384
+            },
+            "validatedEveryDraw": true
+          },
+          "audioJournalMatchesReference": true,
+          "kernel": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1685,
+            "corrections": 151,
+            "replayedFrames": 1063,
+            "maxReplay": 14,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 61472768,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58654720
+          },
+          "replica": {
+            "frames": 1800,
+            "copiedBytes": 2101587968,
+            "comparedBytes": 0,
+            "copyCpuMs": 741.799998998642,
+            "guardCpuMs": 1659.4000005126,
+            "maxCopyCpuMs": 21.299999952316284,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 498267,
+            "fullCopies": 1,
+            "coverageAudits": 0,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 177,
+                "render": 169
+              },
+              {
+                "game": 177,
+                "render": 169
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 629,
+            "restores": 153,
+            "capturedBytes": 1341063168,
+            "restoredBytes": 343408640,
+            "comparedBytes": 2763587584,
+            "sharedPages": 561992,
+            "guardCpuMs": 395.09999936819077,
+            "captureCpuMs": 4192.900000274181,
+            "restoreCpuMs": 994.1000001430511,
+            "maxCaptureCpuMs": 26,
+            "maxRestoreCpuMs": 12.300000011920929,
+            "peakRetainedBytes": 61472768,
+            "sparse": true,
+            "sparseSkippedCapturePages": 560079,
+            "sparseSkippedRestorePages": 136438,
+            "captureAudits": 629,
+            "restoreAudits": 153,
+            "restoreCopyCpuMs": 42.10000044107437,
+            "retainedBytes": 58654720,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 62980096
+          },
+          "failures": [
+            "Simulation/submission cadence below 720p60 gate",
+            "Browser captured-frame cadence/content gate failed"
+          ],
+          "simulationFps": 53.47164665937781,
+          "capturedFps": 44.61857651369642
+        }
+      ]
+    }
+  ],
+  "rollback": [
+    {
+      "stage": "battlefield",
+      "frames": 240,
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "rawReportSha256": "3d48560c56e3362dadb848a2722ad078a88916221c55bbebbe45fffc931dc15b",
+      "reports": [
+        {
+          "seat": 0,
+          "finalHash": {
+            "stateSha256": "b4da4421839b0c01aaba587b41e3f007b6b52db17088ae494d477d524d12567e",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 193,
+            "corrections": 16,
+            "replayedFrames": 62,
+            "maxReplay": 7,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42205184,
+            "retainedSnapshots": 4,
+            "retainedBytes": 40173568
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 56352768,
+            "comparedBytes": 0,
+            "copyCpuMs": 595.8000000119209,
+            "guardCpuMs": 4.300000011920929,
+            "maxCopyCpuMs": 332.30000001192093,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 1422,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 480,
+                "render": 132
+              },
+              {
+                "game": 436,
+                "render": 140
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 20,
+            "capturedBytes": 141361152,
+            "restoredBytes": 131661824,
+            "comparedBytes": 434634752,
+            "sharedPages": 57982,
+            "guardCpuMs": 45.6999996304512,
+            "captureCpuMs": 358.6999999284744,
+            "restoreCpuMs": 96.89999997615814,
+            "maxCaptureCpuMs": 18.399999976158142,
+            "maxRestoreCpuMs": 13.5,
+            "peakRetainedBytes": 42205184,
+            "sparse": true,
+            "sparseSkippedCapturePages": 55211,
+            "sparseSkippedRestorePages": 13411,
+            "captureAudits": 78,
+            "restoreAudits": 20,
+            "restoreCopyCpuMs": 16.200000047683716,
+            "retainedBytes": 40173568,
+            "count": 7,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        },
+        {
+          "seat": 1,
+          "finalHash": {
+            "stateSha256": "b4da4421839b0c01aaba587b41e3f007b6b52db17088ae494d477d524d12567e",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 18,
+            "replayedFrames": 115,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43319296,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41943040
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 56365056,
+            "comparedBytes": 0,
+            "copyCpuMs": 600.7000000476837,
+            "guardCpuMs": 4.5,
+            "maxCopyCpuMs": 384.7000000476837,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 1425,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 468,
+                "render": 132
+              },
+              {
+                "game": 438,
+                "render": 140
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 89,
+            "restores": 22,
+            "capturedBytes": 159383552,
+            "restoredBytes": 135266304,
+            "comparedBytes": 472383488,
+            "sharedPages": 66188,
+            "guardCpuMs": 48,
+            "captureCpuMs": 399.59999990463257,
+            "restoreCpuMs": 103.90000003576279,
+            "maxCaptureCpuMs": 19.599999964237213,
+            "maxRestoreCpuMs": 19.80000001192093,
+            "peakRetainedBytes": 43319296,
+            "sparse": true,
+            "sparseSkippedCapturePages": 63391,
+            "sparseSkippedRestorePages": 14898,
+            "captureAudits": 89,
+            "restoreAudits": 22,
+            "restoreCopyCpuMs": 17.300000071525574,
+            "retainedBytes": 41943040,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        }
+      ]
+    },
+    {
+      "stage": "story",
+      "frames": 240,
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "rawReportSha256": "606b65d4f91812efe026746b07f02738b95d013bfee83f1b1fd9ea945c9c4d35",
+      "reports": [
+        {
+          "seat": 0,
+          "finalHash": {
+            "stateSha256": "5e976513e3bc99b2d4501b90b473cf897ab7e324ae7a5376d23b405e4542a492",
+            "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 224,
+            "corrections": 17,
+            "replayedFrames": 81,
+            "maxReplay": 8,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 47841280,
+            "retainedSnapshots": 5,
+            "retainedBytes": 46989312
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43",
+            "fresh": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.5498374700546265,
+                24.83981704711914,
+                143.14468383789062
+              ],
+              "interest": [
+                -1.7742576599121094,
+                12.03598690032959,
+                0
+              ],
+              "fov": 20,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.5498374700546265,
+                24.83981704711914,
+                143.14468383789062
+              ],
+              "interest": [
+                -1.7742576599121094,
+                12.03598690032959,
+                0
+              ],
+              "fov": 20,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 66842624,
+            "comparedBytes": 0,
+            "copyCpuMs": 553.8000000119209,
+            "guardCpuMs": 3.699999988079071,
+            "maxCopyCpuMs": 298.19999998807907,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 1503,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 496,
+                "render": 147
+              },
+              {
+                "game": 481,
+                "render": 153
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 80,
+            "restores": 21,
+            "capturedBytes": 163577856,
+            "restoredBytes": 155451392,
+            "comparedBytes": 503709696,
+            "sharedPages": 71585,
+            "guardCpuMs": 43.40000003576279,
+            "captureCpuMs": 396.7000000476837,
+            "restoreCpuMs": 109.20000004768372,
+            "maxCaptureCpuMs": 19.799999952316284,
+            "maxRestoreCpuMs": 16,
+            "peakRetainedBytes": 47841280,
+            "sparse": true,
+            "sparseSkippedCapturePages": 68378,
+            "sparseSkippedRestorePages": 17074,
+            "captureAudits": 80,
+            "restoreAudits": 21,
+            "restoreCopyCpuMs": 16.499999821186066,
+            "retainedBytes": 46989312,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184
+          }
+        },
+        {
+          "seat": 1,
+          "finalHash": {
+            "stateSha256": "5e976513e3bc99b2d4501b90b473cf897ab7e324ae7a5376d23b405e4542a492",
+            "memorySha256": "5ec01ed30d76160fe3e4a28bcfcb39bc7e5aa5cc733f88c26bf7d13c343cc405",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 232,
+            "corrections": 19,
+            "replayedFrames": 101,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 48037888,
+            "retainedSnapshots": 5,
+            "retainedBytes": 46989312
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43",
+            "fresh": "3e137222bae0bb9dd3f1e92260687c2a71faee6609894bc55c31306cbbd77b43"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.5498374700546265,
+                24.83981704711914,
+                143.14468383789062
+              ],
+              "interest": [
+                -1.7742576599121094,
+                12.03598690032959,
+                0
+              ],
+              "fov": 20,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.5498374700546265,
+                24.83981704711914,
+                143.14468383789062
+              ],
+              "interest": [
+                -1.7742576599121094,
+                12.03598690032959,
+                0
+              ],
+              "fov": 20,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 66785280,
+            "comparedBytes": 0,
+            "copyCpuMs": 558.3000000715256,
+            "guardCpuMs": 3.399999976158142,
+            "maxCopyCpuMs": 307.2000000476837,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 1489,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 496,
+                "render": 147
+              },
+              {
+                "game": 467,
+                "render": 153
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 85,
+            "restores": 23,
+            "capturedBytes": 173080576,
+            "restoredBytes": 159121408,
+            "comparedBytes": 522977280,
+            "sharedPages": 76070,
+            "guardCpuMs": 48.40000003576279,
+            "captureCpuMs": 406.9000000357628,
+            "restoreCpuMs": 123.99999988079071,
+            "maxCaptureCpuMs": 22.19999998807907,
+            "maxRestoreCpuMs": 14.199999988079071,
+            "peakRetainedBytes": 48037888,
+            "sparse": true,
+            "sparseSkippedCapturePages": 72859,
+            "sparseSkippedRestorePages": 18870,
+            "captureAudits": 85,
+            "restoreAudits": 23,
+            "restoreCopyCpuMs": 18.599999964237213,
+            "retainedBytes": 46989312,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184
+          }
+        }
+      ]
+    },
+    {
+      "stage": "stadium",
+      "frames": 240,
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "rawReportSha256": "8b148c4f03bf38b1bd50e26871e2237fc753edd97af9229f63f4da05199c6d2f",
+      "reports": [
+        {
+          "seat": 0,
+          "finalHash": {
+            "stateSha256": "c24cfe93d996dafcb17e39468633047dd7ddcb334f5398a44c68de02f39416f2",
+            "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 234,
+            "corrections": 18,
+            "replayedFrames": 88,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 51118080,
+            "retainedSnapshots": 5,
+            "retainedBytes": 49610752
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac",
+            "fresh": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.0259143114089966,
+                25.855648040771484,
+                86.34040832519531
+              ],
+              "interest": [
+                -1.4996124505996704,
+                15.240766525268555,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.0259143114089966,
+                25.855648040771484,
+                86.34040832519531
+              ],
+              "interest": [
+                -1.4996124505996704,
+                15.240766525268555,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 66842624,
+            "comparedBytes": 0,
+            "copyCpuMs": 612.5,
+            "guardCpuMs": 3.199999988079071,
+            "maxCopyCpuMs": 322.39999997615814,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 1503,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 496,
+                "render": 146
+              },
+              {
+                "game": 481,
+                "render": 153
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 82,
+            "restores": 22,
+            "capturedBytes": 167051264,
+            "restoredBytes": 157286400,
+            "comparedBytes": 506462208,
+            "sharedPages": 73384,
+            "guardCpuMs": 41.1000000834465,
+            "captureCpuMs": 386.8999999165535,
+            "restoreCpuMs": 116.80000013113022,
+            "maxCaptureCpuMs": 20.400000035762787,
+            "maxRestoreCpuMs": 14.699999988079071,
+            "peakRetainedBytes": 51118080,
+            "sparse": true,
+            "sparseSkippedCapturePages": 70195,
+            "sparseSkippedRestorePages": 17972,
+            "captureAudits": 82,
+            "restoreAudits": 22,
+            "restoreCopyCpuMs": 18.69999998807907,
+            "retainedBytes": 49610752,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 54591488
+          }
+        },
+        {
+          "seat": 1,
+          "finalHash": {
+            "stateSha256": "c24cfe93d996dafcb17e39468633047dd7ddcb334f5398a44c68de02f39416f2",
+            "memorySha256": "f6b31d9ab42be403cea37655c66a813867a799c0a41c5672e4cfbf7c7146adf9",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 227,
+            "corrections": 17,
+            "replayedFrames": 95,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 49807360,
+            "retainedSnapshots": 5,
+            "retainedBytes": 49610752
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac",
+            "fresh": "322d8c2cc89d45fa26117902e4db0c34e6c6998a659eeee549a11a09e31a77ac"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.0259143114089966,
+                25.855648040771484,
+                86.34040832519531
+              ],
+              "interest": [
+                -1.4996124505996704,
+                15.240766525268555,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.0259143114089966,
+                25.855648040771484,
+                86.34040832519531
+              ],
+              "interest": [
+                -1.4996124505996704,
+                15.240766525268555,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 66785280,
+            "comparedBytes": 0,
+            "copyCpuMs": 557.1000000238419,
+            "guardCpuMs": 3.4999999403953552,
+            "maxCopyCpuMs": 306.5999999642372,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 1489,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 496,
+                "render": 146
+              },
+              {
+                "game": 467,
+                "render": 153
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 84,
+            "restores": 21,
+            "capturedBytes": 170262528,
+            "restoredBytes": 154796032,
+            "comparedBytes": 513146880,
+            "sharedPages": 75187,
+            "guardCpuMs": 40.599999845027924,
+            "captureCpuMs": 409.1999998688698,
+            "restoreCpuMs": 113.90000015497208,
+            "maxCaptureCpuMs": 17.899999976158142,
+            "maxRestoreCpuMs": 14.100000023841858,
+            "peakRetainedBytes": 49807360,
+            "sparse": true,
+            "sparseSkippedCapturePages": 71994,
+            "sparseSkippedRestorePages": 17084,
+            "captureAudits": 84,
+            "restoreAudits": 21,
+            "restoreCopyCpuMs": 17.699999928474426,
+            "retainedBytes": 49610752,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 50397184
+          }
+        }
+      ]
+    },
+    {
+      "stage": "dreamland",
+      "frames": 240,
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "rawReportSha256": "70e1b929f10876a85c6d75416f8aef9adb897aa2d1ff353ddc3d36a60b1331c9",
+      "reports": [
+        {
+          "seat": 0,
+          "finalHash": {
+            "stateSha256": "7444ba2157ebc198ef99a5b9b1f74be3c8faafdf58cf658f66f432cff5dc4ead",
+            "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              1,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 19,
+            "replayedFrames": 107,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 44367872,
+            "retainedSnapshots": 6,
+            "retainedBytes": 44892160
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277",
+            "fresh": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                1.3618351221084595,
+                16.934423446655273,
+                238.098388671875
+              ],
+              "interest": [
+                -14.723745346069336,
+                9.44859790802002,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                1.3618351221084595,
+                16.934423446655273,
+                238.098388671875
+              ],
+              "interest": [
+                -14.723745346069336,
+                9.44859790802002,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 56750080,
+            "comparedBytes": 0,
+            "copyCpuMs": 476.9000000357628,
+            "guardCpuMs": 3.099999964237213,
+            "maxCopyCpuMs": 276.9000000357628,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 1519,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 512,
+                "render": 140
+              },
+              {
+                "game": 468,
+                "render": 151
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 86,
+            "restores": 23,
+            "capturedBytes": 156303360,
+            "restoredBytes": 140443648,
+            "comparedBytes": 473694208,
+            "sharedPages": 63922,
+            "guardCpuMs": 46.499999821186066,
+            "captureCpuMs": 333.9999998807907,
+            "restoreCpuMs": 101.30000007152557,
+            "maxCaptureCpuMs": 20,
+            "maxRestoreCpuMs": 12.699999988079071,
+            "peakRetainedBytes": 44892160,
+            "sparse": true,
+            "sparseSkippedCapturePages": 60988,
+            "sparseSkippedRestorePages": 15590,
+            "captureAudits": 86,
+            "restoreAudits": 23,
+            "restoreCopyCpuMs": 15.199999868869781,
+            "retainedBytes": 44892160,
+            "count": 9,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        },
+        {
+          "seat": 1,
+          "finalHash": {
+            "stateSha256": "7444ba2157ebc198ef99a5b9b1f74be3c8faafdf58cf658f66f432cff5dc4ead",
+            "memorySha256": "741b7fde2cc6435fe3137ffb36b23157af1bde285c041d4932aa6cce81450312",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              1,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 205,
+            "corrections": 16,
+            "replayedFrames": 71,
+            "maxReplay": 8,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43646976,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43319296
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277",
+            "fresh": "b1a2eb82bcb523b76c5b2eeedb8744443eef830697cf960084f920bcab98b277"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                1.3618351221084595,
+                16.934423446655273,
+                238.098388671875
+              ],
+              "interest": [
+                -14.723745346069336,
+                9.44859790802002,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                1.3618351221084595,
+                16.934423446655273,
+                238.098388671875
+              ],
+              "interest": [
+                -14.723745346069336,
+                9.44859790802002,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 56700928,
+            "comparedBytes": 0,
+            "copyCpuMs": 464,
+            "guardCpuMs": 3.600000023841858,
+            "maxCopyCpuMs": 236.69999998807907,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 1507,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 512,
+                "render": 140
+              },
+              {
+                "game": 456,
+                "render": 151
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 20,
+            "capturedBytes": 142606336,
+            "restoredBytes": 133496832,
+            "comparedBytes": 444006400,
+            "sharedPages": 57963,
+            "guardCpuMs": 43.099999725818634,
+            "captureCpuMs": 322.4999998807907,
+            "restoreCpuMs": 94.59999996423721,
+            "maxCaptureCpuMs": 16.899999976158142,
+            "maxRestoreCpuMs": 12.099999964237213,
+            "peakRetainedBytes": 43646976,
+            "sparse": true,
+            "sparseSkippedCapturePages": 55064,
+            "sparseSkippedRestorePages": 13383,
+            "captureAudits": 78,
+            "restoreAudits": 20,
+            "restoreCopyCpuMs": 13.400000035762787,
+            "retainedBytes": 43319296,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        }
+      ]
+    },
+    {
+      "stage": "destination",
+      "frames": 240,
+      "pair": [
+        "Fc",
+        "Fx"
+      ],
+      "rawReportSha256": "36275fa18cddb84fd1e0ff98d980da321f4e5e0048916322fc69f394400ccbd6",
+      "reports": [
+        {
+          "seat": 0,
+          "finalHash": {
+            "stateSha256": "8ec858646a7565acacf9db6d7ceee9eee74ab12c5dc8aa85354ab7059360cb79",
+            "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 236,
+            "corrections": 19,
+            "replayedFrames": 81,
+            "maxReplay": 8,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 45285376,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43843584
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0",
+            "fresh": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.851180911064148,
+                29.70431900024414,
+                130.90716552734375
+              ],
+              "interest": [
+                -2.153271198272705,
+                14.212993621826172,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.851180911064148,
+                29.70431900024414,
+                130.90716552734375
+              ],
+              "interest": [
+                -2.153271198272705,
+                14.212993621826172,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 56627200,
+            "comparedBytes": 0,
+            "copyCpuMs": 487.30000001192093,
+            "guardCpuMs": 3.399999976158142,
+            "maxCopyCpuMs": 280.19999998807907,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 1489,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 496,
+                "render": 125
+              },
+              {
+                "game": 467,
+                "render": 134
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 81,
+            "restores": 23,
+            "capturedBytes": 160235520,
+            "restoredBytes": 139591680,
+            "comparedBytes": 465436672,
+            "sharedPages": 60007,
+            "guardCpuMs": 54.99999988079071,
+            "captureCpuMs": 356.2000002861023,
+            "restoreCpuMs": 116.99999994039536,
+            "maxCaptureCpuMs": 20.100000023841858,
+            "maxRestoreCpuMs": 13.900000035762787,
+            "peakRetainedBytes": 45285376,
+            "sparse": true,
+            "sparseSkippedCapturePages": 57323,
+            "sparseSkippedRestorePages": 15603,
+            "captureAudits": 81,
+            "restoreAudits": 23,
+            "restoreCopyCpuMs": 16,
+            "retainedBytes": 43843584,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        },
+        {
+          "seat": 1,
+          "finalHash": {
+            "stateSha256": "8ec858646a7565acacf9db6d7ceee9eee74ab12c5dc8aa85354ab7059360cb79",
+            "memorySha256": "60f59bd8675ecdcc8f02500b935592a0185461c088c7137bae4a05029e309374",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 18,
+            "replayedFrames": 96,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 45088768,
+            "retainedSnapshots": 5,
+            "retainedBytes": 43843584
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0",
+            "fresh": "c18b8ea4e506c87839c28e4f576e20d4286946619c55cc060b8a53651ecd46c0"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.851180911064148,
+                29.70431900024414,
+                130.90716552734375
+              ],
+              "interest": [
+                -2.153271198272705,
+                14.212993621826172,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                -1.851180911064148,
+                29.70431900024414,
+                130.90716552734375
+              ],
+              "interest": [
+                -2.153271198272705,
+                14.212993621826172,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 56573952,
+            "comparedBytes": 0,
+            "copyCpuMs": 473.80000001192093,
+            "guardCpuMs": 3.4999999403953552,
+            "maxCopyCpuMs": 273.10000002384186,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 1476,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 496,
+                "render": 125
+              },
+              {
+                "game": 454,
+                "render": 134
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 85,
+            "restores": 22,
+            "capturedBytes": 167313408,
+            "restoredBytes": 137166848,
+            "comparedBytes": 479985664,
+            "sharedPages": 62983,
+            "guardCpuMs": 45.69999986886978,
+            "captureCpuMs": 365.69999980926514,
+            "restoreCpuMs": 104.50000005960464,
+            "maxCaptureCpuMs": 17,
+            "maxRestoreCpuMs": 11.199999988079071,
+            "peakRetainedBytes": 45088768,
+            "sparse": true,
+            "sparseSkippedCapturePages": 60293,
+            "sparseSkippedRestorePages": 14869,
+            "captureAudits": 85,
+            "restoreAudits": 22,
+            "restoreCopyCpuMs": 14.199999749660492,
+            "retainedBytes": 43843584,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        }
+      ]
+    },
+    {
+      "stage": "fountain",
+      "frames": 240,
+      "pair": [
+        "Pp",
+        "Pe"
+      ],
+      "rawReportSha256": "a5c028ec28b4c9994dc830ce80384e8cc33c9f05effa6d4e31550cc6b910a3bd",
+      "reports": [
+        {
+          "seat": 0,
+          "finalHash": {
+            "stateSha256": "150fa7e08c83f3567b8c3c467f44c0ce69759adc648f3e99f7bedef403310d47",
+            "memorySha256": "9a6aa8ccd91be3268dcdc345735b0d511e79a05bd82479c5268d74c229ab0e58",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 177,
+            "corrections": 8,
+            "replayedFrames": 48,
+            "maxReplay": 8,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 58654720,
+            "retainedSnapshots": 4,
+            "retainedBytes": 56557568
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "efba70b8cb1d254c2060c04d7eedf4ced0e8d7f9387732e95220fc5ede82bd1a",
+            "fresh": "efba70b8cb1d254c2060c04d7eedf4ced0e8d7f9387732e95220fc5ede82bd1a"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.271642208099365,
+                21.856475830078125,
+                83.0000228881836
+              ],
+              "interest": [
+                4.559269428253174,
+                10.764840126037598,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.271642208099365,
+                21.856475830078125,
+                83.0000228881836
+              ],
+              "interest": [
+                4.559269428253174,
+                10.764840126037598,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 65208320,
+            "comparedBytes": 0,
+            "copyCpuMs": 607.4000000357628,
+            "guardCpuMs": 3.899999976158142,
+            "maxCopyCpuMs": 320.4000000357628,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 1104,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 195,
+                "render": 169
+              },
+              {
+                "game": 202,
+                "render": 175
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 12,
+            "capturedBytes": 188416000,
+            "restoredBytes": 141492224,
+            "comparedBytes": 539164672,
+            "sharedPages": 69354,
+            "guardCpuMs": 41.69999986886978,
+            "captureCpuMs": 415.69999980926514,
+            "restoreCpuMs": 79.6000000834465,
+            "maxCaptureCpuMs": 23.80000001192093,
+            "maxRestoreCpuMs": 13.5,
+            "peakRetainedBytes": 58654720,
+            "sparse": true,
+            "sparseSkippedCapturePages": 66207,
+            "sparseSkippedRestorePages": 8953,
+            "captureAudits": 78,
+            "restoreAudits": 12,
+            "restoreCopyCpuMs": 16.200000047683716,
+            "retainedBytes": 56557568,
+            "count": 7,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 58785792
+          }
+        },
+        {
+          "seat": 1,
+          "finalHash": {
+            "stateSha256": "150fa7e08c83f3567b8c3c467f44c0ce69759adc648f3e99f7bedef403310d47",
+            "memorySha256": "9a6aa8ccd91be3268dcdc345735b0d511e79a05bd82479c5268d74c229ab0e58",
+            "bytes": 60686336,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 235,
+            "corrections": 9,
+            "replayedFrames": 53,
+            "maxReplay": 12,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 60751872,
+            "retainedSnapshots": 5,
+            "retainedBytes": 58523648
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "efba70b8cb1d254c2060c04d7eedf4ced0e8d7f9387732e95220fc5ede82bd1a",
+            "fresh": "efba70b8cb1d254c2060c04d7eedf4ced0e8d7f9387732e95220fc5ede82bd1a"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.271642208099365,
+                21.856475830078125,
+                83.0000228881836
+              ],
+              "interest": [
+                4.559269428253174,
+                10.764840126037598,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.271642208099365,
+                21.856475830078125,
+                83.0000228881836
+              ],
+              "interest": [
+                4.559269428253174,
+                10.764840126037598,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 4,
+            "copiedBytes": 125935616,
+            "comparedBytes": 0,
+            "copyCpuMs": 575.3000000119209,
+            "guardCpuMs": 2.9999999403953552,
+            "maxCopyCpuMs": 306.5,
+            "replicaBytes": 60686336,
+            "copyMode": "dirty",
+            "dirtyPages": 15930,
+            "fullCopies": 1,
+            "coverageAudits": 4,
+            "dirtySamples": [
+              {
+                "game": 14816,
+                "render": 14816
+              },
+              {
+                "game": 544,
+                "render": 169
+              },
+              {
+                "game": 545,
+                "render": 175
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 78,
+            "restores": 13,
+            "capturedBytes": 188481536,
+            "restoredBytes": 201850880,
+            "comparedBytes": 480772096,
+            "sharedPages": 69353,
+            "guardCpuMs": 37.89999985694885,
+            "captureCpuMs": 417.7000004053116,
+            "restoreCpuMs": 94.59999990463257,
+            "maxCaptureCpuMs": 20.5,
+            "maxRestoreCpuMs": 18,
+            "peakRetainedBytes": 60751872,
+            "sparse": true,
+            "sparseSkippedCapturePages": 67099,
+            "sparseSkippedRestorePages": 8958,
+            "captureAudits": 78,
+            "restoreAudits": 13,
+            "restoreCopyCpuMs": 25.19999998807907,
+            "retainedBytes": 58523648,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 62980096
+          }
+        }
+      ]
+    }
+  ],
+  "restores": [
+    {
+      "pair": "Fx-Fc",
+      "rawReportSha256": "24baae224c15c589f78c471e89a7f461df7ce7ca2a8e1bfe49e7ca1e99e23bf9",
+      "reports": [
+        {
+          "seat": 0,
+          "illusionRestore": [
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5967b417188a972309407728d0841a2f59eb278f0fe657b715b90a8bcf4f947d"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -5.376774787902832,
+                  78.07793426513672,
+                  257.615234375
+                ],
+                "interest": [
+                  -1.939563512802124,
+                  36.5026741027832,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "deb1c7562db821d298ae1e8fe251270ca280e804d4fa7161b8cb98ac6c1e69f2"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.493697166442871,
+                  85.13861846923828,
+                  304.15093994140625
+                ],
+                "interest": [
+                  -32.652793884277344,
+                  42.847293853759766,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "830e636ed1d38c68c65737281b66fd7b739f69daad4031f6e2db3df10e89db00"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -5.376774787902832,
+                  78.07793426513672,
+                  257.615234375
+                ],
+                "interest": [
+                  -1.939563512802124,
+                  36.5026741027832,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "deb1c7562db821d298ae1e8fe251270ca280e804d4fa7161b8cb98ac6c1e69f2"
+            },
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5967b417188a972309407728d0841a2f59eb278f0fe657b715b90a8bcf4f947d"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.493697166442871,
+                  85.13861846923828,
+                  304.15093994140625
+                ],
+                "interest": [
+                  -32.652793884277344,
+                  42.847293853759766,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "830e636ed1d38c68c65737281b66fd7b739f69daad4031f6e2db3df10e89db00"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -5.376774787902832,
+                  78.07793426513672,
+                  257.615234375
+                ],
+                "interest": [
+                  -1.939563512802124,
+                  36.5026741027832,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "deb1c7562db821d298ae1e8fe251270ca280e804d4fa7161b8cb98ac6c1e69f2"
+            }
+          ],
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 197,
+            "corrections": 16,
+            "replayedFrames": 62,
+            "maxReplay": 8,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42270720,
+            "retainedSnapshots": 5,
+            "retainedBytes": 42074112
+          },
+          "finalHash": {
+            "stateSha256": "25f510391518b7b1c7996bd2afb5d36e2584e2623059d260d89ff86de939985c",
+            "memorySha256": "6046e3bb0ac143a851486d055a83df3e7d096a379fed2a09c4212aae049e1a2a",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "10c0a50af1518a5b1045cfc872bb9a2c409e847590062f4fb65b6097ea6dddfb",
+            "fresh": "10c0a50af1518a5b1045cfc872bb9a2c409e847590062f4fb65b6097ea6dddfb"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.238235950469971,
+                61.99959182739258,
+                279.0414733886719
+              ],
+              "interest": [
+                11.133426666259766,
+                33.166534423828125,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.238235950469971,
+                61.99959182739258,
+                279.0414733886719
+              ],
+              "interest": [
+                11.133426666259766,
+                33.166534423828125,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 11,
+            "copiedBytes": 410042368,
+            "comparedBytes": 0,
+            "copyCpuMs": 1490.4999999403954,
+            "guardCpuMs": 9.699999928474426,
+            "maxCopyCpuMs": 335.60000002384186,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 87772,
+            "fullCopies": 1,
+            "coverageAudits": 11,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 12336,
+                "render": 128
+              },
+              {
+                "game": 12336,
+                "render": 131
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 95,
+            "restores": 35,
+            "capturedBytes": 149291008,
+            "restoredBytes": 840957952,
+            "comparedBytes": 447479808,
+            "sharedPages": 70968,
+            "guardCpuMs": 58.50000011920929,
+            "captureCpuMs": 472.7999999523163,
+            "restoreCpuMs": 262.7999999523163,
+            "maxCaptureCpuMs": 20.30000001192093,
+            "maxRestoreCpuMs": 17.19999998807907,
+            "peakRetainedBytes": 42270720,
+            "sparse": true,
+            "sparseSkippedCapturePages": 68243,
+            "sparseSkippedRestorePages": 14153,
+            "captureAudits": 95,
+            "restoreAudits": 35,
+            "restoreCopyCpuMs": 72.70000022649765,
+            "retainedBytes": 42074112,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        },
+        {
+          "seat": 1,
+          "illusionRestore": [
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5967b417188a972309407728d0841a2f59eb278f0fe657b715b90a8bcf4f947d"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -5.376774787902832,
+                  78.07793426513672,
+                  257.615234375
+                ],
+                "interest": [
+                  -1.939563512802124,
+                  36.5026741027832,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "deb1c7562db821d298ae1e8fe251270ca280e804d4fa7161b8cb98ac6c1e69f2"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.493697166442871,
+                  85.13861846923828,
+                  304.15093994140625
+                ],
+                "interest": [
+                  -32.652793884277344,
+                  42.847293853759766,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "830e636ed1d38c68c65737281b66fd7b739f69daad4031f6e2db3df10e89db00"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -5.376774787902832,
+                  78.07793426513672,
+                  257.615234375
+                ],
+                "interest": [
+                  -1.939563512802124,
+                  36.5026741027832,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "deb1c7562db821d298ae1e8fe251270ca280e804d4fa7161b8cb98ac6c1e69f2"
+            },
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5967b417188a972309407728d0841a2f59eb278f0fe657b715b90a8bcf4f947d"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.493697166442871,
+                  85.13861846923828,
+                  304.15093994140625
+                ],
+                "interest": [
+                  -32.652793884277344,
+                  42.847293853759766,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "830e636ed1d38c68c65737281b66fd7b739f69daad4031f6e2db3df10e89db00"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -5.376774787902832,
+                  78.07793426513672,
+                  257.615234375
+                ],
+                "interest": [
+                  -1.939563512802124,
+                  36.5026741027832,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "deb1c7562db821d298ae1e8fe251270ca280e804d4fa7161b8cb98ac6c1e69f2"
+            }
+          ],
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 19,
+            "replayedFrames": 116,
+            "maxReplay": 10,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 43581440,
+            "retainedSnapshots": 5,
+            "retainedBytes": 42074112
+          },
+          "finalHash": {
+            "stateSha256": "25f510391518b7b1c7996bd2afb5d36e2584e2623059d260d89ff86de939985c",
+            "memorySha256": "6046e3bb0ac143a851486d055a83df3e7d096a379fed2a09c4212aae049e1a2a",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "10c0a50af1518a5b1045cfc872bb9a2c409e847590062f4fb65b6097ea6dddfb",
+            "fresh": "10c0a50af1518a5b1045cfc872bb9a2c409e847590062f4fb65b6097ea6dddfb"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.238235950469971,
+                61.99959182739258,
+                279.0414733886719
+              ],
+              "interest": [
+                11.133426666259766,
+                33.166534423828125,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                4.238235950469971,
+                61.99959182739258,
+                279.0414733886719
+              ],
+              "interest": [
+                11.133426666259766,
+                33.166534423828125,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 11,
+            "copiedBytes": 410103808,
+            "comparedBytes": 0,
+            "copyCpuMs": 1474.0999999642372,
+            "guardCpuMs": 11.300000071525574,
+            "maxCopyCpuMs": 363.2000000476837,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 87787,
+            "fullCopies": 1,
+            "coverageAudits": 11,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 12336,
+                "render": 128
+              },
+              {
+                "game": 12336,
+                "render": 131
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 105,
+            "restores": 38,
+            "capturedBytes": 166395904,
+            "restoredBytes": 846397440,
+            "comparedBytes": 482934784,
+            "sharedPages": 78417,
+            "guardCpuMs": 68.09999996423721,
+            "captureCpuMs": 536.5000001192093,
+            "restoreCpuMs": 269.6000000834465,
+            "maxCaptureCpuMs": 20.399999976158142,
+            "maxRestoreCpuMs": 15.900000035762787,
+            "peakRetainedBytes": 43581440,
+            "sparse": true,
+            "sparseSkippedCapturePages": 75673,
+            "sparseSkippedRestorePages": 16383,
+            "captureAudits": 105,
+            "restoreAudits": 38,
+            "restoreCopyCpuMs": 71.50000005960464,
+            "retainedBytes": 42074112,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        }
+      ]
+    },
+    {
+      "pair": "Fc-Fx",
+      "rawReportSha256": "5ead5a0aef43d7ec4a531f31cb9b88f069a452cc029845b9afcd0f9a014ed4a8",
+      "reports": [
+        {
+          "seat": 0,
+          "illusionRestore": [
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "ed3d376213799cd59998b29e7888a5cfb850c0ab672859ec4eb7213207c267de"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -4.182135105133057,
+                  77.61922454833984,
+                  248.0193634033203
+                ],
+                "interest": [
+                  0.8941421508789062,
+                  36.351287841796875,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5287f67978370db2c6197e239694d2d6f4c015f4fc7c8f86396ab1e4e02d0b16"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.06851863861084,
+                  81.04622650146484,
+                  291.4313659667969
+                ],
+                "interest": [
+                  -28.66105079650879,
+                  38.90616989135742,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "d9cf2436f03fdcee0c456c179278a4519a2ea58de4241c531b839d6c3912ba3c"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -4.182135105133057,
+                  77.61922454833984,
+                  248.0193634033203
+                ],
+                "interest": [
+                  0.8941421508789062,
+                  36.351287841796875,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5287f67978370db2c6197e239694d2d6f4c015f4fc7c8f86396ab1e4e02d0b16"
+            },
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "ed3d376213799cd59998b29e7888a5cfb850c0ab672859ec4eb7213207c267de"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.06851863861084,
+                  81.04622650146484,
+                  291.4313659667969
+                ],
+                "interest": [
+                  -28.66105079650879,
+                  38.90616989135742,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "d9cf2436f03fdcee0c456c179278a4519a2ea58de4241c531b839d6c3912ba3c"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -4.182135105133057,
+                  77.61922454833984,
+                  248.0193634033203
+                ],
+                "interest": [
+                  0.8941421508789062,
+                  36.351287841796875,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5287f67978370db2c6197e239694d2d6f4c015f4fc7c8f86396ab1e4e02d0b16"
+            }
+          ],
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 229,
+            "corrections": 17,
+            "replayedFrames": 76,
+            "maxReplay": 8,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42205184,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41943040
+          },
+          "finalHash": {
+            "stateSha256": "b4da4421839b0c01aaba587b41e3f007b6b52db17088ae494d477d524d12567e",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 11,
+            "copiedBytes": 410050560,
+            "comparedBytes": 0,
+            "copyCpuMs": 1142.3999999761581,
+            "guardCpuMs": 8.600000023841858,
+            "maxCopyCpuMs": 324.7999999523163,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 87774,
+            "fullCopies": 1,
+            "coverageAudits": 11,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 12336,
+                "render": 131
+              },
+              {
+                "game": 12336,
+                "render": 133
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 98,
+            "restores": 36,
+            "capturedBytes": 151388160,
+            "restoredBytes": 842858496,
+            "comparedBytes": 455540736,
+            "sharedPages": 73249,
+            "guardCpuMs": 71.59999996423721,
+            "captureCpuMs": 535.1999998688698,
+            "restoreCpuMs": 252.69999998807907,
+            "maxCaptureCpuMs": 20.5,
+            "maxRestoreCpuMs": 16.599999964237213,
+            "peakRetainedBytes": 42205184,
+            "sparse": true,
+            "sparseSkippedCapturePages": 70465,
+            "sparseSkippedRestorePages": 14895,
+            "captureAudits": 98,
+            "restoreAudits": 36,
+            "restoreCopyCpuMs": 75.09999990463257,
+            "retainedBytes": 41943040,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        },
+        {
+          "seat": 1,
+          "illusionRestore": [
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "ed3d376213799cd59998b29e7888a5cfb850c0ab672859ec4eb7213207c267de"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -4.182135105133057,
+                  77.61922454833984,
+                  248.0193634033203
+                ],
+                "interest": [
+                  0.8941421508789062,
+                  36.351287841796875,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5287f67978370db2c6197e239694d2d6f4c015f4fc7c8f86396ab1e4e02d0b16"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.06851863861084,
+                  81.04622650146484,
+                  291.4313659667969
+                ],
+                "interest": [
+                  -28.66105079650879,
+                  38.90616989135742,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "d9cf2436f03fdcee0c456c179278a4519a2ea58de4241c531b839d6c3912ba3c"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -4.182135105133057,
+                  77.61922454833984,
+                  248.0193634033203
+                ],
+                "interest": [
+                  0.8941421508789062,
+                  36.351287841796875,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5287f67978370db2c6197e239694d2d6f4c015f4fc7c8f86396ab1e4e02d0b16"
+            },
+            {
+              "label": "before-birth",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  8.78895092010498,
+                  77.7341079711914,
+                  226.02481079101562
+                ],
+                "interest": [
+                  16.408323287963867,
+                  36.41558837890625,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "ed3d376213799cd59998b29e7888a5cfb850c0ab672859ec4eb7213207c267de"
+            },
+            {
+              "label": "after-retirement",
+              "attachments": 0,
+              "drawn": 0,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -10.06851863861084,
+                  81.04622650146484,
+                  291.4313659667969
+                ],
+                "interest": [
+                  -28.66105079650879,
+                  38.90616989135742,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "d9cf2436f03fdcee0c456c179278a4519a2ea58de4241c531b839d6c3912ba3c"
+            },
+            {
+              "label": "live-ghost",
+              "attachments": 1,
+              "drawn": 1,
+              "differentBytes": 0,
+              "rgbaBytes": 2764800,
+              "sameCamera": true,
+              "camera": {
+                "resolution": [
+                  960,
+                  720
+                ],
+                "eye": [
+                  -4.182135105133057,
+                  77.61922454833984,
+                  248.0193634033203
+                ],
+                "interest": [
+                  0.8941421508789062,
+                  36.351287841796875,
+                  0
+                ],
+                "fov": 30,
+                "aspect": 1.2173333168029785
+              },
+              "stateSha256": "5287f67978370db2c6197e239694d2d6f4c015f4fc7c8f86396ab1e4e02d0b16"
+            }
+          ],
+          "kernel": {
+            "frame": 240,
+            "confirmed": 239,
+            "pendingCorrection": null,
+            "forwardFrames": 240,
+            "predictedFrames": 240,
+            "corrections": 18,
+            "replayedFrames": 99,
+            "maxReplay": 9,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 42205184,
+            "retainedSnapshots": 5,
+            "retainedBytes": 41943040
+          },
+          "finalHash": {
+            "stateSha256": "b4da4421839b0c01aaba587b41e3f007b6b52db17088ae494d477d524d12567e",
+            "memorySha256": "6b5672e9cf81edbc03fd7b17fa14917062661eb9fad6bf4f355f0f8862199de1",
+            "bytes": 50528256,
+            "globals": [
+              1168352,
+              0,
+              1102816,
+              1168352
+            ]
+          },
+          "pixelOracle": {
+            "differentBytes": 0,
+            "bytes": 2764800,
+            "cached": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501",
+            "fresh": "221e0febc371399c34346bf811f12c69a7c57161d92e9793bc06b5cebd9f0501"
+          },
+          "cameraOracle": {
+            "sameAsFresh": true,
+            "corrected": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            },
+            "fresh": {
+              "resolution": [
+                960,
+                720
+              ],
+              "eye": [
+                3.477607488632202,
+                48.32766342163086,
+                273.18682861328125
+              ],
+              "interest": [
+                8.820296287536621,
+                29.57503318786621,
+                0
+              ],
+              "fov": 30,
+              "aspect": 1.2173333168029785
+            }
+          },
+          "replica": {
+            "frames": 11,
+            "copiedBytes": 458620928,
+            "comparedBytes": 0,
+            "copyCpuMs": 1096.1000000238419,
+            "guardCpuMs": 11.5,
+            "maxCopyCpuMs": 274.80000001192093,
+            "replicaBytes": 50528256,
+            "copyMode": "dirty",
+            "dirtyPages": 99632,
+            "fullCopies": 1,
+            "coverageAudits": 11,
+            "dirtySamples": [
+              {
+                "game": 12336,
+                "render": 12336
+              },
+              {
+                "game": 12336,
+                "render": 131
+              },
+              {
+                "game": 12336,
+                "render": 133
+              }
+            ],
+            "dirtyHostEvents": []
+          },
+          "snapshotCosts": {
+            "captures": 102,
+            "restores": 37,
+            "capturedBytes": 158269440,
+            "restoredBytes": 893059072,
+            "comparedBytes": 421003264,
+            "sharedPages": 76228,
+            "guardCpuMs": 60.89999973773956,
+            "captureCpuMs": 513.0999998450279,
+            "restoreCpuMs": 227.5,
+            "maxCaptureCpuMs": 17.30000001192093,
+            "maxRestoreCpuMs": 21.19999998807907,
+            "peakRetainedBytes": 42205184,
+            "sparse": true,
+            "sparseSkippedCapturePages": 74181,
+            "sparseSkippedRestorePages": 14900,
+            "captureAudits": 102,
+            "restoreAudits": 37,
+            "restoreCopyCpuMs": 63.8000003695488,
+            "retainedBytes": 41943040,
+            "count": 8,
+            "backend": "wasm-simd-multimemory",
+            "storageAllocatedBytes": 46202880
+          }
+        }
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "name": "experiment-native-rooms",
+      "passed": true,
+      "rawReportSha256": "a3abeee6926089470ccd92d84860bfe84577be39bc29c8f081edd57d30ad371b",
+      "scope": "Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.",
+      "frames": 600,
+      "matchingFighterState": true
+    },
+    {
+      "name": "experiment-native-rooms-results",
+      "passed": true,
+      "rawReportSha256": "945cfd64280f363551b317096f6b091e49416d6f48c7844350f0a933fa717e20",
+      "scope": "Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.",
+      "lifecycle": [
+        {
+          "results": {
+            "outcome": 2,
+            "frames": 805,
+            "winnerCount": 1,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 0,
+                "percent": 0,
+                "score": -16777202,
+                "winner": false
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0,
+            "mode": 1,
+            "timer": 1
+          },
+          "scene": "results"
+        },
+        {
+          "results": {
+            "outcome": 2,
+            "frames": 805,
+            "winnerCount": 1,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 0,
+                "percent": 0,
+                "score": -16777202,
+                "winner": false
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0,
+            "mode": 1,
+            "timer": 1
+          },
+          "scene": "results"
+        },
+        {
+          "results": {
+            "outcome": 1,
+            "frames": 28800,
+            "winnerCount": 2,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0,
+            "mode": 1,
+            "timer": 1
+          },
+          "scene": "results"
+        },
+        {
+          "results": {
+            "outcome": 1,
+            "frames": 28800,
+            "winnerCount": 2,
+            "players": [
+              {
+                "character": 20,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              },
+              {
+                "character": 2,
+                "kind": 0,
+                "stocks": 4,
+                "percent": 0,
+                "score": 4,
+                "winner": true
+              }
+            ]
+          },
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0,
+            "mode": 1,
+            "timer": 1
+          },
+          "scene": "results"
+        }
+      ],
+      "restarted": [
+        {
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0,
+            "mode": 1,
+            "timer": 1
+          },
+          "stocks": [
+            4,
+            4
+          ],
+          "limit": 480
+        },
+        {
+          "selection": {
+            "players": [
+              {
+                "character": 20,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 2,
+                "costume": 1,
+                "kind": 0,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              },
+              {
+                "character": 26,
+                "costume": 0,
+                "kind": 3,
+                "stocks": 4
+              }
+            ],
+            "stage": 31,
+            "seconds": 480,
+            "items": -1,
+            "teams": 0,
+            "mode": 1,
+            "timer": 1
+          },
+          "stocks": [
+            4,
+            4
+          ],
+          "limit": 480
+        }
+      ],
+      "legalStagesAfterReturn": [
+        2,
+        3,
+        8,
+        28,
+        31,
+        32
+      ]
+    }
+  ],
+  "tests": {
+    "total": 622,
+    "passed": 612,
+    "failed": 0,
+    "skipped": 10,
+    "logSha256": "68ac5329900286faf693a440074a9b91d244622749096bb81912800f53fd9024"
+  }
+}

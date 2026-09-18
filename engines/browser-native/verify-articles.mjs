@@ -97,3 +97,42 @@ export function verifyArticles(module,fixtures) {
   check(module._portFileAllocations()===baseline.files,'article archive release');
   return {passed:true,checks,scriptFrames,rows,limitation:'Original article model setup and hitbox command handlers in isolated owners. Full item spawning, movement, fighter ownership, collision scheduling and match integration remain.'};
 }
+
+// Drive the original side-B and verify the separately owned second ghost.
+// No fighter position/action or attachment pointer is assigned by this probe.
+export function verifyIllusionAttachments(module,object,code,report,{step,onStep=()=>null}) {
+  if(!['Fx','Fc'].includes(code))throw Error('Illusion probe requires Fox or Falco');
+  const list=module._malloc(512*12);if(!list)throw Error('Illusion attachment probe allocation');
+  const read=()=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(object,i));
+  const require=(ok,message)=>{if(!ok)throw Error('Illusion attachments: '+message);};
+  const seen=new Set(),owners=new Set(),roots=new Set();let previous=new Set(),phase=null;
+  Object.assign(report,{completed:false,frames:0,spawns:0,retirements:0,reusedIdentities:0,reusedOwners:0,reusedRoots:0,attachedFrames:0,renderedAttachmentFrames:0,phases:[]});
+  function tick(buttons=0,x=0,y=0){
+    module._portStageProbePad(0,buttons,x,y);step();report.frames++;
+    const count=module._portItemAttachmentsList(list,512);require(count<=512,'capacity');
+    const rows=Array.from(new Uint32Array(module.HEAPU8.buffer,list,count*3)),current=new Set();
+    for(let i=0;i<count;i++){
+      const [owner,root,descriptor]=rows.slice(i*3,i*3+3);require(owner&&root&&descriptor,'incomplete native identity');
+      const key=owner+':'+root+':'+descriptor;current.add(key);
+      if(!previous.has(key)){report.spawns++;if(seen.has(key))report.reusedIdentities++;seen.add(key);if(owners.has(owner))report.reusedOwners++;if(roots.has(root))report.reusedRoots++;owners.add(owner);roots.add(root);}
+    }
+    for(const key of previous)if(!current.has(key))report.retirements++;
+    previous=current;report.attachedFrames+=count>0;if(phase){phase.peakAttachments=Math.max(phase.peakAttachments,count);const state=read()[0];if(!phase.states.includes(state))phase.states.push(state);}
+    const drawn=onStep({count,rows,frame:report.frames});
+    if(drawn){const visible=drawn.attachmentDraws?.filter(d=>d.draws>0)??[];if(count){require(visible.length>0,'secondary ghost did not reach a native GPU draw');report.renderedAttachmentFrames++;}else require(!drawn.attachmentDraws?.length,'retired ghost retained a GPU binding');report.resources=drawn.resourceStats;}
+    return read();
+  }
+  try {
+    for(let i=0;i<90;i++)tick();
+    for(let repeat=0;repeat<8;repeat++){
+      require(read()[0]===14&&read()[3]===0,'settled grounded fighter');
+      const direction=read()[4]>=0?-1:1;phase={repeat,direction,states:[],peakAttachments:0};report.phases.push(phase);
+      for(let i=0;i<8;i++)tick(0,direction*.5);for(let i=0;i<20;i++)tick();
+      tick(0x200,direction);tick(0x200,direction);for(let i=0;i<120;i++)tick();
+      require(phase.peakAttachments>0,'full side-B never produced its second ghost');require(previous.size===0,'ghost did not retire');
+    }
+    require(report.spawns===report.retirements&&report.spawns>=8,'unbalanced repeated ghost lifetime');
+    require(report.resources?.itemRetired>=report.retirements,'renderer did not retire attachment resources');
+    report.completed=true;
+  }finally{module._free(list);}
+}

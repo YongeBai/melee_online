@@ -1,3 +1,4 @@
+import {verifyIllusionAttachments} from './verify-articles.mjs';
 import {readNativeResults} from './native-results.mjs';
 import {convertPeachCommonItems} from './common-item-assets.mjs';
 import {verifyPeachMoves,verifyPeachPulls,verifyPeachContact} from './verify-peach.mjs';
@@ -360,7 +361,7 @@ try {
         // module. Keep all their calls and direct HEAP writes in the same
         // instance as the renderer. Never retain this scope across an await.
         const scoped=fn=>{const previous=module;module=renderModule;try{const result=fn();if(result?.then)throw Error('Native presentation must be synchronous');return result;}finally{module=previous;}};
-        const renderer=scoped(()=>createNativeMatchPreview(renderModule,canvas,previewActors,{presentationCache,cacheModels:params.get('cachemodels')!=='0',traceAttachments:params.has('kirbycopy'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'}));
+        const renderer=scoped(()=>createNativeMatchPreview(renderModule,canvas,previewActors,{presentationCache,cacheModels:params.get('cachemodels')!=='0',traceAttachments:params.has('kirbycopy')||params.has('illusionattachments'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'}));
         return Object.fromEntries(Object.entries(renderer).map(([key,value])=>[key,typeof value==='function'?(...args)=>scoped(()=>value(...args)):value]));
       };preview=previewFactory();
       if(params.has('prewarmshaders')){
@@ -510,7 +511,8 @@ try {
         report.input.states.push({name,state:state()});
         const latest=report.input.states.at(-1).state;
         if(name==='walk'&&(!(latest[4]>report.afterSteps[4])||![15,16,17].includes(latest[0])))throw Error('Scripted walking input did not produce walking movement');
-        if(name==='air'&&(latest[3]!==1||latest[5]<=report.afterSteps[5]))throw Error('Scripted jump did not become airborne');
+        // Compare to the actual takeoff floor, not the earlier intro spawn platform.
+        if(name==='air'&&(latest[3]!==1||latest[5]<=report.input.states.find(s=>s.name==='release').state[5]))throw Error('Scripted jump did not become airborne');
         if(name==='attack'&&!(latest[0]>=65&&latest[0]<=69||code==='Gw'&&latest[0]>=347&&latest[0]<=349))throw Error('Scripted aerial attack did not enter an aerial attack state');
         if(name==='recover'&&(latest[0]!==14||latest[3]!==0))throw Error('Fighter did not recover into grounded Wait');
       }
@@ -644,6 +646,9 @@ try {
             report.preview[name]=drawn;const img=document.createElement('img');img.id='native-preview-'+name;img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);
           }
         }:undefined});
+      }
+      if(params.has('illusionattachments')){
+        report.illusionAttachments={};verifyIllusionAttachments(module,object,code,report.illusionAttachments,{step,onStep:()=>{const drawn=preview.draw();recordHud(drawn);report.renderedSteps=(report.renderedSteps??0)+1;if(drawn.attachmentDraws?.some(d=>d.draws)&&!report.preview.illusion){report.preview.illusion=drawn;const img=document.createElement('img');img.id='native-preview-illusion';img.width=960;img.height=720;img.src=canvas.toDataURL();canvas.before(img);}return drawn;}});
       }
       if(params.has('linkmoves')){
         if(!['Lk','Cl'].includes(code))throw Error('Link move probe fighter');

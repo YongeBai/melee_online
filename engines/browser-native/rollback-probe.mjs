@@ -18,7 +18,7 @@ try{
  const runtime=await createSnapshotRuntime(create,bytes,{dirtyManifest:dirty?.manifest,onNativeMusic:r=>audio.request(r),onNativeAudioMode:()=>true});
  runtime.module._portMenuDiagnosticMute();
  const presentationCache=params.get('gpucache')==='0'?null:createPresentationCache();
- const boot=await runNativeConstructor({module:runtime.module,presentationCache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
+ const boot=await runNativeConstructor({module:runtime.module,presentationCache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,...(params.has('illusionrestore')?{illusionattachments:1}:{}),map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
   // The standalone constructor inserts settled/Ready/Go still images before
   // the canvas. Remove those diagnostics so screenshots show the corrected
   // live canvas, not the pre-intro image with hidden fighters and an unset HUD.
@@ -31,6 +31,46 @@ try{
   const stageState=()=>params.get('map')==='fountain'?[0,1].map(i=>module._portFountainPlatformRead(0,i)):params.get('map')==='story'?[0,1].map(i=>module._portRandallRead(i)):params.get('map')==='stadium'?[0,1,2,3,4,5].map(i=>module._portStadiumRead(i)):params.get('map')==='dreamland'?[0,1,2].map(i=>module._portDreamlandWindRead(i,0)):[];
   const read=()=>({players:boundary.readPlayers(),partners:[0,1].map(p=>{const o=module._Player_GetEntityAtIndex(p,1);return o?Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)):null;}),stage:stageState(),clock:[12,13,14].map(f=>module._portTournamentRead(f,0)),objects:module._portRuntimeObjectsUsed(),procs:module._portRuntimeProcsUsed()});
   const initial=store.capture();const initialHash=await store.hash(initial),initialState=read();store.restore(initial);
+  // Restore both sides of the short-lived secondary Illusion/Phantasm model.
+  // This opt-in correctness probe uses controller samples only, before the
+  // ordinary delayed-input trial, and restores the original full boundary.
+  const illusionRestore=[];
+  if(params.has('illusionrestore')){
+   if(!replica||!['Fx','Fc'].includes(params.get('character')))throw Error('Illusion restore requires a Fox/Falco replica');
+   const captures=[];
+   const walk=(buttons=0,x=0)=>{module._portControllerSample(0,buttons,x,0,0,0,0,0);module._portControllerSample(1,0,0,0,0,0,0,0);boundary.step();};
+   const count=()=>module._portItemAttachmentsList(0,0);
+   const capture=label=>{const checkpoint=store.capture();const row={label,checkpoint,attachments:count()};captures.push(row);return row;};
+   try{
+    for(let f=0;f<90;f++)walk();
+    const direction=boundary.readPlayers()[0][4]>=0?-1:1;
+    for(let f=0;f<8;f++)walk(0,direction*.5);for(let f=0;f<20;f++)walk();
+    const before=capture('before-birth');if(before.attachments)throw Error('Unexpected pre-Illusion attachment');
+    walk(0x200,direction);walk(0x200,direction);
+    for(let f=0;!count()&&f<80;f++)walk();
+    if(!count())throw Error('Illusion restore never spawned a secondary model');
+    const live=capture('live-ghost');
+    for(let f=0;f<120;f++)walk();
+    const retired=capture('after-retirement');if(retired.attachments)throw Error('Illusion did not retire');
+    const camera=d=>({resolution:d.resolution,eye:d.eye,interest:d.interest,fov:d.fov,aspect:d.aspect});
+    for(const row of [before,live,retired,live,before,retired,live]){
+     store.restore(row.checkpoint);if(count()!==row.attachments)throw Error('Attachment lifetime failed to restore');
+     const expected=await store.hash(row.checkpoint);let rendered,rgba;
+     replica.present(m=>boundary.createPreview(presentationCache,m),p=>{rendered=p.draw();p.validateGpu();rgba=pixels();});
+     const unchanged=store.capture();const hash=await store.hash(unchanged);store.release(unchanged);
+     if(hash.stateSha256!==expected.stateSha256)throw Error('Illusion replica changed full source state');
+     const drawn=rendered.attachmentDraws?.filter(r=>r.draws>0).length??0;
+     if(row.attachments?drawn===0:rendered.attachmentDraws?.length)throw Error('Restored ghost draw/retirement mismatch');
+     let fresh,freshPixels,p;
+     try{p=boundary.createPreview(null);fresh=p.draw();p.validateGpu();freshPixels=pixels();}finally{p?.dispose();store.restore(row.checkpoint);}
+     const differentBytes=rgba.reduce((n,v,i)=>n+(v!==freshPixels[i]),0),sameCamera=JSON.stringify(camera(rendered))===JSON.stringify(camera(fresh));
+     if(differentBytes||!sameCamera)throw Error('Restored Illusion pixel/camera oracle mismatch');
+     const restored=store.capture(),restoredHash=await store.hash(restored);store.release(restored);
+     if(restoredHash.stateSha256!==expected.stateSha256)throw Error('Fresh Illusion renderer failed complete restore');
+     illusionRestore.push({label:row.label,attachments:row.attachments,drawn,differentBytes,rgbaBytes:rgba.length,sameCamera,camera:camera(rendered),stateSha256:hash.stateSha256});
+    }
+   }finally{store.restore(initial);for(const row of captures)store.release(row.checkpoint);}
+  }
   // Identical predetermined normalized controller packets on both browsers;
   // no fighter/timer writes and no dependence on a predicted opponent position.
   const packets=[],combat=params.get('workload')==='combat',workload={hitlagFrames:0,damageFrames:0,attackFrames:0,stockChanges:0};
@@ -38,7 +78,7 @@ try{
   const step=inputs=>{for(let p=0;p<2;p++){module._portTapJumpSet(p,inputs[p].tap);module._portControllerSample(p,...inputs[p].pad);}boundary.step();if(module._portTournamentRead(15,0))throw Error('Rollback diagnostic does not support speculative match endings');};
   const trace=[];let previous=boundary.readPlayers();for(let frame=0;frame<frames;frame++){if(combat)packets[frame]=combatWorkload(frame,previous).map(pad=>({pad:completeNativeSample(pad),tap:1}));step([input(frame,0),input(frame,1)]);const current=boundary.readPlayers();workload.hitlagFrames+=current.some(p=>p[14]>0);workload.damageFrames+=current.some(p=>p[13]>0);workload.attackFrames+=current.some(p=>p[0]>=44&&p[0]<=69);workload.stockChanges+=current.filter((p,i)=>p[18]!==previous[i][18]).length;previous=current;if(frame%30===29)trace.push(read());}if(combat&&(!workload.hitlagFrames||!workload.damageFrames))throw Error('Combat rollback workload did not reach contact');
   const expectedState=read(),reference=store.capture(),referenceHash=await store.hash(reference);store.restore(initial);
-  const stats={replayPresentationCalls:0,presentations:0,presentationFrames:[],presentationCpuMs:[],replaying:false,referenceTrace:trace,workload,initialHash,referenceHash,initialState,expectedState,wasmAudit:runtime.audit,audio:audio.snapshot()};
+  const stats={replayPresentationCalls:0,presentations:0,presentationFrames:[],presentationCpuMs:[],replaying:false,illusionRestore,referenceTrace:trace,workload,initialHash,referenceHash,initialState,expectedState,wasmAudit:runtime.audit,audio:audio.snapshot()};
   function pixels(){const gl=picture.getContext('webgl2'),bytes=new Uint8Array(gl.drawingBufferWidth*gl.drawingBufferHeight*4);gl.readPixels(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight,gl.RGBA,gl.UNSIGNED_BYTE,bytes);return bytes;}
   function present(frame){
    if(stats.replaying){stats.replayPresentationCalls++;throw Error('Presentation during replay');}

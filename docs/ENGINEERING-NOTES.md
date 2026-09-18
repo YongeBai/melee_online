@@ -7,6 +7,13 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+[Illusion/Phantasm attachment lifetime](BROWSER-NATIVE-ILLUSION-ATTACHMENTS.md)
+includes the separately owned `xDDC` ghost in native item enumeration. The
+original item callback draws both roots; registering only its primary tree
+causes a missing-geometry failure during ordinary Fox CPU play. Preserve exact
+owner/root/descriptor identities, binding refresh and retirement. Do not hide
+this failure by dropping the callback or relaxing the geometry guard.
+
 [Per-draw uniform buffers](BROWSER-NATIVE-UNIFORM-BUFFER.md) copy all dynamic
 values into versioned owned std140 records under an exclusive presentation lease.
 Validate each linked program against reflected offsets, types and strides; keep
