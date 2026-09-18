@@ -24,6 +24,11 @@ not physical presentation, WAN, input-to-photon, full-roster performance or full
 tournament certification. The query remains opt-in and default rooms remain
 lockstep. See
 [the scoped evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
+The separate 60-frame product-room matrix now passes all 25 roster tiles, the
+held-A Sheik start and all six legal stages in two browsers with exact confirmed
+fighter state. That matrix proves loading/startup coverage, not sustained FPS
+for every character or matchup; see
+[the roster/stage evidence](benchmarks/browser-2026-09-18-native-room-matrix.json).
 
 [Cold shader preparation](BROWSER-NATIVE-SHADER-PREWARM.md) eliminates observed
 compile spikes with the existing exact-source cache, but the repeated Fountain
