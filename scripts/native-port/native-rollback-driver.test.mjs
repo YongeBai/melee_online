@@ -16,3 +16,10 @@ test('rollback driver freezes a transmitted input while its prediction window is
  const driver=createNativeRollbackDriver({network,session});assert.equal(driver.advance(3,[[256,.5,0],[0,0,0]]),false);network.tapJump=0;assert.equal(driver.advance(3,[[0,-1,0],[0,0,0]]),false);
  assert.deepEqual(sends,[[3,[256,.5,0,0,0,0,0]],[3,[256,.5,0,0,0,0,0]]]);assert.deepEqual(attempts,[{pad:[256,.5,0,0,0,0,0],tap:1},{pad:[256,.5,0,0,0,0,0],tap:1}]);driver.dispose();
 });
+
+test('rollback driver waits for the authenticated room phase before advancing neutral frames',()=>{
+ const calls=[],session={frame:0,confirmed:-1,receive(){},acknowledge(){},reconcile(){},advance(input){calls.push(input);this.frame++;return true;},snapshot(){return {};}};
+ const network={active:true,seat:0,tapJump:1,phaseReady:false,begin(){},bindRollback(){return ()=>{};},sendInput(){throw Error('input sent before phase ready');},snapshot(){return {};}};
+ const driver=createNativeRollbackDriver({network,session});assert.equal(driver.advance(0,[[0],[0]]),false);assert.equal(session.frame,0);assert.deepEqual(calls,[]);
+ network.phaseReady=true;assert.equal(driver.advance(0,[[0],[0]]),true);assert.equal(session.frame,1);assert.equal(calls.length,1);driver.dispose();
+});

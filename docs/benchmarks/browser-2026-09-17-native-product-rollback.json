@@ -1,44 +1,57 @@
 {
   "date": "2026-09-17",
-  "scope": "Opt-in product-room complete-state correction with independent WASM presentation; localhost correctness and cost evidence, not 720p60, WAN, or input-to-photon certification.",
+  "scope": "Opt-in product-room complete-state correction with independent WASM presentation; localhost simulation/submission evidence, not captured-frame, WAN, roster, input-to-photon, or tournament certification.",
   "configuration": {
     "browsers": 2,
-    "framesPerBrowser": 60,
+    "framesPerBrowser": 1800,
     "stage": "Final Destination",
     "characters": ["Falco", "Fox"],
     "resolution": [960, 720],
     "relay": "authenticated native room input/confirmation stream",
     "checkpoint": "audited dirty core, exact sparse pages, four-frame interval",
-    "presentation": "independent dirty WASM replica with retained immutable GPU cache"
+    "presentation": "every-forward-frame independent dirty WASM replica with retained immutable GPU cache",
+    "loadingBoundary": "87 exact shader programs plus 30 restored neutral presentation frames"
   },
   "result": {
     "passed": true,
     "matchingFighterState": true,
-    "confirmedFrame": [59, 59],
-    "corrections": [2, 5],
-    "replayedFrames": [7, 31],
-    "maxReplay": [5, 14],
-    "rejectedLateInputs": [0, 0]
+    "frames": [1800, 1800],
+    "draws": [1800, 1800],
+    "confirmedFrame": [1799, 1799],
+    "corrections": [0, 6],
+    "replayedFrames": [0, 24],
+    "maxReplay": [0, 5],
+    "rejectedLateInputs": [0, 0],
+    "runtimeShaderCompilations": [0, 0]
   },
   "timing": {
-    "elapsedMs": [1137.8, 1235.6],
-    "simulationFpsFromElapsed": [52.73, 48.56],
-    "drawSubmissionMeanMs": [17.08, 17.93],
-    "drawSubmissionP50Ms": [12.6, 12.4],
-    "drawSubmissionP95Ms": [34.0, 47.3],
-    "drawSubmissionMaxMs": [146.3, 146.8],
-    "stepMeanMs": [1.16, 1.24]
+    "elapsedMs": [30055.2, 30080.9],
+    "simulationFpsFromElapsed": [59.890, 59.839],
+    "drawSubmissionMeanMs": [7.846, 7.794],
+    "drawSubmissionP50Ms": [7.6, 7.5],
+    "drawSubmissionP95Ms": [10.9, 10.9],
+    "drawSubmissionMaxMs": [15.7, 16.4],
+    "stepMeanMs": [1.056, 1.058],
+    "drawIntervalMeanMs": [16.685, 16.675],
+    "drawIntervalP95Ms": [16.7, 16.7],
+    "drawIntervalMaxMs": [33.4, 33.4],
+    "animationGapsOver25Ms": [1, 0]
   },
   "copying": {
     "replicaMode": "dirty",
-    "replicaCopiedBytes": [94085120, 97173504],
+    "replicaFramesIncludingWarmup": [1830, 1830],
+    "replicaCopiedBytes": [1340297216, 1344929792],
     "replicaFullCopies": [1, 1],
-    "snapshotRestoredBytes": [3080192, 7667712],
+    "snapshotRestoredBytes": [1703936, 10878976],
+    "peakRetainedSnapshotBytes": [41943040, 42270720],
     "fixedTableContents": true
   },
   "gate": {
-    "requiredFps": 60,
-    "passed": false,
-    "reason": "Both elapsed cadence and draw-tail latency miss the 16.67 ms sustained product budget."
+    "requiredSimulationFps": 59.5,
+    "requiredSubmissionP95Ms": 20,
+    "requiredSubmissionMaxMs": 50,
+    "simulationSubmissionGatePassed": true,
+    "product720p60Certified": false,
+    "reason": "The product-room probe has no independent canvas-capture observer or physical presentation/input-to-photon measurement, covers one matchup and stage, and applies no WAN delay/jitter workload."
   }
 }

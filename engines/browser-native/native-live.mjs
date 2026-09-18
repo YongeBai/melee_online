@@ -60,7 +60,10 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       rollback?.reconcile();
       if(shouldFinish()){if(!rollback||rollback.canFinish(frames-1)){finish();return;}raf=requestAnimationFrame(frame);return;}
       if(document.hidden){reset();raf=requestAnimationFrame(frame);return;}
-      const steps=clock.take(now,frameLimit?Math.min(4,frameLimit-frames):4);
+      // A second forward step in one callback cannot become a distinct browser
+      // presentation. Retain clock debt and slow honestly after a late callback
+      // instead of advancing an unpresented game frame.
+      const steps=clock.take(now,frameLimit?Math.min(1,frameLimit-frames):1);
       cadence.callbacks++;if(!steps)cadence.zeroStepCallbacks++;if(steps>1)cadence.multiStepCallbacks++;
       if(cadence.timingSamples.length<128&&(cadence.callbacks<=8||steps!==1))cadence.timingSamples.push({callback:cadence.callbacks,frame:frames,steps,timestamp:now-started,callbackTime:performance.now()-started,interval:lastCallback===null?null:now-lastCallback,debt:clock.debtMs});
       if(lastCallback!==null&&now-lastCallback>25)cadence.rafGapsOver25Ms++;lastCallback=now;

@@ -14,7 +14,7 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  function restart(value){if(reloading)return;reloading=true;persist(value,true);reload();}
  const network={
   get code(){return state.code;},get seat(){return state.seat;},get state(){return state;},get active(){return state.hasGuest&&!state.cpu;},
-  get connected(){return state.connected.every(Boolean);},get cpu(){return state.cpu;},get tapJump(){return localTapJump;},
+  get connected(){return state.connected.every(Boolean);},get cpu(){return state.cpu;},get tapJump(){return localTapJump;},get phaseReady(){return phaseReady;},
   snapshot(){return {code:state.code,seat:state.seat,epoch:state.epoch,phase:key,phaseReady,nextFrame,buffered:frames.size,lastSent,confirmedFrame,pendingEnding:pendingEnding&&{frame:pendingEnding.frame,sent:pendingEnding.sent},bufferedRollbackEvents:rollbackEvents.length,mode:network.active?'lockstep-3':'solo',transport:network.active?'authenticated-inputs-v2':null};},
   async join(code){const result=await post('/native-rooms/join',{code});reloading=true;try{send({type:'leave'});}catch{}initial=result;persist(result,true);reloading=true;reload();},
   setTapJump(value){if(value!==0&&value!==1)throw Error('Invalid tap jump setting');localTapJump=value;},
@@ -73,6 +73,6 @@ export function createLocalNativeRoom(reason='Room service unavailable'){
  const state={seat:0,cpu:true,hasGuest:false,connected:[true,false],ready:[false,false]};
  const unavailable=()=>{throw Error(reason);};
  return {offline:true,reason,code:'',seat:0,cpu:true,active:false,connected:false,state,
-  tapJump:1,snapshot:()=>({mode:'solo',offline:true}),begin(){},take:s=>s,setTapJump(){},bindRollback(){return ()=>{};},sendInput(){return false;},dispose(){},
+  tapJump:1,phaseReady:false,snapshot:()=>({mode:'solo',offline:true}),begin(){},take:s=>s,setTapJump(){},bindRollback(){return ()=>{};},sendInput(){return false;},dispose(){},
   newRoom:()=>location.reload(),join:unavailable,cpuMode:unavailable,ready:unavailable,kick:unavailable,leave:unavailable};
 }
