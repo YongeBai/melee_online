@@ -1,14 +1,16 @@
 {
   "date": "2026-09-18",
-  "purpose": "Establish a typed, hosted no-ISO asset boundary for Melee's original GmRst result scene before runtime rendering work.",
-  "sourceCommitBeforeCheckpoint": "530bfb20a4d8c871dafdc7caa6e0d7ca2f2404a3",
+  "purpose": "Establish a typed, hosted no-ISO asset boundary for Melee's original GmRst result scene and validate every nested victory-motion FigaTree.",
+  "sourceCommitBeforeCheckpoint": "45437c9",
   "sourceSha256": {
     "engines/browser-native/menu-assets.mjs": "510fea17758ddc4e7aa4561d75a0108f2287d37b83d058a7a293f5ba59136eab",
-    "engines/browser-native/dirty-host-contract.mjs": "d74f76f3c61f165aaf418ae381d2e79a49155070d13df806374af0e5260919cb",
+    "engines/browser-native/result-motion-assets.mjs": "31e9d13451609f525654627d4d12fb8e7cdd5f6849e71769a554db05dcd38fb0",
+    "engines/browser-native/dirty-host-contract.mjs": "a9310137f282c0850d253aec36eb69d8e12071ad6c8feaaf4d3f87a3e8be3768",
     "scripts/native-port/menu-assets.test.mjs": "207febcf33494fdafa3f0c2f8986271326138de19dc5072ae8454135c268c9d6",
     "scripts/native-port/prepare-fixtures.mjs": "3c47b9796825b62cfbd0130aa7e520ebc09356b8d57beb35960026cef47f8505",
-    "scripts/native-port/serve.mjs": "9bf3af7824e94159a1484b074a8ff6d249b03accc5174344d06e7c0ca5db52f9",
-    "scripts/native-port/probe-result-assets.mjs": "5ba0e71a39eb925ac395b701cd5154b8ca070ee154b8123d0ace9e393d053b94"
+    "scripts/native-port/serve.mjs": "d6f79451513c3adb032210b8fd9d397bda4592fd45779e26c1cd61d392a37ff0",
+    "scripts/native-port/build.mjs": "946c8144af16d790ae1201884fde68b5b16b30293a22d01844284848b8fa6e8d",
+    "scripts/native-port/probe-result-assets.mjs": "37f36f996dfd35600de8ae87afb779f089f280174b05f52b7e6dd650ade116fa"
   },
   "commands": [
     "node scripts/native-port/prepare-fixtures.mjs <development USA 1.02 fixture>",
@@ -41,5 +43,15 @@
     "dynamicAnimationListsRetained": true,
     "cameraLightFogDescriptorsRetained": true
   },
-  "scope": "This validates hosted extraction, allowlisting, archive structure, and typed conversion of the original result assets. The product does not yet instantiate or render the GmRst scene, so this is not visual parity, FPS, or tournament-completion evidence."
+  "victoryMotions": {
+    "archives": 26,
+    "publics": 27,
+    "clips": 244,
+    "tracks": 38500,
+    "decodedCommands": 338526,
+    "outerRelocations": 0,
+    "nestedArchiveAlignment": 32,
+    "allNestedFigaTreesValidated": true
+  },
+  "scope": "This validates hosted extraction, allowlisting, archive structure, typed scene conversion, and every nested original victory-motion FigaTree. Native fighter construction, motion attachment, live product standings, result-screen FPS, and tournament-completion evidence remain separate gates."
 }

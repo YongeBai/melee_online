@@ -89,6 +89,14 @@ retain the original camera descriptors. The verified graph has five model roots,
 assets is only a prerequisite; do not claim the original `GmRst` scene until the
 runtime instantiates, animates, and visually validates it.
 
+The result-motion publics are not ordinary relocated archive graphs. Each is a
+32-byte-aligned concatenation of nested HSD FigaTree archives, with no outer
+relocations. Validate every nested tree before passing the original public to
+`ftDemo_SetArchiveData`. The hosted set contains 27 publics (Popo and Nana are
+separate), 244 clips, 38,500 tracks, and 338,526 decoded animation commands.
+Never infer clip boundaries by scanning payload bytes; advance by each nested
+archive header size and its required 32-byte alignment.
+
 The isolated panel bring-up now instantiates `pnlsce` through the original HSD
 archive, camera, light, JObj, and animation APIs, then submits its material state
 through the browser renderer. Preserve its descriptor exactly: the result camera

@@ -72,7 +72,10 @@ The original result-scene asset boundary is also validated independently. The
 hosted no-ISO server returned all 28 result fixtures. Typed conversion retained
 the `pnlsce` and `flmsce` cameras and their five model graphs (141 joints, 143
 meshes, 4,857 relocation slots); all 26 character motion archives and the result
-SIS archive were structurally inspected. This does not validate native runtime
+SIS archive were structurally inspected. Nested validation of every character
+motion public covered 244 FigaTree clips, 38,500 tracks, and 338,526 animation
+commands across all 26 archives, including separate Popo and Nana roots. This
+does not validate native runtime
 animation or pixels yet. See the
 [result-scene asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 
