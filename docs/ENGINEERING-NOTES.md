@@ -126,9 +126,14 @@ also needs the typed item runtime, common effects, camera, and dynamics pools
 before character `OnLoad` callbacks run. Animation sources may live in either
 resident files or owned `lbHeap` archive copies, so the validated copy boundary
 tracks both ranges. The browser probe observes distinct Fox/Falco owners and
-advancing native frames (Fox 0→60, Falco 0→10 after its loop). Their GPU fighter
-draws, result-camera/scissor composition, all-roster construction, live
-standings handoff, and result-screen cadence are still separate gates.
+advancing native frames (Fox 0→60, Falco 0→10 after its loop). A separate Fox
+winner draw now feeds the original fighter callback through the material GPU
+renderer under the untouched winner-camera projection. It submits 59 materials
+and verifies 6,972 transformed vertices; framebuffer readback finds 29,651
+non-black pixels in a 202×312 region. This is direct winner-camera evidence, not
+the final panel composition. Result-camera/scissor texture composition,
+all-roster construction, live standings handoff, and result-screen cadence are
+still separate gates.
 
 The same isolated target now constructs the untouched per-player cameras through
 `fn_8017A318`. PPC retained that function's camera pointer in `r3` and treated
@@ -140,9 +145,12 @@ capture cameras retain the original 20-degree FOV, 1.216667 aspect, and
 camera, whose callback submits the fighter five times across native passes
 0–2. Browser result callbacks use the existing offscreen camera setup because
 the isolated module deliberately has no console video mode. Teardown now returns
-actor objects and processes to zero. This validates camera construction and
-callback traversal, not GPU pixels: the loser portraits still require the
-original EFB-copy-to-panel-texture boundary, which is not implemented yet.
+actor objects and processes to zero. The Fox winner GPU probe uses the exact
+winner camera and original fighter draw callback, but its three render passes are
+still orchestrated by the browser preview rather than entered through the whole
+original camera callback traversal. The loser portraits and final composition
+still require the original EFB-copy-to-panel-texture boundary, which is not
+implemented yet.
 
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.
