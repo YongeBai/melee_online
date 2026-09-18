@@ -23,6 +23,15 @@ controlled relay-to-client adversity check, not full WAN or input-to-photon
 certification; see the
 [relay-delay evidence](benchmarks/browser-2026-09-18-native-room-relay-delay-720p60.json).
 
+The stronger bidirectional run independently injected 2/4/6/8/10 ms before the
+relay processed each client input and before each client received peer input or
+confirmation. Both clients sustained 59.875–59.916 simulation FPS, and seat 0
+captured 1,800/1,800 distinct 960×720 frames at 59.978 FPS. The peers performed
+232 corrections and replayed 452 frames, confirmed frame 1799, rejected no late
+inputs and converged exactly. This covers controlled two-way relay delay, not a
+real WAN, packet loss or physical latency; see the
+[bidirectional-delay evidence](benchmarks/browser-2026-09-18-native-room-bidirectional-delay-720p60.json).
+
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and
 [rollback correctness measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).

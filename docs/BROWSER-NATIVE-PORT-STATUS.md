@@ -28,6 +28,16 @@ identical fighter state. This narrows the network-readiness gap but is not full
 WAN, compositor-scanout or physical input-to-photon certification.
 [Controlled-delay evidence](benchmarks/browser-2026-09-18-native-room-relay-delay-720p60.json).
 
+A stronger bidirectional run independently delayed client-to-relay inputs and
+relay-to-client peer inputs/confirmations by a repeating 2/4/6/8/10 ms. Both
+clients sustained 59.875–59.916 simulation FPS; seat 0 captured all 1,800
+distinct 960×720 frames at 59.978 FPS. It exercised 232 corrections and 452
+replayed frames, confirmed frame 1799 on both peers, rejected no late inputs and
+converged exactly. The production default still bypasses both schedulers. This
+is controlled two-way relay adversity, not real WAN loss/reordering, compositor
+scanout or physical input-to-photon certification.
+[Bidirectional-delay evidence](benchmarks/browser-2026-09-18-native-room-bidirectional-delay-720p60.json).
+
 The separate 60-frame startup matrix remains the fast loading/correctness
 regression for all 25 roster tiles/26 playable starts and all six legal stages
 under the same fixed no-item 1v1 rules.
