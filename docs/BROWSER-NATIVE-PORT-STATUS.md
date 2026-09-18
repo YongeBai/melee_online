@@ -12,8 +12,8 @@ from both seats at 59.882–59.974 captured FPS. The performance work batches
 transport corrections, separates the receive and prediction bounds, clears UBO
 staging once per frame, and resets only validity headers/active GX capture rows.
 A 120-frame Yoshi exact oracle compared 331,776,000 RGBA bytes with zero
-differences and zero camera mismatches. The 645-test repository suite passes
-(635 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
+differences and zero camera mismatches. The 646-test repository suite passes
+(636 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
 gate, not compositor scanout, WAN behavior, physical input-to-photon latency or
 all 676 matchups. [Roster performance evidence](benchmarks/browser-2026-09-18-native-room-roster-720p60.json)
 and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
@@ -184,6 +184,18 @@ pipeline. A real-browser lifecycle observed `ff_fox.hps` playing with nonzero
 audio-graph output on both peers after elimination and timeout. The original
 `GmRst` 3D scene remains unfinished; this presentation no longer exposes the
 temporary debug UI.
+
+The next `GmRst` foundation is now present without changing the player startup
+contract. Development extraction prepares and the native-port server allowlists
+all 28 original result fixtures: the scene, SIS data, and 26 character-motion
+archives. A typed importer converted both `pnlsce` and `flmsce` with their
+original dynamic animation lists, cameras, lights, and fog: five model graphs,
+141 joints, 143 meshes, and all 4,857 relocation slots. Every hosted archive was
+fetched and inspected, including the two Ice Climbers motion roots. Runtime
+instantiation and visual validation of those models are still unfinished, so
+the current product screen remains the fixed-4:3 tournament presentation rather
+than a claimed native `GmRst` scene.
+[Original result-asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 
 Rooms require matching results from both clients and two rematch votes. Either
 player can return both to CSS. One coordinated epoch/reload preserves room code

@@ -51,8 +51,8 @@ be recovered. A sustained browser run also forcibly cut seat 1 at frame 600,
 resumed the same epoch/phase in 268 ms, reached confirmed frame 1799 and
 converged exactly. It captured all 1,800 distinct frames; raw wall cadence was
 59.35 FPS because the honest outage gap was 283 ms, while cadence excluding
-exactly the measured paused interval was 59.88 FPS. The full suite is 645 tests:
-635 pass, 10 skip, 0 fail. This does not validate arbitrary-duration WAN outages. See the
+exactly the measured paused interval was 59.88 FPS. The full suite is 646 tests:
+636 pass, 10 skip, 0 fail. This does not validate arbitrary-duration WAN outages. See the
 [reconnect and cadence evidence](benchmarks/browser-2026-09-18-native-room-reconnect-720p60.json).
 
 The temporary results dialog has been replaced by an animated fixed-4:3
@@ -67,6 +67,14 @@ original character-kind table, and both peers measured `ff_fox.hps` in the
 playing state with audio peaks from 0.1480 to 0.1671 during the Falco/Fox
 lifecycle. See the
 [results presentation evidence](benchmarks/browser-2026-09-18-native-results-presentation.json).
+
+The original result-scene asset boundary is also validated independently. The
+hosted no-ISO server returned all 28 result fixtures. Typed conversion retained
+the `pnlsce` and `flmsce` cameras and their five model graphs (141 joints, 143
+meshes, 4,857 relocation slots); all 26 character motion archives and the result
+SIS archive were structurally inspected. This does not validate native runtime
+animation or pixels yet. See the
+[result-scene asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and

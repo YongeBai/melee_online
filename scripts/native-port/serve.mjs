@@ -9,11 +9,11 @@ const files=new Set(['dirty-core.json','melee-dirty.wasm','costume-fixtures.json
   'stage-collision.mjs','fighter-assets.mjs','verify-fighters.mjs','animation-assets.mjs','verify-animations.mjs','math-reference.mjs','verify-math.mjs','verify.mjs','verify-runtime.mjs',
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','model-fixtures.json',
   'native-shader-catalog.json','fighter-init-build.json','stage-fixtures.json','fighter-fixtures.json','animation-fixtures.json','build.json']);
-files.add('native-rollback-driver.mjs');files.add('native-product-rollback.mjs');
-for(const manifestName of ['costume-fixtures.json','menu-fixtures.json','effect-fixtures.json','shared-fixtures.json','stage-fixtures.json','fighter-fixtures.json','animation-fixtures.json','model-fixtures.json']) {
+files.add('native-rollback-driver.mjs');files.add('native-product-rollback.mjs');files.add('result-fixtures.json');
+for(const manifestName of ['costume-fixtures.json','menu-fixtures.json','result-fixtures.json','effect-fixtures.json','shared-fixtures.json','stage-fixtures.json','fighter-fixtures.json','animation-fixtures.json','model-fixtures.json']) {
 const manifest=path.join(output,manifestName);
 if(fs.existsSync(manifest))for(const name of JSON.parse(fs.readFileSync(manifest))) {
-  if(name!=='MnSlMap.usd'&&name!=='MnSlChr.usd'&&name!=='SdSlChr.usd'&&name!=='MnExtAll.usd'&&name!=='LbMcGame.usd'&&name!=='NtMemAc.usd'&&name!=='GmPause.usd'&&name!=='PdPm.dat'&&name!=='IfAll.usd'&&name!=='ItCo.usd'&&!/^(Gr|Pl|Ef)[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid fixture filename');
+  if(name!=='MnSlMap.usd'&&name!=='MnSlChr.usd'&&name!=='SdSlChr.usd'&&name!=='MnExtAll.usd'&&name!=='LbMcGame.usd'&&name!=='NtMemAc.usd'&&name!=='GmRst.usd'&&name!=='SdRst.usd'&&name!=='GmPause.usd'&&name!=='PdPm.dat'&&name!=='IfAll.usd'&&name!=='ItCo.usd'&&!/^GmRstM[A-Za-z]{2}\.dat$/.test(name)&&!/^(Gr|Pl|Ef)[A-Za-z0-9]+\.(dat|usd)$/.test(name))throw Error('Invalid fixture filename');
   files.add('fixtures/'+name);
 }
 }

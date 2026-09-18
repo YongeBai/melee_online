@@ -12,6 +12,7 @@ const fd=fs.openSync(filename,'r');
 const shared=['PlCo.dat','PdPm.dat','GmPause.usd','IfAll.usd','ItCo.usd','PlKbCpMr.dat','PlKbCpLg.dat','PlKbCpDr.dat','PlKbCpCa.dat','PlKbCpGn.dat','PlKbCpNs.dat','PlKbCpPe.dat','PlKbCpFx.dat','PlKbCpPk.dat','PlKbCpPc.dat','PlKbCpLk.dat','PlKbCpCl.dat','PlKbCpSs.dat','PlKbCpFc.dat','PlKbNrCpFc.dat','PlKbCpDk.dat','PlKbNrCpDk.dat','PlKbCpMs.dat','PlKbCpFe.dat','PlKbCpZd.dat','PlKbCpSk.dat','PlKbCpKp.dat','PlKbCpPp.dat','PlKbCpMt.dat','PlKbNrCpMt.dat','PlKbCpPr.dat','PlKbNrCpPr.dat','PlKbCpGw.dat','PlKbNrCpGw.dat','PlKbCpYs.dat'];
 const effects=['EfCoData.dat','EfCaData.dat','EfDkData.dat','EfMsData.dat','EfGnData.dat','EfFeData.dat','EfFxData.dat','EfPrData.dat','EfMrData.dat','EfLgData.dat','EfPkData.dat','EfSsData.dat','EfKpData.dat','EfLkData.dat','EfYsData.dat','EfMtData.dat','EfNsData.dat','EfZdData.dat','EfPeData.dat','EfIcData.dat','EfKbData.dat','EfKbMr.dat','EfKbLg.dat','EfKbCa.dat','EfKbGn.dat','EfKbFx.dat','EfKbPk.dat','EfKbSs.dat','EfKbDk.dat','EfKbMs.dat','EfKbFe.dat','EfKbZd.dat','EfKbKp.dat','EfKbIc.dat'];
 const menus=['MnSlMap.usd','MnSlChr.usd','SdSlChr.usd','MnExtAll.usd','LbMcGame.usd','NtMemAc.usd'];
+const results=['GmRst.usd','SdRst.usd',...['Ca','Cl','Dk','Dr','Fc','Fx','Gw','Gn','Kb','Kp','Lk','Lg','Ms','Mr','Mt','Ns','Pn','Pe','Pk','Pc','Pr','Ss','Sk','Ys','Zd','Fe'].map(code=>'GmRstM'+code+'.dat')];
 const names=['GrNBa.dat','GrNLa.dat','GrOp.dat','GrSt.dat','GrIz.dat','GrPs.usd'];
 const fighters=Object.keys(fighterArchives).map(code=>'Pl'+code+'.dat');
 const animations=Object.keys(fighterArchives).map(code=>'Pl'+code+'AJ.dat');
@@ -28,7 +29,7 @@ try {
   const files=parseFileTable(read(header.fstOffset,header.fstSize).buffer,total);
   const costumes=files.map(f=>f.path).filter(name=>/^Pl[A-Za-z]{4}(?:Cp[A-Za-z]{2})?\.(dat|usd)$/.test(name)&&Object.hasOwn(fighterArchives,name.slice(2,4))&&!name.endsWith('AJ.dat')).sort();
   fs.mkdirSync(path.join(output,'fixtures'),{recursive:true});
-  for(const name of [...menus,...shared,...effects,...names,...fighters,...animations,...models,...costumes]) {
+  for(const name of [...menus,...results,...shared,...effects,...names,...fighters,...animations,...models,...costumes]) {
     const file=files.find(f=>f.path===name);
     if(!file)throw Error('Development asset missing: '+name);
     fs.writeFileSync(path.join(output,'fixtures',name),read(file.offset,file.size));
@@ -44,6 +45,7 @@ try {
   if(!font)throw Error('Original SIS font lies outside the executable sections');
   fs.writeFileSync(path.join(output,'fixtures','sis-font.bin'),font);
   fs.writeFileSync(path.join(output,'menu-fixtures.json'),JSON.stringify(menus,null,2)+'\n');
+  fs.writeFileSync(path.join(output,'result-fixtures.json'),JSON.stringify(results,null,2)+'\n');
   fs.writeFileSync(path.join(output,'shared-fixtures.json'),JSON.stringify(shared,null,2)+'\n');
   fs.writeFileSync(path.join(output,'effect-fixtures.json'),JSON.stringify(effects,null,2)+'\n');
   fs.writeFileSync(path.join(output,'stage-fixtures.json'),JSON.stringify(names,null,2)+'\n');
@@ -52,5 +54,5 @@ try {
   fs.writeFileSync(path.join(output,'costume-fixtures.json'),JSON.stringify(costumes,null,2)+'\n');
   fs.writeFileSync(path.join(output,'model-fixtures.json'),JSON.stringify(models,null,2)+'\n');
   prepareNativeMusic(filename);
-  console.log('Prepared the original SIS font, shared fighter data, six stages and 27 playable fighter components in ignored dist/native-port.');
+  console.log('Prepared the original SIS font, result scenes/motions, shared fighter data, six stages and 27 playable fighter components in ignored dist/native-port.');
 } finally {fs.closeSync(fd);}

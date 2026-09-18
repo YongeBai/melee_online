@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-18",
+  "purpose": "Establish a typed, hosted no-ISO asset boundary for Melee's original GmRst result scene before runtime rendering work.",
+  "sourceCommitBeforeCheckpoint": "530bfb20a4d8c871dafdc7caa6e0d7ca2f2404a3",
+  "sourceSha256": {
+    "engines/browser-native/menu-assets.mjs": "510fea17758ddc4e7aa4561d75a0108f2287d37b83d058a7a293f5ba59136eab",
+    "engines/browser-native/dirty-host-contract.mjs": "d74f76f3c61f165aaf418ae381d2e79a49155070d13df806374af0e5260919cb",
+    "scripts/native-port/menu-assets.test.mjs": "207febcf33494fdafa3f0c2f8986271326138de19dc5072ae8454135c268c9d6",
+    "scripts/native-port/prepare-fixtures.mjs": "3c47b9796825b62cfbd0130aa7e520ebc09356b8d57beb35960026cef47f8505",
+    "scripts/native-port/serve.mjs": "9bf3af7824e94159a1484b074a8ff6d249b03accc5174344d06e7c0ca5db52f9",
+    "scripts/native-port/probe-result-assets.mjs": "5ba0e71a39eb925ac395b701cd5154b8ca070ee154b8123d0ace9e393d053b94"
+  },
+  "commands": [
+    "node scripts/native-port/prepare-fixtures.mjs <development USA 1.02 fixture>",
+    "node scripts/native-port/probe-result-assets.mjs",
+    "node --test scripts/native-port/menu-assets.test.mjs"
+  ],
+  "passed": true,
+  "hostedNoIsoStartupPreserved": true,
+  "fixtures": {
+    "count": 28,
+    "scene": "GmRst.usd",
+    "sis": "SdRst.usd",
+    "characterMotionArchives": 26,
+    "iceClimbersPublicRoots": [
+      "ftDemoResultMotionFileNana",
+      "ftDemoResultMotionFilePopo"
+    ]
+  },
+  "scene": {
+    "bytes": 476318,
+    "sha256": "c0a9a411113e15863da122b5624ea34781229bfea4ccc8e67c1e46b598edab1f",
+    "publics": [
+      {"name": "pnlsce", "models": 1, "cameraOffset": 415888},
+      {"name": "flmsce", "models": 4, "cameraOffset": 456640}
+    ],
+    "modelGraphs": 5,
+    "joints": 141,
+    "meshes": 143,
+    "relocationSlots": 4857,
+    "dynamicAnimationListsRetained": true,
+    "cameraLightFogDescriptorsRetained": true
+  },
+  "scope": "This validates hosted extraction, allowlisting, archive structure, and typed conversion of the original result assets. The product does not yet instantiate or render the GmRst scene, so this is not visual parity, FPS, or tournament-completion evidence."
+}
