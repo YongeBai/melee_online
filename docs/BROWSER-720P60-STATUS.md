@@ -9,6 +9,17 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 17, latest direct-port renderer result: match-scoped shader keys
+reduce measured key construction from 0.425 to 0.346 ms/frame (-18.5%) and
+two-browser rollback draw submission from 8.219 to 7.808 ms/frame (-5.0%) in a
+Fountain ICs/Peach A/B/B/A. The candidate averaged 59.582 simulation FPS with
+capture disabled, so it does not pass 720p60. Final per-draw oracles on all six
+legal stages compared 1.99 billion RGBA bytes exactly; an intermittent Yoshi
+3/21-byte preliminary mismatch remains recorded even though a full-key audit
+found no collision and later runs passed. Production rollback, displayed-FPS
+coverage, exhaustive roster behavior and physical latency remain open.
+[Evidence](BROWSER-NATIVE-SHADER-KEYS.md).
+
 September 16, latest: the native port's original SIS text engine now renders all
 85 character-select text entries and dynamic labels. Packed-byte portability
 fixes and SDK texture defaults pass browser checks; 258 unit tests pass. An

@@ -47,7 +47,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
   function program(state,attributes,origin,immediateRegisters=false){
-    const keyStart=assetLease?.profileDraw?performance.now():0;const variant=(uniformBuffer?'ubo-v1:':'')+(assetLease?.exactState?assetLease.shaderKey:materialShaderKey)(state,attributes,{immediateRegisters});if(assetLease?.profileDraw){const row=drawTiming.shaderKey??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-keyStart;}if(variants.has(variant))return variants.get(variant);
+    const keyStart=assetLease?.profileDraw?performance.now():0;const variant=(uniformBuffer?'ubo-v1:':'')+(assetLease?.exactState?assetLease.shaderKey:materialShaderKey)(state,attributes,{immediateRegisters,legacy:assetLease?.compactShaderKey===false});if(assetLease?.profileDraw){const row=drawTiming.shaderKey??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-keyStart;}if(variants.has(variant))return variants.get(variant);
     const result=compileProgram(generateMaterialShaders(state,attributes,{immediateRegisters}),origin);result.used=true;variants.set(variant,result);return result;
   }
   function compileProgram(originalSources,origin,allowUbo=true){

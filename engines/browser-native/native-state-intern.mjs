@@ -15,12 +15,20 @@ export function createTevStageInterner({capacity=1024}={}){
   return {stages,registers:rows(4),konst:rows(20),registerMask:words[1],constantMask:words[2],syncs:words[3]};
  },snapshot:()=>({entries,hits,misses})};
 }
-// Stages above are immutable owned arrays. Dynamic shader inputs below are
-// serialized on every draw. The string is identical to materialShaderKey.
+// Stages above are immutable owned arrays. Assign their exact identities a
+// match-scoped number so every draw does not copy the large TEV serialization
+// into its variant key. The remaining arrays contain only shader-generating
+// fields; uniform values intentionally stay out of the key.
 export function createInternedShaderKey(){
- const stages=new WeakMap();return ({tev,textures,pixel,context},attributes,{immediateRegisters=false}={})=>{
-  let code=stages.get(tev.stages);if(code===undefined){code=JSON.stringify(tev.stages);stages.set(tev.stages,code);}
-  const a=pixel.alphaTest,rest=JSON.stringify([textures.generators,textures.textures.map(t=>t.id),pixel.channelCount,pixel.channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b),immediateRegisters,context?.fog?.type??0]);
-  return '['+code+','+rest.slice(1);
+ const stageIds=new WeakMap(),stageJson=new WeakMap();let nextStage=0;
+ return ({tev,textures,pixel,context},attributes,{immediateRegisters=false,legacy=false}={})=>{
+  let stage;
+  if(legacy){stage=stageJson.get(tev.stages);if(stage===undefined){stage=JSON.stringify(tev.stages);stageJson.set(tev.stages,stage);}}
+  else {stage=stageIds.get(tev.stages);if(stage===undefined){if(nextStage>=Number.MAX_SAFE_INTEGER)throw Error('Shader stage identity capacity');stage=nextStage++;stageIds.set(tev.stages,stage);}}
+  const a=pixel.alphaTest;
+  if(legacy){const rest=JSON.stringify([textures.generators,textures.textures.map(t=>t.id),pixel.channelCount,pixel.channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b),immediateRegisters,context?.fog?.type??0]);return '['+stage+','+rest.slice(1);}
+  const generators=textures.generators.map(g=>[g.id,g.type,g.source,g.matrix,g.normalize,g.postMatrix]);
+  const channels=pixel.channels.map(c=>c?[c.enabled,c.ambientSource,c.materialSource,c.lights,c.diffuse,c.attenuation]:null);
+  return stage+':'+JSON.stringify([generators,textures.textures.map(t=>t.id),pixel.channelCount,channels,[a.compare0,a.operation,a.compare1],attributes.map(a=>a.attr).sort((a,b)=>a-b),+immediateRegisters,context?.fog?.type??0]);
  };
 }

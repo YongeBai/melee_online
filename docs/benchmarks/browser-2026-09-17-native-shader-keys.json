@@ -1,0 +1,100 @@
+{
+  "title": "Match-scoped shader variant keys for the direct-port renderer",
+  "date": "2026-09-17",
+  "baseCommit": "0a6693a",
+  "performanceCertified": false,
+  "decision": "Accept the compact key as an exact renderer CPU reduction. Do not claim 720p60: the heavy workload remains below 60 FPS and this run disabled the capture observer.",
+  "productionTransport": "three-frame lockstep unchanged",
+  "scope": "Two localhost Chromium clients on one host for long rollback timing; 960x720 native picture in a 1280x720 presentation; synthetic 15-130 ms delayed/reordered traffic; observer disabled for timing; canvas readback only for strict graphics oracles.",
+  "sources": {
+    "native-state-intern.mjs": "c73c82d39cd77131d2b1ad928257952f90468d10954c1a3037f228b6b8b21689",
+    "material-gpu.mjs": "100ed1bb5a9faac1cf8fa54dd90ce3b613dcc3fd04bde884176ffb74472c4f51",
+    "presentation-cache.mjs": "129087eeed34f551e4cc02cd310868280ed631c67d54a12ecc047448a197f8ad",
+    "certification.mjs": "3e47154acf221c9154e8a044a577ef1863bb7b08d1b9e4f3312cd2fe64759447",
+    "dirty-host-contract.mjs": "f805c87d015b111d378b46eacd45c66ceebc793b81356c6d26ba97da970f64bf",
+    "probe-certification.mjs": "af1a4354be00525fa4a956cdd76d97e3c4b38a569cf59e095068985aa5e9d19d"
+  },
+  "isolated600": {
+    "frames": 600,
+    "keyCallsPerRun": 163918,
+    "controlKeyMeanMs": 0.37150000214576717,
+    "candidateKeyMeanMs": 0.2983333339293798,
+    "keyDeltaMs": -0.0731666682163874,
+    "keyDeltaPercent": -19.694930765485875,
+    "controlDrawMeanMs": 7.233416666338841,
+    "candidateDrawMeanMs": 6.899250000566244,
+    "drawDeltaMs": -0.3341666657725968,
+    "runs": [
+      {"name":"A1 original JSON","rawReportSha256":"76fec8c46b2392e85abf78e6ab05ca52ff82b9aededd99a36a68865bb704faa9","keyMeanMs":0.35416667252779005,"drawMeanMs":6.873833332558473},
+      {"name":"B1 compact identity","rawReportSha256":"3e508816441093f614833f201f6e166835252f5245018991217fccb85c9ba90e","keyMeanMs":0.2959999970595042,"drawMeanMs":6.992333333690961},
+      {"name":"B2 compact identity","rawReportSha256":"bd7353b6213e76eddd00df4ff088019be3dbaf91f0c090e695c170f2d45753b3","keyMeanMs":0.30066667079925535,"drawMeanMs":6.806166667441527},
+      {"name":"A2 original JSON","rawReportSha256":"6799d47ffb9715e99df1d02082dc1498abb3307d3468556f0e9dcd2b3a789f17","keyMeanMs":0.38883333176374435,"drawMeanMs":7.5930000001192095}
+    ]
+  },
+  "longFountain": {
+    "framesPerClient": 1800,
+    "pair": "Pp-Pe",
+    "averages": {
+      "controlKeyMeanMs": 0.4249166662245989,
+      "candidateKeyMeanMs": 0.34640277730921903,
+      "keyDeltaMs": -0.07851388891537986,
+      "keyDeltaPercent": -18.47747926975395,
+      "controlDrawMeanMs": 8.219194444393118,
+      "candidateDrawMeanMs": 7.807986111417413,
+      "drawDeltaMs": -0.411208332975705,
+      "drawDeltaPercent": -5.00302475817711,
+      "controlSimulationFps": 59.48666594918862,
+      "candidateSimulationFps": 59.58215721750403
+    },
+    "runs": [
+      {"name":"A1 original JSON","rawReportSha256":"fd7aa2ceceaf194d46c6a61eee18dbc987904a779f79a803fd51ebdba927e321","simulationFps":[59.41456845225461,59.42947702060222],"keyMeanMs":[0.4423333335253927,0.45433333211474947],"drawMeanMs":[8.631777777870496,8.456777777572473],"corrections":[144,149],"replayedFrames":[699,1196]},
+      {"name":"B1 compact identity","rawReportSha256":"0a324cd840112acc8e3b4199f62dba26e02451f6293d973b80e20c412a47465d","simulationFps":[59.4320279198694,59.549212461618225],"keyMeanMs":[0.3458333315783077,0.3334999996754858],"drawMeanMs":[7.814333335326777,7.8882777772015995],"corrections":[181,152],"replayedFrames":[992,973]},
+      {"name":"B2 compact identity","rawReportSha256":"f24cad5dd02766d9f9e319ca8786c229aa076119da3d7bbb62a5d80a57d8589d","simulationFps":[59.64946000667043,59.69792848185808],"keyMeanMs":[0.34766666700442633,0.35861111097865633],"drawMeanMs":[7.876611111031639,7.652722222109635],"corrections":[188,151],"replayedFrames":[1000,971]},
+      {"name":"A2 original JSON","rawReportSha256":"1225b3503cf9caa3acbe6455835d4d9670619467d35e01d9156f8c5b5f5166d7","simulationFps":[59.51042754945441,59.59219077444321],"keyMeanMs":[0.39711111101839275,0.4058888882398605],"drawMeanMs":[7.816611110899183,7.97161111123032],"corrections":[197,137],"replayedFrames":[1263,824]}
+    ],
+    "allStateMatches": true,
+    "allPixelDifferences": 0,
+    "allCameraMatches": true,
+    "variantsAndProgramsPerClient": 40,
+    "stateBytes": 60686336,
+    "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a"
+  },
+  "correctness": {
+    "perDrawOracle": {
+      "framesPerStage": 120,
+      "stages": ["battlefield", "destination", "dreamland", "fountain", "story", "stadium"],
+      "comparedRgbaBytes": 1990656000,
+      "differentBytes": 0,
+      "cameraMismatches": 0,
+      "statePixelCameraExact": true,
+      "rawReportSha256": {
+        "battlefield": "f78d85bd435aa59f0c17afa4fd939bba731484a2f126d3e11eab947e132e7541",
+        "destination": "2351412365bea1e1b234419275d8baa1863880e962fe6ab07a181b0215a4e7a2",
+        "dreamland": "d12bda9fdeecc77d04e6708a1e63646f71314c5bd8afbc77f8707f6c164fe7b1",
+        "fountain": "4ab4d94a1dbf7dbe61c50ef9e560f0cc9ab4348acc5553bc7880f35a3b2bdbbc",
+        "story": "48e8b079dacbce63ad3badac06041ac8cd2d16e3c14f2c8a2288b8725bb5c964",
+        "stadium": "80c2836463656c95dd3ad57c765cb6a4d29eb354df6d41b79dee8591d2eb5af9"
+      }
+    },
+    "storyIntermittentOracle": {
+      "preliminaryFailures": [
+        {"differentBytes":3,"frame":1,"failureSha256":"f698337f2ac6316281900f24cc8b8a4db8a5abb6df49b0a426cb28e62c5b1b32"},
+        {"differentBytes":21,"frame":62,"failureSha256":"6d91628a9cad948be39a0247dd22bb798729a6a83269425acb34195457891fd8"}
+      ],
+      "legacyControlPassed": true,
+      "fullKeyAuditPassed": true,
+      "fullKeyAuditVariants": 36,
+      "fullKeyAuditReportSha256": "5c2750507dc7a9a74fbca33ac3259a58776e555db102beec94492bd138ff0881",
+      "subsequentCompactPasses": 3,
+      "conclusion": "No compact/original key collision was found. The intermittent oracle or driver discrepancy remains unresolved and is retained as negative evidence."
+    },
+    "tests": {"total":625,"passed":613,"skipped":12,"failed":0}
+  },
+  "remaining": [
+    "The heavy candidate averages 59.582 simulation FPS and is not a strict 60 FPS pass.",
+    "The performance runs disabled the browser capture observer and do not establish displayed cadence.",
+    "Production rooms still use lockstep rather than the diagnostic rollback path.",
+    "The intermittent Yoshi per-frame oracle discrepancy is unresolved despite no detected shader-key collision.",
+    "No physical input-to-photon, WAN, reconnect/recovery, audible rollback-SFX, exhaustive roster-interaction, or complete native-results certification."
+  ]
+}
