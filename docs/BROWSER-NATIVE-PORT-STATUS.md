@@ -196,12 +196,17 @@ fetched and inspected, including the two Ice Climbers motion roots. The original
 archive relocation, camera/light construction, JObj animation, and the retained
 material renderer. At frame 60 it drew 102 passes over 115 joints/123 meshes with
 11 material programs, retained the original 25-degree/1.216667 camera, and cleaned
-up every object, process, and archive allocation. The inspected screenshot is
-recognizably Melee's result panel, but it still contains the archive's default
-four slots and Sheik labels. Native standings, two-slot visibility, SIS text,
-fighter victory models, and product lifecycle integration remain unfinished, so
-the current product screen remains the fixed-4:3 tournament presentation rather
-than a claimed complete native `GmRst` scene.
+up every object, process, and archive allocation. The configured panel now shows
+Fox/Falco, 1st/2nd, P1/P2, original inactive-port treatment, and native SIS
+score/KO/fall/self-destruct rows. A separate isolated actor module converts the
+nested result-motion DATs and constructs Fox/Falco through Melee's original
+result-demo path; both owners are distinct and their animation frames advance
+over 60 native steps. The actors are not yet drawn through their original
+result cameras/scissors, torn down under a lifecycle gate, or validated across
+all 26 characters. Live standings, product lifecycle integration, and native
+result-screen FPS also remain unfinished, so the current product screen remains
+the fixed-4:3 tournament presentation rather than a claimed complete native
+`GmRst` scene.
 [Original result-asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 [Native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
 

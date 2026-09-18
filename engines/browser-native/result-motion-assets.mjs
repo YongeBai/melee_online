@@ -1,5 +1,6 @@
-import {inspectArchive} from './archive.mjs';
+import {inspectArchive,nativeArchiveImage} from './archive.mjs';
 import {animationArchives} from './animation-assets.mjs';
+import {convertMotionAnimations} from './motion-animations.mjs';
 
 // Each public in GmRstM??.dat points at a 32-byte-aligned concatenation of
 // ordinary HSD FigaTree archives. Validate every nested archive and retain its
@@ -14,4 +15,18 @@ export function inspectResultMotions(input,name){
   if(!clips.length)throw Error('Empty result motion public '+symbol);motions.push({symbol,start,end,bytes:end-start,clips});
  }
  return {name,bytes:archive.bytes.length,motions,clips:motions.reduce((sum,row)=>sum+row.clips.length,0),tracks:motions.reduce((sum,row)=>sum+row.clips.reduce((n,clip)=>n+clip.tracks,0),0),commands:motions.reduce((sum,row)=>sum+row.clips.reduce((n,clip)=>n+clip.commands,0),0)};
+}
+
+// Each public is a concatenation of nested FigaTree DATs. Convert their typed
+// headers/descriptors in place while preserving their sizes, offsets, and
+// packed animation command streams; then convert only the outer DAT metadata.
+export function convertResultMotionAsset(input,name){
+ const archive=inspectArchive(input),inspection=inspectResultMotions(input,name);
+ const image=nativeArchiveImage(archive,archive.publics);
+ for(const motion of inspection.motions){
+  const bytes=archive.bytes.subarray(32+motion.start,32+motion.end),converted=convertMotionAnimations(bytes,[]);
+  if(converted.image.length!==bytes.length)throw Error('Result motion import changed public offsets');
+  image.set(converted.image,32+motion.start);
+ }
+ return {...inspection,image};
 }

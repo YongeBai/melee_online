@@ -114,7 +114,21 @@ KOs, falls, and self-destructs rather than copying the packed product score word
 Build this experiment with `--result-scene`; it
 has a separate `melee-result-scene.wasm` so result iteration cannot perturb the
 validated product fighter core. Do not put it in the product result lifecycle
-until it consumes live standings and adds fighter victory models.
+until it consumes live standings and renders the fighter cameras.
+
+The isolated target now also constructs Fox and Falco through the original
+`fn_8017A67C` result-demo path. Convert both the outer `GmRstM??.dat` metadata
+and every nested FigaTree header/descriptor in place; preserve nested archive
+sizes, public offsets, and packed animation streams. `Player_80036E20` cannot
+retain the decompiler's `str_PdPmdat_start_of_data` adjacency overlay in WASM:
+the portable source must name `ftMapping_list` directly. Result fighter startup
+also needs the typed item runtime, common effects, camera, and dynamics pools
+before character `OnLoad` callbacks run. Animation sources may live in either
+resident files or owned `lbHeap` archive copies, so the validated copy boundary
+tracks both ranges. The browser probe observes distinct Fox/Falco owners and
+advancing native frames (Fox 0→60, Falco 0→10 after its loop). Their GPU fighter
+draws, result-camera/scissor composition, teardown, all-roster construction,
+live standings handoff, and result-screen cadence are still separate gates.
 
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.

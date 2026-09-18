@@ -90,6 +90,36 @@ export function adaptSisBytecode(text) {
   if(text.split('Mtx projection_m;').length!==2)throw Error('SIS projection scratch changed');
   return text.replace('Mtx projection_m;','Mtx44 projection_m;');
 }
+// The retail link layout placed ftMapping_list immediately after two filename
+// strings, and this decompiled function recovers it through a struct overlay.
+// Independent WASM globals have no such adjacency guarantee; name the actual
+// table while retaining the original mapping semantics.
+export function adaptPlayerDemoMapping(text){
+ const from=`void Player_80036E20(CharacterKind ckind, HSD_Archive* archive, s32 arg2)
+{
+    struct Unk_Struct_w_Array* unkStruct =
+        (struct Unk_Struct_w_Array*) &str_PdPmdat_start_of_data;
+    ftDemo_SetArchiveData(unkStruct->vec_arr[ckind].x, archive, arg2);
+    if ((unkStruct->vec_arr[ckind].y != -1) &&
+        (unkStruct->vec_arr[ckind].z == 0))
+    {
+        ftDemo_SetArchiveData(unkStruct->vec_arr[ckind].y, archive, arg2);
+    }
+}`;
+ const to=`void Player_80036E20(CharacterKind ckind, HSD_Archive* archive, s32 arg2)
+{
+    ftMapping* mapping = &ftMapping_list[ckind];
+    ftDemo_SetArchiveData(mapping->internal_id, archive, arg2);
+    if ((mapping->extra_internal_id != -1) &&
+        (mapping->has_transformation == 0))
+    {
+        ftDemo_SetArchiveData(mapping->extra_internal_id, archive, arg2);
+    }
+}`;
+ if(text.split(from).length!==2)throw Error('Player demo mapping overlay changed');
+ return text.replace(from,to);
+}
+
 export function preparePortableSource(source,output) {
   const destination=path.join(output,'portable');
   const files=execFileSync('rg',['--files','src','libs/dolphin/include','libs/dolphin/src','-g','*.c','-g','*.h'],
@@ -109,6 +139,7 @@ export function preparePortableSource(source,output) {
     if(file==='src/melee/ft/kinds/ftCommon/ftCo_0A01.c')text=adaptPartnerStickConversion(text);
     if(file==='src/melee/it/kinds/itlinkarrow.c')text=adaptLinkArrowTable(text);
     if(file==='src/melee/ft/kinds/ftYoshi/types.h')text=adaptYoshiAttributes(text);
+    if(file==='src/melee/pl/player.c')text=adaptPlayerDemoMapping(text);
     if(file==='libs/dolphin/include/dolphin/gx/GXVert.h') {
       const declarations=['u8','s8','u16','s16','u32','s32','u64','s64','f32','f64'].map(t=>'void portGXWrite_'+t+'('+t+' value);').join('\n');
       replace('#define GXFIFO_ADDR 0xCC008000',declarations+'\n#define GXFIFO_ADDR 0xCC008000');

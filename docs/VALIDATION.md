@@ -74,9 +74,7 @@ the `pnlsce` and `flmsce` cameras and their five model graphs (141 joints, 143
 meshes, 4,857 relocation slots); all 26 character motion archives and the result
 SIS archive were structurally inspected. Nested validation of every character
 motion public covered 244 FigaTree clips, 38,500 tracks, and 338,526 animation
-commands across all 26 archives, including separate Popo and Nana roots. This
-does not validate native runtime
-animation or pixels yet. See the
+commands across all 26 archives, including separate Popo and Nana roots. See the
 [result-scene asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 
 An isolated Chromium run now covers the next layer: native HSD construction and
@@ -95,7 +93,14 @@ two active stat columns and native inactive-port dashes.
 The configured panel runs in a separate WASM target; rebuilding the ordinary
 fighter target retained its pinned JS glue, and the two-browser elimination,
 rematch, 28,800-frame timeout, return, and legal-stage regression passed. This
-remains isolated panel work, not product parity: live standings, victory fighters,
+target now also converts the nested result-motion archives in place and calls
+Melee's original result-demo fighter constructor for Fox and Falco. The probe
+observed distinct native owners, internal fighter kinds 1 and 22, finite native
+poses, and animation-frame changes from `[0, 0]` to `[60, 10]` over 60 result
+steps. The full source suite passed 648 tests (638 pass, 10 skip, 0 fail).
+This remains isolated result work, not product parity: the actors are not yet
+submitted through their original result cameras/scissors, the actor module does
+not yet have a validated teardown, and all-roster construction, live standings,
 lifecycle integration, and result-screen FPS remain. See the
 [native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
 
