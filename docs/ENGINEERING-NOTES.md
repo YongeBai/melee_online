@@ -7,6 +7,23 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+The opt-in product room (`?rollback=1`) now uses the audited dirty WASM core,
+exact sparse checkpoints, authenticated prediction/correction, confirmed audio,
+and a separate dirty presentation replica. Precompile the exact shader catalog
+and exercise the first 30 neutral presentation frames during loading, then
+restore the complete simulation/global/audio checkpoint before frame zero.
+Wait for the relay's shared phase-ready before advancing even the neutral input
+prefix; otherwise the faster browser consumes its prediction window during the
+other client's loading boundary. The scheduler advances at most one forward
+frame per animation callback because a second step cannot become a distinct
+browser presentation. A 1,800-frame Final Destination room submitted all 1,800
+pictures at 59.890/59.839 simulation FPS with 10.9 ms draw p95, exact confirmed
+state and six real corrections on one peer. This passes the narrow
+simulation/submission gate, not captured-frame, WAN, roster, latency or full
+tournament certification. The query remains opt-in and default rooms remain
+lockstep. See
+[the scoped evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
+
 [Cold shader preparation](BROWSER-NATIVE-SHADER-PREWARM.md) eliminates observed
 compile spikes with the existing exact-source cache, but the repeated Fountain
 capture result stays about 57.1 FPS. The sampled 87-program rollout was rejected
@@ -63,10 +80,11 @@ diagnostic experiment. Its dirty bitmap covers every native store and audited
 host write; never refresh its source/core hash pins without renewing that audit.
 Keep no-correction per-draw coverage checks as well as rollback regressions.
 
-The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
-now isolates draw-side allocations and native writes in a second private WASM
-instance. It removes per-draw gameplay snapshot/restore, but rollback remains
-below the 59.5 simulation/captured-FPS gate. Production rooms remain lockstep.
+The [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md) isolates
+draw-side allocations and native writes in a second private WASM instance. Its
+older generic delayed-input harness remains below the captured-FPS gate; do not
+substitute the newer product-room simulation/submission result for that missing
+capture evidence. Default production rooms remain lockstep.
 
 Use `BROWSER-NATIVE-720P60.md` for the every-forward-frame harness. Keep local
 play, detached presentation and delayed-input rollback separate. Draw counters

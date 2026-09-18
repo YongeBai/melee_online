@@ -2,7 +2,9 @@ import fs from 'node:fs';import os from 'node:os';import path from 'node:path';i
 import {createNativePortServer} from './serve.mjs';
 const root=path.resolve(import.meta.dirname,'../..'),server=createNativePortServer(),clients=[];
 const resultsMode=process.argv.includes('--results');
-const rollbackMode=process.argv.includes('--rollback'),matchFrames=rollbackMode?60:600;
+const rollbackMode=process.argv.includes('--rollback'),framesArg=process.argv.find(arg=>arg.startsWith('--frames='));
+const matchFrames=framesArg?Number(framesArg.slice('--frames='.length)):rollbackMode?60:600;
+if(!Number.isSafeInteger(matchFrames)||matchFrames<1)throw Error('--frames must be a positive integer');
 if(resultsMode&&rollbackMode)throw Error('Rollback room probe uses a bounded match');
 const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':rollbackMode?'-rollback':''));fs.mkdirSync(output,{recursive:true});
 async function client(){

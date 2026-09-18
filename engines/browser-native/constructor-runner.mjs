@@ -366,7 +366,7 @@ try {
         const renderer=scoped(()=>createNativeMatchPreview(renderModule,canvas,previewActors,{presentationCache,cacheModels:params.get('cachemodels')!=='0',traceAttachments:params.has('kirbycopy')||params.has('illusionattachments'),gpuErrorChecks:params.get('gpuerrors')!=='deferred',cameraValidation,items:itemModels,effects:effectModels,stage:dynamicStage,hud:hudPreview,verify:!live&&(!renderSteps||params.has('verifyvertices')),callbacks:params.get('callbacks')!=='0'}));
         return Object.fromEntries(Object.entries(renderer).map(([key,value])=>[key,typeof value==='function'?(...args)=>scoped(()=>value(...args)):value]));
       };preview=previewFactory();
-      if(params.has('prewarmshaders')){
+      if(params.has('prewarmshaders')||params.has('rollback')){
         const build=await (await fetch('./fighter-init-build.json')).json();
         const hashes=await Promise.all(shaderIdentityFiles.map(async name=>{const bytes=await (await fetch('./'+name)).arrayBuffer(),hash=await crypto.subtle.digest('SHA-256',bytes);return [name,Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')];}));
         const identity={wasmSha256:build.wasmSha256,sources:Object.fromEntries(hashes)},catalog=validateShaderCatalog(await (await fetch('./native-shader-catalog.json')).json(),identity);

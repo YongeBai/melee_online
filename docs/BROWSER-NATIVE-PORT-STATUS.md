@@ -1,5 +1,21 @@
 # Native browser port — September 17, 2026
 
+The opt-in product room (`?rollback=1`) now drives the real menu-to-match path
+through authenticated local prediction, complete-state correction, confirmed
+audio and a separate dirty WASM presentation replica. Exact shader preparation
+and a restored 30-frame loading-boundary warmup remove the observed live intro
+compile/resource stalls; a shared phase-ready gate keeps either client from
+spending its prediction window while its peer is loading. The product scheduler
+also submits one native picture for every forward frame. A two-browser,
+1,800-frame Final Destination run submitted all 1,800 pictures at
+59.890/59.839 simulation FPS with 7.846/7.794 ms mean and 10.9/10.9 ms p95 draw
+submission. Both clients confirmed frame 1799 and converged exactly; one peer
+performed six corrections and 24 replayed frames. This clears only the narrow
+simulation/submission gate. Independent captured frames, WAN behavior, physical
+presentation, input-to-photon latency, every legal stage and the full roster
+remain unverified, so rollback stays opt-in and ordinary rooms stay lockstep.
+[Scoped evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
+
 The renderer now uses [compact complete texture descriptor keys](BROWSER-NATIVE-TEXTURE-KEYS.md)
 instead of serializing the full object on every bind. Two recovered adjacent
 pairs reduced direct texture lookup 9.7% (-0.066 ms/frame) and draw submission
@@ -40,10 +56,11 @@ reduces presentation copy volume by about 89–91% in rollback trials, while
 preserving the full-state and pixel oracles. It improves the matched A/B/A
 measurements but still fails the 59.5 FPS gate; production remains lockstep.
 
-The opt-in [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md)
-now isolates draw-side allocations and native writes in a second private WASM
-instance. It removes per-draw gameplay snapshot/restore, but rollback remains
-below the 59.5 simulation/captured-FPS gate. Production rooms remain lockstep.
+The [presentation replica experiment](BROWSER-NATIVE-RENDER-REPLICA.md) isolates
+draw-side allocations and native writes in a second private WASM instance. Its
+older generic rollback harness remains below the captured-FPS gate. The newer
+product-room run above improves simulation/submission cadence but does not add
+capture evidence, so production rollback remains opt-in.
 
 The new [every-frame 720p60 diagnostic](BROWSER-NATIVE-720P60.md) measures local
 combat and delayed-input rollback separately, with a 960×720 native picture in
@@ -66,8 +83,9 @@ immutable GPU assets across restoration while rebuilding native bindings;
 see [the measured optimization and its limits](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md).
 It checks the corrected canvas against a fresh renderer byte for byte. It has
 not established sustained distinct 60 FPS.
-The actual room transport still uses lockstep. Audio commitment, speculative
-endings, reconnect recovery, and safe persistent renderer ownership remain.
+The actual room transport defaults to lockstep; `?rollback=1` uses the opt-in
+product correction path described above. Reconnect recovery and complete
+captured-frame/latency certification remain.
 See [the snapshot boundary and limitations](BROWSER-NATIVE-ROLLBACK.md) and
 [measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).
 
@@ -142,12 +160,13 @@ interactive query. Original moving stage gameplay and frozen Stadium are retaine
 
 Two independent Chrome processes have joined by code, refreshed the guest while
 retaining room/seat, readied independently, selected Battlefield, and completed
-600 synchronized native simulation frames with identical measured fighter fields.
-This is a three-frame **input-lockstep prototype**, not rollback. All game work
-stays in the browsers; the local Node service only authenticates seats and relays
-inputs. Refresh currently returns both players to CSS, rather than restoring an
-in-progress match. A deployed relay/signaling path is still required for online
-play; CPU play can boot from static assets without that service.
+600 synchronized native simulation frames with identical measured fighter fields
+on the default three-frame input-lockstep path. The separate `?rollback=1`
+experiment uses the same authenticated relay for prediction/correction. All game
+work stays in the browsers; the local Node service only authenticates seats and
+relays inputs. Refresh currently returns both players to CSS, rather than
+restoring an in-progress match. A deployed relay/signaling path is still required
+for online play; CPU play can boot from static assets without that service.
 
 The solo probes exercise 900 native frames each, actual W stick jumps with tap
 jump enabled/disabled, Space jumps and attacks, original autonomous CPU activity,

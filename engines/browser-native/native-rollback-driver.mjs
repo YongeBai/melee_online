@@ -11,6 +11,7 @@ export function createNativeRollbackDriver({network,session,neutralFrames=3}){
  function advance(frame,samples){
   if(closed)throw Error('Rollback driver closed');
   if(frame!==session.frame||!Array.isArray(samples)||samples.length!==2)throw Error('Rollback driver frame/input mismatch');
+  if(network.phaseReady===false)return false;
   if(pendingFrame!==frame){pendingFrame=frame;pending={pad:frame<neutralFrames?neutralNativeSample():completeNativeSample(samples[network.seat]),tap:network.tapJump};}
   if(frame>=neutralFrames&&!network.sendInput(frame,pending.pad))return false;
   const advanced=session.advance(pending);if(advanced){pendingFrame=-1;pending=null;}return advanced;
