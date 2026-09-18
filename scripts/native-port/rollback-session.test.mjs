@@ -28,3 +28,15 @@ test('correction retains its unchanged starting checkpoint and reports replay/re
  session.receive(0,input(0,1));session.reconcile();assert.deepEqual(captures,[0,4,4]);assert.equal(state,6);assert.equal(replaying,false);
  assert.equal(events.filter(e=>e.phase==='restore').length,1);assert.equal(events.filter(e=>e.phase==='lookup').length,1);assert.equal(events.filter(e=>e.phase==='replay').length,6);assert.equal(events.filter(e=>e.phase==='checkpoint'&&e.replay).length,1);assert.ok(events.every(e=>e.ms>=0));session.dispose();
 });
+
+test('authoritative acknowledgements gate commitment independently of remote delivery',()=>{
+ let state=0;const alive=new Set(),store={capture(){const s={state};alive.add(s);return s;},restore:s=>state=s.state,release:s=>alive.delete(s),get retainedBytes(){return alive.size*4;}};
+ const session=createRollbackSession({seat:0,store,requireAcknowledgement:true,step:()=>state++});
+ for(let frame=0;frame<6;frame++){assert.equal(session.advance(input(frame,0)),true);session.receive(frame,input(frame,1));}
+ assert.equal(session.snapshot().remoteKnown,5);assert.equal(session.confirmed,-1);
+ session.acknowledge(0);session.acknowledge(0);assert.equal(session.confirmed,0);
+ assert.throws(()=>session.acknowledge(2),/Non-contiguous/);
+ for(let frame=1;frame<6;frame++)session.acknowledge(frame);
+ assert.equal(session.confirmed,5);assert.equal(session.snapshot().acknowledged,5);
+ assert.throws(()=>session.acknowledge(30),/outside/);session.dispose();assert.equal(alive.size,0);
+});

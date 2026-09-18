@@ -30,7 +30,7 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000}={}){
    const sequence=Number(m.key.split(':')[1]);if(sequence!==r.sequence+1)throw Error('Unexpected scene sequence');
    r.barriers.set(seat,m.key);if(r.barriers.get(0)!==m.key||r.barriers.get(1)!==m.key)return;
    r.sequence=sequence;r.phase=m.key.split(':')[0];r.phaseKey=m.key;r.inputs.clear();r.lastFrame=-1;r.ready=[false,false];
-   for(let frame=0;frame<3;frame++){r.players.forEach(p=>send(p.ws,{type:'frame',key:m.key,epoch:r.epoch,frame,inputs:[neutral(),neutral()]}));r.lastFrame=frame;}
+   for(let frame=0;frame<3;frame++){const inputs=[neutral(),neutral()];r.players.forEach((p,player)=>{send(p.ws,{type:'peer-input',key:m.key,epoch:r.epoch,frame,seat:1-player,value:inputs[1-player]});send(p.ws,{type:'frame',key:m.key,epoch:r.epoch,frame,inputs});send(p.ws,{type:'confirmed-frame',key:m.key,epoch:r.epoch,frame});});r.lastFrame=frame;}
    for(const p of r.players)send(p.ws,{type:'phase-ready',key:m.key,epoch:r.epoch});state(r);
   }else if(m.type==='ended'){
    if(m.epoch!==r.epoch)return;
@@ -54,8 +54,9 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000}={}){
    if(!Number.isSafeInteger(m.frame)||m.frame<=r.lastFrame||m.frame>r.lastFrame+120)throw Error('Input outside live window');
    const value=validateInput(m.value),entry=r.inputs.get(m.frame)??[null,null];
    if(entry[seat]&&JSON.stringify(entry[seat])!==JSON.stringify(value))throw Error('Conflicting immutable input');entry[seat]=value;r.inputs.set(m.frame,entry);
+   send(r.players[1-seat]?.ws,{type:'peer-input',key:r.phaseKey,epoch:r.epoch,frame:m.frame,seat,value});
    while(r.inputs.get(r.lastFrame+1)?.every(Boolean)){
-    const frame=++r.lastFrame,inputs=r.inputs.get(frame);r.inputs.delete(frame);for(const p of r.players)send(p?.ws,{type:'frame',key:r.phaseKey,epoch:r.epoch,frame,inputs});
+    const frame=++r.lastFrame,inputs=r.inputs.get(frame);r.inputs.delete(frame);for(const p of r.players){send(p?.ws,{type:'frame',key:r.phaseKey,epoch:r.epoch,frame,inputs});send(p?.ws,{type:'confirmed-frame',key:r.phaseKey,epoch:r.epoch,frame});}
    }
   }else throw Error('Unsupported room action');
  }

@@ -69,6 +69,27 @@ history and conflicting inputs fail rather than silently approximating the game.
 Forward and replayed frames are counted separately. The prototype stalls at the
 prediction bound; it never advances indefinitely on unknown remote inputs.
 
+The production native room relay now exposes the transport half of this boundary
+without changing the playable default. Each input remains assigned to the
+authenticated socket's seat and immutable within its room epoch and scene key.
+The relay forwards that individual sample to the peer as soon as it arrives,
+then sends a monotonically ordered `confirmed-frame` acknowledgement only after
+both seats have supplied the frame. Neutral startup frames 0–2 use the same
+stream, so confirmation is contiguous from each scene boundary. The existing
+combined-frame messages and three-frame lockstep consumer remain unchanged.
+
+`native-room.mjs` can explicitly arm bounded buffering before a match-scoped
+correction owner binds; the unchanged lockstep path discards rollback-only event
+payloads. It also exposes immutable local submission separately from the lockstep
+`take` API. `rollback-session.mjs` has an opt-in acknowledgement mode in which
+remote delivery can correct prediction but cannot advance the committed horizon
+without the relay acknowledgement. Tests cover reordered delivery, immediate
+peer forwarding before an earlier frame is complete, contiguous confirmation,
+duplicate/conflicting inputs, and delayed commitment. This is production relay
+integration, not production rollback: the live match still does not construct a
+checkpoint store, bind the correction kernel, or render corrected speculative
+state.
+
 The browser test uses two independent Chrome processes and a test-only WebSocket
 relay. It injects 15–130 ms packet delay/jitter and reordering. Each browser first
 runs an on-time reference from the same initial state, restores it, then runs its
@@ -142,9 +163,9 @@ lifecycle bug.
    simulation boundary without discarding any game-relevant state.
 3. Reduce checkpoint copy/retention cost with measured dirty-page or typed-region
    snapshots, retaining the full-copy implementation as a reference oracle.
-4. Integrate prediction/correction into authenticated room input delivery, add
-   confirmed frame acknowledgements and terminal-event handling, then reconnect
-   recovery and audio commitment.
+4. Bind the existing authenticated input/confirmation stream to a live
+   match-scoped checkpoint/correction owner; add terminal-event handling, then
+   reconnect recovery and audio commitment.
 5. Validate all roster/stage interactions, sustained rendered frame pacing,
    physical controllers, WAN conditions and input-to-photon latency.
 

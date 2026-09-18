@@ -3,9 +3,13 @@
 For the direct C-to-WASM browser port, see
 [the native snapshot/correction prototype](BROWSER-NATIVE-ROLLBACK.md).
 That diagnostic runs local prediction and full-state correction in two browsers;
-its production room route still uses three-frame lockstep. The server-side
-Dolphin architecture below describes the historical/public implementation and
-must not be used as evidence of browser-native rollback performance.
+its production room route still consumes three-frame lockstep. The native relay
+now also forwards each authenticated peer input immediately and emits an ordered
+confirmed-frame acknowledgement once both seats are present, but the playable
+client does not yet drive its simulation from those rollback-facing events. The
+server-side Dolphin architecture below describes the historical/public
+implementation and must not be used as evidence of browser-native rollback
+performance.
 
 The default `/play/` path now creates a private two-seat room. Share the six-character
 code; the second browser enters it at character select. The room owner is always
