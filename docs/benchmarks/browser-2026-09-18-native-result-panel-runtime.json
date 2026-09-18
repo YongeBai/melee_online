@@ -1,19 +1,19 @@
 {
   "date": "2026-09-18",
-  "purpose": "Instantiate, configure, animate, render, and clean up the original GmRst pnlsce panel, then construct and animate Fox/Falco through the original result-demo fighter path in a separate isolated browser-native module.",
-  "sourceCommitBeforeCheckpoint": "46fd49a",
+  "purpose": "Instantiate, configure, animate, render, and clean up the original GmRst pnlsce panel, then construct, animate, camera-submit, and tear down Fox/Falco through the original result-demo path in a separate isolated browser-native module.",
+  "sourceCommitBeforeCheckpoint": "51b6caf",
   "sourceSha256": {
     "engines/browser-native/result-scene.c": "ba265a3fff60ee8d3be82017b06fc4e1ae175d93ed42af24e0c1cf650d7a9bce",
-    "engines/browser-native/result-scene-config.c": "224545f4fd3d8c14639511215b33acd4cb88126828ccad7ec2623b61714400cf",
+    "engines/browser-native/result-scene-config.c": "0dd0a41e3171ee8c28f1ff55369a5b9040d74d536d95c86b335be49d180207d5",
     "engines/browser-native/native-result-scene-preview.mjs": "bf3e8205bd5ada000732687a3028569240f25aa55b563e255fbb85e3cfa1ddca",
-    "engines/browser-native/result-scene.html": "d0b11aa505893ea9a7b9bb15bf36a3189c0aaf02c27ee00ada382944ef1ee47e",
+    "engines/browser-native/result-scene.html": "0956f32579566a1e5c0496c8ff8039936e5a236084d80836aa18b254a551c5b2",
     "engines/browser-native/result-motion-assets.mjs": "9b41a8c5227dc03c77eb1c9cf89ff1f358bd597bfecb3b4d2a49dc1ac680e047",
     "engines/browser-native/resident-files.c": "f5b94ce5e439c14d25d9f74c7d70080ff3505d7f46c79a56c005bdc7ea3c4247",
     "engines/browser-native/dirty-host-contract.mjs": "a9310137f282c0850d253aec36eb69d8e12071ad6c8feaaf4d3f87a3e8be3768",
-    "scripts/native-port/build.mjs": "f6518e673a6aebf0e2d14bbd311969b72e97f84d0d9cf320be7112c0527ff6e1",
+    "scripts/native-port/build.mjs": "caa75b72c299c8702a52451a0f314bf8a1580e77c14790c171de097aaa4ee06f",
     "scripts/native-port/serve.mjs": "420f0172c4a9308989f64ff6ea651555f6d35b7f4d2724658025c4f6f3ada0c8",
-    "scripts/native-port/probe-result-scene.mjs": "d368c0d6134950c31f077c7486dea9ea95416b3eb107ac95416586c34a9a9ef0",
-    "scripts/native-port/portable-source.mjs": "c7bc3ec7ef41393a0d1370cdb52a34d65cf445970d278e75cc95d7ab5d11ae0f"
+    "scripts/native-port/probe-result-scene.mjs": "ba3c39e25d0c89ed5e6cf59418e3b9358d10eebea852bd3b2bd2d3247dd1a85f",
+    "scripts/native-port/portable-source.mjs": "1f125341e6579840d8a12a23e959a5ed4cd2b8c200cfcc3178b85eccb2bb1f80"
   },
   "commands": [
     "node scripts/native-port/build.mjs --result-scene",
@@ -25,8 +25,8 @@
   "browser": "headless Chromium with WebGL2 GPU path",
   "isolatedWasm": {
     "file": "melee-result-scene.wasm",
-    "bytes": 3578926,
-    "sha256": "da13c581151c864c3ea3f7d0eb1d9db7c2a1ce47bd1cf5a9230e92b7af9d97c0",
+    "bytes": 3581733,
+    "sha256": "063a278cd3f532412dbc4d717ad80a9286f6aa0a55f8866aa2ae4011e170a1dd",
     "productFighterGlueUnchangedSha256": "0d7004dc06463954360722e2156f4b895d89d25ef731c4dc7ff5b6f7bb3059ab"
   },
   "frames": 60,
@@ -72,12 +72,22 @@
     "framesAfter60Steps": [60, 10],
     "finitePoseSnapshots": true,
     "originalConstructor": "fn_8017A67C",
+    "captureCameras": [
+      {"character": "Fox", "eye": [3.5, 117, 132], "interest": [3.5, 117, 0]},
+      {"character": "Falco", "eye": [0.5, 202.5, 12], "interest": [0.5, 202.5, 0]}
+    ],
+    "captureProjection": {"fov": 19.999998092651367, "aspect": 1.2166670560836792, "near": 1, "far": 5000},
+    "captureScissor": [270, 370, 124, 276],
+    "winnerCamera": {"eye": [0, 117.72000122070312, 192], "interest": [0, 117.72000122070312, 0], "scissor": [0, 640, 0, 480]},
+    "winnerCallbackSubmissions": 5,
+    "winnerCallbackPassMask": 7,
     "rendered": false,
-    "teardownValidated": false
+    "teardownValidated": true,
+    "cleanup": {"objects": 0, "processes": 0}
   },
   "productRegression": {
     "passed": true,
-    "eliminationFrame": 805,
+    "eliminationFrame": 806,
     "timeoutFrame": 28800,
     "rematchPassed": true,
     "legalStagesAfterReturn": [2, 3, 8, 28, 31, 32]
@@ -94,5 +104,6 @@
   "cleanup": {"objects": 0, "processes": 0, "archiveAllocations": 0},
   "screenshotSha256": "18f0c34a7159950b75fb9e76bef97b6e67fbb92ddf4d99b491063bcff5e572c5",
   "visualInspection": "The original panel visibly rendered FOX as the winner, 1st/2nd placement, P1/P2 entrants, native score/KO/fall/self-destruct columns for two active players, gray dashes for inactive ports, and the native No Entrant treatment for ports 3/4; the four-Sheik archive default is gone.",
-  "scope": "This validates native two-player panel configuration, original SIS landing rows, all 26 character texture selections, and original Fox/Falco result-fighter construction/animation in isolation. It does not yet render those fighters through the result cameras, validate actor teardown or all-roster construction, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
+  "fullSourceSuite": {"tests": 649, "passed": 639, "skipped": 10, "failed": 0},
+  "scope": "This validates native two-player panel configuration, original SIS landing rows, all 26 character texture selections, original Fox/Falco result-fighter construction/animation, exact result-camera construction, winner callback traversal, and actor teardown in isolation. It does not yet emit GPU fighter pixels or implement the original EFB-copy portrait textures, validate all-roster actor construction, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
 }

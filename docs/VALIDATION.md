@@ -97,11 +97,15 @@ target now also converts the nested result-motion archives in place and calls
 Melee's original result-demo fighter constructor for Fox and Falco. The probe
 observed distinct native owners, internal fighter kinds 1 and 22, finite native
 poses, and animation-frame changes from `[0, 0]` to `[60, 10]` over 60 result
-steps. The full source suite passed 648 tests (638 pass, 10 skip, 0 fail).
-This remains isolated result work, not product parity: the actors are not yet
-submitted through their original result cameras/scissors, the actor module does
-not yet have a validated teardown, and all-roster construction, live standings,
-lifecycle integration, and result-screen FPS remain. See the
+steps. The full source suite passed 649 tests (639 pass, 10 skip, 0 fail).
+It also constructed both original per-player cameras with the exact
+20-degree FOV, 1.216667 aspect, and `270,370,124,276` scissor, plus the winner's
+full-frame camera. The original winner callback reached Fox five times across
+passes 0–2, and actor teardown returned object/process counts to zero.
+This remains isolated result work, not product parity: the callbacks have not
+yet produced GPU fighter pixels or the original EFB-backed portrait textures,
+and all-roster construction, live standings, lifecycle integration, and
+result-screen FPS remain. See the
 [native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
 
 For September 17 direct-browser work, see the

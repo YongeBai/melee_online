@@ -38,6 +38,8 @@ static unsigned winner_character_frame;
 static HSD_Text* result_text[4][2];
 static unsigned result_text_active;
 static HSD_GObj* result_fighters[2];
+static HSD_GObj* result_capture_cameras[2];
+static HSD_GObj* result_live_cameras[2];
 static void destroy_lights(HSD_Obj* object){HSD_LObjRemoveAll((HSD_LObj*)object);}
 extern int portSceneInitialize(void);
 extern void portRuntimeSetSceneDestructors(GObjFunc);
@@ -45,8 +47,11 @@ extern unsigned portRuntimeStep(void);
 extern HSD_Archive* portFileArchivePair(const char*,const char*,const char*,void**);
 extern void portFileArchiveClose(HSD_Archive*);
 extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
+extern void portRenderContextEnter(void),portRenderContextLeave(void);
+extern void portSetGXObserver(int (*)(HSD_GObj*,int));
 extern float gm_80168B34(CharacterKind,int,int);
 extern Fighter_GObj* fn_8017A67C(CharacterKind,int,int);
+extern HSD_GObj* fn_8017A318(s32);
 
 static HSD_JObj* find_node(HSD_JObj* root,unsigned id)
 {
@@ -187,8 +192,37 @@ void portResultFightersInitialize(unsigned character0,unsigned character1,unsign
         MatchPlayerData* standing=&layout->state.match_end.player_standings[slot];standing->pkind=Gm_PKind_Human;standing->ckind=characters[slot];standing->is_big_loser=slot==winner?0:1;standing->x3_b0=costumes[slot];
         HSD_PadCopyStatus[slot].button=slot==winner?0x200:0;result_fighters[slot]=(HSD_GObj*)fn_8017A67C(characters[slot],costumes[slot],slot);if(!result_fighters[slot])abort();
     }
+    for(unsigned slot=0;slot<2;slot++){
+        HSD_GObj* main=fn_8017A318(slot);if(!main||main->obj_kind!=HSD_GObj_CameraKind||!main->hsd_obj||!main->render_cb)abort();
+        result_capture_cameras[slot]=main;
+        if(slot==winner){HSD_GObj* live=main->next;if(!live||live->obj_kind!=HSD_GObj_CameraKind||!live->hsd_obj||!live->render_cb)abort();result_live_cameras[slot]=live;}
+    }
 }
 unsigned portResultFighter(unsigned slot){if(slot>=2||!result_fighters[slot])abort();return (unsigned)result_fighters[slot];}
+unsigned portResultFighterCamera(unsigned slot,unsigned live)
+{
+    if(slot>=2||live>1)abort();HSD_GObj* camera=live?result_live_cameras[slot]:result_capture_cameras[slot];return (unsigned)camera;
+}
+static HSD_GObj* submission_target;
+static unsigned submission_count,submission_passes;
+static int observe_submission(HSD_GObj* object,int pass)
+{
+    if(object==submission_target){submission_count++;if(pass<32)submission_passes|=1U<<pass;}return 1;
+}
+unsigned portResultWinnerCameraSubmission(unsigned slot,unsigned* passes)
+{
+    if(slot>=2||!passes||!result_live_cameras[slot]||submission_target)abort();submission_target=result_fighters[slot];submission_count=submission_passes=0;
+    HSD_GObj* old=HSD_GObj_804D7818;HSD_GObj_804D7818=result_live_cameras[slot];portRenderContextEnter();portSetGXObserver(observe_submission);
+    result_live_cameras[slot]->render_cb(result_live_cameras[slot],0);
+    portSetGXObserver(NULL);portRenderContextLeave();HSD_GObj_804D7818=old;submission_target=NULL;*passes=submission_passes;return submission_count;
+}
+void portResultFighterCameraSnapshot(unsigned slot,unsigned live,float* out)
+{
+    if(!out)abort();HSD_GObj* owner=(HSD_GObj*)portResultFighterCamera(slot,live);if(!owner)abort();HSD_CObj* c=owner->hsd_obj;
+    if(HSD_CObjGetProjectionType(c)!=PROJ_PERSPECTIVE)abort();HSD_CObjGetViewingMtx(c,(float(*)[4])out);MTXPerspective((float(*)[4])(out+12),HSD_CObjGetFov(c),HSD_CObjGetAspect(c),HSD_CObjGetNear(c),HSD_CObjGetFar(c));
+    HSD_CObjGetEyePosition(c,(Vec3*)(out+28));HSD_CObjGetInterest(c,(Vec3*)(out+31));out[34]=HSD_CObjGetFov(c);out[35]=HSD_CObjGetAspect(c);out[36]=HSD_CObjGetNear(c);out[37]=HSD_CObjGetFar(c);
+    Scissor scissor;HSD_CObjGetScissor(c,&scissor);out[38]=scissor.left;out[39]=scissor.right;out[40]=scissor.top;out[41]=scissor.bottom;
+}
 void portResultFighterSnapshot(unsigned slot,float* out)
 {
     if(slot>=2||!result_fighters[slot]||!out)abort();Fighter* fp=result_fighters[slot]->user_data;if(!fp)abort();
@@ -213,5 +247,6 @@ void portResultSceneFinish(void)
     for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
     portFileArchiveClose(archive);archive=NULL;panel_scene=film_scene=NULL;panel=camera=lights=NULL;
     winner_node=NULL;winner_character_frame=0;
+    for(unsigned slot=0;slot<2;slot++){result_fighters[slot]=NULL;result_capture_cameras[slot]=NULL;result_live_cameras[slot]=NULL;}
     for(unsigned slot=0;slot<4;slot++){player_active[slot]=0;for(unsigned part=0;part<15;part++)player_nodes[slot][part]=NULL;}
 }
