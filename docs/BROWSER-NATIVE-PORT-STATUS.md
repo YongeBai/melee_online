@@ -38,12 +38,20 @@ is controlled two-way relay adversity, not real WAN loss/reordering, compositor
 scanout or physical input-to-photon certification.
 [Bidirectional-delay evidence](benchmarks/browser-2026-09-18-native-room-bidirectional-delay-720p60.json).
 
+Rollback is now the production default for two-player rooms. The normal URL,
+without a rollback query parameter, repeated the 1,800-frame bidirectional gate
+at 59.557–59.698 simulation FPS and 59.770 captured FPS. Both peers reported the
+default path, confirmed frame 1799, performed 201 corrections/434 replayed
+frames, rejected no late inputs and converged exactly. `?lockstep=1` remains a
+diagnostic fallback. A 900-frame CPU regression completed without entering
+rollback. [Default-room evidence](benchmarks/browser-2026-09-18-native-room-default-rollback-720p60.json).
+
 The separate 60-frame startup matrix remains the fast loading/correctness
 regression for all 25 roster tiles/26 playable starts and all six legal stages
 under the same fixed no-item 1v1 rules.
 [Roster/stage startup evidence](benchmarks/browser-2026-09-18-native-room-matrix.json).
 
-The opt-in product room (`?rollback=1`) now drives the real menu-to-match path
+The default two-player product room now drives the real menu-to-match path
 through authenticated local prediction, complete-state correction, confirmed
 audio and a separate dirty WASM presentation replica. Exact shader preparation
 and a restored 30-frame loading-boundary warmup remove the observed live intro
@@ -56,9 +64,12 @@ submission. Both clients confirmed frame 1799 and converged exactly; one peer
 performed six corrections and 24 replayed frames. This clears only the narrow
 simulation/submission gate; the later matrices above add captured-frame, legal
 stage, roster and controlled downstream-delay evidence. Full WAN behavior,
-physical presentation and input-to-photon latency remain unverified, so rollback
-stays opt-in and ordinary rooms stay lockstep.
+physical presentation and input-to-photon latency remain unverified.
 [Scoped evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
+
+The optimization entries below preserve historical pre-acceptance conclusions;
+their lockstep/opt-in status statements are superseded by the default-room gate
+above.
 
 The renderer now uses [compact complete texture descriptor keys](BROWSER-NATIVE-TEXTURE-KEYS.md)
 instead of serializing the full object on every bind. Two recovered adjacent
@@ -127,8 +138,8 @@ immutable GPU assets across restoration while rebuilding native bindings;
 see [the measured optimization and its limits](BROWSER-NATIVE-ROLLBACK-OPTIMIZATION.md).
 It checks the corrected canvas against a fresh renderer byte for byte. It has
 not established sustained distinct 60 FPS.
-The actual room transport defaults to lockstep; `?rollback=1` uses the opt-in
-product correction path described above. Reconnect recovery and complete
+The actual room transport defaults to the product correction path described
+above; `?lockstep=1` is diagnostic-only. Reconnect recovery and complete
 captured-frame/latency certification remain.
 See [the snapshot boundary and limitations](BROWSER-NATIVE-ROLLBACK.md) and
 [measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).
@@ -205,8 +216,8 @@ interactive query. Original moving stage gameplay and frozen Stadium are retaine
 Two independent Chrome processes have joined by code, refreshed the guest while
 retaining room/seat, readied independently, selected Battlefield, and completed
 600 synchronized native simulation frames with identical measured fighter fields
-on the default three-frame input-lockstep path. The separate `?rollback=1`
-experiment uses the same authenticated relay for prediction/correction. All game
+on the historical three-frame input-lockstep path. Current rooms use the same
+authenticated relay for default prediction/correction. All game
 work stays in the browsers; the local Node service only authenticates seats and
 relays inputs. Refresh currently returns both players to CSS, rather than
 restoring an in-progress match. A deployed relay/signaling path is still required

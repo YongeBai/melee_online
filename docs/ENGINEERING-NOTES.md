@@ -7,7 +7,7 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
-The opt-in product room (`?rollback=1`) now uses the audited dirty WASM core,
+The default two-player product room now uses the audited dirty WASM core,
 exact sparse checkpoints, authenticated prediction/correction, confirmed audio,
 and a separate dirty presentation replica. Precompile the exact shader catalog
 and exercise the first 30 neutral presentation frames during loading, then
@@ -23,8 +23,8 @@ simulation was 59.557–59.933 FPS, captured cadence was 59.700–59.970 FPS and
 p95 was 7.1–14.1 ms. Require a clean host window before each row because
 unrelated shared-host builds produced synchronous false max-frame failures on
 both browsers. This is browser-canvas evidence, not physical presentation, WAN,
-input-to-photon or exhaustive matchup certification. The query remains opt-in
-and default rooms remain lockstep. See the
+input-to-photon or exhaustive matchup certification. `?lockstep=1` retains the
+old three-frame path only as a diagnostic control. See the
 [roster performance evidence](benchmarks/browser-2026-09-18-native-room-roster-720p60.json)
 and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
 The separate 60-frame matrix remains the fast loading/correctness regression for
@@ -48,6 +48,14 @@ both directions, the product path sustained 59.875–59.916 simulation FPS and
 exact convergence. This still does not model loss, reordering or real WAN
 behavior; see the
 [bidirectional-delay evidence](benchmarks/browser-2026-09-18-native-room-bidirectional-delay-720p60.json).
+The default URL, without a rollback query parameter, repeated that sustained
+gate at 59.557–59.698 simulation FPS and 59.770 captured FPS. Both clients
+reported `productionDefault: true`; a separate 900-frame CPU match did not enter
+rollback. See the
+[default-room evidence](benchmarks/browser-2026-09-18-native-room-default-rollback-720p60.json).
+
+The optimization notes below preserve the state of earlier experiments; their
+old production-disabled conclusions are superseded by the default-room gate.
 
 [Cold shader preparation](BROWSER-NATIVE-SHADER-PREWARM.md) eliminates observed
 compile spikes with the existing exact-source cache, but the repeated Fountain
@@ -68,8 +76,8 @@ values into versioned owned std140 records under an exclusive presentation lease
 Validate each linked program against reflected offsets, types and strides; keep
 aligned ranges, epoch/lease guards, context boundaries and the direct-uniform
 fallback. Retain `uniformbuffer=0` and every-frame pixel/camera/memory oracles.
-The measured draw-CPU reduction is modest; Fountain still fails the repeated
-720p60 cadence gates. Production rollback remains disabled.
+The measured draw-CPU reduction was modest; Fountain still failed the repeated
+720p60 cadence gates at that milestone.
 
 [Exact draw-state staging](BROWSER-NATIVE-DRAW-STATE.md) interns only fully
 compared, pointer-free TEV instruction rows and immutable owned uniform versions.

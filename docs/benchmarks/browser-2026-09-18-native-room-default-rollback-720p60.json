@@ -1,0 +1,68 @@
+{
+  "date": "2026-09-18",
+  "passed": true,
+  "configurationSha256": "2752617128193c148dfa38fcf78bff89b68cd40c345f76cc049425fe2ab7bb25",
+  "scope": "Default two-player product-room URL with no rollback query parameter; independent order-preserving 2/4/6/8/10 ms client-to-relay input and relay-to-client peer-input/confirmation delays, fixed no-item 1v1 rules, sustained normalized-controller combat, rollback correction and exact seat-0 post-draw VideoFrame(canvas) observation. Not real WAN transport, packet loss, compositor scanout or physical input-to-photon latency.",
+  "configuration": {
+    "resolution": [960, 720],
+    "frames": 1800,
+    "pair": [9, 10],
+    "stage": 8,
+    "urlRollbackParameter": false,
+    "reportedProductionDefault": true,
+    "clientToRelayDelayPatternMs": [2, 4, 6, 8, 10],
+    "relayToClientDelayPatternMs": [2, 4, 6, 8, 10],
+    "observedSeat": 0,
+    "cpuAffinity": "0-3,12-15",
+    "clientCpuSets": ["0,1,12,13", "2,3,14,15"],
+    "simulationFpsFloor": 59.5,
+    "captureFpsFloor": 59.5,
+    "drawP95MsCeiling": 20,
+    "drawMaxMsCeiling": 50
+  },
+  "sources": {
+    "engines/browser-native/character-menu.html": "9dfa184939b2499a4ce5eabeef9e794416a19d6b90570d50e7f78d631b66d2df",
+    "engines/browser-native/native-menu-live.mjs": "88566de623f897b1906d065cc3deeb8c762ee3200aefba880f1de6c312d7dcec",
+    "engines/browser-native/native-product-rollback.mjs": "a3190a57e3b25f27936151b4404f596ef5632e6ae83692052ab3d2d884f72e04",
+    "engines/browser-native/constructor-runner.mjs": "3a342664758cd6c3067587b6962c070b78e0960b5f057c8eb0f4d45cbd2597ed",
+    "engines/browser-native/dirty-host-contract.mjs": "dc24b7c095cb0ae34d176ba32d6682019ef4fdb73588bfe13d340500e43cca46",
+    "scripts/native-port/rooms.mjs": "9e5a801c055bcc025dff01b96ae8835e1bcc6666886282a9169b6551509d52aa",
+    "scripts/native-port/probe-native-rooms.mjs": "b3ca00a045c86ec1bdf78c71982bc14ee5952f5359aae81e095ee1ee766cba66",
+    "dist/native-port/native-product-rollback.mjs": "a3190a57e3b25f27936151b4404f596ef5632e6ae83692052ab3d2d884f72e04",
+    "dist/native-port/rollback-session.mjs": "1f5e202e07286be75ef84ec8fe5bc17fc934b5156082374fc4acb4478b2d8dcf",
+    "dist/native-port/native-live.mjs": "60e3c4672ec257f3f73e9af6c880d5e30934c9cc1bb2337ac4024032698b9be3",
+    "dist/native-port/frame-evidence.mjs": "cf32885cbbd01a85a7142d3025725be38b36955a982683e13456113c2053f72d",
+    "dist/native-port/combat-workload.mjs": "af9901e70e70f216b7031d74708116d275c316dc33fdb56280b469912c4650c2"
+  },
+  "transport": {
+    "clientToRelay": {"configured": 3594, "scheduled": 3594, "delivered": 3594, "configuredDelayTotalMs": 21560, "configuredDelayRangeMs": [2, 10], "headOfLineDelayMaxMs": 10},
+    "relayToClient": {"configured": 7188, "scheduledIncludingHeadOfLine": 10031, "delivered": 10031, "configuredDelayTotalMs": 43122, "configuredDelayRangeMs": [2, 10], "headOfLineDelayMaxMs": 12}
+  },
+  "clients": [
+    {
+      "seat": 0,
+      "productionDefault": true,
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.55689668866003,
+      "drawSubmissionCpu": {"meanMs": 7.575333334472444, "p95Ms": 10, "maxMs": 18.5},
+      "rollback": {"confirmed": 1799, "predictedFrames": 1396, "corrections": 94, "replayedFrames": 191, "maxReplay": 5, "rejectedLateInputs": 0},
+      "observation": {"mode": "direct-canvas-video-frame", "requested": 1800, "captured": 1800, "distinctSampledImages": 1800, "repeatedSampledImages": 0, "estimatedUnobservedRequests": 0, "blackFrames": 0, "wrongSizeFrames": 0, "fps": 59.76962613251647, "error": null}
+    },
+    {
+      "seat": 1,
+      "productionDefault": true,
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.6981264738211,
+      "drawSubmissionCpu": {"meanMs": 7.781222222248713, "p95Ms": 10.5, "maxMs": 28.5},
+      "rollback": {"confirmed": 1799, "predictedFrames": 1494, "corrections": 107, "replayedFrames": 243, "maxReplay": 4, "rejectedLateInputs": 0}
+    }
+  ],
+  "combat": {
+    "seat0": {"framesWithAttack": 1051, "framesWithHitlag": 213, "framesWithDamage": 1619},
+    "seat1": {"framesWithAttack": 1030, "framesWithHitlag": 206, "framesWithDamage": 1619}
+  },
+  "matchingFinalFighterState": true,
+  "cpuRegression": {"frames": 900, "passed": true, "rollbackEntered": false}
+}

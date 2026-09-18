@@ -134,7 +134,7 @@ prediction-window stall is pending, and advances only through
 reconciles pending input and requires that exact ending frame to be confirmed;
 a corrected speculative KO therefore cannot escape to results.
 
-`?rollback=1` exercises this boundary in an opt-in product room. It boots the
+Two-player rooms now exercise this boundary by default. The path boots the
 audited dirty core, detaches the menu/match renderer before the first checkpoint,
 uses sparse complete-state checkpoints for simulation, and reconstructs visible
 frames in a second private WASM instance through the retained immutable GPU
@@ -143,9 +143,9 @@ cache. A two-browser 60-frame product run converged at confirmed frame 59 after
 input rejection. Dirty replica copying was about 94 / 97 MB total instead of a
 full 61 MB per presentation. The run still took 1.14 / 1.24 seconds and draw
 submission averaged 17.1 / 17.9 ms, so it is not the 720p60 production path.
-The default remains three-frame lockstep while replica construction spikes and
-sustained cadence are reduced and certified. The bounded product measurements
-are retained in
+Those figures are a historical pre-optimization result. Current sustained
+browser-canvas, roster, stage and controlled-delay gates pass; `?lockstep=1`
+retains the old path as a diagnostic control. The bounded early measurements are retained in
 [the native product rollback evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
 
 ## Validation scope
