@@ -17,6 +17,8 @@ struct ResidentFile { char name[32]; unsigned char* bytes; size_t size; unsigned
 static struct ResidentFile files[FILE_CAPACITY];
 static unsigned file_count, read_count, allocation_count;
 static size_t byte_count;
+struct HeapFileRange { void* pointer; size_t size; };
+static struct HeapFileRange heap_ranges[FILE_CAPACITY*2];
 extern int portRuntimeInit(void);
 
 static int valid_name(const char* name)
@@ -77,12 +79,15 @@ void lbFile_8001668C(const char* name,void* dst,size_t* size)
 void* lbHeap_80015BD0(int heap_id,size_t size)
 {
     if(heap_id!=0||!size||portRuntimeInit()<0)abort();
-    void* result=HSD_MemAlloc(size);if(!result)abort();allocation_count++;return result;
+    void* result=HSD_MemAlloc(size);if(!result)abort();
+    for(unsigned i=0;i<FILE_CAPACITY*2;i++)if(!heap_ranges[i].pointer){heap_ranges[i]=(struct HeapFileRange){result,size};allocation_count++;return result;}
+    HSD_Free(result);abort();
 }
 void lbHeap_80015CA8(int heap_id,void* pointer)
 {
     if(heap_id!=0||!pointer||!allocation_count)abort();
-    HSD_Free(pointer);allocation_count--;
+    for(unsigned i=0;i<FILE_CAPACITY*2;i++)if(heap_ranges[i].pointer==pointer){heap_ranges[i]=(struct HeapFileRange){0};HSD_Free(pointer);allocation_count--;return;}
+    abort();
 }
 HSD_Archive* portFileArchive(const char* name,const char* symbol,void** address)
 {
@@ -116,6 +121,12 @@ void portResidentCopy(void* dst,uintptr_t source,size_t size)
     for(unsigned i=0;i<file_count;i++) {
         uintptr_t begin=(uintptr_t)files[i].bytes;
         if(source>=begin&&source-begin<=files[i].size&&size<=files[i].size-(source-begin)) {
+            memcpy(dst,(void*)source,size);return;
+        }
+    }
+    for(unsigned i=0;i<FILE_CAPACITY*2;i++)if(heap_ranges[i].pointer) {
+        uintptr_t begin=(uintptr_t)heap_ranges[i].pointer;
+        if(source>=begin&&source-begin<=heap_ranges[i].size&&size<=heap_ranges[i].size-(source-begin)) {
             memcpy(dst,(void*)source,size);return;
         }
     }

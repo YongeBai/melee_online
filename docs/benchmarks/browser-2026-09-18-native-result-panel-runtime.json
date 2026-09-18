@@ -1,16 +1,19 @@
 {
   "date": "2026-09-18",
-  "purpose": "Instantiate, configure for native two-player standings, add original SIS result rows, animate, render, and clean up the original GmRst pnlsce panel in an isolated real-browser native runtime.",
+  "purpose": "Instantiate, configure, animate, render, and clean up the original GmRst pnlsce panel, then construct and animate Fox/Falco through the original result-demo fighter path in a separate isolated browser-native module.",
   "sourceCommitBeforeCheckpoint": "46fd49a",
   "sourceSha256": {
     "engines/browser-native/result-scene.c": "ba265a3fff60ee8d3be82017b06fc4e1ae175d93ed42af24e0c1cf650d7a9bce",
-    "engines/browser-native/result-scene-config.c": "25781bdc85d9854a1445d3eeb5d570602a7578de0b4dc177161eb47b93684357",
+    "engines/browser-native/result-scene-config.c": "224545f4fd3d8c14639511215b33acd4cb88126828ccad7ec2623b61714400cf",
     "engines/browser-native/native-result-scene-preview.mjs": "bf3e8205bd5ada000732687a3028569240f25aa55b563e255fbb85e3cfa1ddca",
-    "engines/browser-native/result-scene.html": "92095d67c1fa01242afeac1f4209020478f4a891c124c0926eed2e1087db81a0",
+    "engines/browser-native/result-scene.html": "d0b11aa505893ea9a7b9bb15bf36a3189c0aaf02c27ee00ada382944ef1ee47e",
+    "engines/browser-native/result-motion-assets.mjs": "9b41a8c5227dc03c77eb1c9cf89ff1f358bd597bfecb3b4d2a49dc1ac680e047",
+    "engines/browser-native/resident-files.c": "f5b94ce5e439c14d25d9f74c7d70080ff3505d7f46c79a56c005bdc7ea3c4247",
     "engines/browser-native/dirty-host-contract.mjs": "a9310137f282c0850d253aec36eb69d8e12071ad6c8feaaf4d3f87a3e8be3768",
-    "scripts/native-port/build.mjs": "d289ba12c902dfda3aa659d4f3c2977484ae13c2b12ef8f5a1678a883b6a1783",
-    "scripts/native-port/serve.mjs": "d6f79451513c3adb032210b8fd9d397bda4592fd45779e26c1cd61d392a37ff0",
-    "scripts/native-port/probe-result-scene.mjs": "ce9d35bc7f0bc441006cf8e4eff42ef4c64e32db19d4ffd8ec3f01d35d1b0ab5"
+    "scripts/native-port/build.mjs": "f6518e673a6aebf0e2d14bbd311969b72e97f84d0d9cf320be7112c0527ff6e1",
+    "scripts/native-port/serve.mjs": "420f0172c4a9308989f64ff6ea651555f6d35b7f4d2724658025c4f6f3ada0c8",
+    "scripts/native-port/probe-result-scene.mjs": "d368c0d6134950c31f077c7486dea9ea95416b3eb107ac95416586c34a9a9ef0",
+    "scripts/native-port/portable-source.mjs": "c7bc3ec7ef41393a0d1370cdb52a34d65cf445970d278e75cc95d7ab5d11ae0f"
   },
   "commands": [
     "node scripts/native-port/build.mjs --result-scene",
@@ -22,8 +25,8 @@
   "browser": "headless Chromium with WebGL2 GPU path",
   "isolatedWasm": {
     "file": "melee-result-scene.wasm",
-    "bytes": 3557565,
-    "sha256": "f3feb049a2940bbe9cf99c291249d2f641d6c911307347e05062c3aa4cab4f0a",
+    "bytes": 3578926,
+    "sha256": "da13c581151c864c3ea3f7d0eb1d9db7c2a1ce47bd1cf5a9230e92b7af9d97c0",
     "productFighterGlueUnchangedSha256": "0d7004dc06463954360722e2156f4b895d89d25ef731c4dc7ff5b6f7bb3059ab"
   },
   "frames": 60,
@@ -61,9 +64,20 @@
   },
   "rosterCharacterTextureFrames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24],
   "rosterCases": 26,
+  "nativeResultFighters": {
+    "characters": ["Fox", "Falco"],
+    "internalFighterKinds": [1, 22],
+    "distinctOwners": true,
+    "initialAnimationFrames": [0, 0],
+    "framesAfter60Steps": [60, 10],
+    "finitePoseSnapshots": true,
+    "originalConstructor": "fn_8017A67C",
+    "rendered": false,
+    "teardownValidated": false
+  },
   "productRegression": {
     "passed": true,
-    "eliminationFrame": 806,
+    "eliminationFrame": 805,
     "timeoutFrame": 28800,
     "rematchPassed": true,
     "legalStagesAfterReturn": [2, 3, 8, 28, 31, 32]
@@ -80,5 +94,5 @@
   "cleanup": {"objects": 0, "processes": 0, "archiveAllocations": 0},
   "screenshotSha256": "18f0c34a7159950b75fb9e76bef97b6e67fbb92ddf4d99b491063bcff5e572c5",
   "visualInspection": "The original panel visibly rendered FOX as the winner, 1st/2nd placement, P1/P2 entrants, native score/KO/fall/self-destruct columns for two active players, gray dashes for inactive ports, and the native No Entrant treatment for ports 3/4; the four-Sheik archive default is gone.",
-  "scope": "This validates native two-player panel configuration, original SIS landing rows, and all 26 character texture selections in isolation. It does not yet render fighter victory models, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
+  "scope": "This validates native two-player panel configuration, original SIS landing rows, all 26 character texture selections, and original Fox/Falco result-fighter construction/animation in isolation. It does not yet render those fighters through the result cameras, validate actor teardown or all-roster construction, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
 }

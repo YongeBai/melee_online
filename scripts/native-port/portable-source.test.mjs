@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {adaptStageCallbacks,adaptLinkArrowTable,adaptYoshiAttributes,adaptMotionStateWord,adaptPartnerStickConversion} from './portable-source.mjs';
+import {adaptStageCallbacks,adaptLinkArrowTable,adaptYoshiAttributes,adaptMotionStateWord,adaptPartnerStickConversion,adaptPlayerDemoMapping} from './portable-source.mjs';
 import fs from 'node:fs';
 
 test('Yoshi loader view exposes the actual Egg Throw floats rather than byte padding',()=>{
@@ -78,6 +78,14 @@ test('partner input conversion goes through signed integer before keeping the lo
   assert.match(result,/return \(u8\) \(s32\) \(128\.0F \* x\);/);
   assert.equal(result.replaceAll('(u8) (s32) (127.0F * x)','127.0F * x').replaceAll('(u8) (s32) (128.0F * x)','128.0F * x'),original);
   assert.throws(()=>adaptPartnerStickConversion(result),/conversion changed/);
+});
+
+test('demo motion loading names the fighter mapping table instead of relying on global adjacency',()=>{
+ const original=fs.readFileSync(new URL('../../engines/melee-decomp/src/melee/pl/player.c',import.meta.url),'utf8'),converted=adaptPlayerDemoMapping(original);
+ assert.match(converted,/ftMapping\* mapping = &ftMapping_list\[ckind\]/);
+ assert.match(converted,/mapping->extra_internal_id != -1/);
+ assert(!converted.slice(converted.indexOf('void Player_80036E20'),converted.indexOf('HSD_JObj\* Player_80036EA0')).includes('str_PdPmdat_start_of_data'));
+ assert.throws(()=>adaptPlayerDemoMapping(converted),/overlay changed/);
 });
 
 test('pause bounds adapter preserves the original function and removes its mismatched callback cast',async()=>{

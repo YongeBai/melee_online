@@ -3,10 +3,15 @@
 #include <melee/sc/types.h>
 #include <melee/cm/forward.h>
 #include <melee/ft/forward.h>
+#include <melee/ft/ftdemo.h>
+#include <melee/ft/types.h>
+#include <melee/gm/gmresultplayer.h>
+#include <melee/gm/gmresultplayer.static.h>
 #include <melee/lb/lb_00B0.h>
 #include <melee/lb/lbarchive.h>
 #include <melee/lb/lbspdisplay.h>
 #include <melee/mn/mnmain.h>
+#include <melee/pl/player.h>
 #include <sysdolphin/baselib/aobj.h>
 #include <sysdolphin/baselib/cobj.h>
 #include <sysdolphin/baselib/dobj.h>
@@ -21,6 +26,7 @@
 #include <sysdolphin/baselib/sislib.h>
 #include <sysdolphin/baselib/tobj.h>
 #include <stdlib.h>
+#include <string.h>
 
 static HSD_Archive* archive;
 static SceneDesc *panel_scene,*film_scene;
@@ -31,6 +37,7 @@ static HSD_JObj* winner_node;
 static unsigned winner_character_frame;
 static HSD_Text* result_text[4][2];
 static unsigned result_text_active;
+static HSD_GObj* result_fighters[2];
 static void destroy_lights(HSD_Obj* object){HSD_LObjRemoveAll((HSD_LObj*)object);}
 extern int portSceneInitialize(void);
 extern void portRuntimeSetSceneDestructors(GObjFunc);
@@ -39,6 +46,7 @@ extern HSD_Archive* portFileArchivePair(const char*,const char*,const char*,void
 extern void portFileArchiveClose(HSD_Archive*);
 extern void portRenderContextBegin(HSD_CObj*,HSD_LObj*);
 extern float gm_80168B34(CharacterKind,int,int);
+extern Fighter_GObj* fn_8017A67C(CharacterKind,int,int);
 
 static HSD_JObj* find_node(HSD_JObj* root,unsigned id)
 {
@@ -165,6 +173,27 @@ unsigned portResultScenePlayerSnapshot(unsigned* out,unsigned capacity)
     return 4;
 }
 unsigned portResultSceneWinnerSnapshot(void){if(!archive||!winner_node)abort();return winner_character_frame;}
+/* Bring up the original result demo-fighter constructor after the host has
+ * installed common data, fighter packages, PdPm and GmRstM archives. Keep this
+ * in the isolated result module: these original pools/statics are one-shot. */
+void portResultFightersInitialize(unsigned character0,unsigned character1,unsigned winner,unsigned costume0,unsigned costume1)
+{
+    if(!archive||result_fighters[0]||result_fighters[1]||character0>=26||character1>=26||winner>1||costume0>5||costume1>5)abort();
+    Player_80036DD8();ftDemo_ObjAllocInit();Player_InitAllPlayers();
+    ResultsDisplayLayout* layout=(ResultsDisplayLayout*)&lbl_8046E1B0;memset(&layout->state,0,sizeof(layout->state));
+    const CharacterKind characters[2]={(CharacterKind)character0,(CharacterKind)character1};const unsigned costumes[2]={costume0,costume1};
+    layout->state.match_end.is_teams=0;layout->state.match_end.n_winners=1;layout->state.match_end.winners[0]=winner;
+    for(unsigned slot=0;slot<2;slot++){
+        MatchPlayerData* standing=&layout->state.match_end.player_standings[slot];standing->pkind=Gm_PKind_Human;standing->ckind=characters[slot];standing->is_big_loser=slot==winner?0:1;standing->x3_b0=costumes[slot];
+        HSD_PadCopyStatus[slot].button=slot==winner?0x200:0;result_fighters[slot]=(HSD_GObj*)fn_8017A67C(characters[slot],costumes[slot],slot);if(!result_fighters[slot])abort();
+    }
+}
+unsigned portResultFighter(unsigned slot){if(slot>=2||!result_fighters[slot])abort();return (unsigned)result_fighters[slot];}
+void portResultFighterSnapshot(unsigned slot,float* out)
+{
+    if(slot>=2||!result_fighters[slot]||!out)abort();Fighter* fp=result_fighters[slot]->user_data;if(!fp)abort();
+    out[0]=fp->kind;out[1]=fp->motion_id;out[2]=fp->anim_id;out[3]=fp->cur_anim_frame;out[4]=fp->cur_pos.x;out[5]=fp->cur_pos.y;out[6]=fp->cur_pos.z;out[7]=fp->facing_dir;out[8]=fp->x34_scale.y;out[9]=(unsigned)fp->x5A4;out[10]=(unsigned)fp->x5A8;out[11]=(unsigned)fp->x8AC_animSkeleton;
+}
 unsigned portResultSceneTextOwners(unsigned* out,unsigned capacity)
 {
     if(!archive||!result_text_active||!out||capacity<8)abort();unsigned count=0;

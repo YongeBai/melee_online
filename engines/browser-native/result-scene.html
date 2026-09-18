@@ -4,12 +4,29 @@
 import create from './melee-result-scene.mjs';
 import {convertResultSceneAsset} from './menu-assets.mjs';
 import {convertSisAsset} from './sis-assets.mjs';
-import {installResidentFile} from './resident-files.mjs';
+import {convertSharedParameters} from './shared-assets.mjs';
+import {sharedSpec} from './shared-spec.mjs';
+import {motionSpec} from './motion-spec.mjs';
+import {attributeSpec} from './attribute-spec.mjs';
+import {convertPlayerParameters} from './player-parameters.mjs';
+import {convertResultMotionAsset} from './result-motion-assets.mjs';
+import {convertCommonEffects} from './effect-assets.mjs';
+import {convertItemRuntime} from './item-runtime-assets.mjs';
+import {loadFighterPackage} from './fighter-package.mjs';
+import {installResidentFile,openResidentArchive} from './resident-files.mjs';
 import {createNativeResultScenePreview} from './native-result-scene-preview.mjs';
 const report={passed:false};try{
- const [response,sisResponse]=await Promise.all([fetch('./fixtures/GmRst.usd'),fetch('./fixtures/SdRst.usd')]);if(!response.ok||!sisResponse.ok)throw Error('Hosted result assets unavailable');const bytes=new Uint8Array(await response.arrayBuffer()),sisBytes=new Uint8Array(await sisResponse.arrayBuffer()),asset=convertResultSceneAsset(bytes),sisAsset=convertSisAsset(sisBytes,{symbol:'SIS_ResultData'}),module=await create();
+ const hosted=async name=>{const response=await fetch('./fixtures/'+name);if(!response.ok)throw Error('Hosted asset unavailable '+name);return new Uint8Array(await response.arrayBuffer());};
+ const [bytes,sisBytes]=await Promise.all([hosted('GmRst.usd'),hosted('SdRst.usd')]),asset=convertResultSceneAsset(bytes),sisAsset=convertSisAsset(sisBytes,{symbol:'SIS_ResultData'}),module=await create();
  const slots=module._malloc(24*4),readSlots=()=>{module._portResultScenePlayerSnapshot(slots,24);const values=Array.from(new Uint32Array(module.HEAPU8.buffer,slots,24));return Array.from({length:4},(_,i)=>{const row=values.slice(i*6,i*6+6);return {active:!!row[0],portraitHidden:!!row[1],panelHidden:!!row[2],resultHidden:!!row[3],labelHidden:!!row[4],characterFrame:row[5]};});};
  installResidentFile(module,'GmRst.usd',asset.image);installResidentFile(module,'SdRst.usd',sisAsset.image);module._portResultSceneInitialize(2,20,0);module._portResultSceneConfigureStats(4,1,0,1,4,1);const preview=createNativeResultScenePreview(module,document.querySelector('#picture'),bytes,asset);globalThis.nativeResultScene={module,asset,sisAsset,preview,slots};
- report.initial=preview.draw();report.initialSlots=readSlots();report.winnerCharacterFrame=module._portResultSceneWinnerSnapshot();for(let i=0;i<60;i++)module._portResultSceneStep();report.after60=preview.draw();report.after60Slots=readSlots();report.frames=60;report.passed=true;
+ report.initial=preview.draw();report.initialSlots=readSlots();report.winnerCharacterFrame=module._portResultSceneWinnerSnapshot();for(let i=0;i<60;i++)module._portResultSceneStep();report.after60=preview.draw();report.after60Slots=readSlots();report.frames=60;
+ const actorModule=await create(),common=await hosted('PlCo.dat');installResidentFile(actorModule,'PlCo.dat',convertSharedParameters(common,sharedSpec).image);if(actorModule._portFighterInitialize()!==0)throw Error('Result fighter startup failed');
+ const packages=[],effectFiles=new Map();for(const code of ['Fx','Fc'])packages.push(await loadFighterPackage(actorModule,code,{asset:hosted,models:[],motionSpec,attributeSpec,effectFiles}));
+ installResidentFile(actorModule,'PdPm.dat',convertPlayerParameters(await hosted('PdPm.dat')).image);for(const name of ['GmRstMFx.dat','GmRstMFc.dat'])installResidentFile(actorModule,name,convertResultMotionAsset(await hosted(name),name).image);
+ const itemRuntime=convertItemRuntime(await hosted('ItCo.usd'));installResidentFile(actorModule,'NativeItemRuntime.dat',itemRuntime.image);const itemCommon=openResidentArchive(actorModule,'NativeItemRuntime.dat',['native_item_common','native_item_parameters']),itemColors=openResidentArchive(actorModule,'NativeItemRuntime.dat',['native_item_colors']);actorModule._portItemsInitialize(...itemCommon.addresses,itemColors.addresses[0]);
+ actorModule._portMatchCameraInitialize();actorModule._portDynamicsInitialize();actorModule._portEffectsInitialize();const commonEffects=convertCommonEffects(await hosted('EfCoData.dat'));installResidentFile(actorModule,'EfCoData.dat',commonEffects.image);if(!actorModule._portCommonEffectsLoad())throw Error('Result common effects failed');
+ installResidentFile(actorModule,'GmRst.usd',asset.image);installResidentFile(actorModule,'SdRst.usd',sisAsset.image);actorModule._portResultSceneInitialize(2,20,0);actorModule._portResultFightersInitialize(2,20,0,0,0);
+ const actorSnapshot=actorModule._malloc(12*4),readActor=slot=>{actorModule._portResultFighterSnapshot(slot,actorSnapshot);return Array.from(actorModule.HEAPF32.subarray(actorSnapshot/4,actorSnapshot/4+12));};report.resultFighters={initial:[readActor(0),readActor(1)]};for(let i=0;i<60;i++)actorModule._portResultSceneStep();report.resultFighters.after60=[readActor(0),readActor(1)];report.resultFighters.owners=[actorModule._portResultFighter(0),actorModule._portResultFighter(1)];globalThis.nativeResultActors={module:actorModule,packages,itemCommon,itemColors,snapshot:actorSnapshot};report.passed=true;
 }catch(error){report.error=String(error.stack??error);document.body.dataset.error='true';}globalThis.nativeResultSceneReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
 </script>
