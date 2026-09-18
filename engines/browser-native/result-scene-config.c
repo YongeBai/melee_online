@@ -18,6 +18,7 @@
 #include <sysdolphin/baselib/jobj.h>
 #include <sysdolphin/baselib/lobj.h>
 #include <sysdolphin/baselib/mobj.h>
+#include <sysdolphin/baselib/sislib.h>
 #include <sysdolphin/baselib/tobj.h>
 #include <stdlib.h>
 
@@ -28,6 +29,8 @@ static HSD_JObj* player_nodes[4][15];
 static unsigned player_active[4];
 static HSD_JObj* winner_node;
 static unsigned winner_character_frame;
+static HSD_Text* result_text[4][2];
+static unsigned result_text_active;
 static void destroy_lights(HSD_Obj* object){HSD_LObjRemoveAll((HSD_LObj*)object);}
 extern int portSceneInitialize(void);
 extern void portRuntimeSetSceneDestructors(GObjFunc);
@@ -97,6 +100,39 @@ static void configure_players(HSD_JObj* root,unsigned character0,unsigned charac
     }
 }
 
+static void add_number(HSD_Text* text,float y,int value,GXColor color)
+{
+    int line=HSD_SisLib_803A6B98(text,0.0F,y,"%d",value>999?999:value);
+    HSD_SisLib_803A7548(text,line,0.11F,0.08F);HSD_SisLib_803A74F0(text,line,&color);
+}
+
+static void add_empty(HSD_Text* text,float y,GXColor color)
+{
+    int line=HSD_SisLib_803A6B98(text,0.0F,y,"-");
+    HSD_SisLib_803A7548(text,line,0.11F,0.08F);HSD_SisLib_803A74F0(text,line,&color);
+}
+
+/* Recreate the stock-result landing rows from gmresult.c without depending on
+ * the product MatchEnd singleton. All arguments are already-derived match
+ * counters; raw packed score sentinels never cross this isolated boundary. */
+void portResultSceneConfigureStats(unsigned kos0,unsigned falls0,unsigned self0,
+                                   unsigned kos1,unsigned falls1,unsigned self1)
+{
+    if(!archive||result_text_active||kos0>999||falls0>999||self0>999||kos1>999||falls1>999||self1>999)abort();
+    HSD_JObj* root=panel->hsd_obj;Vec3 base,anchors[6];lb_8000B1CC(find_node(root,0x68),NULL,&base);
+    for(unsigned i=0;i<6;i++)lb_8000B1CC(find_node(root,0x62+i),NULL,&anchors[i]);
+    const float first=1.14F*(anchors[4].y-anchors[0].y),second=1.12F*(anchors[5].y-anchors[4].y);
+    const unsigned values[2][3]={{kos0,falls0,self0},{kos1,falls1,self1}};GXColor white={255,255,255,255},empty={160,160,160,255};
+    for(unsigned slot=0;slot<4;slot++){
+        HSD_Text* score=result_text[slot][0]=HSD_SisLib_803A6754(0,0);HSD_Text* stats=result_text[slot][1]=HSD_SisLib_803A6754(0,0);
+        if(!score||!stats)abort();score->pos_x=anchors[slot].x;score->pos_y=-base.y;score->pos_z=base.z;score->default_alignment=score->default_kerning=1;
+        stats->pos_x=anchors[slot].x;stats->pos_y=-anchors[slot].y-30.0F;stats->pos_z=anchors[slot].z;stats->default_alignment=stats->default_kerning=1;
+        if(slot<2){int derived=(int)values[slot][0]-(int)values[slot][1]-(int)values[slot][2];add_number(score,-30.0F,derived,white);add_number(stats,0.0F,(int)values[slot][0],white);add_number(stats,-first,(int)values[slot][1],white);add_number(stats,-first-second,(int)values[slot][2],white);}
+        else{add_empty(score,-30.0F,empty);add_empty(stats,0.0F,empty);add_empty(stats,-first,empty);add_empty(stats,-first-second,empty);}
+    }
+    result_text_active=1;
+}
+
 unsigned portResultSceneInitialize(unsigned character0,unsigned character1,unsigned winner)
 {
     if(archive||portSceneInitialize()<0)abort();portRuntimeSetSceneDestructors(destroy_lights);
@@ -104,6 +140,7 @@ unsigned portResultSceneInitialize(unsigned character0,unsigned character1,unsig
     panel_scene=scenes[0];film_scene=scenes[1];if(!archive||!panel_scene||!film_scene)abort();
     camera=GObj_Create(HSD_GOBJ_CLASS_CAMERA,20,0);HSD_CObj* c=HSD_CObjLoadDesc(panel_scene->cameras->desc);
     if(!camera||!c)abort();HSD_GObjObject_80390A70(camera,HSD_GObj_CameraKind,c);
+    HSD_SisLib_803A6048(0x10000);HSD_SisLib_803A611C(0,camera,9,0xD,0,0xE,0,0x13);HSD_SisLib_803A62A0(0,"SdRst.usd","SIS_ResultData");
     lights=GObj_Create(11,3,0);HSD_LObj* l=lb_80011AC4(panel_scene->lights);
     if(!lights||!l)abort();HSD_GObjObject_80390A70(lights,HSD_GObj_LightKind,l);
     DynamicModelDesc* model=panel_scene->models[0];panel=GObj_Create(14,15,0);HSD_JObj* root=HSD_JObjLoadJoint(model->joint);
@@ -128,6 +165,12 @@ unsigned portResultScenePlayerSnapshot(unsigned* out,unsigned capacity)
     return 4;
 }
 unsigned portResultSceneWinnerSnapshot(void){if(!archive||!winner_node)abort();return winner_character_frame;}
+unsigned portResultSceneTextOwners(unsigned* out,unsigned capacity)
+{
+    if(!archive||!result_text_active||!out||capacity<8)abort();unsigned count=0;
+    for(unsigned slot=0;slot<4;slot++)for(unsigned row=0;row<2;row++){HSD_Text* text=result_text[slot][row];if(!text||!text->entity)abort();out[count++]=(unsigned)text->entity;}
+    return count;
+}
 void portResultSceneRenderBegin(void){if(!archive)abort();portRenderContextBegin(camera->hsd_obj,lights->hsd_obj);}
 void portResultSceneCameraSnapshot(float* out)
 {
@@ -137,7 +180,8 @@ void portResultSceneCameraSnapshot(float* out)
 }
 void portResultSceneFinish(void)
 {
-    if(!archive)abort();for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
+    if(!archive)abort();if(result_text_active){for(unsigned slot=0;slot<4;slot++)for(unsigned row=0;row<2;row++){HSD_SisLib_803A5CC4(result_text[slot][row]);result_text[slot][row]=NULL;}result_text_active=0;}HSD_SisLib_803A5FBC();
+    for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
     portFileArchiveClose(archive);archive=NULL;panel_scene=film_scene=NULL;panel=camera=lights=NULL;
     winner_node=NULL;winner_character_frame=0;
     for(unsigned slot=0;slot<4;slot++){player_active[slot]=0;for(unsigned part=0;part<15;part++)player_nodes[slot][part]=NULL;}
