@@ -10,4 +10,5 @@ test('capture accounting cannot credit the automatic stream bootstrap frame',()=
  const rows=Array.from({length:61},(_,i)=>({timestampMs:i*1000/60,width:960,height:720,hash:i,nonblackPixels:10}));const r=capturedEvidence(rows,60);
  assert.equal(r.rawCaptured,61);assert.equal(r.captured,60);assert.equal(r.bootstrapDiscarded,1);assert.equal(r.estimatedUnobservedRequests,0);assert.equal(r.distinctSampledImages,60);
  rows[3].hash=rows[2].hash;assert.equal(capturedEvidence(rows,60).repeatedSampledImages,1);assert.equal(capturedEvidence(rows.slice(2),60).estimatedUnobservedRequests,2);
+ const warmed=capturedEvidence(rows.slice(0,60),60,{discardBootstrap:false});assert.equal(warmed.captured,60);assert.equal(warmed.bootstrapDiscarded,0);assert.equal(warmed.estimatedUnobservedRequests,0);
 });

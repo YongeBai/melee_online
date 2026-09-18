@@ -12,6 +12,12 @@ export function combatWorkload(frame,states) {
   if(frame<90)return [[0,0,0],[0,0,frame<5?-1:0]];
   return states.map((s,i)=>{
     const dx=states[1-i][4]-s[4],near=Math.abs(dx)<12;
+    // Yoshi's Story starts both fighters on opposing pass-through platforms.
+    // Walking inward reaches each platform's teeter edge while both fighters
+    // remain at the same height, so the height-based drop rule cannot fire.
+    // Jump inward using ordinary controller input and let native collision
+    // bring the fighters together on the main platform.
+    if(s[0]===245||s[0]===246)return [0x400,Math.sign(dx)*.5,0];
     // Stay near the other fighter, including after a native respawn. Inputs
     // are sampled per simulation frame, independently of presentation cadence.
     const turn=near&&dx*s[16]<0;
