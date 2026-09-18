@@ -17,7 +17,10 @@ export function observeCanvasFrames(canvas,{enabled=true}={}){
  if(!enabled)return {request(){},async stop(){return {enabled:false,physicalPresentationMeasured:false};}};
  if(!globalThis.MediaStreamTrackProcessor)throw Error('Video frame observer unavailable');
  const stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];
- const reader=new MediaStreamTrackProcessor({track,maxBufferSize:2}).readable.getReader();
+ // Retain a bounded burst while the game thread handles a correction or a
+ // long submission. VideoFrame timestamps remain the cadence source, so this
+ // queue cannot turn late or missing captures into synthetic 60 Hz evidence.
+ const reader=new MediaStreamTrackProcessor({track,maxBufferSize:8}).readable.getReader();
  const worker=new Worker(new URL('./frame-evidence-worker.mjs',import.meta.url),{type:'module'});let drained;
  const drain=new Promise(r=>{drained=r;});worker.onmessage=({data})=>{if(data.row){rows.push(data.row);costs.push(data.cost);}if(data.error)error=data.error;if(data.stopped)drained();};worker.onerror=e=>{error=e.message;drained();};
  const reading=(async()=>{try{while(!stopped){const {done,value:frame}=await reader.read();if(done)break;worker.postMessage({frame,receivedMs:performance.now()},[frame]);}}catch(e){if(!stopped)error=String(e);}})();

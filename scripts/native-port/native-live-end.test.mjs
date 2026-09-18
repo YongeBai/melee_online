@@ -5,11 +5,11 @@ test('native exit stops before another draw; frame limits never impersonate resu
  let callback;Object.assign(globalThis,{requestAnimationFrame:fn=>(callback=fn,1),cancelAnimationFrame:()=>{callback=null;},addEventListener(){},removeEventListener(){},document:{hidden:false,addEventListener(){},removeEventListener(){}}});
  try{
   for(const ended of [true,false]){
-   let steps=0,draws=0,result;
+   let steps=0,draws=0,observed=0,result;
    const module={_portFighterConstructRead:()=>0,_portControllerSample(){},_Player_80031848(){}};
-   startNativeLive(module,{draw(){draws++;return {};}},[1],{frameLimit:1,step(){steps++;},inputProvider:()=>[[0,0,0]],shouldFinish:()=>ended&&steps===1,onComplete:r=>result=r,onError:e=>{throw e;}});
+   startNativeLive(module,{draw(){draws++;return {};}},[1],{frameLimit:1,step(){steps++;},inputProvider:()=>[[0,0,0]],shouldFinish:()=>ended&&steps===1,onDraw:event=>{observed++;assert.equal(event.frame,1);assert.equal(event.draw,1);},onComplete:r=>result=r,onError:e=>{throw e;}});
    const start=performance.now()+1;callback(start);callback(start+17);
-   assert.equal(steps,1);assert.equal(result.completionReason,ended?'match-end':'frame-limit');assert.equal(draws,ended?0:1);assert.equal(callback,null);
+   assert.equal(steps,1);assert.equal(result.completionReason,ended?'match-end':'frame-limit');assert.equal(draws,ended?0:1);assert.equal(observed,draws);assert.equal(callback,null);
   }
  }finally{for(const [key,value] of saved)if(value===undefined)delete globalThis[key];else globalThis[key]=value;}
 });
