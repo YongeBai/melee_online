@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-18",
+  "scope": "Two localhost product-room browsers using native hand/token selection, fixed tournament rules, opt-in complete-state rollback and independent WASM presentation. This is a short loading/correctness matrix, not sustained roster-wide FPS, exhaustive matchup, WAN, physical presentation, input-to-photon or tournament certification.",
+  "configuration": {
+    "cases": 26,
+    "framesPerClientPerCase": 60,
+    "opponent": "Fox except the held-A Sheik case, which used Ice Climbers",
+    "rules": {"stocks": 4, "seconds": 480, "items": -1, "teams": 0},
+    "legalStageIds": [2, 3, 8, 28, 31, 32]
+  },
+  "result": {
+    "passed": true,
+    "rosterTiles": 25,
+    "playableStarts": 26,
+    "legalStages": 6,
+    "clientsPerCase": 2,
+    "framesPerClient": 60,
+    "drawsPerClient": 60,
+    "confirmedTerminalFrame": 59,
+    "matchingFinalFighterState": true
+  },
+  "coverage": [
+    {"tile": 0, "forms": ["Dr"], "stage": "Battlefield"},
+    {"tile": 1, "forms": ["Mr"], "stage": "Final Destination"},
+    {"tile": 2, "forms": ["Lg"], "stage": "Dream Land"},
+    {"tile": 3, "forms": ["Kp"], "stage": "Yoshi's Story"},
+    {"tile": 4, "forms": ["Pe"], "stage": "Fountain of Dreams"},
+    {"tile": 5, "forms": ["Ys"], "stage": "Pokémon Stadium"},
+    {"tile": 6, "forms": ["Dk"], "stage": "Battlefield"},
+    {"tile": 7, "forms": ["Ca"], "stage": "Final Destination"},
+    {"tile": 8, "forms": ["Gn"], "stage": "Dream Land"},
+    {"tile": 9, "forms": ["Fc"], "stage": "Yoshi's Story"},
+    {"tile": 10, "forms": ["Fx"], "stage": "Fountain of Dreams"},
+    {"tile": 11, "forms": ["Ns"], "stage": "Pokémon Stadium"},
+    {"tile": 12, "forms": ["Pp", "Nn"], "stage": "Battlefield"},
+    {"tile": 13, "forms": ["Kb"], "stage": "Final Destination"},
+    {"tile": 14, "forms": ["Ss"], "stage": "Dream Land"},
+    {"tile": 15, "forms": ["Zd", "Sk"], "stage": "Yoshi's Story"},
+    {"tile": 16, "forms": ["Lk"], "stage": "Fountain of Dreams"},
+    {"tile": 17, "forms": ["Cl"], "stage": "Pokémon Stadium"},
+    {"tile": 18, "forms": ["Pc"], "stage": "Battlefield"},
+    {"tile": 19, "forms": ["Pk"], "stage": "Final Destination"},
+    {"tile": 20, "forms": ["Pr"], "stage": "Dream Land"},
+    {"tile": 21, "forms": ["Mt"], "stage": "Yoshi's Story"},
+    {"tile": 22, "forms": ["Gw"], "stage": "Fountain of Dreams"},
+    {"tile": 23, "forms": ["Ms"], "stage": "Pokémon Stadium"},
+    {"tile": 24, "forms": ["Fe"], "stage": "Battlefield"},
+    {"tile": 15, "heldA": true, "forms": ["Sk", "Zd"], "stage": "Pokémon Stadium"}
+  ]
+}
