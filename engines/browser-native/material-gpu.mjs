@@ -23,7 +23,7 @@ export function nativePositionRoundoffBound(matrix,row,point) {
 // Resource/program caches are persistent; draw-state capture is still a debug
 // oracle. Original fighter callbacks now select draws; complete camera/GX-link
 // ordering and mutable-image invalidation remain work for the playable renderer.
-export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true,presentationCache=null}={}) {
+export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErrors=true,presentationCache=null,traceTextures=false}={}) {
   const assetLease=presentationCache?.acquire(gl);
   const uniformBuffer=assetLease?.drawUniformBuffer??null;
   const ownedUniforms=assetLease?.exactState?createOwnedUniformState():null;let lastPixelKey=-1,lastCull=-1;
@@ -189,7 +189,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     if(shaped!==!!positions)throw Error('Native shape geometry missing or unexpected');
     const shape=shaped?snapshotShapeGeometry(module,plan.mesh,positions,count,normals,normalCount,{reference:verifyVertices}):null;
     if(shaped&&verifyVertices)shape.reference=verifyShapeSamples(module,plan.archive,plan.mesh,polygon,positions,count,normals,normalCount);
-    queue.push({owner,plan,state,shape,camera:snapshot,program:program(state,plan.mesh.attrs,'model')});
+    const queued={owner,plan,state,shape,camera:snapshot,program:program(state,plan.mesh.attrs,'model')};if(traceTextures)queued.joint=joint;queue.push(queued);
   };
   if(module.onNativeImmediate)throw Error('Immediate draw receiver already owned');
   module.onNativeImmediate=(primitive,count,ptr,cull,textured,tev,kind)=>{
@@ -274,7 +274,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
           const ptr=module._portMaterialDrawState(joint,plan.display,plan.polygon,view,owner);
           const state=captureState(ptr);
           checkNativeRenderContext(state.context,snapshot,state.pixel);
-          queue.push({owner,plan,state,camera:snapshot,program:program(state,mesh.attrs)});count++;
+          const queued={owner,plan,state,camera:snapshot,program:program(state,mesh.attrs)};if(traceTextures)queued.joint=joint;queue.push(queued);count++;
         }
         return count;
       },dispose};models.add(result);return result;
@@ -290,8 +290,8 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     shaderSources(){return [...new Map([...programs.values()].map(p=>[p.sources.vertex+'\n'+p.sources.fragment,p.sources])).values()];},
     shaderCoverage(){const all=[...programs.values()];return {programs:all.length,prepared:all.filter(p=>p.prepared).length,preparedUsed:all.filter(p=>p.prepared&&p.used).length,unpreparedUsed:all.filter(p=>!p.prepared&&p.used).length};},
     begin(camera){for(const key of Object.keys(drawTiming))delete drawTiming[key];selectCamera(camera);queue=[];packedModel?.reset();assetLease?.immediate?.begin();shaderCompilations=[];draws=0;immediateUsed=0;immediateVertices=0;particleDraws=particleVertices=afterimageDraws=afterimageVertices=textDraws=textVertices=0;vertexChecks={vertices:0,positionComponents:0,normalComponents:0,maxScaledPositionError:0,maxNormalError:0,roundoffPositionComponents:0,maxPositionRoundoffAllowance:0,byOwner:{}};},
-    flush({ordered=false,clip=null,clearAlpha=1,forceAlpha=false}={}){
-      gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);if(clip){gl.enable(gl.SCISSOR_TEST);gl.scissor(...clip);}else gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,clearAlpha);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
+    flush({ordered=false,clip=null,viewport=null,clearAlpha=1,forceAlpha=false}={}){
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(...(viewport??[0,0,gl.drawingBufferWidth,gl.drawingBufferHeight]));if(clip){gl.enable(gl.SCISSOR_TEST);gl.scissor(...clip);}else gl.disable(gl.SCISSOR_TEST);gl.colorMask(true,true,true,true);gl.depthMask(true);gl.clearColor(0,0,0,clearAlpha);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.frontFace(gl.CW);
       // Native transparent sorting/callback traversal is still separate. Keep
       // actor order stable, completing opaque draws before blended draws.
       ownedUniforms?.begin();lastPixelKey=lastCull=-1;
@@ -328,7 +328,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
       }
       if(checkErrors&&gl.getError()!==gl.NO_ERROR)throw Error('Native material GPU draw error');
       const uniformAfter=uniformBuffer?.snapshot(),uniformBufferFrame=uniformAfter?{uploads:uniformAfter.uploads-uniformBefore.uploads,binds:uniformAfter.binds-uniformBefore.binds,bytes:uniformAfter.uploadedBytes-uniformBefore.uploadedBytes,draws}:null;
-      return {uniformBufferFrame,drawTiming:assetLease?.profileDraw?structuredClone(drawTiming):null,exactGL:ownedUniforms?.snapshot()??null,shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws+textDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,textDraws,textVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
+      return {uniformBufferFrame,drawTiming:assetLease?.profileDraw?structuredClone(drawTiming):null,exactGL:ownedUniforms?.snapshot()??null,shapeDraws:queue.filter(d=>d.shape).map(d=>({pobj:d.plan.mesh.pobj,reference:d.shape.reference??null})),textureDraws:traceTextures?drawsInOrder.map(d=>({joint:d.plan.mesh.joint,nativeJoint:d.joint??null,display:d.plan.display,dobj:d.plan.mesh.dobj,pobj:d.plan.mesh.pobj,textures:d.state.textures.textures.map(t=>({id:t.id,address:t.address,width:t.width,height:t.height,format:t.format}))})):null,vertexChecks:verifyVertices?vertexChecks:null,immediateDraws:immediateUsed,batchedImmediatePrimitives:particleDraws+afterimageDraws+textDraws-immediateUsed,immediateVertices,particleDraws,particleVertices,afterimageDraws,afterimageVertices,textDraws,textVertices,shaderCompilations:[...shaderCompilations],draws,programs:programs.size,images:images.size,originalMaterialState:true,visualParity:false,performanceMeasured:false};
     },inspect(){
       const tev=new Map(),pixels=new Map(),lights=new Map();
       for(const d of queue){const key=JSON.stringify(d.state.tev.stages);if(!tev.has(key))tev.set(key,{program:d.state.tev,materials:0});tev.get(key).materials++;const p=JSON.stringify(d.state.pixel);if(!pixels.has(p))pixels.set(p,{state:d.state.pixel,materials:0});pixels.get(p).materials++;lights.set(JSON.stringify(d.state.context.lights),d.state.context.lights);}

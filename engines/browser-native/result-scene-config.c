@@ -23,6 +23,7 @@
 #include <sysdolphin/baselib/jobj.h>
 #include <sysdolphin/baselib/lobj.h>
 #include <sysdolphin/baselib/mobj.h>
+#include <sysdolphin/baselib/memory.h>
 #include <sysdolphin/baselib/sislib.h>
 #include <sysdolphin/baselib/tobj.h>
 #include <stdlib.h>
@@ -52,6 +53,8 @@ extern void portSetGXObserver(int (*)(HSD_GObj*,int));
 extern float gm_80168B34(CharacterKind,int,int);
 extern Fighter_GObj* fn_8017A67C(CharacterKind,int,int);
 extern HSD_GObj* fn_8017A318(s32);
+extern void fn_80179F84(HSD_JObj*);
+extern void fn_8017A9B4(int);
 
 static HSD_JObj* find_node(HSD_JObj* root,unsigned id)
 {
@@ -186,10 +189,14 @@ void portResultFightersInitialize(unsigned character0,unsigned character1,unsign
     if(!archive||result_fighters[0]||result_fighters[1]||character0>=26||character1>=26||winner>1||costume0>5||costume1>5)abort();
     Player_80036DD8();ftDemo_ObjAllocInit();Player_InitAllPlayers();
     ResultsDisplayLayout* layout=(ResultsDisplayLayout*)&lbl_8046E1B0;memset(&layout->state,0,sizeof(layout->state));
+    const u16 dim_w1[4]={80,80,70,52},dim_h1[4]={110,114,100,74},dim_w2[4]={52,52,52,52},dim_h2[4]={74,74,74,74},scissor_x[4]={14,14,6,0},scissor_y[4]={12,8,6,0};
+    memcpy(layout->state.dim_w1,dim_w1,sizeof(dim_w1));memcpy(layout->state.dim_h1,dim_h1,sizeof(dim_h1));memcpy(layout->state.dim_w2,dim_w2,sizeof(dim_w2));memcpy(layout->state.dim_h2,dim_h2,sizeof(dim_h2));memcpy(layout->state.scissor_x,scissor_x,sizeof(scissor_x));memcpy(layout->state.scissor_y,scissor_y,sizeof(scissor_y));
+    fn_80179F84(find_node(panel->hsd_obj,0x41));
     const CharacterKind characters[2]={(CharacterKind)character0,(CharacterKind)character1};const unsigned costumes[2]={costume0,costume1};
     layout->state.match_end.is_teams=0;layout->state.match_end.n_winners=1;layout->state.match_end.winners[0]=winner;
     for(unsigned slot=0;slot<2;slot++){
         MatchPlayerData* standing=&layout->state.match_end.player_standings[slot];standing->pkind=Gm_PKind_Human;standing->ckind=characters[slot];standing->is_big_loser=slot==winner?0:1;standing->x3_b0=costumes[slot];
+        fn_8017A9B4(slot);
         HSD_PadCopyStatus[slot].button=slot==winner?0x200:0;result_fighters[slot]=(HSD_GObj*)fn_8017A67C(characters[slot],costumes[slot],slot);if(!result_fighters[slot])abort();
     }
     for(unsigned slot=0;slot<2;slot++){
@@ -219,6 +226,27 @@ void portResultFighterRenderBegin(unsigned slot,unsigned live)
 unsigned portResultFighterNativeDraw(unsigned slot,unsigned pass)
 {
     extern unsigned portNativeDrawObject(HSD_GObj*,unsigned,unsigned);if(slot>=2||!result_fighters[slot]||pass>2)abort();return portNativeDrawObject(result_fighters[slot],pass,1);
+}
+unsigned portResultPortraitDescriptor(unsigned slot,unsigned* out)
+{
+    if(slot>=2||!out)abort();ResultsDisplayLayout* layout=(ResultsDisplayLayout*)&lbl_8046E1B0;HSD_ImageDesc* image=&layout->player_img2[slot];
+    if(!image->image_ptr||!image->width||!image->height||image->format!=GX_TF_RGB5A3)abort();out[0]=(unsigned)image;out[1]=(unsigned)image->image_ptr;out[2]=image->width;out[3]=image->height;out[4]=image->format;out[5]=GXGetTexBufferSize(image->width,image->height,image->format,0,0);return 6;
+}
+void portResultPortraitCopy(unsigned slot)
+{
+    if(slot>=2)abort();ResultsDisplayLayout* layout=(ResultsDisplayLayout*)&lbl_8046E1B0;unsigned lookup=layout->state.match_end.player_standings[slot].is_big_loser;
+    if(lookup>3)abort();u16 x=layout->state.scissor_x[lookup]+(320-(layout->state.dim_w1[lookup]/4)*2),y=layout->state.scissor_y[lookup]+(244-(layout->state.dim_h1[lookup]/2)*2);
+    HSD_ImageDescCopyFromEFB(&layout->player_img2[slot],x,y,0,0);
+}
+void portResultPortraitAttach(unsigned slot)
+{
+    if(slot>=2)abort();ResultsDisplayLayout* layout=(ResultsDisplayLayout*)&lbl_8046E1B0;HSD_JObj* node=layout->jobjs[slot];HSD_TObj* texture=node&&node->u.dobj&&node->u.dobj->next&&node->u.dobj->next->mobj?node->u.dobj->next->mobj->tobj:NULL;
+    if(!texture)abort();texture->imagedesc=&layout->player_img2[slot];HSD_JObjClearFlagsAll(node,JOBJ_HIDDEN);
+}
+unsigned portResultPortraitAttachment(unsigned slot,unsigned* out)
+{
+    if(slot>=2||!out)abort();ResultsDisplayLayout* layout=(ResultsDisplayLayout*)&lbl_8046E1B0;HSD_JObj* node=layout->jobjs[slot];HSD_DObj* dobj=node?node->u.dobj:NULL;HSD_TObj* texture=dobj&&dobj->next&&dobj->next->mobj?dobj->next->mobj->tobj:NULL;
+    if(!node||!dobj||!texture)abort();out[0]=(unsigned)node;out[1]=(unsigned)dobj;out[2]=(unsigned)dobj->next;out[3]=(unsigned)texture;out[4]=(unsigned)texture->imagedesc;out[5]=(unsigned)&layout->player_img2[slot];out[6]=(unsigned)player_nodes[slot][0];out[7]=player_nodes[slot][0]->flags;return 8;
 }
 static HSD_GObj* submission_target;
 static unsigned submission_count,submission_passes;
@@ -260,6 +288,7 @@ void portResultSceneCameraSnapshot(float* out)
 void portResultSceneFinish(void)
 {
     if(!archive)abort();if(result_text_active){for(unsigned slot=0;slot<4;slot++)for(unsigned row=0;row<2;row++){HSD_SisLib_803A5CC4(result_text[slot][row]);result_text[slot][row]=NULL;}result_text_active=0;}HSD_SisLib_803A5FBC();
+    ResultsDisplayLayout* layout=(ResultsDisplayLayout*)&lbl_8046E1B0;for(unsigned slot=0;slot<4;slot++){if(layout->player_img1[slot].image_ptr){HSD_Free(layout->player_img1[slot].image_ptr);layout->player_img1[slot].image_ptr=NULL;}if(layout->player_img2[slot].image_ptr){HSD_Free(layout->player_img2[slot].image_ptr);layout->player_img2[slot].image_ptr=NULL;}}
     for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
     portFileArchiveClose(archive);archive=NULL;panel_scene=film_scene=NULL;panel=camera=lights=NULL;
     winner_node=NULL;winner_character_frame=0;

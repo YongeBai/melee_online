@@ -14,7 +14,7 @@ export function renameBoundaryDefinitions(text,names) {
   }
   return text;
 }
-export function gameLinkInputs(root,upstream,output) {
+export function gameLinkInputs(root,upstream,output,{implementedPlatform=[]}={}) {
   const replacements={
     'src/melee/lb/lbaudio_ax.c':['lbAudioAx_80027168','lbAudioAx_80027648'],
     'src/sysdolphin/baselib/axdriver.c':['AXDriver_8038E8EC','AXDriverStop','AXDriverPause','AXDriverResume','AXDriver_8038EA18'],
@@ -39,7 +39,8 @@ export function gameLinkInputs(root,upstream,output) {
     fs.writeFileSync(result,renameBoundaryDefinitions(text,names).replace(/^#include "([^"]+)"/gm,(_,name)=>'#include '+JSON.stringify(path.join(portable,path.dirname(file),name))));
     return result;
   });
-  const names=JSON.parse(fs.readFileSync(new URL('./game-unimplemented.json',import.meta.url))).functions.filter(name=>!['GXSetTevClampMode','GXSetFog','GXSetFogRangeAdj','GXGetTexBufferSize','GXGetProjectionv','GXEnableTexOffsets','GXSetPointSize','GXSetLineWidth'].includes(name));
+  const implemented=new Set(['GXSetTevClampMode','GXSetFog','GXSetFogRangeAdj','GXGetTexBufferSize','GXGetProjectionv','GXEnableTexOffsets','GXSetPointSize','GXSetLineWidth',...implementedPlatform]);
+  const names=JSON.parse(fs.readFileSync(new URL('./game-unimplemented.json',import.meta.url))).functions.filter(name=>!implemented.has(name));
   const headers=execFileSync('rg',['--files','libs/dolphin/include','-g','*.h'],{cwd:upstream,encoding:'utf8'}).trim().split('\n').sort()
     .map(file=>fs.readFileSync(path.join(upstream,file),'utf8')).join('\n');
   const definitions=names.map(name=>{

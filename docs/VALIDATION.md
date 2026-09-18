@@ -106,11 +106,22 @@ The isolated Fox winner also produced actual GPU pixels under that exact native
 camera through the original fighter draw callback: 59 material draws, 6,972
 vertex checks, and 29,651 non-black framebuffer pixels spanning a 202×312 box.
 The exported 960×720 canvas was visually inspected and shows the shaded native
-Fox victory pose. This remains isolated result work, not product parity: the
-browser preview orchestrates the three passes separately from the original
-camera traversal, and the original EFB-backed portrait textures, loser render,
-all-roster construction, live standings, lifecycle integration, and result-screen
-FPS remain. See the
+Fox victory pose. The isolated loser pass now also uses Falco's exact original
+20-degree capture camera and `270,124,100,152` render scissor. The result target
+implements the four GX texture-copy calls used by `HSD_ImageDescCopyFromEFB`:
+one synchronous copy sampled the 960×720 WebGL framebuffer at the original
+`294,138,52,74` EFB rectangle, encoded all 7,904 bytes as tiled RGB5A3, and
+retained 6,304 nonzero bytes / 2,466 colored texels. Melee's original allocation
+and panel attachment routines then supplied that descriptor to the original
+result material. The final panel used 65 draws and visibly rendered the captured
+Falco in the P2 standings slot; the probe requires the exact runtime image
+address, dimensions, and format to appear in one native material submission.
+The source suite now passes 651 tests (641 pass, 10 skip, 0 fail), the ordinary
+fighter glue remains byte-identical, and elimination/rematch/28,800-frame timeout
+regression still passes. This remains isolated result work, not product parity:
+the browser preview orchestrates capture/copy/panel passes separately from the
+complete original camera traversal, and all-roster actor construction, live
+standings, lifecycle integration, and result-screen FPS remain. See the
 [native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
 
 For September 17 direct-browser work, see the

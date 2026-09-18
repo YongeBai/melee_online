@@ -476,6 +476,16 @@ a two-browser 60-second stress sample achieved ~59.86/59.91 presented FPS with
 human-match sample measured ~59.98 presented FPS with zero dropped frames but no
 induced corrections. Keep workload and duration attached to numbers.
 
+The original result portrait is not the character texture node selected by the
+custom panel setup. `fn_80179F84` records four separate children under joint
+`0x41`; `fn_80179990` attaches the copied RGB5A3 descriptor to the second DObj
+on one of those nodes. In the isolated bring-up that node remains hidden even
+though the configured character-art node is visible. Preserve the original
+attachment target and explicitly restore its visibility after attachment; do not
+redirect the copied image to the superficially similar character-art material.
+The regression must observe the exact allocated image address in a native panel
+draw and inspect final pixels, not merely prove that EFB bytes are nonzero.
+
 ## Reproduction and experiment isolation
 
 - `npm run serve`: production-style server; `MELEE_PORT` selects its port.

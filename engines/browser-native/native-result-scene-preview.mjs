@@ -5,7 +5,7 @@ import {createNativeCamera} from './native-camera.mjs';
 
 export function createNativeResultScenePreview(module,canvas,bytes,converted){
  const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});if(!gl)throw Error('Native results require WebGL2');
- const renderer=createMaterialRenderer(gl,module),camera=createNativeCamera(module,{read:p=>module._portResultSceneCameraSnapshot(p)}),list=module._malloc(12),owners=module._malloc(8*4),archive=inspectArchive(bytes),resources=[];
+ const renderer=createMaterialRenderer(gl,module,{traceTextures:true}),camera=createNativeCamera(module,{read:p=>module._portResultSceneCameraSnapshot(p)}),list=module._malloc(12),owners=module._malloc(8*4),archive=inspectArchive(bytes),resources=[];
  if(!list||!owners)throw Error('Result scene allocation');let base;
  function sync(){
   const count=module._portResultSceneObjects(list,1),words=Array.from(new Uint32Array(module.HEAPU8.buffer,list,count*3));if(count!==1)throw Error('Unexpected result scene object count');

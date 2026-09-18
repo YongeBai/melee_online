@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {decodeGX,textureByteLength} from '../../engines/browser-native/texture.mjs';
+import {decodeGX,encodeGX,textureByteLength} from '../../engines/browser-native/texture.mjs';
 test('CMPR uses GX 5/8 blending and colored transparent entries',()=>{
   const bytes=new Uint8Array(32),v=new DataView(bytes.buffer);
   v.setUint16(0,0xf800);v.setUint16(2,0x001f);bytes[4]=0xb0;
@@ -29,4 +29,11 @@ test('validates texture sizes and split RGBA8 planes',()=>{
   assert.throws(()=>textureByteLength(0,1,0));assert.throws(()=>decodeGX(new Uint8Array(1),4,4,6));
   const bytes=new Uint8Array(64);bytes[0]=77;bytes[1]=33;bytes[32]=44;bytes[33]=55;
   assert.deepEqual(Array.from(decodeGX(bytes,1,1,6)),[33,44,55,77]);
+});
+test('framebuffer RGB5A3 encoding uses GX tiles and opaque/alpha branches',()=>{
+  const rgba=new Uint8Array(5*4*4);for(let i=0;i<20;i++)rgba.set([i*11,255-i*7,i*3,i===6?96:255],i*4);
+  const encoded=encodeGX(rgba,5,4,5),decoded=decodeGX(encoded,5,4,5);
+  assert.equal(encoded.length,64);assert.deepEqual(Array.from(decoded.slice(6*4,6*4+4)),[68,221,17,109]);
+  assert.deepEqual(Array.from(decoded.slice(19*4,19*4+4)),[214,123,57,255]);
+  assert.throws(()=>encodeGX(rgba,5,4,6),/framebuffer encode/);
 });
