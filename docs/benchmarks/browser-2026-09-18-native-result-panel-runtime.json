@@ -1,16 +1,16 @@
 {
   "date": "2026-09-18",
-  "purpose": "Instantiate, configure for native two-player standings, animate, render, and clean up the original GmRst pnlsce panel in an isolated real-browser native runtime.",
-  "sourceCommitBeforeCheckpoint": "9e517433fa4878d2cbd8290b2ce95ec29966cf66",
+  "purpose": "Instantiate, configure for native two-player standings, add original SIS result rows, animate, render, and clean up the original GmRst pnlsce panel in an isolated real-browser native runtime.",
+  "sourceCommitBeforeCheckpoint": "46fd49a",
   "sourceSha256": {
     "engines/browser-native/result-scene.c": "ba265a3fff60ee8d3be82017b06fc4e1ae175d93ed42af24e0c1cf650d7a9bce",
-    "engines/browser-native/result-scene-config.c": "c05b8d97dda678a679ea7280a2300cbf8bd05fa16f5ba8be6a8902da26215028",
-    "engines/browser-native/native-result-scene-preview.mjs": "90d25853afac71491ce820ce0e3bd29aec5f8a6deda0185bf934ae53ec9ad858",
-    "engines/browser-native/result-scene.html": "f50eb4823277e9a53ab79eb335a1b035de275532c207a5b85071352ec167ccff",
+    "engines/browser-native/result-scene-config.c": "25781bdc85d9854a1445d3eeb5d570602a7578de0b4dc177161eb47b93684357",
+    "engines/browser-native/native-result-scene-preview.mjs": "bf3e8205bd5ada000732687a3028569240f25aa55b563e255fbb85e3cfa1ddca",
+    "engines/browser-native/result-scene.html": "92095d67c1fa01242afeac1f4209020478f4a891c124c0926eed2e1087db81a0",
     "engines/browser-native/dirty-host-contract.mjs": "a9310137f282c0850d253aec36eb69d8e12071ad6c8feaaf4d3f87a3e8be3768",
-    "scripts/native-port/build.mjs": "cf6ee7597d949d0b3c25ad869aa9811f143a6edea9849214831c38265d9561a2",
+    "scripts/native-port/build.mjs": "d289ba12c902dfda3aa659d4f3c2977484ae13c2b12ef8f5a1678a883b6a1783",
     "scripts/native-port/serve.mjs": "d6f79451513c3adb032210b8fd9d397bda4592fd45779e26c1cd61d392a37ff0",
-    "scripts/native-port/probe-result-scene.mjs": "7918eea64a2f8fc7b26cdc522f620c3a5495512d8abe4d9d3d3505df2d7a92ac"
+    "scripts/native-port/probe-result-scene.mjs": "ce9d35bc7f0bc441006cf8e4eff42ef4c64e32db19d4ffd8ec3f01d35d1b0ab5"
   },
   "commands": [
     "node scripts/native-port/build.mjs --result-scene",
@@ -22,8 +22,8 @@
   "browser": "headless Chromium with WebGL2 GPU path",
   "isolatedWasm": {
     "file": "melee-result-scene.wasm",
-    "bytes": 3555555,
-    "sha256": "2184a7ef23d5193888c0bc9ad6c63e69f419a82013c820967689f319592de196",
+    "bytes": 3557565,
+    "sha256": "f3feb049a2940bbe9cf99c291249d2f641d6c911307347e05062c3aa4cab4f0a",
     "productFighterGlueUnchangedSha256": "0d7004dc06463954360722e2156f4b895d89d25ef731c4dc7ff5b6f7bb3059ab"
   },
   "frames": 60,
@@ -32,11 +32,22 @@
     "objects": 1,
     "joints": 115,
     "meshes": 123,
-    "initialDraws": 73,
-    "frame60Draws": 52,
-    "materialPrograms": 11,
-    "frame60Images": 30,
+    "initialDraws": 83,
+    "frame60Draws": 62,
+    "materialPrograms": 12,
+    "frame60Images": 35,
     "originalMaterialState": true
+  },
+  "nativeSisRows": {
+    "archive": "SdRst.usd",
+    "symbol": "SIS_ResultData",
+    "layoutJointIds": [98, 99, 100, 101, 102, 103, 104],
+    "activeValues": [[4, 1, 0, 3], [1, 4, 1, -4]],
+    "valueOrder": ["KOs", "falls excluding self-destructs", "self-destructs", "derived score"],
+    "frame60TextDraws": 17,
+    "frame60TextVertices": 68,
+    "inactivePresentation": "native gray dashes",
+    "rawPackedScoreConsumed": false
   },
   "twoPlayerStandings": {
     "characters": ["Fox", "Falco"],
@@ -67,7 +78,7 @@
     "matchesOriginalDescriptor": true
   },
   "cleanup": {"objects": 0, "processes": 0, "archiveAllocations": 0},
-  "screenshotSha256": "3d44be4911432338eb9e96fa4f2839e1d07326011be00c6d6e4ce8ac6c87770f",
-  "visualInspection": "The original panel visibly rendered FOX as the winner, 1st/2nd placement, P1/P2 entrants, and the native No Entrant treatment for ports 3/4; the four-Sheik archive default is gone.",
-  "scope": "This validates native two-player panel configuration and all 26 character texture selections in isolation. It does not yet render SIS result text or fighter victory models, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
+  "screenshotSha256": "18f0c34a7159950b75fb9e76bef97b6e67fbb92ddf4d99b491063bcff5e572c5",
+  "visualInspection": "The original panel visibly rendered FOX as the winner, 1st/2nd placement, P1/P2 entrants, native score/KO/fall/self-destruct columns for two active players, gray dashes for inactive ports, and the native No Entrant treatment for ports 3/4; the four-Sheik archive default is gone.",
+  "scope": "This validates native two-player panel configuration, original SIS landing rows, and all 26 character texture selections in isolation. It does not yet render fighter victory models, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
 }

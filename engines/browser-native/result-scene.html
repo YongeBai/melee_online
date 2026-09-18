@@ -3,12 +3,13 @@
 <script type="module">
 import create from './melee-result-scene.mjs';
 import {convertResultSceneAsset} from './menu-assets.mjs';
+import {convertSisAsset} from './sis-assets.mjs';
 import {installResidentFile} from './resident-files.mjs';
 import {createNativeResultScenePreview} from './native-result-scene-preview.mjs';
 const report={passed:false};try{
- const response=await fetch('./fixtures/GmRst.usd');if(!response.ok)throw Error('Hosted GmRst scene unavailable');const bytes=new Uint8Array(await response.arrayBuffer()),asset=convertResultSceneAsset(bytes),module=await create();
+ const [response,sisResponse]=await Promise.all([fetch('./fixtures/GmRst.usd'),fetch('./fixtures/SdRst.usd')]);if(!response.ok||!sisResponse.ok)throw Error('Hosted result assets unavailable');const bytes=new Uint8Array(await response.arrayBuffer()),sisBytes=new Uint8Array(await sisResponse.arrayBuffer()),asset=convertResultSceneAsset(bytes),sisAsset=convertSisAsset(sisBytes,{symbol:'SIS_ResultData'}),module=await create();
  const slots=module._malloc(24*4),readSlots=()=>{module._portResultScenePlayerSnapshot(slots,24);const values=Array.from(new Uint32Array(module.HEAPU8.buffer,slots,24));return Array.from({length:4},(_,i)=>{const row=values.slice(i*6,i*6+6);return {active:!!row[0],portraitHidden:!!row[1],panelHidden:!!row[2],resultHidden:!!row[3],labelHidden:!!row[4],characterFrame:row[5]};});};
- installResidentFile(module,'GmRst.usd',asset.image);module._portResultSceneInitialize(2,20,0);const preview=createNativeResultScenePreview(module,document.querySelector('#picture'),bytes,asset);globalThis.nativeResultScene={module,asset,preview,slots};
+ installResidentFile(module,'GmRst.usd',asset.image);installResidentFile(module,'SdRst.usd',sisAsset.image);module._portResultSceneInitialize(2,20,0);module._portResultSceneConfigureStats(4,1,0,1,4,1);const preview=createNativeResultScenePreview(module,document.querySelector('#picture'),bytes,asset);globalThis.nativeResultScene={module,asset,sisAsset,preview,slots};
  report.initial=preview.draw();report.initialSlots=readSlots();report.winnerCharacterFrame=module._portResultSceneWinnerSnapshot();for(let i=0;i<60;i++)module._portResultSceneStep();report.after60=preview.draw();report.after60Slots=readSlots();report.frames=60;report.passed=true;
 }catch(error){report.error=String(error.stack??error);document.body.dataset.error='true';}globalThis.nativeResultSceneReport=report;document.querySelector('#result').textContent=JSON.stringify(report,null,2);
 </script>

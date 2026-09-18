@@ -98,11 +98,15 @@ standalone path now applies the original per-port joint visibility sequence,
 placement frames, character-name texture selection, and winner-title animation.
 A Fox/Falco render visibly shows FOX, 1st/2nd, P1/P2, and the original No Entrant
 treatment for ports 3/4; repeated construction covers all 26 character texture
-frames with zero cleanup leaks. Build this experiment with `--result-scene`; it
+frames with zero cleanup leaks. The isolated path also loads the hosted
+`SdRst.usd`/`SIS_ResultData` archive and recreates the stock-result score, KO,
+fall, and self-destruct rows at the original `0x62`-`0x68` joint anchors. Feed
+that layer only already-derived counters: the displayed score is derived from
+KOs, falls, and self-destructs rather than copying the packed product score word.
+Build this experiment with `--result-scene`; it
 has a separate `melee-result-scene.wasm` so result iteration cannot perturb the
 validated product fighter core. Do not put it in the product result lifecycle
-until it consumes live standings and adds SIS result text and fighter victory
-models.
+until it consumes live standings and adds fighter victory models.
 
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.

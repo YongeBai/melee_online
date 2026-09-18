@@ -84,11 +84,16 @@ FOV, 1.216667 aspect). Visual inspection found FOX winner art, 1st/2nd placement
 P1/P2 entrants, and the original No Entrant treatment for ports 3/4. A repeated
 construction pass exercised the exact character texture mapping for all 26 roster
 entries. Cleanup returned object, process, and archive-allocation counts to zero.
+The subsequent SIS pass loads the hosted `SdRst.usd` archive and adds score, KO,
+fall, and self-destruct rows at the original layout anchors. At frame 60 it
+produced 17 native text primitives and 68 text vertices; the complete panel used
+62 draws, 12 programs, and 35 original images. Visual inspection confirmed the
+two active stat columns and native inactive-port dashes.
 The configured panel runs in a separate WASM target; rebuilding the ordinary
 fighter target retained its pinned JS glue, and the two-browser elimination,
 rematch, 28,800-frame timeout, return, and legal-stage regression passed. This
-remains isolated panel work, not product parity: live standings, SIS result text,
-victory fighters, lifecycle integration, and result-screen FPS remain. See the
+remains isolated panel work, not product parity: live standings, victory fighters,
+lifecycle integration, and result-screen FPS remain. See the
 [native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
 
 For September 17 direct-browser work, see the
