@@ -1,25 +1,26 @@
 # Native browser port — September 17, 2026
 
-September 18 sustained product-room checkpoint: all twelve legal-stage/observed-
-seat cases pass the 720p60 browser-canvas gate over 1,800 combat frames. The
-observer received exactly 21,600 requested 960×720 `VideoFrame(canvas)` snapshots,
-all 21,600 sampled images were distinct, and there were no repeats, black frames,
-wrong-size frames or observer errors. Observed cadence ranged from **59.882 to
-59.974 FPS**; both simulation clients in every case ranged from **59.662 to
-59.934 FPS**, and draw-submission p95 ranged from **8.5 to 13.0 ms**. Battlefield,
-Final Destination, Dream Land, Yoshi's Story, Fountain of Dreams and frozen
-Pokémon Stadium were each observed from both seats. The performance work batches
+September 18 sustained product-room checkpoint: every roster tile plus held-A
+Sheik passes the 720p60 browser-canvas gate over 1,800 combat frames while the
+26 cases cycle all six legal stages. The observer received exactly 46,800
+requested 960×720 `VideoFrame(canvas)` snapshots, all 46,800 sampled images were
+distinct, and there were no repeats, black frames, wrong-size frames or observer
+errors. Observed cadence ranged from **59.700 to 59.970 FPS**; both simulation
+clients ranged from **59.557 to 59.933 FPS**, and draw-submission p95 ranged from
+**7.1 to 14.1 ms**. A separate twelve-case matrix observes every legal stage
+from both seats at 59.882–59.974 captured FPS. The performance work batches
 transport corrections, separates the receive and prediction bounds, clears UBO
 staging once per frame, and resets only validity headers/active GX capture rows.
 A 120-frame Yoshi exact oracle compared 331,776,000 RGBA bytes with zero
 differences and zero camera mismatches. The 641-test repository suite passes
 (631 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
 gate, not compositor scanout, WAN behavior, physical input-to-photon latency or
-all 676 matchups. [Sustained evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
+all 676 matchups. [Roster performance evidence](benchmarks/browser-2026-09-18-native-room-roster-720p60.json)
+and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
 
-The separate startup matrix covers all 25 roster tiles/26 playable starts and
-all six legal stages under the same fixed no-item 1v1 rules, but it remains a
-60-frame loading/correctness matrix rather than roster-wide sustained timing.
+The separate 60-frame startup matrix remains the fast loading/correctness
+regression for all 25 roster tiles/26 playable starts and all six legal stages
+under the same fixed no-item 1v1 rules.
 [Roster/stage startup evidence](benchmarks/browser-2026-09-18-native-room-matrix.json).
 
 The opt-in product room (`?rollback=1`) now drives the real menu-to-match path

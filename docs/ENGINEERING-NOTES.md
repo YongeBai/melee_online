@@ -16,18 +16,19 @@ Wait for the relay's shared phase-ready before advancing even the neutral input
 prefix; otherwise the faster browser consumes its prediction window during the
 other client's loading boundary. The scheduler advances at most one forward
 frame per animation callback because a second step cannot become a distinct
-browser presentation. Separate 1,800-frame Battlefield runs observed each seat
-at 59.95+ canvas-capture FPS with all 1,800 sampled pictures distinct. The same
-per-seat gate passed under sustained Falco/Fox contact, including hitlag, damage,
-up to 129 corrections and 475 replayed frames. This is browser-canvas evidence,
-not physical presentation, WAN, input-to-photon, full-roster performance or full
-tournament certification. The query remains opt-in and default rooms remain
-lockstep. See
-[the scoped evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
-The separate 60-frame product-room matrix now passes all 25 roster tiles, the
-held-A Sheik start and all six legal stages in two browsers with exact confirmed
-fighter state. That matrix proves loading/startup coverage, not sustained FPS
-for every character or matchup; see
+browser presentation. A resumable 26-case performance matrix now sustains 1,800
+combat frames for all 25 roster tiles plus held-A Sheik while cycling all six
+legal stages. It captured 46,800/46,800 distinct 960×720 post-draw snapshots;
+simulation was 59.557–59.933 FPS, captured cadence was 59.700–59.970 FPS and draw
+p95 was 7.1–14.1 ms. Require a clean host window before each row because
+unrelated shared-host builds produced synchronous false max-frame failures on
+both browsers. This is browser-canvas evidence, not physical presentation, WAN,
+input-to-photon or exhaustive matchup certification. The query remains opt-in
+and default rooms remain lockstep. See the
+[roster performance evidence](benchmarks/browser-2026-09-18-native-room-roster-720p60.json)
+and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
+The separate 60-frame matrix remains the fast loading/correctness regression for
+all 25 roster tiles, held-A Sheik and all six legal stages; see
 [the roster/stage evidence](benchmarks/browser-2026-09-18-native-room-matrix.json).
 
 [Cold shader preparation](BROWSER-NATIVE-SHADER-PREWARM.md) eliminates observed
