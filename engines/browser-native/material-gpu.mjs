@@ -3,7 +3,7 @@ import {createOwnedUniformState} from './owned-uniform-state.mjs';
 import {immediateTriangles,createImmediateStateMatcher,appendImmediateGeometry,uploadImmediateResource} from './immediate-geometry.mjs';
 import {generateMaterialShaders,materialShaderKey} from './material-shader.mjs';
 import {readNativeTevState} from './native-tev.mjs';
-import {createNativeTextureReader,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
+import {createNativeTextureReader,nativeTextureKey,decodeNativeTexture,nativeTextureSourceBytes} from './native-texture.mjs';
 import {createNativePixelReader,gxAlphaTestRejectsAny} from './native-pixel.mjs';
 import {readNativeModelMatrices,createPackedModelReader} from './native-model.mjs';
 import {readNativeRenderContext,createNativeRenderContextReader,checkNativeRenderContext} from './native-render-context.mjs';
@@ -65,7 +65,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   }
   function image(t){return timed('textureLookup',lookupImage,t);}
   function lookupImage(t){
-    const key=JSON.stringify(t);if(images.has(key))return images.get(key);
+    const key=assetLease?.compactTextureKey===false?JSON.stringify(t):nativeTextureKey(t);if(images.has(key))return images.get(key);
     const texture=assetLease?assetLease.texture(key,nativeTextureSourceBytes(module,t),()=>createImage(t)):createImage(t);
     images.set(key,texture);return texture;
   }

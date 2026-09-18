@@ -52,6 +52,12 @@ export function createNativeTextureReader(module,{cacheView=true}={}) {
     return decodeNativeTextures(view);
   };
 }
+// Fixed-field numeric tuple for the complete decoded descriptor. Delimiters and
+// a fixed field count make this collision-free for the validated finite values,
+// while avoiding recursive object serialization on every texture bind.
+export function nativeTextureKey(t) {
+  return `${t.id},${t.address},${t.width},${t.height},${t.format},${t.wrapS},${t.wrapT},${t.mipmap},${t.tlut},${t.minFilter},${t.magFilter},${t.biasClamp},${t.edgeLod},${t.anisotropy},${t.paletteAddress},${t.paletteFormat},${t.paletteEntries},${t.minLod},${t.maxLod},${t.lodBias},${t.lod.min},${t.lod.max},${t.lod.bias}`;
+}
 
 // Decode the runtime image/palette selection, not a stale archive descriptor.
 // Call while the owning native archive is alive; returned pixels own their data.

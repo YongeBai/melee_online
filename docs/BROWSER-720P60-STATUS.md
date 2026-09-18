@@ -9,6 +9,14 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 17 texture-key follow-up: complete numeric tuple keys replace full
+descriptor JSON serialization on every texture bind. Two recovered adjacent
+pairs reduced direct lookup from 0.681 to 0.615 ms/frame (-9.7%) and whole draw
+submission from 8.597 to 8.189 ms/frame (-4.7%). A legacy-key reference oracle
+compared 331.8 million RGBA bytes exactly; the 627-test scoped suite passes. The
+first order-confounded A/B/B/A is excluded and simulation FPS was mixed, so this
+is not a displayed-720p60 claim. [Evidence](BROWSER-NATIVE-TEXTURE-KEYS.md).
+
 September 17 texture-state follow-up: one renderer-local `DataView` reduced
 direct texture decoding from 0.569 to 0.481 ms/frame (-15.5%) in two recovered
 adjacent pairs. A 331.8-million-byte per-draw oracle and the 626-test suite pass.

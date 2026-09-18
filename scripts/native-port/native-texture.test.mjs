@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gxTextureLod,readNativeTextures,createNativeTextureReader,decodeNativeTexture} from '../../engines/browser-native/native-texture.mjs';
+import {gxTextureLod,readNativeTextures,createNativeTextureReader,nativeTextureKey,decodeNativeTexture} from '../../engines/browser-native/native-texture.mjs';
 function fixture() {
   const heap=new Uint8Array(8192),words=new Uint32Array(heap.buffer,64,724),floats=new Float32Array(heap.buffer,64,724);
   words.set([1,1,1024,1]);words.set([4096,2,2,0,0,0,0,0xffffffff,1,1,0,0,0,0,0,0],4);words[4+23]=1;
@@ -51,6 +51,13 @@ test('renderer-local texture reader rebinds after memory growth and pointer chan
   grown.copyWithin(8256,64,64+2896);f.module._portMaterialTextureState=()=>8256;new Uint32Array(grown.buffer,8256,724)[4+2]=4;assert.equal(read().textures[0].height,4);
   f.module._portMaterialTextureState=()=>16380;assert.throws(read,/bounds/);
   const uncached=createNativeTextureReader({...f.module,_portMaterialTextureState:()=>8256},{cacheView:false});assert.equal(uncached().textures[0].height,4);
+});
+
+test('compact texture keys cover every decoded descriptor field without sampled collisions',()=>{
+  const t=readNativeTextures(fixture().module).textures[0],clone=structuredClone(t),base=nativeTextureKey(t);assert.equal(nativeTextureKey(clone),base);
+  for(const name of ['id','address','width','height','format','wrapS','wrapT','mipmap','tlut','minFilter','magFilter','biasClamp','edgeLod','anisotropy','paletteAddress','paletteFormat','paletteEntries','minLod','maxLod','lodBias']){const changed=structuredClone(t);changed[name]+=1;assert.notEqual(nativeTextureKey(changed),base,name);}
+  for(const name of ['min','max','bias']){const changed=structuredClone(t);changed.lod[name]+=0.03125;assert.notEqual(nativeTextureKey(changed),base,'lod.'+name);}
+  const compact=new Map();for(let i=0;i<10000;i++){const changed=structuredClone(t);changed.address=i*257+1;changed.width=i%2048+1;changed.height=(i*17)%2048+1;changed.lod.bias=(i%255-128)/32;const key=nativeTextureKey(changed),legacy=JSON.stringify(changed);assert.equal(compact.get(key)??legacy,legacy);compact.set(key,legacy);}
 });
 
 test('an actually selected out-of-heap particle palette fails before texture decoding',()=>{

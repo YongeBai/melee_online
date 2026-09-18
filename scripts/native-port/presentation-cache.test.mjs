@@ -64,10 +64,10 @@ test('reference and widened comparisons invalidate the same restored images and 
 
 test('frame staging belongs to the exclusive lease and is discarded with the cache',()=>{
  const cache=createPresentationCache(),gl={isContextLost:()=>false};let creates=0;
- const a=cache.acquire(gl),first=a.modelSnapshot(0,()=>{creates++;return {rows:new Float32Array(120)};});assert.equal(a.packedState,true);assert.equal(a.reuseImmediate,true);assert.equal(a.cacheImmediateViews,true);assert.equal(a.cacheTextureView,true);assert.equal(a.compactShaderKey,true);a.release();
+ const a=cache.acquire(gl),first=a.modelSnapshot(0,()=>{creates++;return {rows:new Float32Array(120)};});assert.equal(a.packedState,true);assert.equal(a.reuseImmediate,true);assert.equal(a.cacheImmediateViews,true);assert.equal(a.cacheTextureView,true);assert.equal(a.compactShaderKey,true);assert.equal(a.compactTextureKey,true);a.release();
  assert.throws(()=>a.modelSnapshot(0,()=>null),/Released/);
  const b=cache.acquire(gl);assert.equal(b.modelSnapshot(0,()=>{creates++;}),first);assert.equal(creates,1);assert.equal(cache.snapshot().modelSnapshotSlots,1);b.release();cache.dispose();assert.equal(cache.snapshot().modelSnapshotSlots,0);
- const control=createPresentationCache({packedState:false,compactShaderKey:false,cacheImmediateViews:false,cacheTextureView:false}),c=control.acquire(gl);assert.equal(c.packedState,false);assert.equal(c.compactShaderKey,false);assert.equal(c.cacheImmediateViews,false);assert.equal(c.cacheTextureView,false);assert.equal(control.snapshot().compactShaderKey,false);assert.equal(control.snapshot().cacheImmediateViews,false);assert.equal(control.snapshot().cacheTextureView,false);c.release();control.dispose();
+ const control=createPresentationCache({packedState:false,compactShaderKey:false,compactTextureKey:false,cacheImmediateViews:false,cacheTextureView:false}),c=control.acquire(gl);assert.equal(c.packedState,false);assert.equal(c.compactShaderKey,false);assert.equal(c.compactTextureKey,false);assert.equal(c.cacheImmediateViews,false);assert.equal(c.cacheTextureView,false);assert.equal(control.snapshot().compactShaderKey,false);assert.equal(control.snapshot().compactTextureKey,false);assert.equal(control.snapshot().cacheImmediateViews,false);assert.equal(control.snapshot().cacheTextureView,false);c.release();control.dispose();
 });
 
 test('immediate resource leases follow cache ownership and can be disabled for reference draws',()=>{

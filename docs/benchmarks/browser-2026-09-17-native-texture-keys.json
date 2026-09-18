@@ -1,0 +1,60 @@
+{
+  "title": "Compact native texture descriptor keys",
+  "date": "2026-09-17",
+  "baseCommit": "c0eed3b",
+  "performanceCertified": false,
+  "decision": "Accept the complete numeric tuple as an exact direct lookup and draw-cost reduction. Reject the order-confounded first A/B/B/A and make no displayed-FPS claim.",
+  "productionTransport": "three-frame lockstep unchanged",
+  "sources": {
+    "native-texture.mjs": "9cdb67fd2cdf4cbcd03e6dbed4c8345b0eed26bc7c852af1bdf33a8e3c3e33bf",
+    "material-gpu.mjs": "4acbe1a2822d1a1da450b539e3e147a56f18e6e5bc9f7a3bb1eda5d3c756c1e5",
+    "presentation-cache.mjs": "a9891e4b44d745f8ce55d16c4988238cf8161d3d5391f0d0d366ecd98f563243",
+    "certification.mjs": "efe061495ea241005f92ac258bde21ace27e5fdf898af335b78102e9dc2e0704",
+    "dirty-host-contract.mjs": "c01eae84b20c8c766ee0a4c476ce83940e020d21794d6fb1dca6a29a3bd321ca",
+    "probe-certification.mjs": "e011a78a9f65cb499d255845287f689e67680fee9a1c1b3851af501f0955fe63"
+  },
+  "discardedInitialOrderConfoundedRuns": [
+    {"name":"A1 JSON key","rawReportSha256":"3385fbc75797aee7f1a1c7751bc6c1a702083489481e82aae6f828ad766c533a","textureLookupMeanMs":0.5906666678190231,"drawMeanMs":7.704666665593783,"simulationFps":59.61311091033406},
+    {"name":"B1 tuple key","rawReportSha256":"28518e2b5ad45b77099614db093570673dc2a5f3e439507cd5c2b3bbb0dc027c","textureLookupMeanMs":0.7124999990065892,"drawMeanMs":8.661499999860922,"simulationFps":59.373608431052396},
+    {"name":"B2 tuple key","rawReportSha256":"10e0d2b4e378f3b0ccebd2ba745d560cc3b26d85ac945a762f5ab5dd54be728b","textureLookupMeanMs":0.5931666691104571,"drawMeanMs":7.895000000496705,"simulationFps":59.71872480637554},
+    {"name":"A2 JSON key","rawReportSha256":"2f754a833c6268ce316b29e128b07b63505a9bd99c092c55ff5ee0ae37693586","textureLookupMeanMs":0.6745000003774961,"drawMeanMs":9.380166667004426,"simulationFps":59.38653707232605}
+  ],
+  "recoveredPairs": {
+    "framesPerRun": 600,
+    "textureLookupsPerRun": 170542,
+    "retainedTexturesPerRun": 237,
+    "textureHitsPerRun": 86062,
+    "textureMissesPerRun": 237,
+    "controlLookupMeanMs": 0.6806666648387909,
+    "candidateLookupMeanMs": 0.6148333338896433,
+    "lookupDeltaMs": -0.06583333094914756,
+    "lookupDeltaPercent": -9.671889979324833,
+    "controlDrawMeanMs": 8.596916667322319,
+    "candidateDrawMeanMs": 8.189083333263794,
+    "drawDeltaMs": -0.40783333405852495,
+    "drawDeltaPercent": -4.7439489044803445,
+    "controlSimulationFps": 59.45130509124206,
+    "candidateSimulationFps": 59.494617016335354,
+    "runs": [
+      {"name":"B3 tuple key","rawReportSha256":"c55375b7b169c6042b752098f781f2b546f07c5f470fe65616e06c7b2eef84a5","textureLookupMeanMs":0.6529999991257985,"drawMeanMs":8.922500000298022,"simulationFps":59.5320778681691},
+      {"name":"A3 JSON key","rawReportSha256":"bdad8b07a498d1277eaf15214030fc079bf9f756b6a4fe80ae98f94e7d880469","textureLookupMeanMs":0.6889999980727831,"drawMeanMs":8.982999999920526,"simulationFps":59.5923880657722},
+      {"name":"A4 JSON key","rawReportSha256":"ecd304707c904dfcdbf5670dd03f0af3bb6d78f31ca1a9f9f2f370b39072ef42","textureLookupMeanMs":0.6723333316047987,"drawMeanMs":8.210833334724109,"simulationFps":59.310222116711934},
+      {"name":"B4 tuple key","rawReportSha256":"d912b65d319938ce4cb9eb89028e347ce5a915461cc68c8b290152b2f085ae61","textureLookupMeanMs":0.5766666686534881,"drawMeanMs":7.455666666229566,"simulationFps":59.45715616450161}
+    ]
+  },
+  "correctness": {
+    "fountainPerDrawOracle": {"frames":120,"comparedRgbaBytes":331776000,"differentBytes":0,"cameraMismatches":0,"statePixelCameraExact":true,"referenceKey":"JSON.stringify","candidateKey":"complete numeric tuple","rawReportSha256":"0860bf87378ca640a13b86bedb7d3530cb37be0785c84b52ef099fadcfcf2a21"},
+    "sampledKeyCollisionAudit": {"descriptors":10000,"collisions":0,"everyDecodedFieldMutatedIndependently":true},
+    "tests": {"total":627,"passed":615,"skipped":12,"failed":0}
+  },
+  "rejectedPrecursors": [
+    {"name":"whole-slab UBO typed views","controlDirectMeanMs":0.5928333344062169,"candidateDirectMeanMs":0.6406666663785776,"deltaPercent":8.068596888241908,"decision":"rejected and removed"},
+    {"name":"cached pixel/context typed views","controlDirectMeanMs":0.6059166674315929,"candidateDirectMeanMs":0.6214999990661938,"deltaPercent":2.571860533339798,"decision":"rejected and removed"}
+  ],
+  "remaining": [
+    "The first A/B/B/A followed run order and is excluded from causal aggregation.",
+    "Performance runs disabled capture and do not establish displayed cadence.",
+    "Production rooms still use lockstep rather than the diagnostic rollback path.",
+    "No physical input-to-photon, WAN, reconnect/recovery, audible rollback-SFX, exhaustive roster-interaction, or complete native-results certification."
+  ]
+}
