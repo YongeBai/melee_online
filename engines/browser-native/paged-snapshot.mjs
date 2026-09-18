@@ -15,9 +15,9 @@ function sameWords(a,start,b){
   return true;
 }
 
-export function createPagedWasmCheckpointStore({module,instance,audit,dirty=null,sparse=false,auditSparse=false,onTiming=()=>{},health={aborted:false},host={capture:()=>null,restore:()=>{}},maxBytes=1024**3}){
+export function createPagedWasmCheckpointStore({module,instance,audit,dirty=null,sparse=false,auditSparse=false,verifyImmutableTable=false,onTiming=()=>{},health={aborted:false},host={capture:()=>null,restore:()=>{}},maxBytes=1024**3}){
   const owned=new Map(),table=instance.exports.__indirect_function_table;
-  const entries=Array.from({length:table.length},(_,i)=>table.get(i)),globals=audit.globals.map(g=>instance.exports[g.name]);
+  const entries=Array.from({length:table.length},(_,i)=>table.get(i)),fixedTableContents=audit.fixedTableContents===true,scanTable=!fixedTableContents||verifyImmutableTable,globals=audit.globals.map(g=>instance.exports[g.name]);
   if(globals.some(g=>!(g instanceof WebAssembly.Global)))throw Error('Snapshot globals not exported');
   let kernel=createSnapshotPageKernel(instance.exports.memory),closed=false;
   const backend=kernel?'wasm-simd-multimemory':'javascript',free=[];let slots=1;
@@ -38,13 +38,14 @@ export function createPagedWasmCheckpointStore({module,instance,audit,dirty=null
     }catch(error){free.push(slot);throw error;}
   }
   function retire(p){if(kernel&&p!==zero)free.push(p.offset/pageBytes);}
-  const metrics={captures:0,restores:0,capturedBytes:0,restoredBytes:0,comparedBytes:0,sharedPages:0,guardCpuMs:0,captureCpuMs:0,restoreCpuMs:0,maxCaptureCpuMs:0,maxRestoreCpuMs:0,peakRetainedBytes:0,sparse,sparseSkippedCapturePages:0,sparseSkippedRestorePages:0,captureAudits:0,restoreAudits:0,restoreCopyCpuMs:0};
+  const metrics={captures:0,restores:0,capturedBytes:0,restoredBytes:0,comparedBytes:0,sharedPages:0,guardCpuMs:0,tableEntriesChecked:0,fixedTableContents,scanTable,captureCpuMs:0,restoreCpuMs:0,maxCaptureCpuMs:0,maxRestoreCpuMs:0,peakRetainedBytes:0,sparse,sparseSkippedCapturePages:0,sparseSkippedRestorePages:0,captureAudits:0,restoreAudits:0,restoreCopyCpuMs:0};
   function guard(){
     const start=performance.now();
     if(closed)throw Error('Checkpoint store disposed');
     if(health.aborted)throw Error('Aborted runtime cannot be restored');
     if(module.onNativeDraw||module.onNativeImmediate||module.onNativeObject)throw Error('Snapshot requires detached renderer');
-    if(table.length!==entries.length||entries.some((e,i)=>table.get(i)!==e))throw Error('Snapshot function table changed');
+    if(table.length!==entries.length)throw Error('Snapshot function table changed');
+    if(scanTable){metrics.tableEntriesChecked+=entries.length;for(let i=0;i<entries.length;i++)if(table.get(i)!==entries[i])throw Error('Snapshot function table changed');}
     if(instance.exports.memory.buffer!==module.HEAPU8.buffer)throw Error('Stale snapshot memory view');
     metrics.guardCpuMs+=performance.now()-start;
   }

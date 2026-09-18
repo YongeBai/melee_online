@@ -6,7 +6,7 @@ async function compile(wat){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dirt
 test('all scalar stores, offsets, page crossings and bulk writes preserve bytes and mark every destination',{skip:!fs.existsSync(assembler)},async()=>{
  const stores=['i32.store','i32.store8','i32.store16','i64.store','i64.store8','i64.store16','i64.store32','f32.store','f64.store'];
  const wat=wrap(stores.map((op,i)=>`(func (export "s${i}") (param $p i32) (${op} offset=3 (local.get $p) (${op.split('.')[0]}.const 7)))`).join('\n')+`(func (export "copy") (param $p i32) (param $s i32) (param $n i32) (memory.copy (local.get $p) (local.get $s) (local.get $n))) (func (export "fill") (param $p i32) (param $n i32) (memory.fill (local.get $p) (i32.const 99) (local.get $n)))`);
- const {wat:tracked,counts}=instrumentDirtyStores(wat),a=await compile(wat),b=await compile(tracked),flags=new Uint8Array(b.__dirty_memory.buffer);assert.deepEqual(counts,{stores:9,copy:1,fill:1});
+ const {wat:tracked,counts}=instrumentDirtyStores(wat),a=await compile(wat),b=await compile(tracked),flags=new Uint8Array(b.__dirty_memory.buffer);assert.deepEqual(counts,{stores:9,copy:1,fill:1,tableMutations:0});
  for(let i=0;i<stores.length;i++){flags.fill(0);a['s'+i](4092);b['s'+i](4092);assert.equal(flags[0],1);const size=Number(stores[i].match(/store(\d+)/)?.[1]??stores[i].match(/^[if](\d+)/)[1])/8;assert.equal(flags[1],size>1?1:0);assert.deepEqual(new Uint8Array(b.memory.buffer),new Uint8Array(a.memory.buffer));}
  flags.fill(0);a.fill(8000,10000);b.fill(8000,10000);assert.deepEqual([...flags.slice(0,6)],[0,1,1,1,1,0]);
  flags.fill(0);a.copy(10000,8000,16000);b.copy(10000,8000,16000);assert.deepEqual([...flags.slice(0,8)],[0,0,1,1,1,1,1,0]);assert.deepEqual(new Uint8Array(b.memory.buffer),new Uint8Array(a.memory.buffer));
@@ -16,6 +16,9 @@ test('all scalar stores, offsets, page crossings and bulk writes preserve bytes 
 test('dirty transform rejects unaudited memory opcodes and explicit foreign memory operands',()=>{
  for(const op of ['memory.init','memory.grow','v128.store','i32.atomic.store'])assert.throws(()=>instrumentDirtyStores(wrap(`(func (${op} (i32.const 0)))`)),/Unaudited/);
  assert.throws(()=>instrumentDirtyStores(wrap('(func (i32.store $other (i32.const 0) (i32.const 1)))')),/Unknown/);
+});
+test('dirty transform rejects mutable function-table instructions',()=>{
+ for(const op of ['table.set','table.grow','table.fill','table.copy','table.init','elem.drop'])assert.throws(()=>instrumentDirtyStores(wrap(`(table 1 1 funcref) (func (${op}))`)),/Mutable function table/);
 });
 test('aliased Emscripten import namespaces mark WASI outputs without invalidating draw callbacks',{skip:!fs.existsSync(assembler)},async()=>{
  const {createSnapshotRuntime}=await import('../../engines/browser-native/wasm-snapshot.mjs'),{createHash}=await import('node:crypto');

@@ -88,6 +88,8 @@ test('full audits reject untracked capture and restore writes instead of silentl
   assert.throws(()=>operation==='capture'?store.capture():store.restore(initial),/Untracked checkpoint capture|differs from full restore/);store.dispose();}
  const r=await dirtyRuntime(),store=createPagedWasmCheckpointStore({...r,sparse:true}),initial=store.capture();r.module.onNativeImmediate=()=>{};assert.throws(()=>store.restore(initial),/detached/);delete r.module.onNativeImmediate;r.instance.exports.__indirect_function_table.set(0,r.instance.exports.noop);assert.throws(()=>store.restore(initial),/table changed/);store.dispose();
  const unaudited=await runtime();assert.throws(()=>createPagedWasmCheckpointStore({...unaudited,sparse:true}),/audited/);
+ const fixed=await runtime();fixed.audit.fixedTableContents=true;const fast=createPagedWasmCheckpointStore(fixed),fastState=fast.capture();assert.equal(fast.metrics().tableEntriesChecked,0);fast.release(fastState);fast.dispose();
+ const checked=await runtime();checked.audit.fixedTableContents=true;const control=createPagedWasmCheckpointStore({...checked,verifyImmutableTable:true}),controlState=control.capture();checked.instance.exports.__indirect_function_table.set(0,checked.instance.exports.noop);assert.throws(()=>control.restore(controlState),/table changed/);assert.equal(control.metrics().scanTable,true);control.dispose();
 });
 
 test('replica synchronization broadcasts destination writes to an independent checkpoint subscriber',async()=>{

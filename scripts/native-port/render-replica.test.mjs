@@ -31,6 +31,10 @@ test('a failed draw disposes native receivers before another mirror overwrite',a
  assert.throws(()=>r.present(construct,()=>{throw Error('draw fault');}),/draw fault/);assert.equal(disposed,1);
  r.present(construct,()=>42);assert.equal(disposed,2);assert.equal(r.metrics().frames,1);
 });
+test('a statically audited immutable table avoids repeated host table scans',async()=>{
+ const a=await runtime(),b=await runtime();a.audit.fixedTableContents=b.audit.fixedTableContents=true;const r=createRenderReplica(a,b);r.present(()=>({dispose(){}}),()=>{});assert.equal(r.metrics().fixedTableContents,true);assert.equal(r.metrics().tableEntriesChecked,0);r.dispose();
+ const c=await runtime(),d=await runtime();c.audit.fixedTableContents=d.audit.fixedTableContents=true;const control=createRenderReplica(c,d,{verifyImmutableTable:true});d.instance.exports.__indirect_function_table.set(0,d.instance.exports.write);assert.throws(()=>control.present(()=>({dispose(){}}),()=>{}),/table changed/);assert.equal(control.metrics().scanTable,true);assert.equal(control.metrics().tableEntriesChecked,2);control.dispose();
+});
 test('dirty replica copies the union of game and renderer writes and detects an unmarked host write',async()=>{
  const a=await runtime(),b=await runtime();for(const r of [a,b]){r.dirty=new Uint8Array(524288);r.audit.instrumentedSha256='test-instrumented';}
  const replica=createRenderReplica(a,b,{copyMode:'dirty',auditDirty:true}),empty=()=>({dispose(){}});
