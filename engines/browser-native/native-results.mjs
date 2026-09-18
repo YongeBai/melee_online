@@ -21,6 +21,9 @@ export function validateResults(value){
 export function resultTitle(result){return ![1,2].includes(result.outcome)?'No Contest':result.winnerCount===1?'Player '+(result.players.findIndex(p=>p.winner)+1)+' Wins':'Draw';}
 const characterNames=['Captain Falcon','Donkey Kong','Fox','Mr Game and Watch','Kirby','Bowser','Link','Luigi','Mario','Marth','Mewtwo','Ness','Peach','Pikachu','Ice Climbers','Jigglypuff','Samus','Yoshi','Zelda','Sheik','Falco','Young Link','Dr Mario','Roy','Pichu','Ganondorf'];
 export function resultCharacterName(character){if(!Number.isInteger(character)||character<0||character>=characterNames.length)throw Error('Invalid result character');return characterNames[character];}
+// gm_1601.c ckind_victory_themes -> lbaudio_ax.static.h hps_files.
+const victoryTracks=['ff_fzero.hps','ff_dk.hps','ff_fox.hps','ff_flat.hps','ff_kirby.hps','ff_mario.hps','ff_link.hps','ff_mario.hps','ff_mario.hps','ff_emb.hps','ff_poke.hps','ff_nes.hps','ff_mario.hps','ff_poke.hps','ff_ice.hps','ff_poke.hps','ff_samus.hps','ff_yoshi.hps','ff_link.hps','ff_link.hps','ff_fox.hps','ff_link.hps','ff_mario.hps','ff_emb.hps','ff_poke.hps','ff_link.hps'];
+export function resultVictoryTrack(character){resultCharacterName(character);return victoryTracks[character];}
 const storageKey='native-melee-return-v1';
 export function saveReturn(ticket,storage=globalThis.sessionStorage){storage.setItem(storageKey,JSON.stringify(returnTicket(ticket.action,ticket)));}
 export function consumeReturn(storage=globalThis.sessionStorage){try{const value=JSON.parse(storage.getItem(storageKey));storage.removeItem(storageKey);return value?returnTicket(value.action,value):null;}catch{return null;}}

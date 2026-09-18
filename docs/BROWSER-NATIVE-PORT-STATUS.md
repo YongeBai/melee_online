@@ -177,8 +177,13 @@ and win/loss/draw state. Input remains locked through the reveal. Rematch
 starts a fresh WASM instance, restores both characters/costumes and the selected
 legal stage, and enters through original CSS/SSS and Ready/Go. Character Select
 returns through the original two-seat menu. No timer, stock or outcome writes
-are used to create an ending. The original `GmRst` 3D scene and victory audio
-remain unfinished; this presentation no longer exposes the temporary debug UI.
+are used to create an ending. The result layer now plays the original
+character-family victory HPS selected by Melee's `ckind_victory_themes` table;
+all 13 themes needed by the full roster are hosted through the no-ISO audio
+pipeline. A real-browser lifecycle observed `ff_fox.hps` playing with nonzero
+audio-graph output on both peers after elimination and timeout. The original
+`GmRst` 3D scene remains unfinished; this presentation no longer exposes the
+temporary debug UI.
 
 Rooms require matching results from both clients and two rematch votes. Either
 player can return both to CSS. One coordinated epoch/reload preserves room code
@@ -207,6 +212,9 @@ decode fidelity, not original AX mixer/resampler or sound-effect parity.
 Real browser startup checks cover the correct track and nonzero audio-graph
 output on all six legal stages. A 900-frame CPU match passed with music, and
 two room clients completed 600 frames with matching measured fighter fields.
+The prepared fixture now also contains all 13 character victory themes. Results
+select them using the exact original character-kind mapping rather than a new
+browser-owned grouping.
 An initial music trial encountered an unuploaded-geometry render failure, and
 a later 900-frame repeat missed the strict CPU jump-coverage assertion. Both
 remain recorded rather than being counted as passing gameplay validation.

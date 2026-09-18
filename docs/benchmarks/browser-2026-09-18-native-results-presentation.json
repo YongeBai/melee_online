@@ -1,14 +1,16 @@
 {
   "date": "2026-09-18",
-  "purpose": "Replace the temporary product results dialog with a 4:3 animated tournament presentation and revalidate the two-browser elimination, rematch, timeout, and character-select lifecycle.",
-  "sourceCommitBeforeCheckpoint": "75614f7745691220deca5be79c46217f25b4c724",
+  "purpose": "Validate the 4:3 animated tournament presentation, original character victory themes, and two-browser elimination, rematch, timeout, and character-select lifecycle.",
+  "sourceCommitBeforeCheckpoint": "34c2b5926a82b88e7531e2567087a586407be1f4",
   "sourceSha256": {
-    "engines/browser-native/native-results.mjs": "c4c5d7d48ded48af8e7b4248c9741dac182870eec4178c1304c1ade87d7d4051",
-    "engines/browser-native/native-results-ui.mjs": "96d63fc24d03c687338d4b0ec311976896a59027b43a3c1c09443ac75acd5eb5",
+    "engines/browser-native/native-results.mjs": "48b86399d50823865c21db781e084a6b7e5b8b9bbeed9a9c10608e8a45a6cc91",
+    "engines/browser-native/native-results-ui.mjs": "4b6c61089799eb95c20f3ca6ad75b3fc6696fa987ba4cc6814566a024f2fefaa",
+    "engines/browser-native/character-menu.html": "1f1eaba9736c7add18ca03cbe980ee388939bd16aaf239aaae6915803c3d10f1",
     "engines/browser-native/native-product.css": "7ebfe10dcc4c3387f7493dfbafe41f168e32d1e337f564afd733ab807dc79965",
-    "engines/browser-native/dirty-host-contract.mjs": "2379d333ee3f8733c686c94a42dadb490115a41888249cdd29602b29a43d2d30",
-    "scripts/native-port/probe-native-rooms.mjs": "89f1c6f1581929a079fbfd715f1639f8cbe411abb9cb3ea8d93ad6cc5164eb3e",
-    "scripts/native-port/native-results.test.mjs": "bf92ab24e6a52ac52ebc370ae9ed9526a7172b157d74878bbcb22a4bc1987b36"
+    "engines/browser-native/dirty-host-contract.mjs": "e5c86a79a8d75e9658b77a4f81fbf4c80bdb9abc8b4ea18317ce9cf58d029286",
+    "scripts/native-port/prepare-music.mjs": "ea33d864e821e8227582a4317713b67aef99b76f5aeb09dc02db57da4363d195",
+    "scripts/native-port/probe-native-rooms.mjs": "6c2f996dab4e1994c5b15797fac27719557ab0a1e437d81b9d96f449b7a231e5",
+    "scripts/native-port/native-results.test.mjs": "d0ad9d03453e913520be2e69d090ac5e7fbfa6dce5bc3b752b8ee48587182437"
   },
   "command": "node scripts/native-port/probe-native-rooms.mjs --results",
   "passed": true,
@@ -24,9 +26,22 @@
     "statistics": ["Stock", "Damage", "Result"],
     "standings": ["Win", "Loss", "Draw"]
   },
+  "victoryAudio": {
+    "mappingProvenance": [
+      "melee/gm/gm_1601.c:ckind_victory_themes",
+      "melee/lb/lbaudio_ax.static.h:hps_files"
+    ],
+    "preparedCharacterThemes": 13,
+    "fixtureMatchup": ["Falco", "Fox"],
+    "expectedTrack": "ff_fox.hps",
+    "peerStates": ["playing", "playing"],
+    "eliminationOutputPeaks": [0.1519215852022171, 0.1480356901884079],
+    "timeoutOutputPeaks": [0.1671498566865921, 0.1519215852022171],
+    "hostedNoIsoStartupPreserved": true
+  },
   "elimination": {
     "nativeOutcome": 2,
-    "nativeFrames": 805,
+    "nativeFrames": 806,
     "winnerCount": 1,
     "winnerSeat": 1,
     "matchingResultsOnBothPeers": true,
@@ -59,5 +74,5 @@
     "timeoutSeat0": "a04261280db17d4ace80fea1a68de422623eaff013fedfcf88fc36134495999b",
     "timeoutSeat1": "d326f83cf800bff94a3e586404497f9e2f8cfb7badea40d872b7fe829d1108e8"
   },
-  "scope": "The standings presentation uses hosted original SIS glyphs, fixed native 4:3 framing, native-computed match results, and product animations. It does not yet recreate Melee's original GmRst 3D scene or victory fanfare. The accelerated timeout executes every original simulation step but bypasses real-time presentation, so this is lifecycle and presentation evidence rather than an FPS result."
+  "scope": "The standings presentation uses hosted original SIS glyphs, fixed native 4:3 framing, native-computed match results, product animations, and original character victory HPS files. It does not yet recreate Melee's original GmRst 3D scene. The accelerated timeout executes every original simulation step but bypasses real-time presentation, so this is lifecycle, presentation, and audible-output evidence rather than an FPS result."
 }
