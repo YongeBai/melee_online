@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gxTextureLod,readNativeTextures,decodeNativeTexture} from '../../engines/browser-native/native-texture.mjs';
+import {gxTextureLod,readNativeTextures,createNativeTextureReader,decodeNativeTexture} from '../../engines/browser-native/native-texture.mjs';
 function fixture() {
   const heap=new Uint8Array(8192),words=new Uint32Array(heap.buffer,64,724),floats=new Float32Array(heap.buffer,64,724);
   words.set([1,1,1024,1]);words.set([4096,2,2,0,0,0,0,0xffffffff,1,1,0,0,0,0,0,0],4);words[4+23]=1;
@@ -43,6 +43,14 @@ test('texgen enable count preserves initialized registers across particle mode c
   assert.deepEqual(readNativeTextures(f.module).generators,[]);
   f.words[3]=1;assert.equal(readNativeTextures(f.module).generators.length,1);
   f.words[1]=0;assert.throws(()=>readNativeTextures(f.module),/resource masks/);
+});
+
+test('renderer-local texture reader rebinds after memory growth and pointer changes',()=>{
+  const f=fixture(),read=createNativeTextureReader(f.module);assert.deepEqual(read(),readNativeTextures(f.module));
+  const grown=new Uint8Array(16384);grown.set(f.module.HEAPU8);f.module.HEAPU8=grown;new Uint32Array(grown.buffer,64,724)[4+1]=4;assert.equal(read().textures[0].width,4);
+  grown.copyWithin(8256,64,64+2896);f.module._portMaterialTextureState=()=>8256;new Uint32Array(grown.buffer,8256,724)[4+2]=4;assert.equal(read().textures[0].height,4);
+  f.module._portMaterialTextureState=()=>16380;assert.throws(read,/bounds/);
+  const uncached=createNativeTextureReader({...f.module,_portMaterialTextureState:()=>8256},{cacheView:false});assert.equal(uncached().textures[0].height,4);
 });
 
 test('an actually selected out-of-heap particle palette fails before texture decoding',()=>{

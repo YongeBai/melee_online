@@ -8,10 +8,8 @@ export function gxTextureLod(min,max,bias) {
   const lod=v=>Math.trunc(Math.min(10,Math.max(0,v))*16)/16;
   return {min:lod(min),max:lod(max),bias:Math.trunc(Math.fround(Math.min(Math.fround(3.99),Math.max(-4,bias))*32))/32};
 }
-export function readNativeTextures(module) {
-  const p=module._portMaterialTextureState(),heap=module.HEAPU8;
-  if(!p||p%4||p+2896>heap.length)throw Error('Native texture snapshot bounds');
-  const view=new DataView(heap.buffer,p,2896),u=at=>view.getUint32(at*4,true),f=at=>view.getFloat32(at*4,true);
+function decodeNativeTextures(view) {
+  const u=at=>view.getUint32(at*4,true),f=at=>view.getFloat32(at*4,true);
   const [textureMask,texgenMask,matrixMask,texgens]=[0,1,2,3].map(u);
   if(textureMask>255||texgenMask>255||matrixMask>=2**30||texgens>8||(texgenMask&(2**texgens-1))!==2**texgens-1)throw Error('Native texture resource masks');
   const textures=[],generators=[],matrices=[];
@@ -39,6 +37,20 @@ export function readNativeTextures(module) {
   }
   for(const g of generators)for(const id of [g.matrix,g.postMatrix])if(![0,30,60,125].includes(id)&&!matrices.some(m=>m.id===id))throw Error('Native texture generator missing matrix');
   return {textures,generators,matrices};
+}
+function nativeTextureView(module) {
+  const p=module._portMaterialTextureState(),heap=module.HEAPU8;
+  if(!p||p%4||p+2896>heap.length)throw Error('Native texture snapshot bounds');
+  return {p,heap,view:new DataView(heap.buffer,p,2896)};
+}
+export function readNativeTextures(module) {return decodeNativeTextures(nativeTextureView(module).view);}
+export function createNativeTextureReader(module,{cacheView=true}={}) {
+  let buffer=null,pointer=0,view=null;
+  return ()=>{
+    const p=module._portMaterialTextureState(),heap=module.HEAPU8;
+    if(!cacheView||buffer!==heap.buffer||pointer!==p){const next=nativeTextureView(module);buffer=next.heap.buffer;pointer=next.p;view=next.view;}
+    return decodeNativeTextures(view);
+  };
 }
 
 // Decode the runtime image/palette selection, not a stale archive descriptor.

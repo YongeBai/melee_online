@@ -1,5 +1,12 @@
 # Native browser port — September 17, 2026
 
+The texture-state decoder now [reuses one renderer-local capture view](BROWSER-NATIVE-TEXTURE-VIEW.md),
+rebinding on memory or pointer changes. Two recovered adjacent comparisons cut
+direct texture decode from 0.569 to 0.481 ms/frame (-15.5%, -0.089 ms) while
+preserving exact per-draw pixels, state, and camera. A thermally collapsed first
+A/B/B/A is explicitly excluded. This is another bounded renderer CPU reduction,
+not a displayed-720p60 result.
+
 The immediate-primitive matcher now [reuses renderer-local typed-array views](BROWSER-NATIVE-IMMEDIATE-VIEWS.md)
 while still comparing every captured state word. Direct matcher time fell
 13.3% in the long two-browser rollback A/B/B/A, saving about 0.055 ms/frame.

@@ -1,0 +1,40 @@
+{
+  "title": "Renderer-local native texture capture view",
+  "date": "2026-09-17",
+  "baseCommit": "d895b19",
+  "performanceCertified": false,
+  "decision": "Accept the renderer-local DataView reuse as an exact direct-cost reduction. Reject the thermally collapsed initial A/B/B/A as end-to-end evidence.",
+  "productionTransport": "three-frame lockstep unchanged",
+  "sources": {
+    "native-texture.mjs": "91c8703d98ae4c4f4e3e3ab79a156df6a951841557ea52cff05be6632cdca1d9",
+    "material-gpu.mjs": "30f7cf1b33cf2b745553404c9923317a1f69c523635048dfd89bb50ab957f0e3",
+    "presentation-cache.mjs": "9e5107114ba62db2aa9ce9bd79024d4ebbeafcf700384e81f55b70a61d6d5964",
+    "certification.mjs": "4e9bcf7620c6992bfa24d87f1ca8dcf467f736bf0c3043caec196cb509436bb6",
+    "dirty-host-contract.mjs": "aae1d6805ad6cda4b3cccf2ba28b1df11ea42bbc001f2c193a5545ef612d8e08",
+    "probe-certification.mjs": "36c5b5f21061abec5bdf22b203a8028a22db862e8289cb8dab1120bc6e90650a"
+  },
+  "recoveredPairs": {
+    "framesPerRun": 600,
+    "textureReadsPerRun": 163918,
+    "controlTextureMeanMs": 0.5692499999205271,
+    "candidateTextureMeanMs": 0.48074999819199245,
+    "deltaMs": -0.08850000172853467,
+    "deltaPercent": -15.546772369175673,
+    "runs": [
+      {"name":"B3 cached view","rawReportSha256":"585f370cd273a1407491639a5a944913e9577991045ca932a68bafc59a29a68c","textureMeanMs":0.4859999934832255,"drawMeanMs":9.215333332518737,"simulationFps":59.265698001548856},
+      {"name":"A3 new view/read","rawReportSha256":"a4d51a1a32e3617a2b5fae002f0ff17efd49ba388584c3f1c96075a98b094b10","textureMeanMs":0.5590000021457672,"drawMeanMs":9.444499998986721,"simulationFps":59.307877074610005},
+      {"name":"A4 new view/read","rawReportSha256":"9739996f1ef6468cea7347e057c4b2b0052142387f9cc5bf496673dde7af61a0","textureMeanMs":0.579499997695287,"drawMeanMs":10.020166666110356,"simulationFps":58.61206627064134},
+      {"name":"B4 cached view","rawReportSha256":"7cdc1fdd3fb63f203f2fcbb606908f380f36f9f35ba0e4f7783ae4262f1c3f20","textureMeanMs":0.4755000029007594,"drawMeanMs":8.889166667560737,"simulationFps":59.16984704587583}
+    ]
+  },
+  "correctness": {
+    "fountainPerDrawOracle": {"frames":120,"comparedRgbaBytes":331776000,"differentBytes":0,"cameraMismatches":0,"statePixelCameraExact":true,"rawReportSha256":"d73a3cea6b2f280c198a48d37c01d17d20fc1c565ca764c4712f488185f37114"},
+    "tests": {"total":626,"passed":614,"skipped":12,"failed":0}
+  },
+  "remaining": [
+    "The initial A/B/B/A suffered a severe host collapse and cannot support an aggregate FPS claim.",
+    "Performance runs disabled capture and do not establish displayed cadence.",
+    "Production rooms still use lockstep rather than the diagnostic rollback path.",
+    "No physical input-to-photon, WAN, reconnect/recovery, audible rollback-SFX, exhaustive roster-interaction, or complete native-results certification."
+  ]
+}
