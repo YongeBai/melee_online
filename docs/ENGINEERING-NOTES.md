@@ -72,7 +72,12 @@ standings; use hosted SIS glyphs and display stock, damage and categorical
 win/loss/draw state. Do not expose the raw internal `score` word—the losing
 fixture contains a packed sentinel rather than a player-facing statistic. Keep
 input disabled through the 900 ms reveal and preserve reduced-motion behavior.
-This does not claim the original `GmRst` 3D scene or victory fanfare.
+Select victory music from the original `ckind_victory_themes` table in
+`melee/gm/gm_1601.c`, resolving its indices through `hps_files` in
+`melee/lb/lbaudio_ax.static.h`; do not infer families from the browser roster.
+The hosted fixture contains all 13 `ff_*` HPS files used by the 26-character
+roster, and browser validation must observe both the requested track and nonzero
+audio-graph output. This does not claim the original `GmRst` 3D scene.
 
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.
@@ -192,12 +197,14 @@ the paused offset across hidden tabs. Original VS startup also calls
 `Stage_80225074(fn_8016E5C0(start))`; omitting it leaves menu music playing during
 matches. This selector can use native RNG, so verify room synchronization after
 changing its call site. The extraction and server allowlist must include music
-without adding a player-supplied file requirement.
+without adding a player-supplied file requirement. Victory themes use the same
+hosted HPS pipeline: `prepare-music.mjs` extracts every `ff_*` file referenced by
+the original character-kind table, while runtime startup remains no-ISO.
 
 Post-match routing stops at the original scene-exit flag, then calls
 `gm_Scene_Vs_OnExit` once to read native rankings. Frame-limit/manual probe stops
-must never fabricate results. The temporary results dialog is explicitly labelled;
-do not describe it as the original animated results scene. Rematch reloads a fresh
+must never fabricate results. The browser tournament presentation is not the
+original `GmRst` 3D scene and must not be described as such. Rematch reloads a fresh
 WASM instance rather than reusing match statics. Restore only playable characters,
 valid native costumes and the six legal stages; rules remain fixed. Apply forced
 rematch stage selection after SSS initialization so its original objects and

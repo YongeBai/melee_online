@@ -7,7 +7,7 @@ const root=path.resolve(import.meta.dirname,'../..'),output=path.join(root,'dist
 const read=(o,n)=>{const bytes=new Uint8Array(n);if(fs.readSync(fd,bytes,0,n,o)!==n)throw Error('Truncated development disc');return bytes;};
 try{
  const total=fs.fstatSync(fd).size,h=parseHeader(read(0,0x440).buffer,total),files=parseFileTable(read(h.fstOffset,h.fstSize).buffer,total);
- const names=['menu01','menu02','menu3','izumi','ystory','old_kb','pstadium','pokesta','sp_zako','sp_end'];const manifest={};fs.mkdirSync(path.join(output,'audio'),{recursive:true});
+ const names=['menu01','menu02','menu3','izumi','ystory','old_kb','pstadium','pokesta','sp_zako','sp_end','ff_dk','ff_emb','ff_flat','ff_fox','ff_fzero','ff_ice','ff_kirby','ff_link','ff_mario','ff_nes','ff_poke','ff_samus','ff_yoshi'];const manifest={};fs.mkdirSync(path.join(output,'audio'),{recursive:true});
  for(const stem of names){const name=stem+'.hps',file=files.find(f=>f.path==='audio/'+name);if(!file)throw Error('Missing '+name);const bytes=read(file.offset,file.size),decoded=decodeHps(bytes);fs.writeFileSync(path.join(output,'audio',name),bytes);manifest[name]={rate:decoded.rate,length:decoded.length,channels:decoded.pcm.length,loopStart:decoded.loopStart};}
  fs.writeFileSync(path.join(output,'music-fixtures.json'),JSON.stringify(manifest,null,2)+'\n');return manifest;
 }finally{fs.closeSync(fd);}

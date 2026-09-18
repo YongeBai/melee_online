@@ -61,7 +61,11 @@ standings. A fresh two-browser lifecycle passed real-time elimination, one-vote
 hold, two-vote rematch, an original 28,800-frame timeout, return to character
 select, and the six-stage legal list. Both peers reported two player panels, no
 temporary label, and a measured 1.333317 aspect ratio. The original `GmRst` 3D
-scene and victory fanfare are still not ported. See the
+scene is still not ported. The original character victory themes are ported:
+the fixture extracts all 13 `ff_*` HPS files, runtime selection follows the
+original character-kind table, and both peers measured `ff_fox.hps` in the
+playing state with audio peaks from 0.1480 to 0.1671 during the Falco/Fox
+lifecycle. See the
 [results presentation evidence](benchmarks/browser-2026-09-18-native-results-presentation.json).
 
 For September 17 direct-browser work, see the

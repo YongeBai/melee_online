@@ -1,7 +1,7 @@
 import {lettering} from './native-product-ui.mjs';
-import {resultCharacterName,resultTitle,returnTicket,saveReturn,validateResults} from './native-results.mjs';
+import {resultCharacterName,resultTitle,resultVictoryTrack,returnTicket,saveReturn,validateResults} from './native-results.mjs';
 import {standardNativeSample} from './native-input.mjs';
-export function showNativeResults({results,selection,network,terminalFrame=undefined}){
+export function showNativeResults({results,selection,network,music=null,terminalFrame=undefined}){
  results=validateResults(results);
  const dialog=document.createElement('dialog');dialog.id='nativeResults';dialog.setAttribute('aria-label','Match results');
  dialog.innerHTML='<div class="results-scene"><div class="results-rays" aria-hidden="true"></div><header><canvas class="results-call"></canvas><h1><canvas></canvas></h1></header><section class="results-players" aria-label="Standings"></section><p class="results-status" role="status"></p><nav class="results-actions" aria-label="Results actions"><button id="rematchButton" class="room-action"><canvas></canvas></button><button id="charactersButton" class="room-action"><canvas></canvas></button></nav><p class="results-help">Enter / P: Rematch · O: Character Select</p></div>';
@@ -16,6 +16,7 @@ export function showNativeResults({results,selection,network,terminalFrame=undef
  dialog.addEventListener('cancel',e=>{e.preventDefault();choose('characters');});addEventListener('keydown',key);
  function frame(){refresh();const p=standardNativeSample(navigator.getGamepads?.()[0]),pressed=p[0]&~lastButtons;lastButtons=p[0];if(pressed&0x1100)choose('rematch');else if(pressed&0x200)choose('characters');raf=requestAnimationFrame(frame);}
  if(network.active)network.endMatch({results,selection:returnTicket('rematch',selection)},terminalFrame);
+ const winner=results.players.find(p=>p.winner);if(winner&&[1,2].includes(results.outcome))music?.request({action:0,path:'/audio/'+resultVictoryTrack(winner.character),volume:255});
  dialog.showModal();requestAnimationFrame(()=>requestAnimationFrame(()=>dialog.dataset.visible='true'));revealTimer=setTimeout(()=>{revealed=true;dialog.dataset.ready='true';refresh();},matchMedia('(prefers-reduced-motion: reduce)').matches?0:900);refresh();raf=requestAnimationFrame(frame);
  return {results,dispose(){clearTimeout(revealTimer);cancelAnimationFrame(raf);removeEventListener('keydown',key);dialog.close();dialog.remove();}};
 }
