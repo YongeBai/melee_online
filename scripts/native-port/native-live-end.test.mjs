@@ -29,7 +29,8 @@ test('rollback live reconciles a speculative ending and only publishes a confirm
 test('rollback frame limits drain correction and confirmation before completing',()=>{
  const saved=new Map();for(const key of ['requestAnimationFrame','cancelAnimationFrame','addEventListener','removeEventListener','document'])saved.set(key,globalThis[key]);let callback,confirmed=false,result,advances=0;
  Object.assign(globalThis,{requestAnimationFrame:fn=>(callback=fn,1),cancelAnimationFrame:()=>{callback=null;},addEventListener(){},removeEventListener(){},document:{hidden:false,addEventListener(){},removeEventListener(){}}});
- try{const state=Array(19).fill(0),module={_portFighterConstructRead:(_o,i)=>state[i],_portControllerSample(){},_Player_80031848(){}},rollback={seat:0,advance(){advances++;return true;},canFinish:()=>confirmed,reconcile(){},dispose(){}};
+ try{const state=Array(19).fill(0),module={_portFighterConstructRead:(_o,i)=>state[i],_portControllerSample(){},_Player_80031848(){}},rollback={seat:0,advance(){advances++;return true;},canFinish(){if(confirmed)state[4]=42;return confirmed;},reconcile(){},dispose(){}};
   startNativeLive(module,{draw:()=>({})},[1],{frameLimit:1,rollback,browserInput:{samples:()=>[[0,0,0],[0,0,0]]},onComplete:r=>result=r,onError:e=>{throw e;}});const start=performance.now()+1;callback(start);callback(start+17);assert.equal(advances,1);assert.equal(result,undefined);confirmed=true;callback(start+34);assert.equal(result.completionReason,'frame-limit');assert.equal(result.frames,1);assert.equal(callback,null);
+  assert.equal(result.final[0][4],42);
  }finally{for(const [key,value] of saved)if(value===undefined)delete globalThis[key];else globalThis[key]=value;}
 });

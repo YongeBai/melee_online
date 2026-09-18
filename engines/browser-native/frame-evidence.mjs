@@ -4,17 +4,17 @@ export function cadence(times){const gaps=times.slice(1).map((v,i)=>v-times[i]);
 // captureStream may deliver an automatic initial frame before a request.
 // Discard the first sample conservatively, even if it was a real forward draw.
 // There is no exact draw-to-capture identity, so loss counts remain estimates.
-export function capturedEvidence(rows,requested){
- const measured=rows.slice(1),repeated=measured.slice(1).filter((v,i)=>v.hash===measured[i].hash).length;
- return {requested,rawCaptured:rows.length,bootstrapDiscarded:Math.min(1,rows.length),captured:measured.length,estimatedUnobservedRequests:Math.max(0,requested-measured.length),repeatedSampledImages:repeated,distinctSampledImages:new Set(measured.map(v=>v.hash)).size,blackFrames:measured.filter(v=>!v.nonblackPixels).length,wrongSize:measured.filter(v=>v.width!==960||v.height!==720).length,cadence:cadence(measured.map(v=>v.timestampMs))};
+export function capturedEvidence(rows,requested,{discardBootstrap=true}={}){
+ const offset=discardBootstrap?Math.min(1,rows.length):0,measured=rows.slice(offset),repeated=measured.slice(1).filter((v,i)=>v.hash===measured[i].hash).length;
+ return {requested,rawCaptured:rows.length,bootstrapDiscarded:offset,captured:measured.length,estimatedUnobservedRequests:Math.max(0,requested-measured.length),repeatedSampledImages:repeated,distinctSampledImages:new Set(measured.map(v=>v.hash)).size,blackFrames:measured.filter(v=>!v.nonblackPixels).length,wrongSize:measured.filter(v=>v.width!==960||v.height!==720).length,cadence:cadence(measured.map(v=>v.timestampMs))};
 }
 
 // Independent browser canvas-capture frames, not draw counters or monitor
 // photons. Downsampling only affects this observer; the game stays 960x720.
 // Timestamp cadence and sampled image changes are deliberately separate.
 export function observeCanvasFrames(canvas,{enabled=true}={}){
- const rows=[],costs=[];let stopped=false,error=null,requested=0;
- if(!enabled)return {request(){},async stop(){return {enabled:false,physicalPresentationMeasured:false};}};
+ const rows=[],costs=[];let stopped=false,error=null,requested=0,warmed=false,warmupCaptured=0,warmResolve=null;
+ if(!enabled)return {async start(){},request(){},async stop(){return {enabled:false,physicalPresentationMeasured:false};}};
  if(!globalThis.MediaStreamTrackProcessor)throw Error('Video frame observer unavailable');
  const stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];
  // Retain a bounded burst while the game thread handles a correction or a
@@ -22,11 +22,16 @@ export function observeCanvasFrames(canvas,{enabled=true}={}){
  // queue cannot turn late or missing captures into synthetic 60 Hz evidence.
  const reader=new MediaStreamTrackProcessor({track,maxBufferSize:8}).readable.getReader();
  const worker=new Worker(new URL('./frame-evidence-worker.mjs',import.meta.url),{type:'module'});let drained;
- const drain=new Promise(r=>{drained=r;});worker.onmessage=({data})=>{if(data.row){rows.push(data.row);costs.push(data.cost);}if(data.error)error=data.error;if(data.stopped)drained();};worker.onerror=e=>{error=e.message;drained();};
+ const drain=new Promise(r=>{drained=r;});worker.onmessage=({data})=>{if(data.row){rows.push(data.row);costs.push(data.cost);warmResolve?.();warmResolve=null;}if(data.error)error=data.error;if(data.stopped)drained();};worker.onerror=e=>{error=e.message;warmResolve?.();warmResolve=null;drained();};
  const reading=(async()=>{try{while(!stopped){const {done,value:frame}=await reader.read();if(done)break;worker.postMessage({frame,receivedMs:performance.now()},[frame]);}}catch(e){if(!stopped)error=String(e);}})();
- return {request(){requested++;track.requestFrame();},async stop(){
+ return {async start(){
+  if(warmed)return;const first=new Promise(resolve=>{warmResolve=resolve;});track.requestFrame();await Promise.race([first,new Promise((_,reject)=>setTimeout(()=>reject(Error('Canvas observer warmup timed out')),2000))]);
+  // Drain both the explicit request and any automatic captureStream bootstrap
+  // before frame zero so neither can be mistaken for a game presentation.
+  await new Promise(r=>setTimeout(r,50));if(error)throw Error(error);warmupCaptured=rows.length;rows.length=0;costs.length=0;warmed=true;
+ },request(){requested++;track.requestFrame();},async stop(){
   // Let the final paint/capture reach the reader. Excluded from throughput.
   await new Promise(r=>setTimeout(r,150));stopped=true;await reader.cancel();track.stop();await reading;worker.postMessage({stop:true});await drain;worker.terminate();
-  return {enabled:true,...capturedEvidence(rows,requested),observerWorkerCpu:distribution(costs),error,rows,physicalPresentationMeasured:false,scope:'Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon.'};
+  return {enabled:true,...capturedEvidence(rows,requested,{discardBootstrap:!warmed}),warmupCaptured,observerWorkerCpu:distribution(costs),error,rows,physicalPresentationMeasured:false,scope:'Browser canvas-capture timestamps and 96x72 RGB sample hashes; not compositor scanout, full pixel uniqueness, or input-to-photon.'};
  }};
 }
