@@ -7,8 +7,9 @@ export function instrumentDirtyStores(wat){
  if(stack.length||nodes[0]?.end!==wat.trimEnd().length)throw Error('WAT must be one folded module');
  if(nodes.some(n=>tokens[n.head][0]==='memory'&&tokens[n.head+1]?.[0]!=='$0'))throw Error('Unexpected source memory');
  if(nodes.filter(n=>tokens[n.head][0]==='memory').length!==2)throw Error('Expected definition and export of one memory');
- const edits=[],counts={stores:0,copy:0,fill:0};
+ const edits=[],counts={stores:0,copy:0,fill:0,tableMutations:0};
  for(const n of nodes){const op=tokens[n.head][0];
+  if(/^table\.(set|grow|fill|copy|init)$/.test(op)||op==='elem.drop')throw Error('Mutable function table instruction '+op);
   if(/atomic|\.store.*lane|^v128\.|^memory\.(init|discard|grow)|^data\.drop/.test(op))throw Error('Unaudited memory instruction '+op);
   if(/^[if](32|64)\.store(?:8|16|32)?$/.test(op)){
    if(n.children.length!==2)throw Error('Unfolded store '+op);

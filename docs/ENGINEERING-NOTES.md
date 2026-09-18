@@ -284,6 +284,16 @@ fields; validate actual fighter port, player ID and controller index after Start
 
 ## Performance wins and traps
 
+For the direct C-to-WASM rollback path, the current dirty core has a fixed
+10,486-entry function table and no mutable table instructions. The dirty builder
+rejects `table.set/grow/fill/copy/init` and `elem.drop`; the pinned Emscripten
+glue has no host table mutator. `fixedTableContents` may therefore skip repeated
+entry-by-entry checkpoint/replica guards only when it comes from the reviewed
+dirty manifest. Continue checking table length, memory identity/growth, health,
+renderer detachment and all snapshot/dirty invariants. Uninstrumented or changed
+cores must keep the old scan. `--verify-immutable-table` forces it for controls.
+See `docs/BROWSER-NATIVE-IMMUTABLE-TABLE.md` for the audit and measurements.
+
 Current rollback uses full Dolphin snapshots every four frames, a 12-frame late
 window, and five slots (~383 MB total on the measured build). Worst correction
 can replay 15 frames because it starts at the preceding checkpoint.

@@ -1,0 +1,173 @@
+{
+  "title": "Fixed function-table audit for direct-port rollback and presentation",
+  "date": "2026-09-17",
+  "baseCommit": "d62fc8f",
+  "performanceCertified": false,
+  "decision": "Accept the statically audited immutable-table fast path as an exact CPU reduction. Do not claim 720p60: Fountain remains below simulation, submission, and captured-frame cadence gates, and Battlefield remains marginal.",
+  "productionTransport": "three-frame lockstep unchanged",
+  "scope": "Two localhost Chromium clients on one host, 960x720 native picture in a 1280x720 presentation, synthetic 15-130 ms delayed/reordered traffic, canvas capture rather than physical scanout.",
+  "staticAudit": {
+    "tableEntries": 10486,
+    "initialEntries": 10486,
+    "maximumEntries": 10486,
+    "importedTable": false,
+    "mutableTableInstructions": 0,
+    "hostGlueMutatorCalls": 0,
+    "rejectedInstructions": [
+      "table.set",
+      "table.grow",
+      "table.fill",
+      "table.copy",
+      "table.init",
+      "elem.drop"
+    ],
+    "dirtyManifestCounts": {
+      "stores": 110316,
+      "copy": 169,
+      "fill": 61,
+      "tableMutations": 0
+    },
+    "fallback": "Unaudited runtimes scan every captured table entry; --verify-immutable-table forces that scan for controls."
+  },
+  "sources": {
+    "certification.mjs": "509807ed1ab261b51550901f0c3807593109252e11a055bb9934f8b37d7e45bd",
+    "dirty-host-contract.mjs": "31ee70d1d67f332a0e67dd071dda3d19f9acea3f0fe307164f7bd3905fb75326",
+    "dirty-runtime.mjs": "6888bed4c63184a23598a949181dedeab62c1d9451cb5418167ee90b31c5f748",
+    "paged-snapshot.mjs": "8aeadeecdd2fba3dd570c0236f5204e5f32d6f5315b69e4fe17815fe234f9c0f",
+    "render-replica.mjs": "b98bd71f11aeec0cea3f6382ee2a3f05762b3a6e3911f6074c0b0c419236ebae",
+    "wasm-snapshot.mjs": "21c0b68d1c443e945a0c2c66646396bd5a74a98d09fe31436ef2f026bb5908f8",
+    "instrument-dirty-stores.mjs": "b032820bb2b48a366e7f2926f9fba169cebdc6dab42adca8e22e9c0ffcc8ed8e",
+    "dirty-core.json": "2f72dcb7e7d7842c9bc3bddba5f72b71e0bb1efb8cb33c8097f0753d4af6c433",
+    "melee-dirty.wasm": "a4cceb880ade743a2d80b1bb54b7b00da919dc9b74ae5d8dc041206f0d242373",
+    "melee-fighter-init.mjs": "79e5fc02530ca737719c4a118aa9b27b0db8e5d9943ce5452e00fee090fe8ff0",
+    "melee-fighter-init.wasm": "f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2"
+  },
+  "fountain": {
+    "pair": "Pp-Pe",
+    "framesPerClient": 1800,
+    "averages": {
+      "forcedScanSimulationFps": 57.91114744934417,
+      "auditedSimulationFps": 58.56630911529483,
+      "simulationDeltaFps": 0.6551616659506578,
+      "forcedScanCapturedFps": 53.1539624244367,
+      "auditedCapturedFps": 55.48696618487717,
+      "capturedDeltaFps": 2.3330037604404694
+    },
+    "runs": [
+      {
+        "name": "A1 forced scan",
+        "rawReportSha256": "ce35358d9c6118b5e98afc15eb73fb40231f8b53607655457ec495feb04cef48",
+        "simulationFps": [58.380145561208074, 58.525736692733304],
+        "capturedFps": [53.524445703817506, 54.30762386892609],
+        "submissionP95Ms": [23.399999976158142, 23.799999952316284],
+        "replicaGuardMs": [1506.1000002026558, 1513.8000031113625],
+        "snapshotGuardMs": [342.3000006079674, 341.3999996185303],
+        "replicaTableEntriesChecked": [37749600, 37749600]
+      },
+      {
+        "name": "B1 audited immutable table",
+        "rawReportSha256": "034a92215545b0ccf5654a871c7f78cb7f42f354d17b93984a15a3f41b3e1657",
+        "simulationFps": [59.043689049622564, 59.05976848566134],
+        "capturedFps": [56.78125674483751, 57.73176078100955],
+        "submissionP95Ms": [22.600000023841858, 22.30000001192093],
+        "replicaGuardMs": [19.79999989271164, 17.499999582767487],
+        "snapshotGuardMs": [7.20000034570694, 6.699999988079071],
+        "replicaTableEntriesChecked": [0, 0]
+      },
+      {
+        "name": "A2 forced scan",
+        "rawReportSha256": "5b516419514abb82a98b450bdc96c1532d38d42f5cf4f4842ab2efe06d08d05e",
+        "simulationFps": [57.331961613023054, 57.406745930412264],
+        "capturedFps": [52.33906019778132, 52.444719927221875],
+        "submissionP95Ms": [24.700000047683716, 24.69999998807907],
+        "replicaGuardMs": [1492.8000009059906, 1501.5000003576279],
+        "snapshotGuardMs": [348.59999918937683, 335.8999999165535],
+        "replicaTableEntriesChecked": [37749600, 37749600]
+      },
+      {
+        "name": "B2 audited immutable table",
+        "rawReportSha256": "2d9e604f0ac7dcc57ac6889e80f6569b44c0c0efee22acb85b36de5e143b28c6",
+        "simulationFps": [58.01567067722391, 58.146108248671524],
+        "capturedFps": [53.618369581970924, 53.816477631690674],
+        "submissionP95Ms": [24, 24],
+        "replicaGuardMs": [17.10000067949295, 18.600000023841858],
+        "snapshotGuardMs": [7.300000071525574, 7.800000011920929],
+        "replicaTableEntriesChecked": [0, 0]
+      }
+    ]
+  },
+  "battlefield": {
+    "pair": "Fc-Fx",
+    "framesPerClient": 1800,
+    "forcedScanRawReportSha256": "5f0bc0af99a39e88813bedab2b9b3ecfccd84bc892c0d57ac54bbcbac94e4c7f",
+    "auditedRawReportSha256": "37ce2aafbe448784a940a161f996ed5f01a2f8258ead3183162ffcd5c58ae4d6",
+    "forcedScanSimulationFps": [59.43418654417035, 59.608175592462565],
+    "auditedSimulationFps": [59.524006362384505, 59.56931386071601],
+    "forcedScanCapturedFps": [59.39261419402958, 59.22784636748673],
+    "auditedCapturedFps": [59.3429192926324, 59.47849178521148],
+    "auditedSubmissionP95Ms": [20.400000035762787, 21.400000035762787]
+  },
+  "correctness": {
+    "perDrawAudits": [
+      {
+        "stage": "battlefield",
+        "pair": "Fx-Fc",
+        "frames": 240,
+        "comparedRgbaBytes": 663552000,
+        "differentBytes": 0,
+        "cameraMismatches": 0,
+        "tableEntriesChecked": 0,
+        "rawReportSha256": "c83d5dd880df299f85601f41d66aeebcbc6a86e7f7e787ad18009df3cf0d567b"
+      },
+      {
+        "stage": "fountain",
+        "pair": "Pp-Pe",
+        "frames": 240,
+        "comparedRgbaBytes": 663552000,
+        "differentBytes": 0,
+        "cameraMismatches": 0,
+        "tableEntriesChecked": 0,
+        "rawReportSha256": "78a7caa6dde416365b4b9b502329729241f4b91827b1d623951510b47c1e7cd7"
+      }
+    ],
+    "sixStageCorrectionMatrix": {
+      "framesPerStage": 240,
+      "stages": ["battlefield", "destination", "dreamland", "fountain", "story", "stadium"],
+      "allPassed": true,
+      "snapshotAudit": true,
+      "statePixelCameraExact": true,
+      "replayPresentations": 0
+    },
+    "longFountain": {
+      "frames": 1800,
+      "corrections": [157, 134],
+      "replayedFrames": [835, 810],
+      "stateBytes": 60686336,
+      "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a",
+      "rawReportSha256": "e9682f789f527aabc18f10e681f1205a59527770f90562943cae945ffd0ec15f"
+    },
+    "attachmentsAndRosterFixtures": {
+      "foxFalcoBothSeatOrders": true,
+      "linkKirby": true
+    },
+    "rooms": {
+      "lockstepFrames": 600,
+      "matchingFighterState": true,
+      "resultsRematchTimeoutReturn": true,
+      "roomRawReportSha256": "4c63fc0b8fe2fcff5cdddfc84b35be726cc11361376db32fd8aeb063590c6872",
+      "resultsRawReportSha256": "e45f26d2804ce0425ee61b37bbad00e3896f1d80fee86b3e0c27232465d8efa4"
+    },
+    "tests": {
+      "total": 624,
+      "passed": 614,
+      "skipped": 10,
+      "failed": 0
+    }
+  },
+  "remaining": [
+    "Fountain is below the 59.5 simulation and captured-frame gates and the 20 ms submission-interval p95 gate.",
+    "Battlefield is marginal and did not pass every captured/submission gate in the measured pair.",
+    "Production rooms still use lockstep rather than the diagnostic rollback path.",
+    "No physical input-to-photon, WAN, reconnect/recovery, audible rollback-SFX, exhaustive roster-interaction, or complete animated-results certification."
+  ]
+}
