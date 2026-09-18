@@ -9,6 +9,12 @@ from play, or relax native gameplay, no-ISO startup, or camera requirements.
 
 **The browser 720p60 goal is not achieved across the required coverage.**
 
+September 17 renderer follow-up: caching six renderer-local immediate-state
+views, without reducing the 1,759 compared words, cut direct matcher time from
+0.412 to 0.357 ms/frame (-13.3%) in long rollback. Exact state/pixel/camera and
+a 331.8-million-byte per-draw oracle pass. The host degraded severely across
+the A/B/B/A, so no whole-frame/FPS improvement is claimed. [Evidence](BROWSER-NATIVE-IMMEDIATE-VIEWS.md).
+
 September 17, latest direct-port renderer result: match-scoped shader keys
 reduce measured key construction from 0.425 to 0.346 ms/frame (-18.5%) and
 two-browser rollback draw submission from 8.219 to 7.808 ms/frame (-5.0%) in a

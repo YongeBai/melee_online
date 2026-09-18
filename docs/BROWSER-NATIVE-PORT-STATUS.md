@@ -1,5 +1,13 @@
 # Native browser port — September 17, 2026
 
+The immediate-primitive matcher now [reuses renderer-local typed-array views](BROWSER-NATIVE-IMMEDIATE-VIEWS.md)
+while still comparing every captured state word. Direct matcher time fell
+13.3% in the long two-browser rollback A/B/B/A, saving about 0.055 ms/frame.
+All clients retained exact state, pixels, and camera; a 331,776,000-byte
+per-draw Fountain oracle and the 625-test suite pass. Severe monotonic host
+degradation invalidates an end-to-end FPS comparison, so only the direct cost
+reduction is accepted and production remains lockstep.
+
 The renderer now uses [match-scoped shader variant keys](BROWSER-NATIVE-SHADER-KEYS.md)
 instead of copying the full TEV-stage JSON into every lookup. Direct key work
 fell 18.5% in the 1,800-frame two-browser rollback A/B/B/A, saving about

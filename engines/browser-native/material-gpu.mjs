@@ -42,7 +42,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
   function timed(name,fn,arg){if(!assetLease?.profileDraw)return fn(arg);const t=performance.now();try{return fn(arg);}finally{const row=drawTiming[name]??={calls:0,ms:0};row.calls++;row.ms+=performance.now()-t;}}
   const readTev=assetLease?.exactState?p=>assetLease.tevInterner.read(module,p):p=>readNativeTevState(module,p),readTextures=()=>readNativeTextures(module);
   function captureState(ptr){return {tev:timed('tev',readTev,ptr),textures:timed('textures',readTextures),pixel:timed('pixel',readPixel),model:timed('model',readModel),context:timed('context',readContext)};}
-  const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module);
+  const readPixel=createNativePixelReader(module),matchImmediateState=createImmediateStateMatcher(module,{cacheViews:assetLease?.cacheImmediateViews!==false});
   const anisotropy=gl.getExtension('EXT_texture_filter_anisotropic');
   let queue=[],snapshot,draws=0,vertexChecks,immediateUsed=0,immediateVertices=0,particleDraws=0,particleVertices=0,afterimageDraws=0,afterimageVertices=0,textDraws=0,textVertices=0;const immediatePlans=[];let shaderCompilations=[];
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(s);gl.deleteShader(s);throw Error(log+'\n'+source);}return s;}
@@ -196,7 +196,7 @@ export function createMaterialRenderer(gl,module,{verifyVertices=false,checkErro
     const data=new Float32Array(module.HEAPU8.buffer,ptr,count*9),triangles=immediateTriangles(primitive,count);
     if(!data.every(Number.isFinite)||cull>3||![0,1,2].includes(kind))throw Error('Invalid immediate geometry');
     const previous=queue.at(-1),eligible=previous?.immediate&&previous.kind===kind&&previous.textured===textured&&previous.camera===snapshot&&previous.plan.mesh.flags===(cull<<14)&&previous.plan.stream.vertexCount+count<=4096;
-    const merge=matchImmediateState(tev,eligible,previous?.flatRegisters===true);
+    const merge=timed('immediateMatch',()=>matchImmediateState(tev,eligible,previous?.flatRegisters===true));
     let state,flatRegisters,attrs;
     if(!merge){
       attrs=[{attr:9},{attr:11},...(textured?[{attr:13}]:[])];
