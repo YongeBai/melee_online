@@ -94,9 +94,15 @@ archive, camera, light, JObj, and animation APIs, then submits its material stat
 through the browser renderer. Preserve its descriptor exactly: the result camera
 uses a 25-degree FOV and 1.216667 projection aspect inside the 4:3 canvas. This is
 intentional native result-screen framing, not a gameplay-camera regression. The
-standalone panel still shows the archive's unconfigured four-slot/Sheik defaults;
-do not put it in the product result lifecycle until native standings configure
-slot visibility, winner art, player icons, text, and fighter victory models.
+standalone path now applies the original per-port joint visibility sequence,
+placement frames, character-name texture selection, and winner-title animation.
+A Fox/Falco render visibly shows FOX, 1st/2nd, P1/P2, and the original No Entrant
+treatment for ports 3/4; repeated construction covers all 26 character texture
+frames with zero cleanup leaks. Build this experiment with `--result-scene`; it
+has a separate `melee-result-scene.wasm` so result iteration cannot perturb the
+validated product fighter core. Do not put it in the product result lifecycle
+until it consumes live standings and adds SIS result text and fighter victory
+models.
 
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.
