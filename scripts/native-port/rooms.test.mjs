@@ -70,7 +70,7 @@ test('live reconnect pauses input and replays the exact missed confirmation hori
  for(const peer of [a,b])peer.send({type:'phase',epoch,key});await a.take(m=>m.type==='phase-ready');await b.take(m=>m.type==='phase-ready');
  const value=button=>({pad:[button,0,0,0,0,0,0],tap:1});a.send({type:'input',epoch,key,frame:3,value:value(16)});b.send({type:'input',epoch,key,frame:3,value:value(64)});
  await a.take(m=>m.type==='confirmed-frame'&&m.frame===3);await b.take(m=>m.type==='confirmed-frame'&&m.frame===3);
- b.ws.close();await a.take(m=>m.type==='state'&&!m.connected[1]);a.send({type:'input',epoch,key,frame:4,value:value(32)});assert.match((await a.take(m=>m.type==='error')).message,/Both players/);
+ b.ws.close();await a.take(m=>m.type==='state'&&!m.connected[1]);a.send({type:'input',epoch,key,frame:4,value:value(32)});await new Promise(r=>setTimeout(r,20));assert.equal(a.queue.some(m=>m.type==='error'||m.type==='confirmed-frame'&&m.frame===4),false);
  const resumed=await socket(guest.token,{resume:{epoch,key,confirmedFrame:2}});const replayedFrame=resumed.queue.find(m=>m.type==='frame'&&m.frame===3),replayedConfirmation=resumed.queue.find(m=>m.type==='confirmed-frame'&&m.frame===3);
  assert.deepEqual(replayedFrame.inputs.map(v=>v.pad[0]),[16,64]);assert.equal(replayedConfirmation.frame,3);assert.equal(resumed.queue.some(m=>m.type==='phase-ready'&&m.key===key),true);
 });

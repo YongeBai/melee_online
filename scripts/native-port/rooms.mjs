@@ -65,7 +65,7 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliver
    else {r.rematchVotes[seat]=true;if(r.rematchVotes.every(Boolean))reset(r,returnTicket('rematch',r.ended[0].value.selection));else state(r);}
   }else if(m.type==='input'){
    if(r.phase==='results'||m.epoch!==r.epoch||m.key!==r.phaseKey||r.cpu||!r.players[1])return;
-   if(!r.players.every(p=>p?.ws?.readyState===1))throw Error('Both players must be connected');
+   if(!r.players.every(p=>p?.ws?.readyState===1))return;
    if(!Number.isSafeInteger(m.frame)||m.frame<=r.lastFrame||m.frame>r.lastFrame+120)throw Error('Input outside live window');
    const value=validateInput(m.value),entry=r.inputs.get(m.frame)??[null,null];
    if(entry[seat]&&JSON.stringify(entry[seat])!==JSON.stringify(value))throw Error('Conflicting immutable input');entry[seat]=value;r.inputs.set(m.frame,entry);

@@ -92,12 +92,14 @@ try{
   const lifecycle=[];
   async function ended(outcome){
    await Promise.all([a,b].map(c=>c.wait('globalThis.nativeMenuMatchReport?.results&&nativeRoom.state.phase==="results"',90000)));
+   await Promise.all([a,b].map(c=>c.wait('document.querySelector("#nativeResults")?.dataset.ready==="true"')));
    const reports=await Promise.all([a,b].map(c=>c.eval('({results:nativeMenuMatchReport.results,selection:nativeMenuMatchReport.selection,room:nativeRoom.snapshot(),scene:nativeMenuLive.snapshot().scene})')));
    if(reports.some(r=>r.results.outcome!==outcome||r.scene!=='results'))throw Error('Wrong result outcome '+JSON.stringify(reports));
    if(JSON.stringify(reports[0].results)!==JSON.stringify(reports[1].results))throw Error('Result divergence');
    if(reports.some(r=>!r.room.pendingEnding?.sent||r.room.pendingEnding.frame>r.room.confirmedFrame))throw Error('Unconfirmed result escaped '+JSON.stringify(reports));
+   const presentation=await Promise.all([a,b].map(c=>c.eval('(()=>{const d=document.querySelector("#nativeResults"),r=d.getBoundingClientRect();return {ready:d.dataset.ready,players:d.querySelectorAll(".results-player").length,temporary:d.textContent.includes("Temporary"),ratio:r.width/r.height};})()')));if(presentation.some(p=>p.ready!=="true"||p.players!==2||p.temporary||Math.abs(p.ratio-4/3)>.01))throw Error('Invalid tournament results presentation '+JSON.stringify(presentation));
    for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/result-'+outcome+'-'+i+'.png',Buffer.from(shot.data,'base64'));}
-   lifecycle.push(...reports);return reports;
+   lifecycle.push(...reports.map((report,i)=>({...report,presentation:presentation[i]})));return reports;
   }
   await a.keys(['KeyD']);const elimination=await ended(2);await a.keys([]);
   if(elimination[0].results.players[0].stocks!==0||!elimination[0].results.players[1].winner)throw Error('Elimination standings');

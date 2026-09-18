@@ -19,6 +19,8 @@ export function validateResults(value){
  return {outcome:value.outcome,frames:value.frames,winnerCount:value.winnerCount,players};
 }
 export function resultTitle(result){return ![1,2].includes(result.outcome)?'No Contest':result.winnerCount===1?'Player '+(result.players.findIndex(p=>p.winner)+1)+' Wins':'Draw';}
+const characterNames=['Captain Falcon','Donkey Kong','Fox','Mr Game and Watch','Kirby','Bowser','Link','Luigi','Mario','Marth','Mewtwo','Ness','Peach','Pikachu','Ice Climbers','Jigglypuff','Samus','Yoshi','Zelda','Sheik','Falco','Young Link','Dr Mario','Roy','Pichu','Ganondorf'];
+export function resultCharacterName(character){if(!Number.isInteger(character)||character<0||character>=characterNames.length)throw Error('Invalid result character');return characterNames[character];}
 const storageKey='native-melee-return-v1';
 export function saveReturn(ticket,storage=globalThis.sessionStorage){storage.setItem(storageKey,JSON.stringify(returnTicket(ticket.action,ticket)));}
 export function consumeReturn(storage=globalThis.sessionStorage){try{const value=JSON.parse(storage.getItem(storageKey));storage.removeItem(storageKey);return value?returnTicket(value.action,value):null;}catch{return null;}}

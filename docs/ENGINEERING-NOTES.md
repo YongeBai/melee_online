@@ -66,6 +66,14 @@ at frame 600 in 268 ms without changing epoch or phase, then completed frame
 the visible pause) and active cadence (which excludes only that measured pause);
 never describe reconnect recovery as uninterrupted presentation.
 
+The product results layer is now a fixed-4:3 animated tournament presentation,
+not the former temporary table. Populate it only from `gm_Scene_Vs_OnExit`
+standings; use hosted SIS glyphs and display stock, damage and categorical
+win/loss/draw state. Do not expose the raw internal `score` word—the losing
+fixture contains a packed sentinel rather than a player-facing statistic. Keep
+input disabled through the 900 ms reveal and preserve reduced-motion behavior.
+This does not claim the original `GmRst` 3D scene or victory fanfare.
+
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.
 

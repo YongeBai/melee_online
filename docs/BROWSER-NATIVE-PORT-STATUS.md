@@ -170,13 +170,15 @@ slots; it now admits native CPU slots and calls the original CPU constructor.
 The CPU's own generated buttons/sticks and action changes are checked in-browser.
 
 Completed tournament matches now stop at the original VS scene-exit boundary.
-The original `gm_Scene_Vs_OnExit` computes standings; a clearly labelled temporary
-results dialog displays the native winner/draw, stocks and damage. Rematch
+The original `gm_Scene_Vs_OnExit` computes standings; the product presents those
+standings in an animated, fixed-4:3 tournament screen using the hosted original
+SIS glyphs, two native-colored player panels, character names, stocks, damage,
+and win/loss/draw state. Input remains locked through the reveal. Rematch
 starts a fresh WASM instance, restores both characters/costumes and the selected
 legal stage, and enters through original CSS/SSS and Ready/Go. Character Select
 returns through the original two-seat menu. No timer, stock or outcome writes
-are used to create an ending. The full animated native results presentation and
-victory audio remain unfinished.
+are used to create an ending. The original `GmRst` 3D scene and victory audio
+remain unfinished; this presentation no longer exposes the temporary debug UI.
 
 Rooms require matching results from both clients and two rematch votes. Either
 player can return both to CSS. One coordinated epoch/reload preserves room code
@@ -185,7 +187,8 @@ not a complete gameplay-state hash. Static-only CPU play uses a validated local
 return ticket and does not require the relay. Post-return music requests attempt
 normal browser audio resume, falling back to the existing gesture unlock if the
 browser blocks autoplay.
-[Results and rematch evidence](benchmarks/browser-2026-09-17-native-port-results.json).
+[Results and rematch evidence](benchmarks/browser-2026-09-17-native-port-results.json) and
+[animated presentation evidence](benchmarks/browser-2026-09-18-native-results-presentation.json).
 The focused lifecycle runs passed, along with 600-frame two-browser and repeated
 900-frame CPU regressions. One earlier music-enabled regression timed out waiting
 for stage audio, and an extra startup probe selected Link while its scripted
