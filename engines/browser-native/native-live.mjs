@@ -30,7 +30,7 @@ export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1
 // Interactive development fixture, not complete competitive match startup.
 // Input samples enter the existing normalized HSD boundary; no game-state
 // positions, action states, damage or velocities are assigned here.
-export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,browserInput=null,resolveObjects=null,readMatch=null,shouldFinish=()=>false,unlockInput=true,network=null,rollback=null}={}) {
+export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=()=>{},onComplete=()=>{},onError=()=>{},onDraw=()=>{},step=()=>module._portRuntimeStep(),inputProvider=null,browserInput=null,resolveObjects=null,readMatch=null,shouldFinish=()=>false,unlockInput=true,network=null,rollback=null}={}) {
   // The first callback can carry a timestamp from before lengthy startup work.
   // Discard such timestamps, then anchor to the first valid display callback.
   // A quarter millisecond of repaid tolerance covers observed display jitter.
@@ -94,7 +94,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         attack ||= isNormalAttackState(final[0]);
         if(pendingEnding){clock.reset();break;}
       }
-      if(advanced){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
+      if(advanced){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;onDraw({frame:frames,draw:draws,render:lastRender});if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
       if(frameLimit&&frames>=frameLimit){if(rollback&&!rollback.canFinish(frames-1)){clock.reset();raf=requestAnimationFrame(frame);return;}completionReason="frame-limit";stop();onComplete(snapshot());return;}
       raf=requestAnimationFrame(frame);
     }catch(error){stop();onError(error,snapshot());}

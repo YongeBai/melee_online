@@ -3,11 +3,15 @@ import {createNativePortServer} from './serve.mjs';
 const root=path.resolve(import.meta.dirname,'../..'),server=createNativePortServer(),clients=[];
 const resultsMode=process.argv.includes('--results');
 const rollbackMode=process.argv.includes('--rollback'),framesArg=process.argv.find(arg=>arg.startsWith('--frames='));
+const captureSeatArg=process.argv.find(arg=>arg.startsWith('--capture-seat=')),captureSeat=captureSeatArg===undefined?null:Number(captureSeatArg.slice('--capture-seat='.length));
+if(captureSeat!==null&&![0,1].includes(captureSeat))throw Error('--capture-seat must be 0 or 1');
+const captureSeats=new Set(captureSeat===null?(process.argv.includes('--capture')?[0,1]:[]):[captureSeat]),captureMode=captureSeats.size>0;
 const matchFrames=framesArg?Number(framesArg.slice('--frames='.length)):rollbackMode?60:600;
 if(!Number.isSafeInteger(matchFrames)||matchFrames<1)throw Error('--frames must be a positive integer');
+if(captureMode&&!rollbackMode)throw Error('Captured-frame room probe requires rollback mode');
 if(resultsMode&&rollbackMode)throw Error('Rollback room probe uses a bounded match');
 const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':rollbackMode?'-rollback':''));fs.mkdirSync(output,{recursive:true});
-async function client(){
+async function client(capture=false){
  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'native-room-')),browser=spawn('google-chrome',['--headless=new','--no-sandbox','--enable-gpu','--disable-dev-shm-usage','--window-size=1280,1100','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});let stderr='';browser.stderr.on('data',b=>stderr=(stderr+b).slice(-12000));
  const c={profile,browser};clients.push(c);
  for(let i=0;!fs.existsSync(profile+'/DevToolsActivePort');i++){if(i>100)throw Error(stderr);await delay(100);}
@@ -19,10 +23,10 @@ async function client(){
  c.click=async selector=>{const pos=await c.eval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e||e.hidden||e.disabled)throw Error('Button unavailable');const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);for(const type of ['mousePressed','mouseReleased'])await c.cmd('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...pos});};
  const held=new Set();c.keys=async next=>{for(const code of held)if(!next.includes(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyUp',code,key:code});held.delete(code);}for(const code of next)if(!held.has(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyDown',code,key:code});held.add(code);}};
  c.press=async code=>{await c.keys([code]);await delay(100);await c.keys([]);await delay(100);};
- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(resultsMode?'':'&liveframes='+matchFrames+(rollbackMode?'&rollback=1':''))});await c.wait('globalThis.characterMenuReport?.passed');return c;
+ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(resultsMode?'':'&liveframes='+matchFrames+(rollbackMode?'&rollback=1':'')+(capture?'&captureframes=1':''))});await c.wait('globalThis.characterMenuReport?.passed');return c;
 }
 try{
- await new Promise(r=>server.listen(0,'127.0.0.1',r));const a=await client(),b=await client();
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const a=await client(captureSeats.has(0)),b=await client(captureSeats.has(1));
  await a.wait('nativeCharacterMenu.read().frames>90');await a.click('#cpuRoom');await a.wait('!nativeRoom.cpu');const code=await a.eval('nativeRoom.code');
  await b.click('#joinCode');await b.cmd('Input.insertText',{text:code});await b.click('#joinRoom button');
  await a.wait('nativeRoom.active&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90');await b.wait('nativeRoom.active&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90');
@@ -82,8 +86,11 @@ try{
  const final=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),report:nativeMenuMatchReport})')));
  if(final.some(v=>v.report.live.frames!==matchFrames))throw Error('Incomplete match');
  if(rollbackMode&&final.some(v=>!v.report.rollback?.enabled||v.report.rollback.metrics?.session?.forwardFrames!==matchFrames||v.report.rollback.metrics?.session?.confirmed!==matchFrames-1))throw Error('Rollback product path was not confirmed '+JSON.stringify(final.map(v=>v.report.rollback)));
+ const captureSummaries=final.map(v=>{const live=v.report.live,o=live.observation;return {frames:live.frames,draws:live.draws,simulationFps:live.frames*1000/live.elapsedMs,drawSubmissionCpu:live.drawSubmissionCpu,observation:o&&{enabled:o.enabled,requested:o.requested,captured:o.captured,estimatedUnobservedRequests:o.estimatedUnobservedRequests,distinctSampledImages:o.distinctSampledImages,repeatedSampledImages:o.repeatedSampledImages,blackFrames:o.blackFrames,wrongSize:o.wrongSize,cadence:o.cadence,observerWorkerCpu:o.observerWorkerCpu,error:o.error}};});
+ if(captureMode&&captureSummaries.some(v=>v.draws!==matchFrames||v.simulationFps<59.5||v.drawSubmissionCpu.p95Ms>20||v.drawSubmissionCpu.maxMs>50))throw Error('720p60 simulation/submission gate failed '+JSON.stringify(captureSummaries));
+ if([...captureSeats].some(seat=>{const o=captureSummaries[seat].observation;return !o?.enabled||o.error||o.requested!==matchFrames||o.captured!==matchFrames||o.estimatedUnobservedRequests!==0||o.distinctSampledImages!==o.captured||o.repeatedSampledImages!==0||o.blackFrames!==0||o.wrongSize!==0||o.cadence.fps<59.5;}))throw Error('Captured-frame product gate failed '+JSON.stringify(captureSummaries));
  if(JSON.stringify(final[0].report.live.final)!==JSON.stringify(final[1].report.live.final))throw Error('Native fighter state diverged: '+JSON.stringify(final.map(v=>v.report.live.final)));
- const scope=rollbackMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; bounded correctness probe, not 720p60 or WAN certification.':'Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.';fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,final,scope},null,2));console.log(JSON.stringify({passed:true,code,frames:matchFrames,rollback:rollbackMode,matchingFighterState:true}));
+ const scope=captureMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) '+[...captureSeats].join(',')+'. Not physical presentation, WAN, input-to-photon, roster or tournament certification.':rollbackMode?'Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; bounded correctness probe, not 720p60 or WAN certification.':'Two localhost browser processes, three-frame input lockstep; not WAN latency or rollback certification.';fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,final,scope},null,2));console.log(JSON.stringify({passed:true,code,frames:matchFrames,rollback:rollbackMode,captureSeats:[...captureSeats],matchingFighterState:true}));
 }
 }catch(e){fs.writeFileSync(output+'/failure.json',JSON.stringify({error:e.stack,states:await Promise.all(clients.map(c=>c.eval?.('({room:globalThis.nativeRoom?.snapshot(),menu:globalThis.nativeMenuLive?.snapshot(),error:globalThis.nativeRoomError})').catch(e=>String(e))))},null,2));throw e;
 }finally{for(const c of clients){c.ws?.close();c.browser.kill();await new Promise(r=>c.browser.once('exit',r));fs.rmSync(c.profile,{recursive:true,force:true});}await new Promise(r=>server.close(r));}

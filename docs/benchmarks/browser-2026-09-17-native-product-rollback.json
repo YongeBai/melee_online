@@ -1,6 +1,6 @@
 {
   "date": "2026-09-17",
-  "scope": "Opt-in product-room complete-state correction with independent WASM presentation; localhost simulation/submission evidence, not captured-frame, WAN, roster, input-to-photon, or tournament certification.",
+  "scope": "Opt-in product-room complete-state correction with independent WASM presentation; localhost simulation/submission and per-seat canvas-capture evidence, not physical presentation, WAN, roster, input-to-photon, or tournament certification.",
   "configuration": {
     "browsers": 2,
     "framesPerBrowser": 1800,
@@ -37,6 +37,46 @@
     "drawIntervalMaxMs": [33.4, 33.4],
     "animationGapsOver25Ms": [1, 0]
   },
+  "canvasCapture": {
+    "method": "Each seat was observed in a separate 1,800-frame run while both browser clients continued to simulate, render and exchange authenticated rollback inputs. This avoids measuring two capture pipelines contending in the same host GPU/media process.",
+    "sample": "MediaStreamTrackProcessor timestamps with a worker-side 96x72 nearest-grid RGB hash; the bootstrap sample is discarded.",
+    "runs": [
+      {
+        "observedSeat": 0,
+        "requestedFrames": 1800,
+        "capturedFrames": 1800,
+        "distinctSampledImages": 1800,
+        "estimatedUnobservedRequests": 0,
+        "blackFrames": 0,
+        "wrongSizeFrames": 0,
+        "captureFps": 59.952,
+        "captureIntervalP95Ms": 18.914,
+        "captureIntervalMaxMs": 34.486,
+        "observerWorkerMeanMs": 0.833,
+        "simulationFps": [59.788, 59.899],
+        "drawSubmissionMeanMs": [7.100, 7.103],
+        "drawSubmissionP95Ms": [9.8, 9.4],
+        "drawSubmissionMaxMs": [13.5, 13.3]
+      },
+      {
+        "observedSeat": 1,
+        "requestedFrames": 1800,
+        "capturedFrames": 1800,
+        "distinctSampledImages": 1800,
+        "estimatedUnobservedRequests": 0,
+        "blackFrames": 0,
+        "wrongSizeFrames": 0,
+        "captureFps": 59.964,
+        "captureIntervalP95Ms": 18.821,
+        "captureIntervalMaxMs": 34.568,
+        "observerWorkerMeanMs": 0.799,
+        "simulationFps": [59.895, 59.930],
+        "drawSubmissionMeanMs": [7.487, 7.367],
+        "drawSubmissionP95Ms": [10.1, 10.2],
+        "drawSubmissionMaxMs": [14.7, 17.2]
+      }
+    ]
+  },
   "copying": {
     "replicaMode": "dirty",
     "replicaFramesIncludingWarmup": [1830, 1830],
@@ -51,7 +91,10 @@
     "requiredSubmissionP95Ms": 20,
     "requiredSubmissionMaxMs": 50,
     "simulationSubmissionGatePassed": true,
+    "requiredCanvasCaptureFps": 59.5,
+    "requiredCapturedFramesPerObservedSeat": 1800,
+    "canvasCaptureGatePassed": true,
     "product720p60Certified": false,
-    "reason": "The product-room probe has no independent canvas-capture observer or physical presentation/input-to-photon measurement, covers one matchup and stage, and applies no WAN delay/jitter workload."
+    "reason": "The browser canvas gate passes, but physical presentation/input-to-photon remains unmeasured; the probe covers one lightweight matchup and stage and applies no WAN delay/jitter workload."
   }
 }
