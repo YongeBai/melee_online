@@ -1,5 +1,16 @@
 # Native browser port — September 17, 2026
 
+The renderer now uses [match-scoped shader variant keys](BROWSER-NATIVE-SHADER-KEYS.md)
+instead of copying the full TEV-stage JSON into every lookup. Direct key work
+fell 18.5% in the 1,800-frame two-browser rollback A/B/B/A, saving about
+0.079 ms/frame; mean draw submission fell 0.411 ms. All clients preserved full
+state, pixels, camera, and the same 40 shader programs. Six final per-draw stage
+oracles compared 1.99 billion RGBA bytes exactly, although two preliminary
+Yoshi runs exposed an unresolved intermittent 3/21-byte oracle discrepancy that
+did not reproduce under a full-key collision audit or three later compact runs.
+The candidate averaged 59.582 simulation FPS with capture disabled, so this is
+not a 720p60 result and production remains lockstep.
+
 The next opt-in [instrumented-write replica](BROWSER-NATIVE-DIRTY-REPLICA.md)
 reduces presentation copy volume by about 89–91% in rollback trials, while
 preserving the full-state and pixel oracles. It improves the matched A/B/A

@@ -21,7 +21,12 @@ test('hash collisions, capacity fallback and stage count changes never alias une
  w[66]=oldA;w[67]=oldB;assert.strictEqual(pool.read(module,64).stages,a.stages);
  w[0]=2;w.set([255,255,0,0],68);assert.deepEqual(pool.read(module,64),readNativeTevState(module,64));assert.equal(pool.snapshot().entries,2);
 });
-test('interned shader keys exactly match original keys across dynamic shader inputs and draw reordering',()=>{
- const {module,w}=fixture(),pool=createTevStageInterner(),key=createInternedShaderKey(),attrs=[{attr:13},{attr:9}],state={tev:pool.read(module,64),textures:{generators:[],textures:[{id:0}]},pixel:{channelCount:0,channels:[null,null,null,null],alphaTest:{compare0:7,operation:0,compare1:7}},context:{fog:{type:0}}};
- for(let i=0;i<32;i++){w[36+3]=i%5;state.tev=pool.read(module,64);state.pixel.channelCount=i%3;state.pixel.channels[0]={enabled:i%2,lights:i};state.pixel.alphaTest.compare0=i%8;state.textures.generators=[{id:0,type:0,source:i%20,matrix:60,normalize:0,postMatrix:125}];state.context.fog.type=i%2?2:0;const options={immediateRegisters:!!(i%2)};assert.equal(key(state,attrs,options),materialShaderKey(state,attrs,options));}
+test('compact shader keys preserve original key equivalence across dynamic shader inputs and draw reordering',()=>{
+ const {module,w}=fixture(),pool=createTevStageInterner(),key=createInternedShaderKey(),attrs=[{attr:13},{attr:9}],state={tev:pool.read(module,64),textures:{generators:[],textures:[{id:0}]},pixel:{channelCount:0,channels:[null,null,null,null],alphaTest:{compare0:7,operation:0,compare1:7}},context:{fog:{type:0}}},rows=[];
+ for(let i=0;i<32;i++){
+  w[36+3]=i%5;state.tev=pool.read(module,64);state.pixel.channelCount=i%3;state.pixel.channels[0]={enabled:i%2,ambientSource:(i>>1)%2,materialSource:(i>>2)%2,lights:i,diffuse:i%3,attenuation:i%3};state.pixel.alphaTest.compare0=i%8;state.textures.generators=[{id:0,type:0,source:i%20,matrix:60,normalize:0,postMatrix:125}];state.context.fog.type=i%2?2:0;const options={immediateRegisters:!!(i%2)},original=materialShaderKey(state,attrs,options),compact=key(state,attrs,options);
+  assert.equal(key(state,attrs,{...options,legacy:true}),original);rows.push({original,compact});
+ }
+ for(const a of rows)for(const b of rows)assert.equal(a.compact===b.compact,a.original===b.original);
+ const before=key(state,attrs);state.tev.registers[0][0]++;state.pixel.alphaTest.reference0=23;state.textures.textures[0].wrapS=2;assert.equal(key(state,attrs),before);
 });
