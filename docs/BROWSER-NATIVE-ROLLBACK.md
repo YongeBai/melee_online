@@ -107,10 +107,15 @@ match both references and each other. The relay sends inputs only.
 
 Audio requests use a deterministic speculative journal in this diagnostic;
 **no sound is presented**. Normal product menu/stage music is unchanged. Audible
-rollback still needs a confirmed-event commitment/deduplication policy and the
-unported SFX backend. The product result transport now requires a confirmed
-ending frame, but speculative-ending correction and recovery after disconnect
-are not implemented. Existing product results/rematch continue on lockstep.
+rollback now has a frame-tagged commitment primitive: checkpoint restore replaces
+unconfirmed journal entries, confirmation presents only the corrected entries,
+and frame/sequence identities deduplicate presentation outside rewindable state.
+The acknowledgement path reconciles pending corrections before calling confirmed
+side-effect consumers. The native SFX backend and live match binding are still
+unported, so this remains silent in diagnostics. The product result transport
+requires a confirmed ending frame, but speculative-ending correction and recovery
+after disconnect are not implemented. Existing product results/rematch continue
+on lockstep.
 
 ## Validation scope
 
@@ -174,7 +179,7 @@ lifecycle bug.
    snapshots, retaining the full-copy implementation as a reference oracle.
 4. Bind the existing authenticated input/confirmation stream to a live
    match-scoped checkpoint/correction owner; add corrected terminal-state
-   reconstruction, then reconnect recovery and audio commitment.
+   reconstruction, then reconnect recovery and the native SFX backend.
 5. Validate all roster/stage interactions, sustained rendered frame pacing,
    physical controllers, WAN conditions and input-to-photon latency.
 
