@@ -77,13 +77,18 @@ animation or pixels yet. See the
 [result-scene asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 
 An isolated Chromium run now covers the next layer: native HSD construction and
-animation of `pnlsce`, plus actual WebGL material submission. The frame-60 image
-used one object, 115 joints, 123 meshes, 102 draws, 11 programs, and 34 original
-images under the exact descriptor camera (25-degree FOV, 1.216667 aspect). Visual
-inspection found the expected original Winner/Total/result-panel art. Cleanup
-returned object, process, and archive-allocation counts to zero. This remains a
-panel bring-up, not product parity: it shows four default slots/Sheik labels and
-does not yet include configured standings, SIS, or victory fighters. See the
+animation of `pnlsce`, two-player configuration, and actual WebGL material
+submission. The frame-60 image used one object, 115 joints, 123 meshes, 52 draws,
+11 programs, and 30 original images under the exact descriptor camera (25-degree
+FOV, 1.216667 aspect). Visual inspection found FOX winner art, 1st/2nd placement,
+P1/P2 entrants, and the original No Entrant treatment for ports 3/4. A repeated
+construction pass exercised the exact character texture mapping for all 26 roster
+entries. Cleanup returned object, process, and archive-allocation counts to zero.
+The configured panel runs in a separate WASM target; rebuilding the ordinary
+fighter target retained its pinned JS glue, and the two-browser elimination,
+rematch, 28,800-frame timeout, return, and legal-stage regression passed. This
+remains isolated panel work, not product parity: live standings, SIS result text,
+victory fighters, lifecycle integration, and result-screen FPS remain. See the
 [native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
 
 For September 17 direct-browser work, see the
