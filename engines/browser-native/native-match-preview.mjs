@@ -15,14 +15,14 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. Full scene startup and teardown remain development work.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},gpuErrorChecks=true,traceAttachments=false,cacheModels=true,presentationCache=null}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},cameraRead=null,renderBegin=null,gpuErrorChecks=true,traceAttachments=false,cacheModels=true,presentationCache=null}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
   const readGpuInfo=()=>{const info=gl.getExtension('WEBGL_debug_renderer_info');return {renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};};
   const gpuInfo=presentationCache?presentationCache.gpuInfo(gl,readGpuInfo):readGpuInfo();
   const geometry=presentationCache?.geometry??createModelGeometryCache({enabled:cacheModels});
-  const camera=createNativeCamera(module),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks,presentationCache}):null,resources=[];
+  const camera=createNativeCamera(module,cameraRead?{read:cameraRead}:undefined),beginRender=renderBegin??(()=>module._portStageRenderBegin()),pipeline=verify||!materials?createMeshPipeline(gl):null,materialRenderer=materials?createMaterialRenderer(gl,module,{verifyVertices:verify,checkErrors:verify||gpuErrorChecks,presentationCache}):null,resources=[];
   const hudCamera=hud?createNativeCamera(module,{read:p=>module._portHudCameraSnapshot(p)}):null,hudResources=new Map(),hudList=hud?module._malloc(32*12):0;
   if(hud&&(!hudList||!callbacks))throw Error('HUD requires original callbacks and object buffer');
   function releaseResource(r){for(const a of r.accessories){a.accessoryGpu?.dispose();if(a.accessoryNodes)module._free(a.accessoryNodes);}r.materialGpu?.dispose();r.modelProbe?.dispose();r.gpu?.dispose();r.skin?.dispose();for(const p of r.allocations)module._free(p);}
@@ -92,7 +92,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         modelProbe=createNativeModelProbe(module,model,actor.bytes,nodes,skin,actor.object);
         }
         materialGpu=materialRenderer?.upload(model,actor.bytes,nodes,actor.object);
-        resources.push({itemAttachment:!!(actor.itemKey&&actor.root),itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessories:[actor.accessory,...(actor.accessories??[])].filter(Boolean).map(accessory=>({accessory})),name:actor.name,active:actor.active,owner:actor.object,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
+        resources.push({itemAttachment:!!(actor.itemKey&&actor.root),itemKey:actor.itemKey,stageKey:actor.stageKey,effectKey:actor.effectKey,materialGpu,accessories:[actor.accessory,...(actor.accessories??[])].filter(Boolean).map(accessory=>({accessory})),name:actor.name,active:actor.active,owner:actor.object,nativeDraw:actor.nativeDraw,prepare:actor.prepare,finish:actor.finish,model,skin,gpu,modelProbe,nodes,flags,indices,visible,allocations});
       } catch(error){materialGpu?.dispose();modelProbe?.dispose();gpu?.dispose();skin?.dispose();for(const p of allocations)module._free(p);throw error;}
     }
   let stageOwners=new Set(),effectOwners=new Set(),itemOwners=new Set();
@@ -191,17 +191,17 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
               if(particles){module._portNativeDrawParticles(owner,pass);particlePasses++;return;}
               const i=resources.findIndex(r=>r.owner===owner),r=resources[i];
               if(!r&&!stageOwners.has(owner)&&!effectOwners.has(owner)&&!itemOwners.has(owner))throw Error('Unregistered native render object '+owner+' link '+link+' class '+classifier);
-              const count=r?.prepare?module._portFighterNativeDraw(owner,pass):module._portNativeDrawObject(owner,pass,1);
+              const count=r?.nativeDraw?r.nativeDraw(pass):r?.prepare?module._portFighterNativeDraw(owner,pass):module._portNativeDrawObject(owner,pass,1);
               if(r){rows[i].passes.push(count);rows[i].draws+=count;}
             };
             try{module._portStageDrawPasses();}finally{delete module.onNativeObject;}
           }else{
           for(let pass=0;pass<3;pass++){
-            module._portStageRenderBegin();
+            beginRender();
             const drawnOwners=new Set();
             for(const [i,r] of resources.entries()){
               if(drawnOwners.has(r.owner))continue;drawnOwners.add(r.owner);
-              const count=r.prepare?module._portFighterNativeDraw(r.owner,pass):module._portNativeDrawObject(r.owner,pass,0);
+              const count=r.nativeDraw?r.nativeDraw(pass):r.prepare?module._portFighterNativeDraw(r.owner,pass):module._portNativeDrawObject(r.owner,pass,0);
               rows[i].passes.push(count);rows[i].draws+=count;
             }
           }
@@ -217,7 +217,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
           return {gpuInfo,materialShaderChecks,materialDraws,accessories,particlePasses,attachmentDraws,accessoryDraws,immediateStats:{...immediateStats},particleStats:{...particleStats},afterimageStats:{...afterimageStats},originalCameraPasses:!!stage,resourceStats:{...resourceStats},modelCache:geometry.stats,effectModels:resources.filter(r=>r.effectKey).length,hud:hudDraws,resolution:[canvas.width,canvas.height],actors:rows,...(verify?materialRenderer.inspect():{}),renderContext,eye:Array.from(snapshot.eye),interest:Array.from(snapshot.interest),fov:snapshot.fov,aspect:snapshot.aspect,near:snapshot.near,far:snapshot.far,originalObjectCallbacks:true,playable:false,performanceMeasured:false,visualParity:false,limitations:stage?'Original camera passes, dynamic models and original particle polygons; point/line particles, shadow capture, refraction, other accessories and complete scene lifecycle remain.':'Original fighter callbacks, joint traversal and respawn platforms; complete camera/GX-link stage ordering, other accessories/effects and full match lifecycle remain.'};
         }
         const snapshot=camera.snapshot();checkNativeCamera(snapshot,cameraValidation);
-        module._portStageRenderBegin();
+        beginRender();
         materialRenderer?.begin(snapshot);
         const renderContext=readNativeRenderContext(module);checkNativeRenderContext(renderContext,snapshot);
         gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);

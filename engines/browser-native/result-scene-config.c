@@ -203,6 +203,23 @@ unsigned portResultFighterCamera(unsigned slot,unsigned live)
 {
     if(slot>=2||live>1)abort();HSD_GObj* camera=live?result_live_cameras[slot]:result_capture_cameras[slot];return (unsigned)camera;
 }
+static void snapshot_camera(HSD_CObj* c,float* out)
+{
+    if(!c||!out||HSD_CObjGetProjectionType(c)!=PROJ_PERSPECTIVE)abort();HSD_CObjGetViewingMtx(c,(float(*)[4])out);MTXPerspective((float(*)[4])(out+12),HSD_CObjGetFov(c),HSD_CObjGetAspect(c),HSD_CObjGetNear(c),HSD_CObjGetFar(c));
+    HSD_CObjGetEyePosition(c,(Vec3*)(out+28));HSD_CObjGetInterest(c,(Vec3*)(out+31));out[34]=HSD_CObjGetFov(c);out[35]=HSD_CObjGetAspect(c);out[36]=HSD_CObjGetNear(c);out[37]=HSD_CObjGetFar(c);
+}
+void portResultFighterCameraProjectionSnapshot(unsigned slot,unsigned live,float* out)
+{
+    HSD_GObj* owner=(HSD_GObj*)portResultFighterCamera(slot,live);if(!owner)abort();snapshot_camera(owner->hsd_obj,out);
+}
+void portResultFighterRenderBegin(unsigned slot,unsigned live)
+{
+    HSD_GObj* owner=(HSD_GObj*)portResultFighterCamera(slot,live);if(!owner||!lights||!lights->hsd_obj)abort();portRenderContextBegin(owner->hsd_obj,lights->hsd_obj);
+}
+unsigned portResultFighterNativeDraw(unsigned slot,unsigned pass)
+{
+    extern unsigned portNativeDrawObject(HSD_GObj*,unsigned,unsigned);if(slot>=2||!result_fighters[slot]||pass>2)abort();return portNativeDrawObject(result_fighters[slot],pass,1);
+}
 static HSD_GObj* submission_target;
 static unsigned submission_count,submission_passes;
 static int observe_submission(HSD_GObj* object,int pass)
@@ -219,8 +236,7 @@ unsigned portResultWinnerCameraSubmission(unsigned slot,unsigned* passes)
 void portResultFighterCameraSnapshot(unsigned slot,unsigned live,float* out)
 {
     if(!out)abort();HSD_GObj* owner=(HSD_GObj*)portResultFighterCamera(slot,live);if(!owner)abort();HSD_CObj* c=owner->hsd_obj;
-    if(HSD_CObjGetProjectionType(c)!=PROJ_PERSPECTIVE)abort();HSD_CObjGetViewingMtx(c,(float(*)[4])out);MTXPerspective((float(*)[4])(out+12),HSD_CObjGetFov(c),HSD_CObjGetAspect(c),HSD_CObjGetNear(c),HSD_CObjGetFar(c));
-    HSD_CObjGetEyePosition(c,(Vec3*)(out+28));HSD_CObjGetInterest(c,(Vec3*)(out+31));out[34]=HSD_CObjGetFov(c);out[35]=HSD_CObjGetAspect(c);out[36]=HSD_CObjGetNear(c);out[37]=HSD_CObjGetFar(c);
+    snapshot_camera(c,out);
     Scissor scissor;HSD_CObjGetScissor(c,&scissor);out[38]=scissor.left;out[39]=scissor.right;out[40]=scissor.top;out[41]=scissor.bottom;
 }
 void portResultFighterSnapshot(unsigned slot,float* out)

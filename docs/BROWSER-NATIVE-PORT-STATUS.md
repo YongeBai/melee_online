@@ -205,9 +205,13 @@ over 60 native steps. Their original per-player cameras now construct with the
 retail 20-degree projection and `270,370,124,276` scissor, the winner's separate
 full-frame camera is retained, and its untouched callback reaches Fox five times
 across passes 0–2. Actor teardown returns object/process counts to zero. The
-callbacks are not yet connected to GPU fighter pixels or the original EFB-copy
-portrait textures, and the actors are not yet validated across all 26
-characters. Live standings, product lifecycle integration, and native
+Fox winner is now also drawn through the original fighter callback and exact
+winner-camera projection into the WebGL framebuffer: 59 material draws and
+6,972 verified vertices produce 29,651 non-black pixels across a 202×312 region
+in the inspected 960×720 image. The browser preview still orchestrates the three
+passes outside the complete original camera traversal. The original EFB-copy
+portrait textures, loser composition, and all 26 result actors are not yet
+validated. Live standings, product lifecycle integration, and native
 result-screen FPS also remain unfinished, so the current product screen remains
 the fixed-4:3 tournament presentation rather than a claimed complete native
 `GmRst` scene.

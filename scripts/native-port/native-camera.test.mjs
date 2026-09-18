@@ -47,3 +47,11 @@ test('Final Destination validation preserves its source-selected near and far pl
   assert.throws(()=>checkNativeCamera(snapshot,{clipPlanes:[0.1,far]}),/clip planes/);
   camera.dispose();
 });
+test('result camera validation accepts its exact native projection aspect',()=>{
+  const f=fixture(),aspect=Math.fround(1.2166670560836792),cot=1/Math.tan(f.raw[34]*Math.PI/360);
+  f.raw[12]=cot/aspect;f.raw[35]=aspect;
+  const camera=createNativeCamera(f.module),snapshot=camera.snapshot();
+  assert.throws(()=>checkNativeCamera(snapshot),/projection aspect/);
+  checkNativeCamera(snapshot,{aspect});
+  camera.dispose();
+});
