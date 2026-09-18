@@ -14,3 +14,8 @@ test('rollback audio snapshots deterministic state but not the external commitme
  audio.beginFrame(4);audio.request({action:0,path:'track',volume:64});const active=audio.capture();assert.equal(audio.request({action:4}),true);audio.restore(empty);assert.equal(audio.request({action:4}),false);
  audio.restore(active);audio.confirm(4);audio.restore(active);audio.confirm(4);assert.equal(presented.length,1);assert.equal(audio.snapshot().journaled,1);assert.throws(()=>audio.beginFrame(-1),/frame/);assert.throws(()=>audio.confirm(3),/confirmation/);
 });
+
+test('product mode presents unframed menu music immediately before framed speculation begins',()=>{
+ const presented=[],audio=createRollbackAudio({present:event=>presented.push(event),presentUnframed:true});audio.request({action:0,path:'menu',volume:72});assert.equal(presented.length,1);assert.equal(presented[0].frame,null);
+ audio.beginFrame(0);audio.request({action:1,path:null,volume:0});assert.equal(presented.length,1);audio.confirm(0);assert.equal(presented.length,2);assert.equal(presented[1].frame,0);
+});

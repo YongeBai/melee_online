@@ -33,8 +33,11 @@ try{testFlow:{
  }
  await cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(resultsMode?'':'&liveframes=900')});
  await waitFor('globalThis.characterMenuReport?.passed');await waitFor('nativeCharacterMenu.read().frames>90');
+ const runtime=await evaluate('({same:nativeSnapshotRuntime?.module===characterModule,globals:nativeSnapshotRuntime?.audit?.globals?.length,wasmSha256:nativeSnapshotRuntime?.audit?.wasmSha256,audio:nativeRollbackAudio?.snapshot()})');
+ if(!runtime.same||runtime.globals!==4||!/^[0-9a-f]{64}$/.test(runtime.wasmSha256??''))throw Error('Interactive runtime is not snapshot-instrumented '+JSON.stringify(runtime));
+ if(!runtime.audio||runtime.audio.presented<1||runtime.audio.pending!==0)throw Error('Unframed menu audio did not present immediately '+JSON.stringify(runtime.audio));
  await keys(['KeyO']);await delay(800);await keys([]);if(await evaluate('nativeMenuLive.snapshot().scene')!=='characters')throw Error('Product CSS exposed another game mode');
- trace.push({phase:'initial',state:await evaluate('nativeCharacterMenu.read()')});
+ trace.push({phase:'initial',state:await evaluate('nativeCharacterMenu.read()'),runtime});
  if(checkMusic){
   await waitFor('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001');trace.push({phase:'menu-music',audio:await evaluate('nativeMusic.snapshot()')});
   // Exercise the browser stream-device transport without changing match state.

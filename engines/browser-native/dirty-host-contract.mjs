@@ -80,7 +80,7 @@ export const dirtyHostContract = {
   "purin-extra-assets.mjs": "2bdabb26cbf1403a20b6fe4e82c7950df79789233c7b5b15ca85fcedecd3a177",
   "render-replica.mjs": "b98bd71f11aeec0cea3f6382ee2a3f05762b3a6e3911f6074c0b0c419236ebae",
   "resident-files.mjs": "14efd542e6621e171e6142827729c7554c770fa189a0a3314467cd41ff0a49b5",
-  "rollback-audio.mjs": "993423529319b0e78c2f67ff2451990cb21c2e3ea412d67518d10752ead582ee",
+  "rollback-audio.mjs": "9f4f951cc6c95694d83815093dfee147a104b56a8033824caa24f5f055d7727e",
   "rollback-probe.mjs": "8784aaa5756a86afcd4c4d094f7bc05c76e33e9e5e54afd2cd129d36466ac935",
   "rollback-session.mjs": "03e946441e09ec2ba3a4715ed4942caf6b3eac4a5e75f48f29ae195f79b51ad5",
   "scene-assets.mjs": "923895d5de9bd4a814f890c22f2849d571ee8c5ed4201e11176fd27a15e5fcd0",

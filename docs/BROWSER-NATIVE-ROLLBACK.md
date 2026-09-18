@@ -117,6 +117,15 @@ requires a confirmed ending frame, but speculative-ending correction and recover
 after disconnect are not implemented. Existing product results/rematch continue
 on lockstep.
 
+The interactive product now instantiates its existing hosted
+`melee-fighter-init.wasm` through the same audited snapshot instrumentation used
+by the diagnostics. Native character/stage menus and their renderers still run
+normally, and unframed menu music is presented immediately through the journal
+bridge. The runtime, instance and mutable-global audit survive into the match
+handoff. No checkpoint store is created while menu/live render owners are
+attached, so this preparation does not claim production rollback or add a
+player-supplied file requirement.
+
 ## Validation scope
 
 The committed measurements are in
