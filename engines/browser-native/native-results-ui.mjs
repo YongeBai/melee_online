@@ -1,7 +1,7 @@
 import {lettering} from './native-product-ui.mjs';
 import {resultTitle,returnTicket,saveReturn,validateResults} from './native-results.mjs';
 import {standardNativeSample} from './native-input.mjs';
-export function showNativeResults({results,selection,network}){
+export function showNativeResults({results,selection,network,terminalFrame=undefined}){
  results=validateResults(results);
  const dialog=document.createElement('dialog');dialog.id='nativeResults';dialog.setAttribute('aria-label','Match results');
  dialog.innerHTML='<div class="controls-surface"><p class="results-preview">Temporary results screen</p><h1><canvas></canvas></h1><p class="results-reason"></p><table><thead><tr><th>Player</th><th>Stocks</th><th>Damage</th></tr></thead><tbody></tbody></table><p class="results-status" role="status"></p><button id="rematchButton" class="room-action"><canvas></canvas></button><button id="charactersButton" class="room-action"><canvas></canvas></button><p class="results-help">Enter / P: Rematch · O: Character Select</p></div>';
@@ -16,7 +16,7 @@ export function showNativeResults({results,selection,network}){
  const key=e=>{if(['Enter','KeyP','KeyO','Escape'].includes(e.code)){e.preventDefault();if(e.repeat)return;choose(['Enter','KeyP'].includes(e.code)?'rematch':'characters');}};
  dialog.addEventListener('cancel',e=>{e.preventDefault();choose('characters');});addEventListener('keydown',key);
  function frame(){refresh();const p=standardNativeSample(navigator.getGamepads?.()[0]),pressed=p[0]&~lastButtons;lastButtons=p[0];if(pressed&0x1100)choose('rematch');else if(pressed&0x200)choose('characters');raf=requestAnimationFrame(frame);}
- if(network.active)network.endMatch({results,selection:returnTicket('rematch',selection)});
+ if(network.active)network.endMatch({results,selection:returnTicket('rematch',selection)},terminalFrame);
  dialog.showModal();refresh();raf=requestAnimationFrame(frame);
  return {results,dispose(){cancelAnimationFrame(raf);removeEventListener('keydown',key);dialog.close();dialog.remove();}};
 }

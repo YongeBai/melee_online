@@ -46,6 +46,7 @@ try{
    const reports=await Promise.all([a,b].map(c=>c.eval('({results:nativeMenuMatchReport.results,selection:nativeMenuMatchReport.selection,room:nativeRoom.snapshot(),scene:nativeMenuLive.snapshot().scene})')));
    if(reports.some(r=>r.results.outcome!==outcome||r.scene!=='results'))throw Error('Wrong result outcome '+JSON.stringify(reports));
    if(JSON.stringify(reports[0].results)!==JSON.stringify(reports[1].results))throw Error('Result divergence');
+   if(reports.some(r=>!r.room.pendingEnding?.sent||r.room.pendingEnding.frame>r.room.confirmedFrame))throw Error('Unconfirmed result escaped '+JSON.stringify(reports));
    for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/result-'+outcome+'-'+i+'.png',Buffer.from(shot.data,'base64'));}
    lifecycle.push(...reports);return reports;
   }

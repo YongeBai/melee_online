@@ -11,6 +11,12 @@ server-side Dolphin architecture below describes the historical/public
 implementation and must not be used as evidence of browser-native rollback
 performance.
 
+Native result submission is tagged with the local ending frame. The browser
+holds it until that frame is confirmed, and the relay rejects future/unconfirmed
+ending frames before accepting the existing two-client result consensus. This
+protects the room lifecycle boundary in preparation for prediction; it does not
+make the current playable client a rollback client.
+
 The default `/play/` path now creates a private two-seat room. Share the six-character
 code; the second browser enters it at character select. The room owner is always
 P1 (controller port 1), and the joining player is P2 (controller port 2), including

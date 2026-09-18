@@ -70,7 +70,8 @@ test('browser room buffers authenticated rollback events and exposes immutable s
  const events=[],unbind=room.bindRollback({receive:(frame,value)=>events.push(['input',frame,value.tap]),acknowledge:frame=>events.push(['confirmed',frame])});assert.deepEqual(events,[['input',0,1],['confirmed',0]]);
  socket.emit({type:'phase-ready',key:'match:0',epoch:4});assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);
  assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);assert.throws(()=>room.sendInput(3,[0,0,0,0,0,0,0]),/Conflicting/);
- assert.equal(room.snapshot().confirmedFrame,0);unbind();room.dispose();
+ room.endMatch({results:'native'},2);assert.equal(socket.sent.some(m=>m.type==='ended'),false);socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:1});assert.equal(socket.sent.some(m=>m.type==='ended'),false);socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:2});assert.equal(socket.sent.filter(m=>m.type==='ended').length,1);
+ assert.deepEqual(room.snapshot().pendingEnding,{frame:2,sent:true});unbind();room.dispose();
 });
 
 test('results require consensus, two rematch votes and one coordinated fresh epoch',async t=>{
@@ -82,7 +83,8 @@ test('results require consensus, two rematch votes and one coordinated fresh epo
  a.send({type:'result-action',epoch,action:'rematch'});await a.take(m=>m.type==='error');
  for(const c of [a,b])c.send({type:'phase',epoch,key:'match:0'});
  await a.take(m=>m.type==='phase-ready');await b.take(m=>m.type==='phase-ready');
- const end=c=>c.send({type:'ended',epoch,key:'match:0',value:{selection,results}});
+ const end=(c,frame=2)=>c.send({type:'ended',epoch,key:'match:0',frame,value:{selection,results}});
+ end(a,3);assert.match((await a.take(m=>m.type==='error')).message,/not confirmed/);
  end(a);a.send({type:'result-action',epoch,action:'rematch'});await a.take(m=>m.type==='error');end(b);
  await a.take(m=>m.type==='state'&&m.phase==='results');await b.take(m=>m.type==='state'&&m.phase==='results');
  a.send({type:'result-action',epoch,action:'rematch'});const voted=await a.take(m=>m.type==='state'&&m.rematchVotes[0]);assert.equal(voted.epoch,epoch);assert.deepEqual(voted.rematchVotes,[true,false]);
@@ -92,8 +94,8 @@ test('results require consensus, two rematch votes and one coordinated fresh epo
  a.send({type:'result-action',epoch,action:'characters'});
  const check=await post('/native-rooms/resume',{token:owner.token,epoch:next.epoch,syncedReload:true});assert.equal(check.epoch,next.epoch);
  for(const c of [a,b])c.send({type:'phase',epoch:next.epoch,key:'match:0'});await a.take(m=>m.type==='phase-ready'&&m.epoch===next.epoch);
- a.send({type:'ended',epoch:next.epoch,key:'match:0',value:{selection,results}});
- b.send({type:'ended',epoch:next.epoch,key:'match:0',value:{selection,results:{...results,frames:1001}}});
+ a.send({type:'ended',epoch:next.epoch,key:'match:0',frame:2,value:{selection,results}});
+ b.send({type:'ended',epoch:next.epoch,key:'match:0',frame:2,value:{selection,results:{...results,frames:1001}}});
  for(const c of [a,b])assert.match((await c.take(m=>m.type==='error')).message,/diverged/);
  a.send({type:'result-action',epoch:next.epoch,action:'rematch'});await a.take(m=>m.type==='error');
 });
