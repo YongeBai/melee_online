@@ -40,3 +40,10 @@ test('authoritative acknowledgements gate commitment independently of remote del
  assert.equal(session.confirmed,5);assert.equal(session.snapshot().acknowledged,5);
  assert.throws(()=>session.acknowledge(30),/outside/);session.dispose();assert.equal(alive.size,0);
 });
+
+test('acknowledgement replays a correction before exposing the confirmed state',()=>{
+ let state=0;const alive=new Set(),confirmed=[],store={capture(){const s={state};alive.add(s);return s;},restore:s=>state=s.state,release:s=>alive.delete(s)};
+ const session=createRollbackSession({seat:0,store,requireAcknowledgement:true,onConfirm:frame=>confirmed.push({frame,state}),step:inputs=>{state+=inputs[1].pad[0]?10:1;}});
+ session.advance(input(0,0));assert.equal(state,1);session.receive(0,{...input(0,1),pad:[256,0,0,0,0,0,0]});assert.equal(state,1);
+ session.acknowledge(0);assert.equal(state,10);assert.deepEqual(confirmed,[{frame:0,state:10}]);assert.equal(session.snapshot().corrections,1);session.dispose();assert.equal(alive.size,0);
+});
