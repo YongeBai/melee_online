@@ -46,8 +46,8 @@ export function validateDrawBlock(gl,program){
  if(!ids.length)throw Error('Uniform block has no active values');gl.uniformBlockBinding(program,index,0);return {version:1,index,size,active:ids.length};
 }
 const offsets=Object.fromEntries(DRAW_FIELDS.map(f=>[f.name,f.offset/4]));
-export function writeDrawUniforms(buffer,byteOffset,state,camera){
- const f=new Float32Array(buffer,byteOffset,DRAW_BLOCK_BYTES/4),i=new Int32Array(buffer,byteOffset,DRAW_BLOCK_BYTES/4);i.fill(0);
+export function writeDrawUniforms(buffer,byteOffset,state,camera,{clear=true}={}){
+ const f=new Float32Array(buffer,byteOffset,DRAW_BLOCK_BYTES/4),i=new Int32Array(buffer,byteOffset,DRAW_BLOCK_BYTES/4);if(clear)i.fill(0);
  const floats=(name,values,at=0)=>f.set(values,offsets[name]+at),ints=(name,values,at=0)=>i.set(values,offsets[name]+at);
  floats('projection',camera.projection);
  for(const [name,packed,rows]of [['positionRows',state.model.positionRows,state.model.positions],['normalRows',state.model.normalRows,state.model.normals]]){
@@ -70,7 +70,12 @@ export function createDrawUniformBuffer(gl,{maxBytes=32*1024**2}={}){
  return {
   prepare(draws){guard();epoch++;uploaded=false;used=0;const count=draws.length,required=count*stride;if(!Number.isSafeInteger(required)||required>maxBytes)return false;
    if(required>capacity){let next=Math.max(stride*16,capacity);while(next<required)next*=2;next=Math.min(next,maxBytes);slab=new ArrayBuffer(next);buffer??=gl.createBuffer();if(!buffer)throw Error('Uniform buffer allocation');gl.bindBuffer(gl.UNIFORM_BUFFER,buffer);gl.bufferData(gl.UNIFORM_BUFFER,next,gl.DYNAMIC_DRAW);const error=gl.getError();if(error!==gl.NO_ERROR)throw Error('Uniform buffer allocation GL error '+error);capacity=next;stats.allocations++;}
-   used=required;for(let n=0;n<count;n++)writeDrawUniforms(slab,n*stride,draws[n].state,draws[n].camera);stats.frames++;return true;
+   used=required;
+   // Clear the complete used range once. This is byte-for-byte equivalent to
+   // clearing each std140 record separately, but avoids hundreds of small
+   // TypedArray fill calls on stages with many native material draws.
+   new Uint8Array(slab,0,used).fill(0);
+   for(let n=0;n<count;n++)writeDrawUniforms(slab,n*stride,draws[n].state,draws[n].camera,{clear:false});stats.frames++;return true;
   },
   upload(){guard();if(used){gl.bindBuffer(gl.UNIFORM_BUFFER,buffer);gl.bufferSubData(gl.UNIFORM_BUFFER,0,new Uint8Array(slab,0,used));stats.uploads++;stats.uploadedBytes+=used;}uploaded=true;return epoch;},
   bind(index,version){guard();if(!uploaded||version!==epoch||!Number.isInteger(index)||index<0||(index+1)*stride>used)throw Error('Uniform buffer stale or invalid draw');gl.bindBufferRange(gl.UNIFORM_BUFFER,0,buffer,index*stride,DRAW_BLOCK_BYTES);stats.binds++;},

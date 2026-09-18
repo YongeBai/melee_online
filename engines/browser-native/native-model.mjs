@@ -27,16 +27,12 @@ export function createPackedModelReader(module,getSlot){
     if(buffer!==heap.buffer){buffer=heap.buffer;words=new Uint32Array(buffer,0,Math.floor(buffer.byteLength/4));values=new Float32Array(buffer,0,words.length);}
     const at=p/4,positionMask=words[at],normalMask=words[at+1],current=words[at+2],currentSet=words[at+3];
     if(!positionMask||positionMask>1023||normalMask>1023||(normalMask&~positionMask)||current>9||currentSet>1)throw Error('Native model matrix masks');
-    const row=getSlot(cursor++,create);row.current=currentSet?current:null;
-    for(let i=0;i<10;i++){
-      const offset=i*12,position=!!(positionMask&(1<<i)),normal=!!(normalMask&(1<<i));
-      row.positions[i]=position?row.positionViews[i]:null;row.normals[i]=normal?row.normalViews[i]:null;
-      if(!position)row.positionRows.fill(0,offset,offset+12);
-      if(!normal)row.normalRows.fill(0,offset,offset+12);
-      for(let j=0;j<12;j++){
-        if(position){const v=values[at+4+offset+j];if(!Number.isFinite(v))throw Error('Native model nonfinite matrix');row.positionRows[offset+j]=v;}
-        if(normal){const v=values[at+124+offset+j];if(!Number.isFinite(v))throw Error('Native model nonfinite matrix');row.normalRows[offset+j]=v;}
-      }
+    const row=getSlot(cursor++,create);row.current=currentSet?current:null;row.positionRows.fill(0);row.normalRows.fill(0);row.positions.fill(null);row.normals.fill(null);
+    for(let bits=positionMask;bits;bits&=bits-1){const i=31-Math.clz32(bits&-bits),offset=i*12;row.positions[i]=row.positionViews[i];
+      for(let j=0;j<12;j++){const v=values[at+4+offset+j];if(!Number.isFinite(v))throw Error('Native model nonfinite matrix');row.positionRows[offset+j]=v;}
+    }
+    for(let bits=normalMask;bits;bits&=bits-1){const i=31-Math.clz32(bits&-bits),offset=i*12;row.normals[i]=row.normalViews[i];
+      for(let j=0;j<12;j++){const v=values[at+124+offset+j];if(!Number.isFinite(v))throw Error('Native model nonfinite matrix');row.normalRows[offset+j]=v;}
     }
     return row;
   }};

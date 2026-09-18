@@ -1,5 +1,16 @@
 # Validation — September 8–9, 2026
 
+September 18 direct-port update: the opt-in two-browser product room passes the
+sustained browser-canvas 720p60 gate for every legal stage from both observed
+seats. Twelve 1,800-frame combat cases produced exactly 21,600 requested and
+21,600 distinct 960×720 post-draw snapshots with no capture/content errors.
+Observed cadence was 59.882–59.974 FPS, simulation was 59.662–59.934 FPS, and
+draw p95 was 8.5–13.0 ms. A separate startup matrix covers all characters/forms
+and legal stages under fixed no-item 1v1 rules. These results still exclude WAN,
+compositor scanout, physical input-to-photon and exhaustive matchup timing; see
+the [sustained matrix](benchmarks/browser-2026-09-18-native-room-720p60.json) and
+[startup matrix](benchmarks/browser-2026-09-18-native-room-matrix.json).
+
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and
 [rollback correctness measurements](benchmarks/browser-2026-09-17-native-port-rollback.json).

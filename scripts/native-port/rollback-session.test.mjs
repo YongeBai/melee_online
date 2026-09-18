@@ -21,6 +21,12 @@ test('prediction stops at its bound, duplicate inputs are immutable, and unavail
  assert.throws(()=>f.session.receive(0,input(0,1)),/too old/);assert.throws(()=>f.session.receive(100,input(1,1)),/outside/);assert.throws(()=>f.session.receive(30,{pad:[0,0,0],tap:2}),/Invalid/);f.session.dispose();assert.throws(()=>f.session.advance(input(30,0)),/closed/);
 });
 
+test('receive horizon can exceed prediction horizon without allowing extra speculation',()=>{
+ const f=fixture(0);f.session.dispose();const session=createRollbackSession({seat:0,store:f.store,step:f.step,window:4,receiveWindow:12,checkpointInterval:4});
+ session.receive(8,input(8,1));for(let frame=0;frame<4;frame++)assert.equal(session.advance(input(frame,0)),true);assert.equal(session.advance(input(4,0)),false);
+ assert.equal(session.snapshot().predictionWindow,4);assert.equal(session.snapshot().receiveWindow,12);assert.throws(()=>session.receive(17,input(17,1)),/outside/);session.dispose();
+});
+
 test('correction retains its unchanged starting checkpoint and reports replay/recapture timings separately',()=>{
  let state=0,replaying=false;const captures=[],events=[],store={capture(){captures.push(state);return {state};},restore:s=>{state=s.state;},release(){}};
  const session=createRollbackSession({seat:0,store,onReplay:v=>replaying=v,onTiming:e=>events.push(e),step:(pads,meta)=>{assert.equal(meta.replay,replaying);state++;}});
