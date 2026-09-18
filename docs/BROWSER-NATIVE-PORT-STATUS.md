@@ -1,5 +1,14 @@
 # Native browser port — September 17, 2026
 
+The renderer now uses [compact complete texture descriptor keys](BROWSER-NATIVE-TEXTURE-KEYS.md)
+instead of serializing the full object on every bind. Two recovered adjacent
+pairs reduced direct texture lookup 9.7% (-0.066 ms/frame) and draw submission
+4.7% (-0.408 ms/frame), with identical cache populations. A legacy-key reference
+renderer matched 331,776,000 RGBA bytes and every camera sample. The first
+order-confounded A/B/B/A is excluded; simulation FPS was mixed and this is not a
+displayed-720p60 result. Two preceding typed-view hypotheses regressed and were
+removed.
+
 The texture-state decoder now [reuses one renderer-local capture view](BROWSER-NATIVE-TEXTURE-VIEW.md),
 rebinding on memory or pointer changes. Two recovered adjacent comparisons cut
 direct texture decode from 0.569 to 0.481 ms/frame (-15.5%, -0.089 ms) while
