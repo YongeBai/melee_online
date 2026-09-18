@@ -20,6 +20,21 @@ export function textureByteLength(width,height,format) {
   const [bw, bh, bytes] = spec;
   return Math.ceil(width / bw) * Math.ceil(height / bh) * bytes;
 }
+// Encode browser RGBA readback into the tiled formats used by result-screen
+// EFB image descriptors. The result path requests RGB5A3; RGB565 shares the
+// same 4x4/16-bit copy layout and is kept as an independently checked case.
+export function encodeGX(rgba,width,height,format) {
+  const size=textureByteLength(width,height,format);
+  if(![4,5].includes(format)||rgba.length!==width*height*4)throw Error('Unsupported GX framebuffer encode');
+  const result=new Uint8Array(size),view=new DataView(result.buffer);let p=0;
+  for(let by=0;by<height;by+=4)for(let bx=0;bx<width;bx+=4,p+=32)for(let y=0;y<4;y++)for(let x=0;x<4;x++){
+    const at=((by+y)*width+bx+x)*4,inside=bx+x<width&&by+y<height;
+    const r=inside?rgba[at]:0,g=inside?rgba[at+1]:0,b=inside?rgba[at+2]:0,a=inside?rgba[at+3]:0;
+    const value=format===4?((r>>3)<<11)|((g>>2)<<5)|(b>>3):a>=224?0x8000|((r>>3)<<10)|((g>>3)<<5)|(b>>3):((a>>5)<<12)|((r>>4)<<8)|((g>>4)<<4)|(b>>4);
+    view.setUint16(p+(y*4+x)*2,value);
+  }
+  return result;
+}
 export function decodeGX(data, width, height, format, palette) {
   const size=textureByteLength(width,height,format),[bw,bh,bytes]=formats[format];
   if (data.length < size) throw Error("Truncated GX texture");

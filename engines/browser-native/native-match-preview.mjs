@@ -15,7 +15,7 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. Full scene startup and teardown remain development work.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},cameraRead=null,renderBegin=null,gpuErrorChecks=true,traceAttachments=false,cacheModels=true,presentationCache=null}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},cameraRead=null,renderBegin=null,nativeViewport=false,gpuErrorChecks=true,traceAttachments=false,cacheModels=true,presentationCache=null}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
   const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
@@ -206,7 +206,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
             }
           }
           }
-          const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),materialDraws=materialRenderer.flush({ordered:true});
+          const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),scaleX=canvas.width/640,scaleY=canvas.height/480,presentation=nativeViewport?{viewport:[Math.round(renderContext.viewport[0]*scaleX),Math.round((480-renderContext.viewport[1]-renderContext.viewport[3])*scaleY),Math.round(renderContext.viewport[2]*scaleX),Math.round(renderContext.viewport[3]*scaleY)],clip:[Math.round(renderContext.scissor[0]*scaleX),Math.round((480-renderContext.scissor[1]-renderContext.scissor[3])*scaleY),Math.round(renderContext.scissor[2]*scaleX),Math.round(renderContext.scissor[3]*scaleY)]}:{},materialDraws=materialRenderer.flush({ordered:true,...presentation});
           const accessoryDraws=traceAttachments?resources.flatMap(r=>r.accessories.filter(a=>a.accessoryGpu).map(a=>({name:a.accessory.name??null,draws:a.accessoryGpu.queuedDrawCount()}))):null;
           const attachmentDraws=traceAttachments?resources.filter(r=>r.itemAttachment).map(r=>({name:r.name,draws:r.materialGpu.queuedDrawCount()})):null;
           for(const [stats,draws,vertices] of [[particleStats,materialDraws.particleDraws,materialDraws.particleVertices],[afterimageStats,materialDraws.afterimageDraws,materialDraws.afterimageVertices]]){

@@ -1,20 +1,25 @@
 {
   "date": "2026-09-18",
-  "purpose": "Instantiate, configure, animate, render, and clean up the original GmRst pnlsce panel, then construct and animate Fox/Falco and render Fox GPU pixels through the original result-demo fighter callback under the exact winner camera in a separate isolated browser-native module.",
-  "sourceCommitBeforeCheckpoint": "e11861e",
+  "purpose": "Instantiate, configure, animate, render, and clean up the original GmRst pnlsce panel; construct and animate Fox/Falco; render Fox through the exact winner camera; then capture Falco through the original portrait camera, run the original HSD EFB-copy allocation/attachment path, and render the copied RGB5A3 image in the original panel material.",
+  "sourceCommitBeforeCheckpoint": "dbfed8b",
   "sourceSha256": {
     "engines/browser-native/result-scene.c": "ba265a3fff60ee8d3be82017b06fc4e1ae175d93ed42af24e0c1cf650d7a9bce",
-    "engines/browser-native/result-scene-config.c": "cd95449d29b213541ef462205059db47bf68aed2f4dd52a3f387547bdf9eff41",
-    "engines/browser-native/native-result-scene-preview.mjs": "bf3e8205bd5ada000732687a3028569240f25aa55b563e255fbb85e3cfa1ddca",
-    "engines/browser-native/result-scene.html": "91bd88c19626a9cd71c0f0cd4fc12259226baa37b2d3ae205335c1a4b815639a",
+    "engines/browser-native/result-scene-config.c": "da938d5e1be0c1aa284c0b129a3f528618ad7021ba461c1726f64d06b81857dc",
+    "engines/browser-native/result-efb.c": "eff7ae12dd80c178257c53cbfb593b6b70dde1ae479d444ce2ce05d175ab5657",
+    "engines/browser-native/result-efb.mjs": "37785be881c918d2cae41c08532b4478bb5598d41b4087865177ec2a5cae3821",
+    "engines/browser-native/native-result-scene-preview.mjs": "552508bc8ac9aa0a3c23ceb3e09fd5748680caf095f3daf5f1888a7c536b5f5d",
+    "engines/browser-native/native-match-preview.mjs": "9dcf7df1be774dde6185d4e1357141d3fe647e66c010abd5a3ebe43bc02b5308",
+    "engines/browser-native/material-gpu.mjs": "21144b293d93ec92a18db0c5155e0f10738c85988e96087c869b1227e77bb4b0",
+    "engines/browser-native/result-scene.html": "a1c3ca11850cffa88987198c2da1e0784e05ed918ef70403d4390d8ad684827c",
+    "engines/browser-native/texture.mjs": "af7e63ab3ec6d4d3029ed39dcc335fa8695c00458cd7f060eb6fa991df6d8cd3",
     "engines/browser-native/result-motion-assets.mjs": "9b41a8c5227dc03c77eb1c9cf89ff1f358bd597bfecb3b4d2a49dc1ac680e047",
     "engines/browser-native/resident-files.c": "f5b94ce5e439c14d25d9f74c7d70080ff3505d7f46c79a56c005bdc7ea3c4247",
     "engines/browser-native/dirty-host-contract.mjs": "a9310137f282c0850d253aec36eb69d8e12071ad6c8feaaf4d3f87a3e8be3768",
     "engines/browser-native/native-camera.mjs": "e25a938310c41205f3c9bb570418ae1f6524aa1bf0523feaeabb76db589a5799",
-    "engines/browser-native/native-match-preview.mjs": "a6fc8c9493e8bea242f3f41e352051bc9113013b988dae492a341d401c946297",
-    "scripts/native-port/build.mjs": "fe09ec9d280f9fddbde65d41333cecd3f7438452314161889ace5082dce6fad0",
-    "scripts/native-port/serve.mjs": "420f0172c4a9308989f64ff6ea651555f6d35b7f4d2724658025c4f6f3ada0c8",
-    "scripts/native-port/probe-result-scene.mjs": "630ed692f676d43ca59c37908077ba74e3552556cf64116684514acc8d237828",
+    "scripts/native-port/build.mjs": "d1ad943bca421adf44ce8d85a2037f72883d8bfc0e4b94bb51d254d074bb1b51",
+    "scripts/native-port/game-link.mjs": "4287b85be80f28e6b2a51605a0a1f3ef9c6469d4b1ec90d2ed3620ad76526a0e",
+    "scripts/native-port/serve.mjs": "3961b302098afb578452a11cec478dad593862f2b412aa912b9bad422c38d41b",
+    "scripts/native-port/probe-result-scene.mjs": "1cb2f86123519cf286d3abfa76ac01c4837ce8ba340d6802b664b0584a9b0491",
     "scripts/native-port/portable-source.mjs": "1f125341e6579840d8a12a23e959a5ed4cd2b8c200cfcc3178b85eccb2bb1f80"
   },
   "commands": [
@@ -27,8 +32,8 @@
   "browser": "headless Chromium with WebGL2 GPU path",
   "isolatedWasm": {
     "file": "melee-result-scene.wasm",
-    "bytes": 3582060,
-    "sha256": "2cc4ed69b9de2cc5638de3ce03c6f9bc36287deb0f9c851591194d9f43e0d7eb",
+    "bytes": 3583665,
+    "sha256": "db8a6fec16e731fd299c3fe77b4f31962209484c40eda8ea4c02110ba3e142e7",
     "productFighterGlueUnchangedSha256": "0d7004dc06463954360722e2156f4b895d89d25ef731c4dc7ff5b6f7bb3059ab"
   },
   "frames": 60,
@@ -97,12 +102,29 @@
       "exactWinnerCamera": true,
       "completeOriginalCameraTraversal": false
     },
+    "loserPortrait": {
+      "character": "Falco",
+      "captureMaterialDraws": 48,
+      "captureVerifiedVertices": 5804,
+      "captureScissor": [270, 124, 100, 152],
+      "efbSource": [294, 138, 52, 74],
+      "format": "GX_TF_RGB5A3",
+      "encodedBytes": 7904,
+      "nonzeroBytes": 6304,
+      "coloredTexels": 2466,
+      "nativeCopies": 1,
+      "panelDrawsAfterAttachment": 65,
+      "exactImageAddressObservedInPanelDraw": true,
+      "originalAllocation": "fn_8017A9B4",
+      "originalCopy": "HSD_ImageDescCopyFromEFB",
+      "originalAttachmentTarget": true
+    },
     "teardownValidated": true,
     "cleanup": {"objects": 0, "processes": 0}
   },
   "productRegression": {
     "passed": true,
-    "eliminationFrame": 807,
+    "eliminationFrame": 806,
     "timeoutFrame": 28800,
     "rematchPassed": true,
     "legalStagesAfterReturn": [2, 3, 8, 28, 31, 32]
@@ -119,7 +141,10 @@
   "cleanup": {"objects": 0, "processes": 0, "archiveAllocations": 0},
   "screenshotSha256": "18f0c34a7159950b75fb9e76bef97b6e67fbb92ddf4d99b491063bcff5e572c5",
   "winnerScreenshotSha256": "ae4ae706bb40106fcc336f217335b3c1673027ff7d8c5e6d26ce5083684f0e24",
-  "visualInspection": "The original panel visibly rendered FOX as the winner, 1st/2nd placement, P1/P2 entrants, native score/KO/fall/self-destruct columns for two active players, gray dashes for inactive ports, and the native No Entrant treatment for ports 3/4; the separate winner framebuffer visibly rendered the shaded native Fox victory pose under the original camera.",
-  "fullSourceSuite": {"tests": 650, "passed": 640, "skipped": 10, "failed": 0},
-  "scope": "This validates native two-player panel configuration, original SIS landing rows, all 26 character texture selections, original Fox/Falco result-fighter construction/animation, exact result-camera construction, winner callback traversal, Fox winner GPU pixels through the original fighter callback, and actor teardown in isolation. The browser preview still orchestrates the three render passes separately from the complete original camera callback traversal. It does not implement the original EFB-copy portrait textures or loser composition, validate all-roster actor construction, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
+  "captureScreenshotSha256": "5dbae41f4e45ad7c02abbd4e80732e6b449be57929bd2c6edd305b602d28aaf1",
+  "portraitScreenshotSha256": "2ba36d8f18af70bb81e6d6ba382760f3a669fe29608a4068387538a815e1abf7",
+  "compositeScreenshotSha256": "b75eea3bac5901ae5e5ba3cd7900cf699998edd284394b6955f0d0a96c46db7e",
+  "visualInspection": "The original panel visibly rendered FOX as the winner, 1st/2nd placement, P1/P2 entrants, native score/KO/fall/self-destruct columns for two active players, gray dashes for inactive ports, the native No Entrant treatment for ports 3/4, and the newly captured shaded Falco portrait in P2's original standings frame. The separate winner framebuffer visibly rendered the shaded native Fox victory pose under the original camera.",
+  "fullSourceSuite": {"tests": 651, "passed": 641, "skipped": 10, "failed": 0},
+  "scope": "This validates native two-player panel configuration, original SIS landing rows, all 26 character texture selections, original Fox/Falco result-fighter construction/animation, exact result-camera construction, winner callback traversal, Fox winner GPU pixels, Falco loser capture through the original EFB-backed RGB5A3 descriptor and original panel attachment target, and actor teardown in isolation. The browser preview still orchestrates capture, copy, and panel passes separately from the complete original camera callback traversal. It does not validate all-roster actor construction, consume live gm_Scene_Vs_OnExit standings, enter from the product match lifecycle, establish result-screen FPS, or replace the product overlay."
 }
