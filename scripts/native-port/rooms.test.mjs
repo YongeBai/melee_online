@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {WebSocket} from '../../web/node_modules/ws/wrapper.mjs';
 import {createNativeRoomRelay} from './rooms.mjs';
-async function fixture(t){
- const server=createServer((req,res)=>void relay.handle(req,res)),relay=createNativeRoomRelay(server);
+async function fixture(t,options){
+ const server=createServer((req,res)=>void relay.handle(req,res)),relay=createNativeRoomRelay(server,options);
  await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>{relay.close();server.close();});
  const base='http://127.0.0.1:'+server.address().port;
  const post=async(route,body={})=>{const r=await fetch(base+route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return {status:r.status,...await r.json()};};
@@ -13,7 +13,7 @@ async function fixture(t){
   const take=(check)=>{const index=queue.findIndex(check);if(index>=0)return Promise.resolve(queue.splice(index,1)[0]);return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Missing relay event '+check)),3000);pending.push({check,resolve:m=>{clearTimeout(timer);resolve(m);}});});};
   await new Promise(r=>ws.on('open',r));const send=m=>ws.send(JSON.stringify(m));send({type:'hello',token});await take(m=>m.type==='state');return {ws,take,send,queue};
  }
- return {post,socket};
+ return {post,socket,relay};
 }
 test('native rooms protect seats, require both Ready, and relay ordered immutable inputs',async t=>{
  const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token);
@@ -39,6 +39,14 @@ test('native rooms protect seats, require both Ready, and relay ordered immutabl
  for(const peer of [a,b]){const f3=await peer.take(m=>m.type==='frame'&&m.frame===3),c3=await peer.take(m=>m.type==='confirmed-frame'&&m.frame===3),f4=await peer.take(m=>m.type==='frame'&&m.frame===4),c4=await peer.take(m=>m.type==='confirmed-frame'&&m.frame===4);assert.equal(f3.frame,3);assert.equal(c3.frame,3);assert.deepEqual(f3.inputs.map(v=>v.pad[0]),[16,64]);assert.equal(f4.frame,4);assert.equal(c4.frame,4);assert.deepEqual(f4.inputs.map(v=>v.pad[0]),[256,512]);}
  a.send({type:'kick'});await b.take(m=>m.type==='removed');assert.equal((await post('/native-rooms/resume',{token:guest.token})).status,400);
  assert.equal((await post('/native-rooms/resume',{token:owner.token})).code,owner.code);
+});
+test('test-only delayed delivery preserves per-socket order and reports injection',async t=>{
+ let calls=0;const {post,socket,relay}=await fixture(t,{deliveryDelayMs:m=>m.type==='peer-input'&&m.frame>=3?[30,0][calls++%2]:null}),owner=await post('/native-rooms'),a=await socket(owner.token);
+ a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);const guest=await post('/native-rooms/join',{code:owner.code}),b=await socket(guest.token),epoch=guest.epoch;
+ for(const peer of [a,b])peer.send({type:'phase',epoch,key:'match:0'});await a.take(m=>m.type==='phase-ready');await b.take(m=>m.type==='phase-ready');
+ const value={pad:[16,0,0,0,0,0,0],tap:1};a.send({type:'input',epoch,key:'match:0',frame:3,value});const blockedUntil=Date.now()+40;while(Date.now()<blockedUntil){}a.send({type:'input',epoch,key:'match:0',frame:4,value});
+ assert.equal((await b.take(m=>m.type==='peer-input'&&m.frame>=3)).frame,3);assert.equal((await b.take(m=>m.type==='peer-input'&&m.frame>=3)).frame,4);
+ const stats=relay.deliverySnapshot();assert.equal(stats.configured,2);assert.equal(stats.scheduled,2);assert.equal(stats.delivered,2);assert.deepEqual(stats.byType,{'peer-input':2});assert.equal(stats.configuredDelayMinMs,0);assert.equal(stats.configuredDelayMaxMs,30);assert.ok(stats.headOfLineDelayMaxMs>=30);
 });
 test('refresh starts one new epoch; coordinated reload does not recurse',async t=>{
  const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token);a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);

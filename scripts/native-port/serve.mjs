@@ -22,7 +22,7 @@ if(fs.existsSync(path.join(output,'ui-fixtures.json')))for(const name of JSON.pa
 files.add('music-fixtures.json');
 if(fs.existsSync(path.join(output,'music-fixtures.json')))for(const name of Object.keys(JSON.parse(fs.readFileSync(path.join(output,'music-fixtures.json'))))){if(!/^[a-z0-9_]+\.hps$/.test(name))throw Error('Invalid music fixture');files.add('audio/'+name);}
 const types={'.css':'text/css','.png':'image/png','.js':'text/javascript','.html':'text/html; charset=utf-8','.mjs':'text/javascript','.wasm':'application/wasm','.json':'application/json'};
-export function createNativePortServer({enableRooms=true}={}) { const server=createServer(async(req,res)=> {
+export function createNativePortServer({enableRooms=true,roomOptions}={}) { const server=createServer(async(req,res)=> {
   if(relay&&await relay.handle(req,res))return;
   const name=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';
   if(!files.has(name)||!fs.existsSync(path.join(output,name))){res.writeHead(404).end();return;}
@@ -30,6 +30,6 @@ export function createNativePortServer({enableRooms=true}={}) { const server=cre
   res.writeHead(200,{'Content-Type':types[path.extname(name)]||'application/octet-stream',
     'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
   if(req.method==='HEAD')res.end();else fs.createReadStream(path.join(output,name)).pipe(res);
-});const relay=enableRooms?createNativeRoomRelay(server):null;const close=server.close.bind(server);server.close=(callback)=>{relay?.close();return close(callback);};return server; }
+});const relay=enableRooms?createNativeRoomRelay(server,roomOptions):null;Object.defineProperty(server,'nativeRoomRelay',{value:relay});const close=server.close.bind(server);server.close=(callback)=>{relay?.close();return close(callback);};return server; }
 if(process.argv[1] && import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)
   createNativePortServer().listen(port,'127.0.0.1',()=>console.log(`Native-port subsystem verification: http://127.0.0.1:${port}/`));

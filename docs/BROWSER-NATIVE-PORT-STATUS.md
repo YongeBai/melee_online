@@ -18,6 +18,16 @@ gate, not compositor scanout, WAN behavior, physical input-to-photon latency or
 all 676 matchups. [Roster performance evidence](benchmarks/browser-2026-09-18-native-room-roster-720p60.json)
 and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
 
+The actual product-room path also passes a sustained controlled-delay run. With
+order-preserving 4/8/12/16/20 ms relay-to-client delay on peer-input and
+confirmation messages, both clients completed 1,800 combat frames at
+59.609/59.622 simulation FPS; seat 0 captured 1,800/1,800 distinct 960×720
+frames at 59.670 FPS. The run exercised 186 corrections and 444 replayed frames,
+confirmed frame 1799 on both peers, rejected no late inputs and converged to
+identical fighter state. This narrows the network-readiness gap but is not full
+WAN, compositor-scanout or physical input-to-photon certification.
+[Controlled-delay evidence](benchmarks/browser-2026-09-18-native-room-relay-delay-720p60.json).
+
 The separate 60-frame startup matrix remains the fast loading/correctness
 regression for all 25 roster tiles/26 playable starts and all six legal stages
 under the same fixed no-item 1v1 rules.
@@ -29,14 +39,15 @@ audio and a separate dirty WASM presentation replica. Exact shader preparation
 and a restored 30-frame loading-boundary warmup remove the observed live intro
 compile/resource stalls; a shared phase-ready gate keeps either client from
 spending its prediction window while its peer is loading. The product scheduler
-also submits one native picture for every forward frame. A two-browser,
+also submits one native picture for every forward frame. A prior two-browser,
 1,800-frame Final Destination run submitted all 1,800 pictures at
 59.890/59.839 simulation FPS with 7.846/7.794 ms mean and 10.9/10.9 ms p95 draw
 submission. Both clients confirmed frame 1799 and converged exactly; one peer
 performed six corrections and 24 replayed frames. This clears only the narrow
-simulation/submission gate. Independent captured frames, WAN behavior, physical
-presentation, input-to-photon latency, every legal stage and the full roster
-remain unverified, so rollback stays opt-in and ordinary rooms stay lockstep.
+simulation/submission gate; the later matrices above add captured-frame, legal
+stage, roster and controlled downstream-delay evidence. Full WAN behavior,
+physical presentation and input-to-photon latency remain unverified, so rollback
+stays opt-in and ordinary rooms stay lockstep.
 [Scoped evidence](benchmarks/browser-2026-09-17-native-product-rollback.json).
 
 The renderer now uses [compact complete texture descriptor keys](BROWSER-NATIVE-TEXTURE-KEYS.md)

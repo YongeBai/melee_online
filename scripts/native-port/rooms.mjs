@@ -8,9 +8,19 @@ const token=()=>randomBytes(24).toString('base64url');
 function sameOrigin(req){if(!req.headers.origin)return true;try{const origin=new URL(req.headers.origin);return ['http:','https:'].includes(origin.protocol)&&origin.host===req.headers.host;}catch{return false;}}
 const neutral=()=>({pad:[0,0,0,0,0,0,0],tap:1});
 function validateInput(input){const p=input?.pad;if(!Array.isArray(p)||p.length!==7||!Number.isInteger(p[0])||p[0]<0||(p[0]&~0x1f7f)||p.slice(1).some((v,i)=>!Number.isFinite(v)||Math.abs(v)>1||(i>=4&&v<0))||![0,1].includes(input.tap))throw Error('Invalid controller input');return {pad:[...p],tap:input.tap};}
-export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000}={}){
- const rooms=new Map(),sessions=new Map(),wss=new WebSocketServer({noServer:true,maxPayload:8192});
- function send(ws,m){if(ws?.readyState===1)ws.send(JSON.stringify(m));}
+export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliveryDelayMs=null}={}){
+ if(deliveryDelayMs!==null&&typeof deliveryDelayMs!=='function')throw Error('Room delivery delay must be a function');
+ const rooms=new Map(),sessions=new Map(),wss=new WebSocketServer({noServer:true,maxPayload:8192}),deliveryAt=new WeakMap(),deliveryPending=new WeakMap(),deliveryTimers=new Set(),deliveryStats={configured:0,scheduled:0,delivered:0,configuredDelayTotalMs:0,configuredDelayMinMs:null,configuredDelayMaxMs:0,headOfLineDelayMaxMs:0,byType:{}};
+ function send(ws,m){
+  if(ws?.readyState!==1)return;if(!deliveryDelayMs){ws.send(JSON.stringify(m));return;}
+  const configuredDelay=deliveryDelayMs(m),configured=configuredDelay!==null&&configuredDelay!==undefined;
+  if(configured&&(!Number.isFinite(configuredDelay)||configuredDelay<0||configuredDelay>10000))throw Error('Invalid room delivery delay');
+  const ms=configured?Math.ceil(configuredDelay):0,now=Date.now(),prior=deliveryAt.get(ws)??now,pending=deliveryPending.get(ws)??0,due=pending?Math.max(now+ms,prior+1,now+1):now+ms,wait=due-now;
+  if(configured){deliveryStats.configured++;deliveryStats.configuredDelayTotalMs+=ms;deliveryStats.configuredDelayMinMs=Math.min(deliveryStats.configuredDelayMinMs??ms,ms);deliveryStats.configuredDelayMaxMs=Math.max(deliveryStats.configuredDelayMaxMs,ms);deliveryStats.byType[m.type]=(deliveryStats.byType[m.type]??0)+1;}
+  if(!wait){ws.send(JSON.stringify(m));return;}
+  deliveryAt.set(ws,due);deliveryPending.set(ws,pending+1);deliveryStats.scheduled++;deliveryStats.headOfLineDelayMaxMs=Math.max(deliveryStats.headOfLineDelayMaxMs,wait);
+  const timer=setTimeout(()=>{deliveryTimers.delete(timer);const remaining=(deliveryPending.get(ws)??1)-1;if(remaining)deliveryPending.set(ws,remaining);else deliveryPending.delete(ws);if(ws.readyState===1){ws.send(JSON.stringify(m));deliveryStats.delivered++;}},wait);deliveryTimers.add(timer);
+ }
  function view(r,seat){return {type:'state',code:r.code,seat,cpu:r.cpu,epoch:r.epoch,connected:r.players.map(p=>p?.ws?.readyState===1),hasGuest:!!r.players[1],ready:[...r.ready],phase:r.phase,selected:r.selected,returnTo:r.returnTo??null,rematchVotes:r.rematchVotes??[false,false]};}
  function state(r){r.players.forEach((p,i)=>send(p?.ws,view(r,i)));}
  function reset(r,returnTo=null){r.returnTo=returnTo;r.ended=[null,null];r.rematchVotes=[false,false];r.epoch++;r.ready=[false,false];r.phase='characters';r.barriers.clear();r.inputs.clear();r.lastFrame=-1;r.phaseKey=null;r.sequence=-1;state(r);}
@@ -69,8 +79,9 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000}={}){
   ws.on('close',()=>{clearTimeout(timeout);if(session){const {r,seat}=session;if(r.players[seat]?.ws===ws){r.players[seat].ws=null;r.touched=Date.now();state(r);}}});
  }
  server.on('upgrade',(req,socket,head)=>{if(new URL(req.url,'http://localhost').pathname!=='/native-room'){socket.destroy();return;}if(!sameOrigin(req)){socket.destroy();return;}wss.handleUpgrade(req,socket,head,websocket);});
- const sweep=setInterval(()=>{for(const r of rooms.values())if(!r.players.some(p=>p?.ws?.readyState===1)&&Date.now()-r.touched>expiryMs){for(const p of r.players)if(p)sessions.delete(p.token);rooms.delete(r.code);}},5000);sweep.unref();server.on('close',()=>{clearInterval(sweep);for(const client of wss.clients)client.terminate();wss.close();});
- return {close(){clearInterval(sweep);for(const client of wss.clients)client.terminate();wss.close();},async handle(req,res){
+ let stopped=false;function stop(){if(stopped)return;stopped=true;clearInterval(sweep);for(const timer of deliveryTimers)clearTimeout(timer);deliveryTimers.clear();for(const client of wss.clients)client.terminate();wss.close();}
+ const sweep=setInterval(()=>{for(const r of rooms.values())if(!r.players.some(p=>p?.ws?.readyState===1)&&Date.now()-r.touched>expiryMs){for(const p of r.players)if(p)sessions.delete(p.token);rooms.delete(r.code);}},5000);sweep.unref();server.on('close',stop);
+ return {close:stop,deliverySnapshot(){return {...deliveryStats,byType:{...deliveryStats.byType}};},async handle(req,res){
   if(!['/native-rooms','/native-rooms/join','/native-rooms/resume'].includes(new URL(req.url,'http://localhost').pathname))return false;
   const reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   if(req.method!=='POST'||req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host){reply(403,{error:'Same-origin POST required'});return true;}
