@@ -4,7 +4,7 @@
   "configuration": {
     "browsers": 2,
     "framesPerBrowser": 1800,
-    "stage": "Final Destination",
+    "stage": "Battlefield",
     "characters": ["Falco", "Fox"],
     "resolution": [960, 720],
     "relay": "authenticated native room input/confirmation stream",
@@ -77,6 +77,44 @@
       }
     ]
   },
+  "combatCanvasCapture": {
+    "method": "The same per-seat 1,800-frame capture gate with deterministic normalized controller inputs driving original gameplay state; no fighter state, damage, position, velocity, or action state is written by the workload.",
+    "runs": [
+      {
+        "observedSeat": 0,
+        "capturedFrames": 1800,
+        "distinctSampledImages": 1800,
+        "captureFps": 59.960,
+        "simulationFps": [59.903, 59.742],
+        "drawSubmissionP95Ms": [10.7, 10.5],
+        "drawSubmissionMaxMs": [16.6, 24.4],
+        "attackFrames": [1192, 1135],
+        "hitlagFrames": [228, 210],
+        "damageFrames": [1649, 1648],
+        "contactWindowsPassed": [3, 3],
+        "corrections": [7, 128],
+        "replayedFrames": [21, 437],
+        "maxReplay": [4, 5]
+      },
+      {
+        "observedSeat": 1,
+        "capturedFrames": 1800,
+        "distinctSampledImages": 1800,
+        "captureFps": 59.961,
+        "simulationFps": [59.681, 59.909],
+        "drawSubmissionP95Ms": [10.6, 10.6],
+        "drawSubmissionMaxMs": [23.4, 16.5],
+        "attackFrames": [1160, 1193],
+        "hitlagFrames": [208, 228],
+        "damageFrames": [1649, 1649],
+        "contactWindowsPassed": [3, 3],
+        "corrections": [129, 0],
+        "replayedFrames": [475, 0],
+        "maxReplay": [6, 0]
+      }
+    ],
+    "passed": true
+  },
   "copying": {
     "replicaMode": "dirty",
     "replicaFramesIncludingWarmup": [1830, 1830],
@@ -95,6 +133,6 @@
     "requiredCapturedFramesPerObservedSeat": 1800,
     "canvasCaptureGatePassed": true,
     "product720p60Certified": false,
-    "reason": "The browser canvas gate passes, but physical presentation/input-to-photon remains unmeasured; the probe covers one lightweight matchup and stage and applies no WAN delay/jitter workload."
+    "reason": "The browser canvas gate passes under sustained contact-heavy play, but physical presentation/input-to-photon remains unmeasured; the probe covers one matchup and stage and applies no WAN delay/jitter workload."
   }
 }
