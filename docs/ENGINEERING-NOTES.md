@@ -53,6 +53,18 @@ gate at 59.557–59.698 simulation FPS and 59.770 captured FPS. Both clients
 reported `productionDefault: true`; a separate 900-frame CPU match did not enter
 rollback. See the
 [default-room evidence](benchmarks/browser-2026-09-18-native-room-default-rollback-720p60.json).
+Treat disconnect as a confirmation-horizon problem, not merely a socket retry.
+Pause input acceptance whenever either seat is absent, retain the last 512
+confirmed input pairs, and have the reconnecting client authenticate its epoch,
+phase key and last contiguous confirmation. Replay peer input before each missed
+confirmation and preserve WebSocket order. If the journal cannot cover the
+reported horizon, force the existing unsynchronized reload so the relay creates
+one coordinated fresh epoch; never resume from a partial history. Transport and
+browser tests cover both paths. The sustained forced-cut probe recovered seat 1
+at frame 600 in 268 ms without changing epoch or phase, then completed frame
+1799 with exact final convergence. Report both raw wall cadence (which includes
+the visible pause) and active cadence (which excludes only that measured pause);
+never describe reconnect recovery as uninterrupted presentation.
 
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.

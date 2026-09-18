@@ -12,8 +12,8 @@ from both seats at 59.882–59.974 captured FPS. The performance work batches
 transport corrections, separates the receive and prediction bounds, clears UBO
 staging once per frame, and resets only validity headers/active GX capture rows.
 A 120-frame Yoshi exact oracle compared 331,776,000 RGBA bytes with zero
-differences and zero camera mismatches. The 641-test repository suite passes
-(631 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
+differences and zero camera mismatches. The 645-test repository suite passes
+(635 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
 gate, not compositor scanout, WAN behavior, physical input-to-photon latency or
 all 676 matchups. [Roster performance evidence](benchmarks/browser-2026-09-18-native-room-roster-720p60.json)
 and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
@@ -45,6 +45,24 @@ default path, confirmed frame 1799, performed 201 corrections/434 replayed
 frames, rejected no late inputs and converged exactly. `?lockstep=1` remains a
 diagnostic fallback. A 900-frame CPU regression completed without entering
 rollback. [Default-room evidence](benchmarks/browser-2026-09-18-native-room-default-rollback-720p60.json).
+
+Unexpected room-socket loss now pauses both browsers and reconnects the same
+authenticated seat in place. The client reports its epoch, phase key and last
+contiguous confirmation; the relay retains a bounded 512-frame confirmed-input
+journal and replays only the missing peer inputs, lockstep frames and
+confirmations before it marks the seat connected again. The relay rejects new
+inputs while either seat is absent. If the requested horizon has fallen out of
+the journal, both peers take the existing coordinated fresh-epoch path instead
+of risking divergent state. Real WebSocket protocol and browser transport tests
+cover pause, replay, in-place reauthentication and the explicit fallback. A
+sustained run forcibly terminated seat 1's socket at frame 600, recovered the
+same epoch/phase in 268 ms, completed through confirmed frame 1799 and converged
+exactly. The outage appears honestly as a 283 ms maximum presentation interval
+and 59.35 raw wall FPS; subtracting exactly the measured paused interval gives
+59.84–59.85 simulation FPS and 59.88 captured FPS while connected, with all
+1,800 images distinct. This is deterministic short-disconnect recovery, not
+evidence for a particular WAN outage duration or browser/OS network timeout.
+[Reconnect and cadence evidence](benchmarks/browser-2026-09-18-native-room-reconnect-720p60.json).
 
 The separate 60-frame startup matrix remains the fast loading/correctness
 regression for all 25 roster tiles/26 playable starts and all six legal stages
