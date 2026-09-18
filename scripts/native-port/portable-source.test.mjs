@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {adaptStageCallbacks,adaptLinkArrowTable,adaptYoshiAttributes,adaptMotionStateWord,adaptPartnerStickConversion,adaptPlayerDemoMapping} from './portable-source.mjs';
+import {adaptStageCallbacks,adaptLinkArrowTable,adaptYoshiAttributes,adaptMotionStateWord,adaptPartnerStickConversion,adaptPlayerDemoMapping,adaptResultCameraReturn} from './portable-source.mjs';
 import fs from 'node:fs';
 
 test('Yoshi loader view exposes the actual Egg Throw floats rather than byte padding',()=>{
@@ -86,6 +86,19 @@ test('demo motion loading names the fighter mapping table instead of relying on 
  assert.match(converted,/mapping->extra_internal_id != -1/);
  assert(!converted.slice(converted.indexOf('void Player_80036E20'),converted.indexOf('HSD_JObj\* Player_80036EA0')).includes('str_PdPmdat_start_of_data'));
  assert.throws(()=>adaptPlayerDemoMapping(converted),/overlay changed/);
+});
+
+test('result fighter camera returns the camera object retained in PPC r3',()=>{
+ const original=fs.readFileSync(new URL('../../engines/melee-decomp/src/melee/gm/gm_1798.c',import.meta.url),'utf8'),converted=adaptResultCameraReturn(original);
+ const body=converted.slice(converted.indexOf('HSD_GObj* fn_8017A318'),converted.indexOf('Fighter_GObj* fn_8017A67C'));
+ assert.match(body,/fn_8017A078\(arg0\);\n    }\n    return gobj;/);
+ assert.match(body,/HSD_CObjLoadDesc\(\(HSD_CObjDesc\*\) &gmResultCameraDesc\)/);
+ assert.match(body,/kind_params\[kind_data\]\.z_scale\[vi\]/);
+ assert.match(body,/gmResultCharacterData\.slot_off\[kind_data\]\[1\]\[slot\]/);
+ assert(!body.includes('gmResultPlayerColors'));
+ assert.equal((converted.match(/portCObjSetCurrentOffscreen\(cobj\)/g)??[]).length,5);
+ assert(!converted.includes('HSD_CObjSetCurrent(cobj)'));
+ assert.throws(()=>adaptResultCameraReturn(converted),/return changed/);
 });
 
 test('pause bounds adapter preserves the original function and removes its mismatched callback cast',async()=>{

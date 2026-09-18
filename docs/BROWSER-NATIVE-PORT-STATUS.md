@@ -201,9 +201,13 @@ Fox/Falco, 1st/2nd, P1/P2, original inactive-port treatment, and native SIS
 score/KO/fall/self-destruct rows. A separate isolated actor module converts the
 nested result-motion DATs and constructs Fox/Falco through Melee's original
 result-demo path; both owners are distinct and their animation frames advance
-over 60 native steps. The actors are not yet drawn through their original
-result cameras/scissors, torn down under a lifecycle gate, or validated across
-all 26 characters. Live standings, product lifecycle integration, and native
+over 60 native steps. Their original per-player cameras now construct with the
+retail 20-degree projection and `270,370,124,276` scissor, the winner's separate
+full-frame camera is retained, and its untouched callback reaches Fox five times
+across passes 0–2. Actor teardown returns object/process counts to zero. The
+callbacks are not yet connected to GPU fighter pixels or the original EFB-copy
+portrait textures, and the actors are not yet validated across all 26
+characters. Live standings, product lifecycle integration, and native
 result-screen FPS also remain unfinished, so the current product screen remains
 the fixed-4:3 tournament presentation rather than a claimed complete native
 `GmRst` scene.

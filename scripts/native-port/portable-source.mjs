@@ -120,6 +120,26 @@ export function adaptPlayerDemoMapping(text){
  return text.replace(from,to);
 }
 
+export function adaptResultCameraReturn(text){
+ const signature='HSD_GObj* fn_8017A318(s32 arg0)';
+ const start=text.indexOf(signature),next=text.indexOf('\nFighter_GObj* fn_8017A67C',start);
+ if(start<0||next<0)throw Error('Result fighter camera function changed');
+ let body=text.slice(start,next);const needle='    if (slot == 0) {\n        fn_8017A078(arg0);\n    }\n}';
+ if(!body.includes(needle)||body.includes('return gobj;'))throw Error('Result fighter camera return changed');
+ const data='    CameraKindData* data = (CameraKindData*) gmResultPlayerColors;';
+ if(!body.includes(data)||(body.match(/data->kind/g)??[]).length!==7||(body.match(/data->slot_off/g)??[]).length!==2)throw Error('Result fighter camera data overlay changed');
+ body=body.replace(data,'    CameraKindParams* kind_params = (CameraKindParams*) gmResultCharacterScaleData;')
+   .replaceAll('data->kind','kind_params').replaceAll('data->slot_off','gmResultCharacterData.slot_off')
+   .replace('HSD_CObjLoadDesc(&data->cobj_desc)','HSD_CObjLoadDesc((HSD_CObjDesc*) &gmResultCameraDesc)')
+   .replace(needle,'    if (slot == 0) {\n        fn_8017A078(arg0);\n    }\n    return gobj;\n}');
+ let result=text.slice(0,start)+body+text.slice(next);
+ if((result.match(/HSD_CObjSetCurrent\(cobj\)/g)??[]).length!==5)throw Error('Result camera current setup changed');
+ const include='#include <sysdolphin/baselib/wobj.h>';
+ if(!result.includes(include))throw Error('Result camera include boundary changed');
+ result=result.replace(include,include+'\n\nextern bool portCObjSetCurrentOffscreen(HSD_CObj*);').replaceAll('HSD_CObjSetCurrent(cobj)','portCObjSetCurrentOffscreen(cobj)');
+ return result;
+}
+
 export function preparePortableSource(source,output) {
   const destination=path.join(output,'portable');
   const files=execFileSync('rg',['--files','src','libs/dolphin/include','libs/dolphin/src','-g','*.c','-g','*.h'],
@@ -526,7 +546,10 @@ unsigned portStageAnimationProbe(float rate,unsigned flags)
     if(file==='src/melee/ft/ftlib.h')replace('void ftLib_800876B4(HSD_GObj*);','bool ftLib_800876B4(HSD_GObj*);');
     if(file==='src/melee/ft/ftlib.c')replace('void ftLib_800876B4(HSD_GObj* gobj)\n{\n    ftAnim_IsFramesRemaining(gobj);\n}',
       'bool ftLib_800876B4(HSD_GObj* gobj)\n{\n    return ftAnim_IsFramesRemaining(gobj);\n}');
-    if(file==='src/melee/gm/gm_1798.c')replace('extern s32 ftLib_800876B4(HSD_GObj*);','extern bool ftLib_800876B4(HSD_GObj*);');
+    if(file==='src/melee/gm/gm_1798.c'){
+      replace('extern s32 ftLib_800876B4(HSD_GObj*);','extern bool ftLib_800876B4(HSD_GObj*);');
+      text=adaptResultCameraReturn(text);
+    }
     if(file==='src/melee/mn/mnmainrule.c')replace('void mnCharSel_802640A0(void);','s32 mnCharSel_802640A0(void);');
     if(file==='src/melee/mn/mnhyaku.c') {
       replace('void gm_801677E8(void);','void gm_801677E8(s8);');
