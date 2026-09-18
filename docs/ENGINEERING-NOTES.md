@@ -294,6 +294,15 @@ renderer detachment and all snapshot/dirty invariants. Uninstrumented or changed
 cores must keep the old scan. `--verify-immutable-table` forces it for controls.
 See `docs/BROWSER-NATIVE-IMMUTABLE-TABLE.md` for the audit and measurements.
 
+The same dirty fan-out can replace repeated texture source comparisons only
+through `createDirtyRangeTracker`. Its stamp polls every 4 KiB page spanned by
+the exact image/palette views, advances monotonic page versions before clearing
+raw marks, and fans each write to existing snapshot/presentation subscribers.
+Foreign buffers, memory growth, disposed trackers and version exhaustion must
+fail closed. A changed stamp always takes the original byte comparison; never
+use addresses alone as texture identity because rollback can restore different
+bytes at the same address. See `docs/BROWSER-NATIVE-TEXTURE-STAMPS.md`.
+
 Current rollback uses full Dolphin snapshots every four frames, a 12-frame late
 window, and five slots (~383 MB total on the measured build). Worst correction
 can replay 15 frames because it starts at the preceding checkpoint.

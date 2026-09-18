@@ -13,6 +13,7 @@ const drawopt=process.argv.includes('--drawopt=0')?'0':'1';
 const dirtyaudit=process.argv.includes('--dirtyaudit')?'1':'0';
 const tablescan=process.argv.includes('--verify-immutable-table')?'1':'0';
 const timeline=process.argv.includes('--timeline')?'1':'0';
+const texturestamp=process.argv.includes('--texture-stamp=0')?'0':'1';
 const sparserestore=process.argv.includes('--sparserestore=0')?'0':'1',snapshotaudit=process.argv.includes('--snapshotaudit')?'1':'0';
 const replicacopy=process.argv.includes('--replicacopy=dirty')?'dirty':'full';
 const presentation=process.argv.find(v=>v.startsWith('--presentation='))?.slice(15)??'conservative';if(!['conservative','replica'].includes(presentation))throw Error('Presentation boundary');
@@ -33,7 +34,7 @@ async function client(seat){
  ws.addEventListener('message',e=>{const m=JSON.parse(e.data),p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);}});
  c.cmd=(method,params={})=>new Promise((resolve,reject)=>{const n=++id,t=setTimeout(()=>{pending.delete(n);reject(Error('Timeout '+method));},60000);pending.set(n,{resolve:r=>{clearTimeout(t);resolve(r);},reject:e=>{clearTimeout(t);reject(e);}});ws.send(JSON.stringify({id:n,method,params}));});
  c.eval=async expression=>{const r=await c.cmd('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description??r.exceptionDetails.text);return r.result.value;};
- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/certification.html?'+new URLSearchParams({seat,token,frames,sparserestore,snapshotaudit,mode,presentation,replicacopy,dirtyaudit,tablescan,timeline,drawopt,uniformbuffer,exactstate,drawtiming,packedstate,immediatereuse,frameoracle,observer,workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
+ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/certification.html?'+new URLSearchParams({seat,token,frames,sparserestore,snapshotaudit,mode,presentation,replicacopy,dirtyaudit,tablescan,timeline,texturestamp,drawopt,uniformbuffer,exactstate,drawtiming,packedstate,immediatereuse,frameoracle,observer,workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
 }
 try{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));await client(0);if(mode==='rollback')await client(1);

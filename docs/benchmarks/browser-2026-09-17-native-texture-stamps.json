@@ -1,0 +1,156 @@
+{
+  "title": "Audited texture-source stamps for the direct-port replica renderer",
+  "date": "2026-09-17",
+  "baseCommit": "688f2f6",
+  "performanceCertified": false,
+  "decision": "Accept the dirty-range stamp as an exact renderer CPU reduction. Do not claim 720p60: the long candidate is near threshold but still misses simulation, captured-frame, and submission-interval gates.",
+  "productionTransport": "three-frame lockstep unchanged",
+  "scope": "Two localhost Chromium clients on one host, 960x720 native picture in a 1280x720 presentation, synthetic 15-130 ms delayed/reordered traffic, canvas capture rather than physical scanout.",
+  "sources": {
+    "certification.mjs": "99f2fe048a425a075bdc7a35fa45fd6dc96b86f728140528907093667b1a99ad",
+    "dirty-host-contract.mjs": "5c1ce8ab72024ef282041b71d0fd022caffdf97e7b05aea16225a9010e69338a",
+    "dirty-runtime.mjs": "b396356218e56faf71ebf52b8117f396f606dc053db1d0cb1dd0978c2990fc6a",
+    "presentation-cache.mjs": "6944913839f1f385bf68ae67d7c767604bc98bbe4688b989caffabc6bc8dd648",
+    "rollback-probe.mjs": "7953b359772784b17c3918e3d4ed1c6c3c173cfb43b2fbcab54a93e064d81ff7",
+    "probe-certification.mjs": "704ac118e0d02ec384c17b5ab4e581152ff43e1bdfb7fe399431dcbe82f42f00"
+  },
+  "profile600": {
+    "controlRawReportSha256": "70ec6d8f9a469388c36e3ce9df845f6be26cd6a85fe195b4b5538bcf9f0375a2",
+    "candidateRawReportSha256": "1e4110d87b1e30ed4845bfa30931f8676ea13392b53d01a8372cf1998d9db18d",
+    "control": {
+      "simulationFps": 59.67417898261266,
+      "textureBytesCompared": 614215208,
+      "textureLookupMeanMs": 0.7453333308299382,
+      "uboTexturesMeanMs": 0.9684999961654345,
+      "drawMeanMs": 7.3186666670441625,
+      "drawP95Ms": 12.300000011920929
+    },
+    "candidate": {
+      "simulationFps": 59.70802774411773,
+      "textureBytesCompared": 6918760,
+      "textureStampHits": 85319,
+      "textureStampMisses": 802,
+      "textureLookupMeanMs": 0.5328333330154419,
+      "uboTexturesMeanMs": 0.7329999982317289,
+      "drawMeanMs": 7.0371666662891705,
+      "drawP95Ms": 11.199999988079071
+    }
+  },
+  "longFountain": {
+    "framesPerClient": 1800,
+    "pair": "Pp-Pe",
+    "averages": {
+      "controlSimulationFps": 59.52317764361086,
+      "candidateSimulationFps": 59.565550526819074,
+      "simulationDeltaFps": 0.042372883208216194,
+      "controlCapturedFps": 59.43308023033879,
+      "candidateCapturedFps": 59.34613802646511,
+      "capturedDeltaFps": -0.0869422038736758,
+      "controlDrawMeanMs": 7.743472222412626,
+      "candidateDrawMeanMs": 7.345180555292302,
+      "drawDeltaMs": -0.3982916671203238
+    },
+    "runs": [
+      {
+        "name": "A1 exact compare",
+        "rawReportSha256": "32f6689a7c0e9ab35b6bb61502ffb6338c958ba7b821cc407d0ddb9da7d221f0",
+        "simulationFps": [59.54409074521778, 59.56064100494817],
+        "capturedFps": [59.394292741151816, 59.717188597451305],
+        "submissionP95Ms": [20.600000023841858, 22.899999976158142],
+        "drawMeanMs": [7.909111111097865, 7.6194444443119895],
+        "textureBytesCompared": [1843346728, 1843996200]
+      },
+      {
+        "name": "B1 dirty stamp",
+        "rawReportSha256": "64c2a2fbbe3602cf816f8af5e4a2695698098487bc87bfbc864f54799b290729",
+        "simulationFps": [59.49174221564735, 59.66527779156561],
+        "capturedFps": [59.5499894653868, 59.04316898174943],
+        "submissionP95Ms": [22.600000023841858, 20.899999976158142],
+        "drawMeanMs": [7.244222221208943, 7.4717777777049275],
+        "textureBytesCompared": [18438760, 18438760],
+        "textureStampHits": [256386, 257077]
+      },
+      {
+        "name": "B2 dirty stamp",
+        "rawReportSha256": "b2bf7f3e783f775a85359a04494022c7cd260c76b6e1e3f7bbf020b96936f95b",
+        "simulationFps": [59.51082105091419, 59.594361049149136],
+        "capturedFps": [59.75374989773044, 59.03764376099376],
+        "submissionP95Ms": [21.30000001192093, 22.30000001192093],
+        "drawMeanMs": [7.335944443941116, 7.32877777831422],
+        "textureBytesCompared": [18438760, 18438760],
+        "textureStampHits": [256721, 256986]
+      },
+      {
+        "name": "A2 exact compare",
+        "rawReportSha256": "be33f53ee670282b083517f44afe87bfa4d02d509bca479853177a13de965fc3",
+        "simulationFps": [59.42319881684147, 59.564780007436006],
+        "capturedFps": [59.45917533021827, 59.161664252533775],
+        "submissionP95Ms": [21.400000035762787, 22.30000001192093],
+        "drawMeanMs": [7.777888889213403, 7.667444445027245],
+        "textureBytesCompared": [1840025512, 1843709480]
+      }
+    ],
+    "allStateMatches": true,
+    "allPixelDifferences": 0,
+    "allCameraMatches": true,
+    "allTextureInvalidations": 0
+  },
+  "correctness": {
+    "perDrawAudits": [
+      {
+        "stage": "battlefield",
+        "pair": "Fx-Fc",
+        "frames": 240,
+        "comparedRgbaBytes": 663552000,
+        "differentBytes": 0,
+        "cameraMismatches": 0,
+        "textureStampHits": 21669,
+        "textureBytesCompared": 407232,
+        "rawReportSha256": "f30ffacc02b82ee272409d87212fbf46c97ff50a208812f25961a753fa70e99b"
+      },
+      {
+        "stage": "fountain",
+        "pair": "Pp-Pe",
+        "frames": 240,
+        "comparedRgbaBytes": 663552000,
+        "differentBytes": 0,
+        "cameraMismatches": 0,
+        "textureStampHits": 33766,
+        "textureBytesCompared": 3462760,
+        "rawReportSha256": "5529b5dff1454295d397fbc03d3d3aac3e527b0dc94236a95bf17b5e5073e8b3"
+      }
+    ],
+    "sixStageCorrectionMatrix": {
+      "framesPerStage": 240,
+      "stages": ["battlefield", "destination", "dreamland", "fountain", "story", "stadium"],
+      "allPassed": true,
+      "snapshotAudit": true,
+      "statePixelCameraExact": true,
+      "replayPresentations": 0
+    },
+    "heavyFountain": {
+      "frames": 1800,
+      "corrections": [163, 126],
+      "replayedFrames": [933, 700],
+      "stateBytes": 60686336,
+      "stateSha256": "184b73f275deea8143de2074fdb97a93bc68c9b450fe3511ae05ef8156d1404a",
+      "rawReportSha256": "d9df01165f3ced982a22c392470bf3d67f0ecb50dca8af54778b9f8cb773fa94"
+    },
+    "attachmentsAndRosterFixtures": {
+      "foxFalcoBothSeatOrders": true,
+      "linkKirby": true
+    },
+    "tests": {
+      "total": 625,
+      "passed": 615,
+      "skipped": 10,
+      "failed": 0
+    }
+  },
+  "remaining": [
+    "Candidate simulation and captured cadence are not repeatably at least 59.5 FPS on both clients.",
+    "Every measured candidate submission-interval p95 exceeds the 20 ms gate.",
+    "Production rooms still use lockstep rather than the diagnostic rollback path.",
+    "No physical input-to-photon, WAN, reconnect/recovery, audible rollback-SFX, exhaustive roster-interaction, or complete animated-results certification."
+  ]
+}

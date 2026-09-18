@@ -23,6 +23,13 @@ test('retained textures require exact image and palette bytes even when addresse
  assert.deepEqual(deleted,[1,2]);lease.release();cache.dispose();assert.deepEqual(deleted,[1,2,3]);
 });
 
+test('audited dirty range stamps skip unchanged texture bytes and recheck every changed page',()=>{
+ let version=0,compares=0;const tracker={stamp:()=>[3,version]},cache=createPresentationCache(),deleted=[],gl={isContextLost:()=>false,deleteProgram(){},deleteTexture:t=>deleted.push(t)},image=new Uint8Array([1,2,3]);cache.trackDirty(tracker);
+ let next=0,lease=cache.acquire(gl);assert.equal(lease.texture('t',[image],()=>++next),1);lease.release();
+ lease=cache.acquire(gl);assert.equal(lease.texture('t',[new Proxy(image,{get(target,key){if(key==='length')return target.length;if(typeof key==='string'&&/^\d+$/.test(key))compares++;return Reflect.get(target,key,target);}})],()=>++next),1);assert.equal(compares,0);
+ version++;image[1]=9;assert.equal(lease.texture('t',[image],()=>++next),2);lease.release();assert.deepEqual(deleted,[1]);assert.equal(cache.snapshot().textureStampHits,1);assert.equal(cache.snapshot().textureStampMisses,2);cache.dispose();
+});
+
 test('archive metadata and GPU identity are reused only within their immutable source/context lifetime',()=>{
  const cache=createPresentationCache(),bytes=new Uint8Array(40);const v=new DataView(bytes.buffer);v.setUint32(0,40);v.setUint32(4,8);
  const a=cache.archive(bytes);assert.equal(cache.archive(bytes),a);assert.notEqual(cache.archive(bytes.slice()),a);
