@@ -35,20 +35,21 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000}={}){
   }else if(m.type==='ended'){
    if(m.epoch!==r.epoch)return;
    if(!r.players[1]||r.cpu||r.phase!=='match'||m.key!==r.phaseKey)throw Error('Results require an active match');
+   if(!Number.isSafeInteger(m.frame)||m.frame<0||m.frame>r.lastFrame)throw Error('Match ending frame is not confirmed');
    const value={results:validateResults(m.value?.results),selection:returnTicket('rematch',m.value?.selection)};
    if(value.selection.players.some(p=>p.kind!==0))throw Error('Room results require human players');
-   if(r.ended[seat]&&JSON.stringify(r.ended[seat])!==JSON.stringify(value))throw Error('Conflicting match results');
-   r.ended[seat]=value;
+   if(r.ended[seat]&&JSON.stringify(r.ended[seat])!==JSON.stringify({frame:m.frame,value}))throw Error('Conflicting match results');
+   r.ended[seat]={frame:m.frame,value};
    if(r.ended.every(Boolean)){
-    if(JSON.stringify(r.ended[0])!==JSON.stringify(r.ended[1])){for(const p of r.players)send(p.ws,{type:'error',message:'Native match results diverged; rematch stopped'});return;}
+    if(JSON.stringify(r.ended[0].value)!==JSON.stringify(r.ended[1].value)){for(const p of r.players)send(p.ws,{type:'error',message:'Native match results diverged; rematch stopped'});return;}
     r.phase='results';r.inputs.clear();state(r);
    }
   }else if(m.type==='result-action'){
    if(m.epoch!==r.epoch)return;
    if(r.phase!=='results'||!r.ended.every(Boolean)||!r.players.every(p=>p?.ws?.readyState===1))throw Error('Both matching results and connected players are required');
    if(!['rematch','characters'].includes(m.action))throw Error('Invalid result action');
-   if(m.action==='characters')reset(r,returnTicket('characters',r.ended[0].selection));
-   else {r.rematchVotes[seat]=true;if(r.rematchVotes.every(Boolean))reset(r,returnTicket('rematch',r.ended[0].selection));else state(r);}
+   if(m.action==='characters')reset(r,returnTicket('characters',r.ended[0].value.selection));
+   else {r.rematchVotes[seat]=true;if(r.rematchVotes.every(Boolean))reset(r,returnTicket('rematch',r.ended[0].value.selection));else state(r);}
   }else if(m.type==='input'){
    if(r.phase==='results'||m.epoch!==r.epoch||m.key!==r.phaseKey||r.cpu||!r.players[1])return;
    if(!Number.isSafeInteger(m.frame)||m.frame<=r.lastFrame||m.frame>r.lastFrame+120)throw Error('Input outside live window');

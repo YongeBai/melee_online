@@ -90,6 +90,15 @@ integration, not production rollback: the live match still does not construct a
 checkpoint store, bind the correction kernel, or render corrected speculative
 state.
 
+Product result submission is also frame-gated. The live scheduler passes its
+ending frame to the room client; the client holds the native result until that
+frame is within the relay's confirmed horizon, and the relay independently
+rejects an ending tagged beyond its authoritative horizon. Only two matching
+native result payloads enter the results phase, after which the existing two-vote
+rematch/epoch transition applies. This prevents an honest speculative client
+from publishing a premature ending, but it does not yet reconstruct an ending
+after correction or make the relay authoritative over game simulation.
+
 The browser test uses two independent Chrome processes and a test-only WebSocket
 relay. It injects 15–130 ms packet delay/jitter and reordering. Each browser first
 runs an on-time reference from the same initial state, restores it, then runs its
@@ -99,9 +108,9 @@ match both references and each other. The relay sends inputs only.
 Audio requests use a deterministic speculative journal in this diagnostic;
 **no sound is presented**. Normal product menu/stage music is unchanged. Audible
 rollback still needs a confirmed-event commitment/deduplication policy and the
-unported SFX backend. Speculative match endings are rejected; authoritative
-end confirmation, results/rematch epoch integration and recovery after disconnect
-are not implemented here. Existing product results/rematch continue on lockstep.
+unported SFX backend. The product result transport now requires a confirmed
+ending frame, but speculative-ending correction and recovery after disconnect
+are not implemented. Existing product results/rematch continue on lockstep.
 
 ## Validation scope
 
@@ -164,8 +173,8 @@ lifecycle bug.
 3. Reduce checkpoint copy/retention cost with measured dirty-page or typed-region
    snapshots, retaining the full-copy implementation as a reference oracle.
 4. Bind the existing authenticated input/confirmation stream to a live
-   match-scoped checkpoint/correction owner; add terminal-event handling, then
-   reconnect recovery and audio commitment.
+   match-scoped checkpoint/correction owner; add corrected terminal-state
+   reconstruction, then reconnect recovery and audio commitment.
 5. Validate all roster/stage interactions, sustained rendered frame pacing,
    physical controllers, WAN conditions and input-to-photon latency.
 
