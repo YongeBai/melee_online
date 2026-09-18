@@ -183,6 +183,7 @@ for (const name of ['stage-archive.mjs','stage-item-assets.mjs','common-item-ass
   'joint-assets.mjs','verify-poses.mjs','mesh-assets.mjs','verify-meshes.mjs','skin-assets.mjs','verify-skin.mjs','material-assets.mjs','texture.mjs','texture-matrix.mjs','gpu-mesh.mjs','verify-gpu-conventions.mjs','gpu-preview.mjs','gpu-preview.html','estimate-vectors.mjs','verify.mjs', 'verify-runtime.mjs', 'index.html'])
   fs.copyFileSync(path.join(root, 'engines/browser-native', name), path.join(output, name));
 fs.copyFileSync(path.join(root,'engines/browser-native/native-rollback-driver.mjs'),path.join(output,'native-rollback-driver.mjs'));
+fs.copyFileSync(path.join(root,'engines/browser-native/native-product-rollback.mjs'),path.join(output,'native-product-rollback.mjs'));
 const wasm = fs.readFileSync(path.join(output, moduleName+'.wasm'));
 const module = new WebAssembly.Module(wasm);
 const report = {source, compiler:execFileSync(compiler, ['--version'], {encoding:'utf8'}).split('\n')[0],

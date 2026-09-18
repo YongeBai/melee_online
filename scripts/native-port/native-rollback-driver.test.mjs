@@ -10,8 +10,9 @@ test('rollback driver arms transport, preserves the neutral prefix and submits e
  assert.deepEqual(calls.filter(c=>c[0]==='send'),[['send',3,[256,-.5,0,0,0,0,0]]]);session.confirmed=3;assert.equal(driver.canFinish(3),true);driver.dispose();assert.equal(unbound,true);assert.throws(()=>driver.advance(4,samples),/closed/);
 });
 
-test('rollback driver stalls without transmitting a mutable replacement',()=>{
- const session={frame:3,confirmed:2,receive(){},acknowledge(){},reconcile(){},advance(){throw Error('must not advance');},snapshot(){return {};}};let sends=0;
- const network={active:true,seat:0,tapJump:1,begin(){},bindRollback(){return ()=>{};},sendInput(){sends++;return false;},snapshot(){return {};}};
- const driver=createNativeRollbackDriver({network,session});assert.equal(driver.advance(3,[[0,0,0],[0,0,0]]),false);assert.equal(sends,1);driver.dispose();
+test('rollback driver freezes a transmitted input while its prediction window is stalled',()=>{
+ const attempts=[],session={frame:3,confirmed:2,receive(){},acknowledge(){},reconcile(){},advance(input){attempts.push(input);return false;},snapshot(){return {};}};const sends=[];
+ const network={active:true,seat:0,tapJump:1,begin(){},bindRollback(){return ()=>{};},sendInput(frame,pad){sends.push([frame,[...pad]]);return true;},snapshot(){return {};}};
+ const driver=createNativeRollbackDriver({network,session});assert.equal(driver.advance(3,[[256,.5,0],[0,0,0]]),false);network.tapJump=0;assert.equal(driver.advance(3,[[0,-1,0],[0,0,0]]),false);
+ assert.deepEqual(sends,[[3,[256,.5,0,0,0,0,0]],[3,[256,.5,0,0,0,0,0]]]);assert.deepEqual(attempts,[{pad:[256,.5,0,0,0,0,0],tap:1},{pad:[256,.5,0,0,0,0,0],tap:1}]);driver.dispose();
 });

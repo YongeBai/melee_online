@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-17",
+  "scope": "Opt-in product-room complete-state correction with independent WASM presentation; localhost correctness and cost evidence, not 720p60, WAN, or input-to-photon certification.",
+  "configuration": {
+    "browsers": 2,
+    "framesPerBrowser": 60,
+    "stage": "Final Destination",
+    "characters": ["Falco", "Fox"],
+    "resolution": [960, 720],
+    "relay": "authenticated native room input/confirmation stream",
+    "checkpoint": "audited dirty core, exact sparse pages, four-frame interval",
+    "presentation": "independent dirty WASM replica with retained immutable GPU cache"
+  },
+  "result": {
+    "passed": true,
+    "matchingFighterState": true,
+    "confirmedFrame": [59, 59],
+    "corrections": [2, 5],
+    "replayedFrames": [7, 31],
+    "maxReplay": [5, 14],
+    "rejectedLateInputs": [0, 0]
+  },
+  "timing": {
+    "elapsedMs": [1137.8, 1235.6],
+    "simulationFpsFromElapsed": [52.73, 48.56],
+    "drawSubmissionMeanMs": [17.08, 17.93],
+    "drawSubmissionP50Ms": [12.6, 12.4],
+    "drawSubmissionP95Ms": [34.0, 47.3],
+    "drawSubmissionMaxMs": [146.3, 146.8],
+    "stepMeanMs": [1.16, 1.24]
+  },
+  "copying": {
+    "replicaMode": "dirty",
+    "replicaCopiedBytes": [94085120, 97173504],
+    "replicaFullCopies": [1, 1],
+    "snapshotRestoredBytes": [3080192, 7667712],
+    "fixedTableContents": true
+  },
+  "gate": {
+    "requiredFps": 60,
+    "passed": false,
+    "reason": "Both elapsed cadence and draw-tail latency miss the 16.67 ms sustained product budget."
+  }
+}
