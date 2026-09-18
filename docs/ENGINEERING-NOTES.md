@@ -7,6 +7,13 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+[Cold shader preparation](BROWSER-NATIVE-SHADER-PREWARM.md) eliminates observed
+compile spikes with the existing exact-source cache, but the repeated Fountain
+capture result stays about 57.1 FPS. The sampled 87-program rollout was rejected
+and its runtime changes reverted. Keep the distinction between cold-stutter
+improvement, exhaustive variant coverage, and sustained frame cadence; prioritize
+steady submission/correction costs for the remaining performance work.
+
 [Illusion/Phantasm attachment lifetime](BROWSER-NATIVE-ILLUSION-ATTACHMENTS.md)
 includes the separately owned `xDDC` ghost in native item enumeration. The
 original item callback draws both roots; registering only its primary tree

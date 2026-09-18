@@ -1,0 +1,164 @@
+diff --git a/engines/browser-native/certification.mjs b/engines/browser-native/certification.mjs
+index 43e4dca..6772dcf 100644
+--- a/engines/browser-native/certification.mjs
++++ b/engines/browser-native/certification.mjs
+@@ -28 +28 @@ if(mode==='calibration'){
+- const boot=await runNativeConstructor({module,presentationCache:cache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
++ const boot=await runNativeConstructor({module,shaderPreparationState:()=>JSON.stringify({globals:runtime.audit.globals.map(g=>runtime.instance.exports[g.name].value),host:audio.capture()}),presentationCache:cache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,...(params.get('prewarmshaders')==='1'?{prewarmshaders:1}:{}),map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
+@@ -43 +43 @@ if(mode==='calibration'){
+-  const corrections=[],sim=[],replaySim=[],advance=[],copy=[],capture=[],rebind=[],draw=[],dispose=[],restore=[],total=[],times=[],cameras=[],drawStages=[],glCalls=[],uniformFrames=[];
++  const corrections=[],sim=[],replaySim=[],advance=[],copy=[],capture=[],rebind=[],draw=[],dispose=[],restore=[],total=[],times=[],cameras=[],drawStages=[],glCalls=[],uniformFrames=[],shaderEvents=[],shaderFrames=[];let shaderCoverage=null;
+@@ -51 +51 @@ if(mode==='calibration'){
+-  function drawFrame(preview){const t=performance.now();lastDraw=preview.draw();if(lastDraw.materialDraws.uniformBufferFrame)uniformFrames.push(lastDraw.materialDraws.uniformBufferFrame);if(lastDraw.materialDraws.drawTiming)drawStages.push(lastDraw.materialDraws.drawTiming);if(lastDraw.materialDraws.exactGL)glCalls.push(lastDraw.materialDraws.exactGL);draw.push(performance.now()-t);observer.request();times.push(performance.now());cameras.push(camera(lastDraw));}
++  function drawFrame(preview){const t=performance.now();lastDraw=preview.draw();if(lastDraw.materialDraws.uniformBufferFrame)uniformFrames.push(lastDraw.materialDraws.uniformBufferFrame);if(lastDraw.materialDraws.drawTiming)drawStages.push(lastDraw.materialDraws.drawTiming);if(lastDraw.materialDraws.exactGL)glCalls.push(lastDraw.materialDraws.exactGL);const submittedAtMs=performance.now(),costMs=submittedAtMs-t;draw.push(costMs);const compilations=lastDraw.materialDraws.shaderCompilations??[];for(const entry of compilations)shaderEvents.push({frame:forward,drawStartMs:t,submittedAtMs,...entry});shaderFrames.push({frame:forward,drawStartMs:t,submittedAtMs,costMs,compileCpuMs:compilations.reduce((n,c)=>n+c.cpuMs,0),compilations:compilations.length});shaderCoverage=preview.shaderCoverage();observer.request();times.push(performance.now());cameras.push(camera(lastDraw));}
+@@ -71 +71 @@ if(mode==='calibration'){
+-   if(replica)replica.present(m=>boundary.createPreview(cache,m),view=>{cachedCamera=camera(view.draw());view.validateGpu();cachedPixels=pixels();});
++   if(replica)replica.present(m=>boundary.createPreview(cache,m),view=>{cachedCamera=camera(view.draw());view.validateGpu();cachedPixels=pixels();if(params.get('recordshaders')==='1')globalThis.certificationShaderSources=view.shaderSources();});
+@@ -89 +89 @@ if(mode==='calibration'){
+-   globalThis.certificationReport={diagnosticPassed:!failures.length,performanceCertified:false,failures,mode,seat,frames,elapsedMs:elapsed,simulationFps:1000*forward/elapsed,drawSubmissions:draw.length,submissionCadence:submission,observation,workload,actualWorkload,referenceHash,finalHash,stateMatches,measuredPlayersMatchReference:JSON.stringify(actualPlayers)===JSON.stringify(expectedPlayers),expectedPlayers,actualPlayers,pixelOracle:{differentBytes,comparedBytes:cachedPixels.length},frameOracle,camera:{sameAsFresh:sameCamera,corrected:cachedCamera,first:cameras[0],last:cameras.at(-1),fresh:oracleCamera,validatedEveryDraw:true},costs:{simulation:distribution(sim),correction:distribution(corrections),replaySimulation:distribution(replaySim),advanceIncludingCorrections:distribution(advance),presentationCopy:distribution(copy),presentationCapture:distribution(capture),rendererRebind:distribution(rebind),drawSubmission:distribution(draw),rendererDispose:distribution(dispose),presentationRestore:distribution(restore),forwardCallback:distribution(total)},uniformBufferMeasured:uniformFrames.reduce((sum,r)=>{sum.frames++;for(const key of Object.keys(r))sum[key]=(sum[key]??0)+r[key];return sum;},{frames:0}),drawStages:Object.fromEntries([...new Set(drawStages.flatMap(r=>Object.keys(r)))].map(key=>[key,{time:distribution(drawStages.map(r=>r[key]?.ms??0)),calls:drawStages.reduce((n,r)=>n+(r[key]?.calls??0),0)}])),glCalls:glCalls.reduce((sum,r)=>{for(const key of Object.keys(r))sum[key]=(sum[key]??0)+r[key];return sum;},{}),correctionBreakdown:{checkpointLookup:distribution(kernelTimings.filter(r=>r.phase==='lookup').map(r=>r.ms)),restoreTotal:distribution(kernelTimings.filter(r=>r.phase==='restore').map(r=>r.ms)),restoreCopy:distribution(snapshotTimings.filter(r=>r.phase==='restore').map(r=>r.copyMs)),restoreSelection:distribution(snapshotTimings.filter(r=>r.phase==='restore').map(r=>r.selectionMs)),restoreHost:distribution(snapshotTimings.filter(r=>r.phase==='restore').map(r=>r.hostMs)),replaySimulation:distribution(kernelTimings.filter(r=>r.phase==='replay').map(r=>r.ms)),checkpointForward:distribution(kernelTimings.filter(r=>r.phase==='checkpoint'&&!r.replay).map(r=>r.ms)),checkpointReplay:distribution(kernelTimings.filter(r=>r.phase==='checkpoint'&&r.replay).map(r=>r.ms))},audio:audio.snapshot(),audioJournalMatchesReference,kernel:kernel?.snapshot()??null,presentationBoundary:replica?'independent-replica':'conservative',replica:replicaMeasured,snapshotCosts:store.metrics(),cache:cache.snapshot(),gpuInfo:lastDraw?.gpuInfo,browser:navigator.userAgent,presentation:{width:1280,height:720,picture:[960,720],rect:picture.getBoundingClientRect().toJSON()},inputToPhoton:{measured:false,reason:'No physical input/display sensor; canvas capture is not photon timing.'},scope:'Diagnostic only; local retains native draw writes; detached modes isolate draw writes using the recorded presentation boundary; audio journal only.'};
++   globalThis.certificationReport={diagnosticPassed:!failures.length,performanceCertified:false,shaderProfile:{events:shaderEvents,frames:shaderFrames,coverage:shaderCoverage,prewarm:params.get('prewarmshaders')==='1'},failures,mode,seat,frames,elapsedMs:elapsed,simulationFps:1000*forward/elapsed,drawSubmissions:draw.length,submissionCadence:submission,observation,workload,actualWorkload,referenceHash,finalHash,stateMatches,measuredPlayersMatchReference:JSON.stringify(actualPlayers)===JSON.stringify(expectedPlayers),expectedPlayers,actualPlayers,pixelOracle:{differentBytes,comparedBytes:cachedPixels.length},frameOracle,camera:{sameAsFresh:sameCamera,corrected:cachedCamera,first:cameras[0],last:cameras.at(-1),fresh:oracleCamera,validatedEveryDraw:true},costs:{simulation:distribution(sim),correction:distribution(corrections),replaySimulation:distribution(replaySim),advanceIncludingCorrections:distribution(advance),presentationCopy:distribution(copy),presentationCapture:distribution(capture),rendererRebind:distribution(rebind),drawSubmission:distribution(draw),rendererDispose:distribution(dispose),presentationRestore:distribution(restore),forwardCallback:distribution(total)},uniformBufferMeasured:uniformFrames.reduce((sum,r)=>{sum.frames++;for(const key of Object.keys(r))sum[key]=(sum[key]??0)+r[key];return sum;},{frames:0}),drawStages:Object.fromEntries([...new Set(drawStages.flatMap(r=>Object.keys(r)))].map(key=>[key,{time:distribution(drawStages.map(r=>r[key]?.ms??0)),calls:drawStages.reduce((n,r)=>n+(r[key]?.calls??0),0)}])),glCalls:glCalls.reduce((sum,r)=>{for(const key of Object.keys(r))sum[key]=(sum[key]??0)+r[key];return sum;},{}),correctionBreakdown:{checkpointLookup:distribution(kernelTimings.filter(r=>r.phase==='lookup').map(r=>r.ms)),restoreTotal:distribution(kernelTimings.filter(r=>r.phase==='restore').map(r=>r.ms)),restoreCopy:distribution(snapshotTimings.filter(r=>r.phase==='restore').map(r=>r.copyMs)),restoreSelection:distribution(snapshotTimings.filter(r=>r.phase==='restore').map(r=>r.selectionMs)),restoreHost:distribution(snapshotTimings.filter(r=>r.phase==='restore').map(r=>r.hostMs)),replaySimulation:distribution(kernelTimings.filter(r=>r.phase==='replay').map(r=>r.ms)),checkpointForward:distribution(kernelTimings.filter(r=>r.phase==='checkpoint'&&!r.replay).map(r=>r.ms)),checkpointReplay:distribution(kernelTimings.filter(r=>r.phase==='checkpoint'&&r.replay).map(r=>r.ms))},audio:audio.snapshot(),audioJournalMatchesReference,kernel:kernel?.snapshot()??null,presentationBoundary:replica?'independent-replica':'conservative',replica:replicaMeasured,snapshotCosts:store.metrics(),cache:cache.snapshot(),gpuInfo:lastDraw?.gpuInfo,browser:navigator.userAgent,presentation:{width:1280,height:720,picture:[960,720],rect:picture.getBoundingClientRect().toJSON()},inputToPhoton:{measured:false,reason:'No physical input/display sensor; canvas capture is not photon timing.'},scope:'Diagnostic only; local retains native draw writes; detached modes isolate draw writes using the recorded presentation boundary; audio journal only.'};
+@@ -103 +103 @@ if(mode==='calibration'){
+- }});if(boot.error)throw Error(boot.error);globalThis.certificationBoot={fighterForms:boot.fighterForms,stage:params.get('map')??'battlefield'};
++ }});if(boot.error)throw Error(boot.error);globalThis.certificationBoot={shaderPreparation:boot.shaderPreparation,fighterForms:boot.fighterForms,stage:params.get('map')??'battlefield'};
+diff --git a/engines/browser-native/constructor-runner.mjs b/engines/browser-native/constructor-runner.mjs
+index f4d5402..def5173 100644
+--- a/engines/browser-native/constructor-runner.mjs
++++ b/engines/browser-native/constructor-runner.mjs
+@@ -283,0 +284 @@ try {
++      if(params.has('recordshaders')){report.shaderTransitions??=[];for(const entry of drawn.materialDraws?.shaderCompilations??[])report.shaderTransitions.push({frame:report.renderedSteps??0,...entry});}
+@@ -371,0 +373,3 @@ try {
++        // Compilation is GL-only: prove the complete live heap and optional
++        // exported-global/host journal boundary do not move during preparation.
++        const nativeBefore=module.HEAPU8.slice(),extraBefore=options.shaderPreparationState?.();
+@@ -372,0 +377,6 @@ try {
++        const nativeAfter=module.HEAPU8;
++        if(nativeAfter.length!==nativeBefore.length)throw Error('Shader preparation changed native memory size');
++        const oldWords=new Uint32Array(nativeBefore.buffer),newWords=new Uint32Array(nativeAfter.buffer,nativeAfter.byteOffset,nativeAfter.byteLength/4);
++        for(let i=0;i<oldWords.length;i++)if(oldWords[i]!==newWords[i])throw Error('Shader preparation changed native memory at '+(i*4));
++        if(extraBefore!==options.shaderPreparationState?.())throw Error('Shader preparation changed exported globals or host state');
++        Object.assign(report.shaderPreparation,{nativeBytesUnchanged:true,bytesCompared:nativeBefore.length,globalsAndHostChecked:!!options.shaderPreparationState});
+diff --git a/engines/browser-native/dirty-host-contract.mjs b/engines/browser-native/dirty-host-contract.mjs
+index ea1b228..ab3ee35 100644
+--- a/engines/browser-native/dirty-host-contract.mjs
++++ b/engines/browser-native/dirty-host-contract.mjs
+@@ -15 +15 @@ export const dirtyHostContract = {
+-  "certification.mjs": "77cb26329847620d39b6e9e1534f21099b28bcbf373a038b142ecb1bb8126da9",
++  "certification.mjs": "14e098a818ec93a522f85dc1580b22ce65f3c5dace4c50c303b07ad1ef36c6e6",
+@@ -21 +21 @@ export const dirtyHostContract = {
+-  "constructor-runner.mjs": "f067a71d7e05c83d35b589ce7c4c6689fedf4e2d92d3304fd425f742aa14cc4f",
++  "constructor-runner.mjs": "cfafcbda6cef9481842584c676bc111dabc010e1ab4eccde2021812cf348764a",
+@@ -79 +79 @@ export const dirtyHostContract = {
+-  "presentation-cache.mjs": "9705e33855e77ee81f33584e09aa890b9f52575abdedc803f8d83758304165a0",
++  "presentation-cache.mjs": "73fcb33c8365e94f069f92991410aaaedb6cbf313c2f0e616c210cfa5d53666c",
+@@ -84 +84 @@ export const dirtyHostContract = {
+-  "rollback-probe.mjs": "1f50c883ef4c8e04893e137cf9810c4f0a880d20ffdbeb4155f5a0598df6c967",
++  "rollback-probe.mjs": "37b5a886ce2b6c8ac9718761b12ec83ca722441f10a3b21f3db6c5ed285a6737",
+diff --git a/engines/browser-native/presentation-cache.mjs b/engines/browser-native/presentation-cache.mjs
+index af0469a..1fa1353 100644
+--- a/engines/browser-native/presentation-cache.mjs
++++ b/engines/browser-native/presentation-cache.mjs
+@@ -28 +28 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
+-  let drawUniformBuffer=null,immediatePool=null,context=null,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
++  let drawUniformBuffer=null,immediatePool=null,context=null,contextInvalid=false,leases=0,closed=false,archives=new WeakMap(),gpuInfo=null;
+@@ -29,0 +30,5 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
++  // A restored WebGL object has a new resource lifetime, even when its JS
++  // identity is unchanged. Fail closed; the caller creates and warms a fresh
++  // cache after recovery rather than using invalid pre-loss programs/models.
++  const invalidateContext=()=>{contextInvalid=true;};
++  function bindContext(gl){if(!context){context=gl;gl.canvas?.addEventListener?.('webglcontextlost',invalidateContext);}}
+@@ -38,2 +43,2 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
+-      if(closed||gl.isContextLost()||(context&&context!==gl))throw Error('Presentation cache context unavailable');
+-      context=gl;return gpuInfo??=read();
++      if(closed||contextInvalid||gl.isContextLost()||(context&&context!==gl))throw Error('Presentation cache context unavailable');
++      bindContext(gl);return gpuInfo??=read();
+@@ -42 +47 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
+-      if(closed||gl.isContextLost()||(context&&context!==gl))throw Error('Presentation cache context unavailable');
++      if(closed||contextInvalid||gl.isContextLost()||(context&&context!==gl))throw Error('Presentation cache context unavailable');
+@@ -44 +49 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
+-      context=gl;leases++;stats.rendererLeases++;
++      bindContext(gl);leases++;stats.rendererLeases++;
+@@ -76 +81 @@ export function createPresentationCache({submissionOptimized=true,packedState=tr
+-      if(closed)return;closed=true;
++      if(closed)return;closed=true;context?.canvas?.removeEventListener?.('webglcontextlost',invalidateContext);
+diff --git a/engines/browser-native/rollback-probe.mjs b/engines/browser-native/rollback-probe.mjs
+index bcb9be2..37f1ad2 100644
+--- a/engines/browser-native/rollback-probe.mjs
++++ b/engines/browser-native/rollback-probe.mjs
+@@ -21 +21 @@ try{
+- const boot=await runNativeConstructor({module:runtime.module,presentationCache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,...(params.has('illusionrestore')?{illusionattachments:1}:{}),map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
++ const boot=await runNativeConstructor({module:runtime.module,shaderPreparationState:()=>JSON.stringify({globals:runtime.audit.globals.map(g=>runtime.instance.exports[g.name].value),host:audio.capture()}),presentationCache,canvas:picture,params:{tournament:1,hud:1,damagehud:1,intro:1,stagecallbacks:1,render:1,rendersteps:1,...(params.has('prewarmshaders')?{prewarmshaders:1}:{}),...(params.has('illusionrestore')?{illusionattachments:1}:{}),map:params.get('map')??'battlefield',character:params.get('character')??'Fc',opponent:params.get('opponent')??'Fx',gpuerrors:'deferred',...(params.get('map')==='fountain'?{fountaincosmetics:'off',fountainscenery:'off'}:{})},onMatchBoundary:async boundary=>{
+@@ -70 +70 @@ try{
+-     illusionRestore.push({label:row.label,attachments:row.attachments,drawn,differentBytes,rgbaBytes:rgba.length,sameCamera,camera:camera(rendered),stateSha256:hash.stateSha256});
++     illusionRestore.push({label:row.label,attachments:row.attachments,drawn,shaderCompilations:rendered.materialDraws.shaderCompilations,differentBytes,rgbaBytes:rgba.length,sameCamera,camera:camera(rendered),stateSha256:hash.stateSha256});
+@@ -126 +126 @@ try{
+- }});if(boot.error)throw Error(boot.error);globalThis.rollbackBoot={fighterForms:boot.fighterForms,selectedCostumes:boot.selectedCostumes,stage:params.get('map')??'battlefield'};
++ }});if(boot.error)throw Error(boot.error);globalThis.rollbackBoot={shaderPreparation:boot.shaderPreparation,fighterForms:boot.fighterForms,selectedCostumes:boot.selectedCostumes,stage:params.get('map')??'battlefield'};
+diff --git a/scripts/native-port/probe-certification.mjs b/scripts/native-port/probe-certification.mjs
+index 760a221..1794cc0 100644
+--- a/scripts/native-port/probe-certification.mjs
++++ b/scripts/native-port/probe-certification.mjs
+@@ -0,0 +1 @@
++import {shaderIdentityFiles,validateShaderCatalog} from '../../engines/browser-native/shader-catalog.mjs';
+@@ -7,0 +9 @@ const immediatereuse=process.argv.find(v=>v.startsWith('--immediatereuse='))?.sl
++const prewarmshaders=process.argv.includes('--prewarm-shaders')?'1':'0',recordshaders=process.argv.includes('--record-shaders')?'1':'0';
+@@ -19 +21 @@ const label=process.argv.find(v=>v.startsWith('--label='))?.slice(8)??'latest';i
+-const sourceFiles=[...(replicacopy==='dirty'?['dirty-runtime.mjs','dirty-host-contract.mjs','dirty-core.json','melee-dirty.wasm']:[]),'certification.mjs','render-replica.mjs','wasm-snapshot.mjs','frame-evidence.mjs','frame-evidence-worker.mjs','native-match-preview.mjs','material-gpu.mjs','owned-uniform-state.mjs','draw-uniform-buffer.mjs','native-state-intern.mjs','native-texture.mjs','presentation-cache.mjs','paged-snapshot.mjs','snapshot-page-kernel.mjs','melee-fighter-init.wasm','native-live.mjs','native-camera.mjs','constructor-runner.mjs','rollback-session.mjs','rollback-audio.mjs','combat-workload.mjs','native-input.mjs'];const provenance={startedAt:new Date().toISOString(),node:process.version,host:{platform:os.platform(),release:os.release(),cpu:os.cpus()[0]?.model},sources:Object.fromEntries(sourceFiles.map(f=>[f,createHash('sha256').update(fs.readFileSync(path.join(root,'dist/native-port',f))).digest('hex')]))};
++const sourceFiles=[...(replicacopy==='dirty'?['dirty-runtime.mjs','dirty-host-contract.mjs','dirty-core.json','melee-dirty.wasm']:[]),'shader-catalog.mjs','certification.mjs','render-replica.mjs','wasm-snapshot.mjs','frame-evidence.mjs','frame-evidence-worker.mjs','native-match-preview.mjs','material-gpu.mjs','owned-uniform-state.mjs','draw-uniform-buffer.mjs','native-state-intern.mjs','native-texture.mjs','presentation-cache.mjs','paged-snapshot.mjs','snapshot-page-kernel.mjs','melee-fighter-init.wasm','native-live.mjs','native-camera.mjs','constructor-runner.mjs','rollback-session.mjs','rollback-audio.mjs','combat-workload.mjs','native-input.mjs'];const provenance={startedAt:new Date().toISOString(),node:process.version,driverShaderCacheDisabled:process.env.MESA_SHADER_CACHE_DISABLE==='true',shaderCatalogSha256:fs.existsSync(path.join(root,'dist/native-port/native-shader-catalog.json'))?createHash('sha256').update(fs.readFileSync(path.join(root,'dist/native-port/native-shader-catalog.json'))).digest('hex'):null,host:{platform:os.platform(),release:os.release(),cpu:os.cpus()[0]?.model},sources:Object.fromEntries(sourceFiles.map(f=>[f,createHash('sha256').update(fs.readFileSync(path.join(root,'dist/native-port',f))).digest('hex')]))};
+@@ -34 +36 @@ async function client(seat){
+- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/certification.html?'+new URLSearchParams({seat,token,frames,sparserestore,snapshotaudit,mode,presentation,replicacopy,dirtyaudit,drawopt,uniformbuffer,exactstate,drawtiming,packedstate,immediatereuse,frameoracle,observer,workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
++ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/certification.html?'+new URLSearchParams({seat,token,frames,prewarmshaders,recordshaders,sparserestore,snapshotaudit,mode,presentation,replicacopy,dirtyaudit,drawopt,uniformbuffer,exactstate,drawtiming,packedstate,immediatereuse,frameoracle,observer,workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
+@@ -40,2 +42,2 @@ try{
+- for(const [i,c]of clients.entries()){if(c.profiling){const profile=await c.cmd('Profiler.stop');fs.writeFileSync(output+'/cpu-'+i+'.json',JSON.stringify(profile));}const s=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/corrected-'+i+'.png',Buffer.from(s.data,'base64'));}
+- fs.writeFileSync(output+'/report.json',JSON.stringify({completed:true,provenance,mode,presentation,replicacopy,sparserestore,snapshotaudit,dirtyaudit,drawopt,uniformbuffer,exactstate,drawtiming,packedstate,immediatereuse,frameoracle,observer,stage,pair,frames,workload,transport,reports},null,2));console.log(JSON.stringify({completed:true,performanceCertified:false,mode,stage,pair,frames,reports:reports.map(r=>({passed:r.diagnosticPassed,failures:r.failures,fps:r.simulationFps,capturedFps:r.observation.cadence?.fps,costs:r.costs}))}));
++ for(const [i,c]of clients.entries()){if(recordshaders==='1'){const programs=await c.eval('globalThis.certificationShaderSources'),identity={wasmSha256:createHash('sha256').update(fs.readFileSync(path.join(root,'dist/native-port/melee-fighter-init.wasm'))).digest('hex'),sources:Object.fromEntries(shaderIdentityFiles.map(name=>[name,createHash('sha256').update(fs.readFileSync(path.join(root,'dist/native-port',name))).digest('hex')]))};const catalog=validateShaderCatalog({version:1,identity,programs},identity);fs.writeFileSync(output+'/shaders-'+i+'.json',JSON.stringify(catalog)+'\n');}if(c.profiling){const profile=await c.cmd('Profiler.stop');fs.writeFileSync(output+'/cpu-'+i+'.json',JSON.stringify(profile));}const s=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/corrected-'+i+'.png',Buffer.from(s.data,'base64'));}
++ fs.writeFileSync(output+'/report.json',JSON.stringify({completed:true,prewarmshaders,recordshaders,provenance,mode,presentation,replicacopy,sparserestore,snapshotaudit,dirtyaudit,drawopt,uniformbuffer,exactstate,drawtiming,packedstate,immediatereuse,frameoracle,observer,stage,pair,frames,workload,transport,reports},null,2));console.log(JSON.stringify({completed:true,performanceCertified:false,mode,stage,pair,frames,reports:reports.map(r=>({passed:r.diagnosticPassed,failures:r.failures,fps:r.simulationFps,capturedFps:r.observation.cadence?.fps,costs:r.costs}))}));
+diff --git a/scripts/native-port/probe-rollback.mjs b/scripts/native-port/probe-rollback.mjs
+index a0fea4d..ab25688 100644
+--- a/scripts/native-port/probe-rollback.mjs
++++ b/scripts/native-port/probe-rollback.mjs
+@@ -8,0 +9 @@ const presentation=process.argv.includes('--presentation=replica')?'replica':'co
++const prewarmshaders=process.argv.includes('--prewarm-shaders');
+@@ -11 +12 @@ const workload=process.argv.find(v=>v.startsWith('--workload='))?.slice(11)??'sc
+-const output=path.join(root,'dist/native-port/experiment-rollback-'+(presentation==='replica'?'replica-'+(replicacopy==='dirty'?'dirty-':''):'')+(illusionrestore?'illusion-restore-':'')+stage+'-'+pair.join('-')+(workload==='combat'?'-combat':'')+(snapshot==='full'||gpucache==='0'?'-'+snapshot+'-gpu'+gpucache:'-optimized'));fs.mkdirSync(output,{recursive:true});
++const output=path.join(root,'dist/native-port/experiment-rollback-'+(presentation==='replica'?'replica-'+(replicacopy==='dirty'?'dirty-':''):'')+(prewarmshaders?'prewarm-':'')+(illusionrestore?'illusion-restore-':'')+stage+'-'+pair.join('-')+(workload==='combat'?'-combat':'')+(snapshot==='full'||gpucache==='0'?'-'+snapshot+'-gpu'+gpucache:'-optimized'));fs.mkdirSync(output,{recursive:true});
+@@ -26 +27 @@ async function client(seat){
+- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/rollback-probe.html?'+new URLSearchParams({seat,token,frames,sparserestore,snapshotaudit,presentation,replicacopy,...(illusionrestore?{illusionrestore:1}:{}),workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
++ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/rollback-probe.html?'+new URLSearchParams({seat,token,frames,sparserestore,snapshotaudit,presentation,replicacopy,...(prewarmshaders?{prewarmshaders:1}:{}),...(illusionrestore?{illusionrestore:1}:{}),workload,snapshot,gpucache,map:stage,character:pair[0],opponent:pair[1]})});return c;
+@@ -35 +36 @@ try{
+- fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,stage,pair,frames,illusionrestore,workload,snapshot,gpucache,sparserestore,snapshotaudit,transport,reports},null,2));console.log(JSON.stringify({passed:true,stage,pair,frames,hash:reports[0].finalHash.stateSha256,bytes:reports[0].finalHash.bytes,corrections:reports.map(r=>r.kernel.corrections),replayed:reports.map(r=>r.kernel.replayedFrames),renderMutatedWasm:reports.map(r=>r.renderMutatedWasm)}));
++ fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,stage,pair,frames,prewarmshaders,illusionrestore,workload,snapshot,gpucache,sparserestore,snapshotaudit,transport,reports},null,2));console.log(JSON.stringify({passed:true,stage,pair,frames,hash:reports[0].finalHash.stateSha256,bytes:reports[0].finalHash.bytes,corrections:reports.map(r=>r.kernel.corrections),replayed:reports.map(r=>r.kernel.replayedFrames),renderMutatedWasm:reports.map(r=>r.renderMutatedWasm)}));
+diff --git a/scripts/native-port/shader-prewarm.test.mjs b/scripts/native-port/shader-prewarm.test.mjs
+new file mode 100644
+index 0000000..980f490
+--- /dev/null
++++ b/scripts/native-port/shader-prewarm.test.mjs
+@@ -0,0 +1,29 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {createMaterialRenderer} from '../../engines/browser-native/material-gpu.mjs';
++import {createPresentationCache} from '../../engines/browser-native/presentation-cache.mjs';
++
++function fixture(){
++ const counts={compiled:0,linked:0,freed:0,deleted:0},canvas=new EventTarget();let forbidden=false,lost=false;
++ const module=new Proxy({_malloc:()=>48,_free:()=>counts.freed++},{get(target,key){if(forbidden)throw Error('Native access during compilation: '+String(key));return target[key];},set(target,key,value){if(forbidden)throw Error('Native write during compilation');target[key]=value;return true;}});
++ const gl={canvas,VERTEX_SHADER:1,FRAGMENT_SHADER:2,COMPILE_STATUS:3,LINK_STATUS:4,INTERLEAVED_ATTRIBS:5,
++  isContextLost:()=>lost,getExtension:()=>null,createShader:type=>({type}),shaderSource(s,text){s.text=text;},compileShader(){counts.compiled++;},getShaderParameter:()=>true,
++  createProgram:()=>({}),attachShader(){},transformFeedbackVaryings(){},linkProgram(){counts.linked++;},getProgramParameter:()=>true,deleteShader(){},deleteProgram(){counts.deleted++;}};
++ return {counts,module,gl,denyNative:v=>{forbidden=v;},lose(){lost=true;canvas.dispatchEvent(new Event('webglcontextlost'));},restore(){lost=false;}};
++}
++const sources=n=>({vertex:'#version 300 es\n// vertex '+n,fragment:'#version 300 es\n// fragment '+n});
++test('preparation compiles exact source pairs once, shares the actual cache, and makes no native accesses',()=>{
++ const f=fixture(),cache=createPresentationCache({uniformBuffer:false}),a=createMaterialRenderer(f.gl,f.module,{presentationCache:cache}),catalog=[sources(1),sources(2)],copy=JSON.stringify(catalog);
++ f.denyNative(true);const prepared=a.prewarm([...catalog,catalog[0]]);f.denyNative(false);
++ assert.equal(prepared.compiled,2);assert.equal(f.counts.linked,2);assert.equal(JSON.stringify(catalog),copy);assert.deepEqual(a.shaderSources(),catalog);assert.deepEqual(a.shaderCoverage(),{programs:2,prepared:2,preparedUsed:0,unpreparedUsed:0});a.dispose();
++ const b=createMaterialRenderer(f.gl,f.module,{presentationCache:cache});f.denyNative(true);assert.equal(b.prewarm(catalog).compiled,0);assert.equal(b.prewarm([{...catalog[0],fragment:catalog[0].fragment+'\n// changed'}]).compiled,1);assert.equal(b.prewarm([{...catalog[0],vertex:catalog[0].vertex+'\n// changed'}]).compiled,1);f.denyNative(false);b.dispose();cache.dispose();assert.equal(f.counts.deleted,4);
++});
++test('shader preparation is isolated between caches and must recompile after context loss/restoration',()=>{
++ const f=fixture(),first=createPresentationCache({uniformBuffer:false});let a=createMaterialRenderer(f.gl,f.module,{presentationCache:first});assert.equal(a.prewarm([sources(1)]).compiled,1);a.dispose();
++ const independent=createPresentationCache({uniformBuffer:false});a=createMaterialRenderer(f.gl,f.module,{presentationCache:independent});assert.equal(a.prewarm([sources(1)]).compiled,1);a.dispose();independent.dispose();
++ f.lose();assert.throws(()=>first.acquire(f.gl),/context unavailable/);f.restore();assert.throws(()=>first.acquire(f.gl),/context unavailable/);first.dispose();
++ const recovered=createPresentationCache({uniformBuffer:false});a=createMaterialRenderer(f.gl,f.module,{presentationCache:recovered});assert.equal(a.prewarm([sources(1)]).compiled,1);a.dispose();recovered.dispose();assert.equal(f.counts.linked,3);
++});
++test('failed shader links are rejected, deleted and never marked prepared',()=>{
++ const f=fixture();f.gl.getProgramParameter=()=>false;f.gl.getProgramInfoLog=()=> 'unsupported variant';const cache=createPresentationCache({uniformBuffer:false}),a=createMaterialRenderer(f.gl,f.module,{presentationCache:cache});assert.throws(()=>a.prewarm([sources(1)]),/unsupported variant/);assert.equal(a.shaderCoverage().prepared,0);assert.equal(f.counts.deleted,1);a.dispose();cache.dispose();
++});
