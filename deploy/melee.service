@@ -1,15 +1,15 @@
 [Unit]
-Description=Melee browser game worker
+Description=Melee browser-native WASM tournament server
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-# Install the checkout at /opt/melee and use a dedicated account with GPU access.
+# Install the checkout at /opt/melee and use a dedicated account.
 User=melee
 WorkingDirectory=/opt/melee
 Environment=NODE_ENV=production
-ExecStart=/usr/bin/node --env-file-if-exists=.env scripts/serve.mjs
+ExecStart=/usr/bin/node --env-file-if-exists=.env scripts/native-port/release-server.mjs
 Restart=on-failure
 RestartSec=5
 KillMode=control-group

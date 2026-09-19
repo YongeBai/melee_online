@@ -178,6 +178,14 @@ now isolates draw-side allocations and native writes in a second private WASM
 instance. It removes per-draw gameplay snapshot/restore, but rollback remains
 below the 59.5 simulation/captured-FPS gate. Production rooms remain lockstep.
 
+The browser-native release server now provides the hosted product boundary at
+`/play/`: it launches the human-only tournament flow, rejects diagnostic HTML
+and non-allowlisted/ISO paths, preserves room query parameters, serves the
+allowlisted result music path, and applies cross-origin isolation. Its access
+cookie and exact-origin checks protect both room POSTs and WebSockets. This
+closes the local packaging/routing gap; it does not by itself validate an
+external TLS host or WAN performance.
+
 The [every-frame direct-port diagnostic](BROWSER-NATIVE-720P60.md) now separates
 30-second local combat from two-browser delayed-input rollback, including an
 independent browser capture observer and timing controls. The local workloads

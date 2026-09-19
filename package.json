@@ -16,6 +16,7 @@
     "setup:native-port": "node scripts/native-port/setup.mjs",
     "build:native-port": "node scripts/native-port/build.mjs",
     "verify:native-port": "node scripts/native-port/verify.mjs",
-    "test:native-port": "node --test scripts/native-port/*.test.mjs"
+    "test:native-port": "node --test scripts/native-port/*.test.mjs",
+    "serve:native-port": "node --env-file-if-exists=.env scripts/native-port/release-server.mjs"
   }
 }

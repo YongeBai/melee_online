@@ -22,14 +22,36 @@ if(fs.existsSync(path.join(output,'ui-fixtures.json')))for(const name of JSON.pa
 files.add('music-fixtures.json');
 if(fs.existsSync(path.join(output,'music-fixtures.json')))for(const name of Object.keys(JSON.parse(fs.readFileSync(path.join(output,'music-fixtures.json'))))){if(!/^[a-z0-9_]+\.hps$/.test(name))throw Error('Invalid music fixture');files.add('audio/'+name);}
 const types={'.css':'text/css','.png':'image/png','.js':'text/javascript','.html':'text/html; charset=utf-8','.mjs':'text/javascript','.wasm':'application/wasm','.json':'application/json'};
-export function createNativePortServer({enableRooms=true,roomOptions}={}) { const server=createServer(async(req,res)=> {
+const isolationHeaders={'Cross-Origin-Opener-Policy':'same-origin','Cross-Origin-Embedder-Policy':'require-corp','Cross-Origin-Resource-Policy':'same-origin','X-Content-Type-Options':'nosniff'};
+export function nativePortFile(pathname,{productEntry=false}={}) {
+ if(!productEntry)return pathname.slice(1)||'index.html';
+ if(pathname==='/play/')return 'character-menu.html';
+ if(pathname.startsWith('/play/')){
+  const name=pathname.slice(6);
+  if(name.endsWith('.html')&&name!=='character-menu.html')return null;
+  return name;
+ }
+ if(pathname.startsWith('/audio/'))return pathname.slice(1);
+ return null;
+}
+export function createNativePortServer({enableRooms=true,roomOptions,productEntry=false,access=null,outputDir=output,allowedFiles=files}={}) { const server=createServer(async(req,res)=> {
+  if(access&&!access.check(req,res))return;
+  let url;try{url=new URL(req.url,'http://localhost');}catch{res.writeHead(400).end();return;}
+  if(productEntry&&(url.pathname==='/'||url.pathname==='/play')){res.writeHead(302,{Location:'/play/'+url.search}).end();return;}
+  if(productEntry&&url.pathname==='/health'){
+   if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{Allow:'GET, HEAD'}).end();return;}
+   const body=JSON.stringify({engine:'browser-native-wasm',dolphin:false,rooms:enableRooms,width:960,height:720});
+   res.writeHead(200,{'Content-Type':'application/json','Content-Length':Buffer.byteLength(body),'Cache-Control':'no-store',...isolationHeaders});
+   res.end(req.method==='HEAD'?'':body);return;
+  }
   if(relay&&await relay.handle(req,res))return;
-  const name=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';
-  if(!files.has(name)||!fs.existsSync(path.join(output,name))){res.writeHead(404).end();return;}
-  if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405).end();return;}
-  res.writeHead(200,{'Content-Type':types[path.extname(name)]||'application/octet-stream',
-    'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
-  if(req.method==='HEAD')res.end();else fs.createReadStream(path.join(output,name)).pipe(res);
-});const relay=enableRooms?createNativeRoomRelay(server,roomOptions):null;Object.defineProperty(server,'nativeRoomRelay',{value:relay});const close=server.close.bind(server);server.close=(callback)=>{relay?.close();return close(callback);};return server; }
+  const name=nativePortFile(url.pathname,{productEntry});
+  if(!name||!allowedFiles.has(name)||!fs.existsSync(path.join(outputDir,name))){res.writeHead(404).end();return;}
+  if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{Allow:'GET, HEAD'}).end();return;}
+  const stat=fs.statSync(path.join(outputDir,name));
+  res.writeHead(200,{'Content-Type':types[path.extname(name)]||'application/octet-stream','Content-Length':stat.size,
+    'Cache-Control':productEntry?'private, no-cache':'no-store',...isolationHeaders});
+  if(req.method==='HEAD')res.end();else {const stream=fs.createReadStream(path.join(outputDir,name));stream.on('error',()=>res.destroy());res.on('close',()=>stream.destroy());stream.pipe(res);}
+ });const relay=enableRooms?createNativeRoomRelay(server,roomOptions):null;Object.defineProperty(server,'nativeRoomRelay',{value:relay});const close=server.close.bind(server);server.close=(callback)=>{relay?.close();return close(callback);};return server; }
 if(process.argv[1] && import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)
   createNativePortServer().listen(port,'127.0.0.1',()=>console.log(`Native-port subsystem verification: http://127.0.0.1:${port}/`));
