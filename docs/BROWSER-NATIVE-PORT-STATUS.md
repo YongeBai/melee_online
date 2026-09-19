@@ -209,14 +209,17 @@ Fox winner is now also drawn through the original fighter callback and exact
 winner-camera projection into the WebGL framebuffer: 59 material draws and
 6,972 verified vertices produce 29,651 non-black pixels across a 202×312 region
 in the inspected 960×720 image. The browser preview still orchestrates the three
-passes outside the complete original camera traversal. The original EFB-copy
-portrait textures, loser composition, and all 26 result actors are not yet
-validated. Live standings, product lifecycle integration, and native
-result-screen FPS also remain unfinished, so the current product screen remains
-the fixed-4:3 tournament presentation rather than a claimed complete native
-`GmRst` scene.
+passes outside the complete original camera traversal. Subsequent work validates
+the original EFB-copy portrait textures, loser composition, and every playable
+result actor in a 13-pair isolated matrix. The product now consumes live
+standings in the same WASM runtime and displays the original `GmRst` panel plus
+winner and portrait fighter draws; its focused 120-frame result probe measured
+59.335 FPS at 960×720. This remains browser-canvas evidence, not physical
+scanout or exhaustive gameplay-parity certification.
 [Original result-asset evidence](benchmarks/browser-2026-09-18-native-result-scene-assets.json).
 [Native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
+[Full result-roster evidence](benchmarks/browser-2026-09-18-native-result-roster.json).
+[Live product-result evidence](benchmarks/browser-2026-09-18-native-live-results.json).
 
 Rooms require matching results from both clients and two rematch votes. Either
 player can return both to CSS. One coordinated epoch/reload preserves room code

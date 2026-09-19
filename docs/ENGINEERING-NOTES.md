@@ -111,10 +111,11 @@ frames with zero cleanup leaks. The isolated path also loads the hosted
 fall, and self-destruct rows at the original `0x62`-`0x68` joint anchors. Feed
 that layer only already-derived counters: the displayed score is derived from
 KOs, falls, and self-destructs rather than copying the packed product score word.
-Build this experiment with `--result-scene`; it
-has a separate `melee-result-scene.wasm` so result iteration cannot perturb the
-validated product fighter core. Do not put it in the product result lifecycle
-until it consumes live standings and renders the fighter cameras.
+Build the isolated experiment with `--result-scene`; it has a separate
+`melee-result-scene.wasm` so result iteration cannot perturb the validated
+product fighter core. The product lifecycle now consumes live standings and
+renders the same panel and fighter-camera composition through its ordinary
+runtime; retain the isolated target as the exhaustive roster and cleanup gate.
 
 The isolated target now also constructs Fox and Falco through the original
 `fn_8017A67C` result-demo path. Convert both the outer `GmRstM??.dat` metadata
@@ -130,10 +131,10 @@ advancing native frames (Fox 0→60, Falco 0→10 after its loop). A separate Fo
 winner draw now feeds the original fighter callback through the material GPU
 renderer under the untouched winner-camera projection. It submits 59 materials
 and verifies 6,972 transformed vertices; framebuffer readback finds 29,651
-non-black pixels in a 202×312 region. This is direct winner-camera evidence, not
-the final panel composition. Result-camera/scissor texture composition,
-all-roster construction, live standings handoff, and result-screen cadence are
-still separate gates.
+non-black pixels in a 202×312 region. This is direct winner-camera evidence. The
+later isolated roster matrix closes result-camera/scissor texture composition
+and all-roster construction; the product live-result probe separately closes
+the live standings handoff and its short 120-frame browser-canvas cadence gate.
 
 The same isolated target now constructs the untouched per-player cameras through
 `fn_8017A318`. PPC retained that function's camera pointer in `r3` and treated
@@ -148,9 +149,11 @@ the isolated module deliberately has no console video mode. Teardown now returns
 actor objects and processes to zero. The Fox winner GPU probe uses the exact
 winner camera and original fighter draw callback, but its three render passes are
 still orchestrated by the browser preview rather than entered through the whole
-original camera callback traversal. The loser portraits and final composition
-still require the original EFB-copy-to-panel-texture boundary, which is not
-implemented yet.
+original camera callback traversal. The later implementation uses the original
+EFB-copy-to-panel-texture boundary for both portrait slots and requires the
+allocated RGB5A3 address to appear in the original panel material. Keep this
+earlier winner-camera probe independent so a final-composite success cannot
+conceal a broken actor draw.
 
 The optimization notes below preserve the state of earlier experiments; their
 old production-disabled conclusions are superseded by the default-room gate.

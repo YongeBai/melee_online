@@ -5,6 +5,7 @@
   "command": "node scripts/native-port/probe-result-roster.mjs",
   "cases": 13,
   "characters": 26,
+  "lifecycleOrdering": "The isolated actor runtime creates and retires the result scene before fighter, item, effect, camera, and dynamics support pools are loaded, matching a fresh scene and preventing teardown through unsupported generic destructors.",
   "checksPerCase": [
     "requested external CharacterKind and exact internal FighterKind",
     "finite initial and post-animation actor state",
