@@ -30,7 +30,7 @@ if(captureMode&&!rollbackMode)throw Error('Captured-frame room probe requires ro
 if(resultsMode&&rollbackMode)throw Error('Full results lifecycle probe uses lockstep');
 if(resultsMode&&lrasMode)throw Error('Choose one results lifecycle probe');
 if((relayDelays||clientDelays)&&!rollbackMode)throw Error('Room delay injection requires rollback mode');
-let relayDelayIndex=0,clientDelayIndex=0;const server=createNativePortServer({productEntry:releaseEntry,roomOptions:relayDelays||clientDelays?{
+let relayDelayIndex=0,clientDelayIndex=0;const server=createNativePortServer({productEntry:releaseEntry,allowProductDiagnostics:releaseEntry,roomOptions:relayDelays||clientDelays?{
  deliveryDelayMs:relayDelays?(m=>m.key?.startsWith('match:')&&m.frame>=3&&['peer-input','confirmed-frame'].includes(m.type)?relayDelays[relayDelayIndex++%relayDelays.length]:null):null,
  receiveDelayMs:clientDelays?(m=>m.key?.startsWith('match:')&&m.frame>=3&&m.type==='input'?clientDelays[clientDelayIndex++%clientDelays.length]:null):null
 }:undefined});

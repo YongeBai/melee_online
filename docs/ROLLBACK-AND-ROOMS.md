@@ -27,7 +27,8 @@ no items. Each player has an independent tap-jump setting.
 
 Normal rooms are human-only and fail closed when the relay is unavailable.
 Human-versus-CPU exists only behind the explicit `?diagnostic-cpu=1`
-development switch and cannot resume into the normal product URL.
+switch on the development server. Release routing strips that switch, and a
+diagnostic room cannot resume into the normal product URL.
 
 ## Historical native-streaming/Dolphin architecture
 

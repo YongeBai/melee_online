@@ -9,7 +9,9 @@ There is no ISO upload, file picker, `/local-disc` route, or Dolphin process.
 The server only serves names in the native-port build manifest. `/play/` maps to
 `character-menu.html`, relative modules and assets remain beneath `/play/`, and
 the original victory audio is available through the allowlisted `/audio/`
-alias. `/` and `/play` redirect to `/play/` while preserving room query strings.
+alias. `/` and `/play` redirect to the canonical interactive `/play/` URL.
+Release routing preserves only a syntactically valid invite code and strips
+development CPU, lockstep, scripted-workload, frame-limit, and capture switches.
 The `/health` response identifies `browser-native-wasm`, reports
 `dolphin: false`, and records the 960×720 presentation target.
 
@@ -38,7 +40,8 @@ origin and a 24+ character access key are configured.
 
 For an unauthenticated loopback smoke test, leave the public origin and access
 key unset and run `npm run serve:native-port`, then open
-`http://127.0.0.1:3000/`. `npm start` remains the development path. The legacy
+`http://127.0.0.1:3000/`. The redirect automatically enables interactive play;
+no query switch is required. `npm start` remains the development path. The legacy
 `npm run serve` command is the separate native-streaming implementation and is
 not the browser-native tournament deployment.
 
