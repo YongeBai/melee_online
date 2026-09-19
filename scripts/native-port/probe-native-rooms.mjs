@@ -1,7 +1,7 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn} from 'node:child_process';import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
 const root=path.resolve(import.meta.dirname,'../..'),clients=[];
-const resultsMode=process.argv.includes('--results');
+const resultsMode=process.argv.includes('--results'),lrasMode=process.argv.includes('--lras'),lifecycleMode=resultsMode||lrasMode;
 const rollbackMode=process.argv.includes('--rollback'),framesArg=process.argv.find(arg=>arg.startsWith('--frames='));
 const combatMode=process.argv.includes('--combat');
 const pairArg=process.argv.find(arg=>arg.startsWith('--pair=')),pair=pairArg?.slice('--pair='.length).split(',').map(Number)??null;
@@ -26,13 +26,14 @@ const matchFrames=framesArg?Number(framesArg.slice('--frames='.length)):rollback
 if(!Number.isSafeInteger(matchFrames)||matchFrames<1)throw Error('--frames must be a positive integer');
 if(disconnectSeat!==null&&(!Number.isSafeInteger(disconnectFrame)||disconnectFrame<1||disconnectFrame>=matchFrames))throw Error('--disconnect-frame must be within the requested match');
 if(captureMode&&!rollbackMode)throw Error('Captured-frame room probe requires rollback mode');
-if(resultsMode&&rollbackMode)throw Error('Rollback room probe uses a bounded match');
+if(resultsMode&&rollbackMode)throw Error('Full results lifecycle probe uses lockstep');
+if(resultsMode&&lrasMode)throw Error('Choose one results lifecycle probe');
 if((relayDelays||clientDelays)&&!rollbackMode)throw Error('Room delay injection requires rollback mode');
 let relayDelayIndex=0,clientDelayIndex=0;const server=createNativePortServer({roomOptions:relayDelays||clientDelays?{
  deliveryDelayMs:relayDelays?(m=>m.key?.startsWith('match:')&&m.frame>=3&&['peer-input','confirmed-frame'].includes(m.type)?relayDelays[relayDelayIndex++%relayDelays.length]:null):null,
  receiveDelayMs:clientDelays?(m=>m.key?.startsWith('match:')&&m.frame>=3&&m.type==='input'?clientDelays[clientDelayIndex++%clientDelays.length]:null):null
 }:undefined});
-const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':rollbackMode?'-rollback':''));fs.mkdirSync(output,{recursive:true});
+const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':lrasMode?'-lras':rollbackMode?'-rollback':''));fs.mkdirSync(output,{recursive:true});
 async function client(capture=false){
  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'native-room-')),chromeArgs=['--headless=new','--no-sandbox','--enable-gpu','--disable-dev-shm-usage','--window-size=1280,1100','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],cpuSet=clientCpuSets?.[clients.length],browser=spawn(cpuSet?'taskset':'google-chrome',cpuSet?['-c',cpuSet,'google-chrome',...chromeArgs]:chromeArgs,{stdio:['ignore','ignore','pipe']});let stderr='';browser.stderr.on('data',b=>stderr=(stderr+b).slice(-12000));
  const c={profile,browser};clients.push(c);
@@ -45,7 +46,7 @@ async function client(capture=false){
  c.click=async selector=>{const pos=await c.eval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e||e.hidden||e.disabled)throw Error('Button unavailable');const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);for(const type of ['mousePressed','mouseReleased'])await c.cmd('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...pos});};
  const held=new Set();c.keys=async next=>{for(const code of held)if(!next.includes(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyUp',code,key:code});held.delete(code);}for(const code of next)if(!held.has(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyDown',code,key:code});held.add(code);}};
  c.press=async code=>{await c.keys([code]);await delay(100);await c.keys([]);await delay(100);};
- await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(rollbackMode?'':'&lockstep=1')+(resultsMode?'':'&liveframes='+matchFrames+(capture?'&captureframes=1':'')+(combatMode?'&workload=1':''))});await c.wait('globalThis.characterMenuReport?.passed');return c;
+ await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(rollbackMode?'':'&lockstep=1')+(lifecycleMode?'':'&liveframes='+matchFrames+(capture?'&captureframes=1':'')+(combatMode?'&workload=1':''))});await c.wait('globalThis.characterMenuReport?.passed');return c;
 }
 try{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const a=await client(captureSeats.has(0)),b=await client(captureSeats.has(1));
@@ -86,9 +87,19 @@ try{
  await delay(100);
  if(holdASeat!==null){await [a,b][holdASeat].keys(['KeyP']);if(holdASeat===1)await a.press('KeyP');}
  else await a.press('KeyP');
- const matchReady=rollbackMode?'globalThis.nativeLive?.snapshot().frames>=1||globalThis.nativeMenuMatchReport':'globalThis.nativeLive?.snapshot().match?.intro?.gate===1';await a.wait(matchReady,120000);await b.wait(matchReady,120000);if(holdASeat!==null)await [a,b][holdASeat].keys([]);
+ const matchReady=lrasMode?'globalThis.nativeLive?.snapshot().match?.intro?.gate===1':rollbackMode?'globalThis.nativeLive?.snapshot().frames>=1||globalThis.nativeMenuMatchReport':'globalThis.nativeLive?.snapshot().match?.intro?.gate===1';await a.wait(matchReady,120000);await b.wait(matchReady,120000);if(holdASeat!==null)await [a,b][holdASeat].keys([]);
  let disconnectRecovery=null;if(disconnectSeat!==null){await a.wait('globalThis.nativeLive?.snapshot().frames>='+disconnectFrame,120000);const before=await Promise.all([a,b].map(c=>c.eval('nativeRoom.snapshot()'))),startedAt=performance.now();if(!server.nativeRoomRelay?.testDisconnectSeat(code,disconnectSeat))throw Error('Could not terminate requested room socket');await Promise.all([a,b].map(c=>c.wait('!nativeRoom.connected')));const paused=await Promise.all([a,b].map(c=>c.eval('nativeRoom.snapshot()')));await Promise.all([a,b].map(c=>c.wait('nativeRoom.connected',30000)));const resumed=await Promise.all([a,b].map(c=>c.eval('nativeRoom.snapshot()')));if(resumed.some((r,i)=>r.epoch!==before[i].epoch||r.phase!==before[i].phase||r.confirmedFrame<before[i].confirmedFrame))throw Error('Reconnect changed the live match '+JSON.stringify({before,paused,resumed}));disconnectRecovery={seat:disconnectSeat,requestedFrame:disconnectFrame,elapsedMs:performance.now()-startedAt,before,paused,resumed};}
- if(resultsMode){
+ if(lrasMode){
+  await a.eval('nativeMenuInput.pulse(0x1000)');await a.wait('nativeLive?.snapshot().match?.pause?.[0]===1');await a.wait('nativeLive.snapshot().match.pause[2]===0');
+  await a.eval('nativeMenuInput.pulse(0x1160)');
+  await Promise.all([a,b].map(c=>c.wait('globalThis.nativeMenuMatchReport?.results&&nativeRoom.state.phase==="results"',90000)));
+  await Promise.all([a,b].map(c=>c.wait('document.querySelector("#nativeResults")?.dataset.ready==="true"')));
+  const reports=await Promise.all([a,b].map(c=>c.eval('(()=>{const result=nativeMenuMatchReport.results,room=nativeRoom.snapshot(),dialog=document.querySelector("#nativeResults");return {result,room,scene:nativeMenuLive.snapshot().scene,presentation:{title:dialog.querySelector("h1").textContent,call:dialog.querySelector("header").textContent,nativeCanvas:!!dialog.querySelector(".native-result-canvas"),players:[...dialog.querySelectorAll(".results-player")].map(p=>p.textContent)}};})()')));
+  if(reports.some(r=>r.result.outcome!==7||r.result.winnerCount!==2||!r.result.players.every(p=>p.winner)||r.scene!=='results'||r.presentation.nativeCanvas||r.presentation.players.some(p=>!p.includes('NO CONTEST')||p.includes('WIN'))||!r.room.pendingEnding?.sent||r.room.pendingEnding.frame>r.room.confirmedFrame))throw Error('Invalid LRAS result '+JSON.stringify(reports));
+  if(JSON.stringify(reports[0].result)!==JSON.stringify(reports[1].result))throw Error('LRAS result divergence');
+  await b.click('#charactersButton');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90')));
+  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,productScope,initial,reports,rollback:rollbackMode,scope:'Two authenticated product browsers execute original pause and LRAS input; the native NO CONTEST result must be confirmed, identical on both peers and return both clients to character select.'},null,2));console.log(JSON.stringify({passed:true,lras:true,rollback:rollbackMode,outcome:reports[0].result.outcome,winnerCount:reports[0].result.winnerCount,confirmedFrame:reports[0].room.confirmedFrame}));
+ }else if(resultsMode){
   const lifecycle=[];
   async function ended(outcome){
    await Promise.all([a,b].map(c=>c.wait('globalThis.nativeMenuMatchReport?.results&&nativeRoom.state.phase==="results"',90000)));

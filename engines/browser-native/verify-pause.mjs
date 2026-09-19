@@ -13,7 +13,7 @@ export function verifyNativePause(module,objects,report,{step,onStep=()=>{},came
   objects.forEach((_,i)=>module._Player_80031848(i));
   function tick(samples=[neutral,neutral],snapshot){
     samples.forEach((s,i)=>module._portControllerSample(i,...s));step();report.frames++;
-    const row={phase,states:read(),pause:pause(),clock:clock(),snapshot,camera:cameraState(),stage:readStage?.()??null};report.trace.push(row);onStep(row);return row;
+    const row={phase,states:read(),pause:pause(),clock:clock(),exit:module._portTournamentRead(25,0),outcome:module._portTournamentRead(16,0),snapshot,camera:cameraState(),stage:readStage?.()??null};report.trace.push(row);onStep(row);return row;
   }
   try{
   for(let i=0;i<120;i++)tick();
@@ -42,6 +42,11 @@ export function verifyNativePause(module,objects,report,{step,onStep=()=>{},came
     if(platformMotion)require(Math.abs(readStage()[slot][0]-frozen.stage[slot][0])>.0001,'platform motion resumes');
     report.cycles.push({slot,movingStage,stageAfter:readStage?.()??null,frozenFrames,clockBefore:frozen.clock,clockAfter:clock()});
   }
+  phase='LRAS no contest';let samples=[start,neutral];let row=tick(samples,'lras-pause');require(row.pause[0]===1&&row.pause[1]===0,'P1 opens pause before LRAS');
+  for(let i=0;i<15;i++)tick(samples);tick();samples=[[0x1160,0,0,0,0,1,1],neutral];row=tick(samples,'lras-exit');
+  require(row.exit===1&&row.outcome===7,'native LRAS requests a no-contest scene exit');module._portTournamentFinish();
+  report.lras={outcome:module._portTournamentResultRead(0,0),winnerCount:module._portTournamentResultRead(2,0),sceneExit:row.exit,sceneState:module._portTournamentRead(20,0)};
+  require(report.lras.outcome===7&&report.lras.winnerCount===2&&report.lras.sceneState===0,'native no-contest standings preserve the LRAS terminal state');
   report.completed=true;
   }finally{camera.dispose();}
 }

@@ -7,6 +7,15 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+LRAS is a distinct original terminal state. `fn_8016CF4C` sets
+`OUTCOME_NO_CONTEST` and requests scene exit, but intentionally does not advance
+`VsSceneState.unk_0` to the GAME/TIME finished value. Finish validation must
+accept either the ordinary state-3 boundary or a nonzero native outcome with a
+real scene-exit request; do not synthesize a stock loss or rewrite the state
+byte. The no-contest record marks both standings entries, so the browser must
+preserve that record while suppressing winner styling and victory presentation.
+See the [LRAS evidence](benchmarks/browser-2026-09-18-native-lras-results.json).
+
 The product URL is strictly human 1v1. New relay rooms must default to
 `cpu=false`; hide the CPU action, reject server-side CPU enable messages, and
 fail closed when the relay is unavailable. CPU play exists only behind

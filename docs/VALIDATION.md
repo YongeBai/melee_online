@@ -1,5 +1,19 @@
 # Validation — September 8–9, 2026
 
+September 18 LRAS update: an isolated native pause probe and the authenticated
+two-browser default-rollback product both complete original L+R+A+Start. The
+native scene-exit flag becomes 1 and outcome becomes 7 (`NO CONTEST`) while the
+LRAS-specific scene-state byte correctly remains zero. Both browsers confirmed
+terminal frame 137, agreed exactly on the native standings, displayed NO CONTEST
+without a fabricated winner scene, and returned together to character select.
+The renewed core also passed a 1,800-frame combat revalidation: both clients ran
+at 59.616–59.920 simulation FPS and the observed seat produced 1,800 distinct
+960×720 frames at 59.968 FPS, with no black or wrong-size frame.
+The renewed dirty-core audit found the same write instruction counts. All 366
+native-port tests pass, and the full 653-test repository suite reports 643 pass,
+10 skip and zero failures. See the
+[LRAS evidence](benchmarks/browser-2026-09-18-native-lras-results.json).
+
 September 18 product-scope update: a normal hosted room is now human-only from
 creation. It starts with `cpu=false`, hides the CPU control, and the relay rejects
 an attempted CPU enable. If the relay is unavailable, startup fails closed

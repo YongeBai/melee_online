@@ -64,6 +64,7 @@ test('player controls retain WASD, attacks, independent shields, C-stick and hal
  const {meleeKeyboardSample:sample}=await import('../../engines/browser-native/native-input.mjs');
  const one=key=>sample(new Set([key]));
  for(const [key,button]of [['KeyP',0x100],['KeyO',0x200],['Space',0x400],['KeyU',0x10],['Enter',0x1000],['Escape',0x1000]])assert.equal(one(key)[0],button);
+ assert.equal(sample(new Set(['KeyI','KeyL','KeyP','Enter']))[0],0x1160);
  assert.deepEqual(one('KeyI'),[0x40,0,0,0,0,1,0]);assert.deepEqual(one('KeyL'),[0x20,0,0,0,0,0,1]);
  assert.deepEqual(sample(new Set(['KeyD','KeyW','ShiftLeft'])).slice(1,3),[.5/Math.SQRT2,.5/Math.SQRT2]);
  assert.deepEqual(sample(new Set(['KeyM','KeyK'])).slice(3,5),[-1,1]);assert.deepEqual(sample(new Set(['Period','Comma'])).slice(3,5),[1,-1]);

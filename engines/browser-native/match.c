@@ -197,7 +197,12 @@ double portTournamentRead(unsigned field,unsigned slot)
 void portTournamentFinish(void)
 {
     extern unsigned portSceneExitStatus(unsigned);
-    if(!started||gmVs_GetSceneState()->unk_0!=3||!portSceneExitStatus(0))abort();
+    VsSceneState* state=gmVs_GetSceneState();
+    /* Ordinary GAME/TIME endings reach state 3. The original LRAS path exits
+     * immediately with a sticky NO CONTEST outcome and deliberately leaves
+     * unk_0 at 0; accepting that native terminal state is required for the
+     * product to preserve Melee's tournament match-exit behavior. */
+    if(!started||!portSceneExitStatus(0)||(state->unk_0!=3&&state->match_result==OUTCOME_NONE))abort();
     if(results_ready)return;
     for(unsigned slot=0;slot<2;slot++)result_falls[slot]=Player_GetFalls(slot);
     gm_Scene_Vs_OnExit(&match_exit);results_ready=1;
