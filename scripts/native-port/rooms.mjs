@@ -1,5 +1,5 @@
 import {returnTicket,validateResults} from '../../engines/browser-native/native-results.mjs';
-// CPU-only room relay. Game simulation and rendering remain in each browser.
+// Input-only room relay. Game simulation and rendering remain in each browser.
 import {randomBytes} from 'node:crypto';
 import {WebSocketServer} from '../../web/node_modules/ws/wrapper.mjs';
 const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -27,11 +27,11 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliver
  function view(r,seat){return {type:'state',code:r.code,seat,cpu:r.cpu,epoch:r.epoch,connected:r.players.map(p=>p?.ws?.readyState===1),hasGuest:!!r.players[1],ready:[...r.ready],phase:r.phase,selected:r.selected,returnTo:r.returnTo??null,rematchVotes:r.rematchVotes??[false,false]};}
  function state(r){r.players.forEach((p,i)=>send(p?.ws,view(r,i)));}
  function reset(r,returnTo=null){r.returnTo=returnTo;r.ended=[null,null];r.rematchVotes=[false,false];r.epoch++;r.ready=[false,false];r.phase='characters';r.barriers.clear();r.inputs.clear();r.history.clear();r.lastFrame=-1;r.phaseKey=null;r.sequence=-1;state(r);}
- function create(){if(rooms.size>=maxRooms)throw Error('Room service is full');let id;do{id=code();}while(rooms.has(id));const r={code:id,cpu:true,epoch:0,players:[null,null],ready:[false,false],phase:'characters',selected:[{character:20,costume:0},{character:2,costume:0}],barriers:new Map(),inputs:new Map(),history:new Map(),lastFrame:-1,phaseKey:null,sequence:-1,touched:Date.now(),ended:[null,null],rematchVotes:[false,false]};rooms.set(id,r);return r;}
+ function create(diagnosticCpu=false){if(rooms.size>=maxRooms)throw Error('Room service is full');let id;do{id=code();}while(rooms.has(id));const r={code:id,cpu:diagnosticCpu,diagnosticCpu,epoch:0,players:[null,null],ready:[false,false],phase:'characters',selected:[{character:20,costume:0},{character:2,costume:0}],barriers:new Map(),inputs:new Map(),history:new Map(),lastFrame:-1,phaseKey:null,sequence:-1,touched:Date.now(),ended:[null,null],rematchVotes:[false,false]};rooms.set(id,r);return r;}
  function reserve(r,seat){const key=token();r.players[seat]={token:key,ws:null};sessions.set(key,{r,seat});return {token:key,...view(r,seat)};}
  function removeGuest(r){const p=r.players[1];if(p){sessions.delete(p.token);send(p.ws,{type:'removed'});p.ws?.close();r.players[1]=null;}reset(r);}
  function action(session,m){const {r,seat}=session;r.touched=Date.now();
-  if(m.type==='cpu'){if(seat||r.players[1]||r.phase!=='characters'||typeof m.enabled!=='boolean')throw Error('CPU changes require an empty guest seat at character select');r.cpu=m.enabled;r.ready=[false,false];state(r);}
+  if(m.type==='cpu'){if(m.enabled&&!r.diagnosticCpu)throw Error('CPU mode is unavailable in tournament rooms');if(seat||r.players[1]||r.phase!=='characters'||typeof m.enabled!=='boolean')throw Error('CPU changes require an empty guest seat at character select');r.cpu=m.enabled;r.ready=[false,false];state(r);}
   else if(m.type==='ready'){if(r.phase!=='characters'||r.cpu||!r.players[1]||!r.players.every(p=>p?.ws?.readyState===1))throw Error('Both players must be connected');r.ready[seat]=true;state(r);}
   else if(m.type==='kick'){if(seat)throw Error('Only P1 can remove a guest');removeGuest(r);}
   else if(m.type==='leave'){if(seat)removeGuest(r);else {removeGuest(r);sessions.delete(r.players[0].token);r.players[0].ws?.close();rooms.delete(r.code);}}
@@ -102,7 +102,7 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliver
   try{let body='';for await(const data of req){body+=data;if(body.length>4096)throw Error('Request too large');}const m=JSON.parse(body||'{}'),route=new URL(req.url,'http://localhost').pathname;
    if(route.endsWith('/resume')){const s=sessions.get(m.token);if(!s)throw Error('Room session expired');if(s.r.players[1]&&!(m.syncedReload===true&&m.epoch===s.r.epoch))reset(s.r);reply(200,{token:m.token,...view(s.r,s.seat)});}
    else if(route.endsWith('/join')){const r=rooms.get(m.code);if(!r)throw Error('Room not found');if(r.cpu)throw Error('P1 must remove the CPU first');if(r.players[1])throw Error('Room is full');const joined=reserve(r,1);reset(r);reply(200,{...joined,...view(r,1)});}
-   else {const r=create();reply(200,reserve(r,0));}
+   else {if(m.diagnosticCpu!==undefined&&typeof m.diagnosticCpu!=='boolean')throw Error('Invalid diagnostic CPU option');const r=create(m.diagnosticCpu===true);reply(200,reserve(r,0));}
   }catch(e){reply(400,{error:e.message});}return true;
  }};
 }

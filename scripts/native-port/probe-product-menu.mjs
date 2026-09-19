@@ -31,7 +31,7 @@ try{testFlow:{
    if(Math.max(Math.abs(dx),Math.abs(dy))<3)next.push('ShiftLeft');await keys(next);await delay(16);
   }await keys([]);throw Error('Keyboard cursor did not reach '+JSON.stringify(target)+' at '+JSON.stringify(await evaluate(expression)));
  }
- await cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1'+(process.argv.includes('--lockstep')?'&lockstep=1':'')+(resultsMode?'':'&liveframes=900')});
+ await cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+'/character-menu.html?interactive=1&diagnostic-cpu=1'+(process.argv.includes('--lockstep')?'&lockstep=1':'')+(resultsMode?'':'&liveframes=900')});
  await waitFor('globalThis.characterMenuReport?.passed');await waitFor('nativeCharacterMenu.read().frames>90');
  const runtime=await evaluate('({same:nativeSnapshotRuntime?.module===characterModule,globals:nativeSnapshotRuntime?.audit?.globals?.length,wasmSha256:nativeSnapshotRuntime?.audit?.wasmSha256,audio:nativeRollbackAudio?.snapshot()})');
  if(!runtime.same||runtime.globals!==4||!/^[0-9a-f]{64}$/.test(runtime.wasmSha256??''))throw Error('Interactive runtime is not snapshot-instrumented '+JSON.stringify(runtime));

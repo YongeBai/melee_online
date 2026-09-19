@@ -1,5 +1,14 @@
 # Native browser port — September 17, 2026
 
+September 18 tournament-scope checkpoint: the ordinary hosted route now creates
+human-only rooms, hides the CPU action, rejects CPU enable messages at the relay,
+and fails closed rather than substituting a local CPU match when the relay is
+missing. The explicit `?diagnostic-cpu=1` path remains for development probes
+and is isolated in session storage so it cannot resume on the normal URL. A
+fresh two-browser product flow reached Battlefield and completed 60 matching
+rollback frames with the fixed tournament rules after asserting that CPU mode
+was absent. [Tournament-only product evidence](benchmarks/browser-2026-09-18-native-tournament-only-product.json).
+
 September 18 sustained product-room checkpoint: every roster tile plus held-A
 Sheik passes the 720p60 browser-canvas gate over 1,800 combat frames while the
 26 cases cycle all six legal stages. The observer received exactly 46,800

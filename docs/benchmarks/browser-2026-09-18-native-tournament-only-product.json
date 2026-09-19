@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-18",
+  "passed": true,
+  "scope": "Default hosted product route exposes only authenticated human 1v1. CPU play remains available solely through the explicit diagnostic-cpu switch and cannot leak back into a normal session.",
+  "productAssertions": [
+    "new rooms default to cpu=false",
+    "the CPU control is hidden on the normal product URL",
+    "the relay rejects attempts to enable CPU in a tournament room",
+    "a missing relay fails closed instead of starting a local CPU match",
+    "session storage records diagnostic scope and a normal URL refuses to resume a diagnostic CPU room",
+    "the existing O-button product guard remains on character select instead of entering another native mode"
+  ],
+  "unit": {
+    "command": "node --test scripts/native-port/rooms.test.mjs",
+    "tests": 11,
+    "passed": 11,
+    "failed": 0
+  },
+  "fullNativePortSuite": {
+    "command": "node --test scripts/native-port/*.test.mjs",
+    "tests": 366,
+    "passed": 366,
+    "failed": 0
+  },
+  "browser": {
+    "command": "node scripts/native-port/probe-native-rooms.mjs --rollback --frames=60 --pair=20,2 --stage=31",
+    "twoBrowsers": true,
+    "cpu": false,
+    "cpuControlHidden": true,
+    "humanPlayers": 2,
+    "stage": 31,
+    "framesPerClient": 60,
+    "drawsPerClient": 60,
+    "confirmedFrame": 59,
+    "matchingFighterState": true,
+    "rules": {"stocks": 4, "seconds": 480, "items": -1, "teams": 0, "mode": 1, "timer": 1},
+    "coreSha256": "c945545513c433199dfb3155863abb01b9b9584461ccc049c7e05012c14920f6",
+    "dirtyCoreSha256": "7cd9a76b334a045be4895e27cb9c1d3b1d5471d8c171f674256befba997e14ac"
+  },
+  "diagnostic": "?diagnostic-cpu=1 creates a separately scoped CPU room for development probes; the switch is not linked or exposed by the normal product UI."
+}

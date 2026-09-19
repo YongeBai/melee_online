@@ -1,15 +1,16 @@
 // An input-only relay: each browser runs the original C game. The relay carries
 // immutable inputs and confirmations for either lockstep or local rollback.
-export async function connectNativeRoom({storage=globalThis.sessionStorage,onState=()=>{},onError=()=>{},reload=()=>location.reload()}={}) {
- const storageKey='native-melee-room-v1';
+export async function connectNativeRoom({storage=globalThis.sessionStorage,onState=()=>{},onError=()=>{},reload=()=>location.reload(),diagnosticCpu=false}={}) {
+ const storageKey='native-melee-room-v1',requestedDiagnostic=diagnosticCpu===true;
  const post=async(path,body={})=>{const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),result=await response.json().catch(()=>({}));if(!response.ok)throw Error(result.error??'Room service unavailable');return result;};
  let saved;try{saved=JSON.parse(storage.getItem(storageKey));}catch{}
  let initial;
- if(saved?.token){try{initial=await post('/native-rooms/resume',saved);}catch{storage.removeItem(storageKey);}}
- initial??=await post('/native-rooms');
+ if(saved?.token&&saved.diagnosticCpu===requestedDiagnostic){try{initial=await post('/native-rooms/resume',saved);}catch{storage.removeItem(storageKey);}}
+ else if(saved?.token)storage.removeItem(storageKey);
+ initial??=await post('/native-rooms',{diagnosticCpu:requestedDiagnostic});
  let state=initial,ws,closed=false,sequence=-1,key=null,phaseReady=false,nextFrame=0,reloading=false,localTapJump=1,lastSent=null,confirmedFrame=-1,rollbackSink,pendingEnding=null,reconnectTimer,reconnectAttempt=0;
  const frames=new Map(),sent=new Map(),rollbackEvents=[];
- const persist=(value,syncedReload=false)=>storage.setItem(storageKey,JSON.stringify({token:value.token??initial.token,epoch:value.epoch,syncedReload}));persist(initial);
+ const persist=(value,syncedReload=false)=>storage.setItem(storageKey,JSON.stringify({token:value.token??initial.token,epoch:value.epoch,syncedReload,diagnosticCpu:requestedDiagnostic}));persist(initial);
  function send(value){if(ws?.readyState!==WebSocket.OPEN)throw Error('Room connection unavailable');ws.send(JSON.stringify(value));}
  function restart(value,syncedReload=true){if(reloading)return;reloading=true;persist(value,syncedReload);reload();}
  const network={
@@ -69,12 +70,12 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  return network;
 }
 
-// Static hosting must still boot a CPU match if the optional input relay is
-// unavailable. Never invent a shareable code or silently simulate a remote peer.
-export function createLocalNativeRoom(reason='Room service unavailable'){
- const state={seat:0,cpu:true,hasGuest:false,connected:[true,false],ready:[false,false]};
+// An unavailable relay must not silently change the tournament-only product
+// into a solo game. CPU play remains available only to the explicit diagnostic.
+export function createLocalNativeRoom(reason='Room service unavailable',{diagnosticCpu=false}={}){
+ const cpu=diagnosticCpu===true,state={seat:0,cpu,hasGuest:false,connected:[true,false],ready:[false,false]};
  const unavailable=()=>{throw Error(reason);};
- return {offline:true,reason,code:'',seat:0,cpu:true,active:false,connected:false,state,
-  tapJump:1,phaseReady:false,snapshot:()=>({mode:'solo',offline:true}),begin(){},take:s=>s,setTapJump(){},bindRollback(){return ()=>{};},sendInput(){return false;},dispose(){},
+ return {offline:true,reason,code:'',seat:0,cpu,active:false,connected:false,state,
+  tapJump:1,phaseReady:false,snapshot:()=>({mode:cpu?'diagnostic-cpu':'unavailable',offline:true}),begin(){},take:s=>cpu?s:s.map((v,i)=>i?[0,0,0,0,0,0,0]:[v[0]&~0x1000,...v.slice(1)]),setTapJump(){},bindRollback(){return ()=>{};},sendInput(){return false;},dispose(){},
   newRoom:()=>location.reload(),join:unavailable,cpuMode:unavailable,ready:unavailable,kick:unavailable,leave:unavailable};
 }

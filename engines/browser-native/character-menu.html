@@ -12,11 +12,11 @@ import {convertSisAsset} from './sis-assets.mjs';
 import {convertCardIconAsset} from './card-assets.mjs';
 import {completeNativeSample} from './native-input.mjs';
 import {installResidentFile} from './resident-files.mjs';
-const pageParams=new URLSearchParams(location.search),interactive=pageParams.has('interactive'),rollbackDefault=interactive&&!pageParams.has('lockstep');
+const pageParams=new URLSearchParams(location.search),interactive=pageParams.has('interactive'),diagnosticCpu=interactive&&pageParams.get('diagnostic-cpu')==='1',rollbackDefault=interactive&&!pageParams.has('lockstep');
 const report={passed:false,playableMatch:false,audioPlayed:false,audioMode:null},diagnostics=[],music=[];
 try{
  let network=null,productUI=null;
- if(interactive){const {connectNativeRoom,createLocalNativeRoom}=await import('./native-room.mjs');try{network=await connectNativeRoom({onState:n=>productUI?.setNetwork(n),onError:e=>{globalThis.nativeRoomError=String(e);productUI?.connectionError(e);}});}catch(e){network=createLocalNativeRoom(e.message);report.roomUnavailable=e.message;}globalThis.nativeRoom=network;}
+ if(interactive){const {connectNativeRoom,createLocalNativeRoom}=await import('./native-room.mjs');try{network=await connectNativeRoom({diagnosticCpu,onState:n=>productUI?.setNetwork(n),onError:e=>{globalThis.nativeRoomError=String(e);productUI?.connectionError(e);}});}catch(e){network=createLocalNativeRoom(e.message,{diagnosticCpu});report.roomUnavailable=e.message;}globalThis.nativeRoom=network;}
  let returning=interactive?(network.active?network.state.returnTo:consumeReturn()):null;if(returning){try{returning=returnTicket(returning.action,returning);if(returning.players[1].kind!==(network.cpu?1:0))returning=null;}catch{returning=null;}}
  const nativeMusic=interactive?await(await import('./native-music.mjs')).createNativeMusic({resumeAfterNavigation:!!returning}).catch(e=>{report.audioError=String(e);return null;}):null;globalThis.nativeMusic=nativeMusic;
  const rollbackAudio=interactive&&nativeMusic?(await import('./rollback-audio.mjs')).createRollbackAudio({present:r=>nativeMusic.request(r),presentUnframed:true}):null;globalThis.nativeRollbackAudio=rollbackAudio;
@@ -52,7 +52,7 @@ try{
  report.initial=preview.draw();if(!interactive)for(let i=0;i<60;i++)step();report.after60=preview.draw();report.state=read();report.passed=true;
  if(interactive){
   const {createBrowserNativeInput}=await import('./browser-input.mjs'),{startNativeMenuLive}=await import('./native-menu-live.mjs');
-  const input=createBrowserNativeInput({layout:"melee"});const {createNativeProductUI}=await import("./native-product-ui.mjs");productUI=createNativeProductUI({module,input,menu:nativeCharacterMenu,canvas:document.querySelector("#picture")});globalThis.nativeProductUI=productUI;input.setNetworkSeat(network.seat);productUI.setNetwork(network);const controls=document.createElement('div');controls.id='menu-controls';
+  const input=createBrowserNativeInput({layout:"melee"});const {createNativeProductUI}=await import("./native-product-ui.mjs");productUI=createNativeProductUI({module,input,menu:nativeCharacterMenu,canvas:document.querySelector("#picture"),allowCPU:diagnosticCpu});globalThis.nativeProductUI=productUI;input.setNetworkSeat(network.seat);productUI.setNetwork(network);const controls=document.createElement('div');controls.id='menu-controls';
   const text=document.createElement('p');text.textContent='WASD move · P attack/select · O special/cancel · Space jump · I/L shield · U grab · Enter Start · Esc pause';controls.append(text);
   for(let port=0;port<2;port++){const button=document.createElement('button');button.textContent='Keyboard: P'+(port+1);button.id='keyboard-p'+(port+1);button.addEventListener('click',()=>{input.setKeyboardPort(port);for(const b of controls.querySelectorAll('button[data-seat]'))b.setAttribute('aria-pressed',String(b===button));});button.dataset.seat=port;button.setAttribute('aria-pressed',String(port===0));controls.append(button);}
   const restart=document.createElement('button');restart.textContent='Return to character select';restart.hidden=true;controls.append(restart);document.querySelector('#picture').after(controls);

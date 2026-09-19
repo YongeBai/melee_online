@@ -16,7 +16,7 @@ async function fixture(t,options){
  return {post,socket,relay};
 }
 test('native rooms protect seats, require both Ready, and relay ordered immutable inputs',async t=>{
- const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token);
+ const {post,socket}=await fixture(t),owner=await post('/native-rooms',{diagnosticCpu:true}),a=await socket(owner.token);
  assert.equal(owner.cpu,true);assert.equal(owner.seat,0);assert.equal((await post('/native-rooms/join',{code:owner.code})).status,400);
  a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);
  const guest=await post('/native-rooms/join',{code:owner.code}),b=await socket(guest.token);assert.equal(guest.seat,1);
@@ -39,6 +39,11 @@ test('native rooms protect seats, require both Ready, and relay ordered immutabl
  for(const peer of [a,b]){const f3=await peer.take(m=>m.type==='frame'&&m.frame===3),c3=await peer.take(m=>m.type==='confirmed-frame'&&m.frame===3),f4=await peer.take(m=>m.type==='frame'&&m.frame===4),c4=await peer.take(m=>m.type==='confirmed-frame'&&m.frame===4);assert.equal(f3.frame,3);assert.equal(c3.frame,3);assert.deepEqual(f3.inputs.map(v=>v.pad[0]),[16,64]);assert.equal(f4.frame,4);assert.equal(c4.frame,4);assert.deepEqual(f4.inputs.map(v=>v.pad[0]),[256,512]);}
  a.send({type:'kick'});await b.take(m=>m.type==='removed');assert.equal((await post('/native-rooms/resume',{token:guest.token})).status,400);
  assert.equal((await post('/native-rooms/resume',{token:owner.token})).code,owner.code);
+});
+test('tournament rooms start human-only and reject CPU mode',async t=>{
+ const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token);
+ assert.equal(owner.cpu,false);a.send({type:'cpu',enabled:true});assert.match((await a.take(m=>m.type==='error')).message,/unavailable/);
+ const guest=await post('/native-rooms/join',{code:owner.code});assert.equal(guest.status,200);assert.equal(guest.cpu,false);
 });
 test('test-only delayed delivery preserves per-socket order and reports injection',async t=>{
  let calls=0;const {post,socket,relay}=await fixture(t,{deliveryDelayMs:m=>m.type==='peer-input'&&m.frame>=3?[30,0][calls++%2]:null}),owner=await post('/native-rooms'),a=await socket(owner.token);
@@ -75,10 +80,11 @@ test('live reconnect pauses input and replays the exact missed confirmation hori
  assert.deepEqual(replayedFrame.inputs.map(v=>v.pad[0]),[16,64]);assert.equal(replayedConfirmation.frame,3);assert.equal(resumed.queue.some(m=>m.type==='phase-ready'&&m.key===key),true);
 });
 
-test('static-only hosting keeps CPU gameplay without a counterfeit room code',async()=>{
+test('static-only hosting cannot become another game mode without an explicit diagnostic',async()=>{
  const {createLocalNativeRoom}=await import('../../engines/browser-native/native-room.mjs');const local=createLocalNativeRoom();
- assert.equal(local.code,'');assert.equal(local.cpu,true);assert.equal(local.active,false);assert.equal(local.offline,true);
- const samples=[[256,1,0,0,0,0,0],[0,0,0,0,0,0,0]];assert.equal(local.take(samples),samples);assert.doesNotThrow(()=>local.begin('match'));assert.throws(()=>local.join('ABCDEF'),/unavailable/);assert.throws(()=>local.cpuMode(false),/unavailable/);
+ assert.equal(local.code,'');assert.equal(local.cpu,false);assert.equal(local.active,false);assert.equal(local.offline,true);assert.equal(local.snapshot().mode,'unavailable');
+ const samples=[[4352,1,0,0,0,0,0],[256,1,0,0,0,0,0]];assert.deepEqual(local.take(samples),[[256,1,0,0,0,0,0],[0,0,0,0,0,0,0]]);assert.doesNotThrow(()=>local.begin('match'));assert.throws(()=>local.join('ABCDEF'),/unavailable/);assert.throws(()=>local.cpuMode(false),/unavailable/);
+ const diagnostic=createLocalNativeRoom('offline',{diagnosticCpu:true});assert.equal(diagnostic.cpu,true);assert.equal(diagnostic.snapshot().mode,'diagnostic-cpu');assert.equal(diagnostic.take(samples),samples);
 });
 
 test('browser room buffers authenticated rollback events and exposes immutable sends',async t=>{
@@ -93,12 +99,22 @@ test('browser room buffers authenticated rollback events and exposes immutable s
  t.after(()=>{globalThis.fetch=original.fetch;globalThis.WebSocket=original.WebSocket;globalThis.location=original.location;});
  const storage={value:null,getItem(){return this.value;},setItem(_key,value){this.value=value;},removeItem(){this.value=null;}};
  const {connectNativeRoom}=await import('../../engines/browser-native/native-room.mjs');const room=await connectNativeRoom({storage,reload(){}});assert.equal(room.tapJump,1);room.setTapJump(0);assert.equal(room.tapJump,0);room.bindRollback(null);room.begin('match');
+ assert.equal(JSON.parse(storage.value).diagnosticCpu,false);
  socket.emit({type:'peer-input',key:'match:0',epoch:4,frame:0,seat:1,value:{pad:[0,0,0,0,0,0,0],tap:1}});socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:0});
  const events=[],unbind=room.bindRollback({receive:(frame,value)=>events.push(['input',frame,value.tap]),acknowledge:frame=>events.push(['confirmed',frame])});assert.deepEqual(events,[['input',0,1],['confirmed',0]]);
  socket.emit({type:'phase-ready',key:'match:0',epoch:4});assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);
  assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);assert.throws(()=>room.sendInput(3,[0,0,0,0,0,0,0]),/Conflicting/);
  room.endMatch({results:'native'},2);assert.equal(socket.sent.some(m=>m.type==='ended'),false);socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:1});assert.equal(socket.sent.some(m=>m.type==='ended'),false);socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:2});assert.equal(socket.sent.filter(m=>m.type==='ended').length,1);
  assert.deepEqual(room.snapshot().pendingEnding,{frame:2,sent:true});unbind();room.dispose();
+});
+
+test('normal startup cannot resume a diagnostic CPU room',async t=>{
+ const original={fetch:globalThis.fetch,WebSocket:globalThis.WebSocket,location:globalThis.location},calls=[];let socket;
+ class FakeSocket{static OPEN=1;constructor(){socket=this;this.readyState=1;queueMicrotask(()=>this.onopen?.());}send(raw){const m=JSON.parse(raw);if(m.type==='hello')queueMicrotask(()=>this.onmessage?.({data:JSON.stringify({type:'state',code:'HUMAN2',seat:0,cpu:false,epoch:0,connected:[true,false],hasGuest:false,ready:[false,false],phase:'characters',selected:[],returnTo:null,rematchVotes:[false,false]})}));}close(){this.readyState=3;}}
+ globalThis.fetch=async(url,init)=>{calls.push({url,body:JSON.parse(init.body)});return new Response(JSON.stringify({token:'human-token',code:'HUMAN2',seat:0,cpu:false,epoch:0,connected:[false,false],hasGuest:false,ready:[false,false],phase:'characters'}),{status:200,headers:{'Content-Type':'application/json'}});};globalThis.WebSocket=FakeSocket;globalThis.location={href:'http://room.test/character-menu.html',reload(){}};
+ t.after(()=>{globalThis.fetch=original.fetch;globalThis.WebSocket=original.WebSocket;globalThis.location=original.location;});
+ const storage={value:JSON.stringify({token:'cpu-token',epoch:3,diagnosticCpu:true}),getItem(){return this.value;},setItem(_key,value){this.value=value;},removeItem(){this.value=null;}};
+ const {connectNativeRoom}=await import('../../engines/browser-native/native-room.mjs'),room=await connectNativeRoom({storage,reload(){}});assert.equal(calls.length,1);assert.equal(calls[0].url,'/native-rooms');assert.deepEqual(calls[0].body,{diagnosticCpu:false});assert.equal(room.cpu,false);room.dispose();
 });
 
 test('browser room reconnects in place and authenticates its exact confirmation horizon',async t=>{
