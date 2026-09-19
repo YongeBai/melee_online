@@ -476,13 +476,19 @@ counters; the previous custom HTML standings cards are hidden. Compact rematch
 and character-select controls remain as browser room-lifecycle controls.
 
 A CPU Falco/Fox elimination on Battlefield rendered 120 consecutive 960×720
-result frames and 120 distinct draws in 2.0212 seconds: **59.371 simulation FPS
-and 59.371 presentation FPS**. Rematch restored the same legal selection and
-four stocks, and a second result returned to the original character select.
+result frames and 120 distinct draws in 2.0224 seconds: **59.335 simulation FPS
+and 59.335 presentation FPS**. The live composite used Fox's original winner
+camera for 59 material draws. Both original EFB portrait paths were non-empty:
+Falco submitted 48 native/material draws and produced 2,465 colored RGB5A3
+texels; Fox submitted 59 and produced 3,296. The transition explicitly restores
+the native scheduler's paused links before constructing result actors, matching
+fresh-scene behavior after match end. Rematch restored the same legal selection
+and four stocks, and a second result returned to the original character select.
 The raw evidence is
 `docs/benchmarks/browser-2026-09-18-native-live-results.json`.
 
-This is not completion of the result scene: the original demo-fighter winner
-camera and EFB-captured portrait textures have full isolated 26-character
-coverage, but are not yet composed into the live product panel. The live result
-measurement also does not replace the longer gameplay/rollback measurements.
+The product probe now requires a non-empty winner actor and both non-empty
+portrait copies in addition to the 960×720, 59-FPS threshold. The earlier
+isolated result probe supplies full 26-character construction coverage. This
+short result-screen measurement does not replace the longer gameplay/rollback
+measurements.
