@@ -1,5 +1,20 @@
 # Native browser port — September 17, 2026
 
+September 18 LRAS checkpoint: the product now accepts Melee's original paused
+L+R+A+Start exit as a terminal native match state. Unlike GAME/TIME, retail
+LRAS deliberately leaves `VsSceneState.unk_0` at zero while setting
+`OUTCOME_NO_CONTEST`; the port now preserves that distinction instead of
+rejecting the result. A two-browser default-rollback run confirmed terminal
+frame 137 on both peers, produced identical native no-contest standings, showed
+no fabricated winner, and returned both clients together to character select.
+The renewed core then completed a separate 1,800-frame combat run at
+59.616–59.920 simulation FPS, with 1,800/1,800 distinct 960×720 captures at
+59.968 FPS and 9.2–9.3 ms draw-submission p95.
+The dirty-core write audit retained the same 111,011 stores, 169 copies, 63
+fills and zero table mutations. All 366 native-port tests pass; the complete
+repository suite reports 643 pass, 10 skip and zero failures across 653 tests.
+[LRAS evidence](benchmarks/browser-2026-09-18-native-lras-results.json).
+
 September 18 tournament-scope checkpoint: the ordinary hosted route now creates
 human-only rooms, hides the CPU action, rejects CPU enable messages at the relay,
 and fails closed rather than substituting a local CPU match when the relay is
@@ -21,8 +36,8 @@ from both seats at 59.882–59.974 captured FPS. The performance work batches
 transport corrections, separates the receive and prediction bounds, clears UBO
 staging once per frame, and resets only validity headers/active GX capture rows.
 A 120-frame Yoshi exact oracle compared 331,776,000 RGBA bytes with zero
-differences and zero camera mismatches. The 646-test repository suite passes
-(636 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
+differences and zero camera mismatches. The 653-test repository suite passes
+(643 pass, 10 skip, 0 fail). This validates the scoped localhost browser-canvas
 gate, not compositor scanout, WAN behavior, physical input-to-photon latency or
 all 676 matchups. [Roster performance evidence](benchmarks/browser-2026-09-18-native-room-roster-720p60.json)
 and [stage/seat evidence](benchmarks/browser-2026-09-18-native-room-720p60.json).
@@ -173,7 +188,8 @@ See [the snapshot boundary and limitations](BROWSER-NATIVE-ROLLBACK.md) and
 
 The player-facing native preview now restores the established controls, 3D
 keyboard view, per-player tap jump, two native CSS cards, room-code controls,
-Falco P1 / level-9 Fox CPU defaults, and tournament-only rules/stages.
+two human slots, and tournament-only rules/stages. The explicit diagnostic CPU
+route retains the Falco P1 / level-9 Fox CPU fixture.
 The reported start abort was a host constructor guard that accepted only human
 slots; it now admits native CPU slots and calls the original CPU constructor.
 The CPU's own generated buttons/sticks and action changes are checked in-browser.
@@ -233,8 +249,8 @@ scanout or exhaustive gameplay-parity certification.
 Rooms require matching results from both clients and two rematch votes. Either
 player can return both to CSS. One coordinated epoch/reload preserves room code
 and seats; stale votes cannot restart a newer match. This checks result agreement,
-not a complete gameplay-state hash. Static-only CPU play uses a validated local
-return ticket and does not require the relay. Post-return music requests attempt
+not a complete gameplay-state hash. Explicit diagnostic CPU play uses a
+validated local return ticket and does not require the relay. Post-return music requests attempt
 normal browser audio resume, falling back to the existing gesture unlock if the
 browser blocks autoplay.
 [Results and rematch evidence](benchmarks/browser-2026-09-17-native-port-results.json) and

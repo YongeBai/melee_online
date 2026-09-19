@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-18",
+  "passed": true,
+  "scope": "Original pause and LRAS match exit in the authenticated two-browser product rollback path, followed by confirmed NO CONTEST standings and coordinated return to character select.",
+  "commands": [
+    "node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --stage-callbacks --hardware",
+    "node scripts/native-port/probe-native-rooms.mjs --lras --rollback",
+    "node --test scripts/native-port/*.test.mjs"
+  ],
+  "isolatedNative": {
+    "sceneExit": 1,
+    "outcome": 7,
+    "winnerCount": 2,
+    "sceneState": 0,
+    "note": "Melee deliberately leaves the ordinary GAME/TIME terminal-state byte at zero for LRAS."
+  },
+  "productRollback": {
+    "browsers": 2,
+    "humanPlayers": 2,
+    "cpu": false,
+    "cpuControlHidden": true,
+    "terminalFrame": 137,
+    "confirmedFrame": 137,
+    "pendingEndingSent": true,
+    "identicalResults": true,
+    "outcome": 7,
+    "winnerCount": 2,
+    "visibleStanding": "NO CONTEST",
+    "fabricatedWinnerScene": false,
+    "returnedTogetherToCharacterSelect": true
+  },
+  "performanceRevalidation": {
+    "command": "node scripts/native-port/probe-native-rooms.mjs --rollback --frames=1800 --capture-seat=0 --combat --pair=20,2 --stage=31",
+    "stage": 31,
+    "framesPerClient": 1800,
+    "drawsPerClient": 1800,
+    "simulationFps": [59.91990705763772, 59.61567759834494],
+    "capturedFrames": 1800,
+    "distinctCapturedFrames": 1800,
+    "capturedFps": 59.968265820421884,
+    "blackFrames": 0,
+    "wrongSizeFrames": 0,
+    "drawSubmissionP95Ms": [9.199999988079071, 9.300000011920929],
+    "confirmedFrame": 1799,
+    "matchingFighterState": true
+  },
+  "dirtyCoreAudit": {
+    "originalSha256": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+    "instrumentedSha256": "596469b1318e55ec377223d36c2aea2cc8f36a0c661e891623d05579d7b5279f",
+    "stores": 111011,
+    "copies": 169,
+    "fills": 63,
+    "tableMutations": 0
+  },
+  "unitSuite": {
+    "tests": 366,
+    "passed": 366,
+    "failed": 0
+  },
+  "repositorySuite": {
+    "tests": 653,
+    "passed": 643,
+    "skipped": 10,
+    "failed": 0
+  },
+  "limits": "This validates the LRAS lifecycle and result synchronization, not exhaustive matchup parity, WAN behavior, physical scanout, or input-to-photon latency."
+}

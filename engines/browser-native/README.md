@@ -13,6 +13,10 @@ opt into a separately scoped CPU room with `?diagnostic-cpu=1`; normal sessions
 cannot resume that room token. If the relay is unavailable, the product fails
 closed rather than silently entering a different game mode.
 
+Original paused L+R+A+Start now exits through Melee's native `NO CONTEST`
+outcome. The result is confirmation-gated in rollback rooms, displayed without
+inventing a winner, and returns both peers together through the result actions.
+
 This is not a complete competitive release. Full menu/match routing, sound effects,
 controller calibration, broader retail parity and static release
 integration remain unfinished. Simulation steps and GPU draw submissions are
@@ -49,7 +53,8 @@ Original pause artwork is fetched automatically with the other hosted assets.
 The original VS routines retain owner-only unpause, debounce, process masks,
 match-clock gating and pause camera controls. The port adapts one mismatched
 PowerPC callback signature; it does not adjust camera pitch or bounds. Audio
-feedback and the LRAS results/menu transition are still unfinished.
+feedback remains unfinished; the LRAS results/menu transition is covered in the
+product rollback lifecycle.
 
 ```sh
 node scripts/native-port/probe-constructor.mjs --character=Ca --input --pause-input --stage-callbacks --render-steps --hardware
@@ -66,8 +71,8 @@ MELEE_NATIVE_PORT=3340 node scripts/native-port/serve.mjs
 ```
 
 Open [the native menu preview](http://127.0.0.1:3340/character-menu.html?interactive=1).
-It defaults to Falco P1 versus original level-9 Fox CPU. Two original native
-cards leave the center for room controls; original hands render over the panel.
+It opens a human-only room. Two original native cards leave the center for room
+controls; original hands render over the panel.
 Only the six tournament stages are selectable, including the random choice.
 The original rules are four stocks, eight minutes, no items and singles. Other
 modes and rules/name submenus are inaccessible in the player-facing profile.
@@ -82,20 +87,24 @@ The setting persists locally. Controls work with the original animated hand or
 mouse. A connected standard gamepad maps to the local network seat; physical
 adapter calibration remains separate work.
 
-The Node preview server includes an input-only WebSocket relay. Remove CPU to
-open the room's second seat; the guest enters its code and both players Ready.
+The Node preview server includes an input-only WebSocket relay. The guest enters
+the owner's room code and both players Ready.
 Each browser runs native C/WASM and WebGL. Three-frame input lockstep and scene
-barriers synchronize loading; this is **not rollback or latency certification**.
+barriers are retained as a diagnostic fallback; the product defaults to
+authenticated local prediction, correction and independent WASM presentation.
+This is not physical input-to-photon certification.
 Guest refresh preserves room/seat but restarts both clients at character select.
 Owner-only kick revokes the guest token. Tokens stay private in session storage.
-If the optional room service is unavailable, static assets still start CPU play;
-no fake room code, remote opponent or player-supplied ISO is substituted.
+If the room service is unavailable, normal startup fails closed; no CPU match,
+fake room code, remote opponent or player-supplied ISO is substituted. An
+explicit `?diagnostic-cpu=1` URL retains the local CPU development fixture.
 A production relay/signaling deployment remains separate from static Vercel assets.
 
 The same input owner survives asynchronous menu/match asset loading. Original
 Ready/Go owns the initial input and clock gates. The native canvas is 960×720,
-preserving 4:3 framing and the original camera. Audio and results/rematch remain
-unfinished. Refresh to start another match; the public play route is unchanged.
+preserving 4:3 framing and the original camera. Results, rematch, character
+return and LRAS are integrated; sound effects and public release integration
+remain unfinished.
 
 ```sh
 node scripts/native-port/probe-product-menu.mjs
