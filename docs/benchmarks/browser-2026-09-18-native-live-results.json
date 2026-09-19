@@ -6,9 +6,14 @@
   "resultScene": {
     "frames": 120,
     "distinctDraws": 120,
-    "elapsedMs": 2021.2000000476837,
-    "simulationFps": 59.37067088718038,
-    "presentationFps": 59.37067088718038
+    "elapsedMs": 2022.4000000357628,
+    "simulationFps": 59.33544303692543,
+    "presentationFps": 59.33544303692543,
+    "winnerMaterialDraws": 59,
+    "portraitCopies": [
+      {"player": 1, "nativeDraws": 48, "materialDraws": 48, "coloredTexels": 2465},
+      {"player": 2, "nativeDraws": 59, "materialDraws": 59, "coloredTexels": 3296}
+    ]
   },
   "match": {
     "characters": [20, 2],
@@ -20,5 +25,5 @@
     ]
   },
   "passed": true,
-  "scope": "Original animated GmRst standings panel and real MatchEnd counters in the product lifecycle. Original result demo fighters and captured portrait textures remain to be integrated into the live composite."
+  "scope": "Same-runtime original GmRst standings panel, real MatchEnd counters, original animated winner fighter, and both native EFB-captured player portraits. The product probe requires every composite component to be non-empty at 960x720 and at least 59 FPS, then validates rematch and return to character select."
 }

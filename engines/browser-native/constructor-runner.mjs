@@ -502,7 +502,7 @@ try {
         document.documentElement.dataset.live='ready';options.onLive?.(globalThis.nativeLive);
       });
       if(tournament)report.matchFinal=Array.from({length:23},(_,i)=>module._portTournamentRead(i,0));
-      if(report.live.completionReason==='match-end')report.results=readNativeResults(module);
+      if(report.live.completionReason==='match-end'){report.results=readNativeResults(module);Object.defineProperty(report,'nativeResultContext',{value:{packages,costumes:[costumeIndex,opponentCostumeIndex]}});}
       report.finalGpuErrorCheck=preview.validateGpu();saveShaders();preview.dispose();
     }else if(preview){report.preview.final=preview.draw();}
     if(params.has('input')){
