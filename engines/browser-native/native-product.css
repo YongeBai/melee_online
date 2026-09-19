@@ -49,5 +49,15 @@ body[data-error="true"] #result { display: block; position: fixed; inset: 10%; z
 #nativeResults .room-action canvas { height: 1.55rem; max-width: 100%; object-fit: contain; }
 #nativeResults .results-help { color: #d7d9e2; text-align: center; font: 600 min(1.25vw,1.7dvh)/1.1 system-ui,sans-serif; text-shadow: 0 2px #000; }
 #nativeResults button:disabled { opacity: .42; cursor: default; }
+#nativeResults.native-result-scene { background: #000; }
+#nativeResults.native-result-scene .native-result-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#nativeResults.native-result-scene .results-scene { position: absolute; inset: 0; display: block; padding: 0; background: transparent; pointer-events: none; }
+#nativeResults.native-result-scene .results-scene::before, #nativeResults.native-result-scene .results-scene::after, #nativeResults.native-result-scene .results-rays, #nativeResults.native-result-scene header, #nativeResults.native-result-scene .results-players { display: none; }
+#nativeResults.native-result-scene .results-status, #nativeResults.native-result-scene .results-actions, #nativeResults.native-result-scene .results-help { pointer-events: auto; }
+#nativeResults.native-result-scene .results-status { position: absolute; left: 50%; bottom: 10%; min-height: 0; padding: .25rem .6rem; transform: translateX(-50%); background: #000a; }
+#nativeResults.native-result-scene .results-actions { position: absolute; left: 50%; bottom: 4.5%; gap: .7rem; transform: translateX(-50%); white-space: nowrap; }
+#nativeResults.native-result-scene .room-action { width: auto; min-width: 9rem; min-height: 2.2rem; padding: .2rem .7rem; background: #090b12d9; }
+#nativeResults.native-result-scene .room-action canvas { height: 1.15rem; }
+#nativeResults.native-result-scene .results-help { position: absolute; left: 50%; bottom: 1.2%; transform: translateX(-50%); white-space: nowrap; font-size: min(1vw,1.35dvh); }
 @keyframes result-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { #nativeResults .results-scene::before { animation: none; } #nativeResults header, #nativeResults .results-player { transition: none; } }

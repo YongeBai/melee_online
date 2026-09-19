@@ -4,7 +4,7 @@ const sha=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256
 // glue or host closure requires a new write-coverage audit before it can run.
 export async function loadDirtyCore(){
  for(const [file,expected]of Object.entries(dirtyHostContract)){const r=await fetch('./'+file);if(!r.ok||await sha(await r.arrayBuffer())!==expected)throw Error('Unaudited dirty host source '+file);}
- const manifest=await(await fetch('./dirty-core.json')).json();if(manifest.originalSha256!=='f0c6a7257496d65621233648e00b6eb0956ea9ce2608c65e919428414c8f5ae2'||manifest.pageBytes!==4096||manifest.counts.stores!==110316||manifest.counts.copy!==169||manifest.counts.fill!==61||manifest.counts.tableMutations!==0)throw Error('Unaudited dirty core');
+ const manifest=await(await fetch('./dirty-core.json')).json();if(manifest.originalSha256!=='c945545513c433199dfb3155863abb01b9b9584461ccc049c7e05012c14920f6'||manifest.pageBytes!==4096||manifest.counts.stores!==111011||manifest.counts.copy!==169||manifest.counts.fill!==63||manifest.counts.tableMutations!==0)throw Error('Unaudited dirty core');
  const bytes=new Uint8Array(await(await fetch('./melee-dirty.wasm')).arrayBuffer());if(await sha(bytes)!==manifest.instrumentedSha256)throw Error('Dirty core integrity');return {bytes,manifest};
 }
 

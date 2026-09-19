@@ -1,5 +1,4 @@
-/* Isolated configured bring-up of the original GmRst panel scene. The product does not
- * switch to this renderer until its pixels and lifecycle are validated. */
+/* Configured bring-up of the original GmRst panel scene. */
 #include <melee/sc/types.h>
 #include <melee/cm/forward.h>
 #include <melee/cm/camera.h>
@@ -152,7 +151,11 @@ void portResultSceneConfigureStats(unsigned kos0,unsigned falls0,unsigned self0,
 
 unsigned portResultSceneInitialize(unsigned character0,unsigned character1,unsigned winner)
 {
-    if(archive||portSceneInitialize()<0)abort();portRuntimeSetSceneDestructors(destroy_lights);
+    if(archive||portSceneInitialize()<0)abort();
+    /* Scene transitions retain resident archives but not live HSD objects. The
+     * browser has already copied MatchEnd before entering here. */
+    for(unsigned link=0;link<64;link++)while(HSD_GObjPLinkHead[link])HSD_GObjFree(HSD_GObjPLinkHead[link]);
+    portRuntimeSetSceneDestructors(destroy_lights);
     void* scenes[2]={0};archive=portFileArchivePair("GmRst.usd","pnlsce","flmsce",scenes);
     panel_scene=scenes[0];film_scene=scenes[1];if(!archive||!panel_scene||!film_scene)abort();
     camera=GObj_Create(HSD_GOBJ_CLASS_CAMERA,20,0);HSD_CObj* c=HSD_CObjLoadDesc(panel_scene->cameras->desc);
