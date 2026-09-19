@@ -29,6 +29,7 @@ static int initialized,started;
 static StartMeleeData* menu_start;
 static struct MatchExitInfo match_exit;
 static int results_ready;
+static unsigned result_falls[2];
 static int hud_initialized;
 static int damage_initialized;
 static HSD_GObj* pause_object;
@@ -198,6 +199,7 @@ void portTournamentFinish(void)
     extern unsigned portSceneExitStatus(unsigned);
     if(!started||gmVs_GetSceneState()->unk_0!=3||!portSceneExitStatus(0))abort();
     if(results_ready)return;
+    for(unsigned slot=0;slot<2;slot++)result_falls[slot]=Player_GetFalls(slot);
     gm_Scene_Vs_OnExit(&match_exit);results_ready=1;
 }
 double portTournamentResultRead(unsigned field,unsigned slot)
@@ -208,6 +210,9 @@ double portTournamentResultRead(unsigned field,unsigned slot)
     case 0:return end->outcome;case 1:return end->frame_count;case 2:return end->n_winners;
     case 3:return p->ckind;case 4:return p->pkind;case 5:return p->stocks;case 6:return p->percent;case 7:return p->score;
     case 8:for(unsigned i=0;i<end->n_winners;i++)if(end->winners[i]==slot)return 1;return 0;
+    case 9:{unsigned kos=0;for(unsigned opponent=0;opponent<4;opponent++)kos+=p->kills[opponent];return kos;}
+    case 10:return result_falls[slot];
+    case 11:return p->self_destructs;
     default:abort();
     }
 }

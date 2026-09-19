@@ -11,7 +11,7 @@ test('return tickets carry only two playable slots and tournament stages',()=>{
  storage.setItem('native-melee-return-v1','broken');assert.equal(consumeReturn(storage),null);
 });
 test('result titles use native winner flags, preserving timeout draws and no contest',()=>{
- const players=[0,1].map(i=>({character:i,kind:0,stocks:4,percent:0,score:0,winner:true}));
+ const players=[0,1].map(i=>({character:i,kind:0,stocks:4,percent:0,score:0,winner:true,kos:0,falls:0,selfDestructs:0}));
  const tie=validateResults({outcome:1,frames:28800,winnerCount:2,players});assert.equal(resultTitle(tie),'Draw');
  assert.equal(resultTitle({...tie,outcome:7}),'No Contest');assert.equal(resultTitle({...tie,outcome:2,winnerCount:1,players:[{...players[0],winner:false},players[1]]}),'Player 2 Wins');
  assert.equal(resultCharacterName(0),'Captain Falcon');assert.equal(resultCharacterName(14),'Ice Climbers');assert.equal(resultCharacterName(25),'Ganondorf');assert.throws(()=>resultCharacterName(26));

@@ -17,7 +17,7 @@ export function instrumentSnapshotWasm(bytes,{memoryInitialPages=null,dirtyTrack
   if(id===7){const count=u(),body=bytes.slice(at,end);exports={count,body};}
   sections.push({id,body:bytes.slice(start,end)});at=end;
  }
- const allowed=new Set(['emit_immediate','portEmitDraw','music_request','accept_diagnostic_mute','portDispatchObject','invoke_viiiiii','invoke_vii','invoke_vi','invoke_v','_abort_js','fd_close','fd_write','fd_seek','emscripten_resize_heap','_emscripten_throw_longjmp']);
+ const allowed=new Set(['emit_immediate','portEmitDraw','emit_efb_copy','music_request','accept_diagnostic_mute','portDispatchObject','invoke_viiiiii','invoke_vii','invoke_vi','invoke_v','_abort_js','fd_close','fd_write','fd_seek','emscripten_resize_heap','_emscripten_throw_longjmp']);
  if(!exports||!globals.length||!table||!memory||imports.some(i=>!allowed.has(i.name)||!['env','wasi_snapshot_preview1'].includes(i.module)))throw Error('Unaudited snapshot imports/state');
  if(memoryInitialPages!==null&&(!Number.isInteger(memoryInitialPages)||memoryInitialPages<memory.initial||memoryInitialPages>memory.maximum))throw Error('Invalid replica initial memory');
  const additions=globals.flatMap(g=>[...string(g.name),3,...leb(g.index)]);

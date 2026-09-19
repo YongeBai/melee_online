@@ -125,7 +125,7 @@ test('results require consensus, two rematch votes and one coordinated fresh epo
  a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);
  const guest=await post('/native-rooms/join',{code:owner.code}),b=await socket(guest.token),epoch=guest.epoch;
  const selection={stage:31,players:[{character:20,costume:0,kind:0},{character:2,costume:0,kind:0}]};
- const results={outcome:2,frames:1000,winnerCount:1,players:[{character:20,kind:0,stocks:0,percent:0,score:-4,winner:false},{character:2,kind:0,stocks:4,percent:0,score:0,winner:true}]};
+ const results={outcome:2,frames:1000,winnerCount:1,players:[{character:20,kind:0,stocks:0,percent:0,score:-4,winner:false,kos:0,falls:4,selfDestructs:0},{character:2,kind:0,stocks:4,percent:0,score:0,winner:true,kos:4,falls:0,selfDestructs:0}]};
  a.send({type:'result-action',epoch,action:'rematch'});await a.take(m=>m.type==='error');
  for(const c of [a,b])c.send({type:'phase',epoch,key:'match:0'});
  await a.take(m=>m.type==='phase-ready');await b.take(m=>m.type==='phase-ready');

@@ -466,3 +466,23 @@ Protocol tests cover owner-only CPU/kick authorization, native CPU start without
 After the native capture-gate rebuild, fresh rooms B68A9R and XRDJQV booted into the customized CSS. CPU on/off transitions retained the customized layout. Unpatched CSS frames are rejected before GPU readback/encoding, including the interval after callback installation but before the first foreground draw; a compiled C++ test checks this boundary and invalid/stale pointers.
 
 P2 refreshed and retained its seat, navigated the native hand to its keyboard indicator, and opened controls using P. P1 then kicked P2 from character select while that dialog was open; removal closes the dialog and exposes the new-room start action.
+
+## Live original result panel (September 18)
+
+The hosted no-ISO product now retires the completed match objects and enters the
+original `GmRst.usd` standings panel in the same WASM runtime. The transition
+uses the native `MatchEnd` outcome plus exact KO, fall, and self-destruct
+counters; the previous custom HTML standings cards are hidden. Compact rematch
+and character-select controls remain as browser room-lifecycle controls.
+
+A CPU Falco/Fox elimination on Battlefield rendered 120 consecutive 960×720
+result frames and 120 distinct draws in 2.0212 seconds: **59.371 simulation FPS
+and 59.371 presentation FPS**. Rematch restored the same legal selection and
+four stocks, and a second result returned to the original character select.
+The raw evidence is
+`docs/benchmarks/browser-2026-09-18-native-live-results.json`.
+
+This is not completion of the result scene: the original demo-fighter winner
+camera and EFB-captured portrait textures have full isolated 26-character
+coverage, but are not yet composed into the live product panel. The live result
+measurement also does not replace the longer gameplay/rollback measurements.

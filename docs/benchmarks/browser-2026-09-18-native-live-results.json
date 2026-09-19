@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-18",
+  "path": "hosted no-ISO character select -> tournament stage -> live match -> original GmRst panel -> rematch -> character select",
+  "browser": "headless Chromium WebGL2 on AMD Radeon 890M (ANGLE/radeonsi)",
+  "resolution": [960, 720],
+  "resultScene": {
+    "frames": 120,
+    "distinctDraws": 120,
+    "elapsedMs": 2021.2000000476837,
+    "simulationFps": 59.37067088718038,
+    "presentationFps": 59.37067088718038
+  },
+  "match": {
+    "characters": [20, 2],
+    "stage": 31,
+    "outcome": 2,
+    "players": [
+      {"character": 20, "stocks": 0, "kos": 0, "falls": 4, "selfDestructs": 4, "winner": false},
+      {"character": 2, "stocks": 4, "kos": 0, "falls": 0, "selfDestructs": 0, "winner": true}
+    ]
+  },
+  "passed": true,
+  "scope": "Original animated GmRst standings panel and real MatchEnd counters in the product lifecycle. Original result demo fighters and captured portrait textures remain to be integrated into the live composite."
+}

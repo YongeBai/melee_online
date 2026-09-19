@@ -1,7 +1,7 @@
 // Only original gm_Scene_Vs_OnExit computes rankings. Browser UI reads its result.
 export function readNativeResults(module){
  module._portTournamentFinish();const read=(f,p=0)=>module._portTournamentResultRead(f,p);
- return {outcome:read(0),frames:read(1),winnerCount:read(2),players:[0,1].map(p=>({character:read(3,p),kind:read(4,p),stocks:read(5,p),percent:read(6,p),score:read(7,p),winner:!!read(8,p)}))};
+ return {outcome:read(0),frames:read(1),winnerCount:read(2),players:[0,1].map(p=>({character:read(3,p),kind:read(4,p),stocks:read(5,p),percent:read(6,p),score:read(7,p),winner:!!read(8,p),kos:read(9,p),falls:read(10,p),selfDestructs:read(11,p)}))};
 }
 export function returnTicket(action,selection){
  if(!['rematch','characters'].includes(action)||!selection||![2,3,8,28,31,32].includes(selection.stage)||!Array.isArray(selection.players)||selection.players.length<2)throw Error('Invalid tournament return');
@@ -13,8 +13,8 @@ export function returnTicket(action,selection){
 export function validateResults(value){
  if(!value||![1,2,7,8,9].includes(value.outcome)||!Number.isInteger(value.frames)||value.frames<0||value.frames>28800||!Number.isInteger(value.winnerCount)||value.winnerCount<0||value.winnerCount>2||!Array.isArray(value.players)||value.players.length!==2)throw Error('Invalid native results');
  const players=value.players.map(p=>{
-  if(!p||!Number.isInteger(p.character)||p.character<0||p.character>25||![0,1].includes(p.kind)||!Number.isInteger(p.stocks)||p.stocks<0||p.stocks>4||!Number.isInteger(p.percent)||p.percent<0||p.percent>65535||!Number.isInteger(p.score)||typeof p.winner!=='boolean')throw Error('Invalid native standings');
-  return {character:p.character,kind:p.kind,stocks:p.stocks,percent:p.percent,score:p.score,winner:p.winner};
+  if(!p||!Number.isInteger(p.character)||p.character<0||p.character>25||![0,1].includes(p.kind)||!Number.isInteger(p.stocks)||p.stocks<0||p.stocks>4||!Number.isInteger(p.percent)||p.percent<0||p.percent>65535||!Number.isInteger(p.score)||typeof p.winner!=='boolean'||!Number.isInteger(p.kos)||p.kos<0||p.kos>65535||!Number.isInteger(p.falls)||p.falls<0||p.falls>65535||!Number.isInteger(p.selfDestructs)||p.selfDestructs<0||p.selfDestructs>65535)throw Error('Invalid native standings');
+  return {character:p.character,kind:p.kind,stocks:p.stocks,percent:p.percent,score:p.score,winner:p.winner,kos:p.kos,falls:p.falls,selfDestructs:p.selfDestructs};
  });if(players.filter(p=>p.winner).length!==value.winnerCount)throw Error('Invalid native winner count');
  return {outcome:value.outcome,frames:value.frames,winnerCount:value.winnerCount,players};
 }
