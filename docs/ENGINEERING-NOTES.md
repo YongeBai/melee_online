@@ -486,6 +486,20 @@ redirect the copied image to the superficially similar character-art material.
 The regression must observe the exact allocated image address in a native panel
 draw and inspect final pixels, not merely prove that EFB bytes are nonzero.
 
+Result-fighter coverage has three roster-specific traps. The result constructor
+reloads costume archives after `Player_InitAllPlayers`, so Link and Young Link
+cannot reuse descriptor addresses cached during package loading; derive the live
+descriptor base from the newly constructed root and map source nodes by ID,
+leaving their one runtime-only attachment joint unmatched. Zelda and Sheik also
+require `MatchPlayerData.ftkind` as well as `ckind`, or the original result code
+resolves both standings entries to Zelda. Finally, Game & Watch's body uses the
+camera-mode-1 two-sided outline path; temporarily select that mode only around
+his original result draw callback and restore it immediately. Portrait capture
+uses a transparent, non-premultiplied WebGL buffer so black/outlined fighters do
+not become indistinguishable from an opaque black clear. The 26-character proof
+and its explicit live-lifecycle limitation are recorded in
+`docs/benchmarks/browser-2026-09-18-native-result-roster.json`.
+
 ## Reproduction and experiment isolation
 
 - `npm run serve`: production-style server; `MELEE_PORT` selects its port.

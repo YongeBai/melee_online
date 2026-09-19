@@ -2,6 +2,7 @@
  * switch to this renderer until its pixels and lifecycle are validated. */
 #include <melee/sc/types.h>
 #include <melee/cm/forward.h>
+#include <melee/cm/camera.h>
 #include <melee/ft/forward.h>
 #include <melee/ft/ftdemo.h>
 #include <melee/ft/types.h>
@@ -195,7 +196,7 @@ void portResultFightersInitialize(unsigned character0,unsigned character1,unsign
     const CharacterKind characters[2]={(CharacterKind)character0,(CharacterKind)character1};const unsigned costumes[2]={costume0,costume1};
     layout->state.match_end.is_teams=0;layout->state.match_end.n_winners=1;layout->state.match_end.winners[0]=winner;
     for(unsigned slot=0;slot<2;slot++){
-        MatchPlayerData* standing=&layout->state.match_end.player_standings[slot];standing->pkind=Gm_PKind_Human;standing->ckind=characters[slot];standing->is_big_loser=slot==winner?0:1;standing->x3_b0=costumes[slot];
+        MatchPlayerData* standing=&layout->state.match_end.player_standings[slot];standing->pkind=Gm_PKind_Human;standing->ckind=characters[slot];standing->ftkind=Player_800325C8(characters[slot],0);standing->is_big_loser=slot==winner?0:1;standing->x3_b0=costumes[slot];
         fn_8017A9B4(slot);
         HSD_PadCopyStatus[slot].button=slot==winner?0x200:0;result_fighters[slot]=(HSD_GObj*)fn_8017A67C(characters[slot],costumes[slot],slot);if(!result_fighters[slot])abort();
     }
@@ -225,7 +226,9 @@ void portResultFighterRenderBegin(unsigned slot,unsigned live)
 }
 unsigned portResultFighterNativeDraw(unsigned slot,unsigned pass)
 {
-    extern unsigned portNativeDrawObject(HSD_GObj*,unsigned,unsigned);if(slot>=2||!result_fighters[slot]||pass>2)abort();return portNativeDrawObject(result_fighters[slot],pass,1);
+    extern unsigned portFighterNativeDraw(HSD_GObj*,unsigned);if(slot>=2||!result_fighters[slot]||pass>2)abort();Fighter* fp=result_fighters[slot]->user_data;if(!fp)abort();
+    if(fp->kind==Ft_Kind_GameWatch){u8 old=Camera_80031060();Camera_80031074(1);unsigned drawn=portFighterNativeDraw(result_fighters[slot],pass);Camera_80031074(old);return drawn;}
+    return portFighterNativeDraw(result_fighters[slot],pass);
 }
 unsigned portResultPortraitDescriptor(unsigned slot,unsigned* out)
 {
@@ -270,7 +273,7 @@ void portResultFighterCameraSnapshot(unsigned slot,unsigned live,float* out)
 void portResultFighterSnapshot(unsigned slot,float* out)
 {
     if(slot>=2||!result_fighters[slot]||!out)abort();Fighter* fp=result_fighters[slot]->user_data;if(!fp)abort();
-    out[0]=fp->kind;out[1]=fp->motion_id;out[2]=fp->anim_id;out[3]=fp->cur_anim_frame;out[4]=fp->cur_pos.x;out[5]=fp->cur_pos.y;out[6]=fp->cur_pos.z;out[7]=fp->facing_dir;out[8]=fp->x34_scale.y;out[9]=(unsigned)fp->x5A4;out[10]=(unsigned)fp->x5A8;out[11]=(unsigned)fp->x8AC_animSkeleton;
+    out[0]=fp->kind;out[1]=fp->motion_id;out[2]=fp->anim_id;out[3]=fp->cur_anim_frame;out[4]=fp->cur_pos.x;out[5]=fp->cur_pos.y;out[6]=fp->cur_pos.z;out[7]=fp->facing_dir;out[8]=fp->x34_scale.y;out[9]=(unsigned)fp->x5A4;out[10]=(unsigned)fp->x5A8;out[11]=(unsigned)fp->x8AC_animSkeleton;out[12]=fp->invisible;out[13]=fp->x221E_b5;out[14]=(unsigned)fp->x5AC.xC[4];
 }
 unsigned portResultSceneTextOwners(unsigned* out,unsigned capacity)
 {

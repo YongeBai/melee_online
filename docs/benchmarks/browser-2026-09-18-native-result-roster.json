@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-18",
+  "passed": true,
+  "scope": "Isolated browser-native result target: every playable CharacterKind is constructed by the original demo-fighter path, animated for 60 steps, submitted through the original fighter callback, captured through the native result camera into a 52x74 RGB5A3 image, attached to the original result-panel material, and fully torn down. This is not evidence for live match-to-results lifecycle or result-screen FPS.",
+  "command": "node scripts/native-port/probe-result-roster.mjs",
+  "cases": 13,
+  "characters": 26,
+  "checksPerCase": [
+    "requested external CharacterKind and exact internal FighterKind",
+    "finite initial and post-animation actor state",
+    "distinct original fighter owners",
+    "winner camera submits all three native passes",
+    "winner GPU draws, verified vertices, and non-black pixels",
+    "loser camera GPU draws and verified vertices",
+    "one 52x74 format-5 7904-byte native EFB copy",
+    "nonempty colored RGB5A3 portrait",
+    "exact portrait address bound once by the original panel material",
+    "zero actor, panel, process, and resident-file leaks"
+  ],
+  "rows": [
+    ["Ca/Dk", [2,3], 63,7272,24069,46,7256,2236,65],
+    ["Fx/Gw", [1,24], 59,6972,29651,81,14437,1154,65],
+    ["Kb/Kp", [4,5], 33,3236,36690,53,7269,3007,65],
+    ["Lk/Lg", [6,17], 69,7244,30449,49,6539,3015,65],
+    ["Mr/Ms", [0,18], 52,6518,28036,69,7513,2864,65],
+    ["Mt/Ns", [16,8], 27,6609,29813,50,6512,3132,65],
+    ["Pe/Pk", [9,12], 54,6904,26637,35,4958,2872,65],
+    ["Pp/Pr", [10,15], 20,3442,29733,19,4805,2717,65],
+    ["Ss/Ys", [13,14], 68,7366,31469,53,6632,1748,65],
+    ["Zd/Sk", [19,7], 62,6763,25395,53,6887,1973,65],
+    ["Fc/Cl", [22,20], 48,5804,32776,52,7137,2584,65],
+    ["Dr/Fe", [21,26], 55,6424,27059,96,7436,2519,65],
+    ["Pc/Gn", [23,25], 21,3854,20710,75,7118,2747,65]
+  ],
+  "rowColumns": ["externalCodes", "internalKinds", "winnerDraws", "winnerVertices", "winnerColoredPixels", "captureDraws", "captureVertices", "portraitColoredPixels", "compositeDraws"],
+  "specialCases": {
+    "LinkAndYoungLink": "Result construction reloads costume archives and inserts one runtime-only joint. GPU binding derives the live descriptor base from the newly loaded root and maps source nodes by descriptor identity, leaving exactly one attachment joint.",
+    "ZeldaAndSheik": "The result MatchPlayerData includes both ckind and ftkind, preserving the requested transformed form instead of resolving both entries to Zelda.",
+    "IceClimbers": "Popo loads the shared Popo/Nana fighter family and the original GmRstMPn result motion.",
+    "GameAndWatch": "The result draw temporarily selects camera fighter-render mode 1 so the original two-sided outline callback runs; its loser capture produced 81 draws, 14437 verified vertices, and 1154 colored portrait pixels. The previous camera mode is restored immediately."
+  },
+  "baseline": {
+    "command": "node scripts/native-port/probe-result-scene.mjs",
+    "defaultPair": "Fx/Fc",
+    "passed": true,
+    "panelScreenshotSha256": "18f0c34a7159950b75fb9e76bef97b6e67fbb92ddf4d99b491063bcff5e572c5",
+    "winnerScreenshotSha256": "5daf1dfaa0959850f2e0567c82516fbe49e0590d89ec0e597a79c422875415aa",
+    "captureScreenshotSha256": "a08a352067783c8b63bc962ac8f577eefeee24c886a51ebbbf4f7f7052c40376",
+    "compositeScreenshotSha256": "9ee04d1e8cca594a3e35c01bb70008f48815cd846d44d7cc568c05d40c6d0a92",
+    "portraitColoredPixels": 2465,
+    "cleanup": {"actorObjects": 0, "actorProcs": 0, "panelObjects": 0, "panelProcs": 0, "residentAllocations": 0},
+    "productFighterGlueUnchangedSha256": "0d7004dc06463954360722e2156f4b895d89d25ef731c4dc7ff5b6f7bb3059ab"
+  },
+  "tests": {
+    "command": "npm test",
+    "tests": 651,
+    "passed": 641,
+    "skipped": 10,
+    "failed": 0
+  }
+}
