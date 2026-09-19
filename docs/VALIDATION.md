@@ -55,13 +55,15 @@ exactly the measured paused interval was 59.88 FPS. The full suite is 646 tests:
 636 pass, 10 skip, 0 fail. This does not validate arbitrary-duration WAN outages. See the
 [reconnect and cadence evidence](benchmarks/browser-2026-09-18-native-room-reconnect-720p60.json).
 
-The temporary results dialog has been replaced by an animated fixed-4:3
+The temporary results dialog was first replaced by an animated fixed-4:3
 tournament presentation built from the hosted original SIS glyphs and native
 standings. A fresh two-browser lifecycle passed real-time elimination, one-vote
 hold, two-vote rematch, an original 28,800-frame timeout, return to character
 select, and the six-stage legal list. Both peers reported two player panels, no
-temporary label, and a measured 1.333317 aspect ratio. The original `GmRst` 3D
-scene is still not ported. The original character victory themes are ported:
+temporary label, and a measured 1.333317 aspect ratio. The product now replaces
+those custom standings cards with the original `GmRst` panel and fighter-camera
+composition described in the live-result section below. The original character
+victory themes are also ported:
 the fixture extracts all 13 `ff_*` HPS files, runtime selection follows the
 original character-kind table, and both peers measured `ff_fox.hps` in the
 playing state with audio peaks from 0.1480 to 0.1671 during the Falco/Fox
@@ -116,13 +118,20 @@ and panel attachment routines then supplied that descriptor to the original
 result material. The final panel used 65 draws and visibly rendered the captured
 Falco in the P2 standings slot; the probe requires the exact runtime image
 address, dimensions, and format to appear in one native material submission.
-The source suite now passes 651 tests (641 pass, 10 skip, 0 fail), the ordinary
-fighter glue remains byte-identical, and elimination/rematch/28,800-frame timeout
-regression still passes. This remains isolated result work, not product parity:
-the browser preview orchestrates capture/copy/panel passes separately from the
-complete original camera traversal, and all-roster actor construction, live
-standings, lifecycle integration, and result-screen FPS remain. See the
-[native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json).
+The source suite passed 651 tests (641 pass, 10 skip, 0 fail), the ordinary
+fighter glue remained byte-identical, and elimination/rematch/28,800-frame
+timeout regression still passed. The isolated matrix now repeats the original
+constructor, animation, winner draw, loser-camera RGB5A3 EFB copy, original
+panel attachment, and leak-free teardown for all 26 playable characters in 13
+pairs. Its actor module creates the result scene before fighter/item/effect
+support pools, matching fresh-scene lifecycle order and avoiding destructors for
+support objects that the isolated harness had incorrectly created before scene
+retirement. This matrix is still isolated coverage; live standings integration
+and measured product cadence are supplied by the separate live-result probe.
+See the
+[native result-panel runtime evidence](benchmarks/browser-2026-09-18-native-result-panel-runtime.json),
+[full result roster evidence](benchmarks/browser-2026-09-18-native-result-roster.json),
+and [live result evidence](benchmarks/browser-2026-09-18-native-live-results.json).
 
 For September 17 direct-browser work, see the
 [native port status](BROWSER-NATIVE-PORT-STATUS.md) and
