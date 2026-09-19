@@ -1,5 +1,14 @@
 # Validation — September 8–9, 2026
 
+September 18 hosted-entry update: the release server now launches the native
+WASM build at `/play/`, not the legacy Dolphin route. A Chromium entry smoke
+verified the 960×720 character-select canvas, human-only room, and absence of a
+file/ISO input. The full two-browser release route then passed the 1,800-frame
+rollback/combat gate at 59.780–59.904 simulation FPS and 59.964 captured FPS,
+with 1,800 distinct 960×720 images, no capture/content errors, confirmed frame
+1799 on both peers, and identical final fighter state. See the
+[hosted-entry evidence](benchmarks/browser-2026-09-18-native-release-entry-720p60.json).
+
 September 18 LRAS update: an isolated native pause probe and the authenticated
 two-browser default-rollback product both complete original L+R+A+Start. The
 native scene-exit flag becomes 1 and outcome becomes 7 (`NO CONTEST`) while the

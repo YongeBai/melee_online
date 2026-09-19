@@ -1,5 +1,17 @@
 # Native browser port — September 17, 2026
 
+September 18 hosted-entry checkpoint: the production server now routes `/play/`
+directly to the no-Dolphin native WASM tournament build, with its file allowlist,
+cross-origin isolation, signed-cookie access, and exact-origin room HTTP/WebSocket
+checks. A release-route Chromium smoke verified a 960×720 character-select canvas,
+a human-only room, and no file input. A separate two-browser run loaded both peers
+through `/play/` and sustained 1,800 combat frames at 59.780–59.904 simulation
+FPS; the observed seat captured 1,800/1,800 distinct 960×720 frames at 59.964 FPS
+with no repeats, black frames, wrong-size frames, or observer error. Both peers
+confirmed frame 1799 and converged exactly after 124/156 corrections. The full
+source suite now reports 647 pass, 10 skip, and zero failures across 657 tests.
+[Hosted-entry evidence](benchmarks/browser-2026-09-18-native-release-entry-720p60.json).
+
 September 18 LRAS checkpoint: the product now accepts Melee's original paused
 L+R+A+Start exit as a terminal native match state. Unlike GAME/TIME, retail
 LRAS deliberately leaves `VsSceneState.unk_0` at zero while setting

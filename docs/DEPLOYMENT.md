@@ -49,7 +49,8 @@ route boundary, cross-origin isolation, traversal/ISO rejection, exact-origin
 room POSTs, and WebSocket access. Browser probes separately validate native
 menus/camera, two-browser deterministic rollback, and sustained 960×720
 presentation cadence; see [VALIDATION.md](VALIDATION.md) for the exact measured
-scope. An external domain/TLS deployment and broad WAN latency matrix still
+scope and the [hosted-entry result](benchmarks/browser-2026-09-18-native-release-entry-720p60.json).
+An external domain/TLS deployment and broad WAN latency matrix still
 require validation on the actual release host.
 
 The server is an input relay, not a streamed server emulator. Simulation,
