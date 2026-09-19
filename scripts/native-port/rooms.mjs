@@ -8,7 +8,7 @@ const token=()=>randomBytes(24).toString('base64url');
 function sameOrigin(req){if(!req.headers.origin)return true;try{const origin=new URL(req.headers.origin);return ['http:','https:'].includes(origin.protocol)&&origin.host===req.headers.host;}catch{return false;}}
 const neutral=()=>({pad:[0,0,0,0,0,0,0],tap:1});
 function validateInput(input){const p=input?.pad;if(!Array.isArray(p)||p.length!==7||!Number.isInteger(p[0])||p[0]<0||(p[0]&~0x1f7f)||p.slice(1).some((v,i)=>!Number.isFinite(v)||Math.abs(v)>1||(i>=4&&v<0))||![0,1].includes(input.tap))throw Error('Invalid controller input');return {pad:[...p],tap:input.tap};}
-export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliveryDelayMs=null,receiveDelayMs=null}={}){
+export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliveryDelayMs=null,receiveDelayMs=null,authorize=()=>true,origins=null}={}){
  if(deliveryDelayMs!==null&&typeof deliveryDelayMs!=='function')throw Error('Room delivery delay must be a function');
  if(receiveDelayMs!==null&&typeof receiveDelayMs!=='function')throw Error('Room receive delay must be a function');
  const rooms=new Map(),sessions=new Map(),wss=new WebSocketServer({noServer:true,maxPayload:8192}),delayTimers=new Set();
@@ -92,13 +92,15 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliver
   }catch(e){fail(e);}});
   ws.on('close',()=>{clearTimeout(timeout);if(session){const {r,seat}=session;if(r.players[seat]?.ws===ws){r.players[seat].ws=null;r.touched=Date.now();state(r);}}});
  }
- server.on('upgrade',(req,socket,head)=>{if(new URL(req.url,'http://localhost').pathname!=='/native-room'){socket.destroy();return;}if(!sameOrigin(req)){socket.destroy();return;}wss.handleUpgrade(req,socket,head,websocket);});
+ const originAllowed=req=>origins?origins.includes(req.headers.origin):sameOrigin(req);
+ server.on('upgrade',(req,socket,head)=>{if(new URL(req.url,'http://localhost').pathname!=='/native-room'){socket.destroy();return;}if(!authorize(req)||!originAllowed(req)){socket.destroy();return;}wss.handleUpgrade(req,socket,head,websocket);});
  let stopped=false;function stop(){if(stopped)return;stopped=true;clearInterval(sweep);for(const timer of delayTimers)clearTimeout(timer);delayTimers.clear();for(const client of wss.clients)client.terminate();wss.close();}
  const sweep=setInterval(()=>{for(const r of rooms.values())if(!r.players.some(p=>p?.ws?.readyState===1)&&Date.now()-r.touched>expiryMs){for(const p of r.players)if(p)sessions.delete(p.token);rooms.delete(r.code);}},5000);sweep.unref();server.on('close',stop);
  const snapshot=state=>({...state.stats,byType:{...state.stats.byType}});return {close:stop,deliverySnapshot(){return snapshot(delivery);},receiveSnapshot(){return snapshot(receive);},testDisconnectSeat(roomCode,seat){const ws=rooms.get(roomCode)?.players[seat]?.ws;if(!ws||ws.readyState!==1)return false;ws.terminate();return true;},async handle(req,res){
   if(!['/native-rooms','/native-rooms/join','/native-rooms/resume'].includes(new URL(req.url,'http://localhost').pathname))return false;
   const reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
-  if(req.method!=='POST'||req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host){reply(403,{error:'Same-origin POST required'});return true;}
+  if(!authorize(req)){reply(401,{error:'Authentication required'});return true;}
+  if(req.method!=='POST'||!originAllowed(req)){reply(403,{error:'Same-origin POST required'});return true;}
   try{let body='';for await(const data of req){body+=data;if(body.length>4096)throw Error('Request too large');}const m=JSON.parse(body||'{}'),route=new URL(req.url,'http://localhost').pathname;
    if(route.endsWith('/resume')){const s=sessions.get(m.token);if(!s)throw Error('Room session expired');if(s.r.players[1]&&!(m.syncedReload===true&&m.epoch===s.r.epoch))reset(s.r);reply(200,{token:m.token,...view(s.r,s.seat)});}
    else if(route.endsWith('/join')){const r=rooms.get(m.code);if(!r)throw Error('Room not found');if(r.cpu)throw Error('P1 must remove the CPU first');if(r.players[1])throw Error('Room is full');const joined=reserve(r,1);reset(r);reply(200,{...joined,...view(r,1)});}
