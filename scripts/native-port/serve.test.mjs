@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {WebSocket} from '../../web/node_modules/ws/wrapper.mjs';
 import {webAccess} from '../native/web-server.mjs';
-import {createNativePortServer,nativePortFile} from './serve.mjs';
+import {createNativePortServer,nativePortFile,nativeProductLocation} from './serve.mjs';
 import {releaseConfiguration} from './release-server.mjs';
 
 test('product routing exposes one game entry and preserves diagnostic routing by default',()=>{
@@ -16,6 +16,8 @@ test('product routing exposes one game entry and preserves diagnostic routing by
  assert.equal(nativePortFile('/play/certification.html',{productEntry:true}),null);
  assert.equal(nativePortFile('/index.html',{productEntry:true}),null);
  assert.equal(nativePortFile('/secret.iso',{productEntry:true}),null);
+ assert.equal(nativeProductLocation(new URL('https://game.test/?join=ABC234&diagnostic-cpu=1')),'/play/?interactive=1&join=ABC234');
+ assert.equal(nativeProductLocation(new URL('https://game.test/?join=INVALID')),'/play/?interactive=1');
 });
 
 test('release configuration fails closed for external and malformed endpoints',()=>{
@@ -37,7 +39,8 @@ test('product server privately serves the hosted no-ISO entry with isolation hea
  assert.equal(await authed.text(),'<html>tournament</html>');assert.equal(authed.headers.get('cross-origin-embedder-policy'),'require-corp');
  assert.equal((await fetch(base+'/play/native-live.mjs',{headers})).status,200);assert.equal((await fetch(base+'/audio/victory.hps',{headers})).status,200);
  for(const route of ['/play/certification.html','/certification.html','/secret.iso','/play/%2e%2e%2fsecret.iso'])assert.equal((await fetch(base+route,{headers})).status,404);
- const redirect=await fetch(base+'/?join=ABC234',{headers,redirect:'manual'});assert.equal(redirect.status,302);assert.equal(redirect.headers.get('location'),'/play/?join=ABC234');
+ const redirect=await fetch(base+'/?join=ABC234',{headers,redirect:'manual'});assert.equal(redirect.status,302);assert.equal(redirect.headers.get('location'),'/play/?interactive=1&join=ABC234');
+ const restricted=await fetch(base+'/play/?diagnostic-cpu=1&lockstep=1&workload=1&liveframes=60&captureframes=1',{headers,redirect:'manual'});assert.equal(restricted.status,302);assert.equal(restricted.headers.get('location'),'/play/?interactive=1');
  const health=await fetch(base+'/health',{headers});assert.deepEqual(await health.json(),{engine:'browser-native-wasm',dolphin:false,rooms:false,width:960,height:720});
 });
 

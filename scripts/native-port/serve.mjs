@@ -34,10 +34,17 @@ export function nativePortFile(pathname,{productEntry=false}={}) {
  if(pathname.startsWith('/audio/'))return pathname.slice(1);
  return null;
 }
-export function createNativePortServer({enableRooms=true,roomOptions,productEntry=false,access=null,outputDir=output,allowedFiles=files}={}) { const server=createServer(async(req,res)=> {
+export function nativeProductLocation(url){
+ const params=new URLSearchParams({interactive:'1'}),join=url.searchParams.get('join');if(join&&/^[A-HJ-NP-Z2-9]{6}$/.test(join))params.set('join',join);
+ return '/play/?'+params;
+}
+export function createNativePortServer({enableRooms=true,roomOptions,productEntry=false,allowProductDiagnostics=false,access=null,outputDir=output,allowedFiles=files}={}) { const server=createServer(async(req,res)=> {
   if(access&&!access.check(req,res))return;
   let url;try{url=new URL(req.url,'http://localhost');}catch{res.writeHead(400).end();return;}
-  if(productEntry&&(url.pathname==='/'||url.pathname==='/play')){res.writeHead(302,{Location:'/play/'+url.search}).end();return;}
+  if(productEntry&&(url.pathname==='/'||url.pathname==='/play')){res.writeHead(302,{Location:allowProductDiagnostics?'/play/'+url.search:nativeProductLocation(url)}).end();return;}
+  if(productEntry&&!allowProductDiagnostics&&['/play/','/play/character-menu.html'].includes(url.pathname)){
+   const location=nativeProductLocation(url);if(url.pathname!=='/play/'||location!=='/play/'+url.search){res.writeHead(302,{Location:location}).end();return;}
+  }
   if(productEntry&&url.pathname==='/health'){
    if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{Allow:'GET, HEAD'}).end();return;}
    const body=JSON.stringify({engine:'browser-native-wasm',dolphin:false,rooms:enableRooms,width:960,height:720});

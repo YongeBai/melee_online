@@ -3,7 +3,9 @@
 September 18 hosted-entry update: the release server now launches the native
 WASM build at `/play/`, not the legacy Dolphin route. A Chromium entry smoke
 verified the 960×720 character-select canvas, human-only room, and absence of a
-file/ISO input. The full two-browser release route then passed the 1,800-frame
+file/ISO input. It also verified that plain `/play/` becomes interactive and
+that development CPU, lockstep, workload, frame-limit, and capture query
+switches are stripped. The full two-browser release route then passed the 1,800-frame
 rollback/combat gate at 59.780–59.904 simulation FPS and 59.964 captured FPS,
 with 1,800 distinct 960×720 images, no capture/content errors, confirmed frame
 1799 on both peers, and identical final fighter state. See the
