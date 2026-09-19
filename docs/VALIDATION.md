@@ -1,5 +1,16 @@
 # Validation — September 8–9, 2026
 
+September 18 product-scope update: a normal hosted room is now human-only from
+creation. It starts with `cpu=false`, hides the CPU control, and the relay rejects
+an attempted CPU enable. If the relay is unavailable, startup fails closed
+instead of silently becoming a solo match. The session record includes its
+diagnostic scope, so returning to a normal URL cannot resume a CPU room created
+with the explicit `?diagnostic-cpu=1` development switch. Eleven room/transport
+tests pass, and a fresh two-browser product flow confirmed that the control was
+absent before completing character select, legal-stage select, and 60 matching
+rollback frames under four-stock/eight-minute/no-item rules. See the
+[tournament-only product evidence](benchmarks/browser-2026-09-18-native-tournament-only-product.json).
+
 September 18 direct-port update: the default two-browser product room passes the
 sustained browser-canvas 720p60 gate for every legal stage from both observed
 seats and for every roster tile plus held-A Sheik. The roster run used 26

@@ -7,6 +7,15 @@ proof of a future revision.
 
 ## Direct browser port update (September 17)
 
+The product URL is strictly human 1v1. New relay rooms must default to
+`cpu=false`; hide the CPU action, reject server-side CPU enable messages, and
+fail closed when the relay is unavailable. CPU play exists only behind
+`?diagnostic-cpu=1` for development probes. Persist that diagnostic bit beside
+the room token and refuse to resume the room when the current URL has a different
+scope, otherwise a CPU room can leak back into the ordinary product after a
+reload. See the
+[tournament-only product evidence](benchmarks/browser-2026-09-18-native-tournament-only-product.json).
+
 The default two-player product room now uses the audited dirty WASM core,
 exact sparse checkpoints, authenticated prediction/correction, confirmed audio,
 and a separate dirty presentation replica. Precompile the exact shader catalog

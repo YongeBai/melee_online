@@ -7,6 +7,12 @@ all 25 copied-ability packages, original tournament stage callbacks, camera and
 HUD. Hosted assets load automatically; a player-supplied ISO is never required.
 The local disc is used only by the development extraction tools.
 
+The normal hosted route creates only authenticated human 1v1 rooms. CPU play is
+not exposed and the relay rejects attempts to enable it. Development probes may
+opt into a separately scoped CPU room with `?diagnostic-cpu=1`; normal sessions
+cannot resume that room token. If the relay is unavailable, the product fails
+closed rather than silently entering a different game mode.
+
 This is not a complete competitive release. Full menu/match routing, sound effects,
 controller calibration, broader retail parity and static release
 integration remain unfinished. Simulation steps and GPU draw submissions are
