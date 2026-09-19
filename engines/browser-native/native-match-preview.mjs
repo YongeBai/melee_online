@@ -15,9 +15,9 @@ import {createNativeModelProbe} from './verify-model-state.mjs';
 
 // Inspection bridge, not the gameplay renderer: native live poses, visibility
 // and camera. Full scene startup and teardown remain development work.
-export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},cameraRead=null,renderBegin=null,nativeViewport=false,gpuErrorChecks=true,traceAttachments=false,cacheModels=true,presentationCache=null}={}) {
+export function createNativeMatchPreview(module,canvas,actors,{materials=true,verify=true,callbacks=true,hud=null,stage=null,effects=null,items=null,cameraValidation={},cameraRead=null,renderBegin=null,nativeViewport=false,transparent=false,gpuErrorChecks=true,traceAttachments=false,cacheModels=true,presentationCache=null}={}) {
   if(stage&&!callbacks)throw Error('Stage callbacks require original camera passes');
-  const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:verify});
+  const gl=canvas.getContext('webgl2',{alpha:transparent,premultipliedAlpha:!transparent,antialias:false,depth:true,preserveDrawingBuffer:verify});
   if(!gl)throw Error('Native preview needs WebGL2');
   const readGpuInfo=()=>{const info=gl.getExtension('WEBGL_debug_renderer_info');return {renderer:gl.getParameter(info?info.UNMASKED_RENDERER_WEBGL:gl.RENDERER),vendor:gl.getParameter(info?info.UNMASKED_VENDOR_WEBGL:gl.VENDOR),version:gl.getParameter(gl.VERSION)};};
   const gpuInfo=presentationCache?presentationCache.gpuInfo(gl,readGpuInfo):readGpuInfo();
@@ -206,7 +206,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
             }
           }
           }
-          const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),scaleX=canvas.width/640,scaleY=canvas.height/480,presentation=nativeViewport?{viewport:[Math.round(renderContext.viewport[0]*scaleX),Math.round((480-renderContext.viewport[1]-renderContext.viewport[3])*scaleY),Math.round(renderContext.viewport[2]*scaleX),Math.round(renderContext.viewport[3]*scaleY)],clip:[Math.round(renderContext.scissor[0]*scaleX),Math.round((480-renderContext.scissor[1]-renderContext.scissor[3])*scaleY),Math.round(renderContext.scissor[2]*scaleX),Math.round(renderContext.scissor[3]*scaleY)]}:{},materialDraws=materialRenderer.flush({ordered:true,...presentation});
+          const renderContext=readNativeRenderContext(module),hudDraws=drawHud(),scaleX=canvas.width/640,scaleY=canvas.height/480,presentation=nativeViewport?{viewport:[Math.round(renderContext.viewport[0]*scaleX),Math.round((480-renderContext.viewport[1]-renderContext.viewport[3])*scaleY),Math.round(renderContext.viewport[2]*scaleX),Math.round(renderContext.viewport[3]*scaleY)],clip:[Math.round(renderContext.scissor[0]*scaleX),Math.round((480-renderContext.scissor[1]-renderContext.scissor[3])*scaleY),Math.round(renderContext.scissor[2]*scaleX),Math.round(renderContext.scissor[3]*scaleY)]}:{},materialDraws=materialRenderer.flush({ordered:true,clearAlpha:transparent?0:1,...presentation});
           const accessoryDraws=traceAttachments?resources.flatMap(r=>r.accessories.filter(a=>a.accessoryGpu).map(a=>({name:a.accessory.name??null,draws:a.accessoryGpu.queuedDrawCount()}))):null;
           const attachmentDraws=traceAttachments?resources.filter(r=>r.itemAttachment).map(r=>({name:r.name,draws:r.materialGpu.queuedDrawCount()})):null;
           for(const [stats,draws,vertices] of [[particleStats,materialDraws.particleDraws,materialDraws.particleVertices],[afterimageStats,materialDraws.afterimageDraws,materialDraws.afterimageVertices]]){
@@ -220,7 +220,7 @@ export function createNativeMatchPreview(module,canvas,actors,{materials=true,ve
         beginRender();
         materialRenderer?.begin(snapshot);
         const renderContext=readNativeRenderContext(module);checkNativeRenderContext(renderContext,snapshot);
-        gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+        gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,transparent?0:1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
         const rows=[],programs=new Map(),pixelStates=new Map(),lightStates=new Map();
         for(const r of resources) {
           const {model,skin,gpu,nodes,flags,indices,visible}=r;
