@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-18",
+  "passed": true,
+  "command": "node scripts/native-port/probe-native-rooms.mjs --release-entry --rollback --frames=1800 --capture-seat=0 --combat --pair=20,2 --stage=31",
+  "entry": "/play/",
+  "engine": "browser-native-wasm",
+  "dolphin": false,
+  "resolution": [960, 720],
+  "frames": 1800,
+  "durationTargetSeconds": 30,
+  "selection": {
+    "players": [
+      {"character": 15, "costume": 0, "kind": 0, "stocks": 4},
+      {"character": 7, "costume": 0, "kind": 0, "stocks": 4}
+    ],
+    "stage": 31,
+    "seconds": 480,
+    "items": -1,
+    "teams": 0,
+    "mode": 1,
+    "timer": 1
+  },
+  "productScope": {
+    "cpu": false,
+    "cpuControlHidden": true
+  },
+  "coreSha256": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+  "clients": [
+    {
+      "simulationFps": 59.904292908016345,
+      "draws": 1800,
+      "drawSubmissionCpu": {"meanMs": 6.174936111304495, "p95Ms": 9.65499997138977, "maxMs": 18.375},
+      "rollback": {"confirmed": 1799, "corrections": 124, "replayedFrames": 207, "maxReplay": 3, "rejectedLateInputs": 0},
+      "observation": {
+        "mode": "direct-canvas-video-frame",
+        "requested": 1800,
+        "captured": 1800,
+        "distinctSampledImages": 1800,
+        "repeatedSampledImages": 0,
+        "blackFrames": 0,
+        "wrongSize": 0,
+        "fps": 59.96352857533788,
+        "p95GapMs": 19,
+        "maxGapMs": 34.375,
+        "error": null
+      }
+    },
+    {
+      "simulationFps": 59.7800294184451,
+      "draws": 1800,
+      "drawSubmissionCpu": {"meanMs": 6.314211110737588, "p95Ms": 9.939999997615814, "maxMs": 16.82499998807907},
+      "rollback": {"confirmed": 1799, "corrections": 156, "replayedFrames": 268, "maxReplay": 4, "rejectedLateInputs": 0}
+    }
+  ],
+  "matchingFighterState": true,
+  "scope": "Two localhost browser processes loaded the hosted /play/ product entry and used authenticated local prediction, complete-state correction, independent WASM presentation, and scripted combat. Canvas capture is not compositor scanout, WAN, or physical input-to-photon certification."
+}

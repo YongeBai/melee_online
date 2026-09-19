@@ -1,21 +1,19 @@
-# Two-player rooms and server-side rollback
+# Browser-native rooms and historical server rollback
 
-For the direct C-to-WASM browser port, see
-[the native snapshot/correction prototype](BROWSER-NATIVE-ROLLBACK.md).
-That diagnostic runs local prediction and full-state correction in two browsers;
-its production room route still consumes three-frame lockstep. The native relay
-now also forwards each authenticated peer input immediately and emits an ordered
-confirmed-frame acknowledgement once both seats are present, but the playable
-client does not yet drive its simulation from those rollback-facing events. The
-server-side Dolphin architecture below describes the historical/public
-implementation and must not be used as evidence of browser-native rollback
-performance.
+The hosted `/play/` product now runs the direct C-to-WASM port in both browsers.
+Its input-only relay authenticates each seat, forwards immutable peer inputs,
+and emits ordered confirmation acknowledgements. The playable client uses those
+events for bounded local prediction, complete-state correction, confirmed audio,
+and an independent dirty-WASM presentation replica. This is the default room
+path; `?lockstep=1` is a diagnostic fallback. See
+[the native snapshot/correction design](BROWSER-NATIVE-ROLLBACK.md) and the
+[current port status](BROWSER-NATIVE-PORT-STATUS.md).
 
 Native result submission is tagged with the local ending frame. The browser
 holds it until that frame is confirmed, and the relay rejects future/unconfirmed
 ending frames before accepting the existing two-client result consensus. This
-protects the room lifecycle boundary in preparation for prediction; it does not
-make the current playable client a rollback client.
+protects the room lifecycle boundary so speculative endings cannot escape before
+correction and confirmation finish.
 
 The default `/play/` path now creates a private two-seat room. Share the six-character
 code; the second browser enters it at character select. The room owner is always
@@ -27,8 +25,15 @@ Melee's extracted SIS lettering. Both players press Ready; P1 chooses the stage
 on the original stage-select screen. Rules remain four stocks, eight minutes,
 no items. Each player has an independent tap-jump setting.
 
-`/play/?solo=1` retains human-versus-CPU play. `?qa=1&online=1` exposes the room test
-controls; plain `?qa=1` selects the solo diagnostic path.
+Normal rooms are human-only and fail closed when the relay is unavailable.
+Human-versus-CPU exists only behind the explicit `?diagnostic-cpu=1`
+development switch and cannot resume into the normal product URL.
+
+## Historical native-streaming/Dolphin architecture
+
+The sections below describe the older GPU-server implementation. They remain as
+an architectural record and must not be cited as browser-native performance or
+deployment evidence.
 
 ## What actually rolls back
 
