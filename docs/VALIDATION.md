@@ -1,5 +1,27 @@
 # Validation — September 8–9, 2026
 
+September 19 double-Ice-Climbers update: the
+[Fountain iteration](BROWSER-NATIVE-DOUBLE-IC-2026-09-19.md) retains exact
+uniform-slab and immediate-state optimizations and fixes confirmed-input retries.
+Controlled draw CPU averages 8.8% lower. Two 3,600-frame authenticated room runs
+capture all requested images at 59.984–59.987 FPS; occasional 25–33 ms submission
+tails remain. These are canvas measurements, not hitch-free physical scanout
+or full tournament certification.
+
+September 19 pacing update: the [frame/input investigation](BROWSER-NATIVE-PACING-2026-09-19.md)
+removes per-frame GPU error synchronization and the extra idle recovery tick
+after transport stalls. A clean 1,800-frame Fountain control comparison reduced
+mean draw CPU about 20% while retaining exact final camera/fighter state and
+59.97 captured FPS. Browser input-tail improvement is not yet consistent;
+physical input-to-photon remains unmeasured. Entry HTML caching is disabled to
+preserve room session storage across isolated-document reloads.
+
+September 19 review update: rollback retention, release API enforcement,
+authenticated cache revalidation and normal-play diagnostics overhead are fixed.
+The actual release-server probes pass the measured 720p60 workloads; the full
+suite reports 651 pass, 10 skip and zero failures. See the
+[review evidence and remaining refresh caveat](BROWSER-NATIVE-REVIEW-2026-09-19.md).
+
 September 18 hosted-entry update: the release server now launches the native
 WASM build at `/play/`, not the legacy Dolphin route. A Chromium entry smoke
 verified the 960×720 character-select canvas, human-only room, and absence of a

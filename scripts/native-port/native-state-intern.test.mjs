@@ -30,3 +30,14 @@ test('compact shader keys preserve original key equivalence across dynamic shade
  for(const a of rows)for(const b of rows)assert.equal(a.compact===b.compact,a.original===b.original);
  const before=key(state,attrs);state.tev.registers[0][0]++;state.pixel.alphaTest.reference0=23;state.textures.textures[0].wrapS=2;assert.equal(key(state,attrs),before);
 });
+
+test('shader keys distinguish each shader control and preserve attribute-order equivalence',()=>{
+ const {module}=fixture(),tev=createTevStageInterner().read(module,64),key=createInternedShaderKey();
+ const make=()=>({tev,textures:{generators:[{id:0,type:0,source:4,matrix:30,normalize:0,postMatrix:125}],textures:[{id:0}]},pixel:{channelCount:1,channels:[{enabled:1,ambientSource:0,materialSource:0,lights:1,diffuse:0,attenuation:0},null,null,null],alphaTest:{compare0:7,operation:0,compare1:7}},context:{fog:{type:0}}});
+ const attrs=[{attr:13},{attr:9}],base=key(make(),attrs);
+ const changes=[...['id','type','source','matrix','normalize','postMatrix'].map(f=>s=>s.textures.generators[0][f]++),...['enabled','ambientSource','materialSource','lights','diffuse','attenuation'].map(f=>s=>s.pixel.channels[0][f]++),...['compare0','operation','compare1'].map(f=>s=>s.pixel.alphaTest[f]++),s=>s.pixel.channelCount++,s=>s.textures.textures[0].id++,s=>s.context.fog.type++,s=>s.pixel.channels.reverse(),s=>s.textures.generators.push({...s.textures.generators[0]})];
+ for(const change of changes){const s=make();change(s);assert.notEqual(key(s,attrs),base);assert.notEqual(materialShaderKey(s,attrs),materialShaderKey(make(),attrs));}
+ assert.equal(key(make(),[...attrs].reverse()),base);
+ assert.notEqual(key(make(),attrs,{immediateRegisters:true}),base);
+ assert.notEqual(key(make(),[...attrs,{attr:11}]),base);
+});

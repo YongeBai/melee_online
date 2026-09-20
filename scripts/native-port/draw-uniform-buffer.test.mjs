@@ -53,3 +53,22 @@ test('presentation leases exclusively own UBO staging and revoke methods after r
  a.drawUniformBuffer.prepare([fixture()]);const epoch=a.drawUniformBuffer.upload();a.release();assert.throws(()=>a.drawUniformBuffer.bind(0,epoch),/Released/);
  const b=cache.acquire(gl);assert.throws(()=>a.drawUniformBuffer.prepare([fixture()]),/Released/);b.drawUniformBuffer.prepare([fixture(2)]);b.drawUniformBuffer.bind(0,b.drawUniformBuffer.upload());b.release();cache.dispose();
 });
+
+test('retained slab views match isolated record packing through growth, sparse rows and reuse',()=>{
+ const gl=fakeGL(),pool=createDrawUniformBuffer(gl),stride=pool.snapshot().stride;
+ for(const count of [2,40,1,0,17]){
+  const draws=Array.from({length:count},(_,n)=>{
+   const d=fixture(n+1);
+   if(n%2){d.state.model.positionRows=new Float32Array(120).fill(n/7);d.state.model.normalRows=new Float32Array(120).fill(-n/9);}
+   else {d.state.model.positions[9]=new Float32Array(12).fill(n+.25);d.state.model.normals[9]=new Float32Array(12).fill(-n-.25);}
+   if(n%3===0){d.state.context.fog=null;d.state.context.lights.fill(null);d.state.textures={matrices:[],textures:[]};}
+   return d;
+  });
+  assert.ok(pool.prepare(draws));pool.upload();if(!count)continue;
+  const actual=gl.calls.filter(c=>c[0]==='bufferSubData').at(-1)[3],expected=new ArrayBuffer(count*stride);
+  draws.forEach((d,n)=>writeDrawUniforms(expected,n*stride,d.state,d.camera));
+  assert.deepEqual(actual,new Uint8Array(expected));
+ }
+ pool.dispose();
+ const unaligned=createDrawUniformBuffer(fakeGL(),{maxBytes:stride+1});assert.ok(unaligned.prepare([fixture()]));unaligned.upload();unaligned.dispose();
+});

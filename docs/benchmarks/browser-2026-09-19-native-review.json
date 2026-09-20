@@ -1,0 +1,643 @@
+{
+  "date": "2026-09-19",
+  "lras": {"passed":true,"releaseEntry":true,"rollback":true,"outcome":7,"confirmedFrame":137,"returnedToCharacterSelect":true},
+"reconnect": {
+  "passed": true,
+  "requested": {
+    "pair": [
+      20,
+      2
+    ],
+    "stage": 31,
+    "holdASeat": null,
+    "clientCpuSets": null,
+    "relayDelays": null,
+    "clientDelays": null,
+    "disconnectSeat": 1,
+    "disconnectFrame": 600,
+    "releaseEntry": true
+  },
+  "recovery": {
+    "seat": 1,
+    "requestedFrame": 600,
+    "elapsedMs": 281.0481249999939,
+    "before": [
+      {
+        "code": "2JRLZQ",
+        "seat": 0,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 599,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 599,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "rollback",
+        "transport": "authenticated-inputs-v3"
+      },
+      {
+        "code": "2JRLZQ",
+        "seat": 1,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 599,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 599,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "rollback",
+        "transport": "authenticated-inputs-v3"
+      }
+    ],
+    "paused": [
+      {
+        "code": "2JRLZQ",
+        "seat": 0,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 599,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 599,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "rollback",
+        "transport": "authenticated-inputs-v3"
+      },
+      {
+        "code": "2JRLZQ",
+        "seat": 1,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 599,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 599,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "rollback",
+        "transport": "authenticated-inputs-v3"
+      }
+    ],
+    "resumed": [
+      {
+        "code": "2JRLZQ",
+        "seat": 0,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 600,
+          "pad": [
+            256,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 600,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "rollback",
+        "transport": "authenticated-inputs-v3"
+      },
+      {
+        "code": "2JRLZQ",
+        "seat": 1,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 600,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 600,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "rollback",
+        "transport": "authenticated-inputs-v3"
+      }
+    ]
+  },
+  "capture": [
+    {
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.02815068912299,
+      "activeSimulationFps": 59.57724606795957,
+      "recoveryExcludedMs": 281.0481249999939,
+      "drawSubmissionCpu": {
+        "samples": 1800,
+        "meanMs": 5.096855555474758,
+        "p50Ms": 4.799999952316284,
+        "p95Ms": 7.164999961853027,
+        "maxMs": 14.175000011920929
+      },
+      "observation": {
+        "enabled": true,
+        "mode": "direct-canvas-video-frame",
+        "sampleRegion": "full-frame-downsample",
+        "requested": 1800,
+        "captured": 1800,
+        "estimatedUnobservedRequests": 0,
+        "distinctSampledImages": 1800,
+        "repeatedSampledImages": 0,
+        "blackFrames": 0,
+        "wrongSize": 0,
+        "cadence": {
+          "samples": 1799,
+          "meanMs": 16.83262923846581,
+          "p95Ms": 18.529999999998836,
+          "maxMs": 285.1749999999993,
+          "fps": 59.40842549509773,
+          "gapsOver25Ms": 5,
+          "estimatedMissed60HzSlots": 20
+        },
+        "activeCadenceFps": 59.9649639115456,
+        "observerWorkerCpu": {
+          "samples": 1800,
+          "meanMs": 1.5027972230315207,
+          "p95Ms": 2.274999976158142,
+          "maxMs": 4.060000002384186
+        },
+        "error": null
+      }
+    },
+    {
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.35236675801166,
+      "activeSimulationFps": 59.907538953945604,
+      "recoveryExcludedMs": 281.0481249999939,
+      "drawSubmissionCpu": {
+        "samples": 1800,
+        "meanMs": 4.97465833220217,
+        "p50Ms": 4.620000004768372,
+        "p95Ms": 7.269999980926514,
+        "maxMs": 13.375
+      }
+    }
+  ],
+  "rooms": [
+    {
+      "code": "2JRLZQ",
+      "seat": 0,
+      "epoch": 2,
+      "phase": "match:2",
+      "phaseReady": true,
+      "nextFrame": 0,
+      "buffered": 0,
+      "bufferedSent": 0,
+      "lastSent": {
+        "frame": 1799,
+        "pad": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "confirmedFrame": 1799,
+      "pendingEnding": null,
+      "bufferedRollbackEvents": 0,
+      "mode": "rollback",
+      "transport": "authenticated-inputs-v3"
+    },
+    {
+      "code": "2JRLZQ",
+      "seat": 1,
+      "epoch": 2,
+      "phase": "match:2",
+      "phaseReady": true,
+      "nextFrame": 0,
+      "buffered": 0,
+      "bufferedSent": 0,
+      "lastSent": {
+        "frame": 1799,
+        "pad": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "confirmedFrame": 1799,
+      "pendingEnding": null,
+      "bufferedRollbackEvents": 0,
+      "mode": "rollback",
+      "transport": "authenticated-inputs-v3"
+    }
+  ],
+  "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Both clients loaded the hosted /play/ product entry. One authenticated room socket was forcibly terminated and recovered in place; raw wall cadence includes the pause, while active cadence subtracts exactly the measured recovery interval. Not physical presentation, WAN, input-to-photon, roster or tournament certification."
+},
+"failures": ["One pre-match refresh lost the guest room; identical retry passed. Cause unresolved.","Initial release harness attempt lacked Page.enable; fixed and rerun."],
+  "scope": "Review fixes; host JavaScript and relay/server only. No native core, renderer, camera, roster, stage or gameplay changes.",
+  "release": {
+    "requested": {
+      "pair": [
+        20,
+        2
+      ],
+      "stage": 31,
+      "holdASeat": null,
+      "clientCpuSets": null,
+      "relayDelays": null,
+      "clientDelays": null,
+      "disconnectSeat": null,
+      "disconnectFrame": 600,
+      "releaseEntry": true
+    },
+    "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Both clients loaded the hosted /play/ product entry. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+    "capture": [
+      {
+        "frames": 1800,
+        "draws": 1800,
+        "simulationFps": 59.83225031417396,
+        "activeSimulationFps": 59.83225031417396,
+        "recoveryExcludedMs": 0,
+        "drawSubmissionCpu": {
+          "samples": 1800,
+          "meanMs": 4.762080555756887,
+          "p50Ms": 4.344999969005585,
+          "p95Ms": 7.535000026226044,
+          "maxMs": 11.745000004768372
+        },
+        "observation": {
+          "enabled": true,
+          "mode": "direct-canvas-video-frame",
+          "sampleRegion": "full-frame-downsample",
+          "requested": 1800,
+          "captured": 1800,
+          "estimatedUnobservedRequests": 0,
+          "distinctSampledImages": 1800,
+          "repeatedSampledImages": 0,
+          "blackFrames": 0,
+          "wrongSize": 0,
+          "cadence": {
+            "samples": 1799,
+            "meanMs": 16.6751834352418,
+            "p95Ms": 18.774999999997817,
+            "maxMs": 35.56499999999869,
+            "fps": 59.96935529276229,
+            "gapsOver25Ms": 1,
+            "estimatedMissed60HzSlots": 1
+          },
+          "activeCadenceFps": 59.9693552927623,
+          "observerWorkerCpu": {
+            "samples": 1800,
+            "meanMs": 1.4574416654639775,
+            "p95Ms": 2.3899999856948853,
+            "maxMs": 4.7799999713897705
+          },
+          "error": null
+        }
+      },
+      {
+        "frames": 1800,
+        "draws": 1800,
+        "simulationFps": 59.90497074812227,
+        "activeSimulationFps": 59.90497074812227,
+        "recoveryExcludedMs": 0,
+        "drawSubmissionCpu": {
+          "samples": 1800,
+          "meanMs": 4.890169445110692,
+          "p50Ms": 4.514999985694885,
+          "p95Ms": 7.370000004768372,
+          "maxMs": 10.870000004768372
+        }
+      }
+    ],
+    "rooms": [
+      {
+        "code": "GNP4MS",
+        "seat": 0,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 1799,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 1799,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "lockstep-3",
+        "transport": "authenticated-inputs-v3"
+      },
+      {
+        "code": "GNP4MS",
+        "seat": 1,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 1799,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 1799,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "lockstep-3",
+        "transport": "authenticated-inputs-v3"
+      }
+    ],
+    "sessions": [
+      {
+        "frame": 1800,
+        "confirmed": 1799,
+        "remoteKnown": 1799,
+        "acknowledged": 1799,
+        "requiresAcknowledgement": true,
+        "predictionWindow": 3,
+        "receiveWindow": 12,
+        "pendingCorrection": null,
+        "forwardFrames": 1800,
+        "predictedFrames": 1797,
+        "corrections": 132,
+        "replayedFrames": 351,
+        "maxReplay": 4,
+        "rejectedLateInputs": 0,
+        "peakSnapshotBytes": 36634624,
+        "retainedSnapshots": 1,
+        "retainedBytes": 33619968
+      },
+      {
+        "frame": 1800,
+        "confirmed": 1799,
+        "remoteKnown": 1799,
+        "acknowledged": 1799,
+        "requiresAcknowledgement": true,
+        "predictionWindow": 3,
+        "receiveWindow": 12,
+        "pendingCorrection": null,
+        "forwardFrames": 1800,
+        "predictedFrames": 2,
+        "corrections": 0,
+        "replayedFrames": 0,
+        "maxReplay": 0,
+        "rejectedLateInputs": 0,
+        "peakSnapshotBytes": 35192832,
+        "retainedSnapshots": 1,
+        "retainedBytes": 33619968
+      }
+    ],
+    "passed": true
+  },
+  "delayedFountain": {
+    "passed": true,
+    "requested": {
+      "pair": [
+        20,
+        2
+      ],
+      "stage": 2,
+      "holdASeat": null,
+      "clientCpuSets": null,
+      "relayDelays": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ],
+      "clientDelays": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ],
+      "disconnectSeat": null,
+      "disconnectFrame": 600,
+      "releaseEntry": false
+    },
+    "capture": [
+      {
+        "frames": 1800,
+        "draws": 1800,
+        "simulationFps": 59.705631335586254,
+        "activeSimulationFps": 59.705631335586254,
+        "recoveryExcludedMs": 0,
+        "drawSubmissionCpu": {
+          "samples": 1800,
+          "meanMs": 6.2004499993721645,
+          "p50Ms": 5.625,
+          "p95Ms": 9.39000004529953,
+          "maxMs": 18.775000035762787
+        }
+      },
+      {
+        "frames": 1800,
+        "draws": 1800,
+        "simulationFps": 59.894206865920125,
+        "activeSimulationFps": 59.894206865920125,
+        "recoveryExcludedMs": 0,
+        "drawSubmissionCpu": {
+          "samples": 1800,
+          "meanMs": 6.0170277779301005,
+          "p50Ms": 5.425000011920929,
+          "p95Ms": 9.235000014305115,
+          "maxMs": 32.62999999523163
+        },
+        "observation": {
+          "enabled": true,
+          "mode": "direct-canvas-video-frame",
+          "sampleRegion": "full-frame-downsample",
+          "requested": 1800,
+          "captured": 1800,
+          "estimatedUnobservedRequests": 0,
+          "distinctSampledImages": 1800,
+          "repeatedSampledImages": 0,
+          "blackFrames": 0,
+          "wrongSize": 0,
+          "cadence": {
+            "samples": 1799,
+            "meanMs": 16.67560311284046,
+            "p95Ms": 19.275000000001455,
+            "maxMs": 43.56999999999971,
+            "fps": 59.967846034305346,
+            "gapsOver25Ms": 1,
+            "estimatedMissed60HzSlots": 2
+          },
+          "activeCadenceFps": 59.96784603430537,
+          "observerWorkerCpu": {
+            "samples": 1800,
+            "meanMs": 1.4640611109468673,
+            "p95Ms": 2.3600000143051147,
+            "maxMs": 5.485000014305115
+          },
+          "error": null
+        }
+      }
+    ],
+    "rooms": [
+      {
+        "code": "MYQUT5",
+        "seat": 0,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 1799,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 1799,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "lockstep-3",
+        "transport": "authenticated-inputs-v3"
+      },
+      {
+        "code": "MYQUT5",
+        "seat": 1,
+        "epoch": 2,
+        "phase": "match:2",
+        "phaseReady": true,
+        "nextFrame": 0,
+        "buffered": 0,
+        "bufferedSent": 0,
+        "lastSent": {
+          "frame": 1799,
+          "pad": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "confirmedFrame": 1799,
+        "pendingEnding": null,
+        "bufferedRollbackEvents": 0,
+        "mode": "lockstep-3",
+        "transport": "authenticated-inputs-v3"
+      }
+    ],
+    "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 1 under scripted combat. Ordered relay-to-client input/confirmation delay was injected. Ordered client-to-relay input delay was injected. This is not full WAN emulation. Not physical presentation, WAN, input-to-photon, roster or tournament certification."
+  },
+  "tests": {
+    "total": 661,
+    "passed": 651,
+    "skipped": 10,
+    "failed": 0
+  },
+  "limitations": [
+    "960x720 native 4:3, not stretched 1280x720.",
+    "Browser canvas observation, not physical presentation or input-to-photon.",
+    "Release probes use the actual authenticated release-server factory; CDP injects measurement controls after navigation. Public query restrictions remain enabled.",
+    "These workloads do not certify every roster/stage pairing or WAN conditions.",
+    "Earlier captures label mode lockstep-3 after rollback driver disposal; fixed phase metadata separately, without gameplay changes."
+  ]
+}

@@ -53,11 +53,23 @@ export function createNativePortServer({enableRooms=true,roomOptions,productEntr
   }
   if(relay&&await relay.handle(req,res))return;
   const name=nativePortFile(url.pathname,{productEntry});
-  if(!name||!allowedFiles.has(name)||!fs.existsSync(path.join(outputDir,name))){res.writeHead(404).end();return;}
+  if(!name||!allowedFiles.has(name)){res.writeHead(404).end();return;}
   if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{Allow:'GET, HEAD'}).end();return;}
-  const stat=fs.statSync(path.join(outputDir,name));
+  let stat;try{stat=await fs.promises.stat(path.join(outputDir,name));}catch{res.writeHead(404).end();return;}
+  if(!stat.isFile()){res.writeHead(404).end();return;}
+  const etag='W/"'+stat.size.toString(16)+'-'+stat.mtimeMs.toString(16)+'-'+stat.ctimeMs.toString(16)+'"';
+  // Keep entry documents out of the HTTP cache. Chromium's cached isolated
+  // document reload path can replace sessionStorage and lose the room seat.
+  // Large modules/assets still revalidate privately without retransmission.
+  const cacheControl=productEntry&&path.extname(name)!=='.html'?'private, no-cache':'no-store';
+  if(productEntry&&path.extname(name)!=='.html'){
+   res.setHeader('ETag',etag);res.setHeader('Last-Modified',stat.mtime.toUTCString());res.setHeader('Cache-Control','private, no-cache');
+   for(const [key,value]of Object.entries(isolationHeaders))res.setHeader(key,value);
+   const tags=req.headers['if-none-match'],since=req.headers['if-modified-since'];
+   if(tags?tags.split(',').some(tag=>tag.trim()==='*'||tag.trim().replace(/^W\//,'')===etag.slice(2)):since&&Math.floor(stat.mtimeMs/1000)<=Math.floor(Date.parse(since)/1000)){res.writeHead(304).end();return;}
+  }
   res.writeHead(200,{'Content-Type':types[path.extname(name)]||'application/octet-stream','Content-Length':stat.size,
-    'Cache-Control':productEntry?'private, no-cache':'no-store',...isolationHeaders});
+    'Cache-Control':cacheControl,...isolationHeaders});
   if(req.method==='HEAD')res.end();else {const stream=fs.createReadStream(path.join(outputDir,name));stream.on('error',()=>res.destroy());res.on('close',()=>stream.destroy());stream.pipe(res);}
  });const relay=enableRooms?createNativeRoomRelay(server,roomOptions):null;Object.defineProperty(server,'nativeRoomRelay',{value:relay});const close=server.close.bind(server);server.close=(callback)=>{relay?.close();return close(callback);};return server; }
 if(process.argv[1] && import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)

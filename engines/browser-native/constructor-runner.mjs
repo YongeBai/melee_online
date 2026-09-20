@@ -497,7 +497,7 @@ try {
       await new Promise((resolve,reject)=>{
         globalThis.nativeLive=startNativeLive(module,preview,[object,opponent].filter(Boolean),{step,network:options.network,rollback:productRollback?.driver,browserInput:options.browserInput,unlockInput:!menuHandoff,shouldFinish:()=>tournament&&module._portTournamentRead(25,0)!==0,readMatch:withHud?()=>({pause:Array.from({length:5},(_,i)=>module._portTournamentPauseRead(i)),clock:[12,13,14].map(i=>module._portTournamentRead(i,0)),...(menuHandoff?{intro:{mask:module._portTournamentRead(23,0),gate:module._portTournamentRead(17,0),blocked:[0,1].map(p=>module._portTournamentRead(24,p))}}:{})}):null,resolveObjects:()=>[object,opponent].filter(Boolean),frameLimit:limit,inputProvider:params.has('workload')?combatWorkload:null,
           onDraw:()=>frameObserver?.request(),
-          onProgress:s=>{report.live=s;if(productRollback)report.rollback.metrics=productRollback.snapshot();document.querySelector('#result').textContent=JSON.stringify(s,null,2);},
+          onProgress:params.has('liveframes')||params.has('captureframes')?s=>{report.live=s;if(productRollback)report.rollback.metrics=productRollback.snapshot();document.querySelector('#result').textContent=JSON.stringify(s,null,2);}:null,
           onComplete:s=>{void (async()=>{if(frameObserver)s.observation=await frameObserver.stop();report.live=s;if(productRollback)report.rollback.metrics=productRollback.snapshot();resolve();})().catch(reject);},onError:(error,s)=>{report.live=s;document.documentElement.dataset.live='failed';preview.dispose();void frameObserver?.stop();reject(error);}});
         document.documentElement.dataset.live='ready';options.onLive?.(globalThis.nativeLive);
       });

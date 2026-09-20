@@ -9,13 +9,13 @@ export function releaseConfiguration(env=process.env){
  if(publicOrigin&&new URL(publicOrigin).origin!==publicOrigin)throw Error('MELEE_PUBLIC_ORIGIN must be an origin without a trailing slash');
  const external=!['127.0.0.1','localhost','::1'].includes(host)||(publicOrigin&&!['localhost','127.0.0.1','[::1]'].includes(new URL(publicOrigin).hostname));
  if(external&&(!publicOrigin.startsWith('https://')||accessKey.length<24))throw Error('A public server requires an HTTPS MELEE_PUBLIC_ORIGIN and a 24+ character MELEE_ACCESS_KEY');
- const localOrigins=[`http://localhost:${port}`,`http://127.0.0.1:${port}`];
+ const localOrigins=[`http://localhost:${port}`,`http://127.0.0.1:${port}`,`http://[::1]:${port}`];
  return {host,port,publicOrigin,accessKey,origins:publicOrigin?[publicOrigin]:localOrigins};
 }
 
 export function createReleaseServer(env=process.env){
  const config=releaseConfiguration(env),access=webAccess({key:config.accessKey,secure:config.publicOrigin.startsWith('https://')});
- return {config,server:createNativePortServer({productEntry:true,access,roomOptions:{authorize:access.authorized,origins:config.origins}})};
+ return {config,server:createNativePortServer({productEntry:true,access,roomOptions:{authorize:access.authorized,origins:config.origins,allowDiagnosticCpu:false}})};
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){

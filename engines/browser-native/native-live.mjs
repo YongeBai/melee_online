@@ -22,7 +22,7 @@ export function createNativeFrameClock(start,rate=60,{align=false,toleranceMs=.1
       const whole=Math.max(0,Math.floor((debt+1e-6)/duration));
       const count=Math.min(limit,whole||(debt+toleranceMs>=duration?1:0));debt-=count*duration;return count;
     },
-    reset(){previous=null;debt=0;},
+    reset(now=null){if(now!==null&&!Number.isFinite(now))throw Error('Native frame clock reset');previous=now;debt=0;},
     get debtMs(){return debt;},get maxDebtMs(){return maxDebt;},
   };
 }
@@ -73,8 +73,12 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         const previous=final??initial;
         const pads=!inputProvider&&!browserInput&&focused?(globalThis.navigator?.getGamepads?.()??[]):[];
         let samples=(inputProvider?inputProvider(frames,previous):browserInput?browserInput.samples(objects.length):objects.map((_,i)=>!focused?neutralNativeSample():i===0&&keys.size?keyboardNativeSample(keys):standardNativeSample(pads[i]))).map(completeNativeSample);
-        if(rollback){const before=performance.now(),didAdvance=rollback.advance(frames,samples);sample(stepTimes,performance.now()-before);if(!didAdvance){clock.reset();break;}}
-        else {if(network?.active){samples=network.take(samples,module);if(!samples){clock.reset();break;}}if(samples.length!==objects.length)throw Error('Controller sample count differs from players');for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);const before=performance.now();step();sample(stepTimes,performance.now()-before);}
+        // A transport stall has already consumed this display callback. Anchor
+        // here so recovery can use the next due tick, rather than wasting an
+        // extra callback just to re-establish the clock origin. Hidden/focus
+        // resets still use a fresh origin and never accumulate catch-up work.
+        if(rollback){const before=performance.now(),didAdvance=rollback.advance(frames,samples);sample(stepTimes,performance.now()-before);if(!didAdvance){clock.reset(now);break;}}
+        else {if(network?.active){samples=network.take(samples,module);if(!samples){clock.reset(now);break;}}if(samples.length!==objects.length)throw Error('Controller sample count differs from players');for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);const before=performance.now();step();sample(stepTimes,performance.now()-before);}
         frames++;advanced++;const pendingEnding=shouldFinish();
         if(pendingEnding&&(!rollback||rollback.canFinish(frames-1))){finish();return;}
         final=readState();
@@ -94,7 +98,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         attack ||= isNormalAttackState(final[0]);
         if(pendingEnding){clock.reset();break;}
       }
-      if(advanced){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;onDraw({frame:frames,draw:draws,render:lastRender});if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(draws%30===0)onProgress(snapshot());}
+      if(advanced){const before=performance.now();lastRender=preview.draw();const cost=performance.now()-before;sample(drawTimes,cost);for(const entry of lastRender.materialDraws?.shaderCompilations??[])shaderCompilations.push({frame:frames,...entry});if(cost>1000/60&&slowDraws.length<64)slowDraws.push({frame:frames,costMs:cost,materials:lastRender.materialDraws,resources:lastRender.resourceStats});draws++;onDraw({frame:frames,draw:draws,render:lastRender});if(lastDraw!==null)sample(intervals,now-lastDraw);lastDraw=now;if(onProgress&&draws%30===0)onProgress(snapshot());}
       if(frameLimit&&frames>=frameLimit){if(rollback&&!rollback.canFinish(frames-1)){clock.reset();raf=requestAnimationFrame(frame);return;}finish("frame-limit");return;}
       raf=requestAnimationFrame(frame);
     }catch(error){stop();onError(error,snapshot());}

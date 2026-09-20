@@ -1,0 +1,4109 @@
+{
+  "date": "2026-09-19",
+  "branch": "codex/rollback-critical-path",
+  "head": "e09274e",
+  "sources": {
+    "draw-uniform-buffer.mjs": "e302656bdaa120f1d58bafedc8a6ce5f275a9dc3fb4adf8abd72d1fbfe61ff7c",
+    "immediate-geometry.mjs": "c8d70ef75e9a5221c3c1c66ba4ad8a3ccc20e98b566c1c1e1479cee66df21813",
+    "native-room.mjs": "3384035d9f46dbc288140594a96a3e0ad2fc675a82c09abdc174ecb26d5aff29",
+    "native-state-intern.mjs": "c73c82d39cd77131d2b1ad928257952f90468d10954c1a3037f228b6b8b21689",
+    "native-live.mjs": "e92854ca5da2324cd4f0857aa675df8fbf835dd4f1ffa6c30d0ca96d4296e700",
+    "native-product-rollback.mjs": "ca4a343d96249684184ca46a6077c233314f02fc3d537ae31987fb82dbcc5cea",
+    "dirty-host-contract.mjs": "9baf66d5edc31475f285497e2f6d6a7d0e9a878b4d2bd4230af228f27df53cfc",
+    "melee-fighter-init.wasm": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+    "melee-dirty.wasm": "596469b1318e55ec377223d36c2aea2cc8f36a0c661e891623d05579d7b5279f"
+  },
+  "target": {
+    "rosterTiles": [
+      12,
+      12
+    ],
+    "forms": [
+      "Pp",
+      "Nn",
+      "Pp",
+      "Nn"
+    ],
+    "stage": 2,
+    "resolution": [
+      960,
+      720
+    ],
+    "items": false,
+    "stocks": 4,
+    "seconds": 480
+  },
+  "costRuns": [
+    {
+      "name": "control",
+      "rawSha256": "06ad4d1b6f5d6c923d7dacc9119102e788225639d0d6b29e74213cd72de9632f",
+      "sources": {
+        "draw-uniform-buffer.mjs": "ea6a7e72cf14ddb8eb3f0d9709e91831937313adf93d762735a01e635c95bef6",
+        "native-state-intern.mjs": "c73c82d39cd77131d2b1ad928257952f90468d10954c1a3037f228b6b8b21689",
+        "native-live.mjs": "e92854ca5da2324cd4f0857aa675df8fbf835dd4f1ffa6c30d0ca96d4296e700",
+        "dirty-host-contract.mjs": "f970e5c5b91b092288882f42f0cae11060781dc267df00beff698814d1ee7eb2",
+        "melee-fighter-init.wasm": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+        "melee-dirty.wasm": "596469b1318e55ec377223d36c2aea2cc8f36a0c661e891623d05579d7b5279f"
+      },
+      "frames": 600,
+      "fullStateHash": "154accb264a7ac4d44a1fe65af4b8ffaddcd537aa6248ec3d319e1617ab97067",
+      "stateMatches": true,
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Browser captured-frame cadence/content gate failed"
+      ],
+      "draw": {
+        "samples": 600,
+        "meanMs": 5.4600999997059505,
+        "p95Ms": 9.884999990463257,
+        "maxMs": 31.305000007152557
+      },
+      "stages": {
+        "uboPack": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.41847499907016755,
+            "p95Ms": 0.8199999928474426,
+            "maxMs": 1.3399999737739563
+          },
+          "calls": 600
+        },
+        "immediateMatch": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.3212499952316284,
+            "p95Ms": 0.5899998545646667,
+            "maxMs": 5.375
+          },
+          "calls": 63403
+        },
+        "shaderKey": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.23048334191242853,
+            "p95Ms": 0.419999897480011,
+            "maxMs": 0.5699999332427979
+          },
+          "calls": 160557
+        }
+      }
+    },
+    {
+      "name": "control2",
+      "rawSha256": "615f2aa5d1b4417130d786027242fb60b060bdc7b3389774c43373165c46511f",
+      "sources": {
+        "draw-uniform-buffer.mjs": "ea6a7e72cf14ddb8eb3f0d9709e91831937313adf93d762735a01e635c95bef6",
+        "native-state-intern.mjs": "c73c82d39cd77131d2b1ad928257952f90468d10954c1a3037f228b6b8b21689",
+        "native-live.mjs": "e92854ca5da2324cd4f0857aa675df8fbf835dd4f1ffa6c30d0ca96d4296e700",
+        "dirty-host-contract.mjs": "f970e5c5b91b092288882f42f0cae11060781dc267df00beff698814d1ee7eb2",
+        "melee-fighter-init.wasm": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+        "melee-dirty.wasm": "596469b1318e55ec377223d36c2aea2cc8f36a0c661e891623d05579d7b5279f"
+      },
+      "frames": 600,
+      "fullStateHash": "154accb264a7ac4d44a1fe65af4b8ffaddcd537aa6248ec3d319e1617ab97067",
+      "stateMatches": true,
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Browser captured-frame cadence/content gate failed"
+      ],
+      "draw": {
+        "samples": 600,
+        "meanMs": 5.272466666301091,
+        "p95Ms": 9.584999978542328,
+        "maxMs": 26.725000023841858
+      },
+      "stages": {
+        "uboPack": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.34967500040928523,
+            "p95Ms": 0.7050000429153442,
+            "maxMs": 1.1449999809265137
+          },
+          "calls": 600
+        },
+        "immediateMatch": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.315191666384538,
+            "p95Ms": 0.6100000739097595,
+            "maxMs": 2.8350000381469727
+          },
+          "calls": 63403
+        },
+        "shaderKey": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.2235999975601832,
+            "p95Ms": 0.39499974250793457,
+            "maxMs": 2.990000069141388
+          },
+          "calls": 160557
+        }
+      }
+    },
+    {
+      "name": "candidate",
+      "rawSha256": "9b7eba9d7b79b7d3755e560a7bec4691b544e8509452f8b50e7f215155ac4ffe",
+      "sources": {
+        "draw-uniform-buffer.mjs": "96b49c23ef3acf24d1d9b355d323cd6ff401b3f31a677070be05069fb9937430",
+        "native-state-intern.mjs": "eff37dcb08096fadcd5342d13dd9e1da1e4902aa15ccf66192d5af43753fd53a",
+        "native-live.mjs": "e92854ca5da2324cd4f0857aa675df8fbf835dd4f1ffa6c30d0ca96d4296e700",
+        "dirty-host-contract.mjs": "463381c47be7ffab3f89399755d684bb9109323d0b6cdd67e9aa2cd180a89fe1",
+        "melee-fighter-init.wasm": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+        "melee-dirty.wasm": "596469b1318e55ec377223d36c2aea2cc8f36a0c661e891623d05579d7b5279f"
+      },
+      "frames": 600,
+      "fullStateHash": "154accb264a7ac4d44a1fe65af4b8ffaddcd537aa6248ec3d319e1617ab97067",
+      "stateMatches": true,
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Browser captured-frame cadence/content gate failed"
+      ],
+      "draw": {
+        "samples": 600,
+        "meanMs": 5.531074999968211,
+        "p95Ms": 10.030000030994415,
+        "maxMs": 19.185000002384186
+      },
+      "stages": {
+        "uboPack": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.35845000147819517,
+            "p95Ms": 0.699999988079071,
+            "maxMs": 1.0400000214576721
+          },
+          "calls": 600
+        },
+        "immediateMatch": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.196966669857502,
+            "p95Ms": 0.3649998903274536,
+            "maxMs": 0.6499999165534973
+          },
+          "calls": 63403
+        },
+        "shaderKey": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.2775250033537547,
+            "p95Ms": 0.4650002717971802,
+            "maxMs": 0.695000171661377
+          },
+          "calls": 160557
+        }
+      }
+    },
+    {
+      "name": "retained",
+      "rawSha256": "f32f864e173f30c36b9735404da3833867705245c2779bbc6a726157753ede7d",
+      "sources": {
+        "draw-uniform-buffer.mjs": "96b49c23ef3acf24d1d9b355d323cd6ff401b3f31a677070be05069fb9937430",
+        "native-state-intern.mjs": "c73c82d39cd77131d2b1ad928257952f90468d10954c1a3037f228b6b8b21689",
+        "native-live.mjs": "e92854ca5da2324cd4f0857aa675df8fbf835dd4f1ffa6c30d0ca96d4296e700",
+        "dirty-host-contract.mjs": "bcb7eb8830356a2a4d29a531ab2826a37cafb372445c514766e9690b39484754",
+        "melee-fighter-init.wasm": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+        "melee-dirty.wasm": "596469b1318e55ec377223d36c2aea2cc8f36a0c661e891623d05579d7b5279f"
+      },
+      "frames": 600,
+      "fullStateHash": "154accb264a7ac4d44a1fe65af4b8ffaddcd537aa6248ec3d319e1617ab97067",
+      "stateMatches": true,
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Browser captured-frame cadence/content gate failed"
+      ],
+      "draw": {
+        "samples": 600,
+        "meanMs": 4.713275000254313,
+        "p95Ms": 8.525000035762787,
+        "maxMs": 18.639999985694885
+      },
+      "stages": {
+        "uboPack": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.30414999882380167,
+            "p95Ms": 0.5750000476837158,
+            "maxMs": 1.024999976158142
+          },
+          "calls": 600
+        },
+        "immediateMatch": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.16700832823912304,
+            "p95Ms": 0.28999990224838257,
+            "maxMs": 0.47999972105026245
+          },
+          "calls": 63403
+        },
+        "shaderKey": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.21104166229565938,
+            "p95Ms": 0.3699999451637268,
+            "maxMs": 0.5600001811981201
+          },
+          "calls": 160557
+        }
+      }
+    },
+    {
+      "name": "retained2",
+      "rawSha256": "06723f2c399d710bd30cc1bdbe93e85cb7af1a7b2003f9ea82c22db674a5cc0a",
+      "sources": {
+        "draw-uniform-buffer.mjs": "96b49c23ef3acf24d1d9b355d323cd6ff401b3f31a677070be05069fb9937430",
+        "native-state-intern.mjs": "c73c82d39cd77131d2b1ad928257952f90468d10954c1a3037f228b6b8b21689",
+        "native-live.mjs": "e92854ca5da2324cd4f0857aa675df8fbf835dd4f1ffa6c30d0ca96d4296e700",
+        "dirty-host-contract.mjs": "bcb7eb8830356a2a4d29a531ab2826a37cafb372445c514766e9690b39484754",
+        "melee-fighter-init.wasm": "2820341e3467ee4db678cf4a78597d70769bb0a7b29ef4a5e8b2e63af776f1e9",
+        "melee-dirty.wasm": "596469b1318e55ec377223d36c2aea2cc8f36a0c661e891623d05579d7b5279f"
+      },
+      "frames": 600,
+      "fullStateHash": "154accb264a7ac4d44a1fe65af4b8ffaddcd537aa6248ec3d319e1617ab97067",
+      "stateMatches": true,
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Browser captured-frame cadence/content gate failed"
+      ],
+      "draw": {
+        "samples": 600,
+        "meanMs": 5.078400000433127,
+        "p95Ms": 9.304999947547913,
+        "maxMs": 21.72999995946884
+      },
+      "stages": {
+        "uboPack": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.35071666528781253,
+            "p95Ms": 0.6800000071525574,
+            "maxMs": 1.125
+          },
+          "calls": 600
+        },
+        "immediateMatch": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.17766666462024053,
+            "p95Ms": 0.3199999928474426,
+            "maxMs": 1.0899999141693115
+          },
+          "calls": 63403
+        },
+        "shaderKey": {
+          "time": {
+            "samples": 600,
+            "meanMs": 0.218208333949248,
+            "p95Ms": 0.3900003433227539,
+            "maxMs": 0.5650002360343933
+          },
+          "calls": 160557
+        }
+      }
+    }
+  ],
+  "productRuns": [
+    {
+      "name": "baseline",
+      "rawSha256": "0403fb34a775c5da3d6196d249d283ff1aeb207b19a50199eb857f09e24fa255",
+      "timingSha256": "94fd405ae0343f162c6bb0ab9b31e3fd41861f23e9b50f8509575c59288c2ee9",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": false
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 1800,
+          "draws": 1800,
+          "simulationFps": 59.878685782661435,
+          "activeSimulationFps": 59.878685782661435,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 1800,
+            "meanMs": 7.847200000021193,
+            "p50Ms": 7.324999988079071,
+            "p95Ms": 11.814999997615814,
+            "maxMs": 25.735000014305115
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 1800,
+            "captured": 1800,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 1800,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1799,
+              "meanMs": 16.684633129516396,
+              "p95Ms": 19.64999999999418,
+              "maxMs": 41.220000000001164,
+              "fps": 59.93539038211894,
+              "gapsOver25Ms": 6,
+              "estimatedMissed60HzSlots": 6
+            },
+            "activeCadenceFps": 59.93539038211894,
+            "observerWorkerCpu": {
+              "samples": 1800,
+              "meanMs": 3.2145138890544573,
+              "p95Ms": 5.965000033378601,
+              "maxMs": 12.634999990463257
+            },
+            "error": null
+          }
+        },
+        {
+          "frames": 1800,
+          "draws": 1800,
+          "simulationFps": 59.859659029448274,
+          "activeSimulationFps": 59.859659029448274,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 1800,
+            "meanMs": 7.771877778106266,
+            "p50Ms": 7.189999997615814,
+            "p95Ms": 11.75,
+            "maxMs": 23.259999990463257
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 1800,
+              "meanMs": 0.03415277828772863,
+              "p50Ms": 0.02499997615814209,
+              "p95Ms": 0.059999942779541016,
+              "p99Ms": 0.0899999737739563,
+              "maxMs": 4.384999990463257,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 1799,
+              "meanMs": 1.4855002784079614,
+              "p50Ms": 1.4150000214576721,
+              "p95Ms": 2.3350000381469727,
+              "p99Ms": 2.76500004529953,
+              "maxMs": 5.629999995231628,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 1799,
+              "meanMs": 7.835500277732066,
+              "p50Ms": 7.310000002384186,
+              "p95Ms": 11.790000021457672,
+              "p99Ms": 15.344999969005585,
+              "maxMs": 25.714999973773956,
+              "over16_67": 11,
+              "over25": 1,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.38999998569488525,
+              "p50Ms": 0.38999998569488525,
+              "p95Ms": 0.38999998569488525,
+              "p99Ms": 0.38999998569488525,
+              "maxMs": 0.38999998569488525,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 1798,
+              "meanMs": 16.685867630699452,
+              "p50Ms": 16.62999999523163,
+              "p95Ms": 19.59500002861023,
+              "p99Ms": 22.285000026226044,
+              "maxMs": 41.19499999284744,
+              "over16_67": 860,
+              "over25": 6,
+              "over33_34": 1
+            }
+          }
+        },
+        {
+          "stalledAdvances": 1,
+          "costs": {
+            "reconcile": {
+              "samples": 1802,
+              "meanMs": 0.3232075474436884,
+              "p50Ms": 0.025000035762786865,
+              "p95Ms": 2.75,
+              "p99Ms": 5.129999995231628,
+              "maxMs": 8.285000026226044,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 1799,
+              "meanMs": 1.4434824906302002,
+              "p50Ms": 1.409999966621399,
+              "p95Ms": 2.189999997615814,
+              "p99Ms": 2.659999966621399,
+              "maxMs": 3.935000002384186,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 1798,
+              "meanMs": 7.761095662370274,
+              "p50Ms": 7.180000007152557,
+              "p95Ms": 11.735000014305115,
+              "p99Ms": 14.289999961853027,
+              "maxMs": 23.25,
+              "over16_67": 6,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.4950000047683716,
+              "p50Ms": 0.4950000047683716,
+              "p95Ms": 0.4950000047683716,
+              "p99Ms": 0.4950000047683716,
+              "maxMs": 0.4950000047683716,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 1797,
+              "meanMs": 16.683834168037972,
+              "p50Ms": 16.660000026226044,
+              "p95Ms": 20.0799999833107,
+              "p99Ms": 23.280000030994415,
+              "maxMs": 32.36500000953674,
+              "over16_67": 895,
+              "over25": 13,
+              "over33_34": 0
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "e17441f8708c64f30afa5039b48a675c5ac6791da26901b08beee7c55b4ad5b7",
+          "workload": {
+            "framesWithAttack": 724,
+            "framesWithHitlag": 236,
+            "framesWithDamage": 1617,
+            "stockChanges": [
+              {
+                "frame": 1384,
+                "slot": 1,
+                "stocks": 3
+              }
+            ],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 241
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 323
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 50,
+                "attack": 160
+              }
+            ]
+          },
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 81,
+            "corrections": 5,
+            "replayedFrames": 7,
+            "maxReplay": 2,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41353216,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              32.81378173828125,
+              23.531068801879883,
+              83.0000228881836
+            ],
+            "interest": [
+              35.273155212402344,
+              10.807595252990723,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "e17441f8708c64f30afa5039b48a675c5ac6791da26901b08beee7c55b4ad5b7",
+          "workload": {
+            "framesWithAttack": 678,
+            "framesWithHitlag": 236,
+            "framesWithDamage": 1617,
+            "stockChanges": [
+              {
+                "frame": 1384,
+                "slot": 1,
+                "stocks": 3
+              }
+            ],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 225
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 299
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 50,
+                "attack": 154
+              }
+            ]
+          },
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1797,
+            "corrections": 166,
+            "replayedFrames": 463,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41680896,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              32.81378173828125,
+              23.531068801879883,
+              83.0000228881836
+            ],
+            "interest": [
+              35.273155212402344,
+              10.807595252990723,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ubo",
+      "rawSha256": "51ec71012c19ff55faaf7e05b677f743be0b7004484004e4024bad549988fb42",
+      "timingSha256": "5ead4cddf39294d58a5bcd09be97992fd2ce184c58efe044a10960b41b915e49",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": false
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 1800,
+          "draws": 1800,
+          "simulationFps": 59.53422407561632,
+          "activeSimulationFps": 59.53422407561632,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 1800,
+            "meanMs": 8.125947222908337,
+            "p50Ms": 7.574999988079071,
+            "p95Ms": 12.64000004529953,
+            "maxMs": 31.110000014305115
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 1800,
+            "captured": 1800,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 1800,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1799,
+              "meanMs": 16.71211784324625,
+              "p95Ms": 20.729999999995925,
+              "maxMs": 40.25,
+              "fps": 59.836820765605296,
+              "gapsOver25Ms": 10,
+              "estimatedMissed60HzSlots": 10
+            },
+            "activeCadenceFps": 59.83682076560529,
+            "observerWorkerCpu": {
+              "samples": 1800,
+              "meanMs": 4.466019443902704,
+              "p95Ms": 8.430000007152557,
+              "maxMs": 17.959999978542328
+            },
+            "error": null
+          }
+        },
+        {
+          "frames": 1800,
+          "draws": 1800,
+          "simulationFps": 59.81874919000183,
+          "activeSimulationFps": 59.81874919000183,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 1800,
+            "meanMs": 8.114911110268698,
+            "p50Ms": 7.5450000166893005,
+            "p95Ms": 12.990000009536743,
+            "maxMs": 35.33499997854233
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 1799,
+              "meanMs": 0.3199138409432734,
+              "p50Ms": 0.034999966621398926,
+              "p95Ms": 2.5550000071525574,
+              "p99Ms": 4.910000026226044,
+              "maxMs": 11.444999992847443,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 1798,
+              "meanMs": 1.6959232476781287,
+              "p50Ms": 1.6050000190734863,
+              "p95Ms": 2.8799999952316284,
+              "p99Ms": 3.625,
+              "maxMs": 5.409999966621399,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 1798,
+              "meanMs": 8.123264739457705,
+              "p50Ms": 7.570000052452087,
+              "p95Ms": 12.629999995231628,
+              "p99Ms": 15.775000035762787,
+              "maxMs": 31.100000023841858,
+              "over16_67": 11,
+              "over25": 1,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.1499999761581421,
+              "p50Ms": 0.1499999761581421,
+              "p95Ms": 0.1499999761581421,
+              "p99Ms": 0.1499999761581421,
+              "maxMs": 0.1499999761581421,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 1797,
+              "meanMs": 16.71360322758431,
+              "p50Ms": 16.625,
+              "p95Ms": 20.714999973773956,
+              "p99Ms": 24.555000007152557,
+              "maxMs": 40.25999999046326,
+              "over16_67": 876,
+              "over25": 10,
+              "over33_34": 3
+            }
+          }
+        },
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 1800,
+              "meanMs": 0.10160277740822898,
+              "p50Ms": 0.030000030994415283,
+              "p95Ms": 0.08499997854232788,
+              "p99Ms": 2.5950000286102295,
+              "maxMs": 9.40499997138977,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 1799,
+              "meanMs": 1.761700945042318,
+              "p50Ms": 1.6800000071525574,
+              "p95Ms": 2.925000011920929,
+              "p99Ms": 3.5049999952316284,
+              "maxMs": 5.590000033378601,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 1799,
+              "meanMs": 8.111923289802618,
+              "p50Ms": 7.540000021457672,
+              "p95Ms": 12.979999959468842,
+              "p99Ms": 15.394999980926514,
+              "maxMs": 35.32499998807907,
+              "over16_67": 11,
+              "over25": 2,
+              "over33_34": 1
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.6200000047683716,
+              "p50Ms": 0.6200000047683716,
+              "p95Ms": 0.6200000047683716,
+              "p99Ms": 0.6200000047683716,
+              "maxMs": 0.6200000047683716,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 1798,
+              "meanMs": 16.707741935506412,
+              "p50Ms": 16.589999973773956,
+              "p95Ms": 20.305000007152557,
+              "p99Ms": 23.4099999666214,
+              "maxMs": 38.39000004529953,
+              "over16_67": 866,
+              "over25": 13,
+              "over33_34": 1
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "5a9f1fd9a6ae967f1fddf24891620d88ad274dc721c4327b8546f972f37d3082",
+          "workload": {
+            "framesWithAttack": 856,
+            "framesWithHitlag": 276,
+            "framesWithDamage": 1617,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 235
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 332
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 90,
+                "attack": 289
+              }
+            ]
+          },
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1795,
+            "corrections": 154,
+            "replayedFrames": 374,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41680896,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -40.90753936767578,
+              23.13201332092285,
+              83.0574722290039
+            ],
+            "interest": [
+              -46.34163284301758,
+              12.442875862121582,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "5a9f1fd9a6ae967f1fddf24891620d88ad274dc721c4327b8546f972f37d3082",
+          "workload": {
+            "framesWithAttack": 882,
+            "framesWithHitlag": 276,
+            "framesWithDamage": 1617,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 240
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 349
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 90,
+                "attack": 293
+              }
+            ]
+          },
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 680,
+            "corrections": 41,
+            "replayedFrames": 74,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41549824,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -40.90753936767578,
+              23.13201332092285,
+              83.0574722290039
+            ],
+            "interest": [
+              -46.34163284301758,
+              12.442875862121582,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "key",
+      "rawSha256": "8750df837de676e3a36442e22814cb3660679b5319fd7049ed5e73a25ae0955b",
+      "timingSha256": "222c29d1c8f918df86218e90febe35915c96ce7baf9a0fc2de3d0a856c902423",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": true
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Both clients loaded the hosted /play/ product entry. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.9366619324719,
+          "activeSimulationFps": 59.9366619324719,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.92240416634414,
+            "p50Ms": 5.325000047683716,
+            "p95Ms": 8.959999978542328,
+            "maxMs": 23.615000009536743
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 3600,
+            "captured": 3600,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 3600,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 3599,
+              "meanMs": 16.674983328702403,
+              "p95Ms": 19.200000000000728,
+              "maxMs": 29.669999999998254,
+              "fps": 59.9700749492633,
+              "gapsOver25Ms": 6,
+              "estimatedMissed60HzSlots": 7
+            },
+            "activeCadenceFps": 59.97007494926335,
+            "observerWorkerCpu": {
+              "samples": 3600,
+              "meanMs": 2.5259541672302617,
+              "p95Ms": 3.800000011920929,
+              "maxMs": 10.5450000166893
+            },
+            "error": null
+          }
+        },
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.8160705676722,
+          "activeSimulationFps": 59.8160705676722,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.9939638893140685,
+            "p50Ms": 5.375,
+            "p95Ms": 9.324999988079071,
+            "maxMs": 26.464999973773956
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 3599,
+              "meanMs": 0.16349124704741477,
+              "p50Ms": 0.02499997615814209,
+              "p95Ms": 1.4850000143051147,
+              "p99Ms": 2.949999988079071,
+              "maxMs": 5.930000007152557,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3598,
+              "meanMs": 1.3302362434329955,
+              "p50Ms": 1.3199999928474426,
+              "p95Ms": 2.040000021457672,
+              "p99Ms": 2.449999988079071,
+              "maxMs": 4.475000023841858,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3598,
+              "meanMs": 5.919619232349889,
+              "p50Ms": 5.324999988079071,
+              "p95Ms": 8.949999988079071,
+              "p99Ms": 11.094999969005585,
+              "maxMs": 23.615000009536743,
+              "over16_67": 3,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.25999999046325684,
+              "p50Ms": 0.25999999046325684,
+              "p95Ms": 0.25999999046325684,
+              "p99Ms": 0.25999999046325684,
+              "maxMs": 0.25999999046325684,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3597,
+              "meanMs": 16.67447039199134,
+              "p50Ms": 16.639999985694885,
+              "p95Ms": 19.195000052452087,
+              "p99Ms": 20.955000042915344,
+              "maxMs": 29.650000035762787,
+              "over16_67": 1744,
+              "over25": 5,
+              "over33_34": 0
+            }
+          }
+        },
+        {
+          "stalledAdvances": 1,
+          "costs": {
+            "reconcile": {
+              "samples": 3598,
+              "meanMs": 0.19924541409973837,
+              "p50Ms": 0.020000040531158447,
+              "p95Ms": 1.7699999809265137,
+              "p99Ms": 3.2199999690055847,
+              "maxMs": 6.915000021457672,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3597,
+              "meanMs": 1.306055045588533,
+              "p50Ms": 1.26500004529953,
+              "p95Ms": 2.0199999809265137,
+              "p99Ms": 2.3700000047683716,
+              "maxMs": 5.094999969005585,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3596,
+              "meanMs": 5.993385706548564,
+              "p50Ms": 5.375,
+              "p95Ms": 9.314999997615814,
+              "p99Ms": 11.884999990463257,
+              "maxMs": 26.459999978542328,
+              "over16_67": 8,
+              "over25": 1,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.20999997854232788,
+              "p50Ms": 0.20999997854232788,
+              "p95Ms": 0.20999997854232788,
+              "p99Ms": 0.20999997854232788,
+              "maxMs": 0.20999997854232788,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3595,
+              "meanMs": 16.683413073714817,
+              "p50Ms": 16.615000009536743,
+              "p95Ms": 19.275000035762787,
+              "p99Ms": 21.589999973773956,
+              "maxMs": 36.70999997854233,
+              "over16_67": 1714,
+              "over25": 7,
+              "over33_34": 2
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "15de90ba3a243797e82f57bfbb13fe913acae083910c50037f8a313d448abe22",
+          "workload": {
+            "framesWithAttack": 1562,
+            "framesWithHitlag": 497,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 242
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 114,
+                "attack": 348
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 96,
+                "attack": 291
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 72,
+                "attack": 274
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 81,
+                "attack": 243
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 56,
+                "attack": 164
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3061,
+            "corrections": 245,
+            "replayedFrames": 444,
+            "maxReplay": 3,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41549824,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              23.836116790771484,
+              20.140583038330078,
+              83.0000228881836
+            ],
+            "interest": [
+              27.974342346191406,
+              10.696385383605957,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "15de90ba3a243797e82f57bfbb13fe913acae083910c50037f8a313d448abe22",
+          "workload": {
+            "framesWithAttack": 1529,
+            "framesWithHitlag": 497,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 226
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 114,
+                "attack": 339
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 96,
+                "attack": 295
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 72,
+                "attack": 270
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 81,
+                "attack": 241
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 56,
+                "attack": 158
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3596,
+            "corrections": 293,
+            "replayedFrames": 583,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41418752,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              23.836116790771484,
+              20.140583038330078,
+              83.0000228881836
+            ],
+            "interest": [
+              27.974342346191406,
+              10.696385383605957,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "candidate1",
+      "rawSha256": "429993a4dd66ff180134eb4fab4280575de46dd97f07584a0b4de085be6469d4",
+      "timingSha256": "fc745cf39fd51cfdaa3a4355d8ef50c0dab7aff30a09ab7ddc57113680c7663f",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": true
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Both clients loaded the hosted /play/ product entry. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.95476413048261,
+          "activeSimulationFps": 59.95476413048261,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.60176527818044,
+            "p50Ms": 4.944999992847443,
+            "p95Ms": 8.589999973773956,
+            "maxMs": 17.899999976158142
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 3600,
+            "captured": 3600,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 3600,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 3599,
+              "meanMs": 16.670129202556236,
+              "p95Ms": 19.095000000001164,
+              "maxMs": 33.39500000000044,
+              "fps": 59.987537459916986,
+              "gapsOver25Ms": 5,
+              "estimatedMissed60HzSlots": 5
+            },
+            "activeCadenceFps": 59.987537459917085,
+            "observerWorkerCpu": {
+              "samples": 3600,
+              "meanMs": 2.522820833126704,
+              "p95Ms": 3.7700000405311584,
+              "maxMs": 7.564999997615814
+            },
+            "error": null
+          }
+        },
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.92114377475433,
+          "activeSimulationFps": 59.92114377475433,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.614576388216681,
+            "p50Ms": 5.019999980926514,
+            "p95Ms": 8.600000023841858,
+            "maxMs": 17.774999976158142
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 3600,
+              "meanMs": 0.019290277361869813,
+              "p50Ms": 0.01500004529953003,
+              "p95Ms": 0.0350000262260437,
+              "p99Ms": 0.050000011920928955,
+              "maxMs": 0.11499994993209839,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3598,
+              "meanMs": 1.2510881047072577,
+              "p50Ms": 1.1850000023841858,
+              "p95Ms": 1.9850000143051147,
+              "p99Ms": 2.3399999737739563,
+              "maxMs": 3.0200000405311584,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3598,
+              "meanMs": 5.599353807992309,
+              "p50Ms": 4.944999992847443,
+              "p95Ms": 8.584999978542328,
+              "p99Ms": 10.399999976158142,
+              "maxMs": 17.894999980926514,
+              "over16_67": 2,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.24500000476837158,
+              "p50Ms": 0.24500000476837158,
+              "p95Ms": 0.24500000476837158,
+              "p99Ms": 0.24500000476837158,
+              "maxMs": 0.24500000476837158,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3597,
+              "meanMs": 16.670252988594985,
+              "p50Ms": 16.62000000476837,
+              "p95Ms": 19.089999973773956,
+              "p99Ms": 21.1149999499321,
+              "maxMs": 33.40499997138977,
+              "over16_67": 1694,
+              "over25": 5,
+              "over33_34": 1
+            }
+          }
+        },
+        {
+          "stalledAdvances": 1,
+          "costs": {
+            "reconcile": {
+              "samples": 3600,
+              "meanMs": 0.2294833328988817,
+              "p50Ms": 0.020000040531158447,
+              "p95Ms": 2.0899999737739563,
+              "p99Ms": 3.935000002384186,
+              "maxMs": 6.665000021457672,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3597,
+              "meanMs": 1.2791604115991484,
+              "p50Ms": 1.2599999904632568,
+              "p95Ms": 1.9449999928474426,
+              "p99Ms": 2.224999964237213,
+              "maxMs": 3.1050000190734863,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3596,
+              "meanMs": 5.613855672161094,
+              "p50Ms": 5.019999980926514,
+              "p95Ms": 8.599999964237213,
+              "p99Ms": 10.2950000166893,
+              "maxMs": 17.764999985694885,
+              "over16_67": 2,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.3149999976158142,
+              "p50Ms": 0.3149999976158142,
+              "p95Ms": 0.3149999976158142,
+              "p99Ms": 0.3149999976158142,
+              "maxMs": 0.3149999976158142,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3595,
+              "meanMs": 16.67636300418241,
+              "p50Ms": 16.62000000476837,
+              "p95Ms": 19.480000019073486,
+              "p99Ms": 21.560000002384186,
+              "maxMs": 35.0799999833107,
+              "over16_67": 1707,
+              "over25": 6,
+              "over33_34": 1
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "2c637e968ea6b819e6f21685a466f5a2a0bb63827507294119d02c88f38dbf6f",
+          "workload": {
+            "framesWithAttack": 1501,
+            "framesWithHitlag": 487,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 241
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 320
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 70,
+                "attack": 168
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 276
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 75,
+                "attack": 264
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 232
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3,
+            "corrections": 0,
+            "replayedFrames": 0,
+            "maxReplay": 0,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41353216,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              10.545209884643555,
+              20.073375701904297,
+              83.0000228881836
+            ],
+            "interest": [
+              11.44611644744873,
+              10.668827056884766,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "2c637e968ea6b819e6f21685a466f5a2a0bb63827507294119d02c88f38dbf6f",
+          "workload": {
+            "framesWithAttack": 1418,
+            "framesWithHitlag": 487,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 224
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 300
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 70,
+                "attack": 158
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 263
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 75,
+                "attack": 254
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 219
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3597,
+            "corrections": 274,
+            "replayedFrames": 769,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41680896,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              10.545209884643555,
+              20.073375701904297,
+              83.0000228881836
+            ],
+            "interest": [
+              11.44611644744873,
+              10.668827056884766,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "control3600",
+      "rawSha256": "44ecbc4f385902fee71fe1d3d354c2445210e105b90e258c2a48b9f9af853c3c",
+      "timingSha256": "f65babc337c9754b7f594256a23d1889e24e4aefe0d813f9056abb733588e814",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": true
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Both clients loaded the hosted /play/ product entry. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.95188361743529,
+          "activeSimulationFps": 59.95188361743529,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.791006944477558,
+            "p50Ms": 5.1049999594688416,
+            "p95Ms": 8.85999995470047,
+            "maxMs": 19.060000002384186
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 3600,
+            "captured": 3600,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 3600,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 3599,
+              "meanMs": 16.670608502361745,
+              "p95Ms": 19.114999999997963,
+              "maxMs": 35.125,
+              "fps": 59.98581274692688,
+              "gapsOver25Ms": 3,
+              "estimatedMissed60HzSlots": 3
+            },
+            "activeCadenceFps": 59.98581274692695,
+            "observerWorkerCpu": {
+              "samples": 3600,
+              "meanMs": 2.543469443966945,
+              "p95Ms": 3.935000002384186,
+              "maxMs": 8.324999988079071
+            },
+            "error": null
+          }
+        },
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.897819311720106,
+          "activeSimulationFps": 59.897819311720106,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.747598611083296,
+            "p50Ms": 5.040000021457672,
+            "p95Ms": 9.104999959468842,
+            "maxMs": 22.685000002384186
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 3600,
+              "meanMs": 0.135480554782682,
+              "p50Ms": 0.020000040531158447,
+              "p95Ms": 1.2200000286102295,
+              "p99Ms": 2.5450000166893005,
+              "maxMs": 5.110000014305115,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3598,
+              "meanMs": 1.2721692598681107,
+              "p50Ms": 1.215000033378601,
+              "p95Ms": 2.024999976158142,
+              "p99Ms": 2.4600000381469727,
+              "maxMs": 4.310000002384186,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3598,
+              "meanMs": 5.788129516447034,
+              "p50Ms": 5.100000023841858,
+              "p95Ms": 8.849999964237213,
+              "p99Ms": 10.520000040531158,
+              "maxMs": 19.055000007152557,
+              "over16_67": 1,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.19499999284744263,
+              "p50Ms": 0.19499999284744263,
+              "p95Ms": 0.19499999284744263,
+              "p99Ms": 0.19499999284744263,
+              "maxMs": 0.19499999284744263,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3597,
+              "meanMs": 16.670408673888947,
+              "p50Ms": 16.62000000476837,
+              "p95Ms": 19.110000014305115,
+              "p99Ms": 21.19000005722046,
+              "maxMs": 35.12000000476837,
+              "over16_67": 1702,
+              "over25": 3,
+              "over33_34": 1
+            }
+          }
+        },
+        {
+          "stalledAdvances": 1,
+          "costs": {
+            "reconcile": {
+              "samples": 3599,
+              "meanMs": 0.19297721611853935,
+              "p50Ms": 0.020000040531158447,
+              "p95Ms": 1.7900000214576721,
+              "p99Ms": 3.1600000262260437,
+              "maxMs": 6.115000009536743,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3597,
+              "meanMs": 1.3107631360288126,
+              "p50Ms": 1.2799999713897705,
+              "p95Ms": 2.0300000309944153,
+              "p99Ms": 2.584999978542328,
+              "maxMs": 3.810000002384186,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3596,
+              "meanMs": 5.7458759731591345,
+              "p50Ms": 5.040000021457672,
+              "p95Ms": 9.09500002861023,
+              "p99Ms": 11.219999969005585,
+              "maxMs": 22.67500001192093,
+              "over16_67": 4,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.13499999046325684,
+              "p50Ms": 0.13499999046325684,
+              "p95Ms": 0.13499999046325684,
+              "p99Ms": 0.13499999046325684,
+              "maxMs": 0.13499999046325684,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3595,
+              "meanMs": 16.678910987483277,
+              "p50Ms": 16.625,
+              "p95Ms": 19.419999957084656,
+              "p99Ms": 21.274999976158142,
+              "maxMs": 39.4200000166893,
+              "over16_67": 1709,
+              "over25": 6,
+              "over33_34": 2
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "930cc92502c40d1b4a62c0bc4ea4a4d78d3ff4d80dee995561ae407e07c61877",
+          "workload": {
+            "framesWithAttack": 1533,
+            "framesWithHitlag": 502,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 241
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 107,
+                "attack": 305
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 84,
+                "attack": 234
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 77,
+                "attack": 242
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 72,
+                "attack": 240
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 84,
+                "attack": 271
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 2798,
+            "corrections": 211,
+            "replayedFrames": 376,
+            "maxReplay": 3,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41156608,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.9505647420883179,
+              24.32131004333496,
+              83.0000228881836
+            ],
+            "interest": [
+              -2.730027675628662,
+              11.017940521240234,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "930cc92502c40d1b4a62c0bc4ea4a4d78d3ff4d80dee995561ae407e07c61877",
+          "workload": {
+            "framesWithAttack": 1495,
+            "framesWithHitlag": 502,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 224
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 107,
+                "attack": 288
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 84,
+                "attack": 234
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 77,
+                "attack": 238
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 72,
+                "attack": 240
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 84,
+                "attack": 271
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3595,
+            "corrections": 283,
+            "replayedFrames": 595,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41615360,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -1.9505647420883179,
+              24.32131004333496,
+              83.0000228881836
+            ],
+            "interest": [
+              -2.730027675628662,
+              11.017940521240234,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "record",
+      "rawSha256": "2a3d7ae5aa69a1663593737b0efad80b6f3ffbf94384fd2b4ba969a798cacfb0",
+      "timingSha256": "2a9fe61ac8f567ac3d3e315d39062cbcd168883756e29fc4a40811635e7b2bdb",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": true
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Both clients loaded the hosted /play/ product entry. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.82060299666089,
+          "activeSimulationFps": 59.82060299666089,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 6.171824999749661,
+            "p50Ms": 5.524999976158142,
+            "p95Ms": 9.485000014305115,
+            "maxMs": 16.790000021457672
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 3600,
+            "captured": 3600,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 3600,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 3599,
+              "meanMs": 16.679858293970547,
+              "p95Ms": 19.545000000012806,
+              "maxMs": 37.1150000000016,
+              "fps": 59.95254770008934,
+              "gapsOver25Ms": 11,
+              "estimatedMissed60HzSlots": 11
+            },
+            "activeCadenceFps": 59.95254770008934,
+            "observerWorkerCpu": {
+              "samples": 3600,
+              "meanMs": 2.5536027781830892,
+              "p95Ms": 3.8050000071525574,
+              "maxMs": 8.620000004768372
+            },
+            "error": null
+          }
+        },
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.94731130895441,
+          "activeSimulationFps": 59.94731130895441,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 6.217761111276017,
+            "p50Ms": 5.504999995231628,
+            "p95Ms": 9.664999961853027,
+            "maxMs": 18.75499999523163
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 2,
+          "costs": {
+            "reconcile": {
+              "samples": 3602,
+              "meanMs": 0.19326624163384573,
+              "p50Ms": 0.020000040531158447,
+              "p95Ms": 1.7000000476837158,
+              "p99Ms": 3.2450000047683716,
+              "maxMs": 6.400000035762787,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3600,
+              "meanMs": 1.27084999917282,
+              "p50Ms": 1.215000033378601,
+              "p95Ms": 2.060000002384186,
+              "p99Ms": 2.475000023841858,
+              "maxMs": 3.689999997615814,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3598,
+              "meanMs": 6.168276820482977,
+              "p50Ms": 5.5200000405311584,
+              "p95Ms": 9.47000002861023,
+              "p99Ms": 11.424999952316284,
+              "maxMs": 16.7849999666214,
+              "over16_67": 1,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.17500001192092896,
+              "p50Ms": 0.17500001192092896,
+              "p95Ms": 0.17500001192092896,
+              "p99Ms": 0.17500001192092896,
+              "maxMs": 0.17500001192092896,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3597,
+              "meanMs": 16.680273839308548,
+              "p50Ms": 16.594999969005585,
+              "p95Ms": 19.5450000166893,
+              "p99Ms": 21.894999980926514,
+              "maxMs": 37.13499999046326,
+              "over16_67": 1693,
+              "over25": 11,
+              "over33_34": 1
+            }
+          }
+        },
+        {
+          "stalledAdvances": 1,
+          "costs": {
+            "reconcile": {
+              "samples": 3602,
+              "meanMs": 0.18194197635396464,
+              "p50Ms": 0.02499997615814209,
+              "p95Ms": 1.5400000214576721,
+              "p99Ms": 2.959999978542328,
+              "maxMs": 5.764999985694885,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3600,
+              "meanMs": 1.3121083325478766,
+              "p50Ms": 1.2649999856948853,
+              "p95Ms": 2.1049999594688416,
+              "p99Ms": 2.4200000166893005,
+              "maxMs": 3.549999952316284,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3599,
+              "meanMs": 6.214697138158173,
+              "p50Ms": 5.504999995231628,
+              "p95Ms": 9.65499997138977,
+              "p99Ms": 11.669999957084656,
+              "maxMs": 18.75,
+              "over16_67": 6,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.12000000476837158,
+              "p50Ms": 0.12000000476837158,
+              "p95Ms": 0.12000000476837158,
+              "p99Ms": 0.12000000476837158,
+              "maxMs": 0.12000000476837158,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3598,
+              "meanMs": 16.67539327404047,
+              "p50Ms": 16.610000014305115,
+              "p95Ms": 19.37999999523163,
+              "p99Ms": 21.44999998807907,
+              "maxMs": 31.115000009536743,
+              "over16_67": 1720,
+              "over25": 8,
+              "over33_34": 0
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "cb29304947d6b99cf74e67cfdc3811c40acd0a265eecb4a7498762fdaf8efd04",
+          "workload": {
+            "framesWithAttack": 1438,
+            "framesWithHitlag": 463,
+            "framesWithDamage": 3417,
+            "stockChanges": [
+              {
+                "frame": 1894,
+                "slot": 1,
+                "stocks": 3
+              },
+              {
+                "frame": 3396,
+                "slot": 0,
+                "stocks": 3
+              }
+            ],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 235
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 105,
+                "attack": 304
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 71,
+                "attack": 131
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 54,
+                "attack": 236
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 96,
+                "attack": 314
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 59,
+                "attack": 218
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3596,
+            "corrections": 285,
+            "replayedFrames": 581,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41418752,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -17.95064926147461,
+              18.5695743560791,
+              83.21490478515625
+            ],
+            "interest": [
+              -19.80063819885254,
+              12.403071403503418,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "cb29304947d6b99cf74e67cfdc3811c40acd0a265eecb4a7498762fdaf8efd04",
+          "workload": {
+            "framesWithAttack": 1412,
+            "framesWithHitlag": 463,
+            "framesWithDamage": 3417,
+            "stockChanges": [
+              {
+                "frame": 1894,
+                "slot": 1,
+                "stocks": 3
+              },
+              {
+                "frame": 3396,
+                "slot": 0,
+                "stocks": 3
+              }
+            ],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 240
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 105,
+                "attack": 299
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 71,
+                "attack": 127
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 54,
+                "attack": 227
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 96,
+                "attack": 307
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 59,
+                "attack": 212
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 2823,
+            "corrections": 275,
+            "replayedFrames": 504,
+            "maxReplay": 3,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41222144,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -17.95064926147461,
+              18.5695743560791,
+              83.21490478515625
+            ],
+            "interest": [
+              -19.80063819885254,
+              12.403071403503418,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "final-seat1",
+      "rawSha256": "81d80e3ce1f39f6b88f283416dfe9803b185761691e2812b063308472f87fb91",
+      "timingSha256": "b2a6ade8758f46a209a19ad1a78c348e53b9b26c933470ddf4d0e7475e23b635",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": true
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 1 under scripted combat. Both clients loaded the hosted /play/ product entry. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.95445959174702,
+          "activeSimulationFps": 59.95445959174702,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 6.011434722195069,
+            "p50Ms": 5.5799999833106995,
+            "p95Ms": 8.985000014305115,
+            "maxMs": 17.944999992847443
+          }
+        },
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.87520510375536,
+          "activeSimulationFps": 59.87520510375536,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 6.0332416665057345,
+            "p50Ms": 5.679999947547913,
+            "p95Ms": 8.824999988079071,
+            "maxMs": 17.019999980926514
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 3600,
+            "captured": 3600,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 3600,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 3599,
+              "meanMs": 16.671064184495666,
+              "p95Ms": 19.444999999992433,
+              "maxMs": 32.580000000001746,
+              "fps": 59.984173111756895,
+              "gapsOver25Ms": 6,
+              "estimatedMissed60HzSlots": 6
+            },
+            "activeCadenceFps": 59.984173111756995,
+            "observerWorkerCpu": {
+              "samples": 3600,
+              "meanMs": 2.390276388608747,
+              "p95Ms": 3.6200000047683716,
+              "maxMs": 8.245000004768372
+            },
+            "error": null
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 3605,
+              "meanMs": 0.023134534798779534,
+              "p50Ms": 0.020000040531158447,
+              "p95Ms": 0.04499995708465576,
+              "p99Ms": 0.06499999761581421,
+              "maxMs": 0.20999997854232788,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3600,
+              "meanMs": 1.4140097224381234,
+              "p50Ms": 1.3949999809265137,
+              "p95Ms": 2.1649999618530273,
+              "p99Ms": 2.5450000166893005,
+              "maxMs": 4.259999990463257,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3600,
+              "meanMs": 6.007363889167706,
+              "p50Ms": 5.574999988079071,
+              "p95Ms": 8.974999964237213,
+              "p99Ms": 11.1700000166893,
+              "maxMs": 17.944999992847443,
+              "over16_67": 2,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.09999996423721313,
+              "p50Ms": 0.09999996423721313,
+              "p95Ms": 0.09999996423721313,
+              "p99Ms": 0.09999996423721313,
+              "maxMs": 0.09999996423721313,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67131564323357,
+              "p50Ms": 16.62000000476837,
+              "p95Ms": 19.100000023841858,
+              "p99Ms": 20.740000009536743,
+              "maxMs": 32.07499998807907,
+              "over16_67": 1709,
+              "over25": 5,
+              "over33_34": 0
+            }
+          }
+        },
+        {
+          "stalledAdvances": 4,
+          "costs": {
+            "reconcile": {
+              "samples": 3609,
+              "meanMs": 0.27065530539087457,
+              "p50Ms": 0.02499997615814209,
+              "p95Ms": 2.3700000047683716,
+              "p99Ms": 3.9100000262260437,
+              "maxMs": 7.0450000166893005,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3604,
+              "meanMs": 1.3042716425610965,
+              "p50Ms": 1.2750000357627869,
+              "p95Ms": 1.9900000095367432,
+              "p99Ms": 2.3649999499320984,
+              "maxMs": 3.8550000190734863,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3600,
+              "meanMs": 6.029320833302206,
+              "p50Ms": 5.6700000166893005,
+              "p95Ms": 8.814999997615814,
+              "p99Ms": 10.714999973773956,
+              "maxMs": 17.009999990463257,
+              "over16_67": 1,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.30000001192092896,
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 0.30000001192092896,
+              "maxMs": 0.30000001192092896,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67107668796424,
+              "p50Ms": 16.634999990463257,
+              "p95Ms": 19.435000002384186,
+              "p99Ms": 21.435000002384186,
+              "maxMs": 32.580000042915344,
+              "over16_67": 1745,
+              "over25": 6,
+              "over33_34": 0
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "1ff02c0b7147bcced0434c6991269962f1bc34fac9799fd46dea7e0acff8d5f7",
+          "workload": {
+            "framesWithAttack": 1562,
+            "framesWithHitlag": 492,
+            "framesWithDamage": 3417,
+            "stockChanges": [
+              {
+                "frame": 1384,
+                "slot": 1,
+                "stocks": 3
+              },
+              {
+                "frame": 2233,
+                "slot": 0,
+                "stocks": 3
+              }
+            ],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 241
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 323
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 50,
+                "attack": 160
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 49,
+                "attack": 157
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 105,
+                "attack": 366
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 102,
+                "attack": 315
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 6,
+            "corrections": 0,
+            "replayedFrames": 0,
+            "maxReplay": 0,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40894464,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              7.653726100921631,
+              19.391464233398438,
+              83.0000228881836
+            ],
+            "interest": [
+              10.335760116577148,
+              9.448973655700684,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "1ff02c0b7147bcced0434c6991269962f1bc34fac9799fd46dea7e0acff8d5f7",
+          "workload": {
+            "framesWithAttack": 1487,
+            "framesWithHitlag": 492,
+            "framesWithDamage": 3417,
+            "stockChanges": [
+              {
+                "frame": 1384,
+                "slot": 1,
+                "stocks": 3
+              },
+              {
+                "frame": 2233,
+                "slot": 0,
+                "stocks": 3
+              }
+            ],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 225
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 108,
+                "attack": 299
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 50,
+                "attack": 154
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 49,
+                "attack": 151
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 105,
+                "attack": 349
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 102,
+                "attack": 309
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3597,
+            "corrections": 326,
+            "replayedFrames": 906,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41680896,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              7.653726100921631,
+              19.391464233398438,
+              83.0000228881836
+            ],
+            "interest": [
+              10.335760116577148,
+              9.448973655700684,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "final-seat0",
+      "rawSha256": "c2ed9c2635bec1fe3a4148eb0a8db8aea480fe83dd38b5a0a53d6f1c33ad2cfb",
+      "timingSha256": "de1919330bc7cee80bacd1e694dc19ebb2503a2ca1082a4e770b73d9a6523525",
+      "passed": true,
+      "requested": {
+        "pair": [
+          12,
+          12
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": true
+      },
+      "scope": "Two localhost browser processes using authenticated local prediction, complete-state correction and independent WASM presentation; canvas-capture observation on seat(s) 0 under scripted combat. Both clients loaded the hosted /play/ product entry. Not physical presentation, WAN, input-to-photon, roster or tournament certification.",
+      "captureSummaries": [
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.968661377023,
+          "activeSimulationFps": 59.968661377023,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.928213888208071,
+            "p50Ms": 5.175000011920929,
+            "p95Ms": 9.590000033378601,
+            "maxMs": 17.719999969005585
+          },
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 3600,
+            "captured": 3600,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 3600,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 3599,
+              "meanMs": 16.67030564045566,
+              "p95Ms": 19.25,
+              "maxMs": 32.215000000000146,
+              "fps": 59.9869025540353,
+              "gapsOver25Ms": 6,
+              "estimatedMissed60HzSlots": 6
+            },
+            "activeCadenceFps": 59.986902554035375,
+            "observerWorkerCpu": {
+              "samples": 3600,
+              "meanMs": 2.581055555774106,
+              "p95Ms": 4.074999988079071,
+              "maxMs": 10.569999992847443
+            },
+            "error": null
+          }
+        },
+        {
+          "frames": 3600,
+          "draws": 3600,
+          "simulationFps": 59.93326431018822,
+          "activeSimulationFps": 59.93326431018822,
+          "recoveryExcludedMs": 0,
+          "drawSubmissionCpu": {
+            "samples": 3600,
+            "meanMs": 5.665669444998105,
+            "p50Ms": 4.909999966621399,
+            "p95Ms": 9.299999952316284,
+            "maxMs": 24.335000038146973
+          }
+        }
+      ],
+      "timing": [
+        {
+          "stalledAdvances": 0,
+          "costs": {
+            "reconcile": {
+              "samples": 3603,
+              "meanMs": 0.022571468515393472,
+              "p50Ms": 0.019999980926513672,
+              "p95Ms": 0.04000002145767212,
+              "p99Ms": 0.06000000238418579,
+              "maxMs": 0.26499998569488525,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3600,
+              "meanMs": 1.4078527778387069,
+              "p50Ms": 1.3799999952316284,
+              "p95Ms": 2.149999976158142,
+              "p99Ms": 2.7300000190734863,
+              "maxMs": 4.300000011920929,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3600,
+              "meanMs": 5.924019443955686,
+              "p50Ms": 5.1700000166893005,
+              "p95Ms": 9.580000042915344,
+              "p99Ms": 11.480000019073486,
+              "maxMs": 17.714999973773956,
+              "over16_67": 3,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.23500001430511475,
+              "p50Ms": 0.23500001430511475,
+              "p95Ms": 0.23500001430511475,
+              "p99Ms": 0.23500001430511475,
+              "maxMs": 0.23500001430511475,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3599,
+              "meanMs": 16.670333425960266,
+              "p50Ms": 16.62999999523163,
+              "p95Ms": 19.240000009536743,
+              "p99Ms": 21.014999985694885,
+              "maxMs": 32.214999973773956,
+              "over16_67": 1728,
+              "over25": 6,
+              "over33_34": 0
+            }
+          }
+        },
+        {
+          "stalledAdvances": 1,
+          "costs": {
+            "reconcile": {
+              "samples": 3607,
+              "meanMs": 0.23278624855450789,
+              "p50Ms": 0.02499997615814209,
+              "p95Ms": 2.125,
+              "p99Ms": 3.685000002384186,
+              "maxMs": 7.664999961853027,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "advance": {
+              "samples": 3601,
+              "meanMs": 1.3295390166464331,
+              "p50Ms": 1.3050000071525574,
+              "p95Ms": 2.0399999618530273,
+              "p99Ms": 2.4649999737739563,
+              "maxMs": 3.494999945163727,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "draw": {
+              "samples": 3600,
+              "meanMs": 5.66175833389163,
+              "p50Ms": 4.905000030994415,
+              "p95Ms": 9.290000021457672,
+              "p99Ms": 11.134999990463257,
+              "maxMs": 24.325000047683716,
+              "over16_67": 2,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "gpuCheck": {
+              "samples": 1,
+              "meanMs": 0.26999998092651367,
+              "p50Ms": 0.26999998092651367,
+              "p95Ms": 0.26999998092651367,
+              "p99Ms": 0.26999998092651367,
+              "maxMs": 0.26999998092651367,
+              "over16_67": 0,
+              "over25": 0,
+              "over33_34": 0
+            },
+            "frameIntervals": {
+              "samples": 3599,
+              "meanMs": 16.67512225619486,
+              "p50Ms": 16.644999980926514,
+              "p95Ms": 19.325000047683716,
+              "p99Ms": 21.319999992847443,
+              "maxMs": 33.7950000166893,
+              "over16_67": 1758,
+              "over25": 8,
+              "over33_34": 1
+            }
+          }
+        }
+      ],
+      "peersMatch": true,
+      "clients": [
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "419fabe53d7d59f642309066165d062ce3dcd088dc9061c3ccc866581470af62",
+          "workload": {
+            "framesWithAttack": 1653,
+            "framesWithHitlag": 507,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 241
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 114,
+                "attack": 352
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 93,
+                "attack": 283
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 59,
+                "attack": 265
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 263
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 85,
+                "attack": 249
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 4,
+            "corrections": 0,
+            "replayedFrames": 0,
+            "maxReplay": 0,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41484288,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              0.9372780323028564,
+              19.609359741210938,
+              83.58137512207031
+            ],
+            "interest": [
+              -0.36736905574798584,
+              11.604597091674805,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        },
+        {
+          "fighterForms": [
+            {
+              "slot": 0,
+              "index": 0,
+              "code": "Pp",
+              "costume": 0
+            },
+            {
+              "slot": 0,
+              "index": 1,
+              "code": "Nn",
+              "costume": 0
+            },
+            {
+              "slot": 1,
+              "index": 0,
+              "code": "Pp",
+              "costume": 1
+            },
+            {
+              "slot": 1,
+              "index": 1,
+              "code": "Nn",
+              "costume": 1
+            }
+          ],
+          "finalFighterHash": "419fabe53d7d59f642309066165d062ce3dcd088dc9061c3ccc866581470af62",
+          "workload": {
+            "framesWithAttack": 1565,
+            "framesWithHitlag": 507,
+            "framesWithDamage": 3417,
+            "stockChanges": [],
+            "windows": [
+              {
+                "firstFrame": 1,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 224
+              },
+              {
+                "firstFrame": 601,
+                "frames": 600,
+                "hitlag": 114,
+                "attack": 329
+              },
+              {
+                "firstFrame": 1201,
+                "frames": 600,
+                "hitlag": 93,
+                "attack": 271
+              },
+              {
+                "firstFrame": 1801,
+                "frames": 600,
+                "hitlag": 59,
+                "attack": 255
+              },
+              {
+                "firstFrame": 2401,
+                "frames": 600,
+                "hitlag": 78,
+                "attack": 249
+              },
+              {
+                "firstFrame": 3001,
+                "frames": 600,
+                "hitlag": 85,
+                "attack": 237
+              }
+            ]
+          },
+          "session": {
+            "frame": 3600,
+            "confirmed": 3599,
+            "remoteKnown": 3599,
+            "acknowledged": 3599,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 3600,
+            "predictedFrames": 3597,
+            "corrections": 282,
+            "replayedFrames": 783,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 41680896,
+            "retainedSnapshots": 1,
+            "retainedBytes": 37093376
+          },
+          "gpuValidation": true,
+          "lastDraw": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              0.9372780323028564,
+              19.609359741210938,
+              83.58137512207031
+            ],
+            "interest": [
+              -0.36736905574798584,
+              11.604597091674805,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "oracleRuns": [
+    {
+      "stage": "fountain",
+      "pair": [
+        "Pp",
+        "Pp"
+      ],
+      "rawSha256": "8cf8ea5777faea8e3e490d52302b8f335e2971f01c4e7060b2afa1de7dba1429",
+      "frames": 300,
+      "frameOracle": {
+        "enabled": true,
+        "frames": 300,
+        "comparedBytes": 829440000,
+        "differentBytes": 0,
+        "cameraMismatches": 0
+      },
+      "coverageAudits": 600,
+      "stateMatches": true,
+      "fullStateHash": "96cf1a501d1ca97e9c49b17e038228bf142c528a263e59582f0f5aa0de7341c3",
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Simulation/submission cadence below 720p60 gate",
+        "Browser captured-frame cadence/content gate failed"
+      ]
+    },
+    {
+      "stage": "battlefield",
+      "pair": [
+        "Lk",
+        "Kb"
+      ],
+      "rawSha256": "826e28f53c6ff28a67cee46300df00bcace63d192972244adcc45090d113ceac",
+      "frames": 300,
+      "frameOracle": {
+        "enabled": true,
+        "frames": 300,
+        "comparedBytes": 829440000,
+        "differentBytes": 0,
+        "cameraMismatches": 0
+      },
+      "coverageAudits": 600,
+      "stateMatches": true,
+      "fullStateHash": "2b3f685e7d0758425472e1d2898f7a779bcb27fb5b0e02a5964d4e00dbfc44e7",
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Simulation/submission cadence below 720p60 gate",
+        "Browser captured-frame cadence/content gate failed"
+      ]
+    },
+    {
+      "stage": "destination",
+      "pair": [
+        "Pp",
+        "Pp"
+      ],
+      "rawSha256": "8c2385435af2eef5ab7a199ed788aaa795886d900a45a71369e7cd8a0800bc2d",
+      "frames": 60,
+      "frameOracle": {
+        "enabled": true,
+        "frames": 60,
+        "comparedBytes": 165888000,
+        "differentBytes": 0,
+        "cameraMismatches": 0
+      },
+      "coverageAudits": 120,
+      "stateMatches": true,
+      "fullStateHash": "a095f2d4607605a7e1ce757a983108db3b8a53145b6d3f7f70317c62af98faa6",
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Forward combat did not demonstrate contact",
+        "Simulation/submission cadence below 720p60 gate",
+        "Browser captured-frame cadence/content gate failed"
+      ]
+    },
+    {
+      "stage": "dreamland",
+      "pair": [
+        "Pp",
+        "Pp"
+      ],
+      "rawSha256": "bd9792bafb1a4fb4ccb4d6ba30819c7e6be70f2463a5210442615860e7d1cfb0",
+      "frames": 60,
+      "frameOracle": {
+        "enabled": true,
+        "frames": 60,
+        "comparedBytes": 165888000,
+        "differentBytes": 0,
+        "cameraMismatches": 0
+      },
+      "coverageAudits": 120,
+      "stateMatches": true,
+      "fullStateHash": "6d33eca65189c0356518009c7e267b6d7d409ca6dd2a4dabd3ad8e2bba975c0c",
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Forward combat did not demonstrate contact",
+        "Simulation/submission cadence below 720p60 gate",
+        "Browser captured-frame cadence/content gate failed"
+      ]
+    },
+    {
+      "stage": "stadium",
+      "pair": [
+        "Pp",
+        "Pp"
+      ],
+      "rawSha256": "680e7ef1f6e2a3c64e12a5b10ecf5c9330f5a95ef3d31692ed0fa36a269f101c",
+      "frames": 60,
+      "frameOracle": {
+        "enabled": true,
+        "frames": 60,
+        "comparedBytes": 165888000,
+        "differentBytes": 0,
+        "cameraMismatches": 0
+      },
+      "coverageAudits": 120,
+      "stateMatches": true,
+      "fullStateHash": "0a1c841fc29a4157d818f181685e81cc4dce4c1b932ce2f229eac03a849a9561",
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Forward combat did not demonstrate contact",
+        "Simulation/submission cadence below 720p60 gate",
+        "Browser captured-frame cadence/content gate failed"
+      ]
+    },
+    {
+      "stage": "story",
+      "pair": [
+        "Pp",
+        "Pp"
+      ],
+      "rawSha256": "769739409de95d3077bc1a48ca03c335b2020b8ff91f67219eaf01cdfd7cda3f",
+      "frames": 60,
+      "frameOracle": {
+        "enabled": true,
+        "frames": 60,
+        "comparedBytes": 165888000,
+        "differentBytes": 0,
+        "cameraMismatches": 0
+      },
+      "coverageAudits": 120,
+      "stateMatches": true,
+      "fullStateHash": "2629e87ae7837bb82a1e960b0c81ce62e0a2c3fe4dc0f7f2b607af6b22912b2e",
+      "pixelOracle": {
+        "differentBytes": 0,
+        "comparedBytes": 2764800
+      },
+      "cameraMatches": true,
+      "audioMatches": true,
+      "diagnosticPassed": false,
+      "failures": [
+        "Less than 1800 forward frames; short probe only",
+        "Forward combat did not demonstrate contact",
+        "Simulation/submission cadence below 720p60 gate",
+        "Browser captured-frame cadence/content gate failed"
+      ]
+    }
+  ],
+  "latency": {
+    "rawSha256": "b4b52ed7a24ff8d2d72ee0337298d6a3aa4415b36d3f72eea9fc51413d87107a",
+    "timingSha256": "ad46236864246ea395a9203417e8a1580d2f0cb794638ed3a96b3fd77b80c643",
+    "frames": 1800,
+    "presses": 40,
+    "passed": true,
+    "clients": [
+      {
+        "stalledAdvances": 0,
+        "eventToNativeInputSubmission": {
+          "samples": 20,
+          "meanMs": 13.341500002145768,
+          "p50Ms": 14.194999992847443,
+          "p95Ms": 18.564999997615814,
+          "p99Ms": 18.564999997615814,
+          "maxMs": 19.605000019073486,
+          "over16_67": 5,
+          "over25": 0,
+          "over33_34": 0
+        },
+        "eventToDrawSubmission": {
+          "samples": 20,
+          "meanMs": 13.341500002145768,
+          "p50Ms": 14.194999992847443,
+          "p95Ms": 18.564999997615814,
+          "p99Ms": 18.564999997615814,
+          "maxMs": 19.605000019073486,
+          "over16_67": 5,
+          "over25": 0,
+          "over33_34": 0
+        }
+      },
+      {
+        "stalledAdvances": 7,
+        "eventToNativeInputSubmission": {
+          "samples": 20,
+          "meanMs": 14.271000000834466,
+          "p50Ms": 14.955000042915344,
+          "p95Ms": 16.6350000500679,
+          "p99Ms": 16.6350000500679,
+          "maxMs": 23.00499999523163,
+          "over16_67": 1,
+          "over25": 0,
+          "over33_34": 0
+        },
+        "eventToDrawSubmission": {
+          "samples": 20,
+          "meanMs": 14.271000000834466,
+          "p50Ms": 14.955000042915344,
+          "p95Ms": 16.6350000500679,
+          "p99Ms": 16.6350000500679,
+          "maxMs": 23.00499999523163,
+          "over16_67": 1,
+          "over25": 0,
+          "over33_34": 0
+        }
+      }
+    ],
+    "scope": "CDP browser key handler to CPU submission of a frame whose native fighter input reflects the key. No combat workload. Not physical input-to-photon or a before/after comparison."
+  },
+  "excluded": [
+    {
+      "kind": "profile before retry fix",
+      "reason": "Input outside live window: confirmed immutable sample was resent after a stalled advance."
+    },
+    {
+      "kind": "recorded-input replay",
+      "rawSha256": "dac9d836233e31f7b3931dac9decd14b7ca686d49a79f430002ea1ce5dc47f12",
+      "reason": "Identical input tape did not establish identical initial native state; one 600-frame window had no contact. Not an acceptance pass."
+    },
+    {
+      "kind": "shader tuple candidate",
+      "reason": "Direct shader-key cost regressed; reverted."
+    }
+  ],
+  "tests": {
+    "total": 669,
+    "passed": 659,
+    "skipped": 10,
+    "failed": 0
+  },
+  "artifactPinsVerified": 166,
+  "physicalInputToPhotonValidated": false,
+  "hitchFreeValidated": false,
+  "deployed": false,
+  "lifecycle": {
+    "rawSha256": "7127d143711dffff5d44a9c4c4a2802daf034f07c7eac3a1cbaf5e3e7c54e910",
+    "passed": true,
+    "outcome": 7,
+    "confirmedFrame": 135,
+    "returnedToCharacters": true
+  }
+}

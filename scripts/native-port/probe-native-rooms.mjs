@@ -1,10 +1,21 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn} from 'node:child_process';import {setTimeout as delay} from 'node:timers/promises';
 import {createNativePortServer} from './serve.mjs';
+import {createReleaseServer} from './release-server.mjs';
+import {randomBytes} from 'node:crypto';
+import {installRoomTiming} from './measure-room-timing.mjs';
 const root=path.resolve(import.meta.dirname,'../..'),clients=[];
+const label=process.argv.find(arg=>arg.startsWith('--label='))?.slice(8)??'';
+if(label&&!/^[a-z0-9-]+$/.test(label))throw Error('Invalid probe output label');
 const resultsMode=process.argv.includes('--results'),lrasMode=process.argv.includes('--lras'),lifecycleMode=resultsMode||lrasMode;
 const rollbackMode=process.argv.includes('--rollback'),framesArg=process.argv.find(arg=>arg.startsWith('--frames='));
 const combatMode=process.argv.includes('--combat');
 const releaseEntry=process.argv.includes('--release-entry');
+const timingMode=process.argv.includes('--timing'),latencyMode=process.argv.includes('--latency');
+const recordInputs=process.argv.includes('--record-inputs'),tapeArg=process.argv.find(arg=>arg.startsWith('--input-tape=')),inputTape=tapeArg?JSON.parse(fs.readFileSync(tapeArg.slice(13),'utf8')):null;
+if((recordInputs||inputTape)&&(!timingMode||!combatMode))throw Error('Input recording/replay requires --timing --combat');
+if(latencyMode&&(!timingMode||combatMode))throw Error('Latency requires --timing without --combat');
+if(timingMode&&(!rollbackMode||lifecycleMode))throw Error('--timing requires a bounded --rollback match');
+if((process.argv.includes('--profile')||process.argv.includes('--gpu-check-every-frame'))&&!timingMode)throw Error('Profiling and GPU controls require --timing');
 const pairArg=process.argv.find(arg=>arg.startsWith('--pair=')),pair=pairArg?.slice('--pair='.length).split(',').map(Number)??null;
 const stageArg=process.argv.find(arg=>arg.startsWith('--stage=')),selectedStage=Number(stageArg?.slice('--stage='.length)??31),legalStages=[2,3,8,28,31,32];
 const holdAArg=process.argv.find(arg=>arg.startsWith('--hold-a-seat=')),holdASeat=holdAArg===undefined?null:Number(holdAArg.slice('--hold-a-seat='.length));
@@ -25,16 +36,24 @@ if(captureSeat!==null&&![0,1].includes(captureSeat))throw Error('--capture-seat 
 const captureSeats=new Set(captureSeat===null?(process.argv.includes('--capture')?[0,1]:[]):[captureSeat]),captureMode=captureSeats.size>0;
 const matchFrames=framesArg?Number(framesArg.slice('--frames='.length)):rollbackMode?60:600;
 if(!Number.isSafeInteger(matchFrames)||matchFrames<1)throw Error('--frames must be a positive integer');
+if(inputTape&&(!Array.isArray(inputTape)||inputTape.length!==2||inputTape.some(t=>!Array.isArray(t)||t.length!==matchFrames||t.some(p=>!Array.isArray(p)||p.length!==7||p.some(v=>!Number.isFinite(v))))))throw Error('Input tape must contain two complete normalized controller sequences');
+if(latencyMode&&matchFrames<1800)throw Error('Latency sampling requires at least 1800 frames');
 if(disconnectSeat!==null&&(!Number.isSafeInteger(disconnectFrame)||disconnectFrame<1||disconnectFrame>=matchFrames))throw Error('--disconnect-frame must be within the requested match');
 if(captureMode&&!rollbackMode)throw Error('Captured-frame room probe requires rollback mode');
 if(resultsMode&&rollbackMode)throw Error('Full results lifecycle probe uses lockstep');
 if(resultsMode&&lrasMode)throw Error('Choose one results lifecycle probe');
 if((relayDelays||clientDelays)&&!rollbackMode)throw Error('Room delay injection requires rollback mode');
-let relayDelayIndex=0,clientDelayIndex=0;const server=createNativePortServer({productEntry:releaseEntry,allowProductDiagnostics:releaseEntry,roomOptions:relayDelays||clientDelays?{
+if(releaseEntry&&(relayDelays||clientDelays))throw Error('Release server probe cannot inject relay scheduling');
+const releaseKey=randomBytes(24).toString('hex'),release=releaseEntry?createReleaseServer({MELEE_ACCESS_KEY:releaseKey}):null;let releaseCookie;
+let relayDelayIndex=0,clientDelayIndex=0;const server=release?.server??createNativePortServer({roomOptions:relayDelays||clientDelays?{
  deliveryDelayMs:relayDelays?(m=>m.key?.startsWith('match:')&&m.frame>=3&&['peer-input','confirmed-frame'].includes(m.type)?relayDelays[relayDelayIndex++%relayDelays.length]:null):null,
  receiveDelayMs:clientDelays?(m=>m.key?.startsWith('match:')&&m.frame>=3&&m.type==='input'?clientDelays[clientDelayIndex++%clientDelays.length]:null):null
 }:undefined});
-const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':lrasMode?'-lras':rollbackMode?'-rollback':''));fs.mkdirSync(output,{recursive:true});
+const output=path.join(root,'dist/native-port/experiment-native-rooms'+(resultsMode?'-results':lrasMode?'-lras':rollbackMode?'-rollback':'')+(label?'-'+label:''));fs.mkdirSync(output,{recursive:true});
+// A failed run must not leave a previous success/profile looking current.
+// Labels preserve separate trials; rerunning one label replaces its outputs.
+for(const name of ['report.json','raw-report.json','failure.json','timing.json','inputs.json','cpu-0.json','cpu-1.json','request-errors.jsonl','player-0.png','player-1.png'])fs.rmSync(path.join(output,name),{force:true});
+server.on('request',(req,res)=>res.on('finish',()=>{if(req.url.startsWith('/native-rooms')&&res.statusCode>=400)fs.appendFileSync(output+'/request-errors.jsonl',JSON.stringify({path:new URL(req.url,'http://local').pathname,status:res.statusCode,origin:req.headers.origin??null})+'\n');}));
 async function client(capture=false){
  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'native-room-')),chromeArgs=['--headless=new','--no-sandbox','--enable-gpu','--disable-dev-shm-usage','--window-size=1280,1100','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],cpuSet=clientCpuSets?.[clients.length],browser=spawn(cpuSet?'taskset':'google-chrome',cpuSet?['-c',cpuSet,'google-chrome',...chromeArgs]:chromeArgs,{stdio:['ignore','ignore','pipe']});let stderr='';browser.stderr.on('data',b=>stderr=(stderr+b).slice(-12000));
  const c={profile,browser};clients.push(c);
@@ -47,11 +66,32 @@ async function client(capture=false){
  c.click=async selector=>{const pos=await c.eval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e||e.hidden||e.disabled)throw Error('Button unavailable');const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);for(const type of ['mousePressed','mouseReleased'])await c.cmd('Input.dispatchMouseEvent',{type,button:'left',clickCount:1,...pos});};
  const held=new Set();c.keys=async next=>{for(const code of held)if(!next.includes(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyUp',code,key:code});held.delete(code);}for(const code of next)if(!held.has(code)){await c.cmd('Input.dispatchKeyEvent',{type:'keyDown',code,key:code});held.add(code);}};
  c.press=async code=>{await c.keys([code]);await delay(100);await c.keys([]);await delay(100);};
+ if(timingMode){
+  await c.cmd('Page.enable');
+  // Install before the first live frame, including during coordinated reload.
+  // Attaching after matchReady can miss early inputs and invalidate A/B replay.
+  const options={gpuCheckEveryFrame:process.argv.includes('--gpu-check-every-frame'),measureInput:latencyMode,recordInputs,inputTape:inputTape?.[clients.length-1]??null};
+  await c.cmd('Page.addScriptToEvaluateOnNewDocument',{source:`Object.defineProperty(globalThis,'nativeProductRollback',{configurable:true,set(value){Object.defineProperty(globalThis,'nativeProductRollback',{configurable:true,writable:true,value});(${installRoomTiming.toString()})(${JSON.stringify(options)});}});`});
+ }
+ if(releaseEntry){
+  const base='http://127.0.0.1:'+server.address().port;
+  await c.cmd('Page.enable');
+  if(process.argv.includes('--trace-room-startup')){
+   ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.method==='Runtime.consoleAPICalled'&&m.params.args[0]?.value==='ROOMSTART')console.log('ROOMSTART',m.params.args[1]?.value);});
+   await c.cmd('Runtime.enable');await c.cmd('Page.addScriptToEvaluateOnNewDocument',{source:'{const s=JSON.parse(sessionStorage.getItem("native-melee-room-v1")||"null");console.info("ROOMSTART",JSON.stringify({saved:!!s,epoch:s?.epoch,scope:s?.diagnosticCpu,tokenPresent:!!s?.token,path:location.pathname}));}'});
+  }
+  await c.cmd('Network.setCookie',{name:'melee_session',value:releaseCookie,url:base,httpOnly:true,sameSite:'Strict'});
+  // Only the browser harness injects measurement controls after the real
+  // release redirect. The server keeps its public query restrictions enabled.
+  await c.cmd('Page.addScriptToEvaluateOnNewDocument',{source:`if(location.pathname==='/play/'){const u=new URL(location.href);u.searchParams.set('interactive','1');${rollbackMode?'':"u.searchParams.set('lockstep','1');"}${lifecycleMode?'':"u.searchParams.set('liveframes','"+matchFrames+"');"}${capture?"u.searchParams.set('captureframes','1');":''}${combatMode?"u.searchParams.set('workload','1');":''}history.replaceState(null,'',u);}`});
+ }
  await c.cmd('Page.navigate',{url:'http://127.0.0.1:'+server.address().port+(releaseEntry?'/play/':'/character-menu.html')+'?interactive=1'+(rollbackMode?'':'&lockstep=1')+(lifecycleMode?'':'&liveframes='+matchFrames+(capture?'&captureframes=1':'')+(combatMode?'&workload=1':''))});await c.wait('globalThis.characterMenuReport?.passed');return c;
 }
 try{
- await new Promise(r=>server.listen(0,'127.0.0.1',r));const a=await client(captureSeats.has(0)),b=await client(captureSeats.has(1));
- await a.wait('nativeCharacterMenu.read().frames>90');const productScope=await a.eval('({cpu:nativeRoom.cpu,cpuControlHidden:document.querySelector("#cpuRoom").hidden})');if(productScope.cpu||!productScope.cpuControlHidden)throw Error('Tournament room exposed CPU mode');const code=await a.eval('nativeRoom.code');
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ if(releaseEntry){const base='http://127.0.0.1:'+server.address().port;release.config.origins.splice(0,release.config.origins.length,base);const login=await fetch(base+'/health',{headers:{Authorization:'Basic '+Buffer.from('player:'+releaseKey).toString('base64')}});releaseCookie=login.headers.get('set-cookie').split(';')[0].slice('melee_session='.length);await login.arrayBuffer();}
+ const a=await client(captureSeats.has(0)),b=await client(captureSeats.has(1));
+ await a.wait('nativeCharacterMenu.read().frames>90');if(releaseEntry&&!lifecycleMode){for(const c of [a,b])if(await c.eval('new URL(location.href).searchParams.get("liveframes")')!==String(matchFrames))throw Error('Release harness measurement controls were not installed');}const productScope=await a.eval('({cpu:nativeRoom.cpu,cpuControlHidden:document.querySelector("#cpuRoom").hidden})');if(productScope.cpu||!productScope.cpuControlHidden)throw Error('Tournament room exposed CPU mode');const code=await a.eval('nativeRoom.code');
  await b.click('#joinCode');await b.cmd('Input.insertText',{text:code});await b.click('#joinRoom button');
  await a.wait('nativeRoom.active&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90');await b.wait('nativeRoom.active&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90');
  const beforeRefresh=await a.eval('nativeRoom.snapshot()');await b.cmd('Page.reload');await a.wait(`nativeRoom.snapshot().epoch>${beforeRefresh.epoch}&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90`);await b.wait(`nativeRoom.snapshot().epoch>${beforeRefresh.epoch}&&nativeRoom.snapshot().phaseReady&&nativeCharacterMenu.read().frames>90`);
@@ -90,6 +130,11 @@ try{
  else await a.press('KeyP');
  const matchReady=lrasMode?'globalThis.nativeLive?.snapshot().match?.intro?.gate===1':rollbackMode?'globalThis.nativeLive?.snapshot().frames>=1||globalThis.nativeMenuMatchReport':'globalThis.nativeLive?.snapshot().match?.intro?.gate===1';await a.wait(matchReady,120000);await b.wait(matchReady,120000);if(holdASeat!==null)await [a,b][holdASeat].keys([]);
  let disconnectRecovery=null;if(disconnectSeat!==null){await a.wait('globalThis.nativeLive?.snapshot().frames>='+disconnectFrame,120000);const before=await Promise.all([a,b].map(c=>c.eval('nativeRoom.snapshot()'))),startedAt=performance.now();if(!server.nativeRoomRelay?.testDisconnectSeat(code,disconnectSeat))throw Error('Could not terminate requested room socket');await Promise.all([a,b].map(c=>c.wait('!nativeRoom.connected')));const paused=await Promise.all([a,b].map(c=>c.eval('nativeRoom.snapshot()')));await Promise.all([a,b].map(c=>c.wait('nativeRoom.connected',30000)));const resumed=await Promise.all([a,b].map(c=>c.eval('nativeRoom.snapshot()')));if(resumed.some((r,i)=>r.epoch!==before[i].epoch||r.phase!==before[i].phase||r.confirmedFrame<before[i].confirmedFrame))throw Error('Reconnect changed the live match '+JSON.stringify({before,paused,resumed}));disconnectRecovery={seat:disconnectSeat,requestedFrame:disconnectFrame,elapsedMs:performance.now()-startedAt,before,paused,resumed};}
+ if(timingMode)for(const c of [a,b]){if(!await c.eval('typeof roomTimingReport==="function"'))throw Error('Timing was not installed before live startup');if(process.argv.includes('--profile')){await c.cmd('Profiler.enable');await c.cmd('Profiler.start');}}
+ if(latencyMode){
+  await Promise.all([a,b].map(c=>c.wait('nativeLive.snapshot().match.intro.gate===1')));
+  for(let i=0;i<40;i++){const c=[a,b][i%2];await c.keys([i%4<2?'KeyD':'KeyA']);await delay(80);await c.keys([]);await delay(220+(i*17)%83);}
+ }
  if(lrasMode){
   await a.eval('nativeMenuInput.pulse(0x1000)');await a.wait('nativeLive?.snapshot().match?.pause?.[0]===1');await a.wait('nativeLive.snapshot().match.pause[2]===0');
   await a.eval('nativeMenuInput.pulse(0x1160)');
@@ -133,16 +178,19 @@ try{
   await a.press('KeyO');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90')));
   fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,lifecycle,restarted,returned,legalStagesAfterReturn:legal,scope:'Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.'},null,2));console.log(JSON.stringify({passed:true,results:true,elimination:elimination[0].results,timeout:timeout[0].results}));
  }else{
- await a.keys(['KeyD','KeyP']);await b.keys(['KeyA','KeyP']);await delay(400);await a.keys([]);await b.keys([]);
+ if(!latencyMode){await a.keys(['KeyD','KeyP']);await b.keys(['KeyA','KeyP']);await delay(400);await a.keys([]);await b.keys([]);}
  await a.press('Space');await b.press('Space');await a.press('KeyO');await b.press('KeyO');
- for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/player-'+i+'.png',Buffer.from(shot.data,'base64'));}
  await a.wait('globalThis.nativeMenuMatchReport');await b.wait('globalThis.nativeMenuMatchReport');
+ for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/player-'+i+'.png',Buffer.from(shot.data,'base64'));}
+ if(timingMode){fs.writeFileSync(output+'/timing.json',JSON.stringify(await Promise.all([a,b].map(c=>c.eval('roomTimingReport()'))),null,2));if(recordInputs)fs.writeFileSync(output+'/inputs.json',JSON.stringify(await Promise.all([a,b].map(c=>c.eval('roomInputTape('+matchFrames+')')))));if(process.argv.includes('--profile'))for(const [i,c]of [a,b].entries())fs.writeFileSync(output+'/cpu-'+i+'.json',JSON.stringify(await c.cmd('Profiler.stop')));}
  const final=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),report:nativeMenuMatchReport})'))),transport=server.nativeRoomRelay?.deliverySnapshot()??null,receiveTransport=server.nativeRoomRelay?.receiveSnapshot()??null;
  fs.writeFileSync(output+'/raw-report.json',JSON.stringify({requested:{pair,stage:selectedStage,holdASeat,clientCpuSets,relayDelays,clientDelays,disconnectSeat,disconnectFrame,releaseEntry},initial,disconnectRecovery,final,transport,receiveTransport},null,2));
  if(final.some(v=>v.report.live.frames!==matchFrames))throw Error('Incomplete match');
  if(final.some(v=>v.report.selection.stage!==selectedStage||pair&&v.report.selection.players.slice(0,2).some((p,i)=>p.character!==final[0].report.selection.players[i].character)))throw Error('Requested tournament selection was not retained '+JSON.stringify(final.map(v=>v.report.selection)));
  if(holdASeat!==null&&final.some(v=>v.report.live.initial[holdASeat][11]!==7))throw Error('Held-A Zelda did not start as Sheik '+JSON.stringify(final.map(v=>v.report.live.initial[holdASeat])));
+ if(pair)for(const v of final)for(const [slot,tile] of pair.entries())if(tile===12){const forms=v.report.fighterForms.filter(f=>f.slot===slot);if(forms.length!==2||forms[0].code!=='Pp'||forms[1].code!=='Nn'||forms[0].owner===forms[1].owner)throw Error('Ice Climbers workload must retain distinct Popo and Nana owners in each selected seat');}
  if(rollbackMode&&final.some(v=>!v.report.rollback?.enabled||!v.report.rollback.productionDefault||v.report.rollback.metrics?.session?.forwardFrames!==matchFrames||v.report.rollback.metrics?.session?.confirmed!==matchFrames-1))throw Error('Default rollback product path was not confirmed '+JSON.stringify(final.map(v=>v.report.rollback)));
+ if(rollbackMode&&final.some(v=>v.room.buffered!==0||v.room.bufferedSent!==0||v.room.mode!=='rollback'))throw Error('Rollback retained obsolete lockstep state '+JSON.stringify(final.map(v=>v.room)));
  if(relayDelays&&(!transport||transport.scheduled<matchFrames||transport.delivered!==transport.scheduled||transport.configuredDelayMinMs!==Math.min(...relayDelays)||transport.configuredDelayMaxMs!==Math.max(...relayDelays)))throw Error('Relay delay injection was not exercised '+JSON.stringify(transport));
  if(clientDelays&&(!receiveTransport||receiveTransport.scheduled<matchFrames||receiveTransport.delivered!==receiveTransport.scheduled||receiveTransport.configuredDelayMinMs!==Math.min(...clientDelays)||receiveTransport.configuredDelayMaxMs!==Math.max(...clientDelays)))throw Error('Client delay injection was not exercised '+JSON.stringify(receiveTransport));
  if(combatMode&&final.some(v=>v.report.live.inputSource!=='scripted normalized controller samples'||!v.report.live.workload.framesWithAttack||!v.report.live.workload.framesWithHitlag||!v.report.live.workload.framesWithDamage||v.report.live.workload.windows.some(w=>w.frames===600&&(!w.attack||!w.hitlag))))throw Error('Combat workload did not sustain attack and contact '+JSON.stringify(final.map(v=>v.report.live.workload)));

@@ -13,8 +13,15 @@ async function fixture(t,options){
   const take=(check)=>{const index=queue.findIndex(check);if(index>=0)return Promise.resolve(queue.splice(index,1)[0]);return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Missing relay event '+check)),3000);pending.push({check,resolve:m=>{clearTimeout(timer);resolve(m);}});});};
   await new Promise(r=>ws.on('open',r));const send=m=>ws.send(JSON.stringify(m));send({type:'hello',token,...hello});await take(m=>m.type==='state');return {ws,take,send,queue};
  }
- return {post,socket,relay};
+ return {post,socket,relay,base};
 }
+test('an invalid hello cannot poison a later valid session handshake',async t=>{
+ const {post,base}=await fixture(t),owner=await post('/native-rooms'),ws=new WebSocket(base.replace('http','ws')+'/native-room');
+ await new Promise((resolve,reject)=>{ws.once('open',resolve);ws.once('error',reject);});
+ const next=()=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Missing handshake response')),1000);ws.once('message',raw=>{clearTimeout(timer);resolve(JSON.parse(raw));});});
+ let response=next();ws.send(JSON.stringify({type:'invalid',token:owner.token}));assert.equal((await response).type,'error');
+ response=next();ws.send(JSON.stringify({type:'hello',token:owner.token}));assert.equal((await response).type,'state');ws.close();
+});
 test('native rooms protect seats, require both Ready, and relay ordered immutable inputs',async t=>{
  const {post,socket}=await fixture(t),owner=await post('/native-rooms',{diagnosticCpu:true}),a=await socket(owner.token);
  assert.equal(owner.cpu,true);assert.equal(owner.seat,0);assert.equal((await post('/native-rooms/join',{code:owner.code})).status,400);
@@ -44,6 +51,25 @@ test('tournament rooms start human-only and reject CPU mode',async t=>{
  const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token);
  assert.equal(owner.cpu,false);a.send({type:'cpu',enabled:true});assert.match((await a.take(m=>m.type==='error')).message,/unavailable/);
  const guest=await post('/native-rooms/join',{code:owner.code});assert.equal(guest.status,200);assert.equal(guest.cpu,false);
+});
+test('release relay rejects diagnostic CPU creation',async t=>{
+ const {post}=await fixture(t,{allowDiagnosticCpu:false});
+ assert.equal((await post('/native-rooms',{diagnosticCpu:true})).status,400);
+ assert.equal((await post('/native-rooms')).cpu,false);
+});
+test('rollback negotiation omits lockstep packets and survives reconnect',async t=>{
+ const {post,socket}=await fixture(t),owner=await post('/native-rooms'),a=await socket(owner.token),guest=await post('/native-rooms/join',{code:owner.code}),b=await socket(guest.token),epoch=guest.epoch,key='match:0';
+ for(const peer of [a,b])peer.send({type:'phase',epoch,key,rollback:true});
+ await a.take(m=>m.type==='phase-ready');await b.take(m=>m.type==='phase-ready');
+ const value={pad:[16,0,0,0,0,0,0],tap:1};
+ for(const peer of [a,b])peer.send({type:'input',epoch,key,frame:3,value});
+ await a.take(m=>m.type==='confirmed-frame'&&m.frame===3);await b.take(m=>m.type==='confirmed-frame'&&m.frame===3);
+ assert.equal(a.queue.some(m=>m.type==='frame'),false);assert.equal(b.queue.some(m=>m.type==='frame'),false);
+ b.ws.close();await a.take(m=>m.type==='state'&&!m.connected[1]);
+ const resumed=await socket(guest.token,{rollback:true,resume:{epoch,key,confirmedFrame:2}});
+ assert.equal(resumed.queue.some(m=>m.type==='frame'),false);
+ assert.equal(resumed.queue.some(m=>m.type==='peer-input'&&m.frame===3),true);
+ assert.equal(resumed.queue.some(m=>m.type==='confirmed-frame'&&m.frame===3),true);
 });
 test('test-only delayed delivery preserves per-socket order and reports injection',async t=>{
  let calls=0;const {post,socket,relay}=await fixture(t,{deliveryDelayMs:m=>m.type==='peer-input'&&m.frame>=3?[30,0][calls++%2]:null}),owner=await post('/native-rooms'),a=await socket(owner.token);
@@ -105,7 +131,18 @@ test('browser room buffers authenticated rollback events and exposes immutable s
  socket.emit({type:'phase-ready',key:'match:0',epoch:4});assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);
  assert.equal(room.sendInput(3,[256,0,0,0,0,0,0]),true);assert.equal(socket.sent.filter(m=>m.type==='input').length,1);assert.throws(()=>room.sendInput(3,[0,0,0,0,0,0,0]),/Conflicting/);
  room.endMatch({results:'native'},2);assert.equal(socket.sent.some(m=>m.type==='ended'),false);socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:1});assert.equal(socket.sent.some(m=>m.type==='ended'),false);socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame:2});assert.equal(socket.sent.filter(m=>m.type==='ended').length,1);
- assert.deepEqual(room.snapshot().pendingEnding,{frame:2,sent:true});unbind();room.dispose();
+ assert.deepEqual(room.snapshot().pendingEnding,{frame:2,sent:true});
+ for(let frame=3;frame<28800;frame++){
+  if(frame>3)room.sendInput(frame,[0,0,0,0,0,0,0]);
+  socket.emit({type:'frame',key:'match:0',epoch:4,frame,inputs:[]});
+  socket.emit({type:'confirmed-frame',key:'match:0',epoch:4,frame});
+ }
+ assert.equal(room.snapshot().buffered,0);assert.equal(room.snapshot().bufferedSent,0);assert.equal(room.snapshot().confirmedFrame,28799);
+ const sentBeforeRetry=socket.sent.filter(m=>m.type==='input').length;
+ assert.equal(room.sendInput(28799,[0,0,0,0,0,0,0]),true);
+ assert.equal(socket.sent.filter(m=>m.type==='input').length,sentBeforeRetry);
+ assert.equal(room.snapshot().bufferedSent,0);
+ unbind();room.dispose();
 });
 
 test('normal startup cannot resume a diagnostic CPU room',async t=>{

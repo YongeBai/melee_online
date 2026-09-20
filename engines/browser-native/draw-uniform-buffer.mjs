@@ -48,39 +48,48 @@ export function validateDrawBlock(gl,program){
 const offsets=Object.fromEntries(DRAW_FIELDS.map(f=>[f.name,f.offset/4]));
 export function writeDrawUniforms(buffer,byteOffset,state,camera,{clear=true}={}){
  const f=new Float32Array(buffer,byteOffset,DRAW_BLOCK_BYTES/4),i=new Int32Array(buffer,byteOffset,DRAW_BLOCK_BYTES/4);if(clear)i.fill(0);
- const floats=(name,values,at=0)=>f.set(values,offsets[name]+at),ints=(name,values,at=0)=>i.set(values,offsets[name]+at);
- floats('projection',camera.projection);
- for(const [name,packed,rows]of [['positionRows',state.model.positionRows,state.model.positions],['normalRows',state.model.normalRows,state.model.normals]]){
-  if(packed)floats(name,packed);else for(let n=0;n<rows.length;n++)if(rows[n])floats(name,rows[n],n*12);
- }
- for(const m of state.textures.matrices)floats(m.id<64?'textureRows':'postRows',m.values,(m.id<64?m.id-30:m.id-64)*4);
- for(let n=0;n<4;n++){ints('tevRegisters',state.tev.registers[n],n*4);ints('tevKonst',state.tev.konst[n],n*4);}
- for(let n=0;n<2;n++){ints('ambientColor',state.pixel.colors[n].ambient,n*4);ints('materialColor',state.pixel.colors[n].material,n*4);}
- for(let n=0;n<8;n++)if(state.context.lights[n]){const l=state.context.lights[n];ints('lightColor',l.color,n*4);floats('lightPosition',l.position,n*4);floats('lightDirection',l.direction,n*4);floats('lightAngular',l.angular,n*4);floats('lightDistance',l.distance,n*4);}
- for(const t of state.textures.textures)f[offsets.lodBias+t.id*4]=t.lod.bias;
- const fog=state.context.fog;if(fog){floats('fogAC',[fog.a,fog.c]);ints('fogBShift',[fog.b,fog.shift]);ints('fogColor',fog.color);}
- ints('alphaReference',[state.pixel.alphaTest.reference0,state.pixel.alphaTest.reference1]);i[offsets.currentMatrix]=state.model.current??0;
+ writeDrawUniformViews(f,i,0,state,camera);
+}
+function writeModelRows(f,at,packed,rows){
+ if(packed)f.set(packed,at);else for(let n=0;n<rows.length;n++)if(rows[n])f.set(rows[n],at+n*12);
+}
+// The pool owns these views, so packing hundreds of records needs no per-draw
+// views, closures, descriptor arrays or temporary scalar arrays. Offsets remain
+// derived from the reflected std140 layout; all padding is cleared by prepare.
+function writeDrawUniformViews(f,i,base,state,camera){
+ f.set(camera.projection,base+offsets.projection);
+ writeModelRows(f,base+offsets.positionRows,state.model.positionRows,state.model.positions);
+ writeModelRows(f,base+offsets.normalRows,state.model.normalRows,state.model.normals);
+ for(const m of state.textures.matrices)f.set(m.values,base+(m.id<64?offsets.textureRows+(m.id-30)*4:offsets.postRows+(m.id-64)*4));
+ for(let n=0;n<4;n++){i.set(state.tev.registers[n],base+offsets.tevRegisters+n*4);i.set(state.tev.konst[n],base+offsets.tevKonst+n*4);}
+ for(let n=0;n<2;n++){i.set(state.pixel.colors[n].ambient,base+offsets.ambientColor+n*4);i.set(state.pixel.colors[n].material,base+offsets.materialColor+n*4);}
+ for(let n=0;n<8;n++)if(state.context.lights[n]){const l=state.context.lights[n];i.set(l.color,base+offsets.lightColor+n*4);f.set(l.position,base+offsets.lightPosition+n*4);f.set(l.direction,base+offsets.lightDirection+n*4);f.set(l.angular,base+offsets.lightAngular+n*4);f.set(l.distance,base+offsets.lightDistance+n*4);}
+ for(const t of state.textures.textures)f[base+offsets.lodBias+t.id*4]=t.lod.bias;
+ const fog=state.context.fog;if(fog){f[base+offsets.fogAC]=fog.a;f[base+offsets.fogAC+1]=fog.c;i[base+offsets.fogBShift]=fog.b;i[base+offsets.fogBShift+1]=fog.shift;i.set(fog.color,base+offsets.fogColor);}
+ i[base+offsets.alphaReference]=state.pixel.alphaTest.reference0;i[base+offsets.alphaReference+1]=state.pixel.alphaTest.reference1;i[base+offsets.currentMatrix]=state.model.current??0;
 }
 export function createDrawUniformBuffer(gl,{maxBytes=32*1024**2}={}){
  const alignment=gl.getParameter(gl.UNIFORM_BUFFER_OFFSET_ALIGNMENT),limit=gl.getParameter(gl.MAX_UNIFORM_BLOCK_SIZE);
  if(!Number.isInteger(alignment)||alignment<=0||alignment%4||limit<DRAW_BLOCK_BYTES||gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS)<1||gl.getParameter(gl.MAX_VERTEX_UNIFORM_BLOCKS)<1||gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_BLOCKS)<1)return null;
  const stride=round(DRAW_BLOCK_BYTES,alignment);let buffer=null,slab=new ArrayBuffer(0),capacity=0,used=0,epoch=0,closed=false,uploaded=false;
+ let floats=new Float32Array(slab),ints=new Int32Array(slab);
  const stats={version:1,alignment,stride,blockBytes:DRAW_BLOCK_BYTES,allocations:0,uploads:0,uploadedBytes:0,binds:0,frames:0,fallbacks:[]};
  const guard=()=>{if(closed||gl.isContextLost())throw Error('Uniform buffer context unavailable');};
  return {
   prepare(draws){guard();epoch++;uploaded=false;used=0;const count=draws.length,required=count*stride;if(!Number.isSafeInteger(required)||required>maxBytes)return false;
    if(required>capacity){let next=Math.max(stride*16,capacity);while(next<required)next*=2;next=Math.min(next,maxBytes);slab=new ArrayBuffer(next);buffer??=gl.createBuffer();if(!buffer)throw Error('Uniform buffer allocation');gl.bindBuffer(gl.UNIFORM_BUFFER,buffer);gl.bufferData(gl.UNIFORM_BUFFER,next,gl.DYNAMIC_DRAW);const error=gl.getError();if(error!==gl.NO_ERROR)throw Error('Uniform buffer allocation GL error '+error);capacity=next;stats.allocations++;}
+   if(floats.buffer!==slab){const words=Math.floor(slab.byteLength/4);floats=new Float32Array(slab,0,words);ints=new Int32Array(slab,0,words);}
    used=required;
    // Clear the complete used range once. This is byte-for-byte equivalent to
    // clearing each std140 record separately, but avoids hundreds of small
    // TypedArray fill calls on stages with many native material draws.
    new Uint8Array(slab,0,used).fill(0);
-   for(let n=0;n<count;n++)writeDrawUniforms(slab,n*stride,draws[n].state,draws[n].camera,{clear:false});stats.frames++;return true;
+   for(let n=0;n<count;n++)writeDrawUniformViews(floats,ints,n*stride/4,draws[n].state,draws[n].camera);stats.frames++;return true;
   },
   upload(){guard();if(used){gl.bindBuffer(gl.UNIFORM_BUFFER,buffer);gl.bufferSubData(gl.UNIFORM_BUFFER,0,new Uint8Array(slab,0,used));stats.uploads++;stats.uploadedBytes+=used;}uploaded=true;return epoch;},
   bind(index,version){guard();if(!uploaded||version!==epoch||!Number.isInteger(index)||index<0||(index+1)*stride>used)throw Error('Uniform buffer stale or invalid draw');gl.bindBufferRange(gl.UNIFORM_BUFFER,0,buffer,index*stride,DRAW_BLOCK_BYTES);stats.binds++;},
   fallback(reason){if(stats.fallbacks.length<16)stats.fallbacks.push(String(reason));},
   snapshot:()=>({...stats,capacity,used}),
-  dispose(){if(closed)return;closed=true;if(buffer)gl.deleteBuffer(buffer);buffer=null;slab=new ArrayBuffer(0);capacity=used=0;}
+  dispose(){if(closed)return;closed=true;if(buffer)gl.deleteBuffer(buffer);buffer=null;slab=new ArrayBuffer(0);floats=new Float32Array(slab);ints=new Int32Array(slab);capacity=used=0;}
  };
 }

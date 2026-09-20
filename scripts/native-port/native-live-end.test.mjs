@@ -1,5 +1,27 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {startNativeLive} from '../../engines/browser-native/native-live.mjs';
+test('live rollback retries a stalled input on the next due display tick',()=>{
+ const saved=new Map();for(const key of ['requestAnimationFrame','cancelAnimationFrame','addEventListener','removeEventListener','document'])saved.set(key,globalThis[key]);
+ let callback,available=false,attempts=0,draws=0;
+ Object.assign(globalThis,{requestAnimationFrame:fn=>(callback=fn,1),cancelAnimationFrame:()=>{callback=null;},addEventListener(){},removeEventListener(){},document:{hidden:false,addEventListener(){},removeEventListener(){}}});
+ try{
+  const module={_portFighterConstructRead:()=>0,_portControllerSample(){},_Player_80031848(){}},rollback={seat:0,reconcile(){},advance(){attempts++;return available;},dispose(){}};
+  const live=startNativeLive(module,{draw(){draws++;return {};}},[1],{rollback,browserInput:{samples:()=>[[0,0,0],[0,0,0]]},onError:e=>{throw e;}});
+  const start=performance.now()+1;callback(start);callback(start+1000/60);assert.equal(attempts,1);assert.equal(draws,0);
+  available=true;callback(start+1000/30);assert.equal(attempts,2);assert.equal(draws,1);assert.equal(live.snapshot().frames,1);live.stop();
+ }finally{for(const [key,value]of saved)if(value===undefined)delete globalThis[key];else globalThis[key]=value;}
+});
+test('disabled progress reporting skips periodic snapshots but retains final metrics',()=>{
+ const saved=new Map();for(const key of ['requestAnimationFrame','cancelAnimationFrame','addEventListener','removeEventListener','document'])saved.set(key,globalThis[key]);
+ let callback,result,coverageReads=0;
+ Object.assign(globalThis,{requestAnimationFrame:fn=>(callback=fn,1),cancelAnimationFrame:()=>{callback=null;},addEventListener(){},removeEventListener(){},document:{hidden:false,addEventListener(){},removeEventListener(){}}});
+ try{
+  const module={_portFighterConstructRead:()=>0,_portControllerSample(){},_Player_80031848(){}};
+  startNativeLive(module,{draw:()=>({}),shaderCoverage(){coverageReads++;return {};}},[1],{frameLimit:60,onProgress:null,step(){},inputProvider:()=>[[0,0,0]],onComplete:r=>result=r,onError:e=>{throw e;}});
+  const start=performance.now()+1;callback(start);for(let frame=1;frame<=60;frame++)callback(start+frame*1000/60);
+  assert.equal(coverageReads,1);assert.equal(result.frames,60);assert.equal(result.draws,60);assert.equal(result.drawSubmissionCpu.samples,60);
+ }finally{for(const [key,value]of saved)if(value===undefined)delete globalThis[key];else globalThis[key]=value;}
+});
 test('native exit stops before another draw; frame limits never impersonate results',()=>{
  const saved=new Map();for(const key of ['requestAnimationFrame','cancelAnimationFrame','addEventListener','removeEventListener','document'])saved.set(key,globalThis[key]);
  let callback;Object.assign(globalThis,{requestAnimationFrame:fn=>(callback=fn,1),cancelAnimationFrame:()=>{callback=null;},addEventListener(){},removeEventListener(){},document:{hidden:false,addEventListener(){},removeEventListener(){}}});

@@ -4,6 +4,12 @@ import {createNativeFrameClock} from '../../engines/browser-native/native-live.m
 test('one second produces exactly 60 native steps at 60, 120 and 144 Hz',()=>{
   for(const refresh of [60,120,144]){const c=createNativeFrameClock(0);let frames=0;for(let i=1;i<=refresh;i++)frames+=c.take(i*1000/refresh);assert.equal(frames,60);assert.ok(c.debtMs<1e-6);}
 });
+test('transport reset resumes on the next due tick without skipping or catching up',()=>{
+ const c=createNativeFrameClock(0);assert.equal(c.take(1000/60),1);c.reset(1000/60);
+ assert.equal(c.take(25),0);assert.equal(c.take(1000/30),1);assert.equal(c.take(1000/30),0);
+ assert.ok(Math.abs(c.debtMs)<1e-6);assert.throws(()=>c.reset(NaN),/reset/);
+ c.reset();assert.equal(c.take(10000),0);
+});
 test('slow callbacks retain all simulation debt and cap work per callback',()=>{
   const c=createNativeFrameClock(0);assert.equal(c.take(1000),4);let frames=4;
   for(let i=0;i<14;i++)frames+=c.take(1000);assert.equal(frames,60);assert.ok(c.debtMs<1e-6);assert.equal(c.maxDebtMs,1000);

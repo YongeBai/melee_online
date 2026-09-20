@@ -10,22 +10,28 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  initial??=await post('/native-rooms',{diagnosticCpu:requestedDiagnostic});
  let state=initial,ws,closed=false,sequence=-1,key=null,phaseReady=false,nextFrame=0,reloading=false,localTapJump=1,lastSent=null,confirmedFrame=-1,rollbackSink,pendingEnding=null,reconnectTimer,reconnectAttempt=0;
  const frames=new Map(),sent=new Map(),rollbackEvents=[];
+ let rollbackPhase=false;
  const persist=(value,syncedReload=false)=>storage.setItem(storageKey,JSON.stringify({token:value.token??initial.token,epoch:value.epoch,syncedReload,diagnosticCpu:requestedDiagnostic}));persist(initial);
  function send(value){if(ws?.readyState!==WebSocket.OPEN)throw Error('Room connection unavailable');ws.send(JSON.stringify(value));}
  function restart(value,syncedReload=true){if(reloading)return;reloading=true;persist(value,syncedReload);reload();}
  const network={
   get code(){return state.code;},get seat(){return state.seat;},get state(){return state;},get active(){return state.hasGuest&&!state.cpu;},
   get connected(){return state.connected.every(Boolean);},get cpu(){return state.cpu;},get tapJump(){return localTapJump;},get phaseReady(){return phaseReady;},
-  snapshot(){return {code:state.code,seat:state.seat,epoch:state.epoch,phase:key,phaseReady,nextFrame,buffered:frames.size,lastSent,confirmedFrame,pendingEnding:pendingEnding&&{frame:pendingEnding.frame,sent:pendingEnding.sent},bufferedRollbackEvents:rollbackEvents.length,mode:network.active?'lockstep-3':'solo',transport:network.active?'authenticated-inputs-v3':null};},
+  snapshot(){return {code:state.code,seat:state.seat,epoch:state.epoch,phase:key,phaseReady,nextFrame,buffered:frames.size,bufferedSent:sent.size,lastSent,confirmedFrame,pendingEnding:pendingEnding&&{frame:pendingEnding.frame,sent:pendingEnding.sent},bufferedRollbackEvents:rollbackEvents.length,mode:network.active?(rollbackPhase?'rollback':'lockstep-3'):'solo',transport:network.active?'authenticated-inputs-v3':null};},
   async join(code){const result=await post('/native-rooms/join',{code});reloading=true;try{send({type:'leave'});}catch{}initial=result;persist(result,true);reloading=true;reload();},
   setTapJump(value){if(value!==0&&value!==1)throw Error('Invalid tap jump setting');localTapJump=value;},
   endMatch(value,frame=nextFrame-1){if(!Number.isSafeInteger(frame)||frame<0)throw Error('Invalid match ending frame');const ending={frame,value:structuredClone(value),sent:false};if(pendingEnding){if(JSON.stringify({...pendingEnding,sent:false})!==JSON.stringify(ending))throw Error('Conflicting match ending');return;}pendingEnding=ending;flushEnding();},chooseResult(action){send({type:'result-action',epoch:state.epoch,action});},
   cpuMode(enabled){send({type:'cpu',enabled});},ready(){if(!state.ready[state.seat])send({type:'ready'});},kick(){send({type:'kick'});},
   newRoom(){reloading=true;try{send({type:'leave'});}catch{}storage.removeItem(storageKey);closed=true;ws.close();reload();},
   leave(){reloading=true;try{send({type:'leave'});}finally{storage.removeItem(storageKey);closed=true;ws.close();reload();}},
-  begin(scene){if(!network.active)return;key=scene+':'+(++sequence);nextFrame=0;confirmedFrame=-1;pendingEnding=null;phaseReady=false;frames.clear();sent.clear();rollbackEvents.length=0;send({type:'phase',key,epoch:state.epoch});},
+  begin(scene){if(!network.active)return;rollbackPhase=rollbackSink!==undefined;key=scene+':'+(++sequence);nextFrame=0;confirmedFrame=-1;pendingEnding=null;phaseReady=false;frames.clear();sent.clear();rollbackEvents.length=0;send({type:'phase',key,epoch:state.epoch,rollback:rollbackPhase});},
   bindRollback(sink){if(sink!==null&&(typeof sink!=='object'||typeof sink.receive!=='function'||typeof sink.acknowledge!=='function'))throw Error('Invalid rollback sink');rollbackSink=sink;while(rollbackSink&&rollbackEvents.length)deliverRollback(rollbackEvents.shift());return ()=>{if(rollbackSink===sink)rollbackSink=undefined;};},
-  sendInput(frame,pad){if(!network.active||!phaseReady||!network.connected)return false;if(!Number.isSafeInteger(frame)||frame<0)throw Error('Invalid room input frame');transmit(frame,pad);return true;},
+  sendInput(frame,pad){if(!network.active||!phaseReady||!network.connected)return false;if(!Number.isSafeInteger(frame)||frame<0)throw Error('Invalid room input frame');
+   // A stalled local advance can retry after the relay has confirmed its
+   // immutable sample and released sent bookkeeping. Confirmation proves the
+   // relay already owns that input; never retransmit it outside the live window.
+   if(frame<=confirmedFrame)return true;
+   transmit(frame,pad);return true;},
   take(samples,module){
    if(!network.active){if(!state.cpu){samples=samples.map(s=>[...s]);samples[0][0]&=~0x1000;samples[1].fill(0);}return samples;}
    if(!phaseReady||!network.connected)return null;
@@ -49,16 +55,16 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  function open(initialConnect=false){return new Promise((resolve,reject)=>{
   const socket=new WebSocket(new URL('/native-room',location.href).href.replace(/^http/,'ws'));ws=socket;let connected=false;
   const timeout=setTimeout(()=>{socket.close();if(initialConnect&&!connected)reject(Error('Room connection timed out'));},8000);
-  socket.onopen=()=>socket.send(JSON.stringify({type:'hello',token:initial.token,resume:{epoch:state.epoch,key,confirmedFrame}}));
+  socket.onopen=()=>socket.send(JSON.stringify({type:'hello',token:initial.token,rollback:rollbackSink!==undefined,resume:{epoch:state.epoch,key,confirmedFrame}}));
   socket.onerror=()=>{if(initialConnect&&!connected){clearTimeout(timeout);reject(Error('Room connection failed'));}};
   socket.onmessage=event=>{if(reloading||socket!==ws)return;try{
    const m=JSON.parse(event.data);
    if(m.type==='state'){
     if(m.epoch!==initial.epoch){restart({...m,token:initial.token});return;}
     state=m;persist(m);flushEnding();onState(network);clearTimeout(timeout);connected=true;reconnectAttempt=0;resolve(network);
-   }else if(m.type==='frame'&&m.epoch===state.epoch&&m.key===key){frames.set(m.frame,m.inputs);}
+   }else if(m.type==='frame'&&m.epoch===state.epoch&&m.key===key){if(rollbackSink===undefined)frames.set(m.frame,m.inputs);}
    else if(m.type==='peer-input'&&m.epoch===state.epoch&&m.key===key&&m.seat===1-state.seat)queueRollback(m);
-   else if(m.type==='confirmed-frame'&&m.epoch===state.epoch&&m.key===key){if(!Number.isSafeInteger(m.frame)||m.frame!==confirmedFrame+1)throw Error('Non-contiguous room confirmation');confirmedFrame=m.frame;queueRollback(m);flushEnding();}
+   else if(m.type==='confirmed-frame'&&m.epoch===state.epoch&&m.key===key){if(!Number.isSafeInteger(m.frame)||m.frame!==confirmedFrame+1)throw Error('Non-contiguous room confirmation');confirmedFrame=m.frame;if(rollbackSink!==undefined)sent.delete(m.frame);queueRollback(m);flushEnding();}
    else if(m.type==='phase-ready'&&m.epoch===state.epoch&&m.key===key)phaseReady=true;
    else if(m.type==='resync-required')restart(state,false);
    else if(m.type==='removed'){state={...state,connected:[false,false]};storage.removeItem(storageKey);closed=true;ws.close();onError(Error('You were removed from the room. Reload to start a new room.'));}

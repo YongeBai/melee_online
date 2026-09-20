@@ -13,6 +13,12 @@ export function immediateTriangles(primitive,count) {
 // Compare the six captured GX blocks (including fog), including masks and diagnostic counters.
 // Only TEV register values transported per vertex may differ. Sizes
 // match the static assertions in tev/texture/pixel/model-state and render-context.
+function equalWords(a,b,start,end){
+ let i=start;
+ for(;i+3<end;i+=4)if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3])return false;
+ for(;i<end;i++)if(a[i]!==b[i])return false;
+ return true;
+}
 export function createImmediateStateMatcher(module,{cacheViews=true}={}) {
   const sizes=[548,724,80,244,158,5],saved=sizes.map(n=>new Uint32Array(n));
   let initialized=false,buffer=null,cachedAddresses=[],views=[];
@@ -23,9 +29,12 @@ export function createImmediateStateMatcher(module,{cacheViews=true}={}) {
       buffer=heap.buffer;cachedAddresses=addresses;
     }
     let same=initialized&&eligible;
-    if(same)outer:for(let block=0;block<views.length;block++)for(let i=0;i<sizes[block];i++){
-      if(vertexRegisters&&block===0&&i>=4&&i<20)continue;
-      if(views[block][i]!==saved[block][i]){same=false;break outer;}
+    if(same)for(let block=0;block<views.length;block++){
+      const a=views[block],b=saved[block];
+      // Split out the sole allowed exception instead of branching for every
+      // word. Both ranges and all other blocks still receive exact comparison.
+      const equal=vertexRegisters&&block===0?equalWords(a,b,0,4)&&equalWords(a,b,20,sizes[block]):equalWords(a,b,0,sizes[block]);
+      if(!equal){same=false;break;}
     }
     if(!same)for(let block=0;block<views.length;block++)saved[block].set(views[block]);
     initialized=true;return same;

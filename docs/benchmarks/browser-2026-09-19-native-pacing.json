@@ -1,0 +1,1553 @@
+{
+  "date": "2026-09-19",
+  "tests": {"total":666,"passed":656,"skipped":10,"failed":0},
+  "releaseLras": {"passed":true,"outcome":7,"confirmedFrame":136,"returnedToCharacterSelect":true},
+"releaseNativeInput": {
+  "passed": true,
+  "release": true,
+  "inputs": [
+    {
+      "samples": 20,
+      "eventToSample": {
+        "samples": 20,
+        "meanMs": 6.913749992847443,
+        "p50Ms": 6.495000004768372,
+        "p95Ms": 11.354999959468842,
+        "p99Ms": 11.354999959468842,
+        "maxMs": 11.870000004768372,
+        "over16_67": 0,
+        "over25": 0,
+        "over33_34": 0
+      },
+      "eventToDrawSubmission": {
+        "samples": 20,
+        "meanMs": 14.052999994158744,
+        "p50Ms": 14.849999964237213,
+        "p95Ms": 17.055000007152557,
+        "p99Ms": 17.055000007152557,
+        "maxMs": 20.389999985694885,
+        "over16_67": 4,
+        "over25": 0,
+        "over33_34": 0
+      },
+      "eventToNativeInputSubmission": {
+        "samples": 20,
+        "meanMs": 14.052999994158744,
+        "p50Ms": 14.849999964237213,
+        "p95Ms": 17.055000007152557,
+        "p99Ms": 17.055000007152557,
+        "maxMs": 20.389999985694885,
+        "over16_67": 4,
+        "over25": 0,
+        "over33_34": 0
+      },
+      "eventToMovementSubmission": {
+        "samples": 20,
+        "meanMs": 37.72649999260902,
+        "p50Ms": 44.27499997615814,
+        "p95Ms": 50.310000002384186,
+        "p99Ms": 50.310000002384186,
+        "maxMs": 54.144999980926514,
+        "over16_67": 15,
+        "over25": 15,
+        "over33_34": 14
+      }
+    },
+    {
+      "samples": 20,
+      "eventToSample": {
+        "samples": 20,
+        "meanMs": 7.670250001549721,
+        "p50Ms": 8.25,
+        "p95Ms": 11.645000040531158,
+        "p99Ms": 11.645000040531158,
+        "maxMs": 12.25,
+        "over16_67": 0,
+        "over25": 0,
+        "over33_34": 0
+      },
+      "eventToDrawSubmission": {
+        "samples": 20,
+        "meanMs": 14.656250005960464,
+        "p50Ms": 15.314999997615814,
+        "p95Ms": 18.47000002861023,
+        "p99Ms": 18.47000002861023,
+        "maxMs": 22.594999969005585,
+        "over16_67": 4,
+        "over25": 0,
+        "over33_34": 0
+      },
+      "eventToNativeInputSubmission": {
+        "samples": 20,
+        "meanMs": 14.656250005960464,
+        "p50Ms": 15.314999997615814,
+        "p95Ms": 18.47000002861023,
+        "p99Ms": 18.47000002861023,
+        "maxMs": 22.594999969005585,
+        "over16_67": 4,
+        "over25": 0,
+        "over33_34": 0
+      },
+      "eventToMovementSubmission": {
+        "samples": 17,
+        "meanMs": 52.06764706793953,
+        "p50Ms": 45.71000003814697,
+        "p95Ms": 49.5,
+        "p99Ms": 49.5,
+        "maxMs": 251.8200000524521,
+        "over16_67": 15,
+        "over25": 14,
+        "over33_34": 12
+      }
+    }
+  ],
+  "stalled": [
+    0,
+    0
+  ],
+  "fps": [
+    59.904980716463086,
+    59.92967252932018
+  ],
+  "confirmed": [
+    1799,
+    1799
+  ]
+},
+"releaseReconnect": {
+  "passed": true,
+  "requested": {
+    "pair": [
+      20,
+      2
+    ],
+    "stage": 31,
+    "holdASeat": null,
+    "clientCpuSets": null,
+    "relayDelays": null,
+    "clientDelays": null,
+    "disconnectSeat": 1,
+    "disconnectFrame": 600,
+    "releaseEntry": true
+  },
+  "recoveryMs": 274.06563599999936,
+  "capture": [
+    {
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.379650890612794,
+      "activeSimulationFps": 59.921404361688886,
+      "recoveryExcludedMs": 274.06563599999936,
+      "drawSubmissionCpu": {
+        "samples": 1800,
+        "meanMs": 4.2415250003669,
+        "p50Ms": 3.8050000071525574,
+        "p95Ms": 6.794999957084656,
+        "maxMs": 14.574999988079071
+      },
+      "observation": {
+        "enabled": true,
+        "mode": "direct-canvas-video-frame",
+        "sampleRegion": "full-frame-downsample",
+        "requested": 1800,
+        "captured": 1800,
+        "estimatedUnobservedRequests": 0,
+        "distinctSampledImages": 1800,
+        "repeatedSampledImages": 0,
+        "blackFrames": 0,
+        "wrongSize": 0,
+        "cadence": {
+          "samples": 1799,
+          "meanMs": 16.825016675931067,
+          "p95Ms": 18.69499999999971,
+          "maxMs": 267.0650000000023,
+          "fps": 59.435305132894406,
+          "gapsOver25Ms": 5,
+          "estimatedMissed60HzSlots": 19
+        },
+        "activeCadenceFps": 59.978383715827576,
+        "observerWorkerCpu": {
+          "samples": 1800,
+          "meanMs": 2.5307027790612646,
+          "p95Ms": 4.159999966621399,
+          "maxMs": 10.305000007152557
+        },
+        "error": null
+      }
+    },
+    {
+      "frames": 1800,
+      "draws": 1800,
+      "simulationFps": 59.24482595191336,
+      "activeSimulationFps": 59.78411087906787,
+      "recoveryExcludedMs": 274.06563599999936,
+      "drawSubmissionCpu": {
+        "samples": 1800,
+        "meanMs": 4.251680556370152,
+        "p50Ms": 3.865000009536743,
+        "p95Ms": 6.680000007152557,
+        "maxMs": 12.435000002384186
+      }
+    }
+  ],
+  "session": [
+    {
+      "frame": 1800,
+      "confirmed": 1799,
+      "remoteKnown": 1799,
+      "acknowledged": 1799,
+      "requiresAcknowledgement": true,
+      "predictionWindow": 3,
+      "receiveWindow": 12,
+      "pendingCorrection": null,
+      "forwardFrames": 1800,
+      "predictedFrames": 0,
+      "corrections": 0,
+      "replayedFrames": 0,
+      "maxReplay": 0,
+      "rejectedLateInputs": 0,
+      "peakSnapshotBytes": 36569088,
+      "retainedSnapshots": 1,
+      "retainedBytes": 33619968
+    },
+    {
+      "frame": 1800,
+      "confirmed": 1799,
+      "remoteKnown": 1799,
+      "acknowledged": 1799,
+      "requiresAcknowledgement": true,
+      "predictionWindow": 3,
+      "receiveWindow": 12,
+      "pendingCorrection": null,
+      "forwardFrames": 1800,
+      "predictedFrames": 1797,
+      "corrections": 157,
+      "replayedFrames": 535,
+      "maxReplay": 5,
+      "rejectedLateInputs": 0,
+      "peakSnapshotBytes": 36634624,
+      "retainedSnapshots": 1,
+      "retainedBytes": 33619968
+    }
+  ],
+  "finalGpuErrorCheck": [
+    true,
+    true
+  ]
+},
+  "environment": {
+    "browser": "Google Chrome 151.0.7922.137",
+    "gpu": "AMD Radeon 890M / ANGLE OpenGL 4.6",
+    "presentation": "960x720 native 4:3; two independent localhost browser processes"
+  },
+  "runs": {
+    "combat-control-clean": {
+      "passed": true,
+      "requested": {
+        "pair": [
+          20,
+          2
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": false
+      },
+      "clients": [
+        {
+          "timing": {
+            "gpuCheckEveryFrame": true,
+            "stalledAdvances": 0,
+            "costs": {
+              "reconcile": {
+                "samples": 1799,
+                "meanMs": 0.15586436894815986,
+                "p50Ms": 0.025000035762786865,
+                "p95Ms": 1.3299999833106995,
+                "p99Ms": 2.439999997615814,
+                "maxMs": 6.115000009536743,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1798,
+                "meanMs": 1.0474694112649352,
+                "p50Ms": 0.9800000190734863,
+                "p95Ms": 1.774999976158142,
+                "p99Ms": 2.340000033378601,
+                "maxMs": 4.165000021457672,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1798,
+                "meanMs": 6.842422136409131,
+                "p50Ms": 5.975000023841858,
+                "p95Ms": 11.319999992847443,
+                "p99Ms": 15.0450000166893,
+                "maxMs": 35.76500004529953,
+                "over16_67": 9,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "gpuCheck": {
+                "samples": 1799,
+                "meanMs": 1.1841300720635755,
+                "p50Ms": 1.1100000143051147,
+                "p95Ms": 2.025000035762787,
+                "p99Ms": 3.2800000309944153,
+                "maxMs": 9.160000026226044,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1797,
+                "meanMs": 16.68740122429052,
+                "p50Ms": 16.62000000476837,
+                "p95Ms": 19.19999998807907,
+                "p99Ms": 22.12999999523163,
+                "maxMs": 43.9200000166893,
+                "over16_67": 864,
+                "over25": 6,
+                "over33_34": 1
+              }
+            },
+            "input": {
+              "samples": 1,
+              "eventToSample": {
+                "samples": 1,
+                "meanMs": 1492.9050000309944,
+                "p50Ms": 1492.9050000309944,
+                "p95Ms": 1492.9050000309944,
+                "p99Ms": 1492.9050000309944,
+                "maxMs": 1492.9050000309944,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToDrawSubmission": {
+                "samples": 1,
+                "meanMs": 1501.199999988079,
+                "p50Ms": 1501.199999988079,
+                "p95Ms": 1501.199999988079,
+                "p99Ms": 1501.199999988079,
+                "maxMs": 1501.199999988079,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToMovementSubmission": {
+                "samples": 1,
+                "meanMs": 1501.199999988079,
+                "p50Ms": 1501.199999988079,
+                "p95Ms": 1501.199999988079,
+                "p99Ms": 1501.199999988079,
+                "maxMs": 1501.199999988079,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.869842961344936,
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 1800,
+            "captured": 1800,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 1800,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1799,
+              "meanMs": 16.68796275708727,
+              "p95Ms": 19.205000000001746,
+              "maxMs": 43.960000000002765,
+              "fps": 59.923431910543215,
+              "gapsOver25Ms": 6,
+              "estimatedMissed60HzSlots": 7
+            },
+            "activeCadenceFps": 59.92343191054321,
+            "observerWorkerCpu": {
+              "samples": 1800,
+              "meanMs": 1.7531999996966785,
+              "p95Ms": 3.924999952316284,
+              "maxMs": 9.900000035762787
+            },
+            "error": null
+          },
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1734,
+            "corrections": 132,
+            "replayedFrames": 261,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40304640,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "gpu": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "finalGpuErrorCheck": true,
+          "camera": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.57626724243164,
+              24.929399490356445,
+              86.1706314086914
+            ],
+            "interest": [
+              10.800518989562988,
+              11.553236961364746,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          },
+          "forms": [
+            "Pr",
+            "Lg"
+          ]
+        },
+        {
+          "timing": {
+            "gpuCheckEveryFrame": true,
+            "stalledAdvances": 1,
+            "costs": {
+              "reconcile": {
+                "samples": 1799,
+                "meanMs": 0.13944135665098384,
+                "p50Ms": 0.025000035762786865,
+                "p95Ms": 1.1100000143051147,
+                "p99Ms": 2.375,
+                "maxMs": 4.634999990463257,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1797,
+                "meanMs": 1.0795909853597183,
+                "p50Ms": 1.0099999904632568,
+                "p95Ms": 1.8300000429153442,
+                "p99Ms": 2.415000021457672,
+                "maxMs": 4.560000002384186,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1796,
+                "meanMs": 6.852152004340178,
+                "p50Ms": 6.064999997615814,
+                "p95Ms": 11.225000023841858,
+                "p99Ms": 14.544999957084656,
+                "maxMs": 37.00999999046326,
+                "over16_67": 6,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "gpuCheck": {
+                "samples": 1797,
+                "meanMs": 1.22023928772428,
+                "p50Ms": 1.1399999856948853,
+                "p95Ms": 2.090000033378601,
+                "p99Ms": 2.959999978542328,
+                "maxMs": 9.334999978542328,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1795,
+                "meanMs": 16.705261838436126,
+                "p50Ms": 16.634999990463257,
+                "p95Ms": 19.360000014305115,
+                "p99Ms": 21.224999964237213,
+                "maxMs": 49.22500002384186,
+                "over16_67": 867,
+                "over25": 6,
+                "over33_34": 2
+              }
+            },
+            "input": {
+              "samples": 1,
+              "eventToSample": {
+                "samples": 1,
+                "meanMs": 1491.8149999976158,
+                "p50Ms": 1491.8149999976158,
+                "p95Ms": 1491.8149999976158,
+                "p99Ms": 1491.8149999976158,
+                "maxMs": 1491.8149999976158,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToDrawSubmission": {
+                "samples": 1,
+                "meanMs": 1500.9050000309944,
+                "p50Ms": 1500.9050000309944,
+                "p95Ms": 1500.9050000309944,
+                "p99Ms": 1500.9050000309944,
+                "maxMs": 1500.9050000309944,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToMovementSubmission": {
+                "samples": 1,
+                "meanMs": 1500.9050000309944,
+                "p50Ms": 1500.9050000309944,
+                "p95Ms": 1500.9050000309944,
+                "p99Ms": 1500.9050000309944,
+                "maxMs": 1500.9050000309944,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.81157360596901,
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1408,
+            "corrections": 119,
+            "replayedFrames": 206,
+            "maxReplay": 3,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40108032,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "gpu": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "finalGpuErrorCheck": true,
+          "camera": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.57626724243164,
+              24.929399490356445,
+              86.1706314086914
+            ],
+            "interest": [
+              10.800518989562988,
+              11.553236961364746,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          },
+          "forms": [
+            "Pr",
+            "Lg"
+          ]
+        }
+      ]
+    },
+    "combat-optimized-clean": {
+      "passed": true,
+      "requested": {
+        "pair": [
+          20,
+          2
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": false
+      },
+      "clients": [
+        {
+          "timing": {
+            "gpuCheckEveryFrame": false,
+            "stalledAdvances": 0,
+            "costs": {
+              "reconcile": {
+                "samples": 1800,
+                "meanMs": 0.18119166572888692,
+                "p50Ms": 0.025000035762786865,
+                "p95Ms": 1.5849999785423279,
+                "p99Ms": 3.050000011920929,
+                "maxMs": 4.6700000166893005,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1797,
+                "meanMs": 0.9989872012260429,
+                "p50Ms": 0.9550000429153442,
+                "p95Ms": 1.5799999833106995,
+                "p99Ms": 1.98499995470047,
+                "maxMs": 3.715000033378601,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1797,
+                "meanMs": 5.532904841598698,
+                "p50Ms": 4.875,
+                "p95Ms": 8.985000014305115,
+                "p99Ms": 11.339999973773956,
+                "maxMs": 23.2049999833107,
+                "over16_67": 4,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "gpuCheck": {
+                "samples": 1,
+                "meanMs": 0.3050000071525574,
+                "p50Ms": 0.3050000071525574,
+                "p95Ms": 0.3050000071525574,
+                "p99Ms": 0.3050000071525574,
+                "maxMs": 0.3050000071525574,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1796,
+                "meanMs": 16.67465200446098,
+                "p50Ms": 16.615000009536743,
+                "p95Ms": 19.455000042915344,
+                "p99Ms": 21.25499999523163,
+                "maxMs": 35.98499995470047,
+                "over16_67": 849,
+                "over25": 5,
+                "over33_34": 2
+              }
+            },
+            "input": {
+              "samples": 1,
+              "eventToSample": {
+                "samples": 1,
+                "meanMs": 1456.7950000166893,
+                "p50Ms": 1456.7950000166893,
+                "p95Ms": 1456.7950000166893,
+                "p99Ms": 1456.7950000166893,
+                "maxMs": 1456.7950000166893,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToDrawSubmission": {
+                "samples": 1,
+                "meanMs": 1462.6500000357628,
+                "p50Ms": 1462.6500000357628,
+                "p95Ms": 1462.6500000357628,
+                "p99Ms": 1462.6500000357628,
+                "maxMs": 1462.6500000357628,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToMovementSubmission": {
+                "samples": 1,
+                "meanMs": 1462.6500000357628,
+                "p50Ms": 1462.6500000357628,
+                "p95Ms": 1462.6500000357628,
+                "p99Ms": 1462.6500000357628,
+                "maxMs": 1462.6500000357628,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.830281435067185,
+          "observation": {
+            "enabled": true,
+            "mode": "direct-canvas-video-frame",
+            "sampleRegion": "full-frame-downsample",
+            "requested": 1800,
+            "captured": 1800,
+            "estimatedUnobservedRequests": 0,
+            "distinctSampledImages": 1800,
+            "repeatedSampledImages": 0,
+            "blackFrames": 0,
+            "wrongSize": 0,
+            "cadence": {
+              "samples": 1799,
+              "meanMs": 16.674241245136187,
+              "p95Ms": 19.50499999999738,
+              "maxMs": 36.0099999999984,
+              "fps": 59.97274390471567,
+              "gapsOver25Ms": 5,
+              "estimatedMissed60HzSlots": 5
+            },
+            "activeCadenceFps": 59.97274390471568,
+            "observerWorkerCpu": {
+              "samples": 1800,
+              "meanMs": 2.7204333331187565,
+              "p95Ms": 4.490000009536743,
+              "maxMs": 13.480000019073486
+            },
+            "error": null
+          },
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1797,
+            "corrections": 134,
+            "replayedFrames": 369,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40370176,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "gpu": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "finalGpuErrorCheck": true,
+          "camera": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.57626724243164,
+              24.929399490356445,
+              86.1706314086914
+            ],
+            "interest": [
+              10.800518989562988,
+              11.553236961364746,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          },
+          "forms": [
+            "Pr",
+            "Lg"
+          ]
+        },
+        {
+          "timing": {
+            "gpuCheckEveryFrame": false,
+            "stalledAdvances": 0,
+            "costs": {
+              "reconcile": {
+                "samples": 1800,
+                "meanMs": 0.026494443714618683,
+                "p50Ms": 0.02499997615814209,
+                "p95Ms": 0.05500000715255737,
+                "p99Ms": 0.07999998331069946,
+                "maxMs": 0.15500003099441528,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1798,
+                "meanMs": 1.0291351492664838,
+                "p50Ms": 0.9700000286102295,
+                "p95Ms": 1.625,
+                "p99Ms": 2.025000035762787,
+                "maxMs": 3.5949999690055847,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1798,
+                "meanMs": 5.390325361748824,
+                "p50Ms": 4.664999961853027,
+                "p95Ms": 9.115000009536743,
+                "p99Ms": 12.009999990463257,
+                "maxMs": 22.97000002861023,
+                "over16_67": 4,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "gpuCheck": {
+                "samples": 1,
+                "meanMs": 1.9899999499320984,
+                "p50Ms": 1.9899999499320984,
+                "p95Ms": 1.9899999499320984,
+                "p99Ms": 1.9899999499320984,
+                "maxMs": 1.9899999499320984,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1797,
+                "meanMs": 16.67514468559505,
+                "p50Ms": 16.625,
+                "p95Ms": 19.24500000476837,
+                "p99Ms": 21.189999997615814,
+                "maxMs": 36.64999997615814,
+                "over16_67": 859,
+                "over25": 4,
+                "over33_34": 1
+              }
+            },
+            "input": {
+              "samples": 1,
+              "eventToSample": {
+                "samples": 1,
+                "meanMs": 1472.6299999952316,
+                "p50Ms": 1472.6299999952316,
+                "p95Ms": 1472.6299999952316,
+                "p99Ms": 1472.6299999952316,
+                "maxMs": 1472.6299999952316,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToDrawSubmission": {
+                "samples": 1,
+                "meanMs": 1478.1200000047684,
+                "p50Ms": 1478.1200000047684,
+                "p95Ms": 1478.1200000047684,
+                "p99Ms": 1478.1200000047684,
+                "maxMs": 1478.1200000047684,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "eventToMovementSubmission": {
+                "samples": 1,
+                "meanMs": 1478.1200000047684,
+                "p50Ms": 1478.1200000047684,
+                "p95Ms": 1478.1200000047684,
+                "p99Ms": 1478.1200000047684,
+                "maxMs": 1478.1200000047684,
+                "over16_67": 1,
+                "over25": 1,
+                "over33_34": 1
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.91354475487586,
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 4,
+            "corrections": 0,
+            "replayedFrames": 0,
+            "maxReplay": 0,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 39911424,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "gpu": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "finalGpuErrorCheck": true,
+          "camera": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              9.57626724243164,
+              24.929399490356445,
+              86.1706314086914
+            ],
+            "interest": [
+              10.800518989562988,
+              11.553236961364746,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          },
+          "forms": [
+            "Pr",
+            "Lg"
+          ]
+        }
+      ]
+    },
+    "latency-control-clean": {
+      "passed": true,
+      "requested": {
+        "pair": [
+          20,
+          2
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": false
+      },
+      "clients": [
+        {
+          "timing": {
+            "gpuCheckEveryFrame": true,
+            "stalledAdvances": 0,
+            "costs": {
+              "reconcile": {
+                "samples": 1800,
+                "meanMs": 0.02656388805972205,
+                "p50Ms": 0.02499997615814209,
+                "p95Ms": 0.050000011920928955,
+                "p99Ms": 0.06499999761581421,
+                "maxMs": 0.1549999713897705,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1798,
+                "meanMs": 0.9398887656355593,
+                "p50Ms": 0.9049999713897705,
+                "p95Ms": 1.4049999713897705,
+                "p99Ms": 1.7450000047683716,
+                "maxMs": 2.975000023841858,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1798,
+                "meanMs": 6.820689654688416,
+                "p50Ms": 6.364999949932098,
+                "p95Ms": 9.789999961853027,
+                "p99Ms": 12.210000038146973,
+                "maxMs": 26.150000035762787,
+                "over16_67": 3,
+                "over25": 1,
+                "over33_34": 0
+              },
+              "gpuCheck": {
+                "samples": 1799,
+                "meanMs": 1.234327404746882,
+                "p50Ms": 1.1649999618530273,
+                "p95Ms": 2.0049999952316284,
+                "p99Ms": 3.1200000047683716,
+                "maxMs": 8.254999995231628,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1797,
+                "meanMs": 16.674557595997303,
+                "p50Ms": 16.62000000476837,
+                "p95Ms": 19.024999976158142,
+                "p99Ms": 20.610000014305115,
+                "maxMs": 37.35000002384186,
+                "over16_67": 857,
+                "over25": 5,
+                "over33_34": 2
+              }
+            },
+            "input": {
+              "samples": 20,
+              "eventToSample": {
+                "samples": 20,
+                "meanMs": 8.23649999499321,
+                "p50Ms": 8.105000019073486,
+                "p95Ms": 10.144999980926514,
+                "p99Ms": 10.144999980926514,
+                "maxMs": 17.964999973773956,
+                "over16_67": 1,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToDrawSubmission": {
+                "samples": 20,
+                "meanMs": 16.31574999988079,
+                "p50Ms": 16.319999992847443,
+                "p95Ms": 19.244999945163727,
+                "p99Ms": 19.244999945163727,
+                "maxMs": 24.865000009536743,
+                "over16_67": 9,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToMovementSubmission": {
+                "samples": 20,
+                "meanMs": 41.572000005841254,
+                "p50Ms": 46.825000047683716,
+                "p95Ms": 51.34500002861023,
+                "p99Ms": 51.34500002861023,
+                "maxMs": 57.044999957084656,
+                "over16_67": 17,
+                "over25": 16,
+                "over33_34": 15
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.91806205007509,
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 817,
+            "corrections": 0,
+            "replayedFrames": 0,
+            "maxReplay": 0,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40173568,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "gpu": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "finalGpuErrorCheck": true,
+          "camera": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -24.926301956176758,
+              58.66938400268555,
+              167.5708770751953
+            ],
+            "interest": [
+              -32.765869140625,
+              29.674407958984375,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          },
+          "forms": [
+            "Pr",
+            "Lg"
+          ]
+        },
+        {
+          "timing": {
+            "gpuCheckEveryFrame": true,
+            "stalledAdvances": 0,
+            "costs": {
+              "reconcile": {
+                "samples": 1799,
+                "meanMs": 0.07607837674881499,
+                "p50Ms": 0.02499997615814209,
+                "p95Ms": 0.05500000715255737,
+                "p99Ms": 2.1950000524520874,
+                "maxMs": 3.8550000190734863,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1797,
+                "meanMs": 0.9234474120235603,
+                "p50Ms": 0.8999999761581421,
+                "p95Ms": 1.3550000190734863,
+                "p99Ms": 1.6899999976158142,
+                "maxMs": 2.7199999690055847,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1797,
+                "meanMs": 6.793046745347791,
+                "p50Ms": 6.319999992847443,
+                "p95Ms": 9.865000009536743,
+                "p99Ms": 11.8299999833107,
+                "maxMs": 33.82000005245209,
+                "over16_67": 3,
+                "over25": 1,
+                "over33_34": 1
+              },
+              "gpuCheck": {
+                "samples": 1798,
+                "meanMs": 1.2220189095670575,
+                "p50Ms": 1.1500000357627869,
+                "p95Ms": 1.9449999928474426,
+                "p99Ms": 3.1449999809265137,
+                "maxMs": 8.400000035762787,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1796,
+                "meanMs": 16.6840423162703,
+                "p50Ms": 16.62999999523163,
+                "p95Ms": 19.194999992847443,
+                "p99Ms": 20.735000014305115,
+                "maxMs": 44.8400000333786,
+                "over16_67": 864,
+                "over25": 5,
+                "over33_34": 1
+              }
+            },
+            "input": {
+              "samples": 20,
+              "eventToSample": {
+                "samples": 20,
+                "meanMs": 6.822749996185303,
+                "p50Ms": 8.025000035762787,
+                "p95Ms": 10.2950000166893,
+                "p99Ms": 10.2950000166893,
+                "maxMs": 10.620000004768372,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToDrawSubmission": {
+                "samples": 20,
+                "meanMs": 15.023250004649162,
+                "p50Ms": 15.76500004529953,
+                "p95Ms": 17.32499998807907,
+                "p99Ms": 17.32499998807907,
+                "maxMs": 19.310000002384186,
+                "over16_67": 4,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToMovementSubmission": {
+                "samples": 17,
+                "meanMs": 53.472058815114636,
+                "p50Ms": 46.27999997138977,
+                "p95Ms": 50.435000002384186,
+                "p99Ms": 50.435000002384186,
+                "maxMs": 284.52999997138977,
+                "over16_67": 14,
+                "over25": 14,
+                "over33_34": 13
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.789014532531446,
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1797,
+            "corrections": 44,
+            "replayedFrames": 131,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40239104,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "gpu": {
+            "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+            "vendor": "Google Inc. (AMD)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+          },
+          "finalGpuErrorCheck": true,
+          "camera": {
+            "resolution": [
+              960,
+              720
+            ],
+            "eye": [
+              -24.926301956176758,
+              58.66938400268555,
+              167.5708770751953
+            ],
+            "interest": [
+              -32.765869140625,
+              29.674407958984375,
+              0
+            ],
+            "fov": 30,
+            "aspect": 1.2173333168029785,
+            "gpuInfo": {
+              "renderer": "ANGLE (AMD, AMD Radeon 890M Graphics (radeonsi gfx1150 LLVM 20.1.2), OpenGL 4.6)",
+              "vendor": "Google Inc. (AMD)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+            }
+          },
+          "forms": [
+            "Pr",
+            "Lg"
+          ]
+        }
+      ]
+    },
+    "latency-optimized-clean": {
+      "passed": true,
+      "requested": {
+        "pair": [
+          20,
+          2
+        ],
+        "stage": 2,
+        "holdASeat": null,
+        "clientCpuSets": null,
+        "relayDelays": null,
+        "clientDelays": null,
+        "disconnectSeat": null,
+        "disconnectFrame": 600,
+        "releaseEntry": false
+      },
+      "clients": [
+        {
+          "timing": {
+            "gpuCheckEveryFrame": false,
+            "stalledAdvances": 0,
+            "costs": {
+              "reconcile": {
+                "samples": 1800,
+                "meanMs": 0.03495277831951777,
+                "p50Ms": 0.030000030994415283,
+                "p95Ms": 0.05500000715255737,
+                "p99Ms": 0.08000004291534424,
+                "maxMs": 0.4150000214576721,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1799,
+                "meanMs": 1.0484324622445798,
+                "p50Ms": 0.9950000047683716,
+                "p95Ms": 1.4850000143051147,
+                "p99Ms": 1.965000033378601,
+                "maxMs": 3.950000047683716,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1799,
+                "meanMs": 6.862137298440854,
+                "p50Ms": 6.639999985694885,
+                "p95Ms": 9.644999980926514,
+                "p99Ms": 11.25,
+                "maxMs": 42.42500001192093,
+                "over16_67": 5,
+                "over25": 2,
+                "over33_34": 1
+              },
+              "gpuCheck": {
+                "samples": 1,
+                "meanMs": 0.2799999713897705,
+                "p50Ms": 0.2799999713897705,
+                "p95Ms": 0.2799999713897705,
+                "p99Ms": 0.2799999713897705,
+                "maxMs": 0.2799999713897705,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1798,
+                "meanMs": 16.695617352629927,
+                "p50Ms": 16.634999990463257,
+                "p95Ms": 18.769999980926514,
+                "p99Ms": 20.600000023841858,
+                "maxMs": 44.5450000166893,
+                "over16_67": 873,
+                "over25": 6,
+                "over33_34": 2
+              }
+            },
+            "input": {
+              "samples": 20,
+              "eventToSample": {
+                "samples": 20,
+                "meanMs": 6.846999999880791,
+                "p50Ms": 7.4549999833106995,
+                "p95Ms": 10.120000004768372,
+                "p99Ms": 10.120000004768372,
+                "maxMs": 10.14000004529953,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToDrawSubmission": {
+                "samples": 20,
+                "meanMs": 14.72475000321865,
+                "p50Ms": 14.840000033378601,
+                "p95Ms": 17.219999969005585,
+                "p99Ms": 17.219999969005585,
+                "maxMs": 17.540000021457672,
+                "over16_67": 6,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToMovementSubmission": {
+                "samples": 20,
+                "meanMs": 40.28424999117851,
+                "p50Ms": 47.44500005245209,
+                "p95Ms": 49.72999995946884,
+                "p99Ms": 49.72999995946884,
+                "maxMs": 51.17500001192093,
+                "over16_67": 18,
+                "over25": 16,
+                "over33_34": 15
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.83580059056982,
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 30,
+            "corrections": 0,
+            "replayedFrames": 0,
+            "maxReplay": 0,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40108032,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "finalGpuErrorCheck": true
+        },
+        {
+          "timing": {
+            "gpuCheckEveryFrame": false,
+            "stalledAdvances": 0,
+            "costs": {
+              "reconcile": {
+                "samples": 1799,
+                "meanMs": 0.09947748698414266,
+                "p50Ms": 0.0350000262260437,
+                "p95Ms": 0.06999999284744263,
+                "p99Ms": 2.7549999952316284,
+                "maxMs": 4.485000014305115,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "advance": {
+                "samples": 1797,
+                "meanMs": 1.0357067348496676,
+                "p50Ms": 0.9850000143051147,
+                "p95Ms": 1.5,
+                "p99Ms": 1.9000000357627869,
+                "maxMs": 3.165000021457672,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "draw": {
+                "samples": 1797,
+                "meanMs": 6.869098497153523,
+                "p50Ms": 6.685000002384186,
+                "p95Ms": 9.655000030994415,
+                "p99Ms": 11.199999988079071,
+                "maxMs": 52.25,
+                "over16_67": 4,
+                "over25": 2,
+                "over33_34": 1
+              },
+              "gpuCheck": {
+                "samples": 1,
+                "meanMs": 0.4350000023841858,
+                "p50Ms": 0.4350000023841858,
+                "p95Ms": 0.4350000023841858,
+                "p99Ms": 0.4350000023841858,
+                "maxMs": 0.4350000023841858,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "frameIntervals": {
+                "samples": 1796,
+                "meanMs": 16.693736080204722,
+                "p50Ms": 16.630000054836273,
+                "p95Ms": 18.855000019073486,
+                "p99Ms": 20.810000002384186,
+                "maxMs": 57.44499999284744,
+                "over16_67": 873,
+                "over25": 6,
+                "over33_34": 2
+              }
+            },
+            "input": {
+              "samples": 20,
+              "eventToSample": {
+                "samples": 20,
+                "meanMs": 6.476499998569489,
+                "p50Ms": 7.319999992847443,
+                "p95Ms": 9.399999976158142,
+                "p99Ms": 9.399999976158142,
+                "maxMs": 9.800000011920929,
+                "over16_67": 0,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToDrawSubmission": {
+                "samples": 20,
+                "meanMs": 15.182249993085861,
+                "p50Ms": 15.575000047683716,
+                "p95Ms": 20.1599999666214,
+                "p99Ms": 20.1599999666214,
+                "maxMs": 21.539999961853027,
+                "over16_67": 6,
+                "over25": 0,
+                "over33_34": 0
+              },
+              "eventToMovementSubmission": {
+                "samples": 17,
+                "meanMs": 54.68264705293319,
+                "p50Ms": 48.514999985694885,
+                "p95Ms": 52.27499997615814,
+                "p99Ms": 52.27499997615814,
+                "maxMs": 282.085000038147,
+                "over16_67": 15,
+                "over25": 13,
+                "over33_34": 13
+              }
+            },
+            "scope": "Browser key event handler to accepted local simulation input and CPU draw submission; movement metric additionally requires native X displacement in the requested direction. Excludes physical device, GPU completion, compositor and scanout. Not input-to-photon."
+          },
+          "simulationFps": 59.61873816947726,
+          "session": {
+            "frame": 1800,
+            "confirmed": 1799,
+            "remoteKnown": 1799,
+            "acknowledged": 1799,
+            "requiresAcknowledgement": true,
+            "predictionWindow": 3,
+            "receiveWindow": 12,
+            "pendingCorrection": null,
+            "forwardFrames": 1800,
+            "predictedFrames": 1797,
+            "corrections": 44,
+            "replayedFrames": 137,
+            "maxReplay": 4,
+            "rejectedLateInputs": 0,
+            "peakSnapshotBytes": 40370176,
+            "retainedSnapshots": 1,
+            "retainedBytes": 36896768
+          },
+          "finalGpuErrorCheck": true
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "sameFinalFighterState": true,
+    "sameFinalCamera": true,
+    "meanDrawCpuReductionPercent": 20.2
+  },
+  "limitations": [
+    "Browser event and canvas timing, not physical input-to-photon or scanout.",
+    "20 keyboard presses per seat; input p95 did not consistently improve.",
+    "Control restores equivalent getError after replica teardown rather than the original in-draw call.",
+    "Native input X-motion detection is exploratory and can be affected by collision/momentum.",
+    "Profiler discovery failed one simulation gate; excluded from acceptance.",
+    "Earlier discovery screenshots ran during the measurement and contaminated maxima; clean comparisons moved screenshots after completion.",
+    "Pre-fix release refresh failures lost sessionStorage on cached isolated HTML; no gameplay metrics accepted from those runs."
+  ]
+}
