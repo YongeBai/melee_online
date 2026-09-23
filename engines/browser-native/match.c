@@ -154,12 +154,19 @@ void portTournamentBegin(void)
     fn_8016B784();started=1;
 }
 static void ready_complete(int status) { fn_8016B7F8(); }
+/* Supplied only by targets linked with the audio device boundary. */
+extern int portAudioEnabled(void) __attribute__((weak));
+extern void lbAudioAx_8002785C(void);
+extern void sfx_setupCrowdSFX(void);
+extern struct CrowdConfig* gCrowdConfig;
 void portTournamentIntroBegin(void)
 {
     if(!initialized||started||!hud_initialized||!Player_GetEntity(0)||!Player_GetEntity(1))abort();
     portStageSelectResident(gm_GetStartMeleeRules()->stkind);
     /* Match the original VS startup's native stage/alternate-track selector. */
     if(menu_start&&!menu_start->rules.x1_4)Stage_80225074(fn_8016E5C0(menu_start));
+    /* gmvs.c loads the fighter/stage sound banks and crowd voice during scene setup. */
+    if(portAudioEnabled&&portAudioEnabled()){lbAudioAx_8002785C();if(gCrowdConfig)sfx_setupCrowdSFX();}
     ifStatus_802F6EA4(3,-1,-1,0,(Event)fn_8016B7B4,(Event)ready_complete);
     started=1;
 }

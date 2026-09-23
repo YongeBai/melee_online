@@ -49,6 +49,7 @@ function summarize(combat,keys){
   rttP50Ms:net?.link?.map(l=>round(l?.stats?.rttP50Ms)),
   oneWayP50Ms:net?.oneWayInputTransit?.map(x=>round(x.p50Ms)),oneWayP95Ms:net?.oneWayInputTransit?.map(x=>round(x.p95Ms)),
   localInputMeanMs:input.map(x=>round(x.meanMs)),localInputP95Ms:input.map(x=>round(x.p95Ms)),
+  sfxStarts:r?.final?.map(v=>v.sfx?.starts??null),sfxMissing:r?.final?.map(v=>v.sfx?.missingSamples??null),
   latencyRunPassed:keys?keys.code===0:null,
   error:combat.code===0?null:(combat.failure?.error??combat.output).split('\n')[0].slice(0,500),
  };

@@ -25,6 +25,10 @@ export function gameLinkInputs(root,upstream,output,{implementedPlatform=[]}={})
     'src/melee/lb/lbfile.c':['lbFileGetSize','lbFile_8001668C','lbFile_800168A0'],
     'src/melee/lb/lbheap.c':['lbHeap_80015BD0','lbHeap_80015CA8'],
     'src/melee/lb/lbdvd.c':['lbDvd_8001819C'],
+    // audio-device.c completes synthesizer transfers synchronously.
+    'src/sysdolphin/baselib/devcom.c':['HSD_DevComRequest'],
+    // Compiled with the game link (not the audit archive) so it shares the target's flags.
+    'src/sysdolphin/baselib/synth.c':['HSD_SynthSFXWaitForLoadCompletion'],
   };
   const audit=path.join(output,'audit'),portable=path.join(output,'portable');
   const report=JSON.parse(fs.readFileSync(path.join(audit,'report.json'))),failed=new Set(report.failures.map(f=>f.file));
@@ -34,7 +38,9 @@ export function gameLinkInputs(root,upstream,output,{implementedPlatform=[]}={})
   execFileSync(path.join(root,'.browser-tools/emsdk/upstream/emscripten/emar'),['rcs',library,...objects]);
   const sources=Object.entries(replacements).map(([file,names])=>{
     const result=path.join(output,'runtime-'+path.basename(file));
-    const text=fs.readFileSync(path.join(portable,file),'utf8');
+    let text=fs.readFileSync(path.join(portable,file),'utf8');
+    // Development only: MELEE_DEBUG_SYNTH=1 adds a synthesizer table validator.
+    if(process.env.MELEE_DEBUG_SYNTH&&file.endsWith('synth.c'))text='#include <stdio.h>\n'+text+'\nint portSynthValidate(int where){for(int b=0;b<32;b++){struct foo* prev=0;struct foo* e=HSD_Synth_804C29E0[b];for(int k=0;e&&k<2000;k++){if(e->unk8<1||e->unk8>2||(e->unk4&31)!=b){fprintf(stderr,"SYNTHCORRUPT where=%d bucket=%d entry=%p prev=%p id=%d n=%d\\n",where,b,(void*)e,(void*)prev,e->unk4,e->unk8);return 0;}prev=e;e=e->next;}}return 1;}\n';
     // Preserve local quoted includes after moving the generated source file.
     fs.writeFileSync(result,renameBoundaryDefinitions(text,names).replace(/^#include "([^"]+)"/gm,(_,name)=>'#include '+JSON.stringify(path.join(portable,path.dirname(file),name))));
     return result;

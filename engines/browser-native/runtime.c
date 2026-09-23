@@ -95,10 +95,13 @@ int portRuntimeInit(void)
     return 1;
 }
 
+/* Supplied only by targets linked with the audio device boundary. */
+extern void portAudioFrame(void) __attribute__((weak));
 unsigned portRuntimeStep(void)
 {
     if (!arena) abort();
     HSD_GObj_RunProcs();
+    if (portAudioFrame) portAudioFrame();
     return ++frames;
 }
 

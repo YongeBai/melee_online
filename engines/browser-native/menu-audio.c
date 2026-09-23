@@ -14,11 +14,13 @@ void portMenuDiagnosticMute(void)
 {
     if(diagnostic_mute||!accept_diagnostic_mute())abort();diagnostic_mute=1;
 }
+extern int portAudioEnabled(void);
+/* With the deterministic audio device enabled, the original bank loaders run. */
 void lbAudioAx_80027168(void)
 {
-    if(!diagnostic_mute)port_unlinked_lbAudioAx_80027168();
+    if(!diagnostic_mute||portAudioEnabled())port_unlinked_lbAudioAx_80027168();
 }
 void lbAudioAx_80027648(void)
 {
-    if(!diagnostic_mute)port_unlinked_lbAudioAx_80027648();
+    if(!diagnostic_mute||portAudioEnabled())port_unlinked_lbAudioAx_80027648();
 }

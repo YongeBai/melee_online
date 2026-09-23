@@ -11,7 +11,7 @@ import {createDirtyRangeTracker} from './dirty-runtime.mjs';
 // Correctness-first product bridge. Simulation/checkpoints stay in the menu
 // runtime; every visible frame is reconstructed in an independent WASM heap.
 // This is the default two-player room path after clearing the product gate.
-export async function createNativeProductRollback({source,wasmBytes,dirtyManifest=null,audio,network,step,createPreview,presentationCache=null,validateEveryFrame=false}){
+export async function createNativeProductRollback({source,wasmBytes,dirtyManifest=null,audio,sfx=globalThis.nativeSfx??null,network,step,createPreview,presentationCache=null,validateEveryFrame=false}){
  if(typeof validateEveryFrame!=='boolean')throw Error('Invalid GPU validation mode');
  if(!source?.module||!(wasmBytes instanceof Uint8Array)||!audio||!network?.active||typeof step!=='function'||typeof createPreview!=='function')throw Error('Incomplete product rollback boundary');
  const replicaAudio=createRollbackAudio(),target=await createSnapshotRuntime(create,wasmBytes,{dirtyManifest,memoryInitialPages:source.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}),dirty=!!dirtyManifest;
@@ -24,8 +24,8 @@ export async function createNativeProductRollback({source,wasmBytes,dirtyManifes
  // closes over the shared GL context and remains valid after native detachment.
  const present=()=>replica.present(module=>createPreview(cache,module),renderer=>{lastDraw=renderer.draw();lastGpuCheck=renderer.validateGpu;if(validateEveryFrame)validateGpu();lastCoverage=renderer.shaderCoverage?.()??null;return lastDraw;});
  try{
-  const initial=store.capture(),began=performance.now();try{for(let frame=0;frame<warmup.frames;frame++){audio.beginFrame(frame);for(let seat=0;seat<2;seat++){source.module._portTapJumpSet(seat,1);source.module._portControllerSample(seat,0,0,0,0,0,0,0);}step();present();}}finally{store.restore(initial);store.release(initial);}warmup.cpuMs=performance.now()-began;
-  session=createRollbackSession({seat:network.seat,store,window:rollbackConfig.predictionWindow,receiveWindow:rollbackConfig.receiveWindow,acknowledgementWindow:rollbackConfig.acknowledgementWindow,checkpointInterval:rollbackConfig.checkpointInterval,requireAcknowledgement:true,step(inputs,{frame}){audio.beginFrame(frame);for(const [seat,input]of inputs.entries()){source.module._portTapJumpSet(seat,input.tap);source.module._portControllerSample(seat,...input.pad);}step();
+  const initial=store.capture(),began=performance.now();sfx?.mute(true);try{for(let frame=0;frame<warmup.frames;frame++){audio.beginFrame(frame);for(let seat=0;seat<2;seat++){source.module._portTapJumpSet(seat,1);source.module._portControllerSample(seat,0,0,0,0,0,0,0);}step();present();}}finally{store.restore(initial);store.release(initial);sfx?.mute(false);}warmup.cpuMs=performance.now()-began;
+  session=createRollbackSession({seat:network.seat,store,window:rollbackConfig.predictionWindow,receiveWindow:rollbackConfig.receiveWindow,acknowledgementWindow:rollbackConfig.acknowledgementWindow,checkpointInterval:rollbackConfig.checkpointInterval,requireAcknowledgement:true,step(inputs,{frame,replay}){audio.beginFrame(frame);sfx?.beginFrame(frame,replay);for(const [seat,input]of inputs.entries()){source.module._portTapJumpSet(seat,input.tap);source.module._portControllerSample(seat,...input.pad);}step();
    // Earliest frame whose state is terminal in the current timeline. A replay
    // can create or erase the ending, so it is recomputed in frame order.
    const ended=source.module._portTournamentRead(25,0)!==0;if(ended){if(terminal===null||frame<terminal)terminal=frame;}else if(terminal!==null&&frame<=terminal)terminal=null;},onConfirm:frame=>audio.confirm(frame)});

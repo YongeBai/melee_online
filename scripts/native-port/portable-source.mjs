@@ -140,6 +140,23 @@ export function adaptResultCameraReturn(text){
  return result;
 }
 
+// The synthesizer calls its master-clock callback with the frame counter; the
+// sound manager's clock takes no argument. WASM indirect calls need matching types.
+export function adaptAxDriverClock(text){
+ const from='    HSD_SynthSFXSetDriverMasterClockCallback(fn_8038CC1C);',marker='void AXDriver_8038E498(int voices, int priority, int sample_rate,';
+ if(text.split(from).length!==2||text.split(marker).length!==2)throw Error('Sound driver clock registration changed');
+ return text.replace(marker,'static void portMasterClock(int frame)\n{\n    (void) frame;\n    fn_8038CC1C();\n}\n\n'+marker).replace(from,'    HSD_SynthSFXSetDriverMasterClockCallback(portMasterClock);');
+}
+
+// Bank compaction stores the new fill offset through the retail layout, where
+// hsd_SynthSFXBank directly follows the 32 bank-list heads. Compiled statics
+// are not adjacent, so name the intended array instead of indexing past one.
+export function adaptSynthBankFill(text){
+ const from='    HSD_Synth_804C2AE0[bank_id + 0x80 / 4] = (void*) offset;';
+ if(text.split(from).length!==2)throw Error('Sound bank compaction store changed');
+ return text.replace(from,'    hsd_SynthSFXBank[bank_id] = (int) offset;');
+}
+
 export function preparePortableSource(source,output) {
   const destination=path.join(output,'portable');
   const files=execFileSync('rg',['--files','src','libs/dolphin/include','libs/dolphin/src','-g','*.c','-g','*.h'],
@@ -160,6 +177,8 @@ export function preparePortableSource(source,output) {
     if(file==='src/melee/it/kinds/itlinkarrow.c')text=adaptLinkArrowTable(text);
     if(file==='src/melee/ft/kinds/ftYoshi/types.h')text=adaptYoshiAttributes(text);
     if(file==='src/melee/pl/player.c')text=adaptPlayerDemoMapping(text);
+    if(file==='src/sysdolphin/baselib/axdriver.c')text=adaptAxDriverClock(text);
+    if(file==='src/sysdolphin/baselib/synth.c')text=adaptSynthBankFill(text);
     if(file==='libs/dolphin/include/dolphin/gx/GXVert.h') {
       const declarations=['u8','s8','u16','s16','u32','s32','u64','s64','f32','f64'].map(t=>'void portGXWrite_'+t+'('+t+' value);').join('\n');
       replace('#define GXFIFO_ADDR 0xCC008000',declarations+'\n#define GXFIFO_ADDR 0xCC008000');

@@ -20,6 +20,9 @@ if(fs.existsSync(manifest))for(const name of JSON.parse(fs.readFileSync(manifest
 for(const name of ['melee-ui.css','keyboard-model.js','gamecube-buttons.js','vendor/three.module.js','vendor/three.core.js'])files.add(name);
 if(fs.existsSync(path.join(output,'ui-fixtures.json')))for(const name of JSON.parse(fs.readFileSync(path.join(output,'ui-fixtures.json')))){if(!/^[A-Za-z0-9-]+\.png$/.test(name))throw Error('Invalid UI fixture');files.add('assets/'+name);}
 files.add('music-fixtures.json');
+// Original sound-effect tables and banks (prepare-sfx.mjs).
+files.add('native-sfx.mjs');files.add('native-sfx-worker.mjs');files.add('sfx-fixtures.json');files.add('sfx/headers.bin');
+if(fs.existsSync(path.join(output,'sfx-fixtures.json')))for(const f of Object.values(JSON.parse(fs.readFileSync(path.join(output,'sfx-fixtures.json'))).files)){if(!/^sfx\/[a-z0-9_]+\.(ssm|sem)$/.test(f.url))throw Error('Invalid sound fixture');files.add(f.url);}
 if(fs.existsSync(path.join(output,'music-fixtures.json')))for(const name of Object.keys(JSON.parse(fs.readFileSync(path.join(output,'music-fixtures.json'))))){if(!/^[a-z0-9_]+\.hps$/.test(name))throw Error('Invalid music fixture');files.add('audio/'+name);}
 const types={'.css':'text/css','.png':'image/png','.js':'text/javascript','.html':'text/html; charset=utf-8','.mjs':'text/javascript','.wasm':'application/wasm','.json':'application/json'};
 const isolationHeaders={'Cross-Origin-Opener-Policy':'same-origin','Cross-Origin-Embedder-Policy':'require-corp','Cross-Origin-Resource-Policy':'same-origin','X-Content-Type-Options':'nosniff'};
