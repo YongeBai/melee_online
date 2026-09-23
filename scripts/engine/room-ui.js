@@ -13,7 +13,7 @@ function glyph(c) {
     );
   return glyphs.get(c);
 }
-async function text(canvas, value) {
+export async function text(canvas, value) {
   if (canvas.dataset.text === value) return;
   canvas.setAttribute("aria-label", value);
   const version = (canvas.dataset.text = value);
@@ -27,6 +27,7 @@ async function text(canvas, value) {
     if (i) ctx.drawImage(i, x, 0);
     x += i ? i.width : 12;
   }
+  return images.every((i, index) => i || value[index] === " ");
 }
 export function createRoomUI(host) {
   const panel = document.createElement("section");
@@ -36,13 +37,13 @@ export function createRoomUI(host) {
   panel.innerHTML = `<canvas id="roomStatus" role="status"></canvas>
  <div class="room-code"><img src="/play/assets/room-code.png" alt="Your code"><button id="copyRoom" aria-label="Copy room code"><canvas id="ownCode"></canvas></button></div>
  <form id="joinRoom"><label for="joinCode"><img src="/play/assets/room-join.png" alt="Join room"></label><div class="code-entry"><input id="joinCode" aria-label="Room code" maxlength="6" autocomplete="off" spellcheck="false"><canvas id="typedCode" aria-hidden="true"></canvas></div><button id="joinSubmit" aria-label="Join room"><span aria-hidden="true">▶</span></button></form>
- <button id="readyRoom" class="room-action"><img src="/play/assets/room-ready.png" alt="Ready"></button>
- <button id="cpuRoom" class="room-action"><canvas></canvas></button>
+ <button id="readyRoom" class="room-action"><canvas></canvas></button>
  <button id="kickRoom" class="room-action"><img src="/play/assets/room-kick.png" alt="Kick player"></button>
  <button id="leaveRoom" class="room-action"><img src="/play/assets/room-leave.png" alt="Leave room"></button>`;
   document.getElementById("gameViewport").append(panel);
   const $ = (id) => document.getElementById(id);
   const peerKeyboard = $("keyboardButton").cloneNode(true);
+  const keyboardArtwork = peerKeyboard.innerHTML;
   peerKeyboard.id = "peerKeyboard";
   peerKeyboard.hidden = true;
   peerKeyboard.setAttribute("aria-label", "Other player keyboard");
@@ -64,6 +65,11 @@ export function createRoomUI(host) {
     $("controls").setAttribute("aria-label", `Player ${r.seat + 1} keyboard controls`);
     peerKeyboard.hidden = !["selecting", "disconnected", "error"].includes(r.phase);
     peerKeyboard.classList.toggle("cpu", r.cpu);
+    if (peerKeyboard.dataset.cpu !== String(r.cpu)) {
+      peerKeyboard.dataset.cpu = String(r.cpu);
+      peerKeyboard.innerHTML = r.cpu ? '<span aria-hidden="true">CPU</span>' : keyboardArtwork;
+      peerKeyboard.setAttribute("aria-label", r.cpu ? "CPU level 9" : "Other player keyboard");
+    }
     $("keyboardButton")?.setAttribute("aria-label", `Player ${r.seat + 1} keyboard controls`);
     panel.hidden =
       !["selecting", "disconnected", "error"].includes(r.phase) &&
@@ -72,18 +78,16 @@ export function createRoomUI(host) {
     if (r.code !== $("ownCode").dataset.text) text($("ownCode"), r.code);
     $("copyRoom").setAttribute("aria-label", `Copy room code ${r.code}`);
     const connected = r.connected.every(Boolean);
-    $("joinRoom").hidden = connected || r.cpu;
+    $("joinRoom").hidden = connected;
     $("leaveRoom").hidden = !connected && r.seat === 0 && r.phase !== "disconnected";
     $("readyRoom").hidden = !connected && !r.cpu;
-    $("cpuRoom").hidden = r.seat !== 0 || r.hasGuest || r.phase !== "selecting";
-    $("cpuRoom").setAttribute("aria-label", r.cpu ? "Remove CPU" : "Add level 9 CPU");
-    text($("cpuRoom").querySelector("canvas"), r.cpu ? "Remove CPU" : "Play CPU Lv 9");
     $("kickRoom").hidden = r.seat !== 0 || !r.hasGuest;
     matchKick.hidden = r.seat !== 0 || !r.hasGuest || !["match", "stage"].includes(r.phase);
     for (const b of panel.querySelectorAll("button")) b.disabled = busy || r.phase === "loading";
     $("readyRoom").disabled = busy || r.phase !== "selecting";
     $("readyRoom").classList.toggle("selected", r.ready[r.seat]);
-    $("readyRoom").setAttribute("aria-label", r.ready[r.seat] ? "Cancel ready" : "Ready");
+    $("readyRoom").setAttribute("aria-label", r.ready[r.seat] ? "Cancel start" : "Start");
+    text($("readyRoom").querySelector("canvas"), r.ready[r.seat] ? "Cancel" : "Start");
     if (!error)
       text(
         $("roomStatus"),
@@ -95,8 +99,8 @@ export function createRoomUI(host) {
               : r.ready.every(Boolean)
                 ? "Starting"
                 : r.ready[r.seat]
-                  ? "Waiting for ready"
-                  : "Player connected"),
+                  ? "Waiting for other player"
+                  : "Press Start"),
       );
   });
   async function action(fn) {
@@ -135,7 +139,6 @@ export function createRoomUI(host) {
   };
   $("readyRoom").onclick = () => action(() => host.request("meleeControl", { action: "start" }));
   $("leaveRoom").onclick = () => action(() => host.request("roomLeave"));
-  $("cpuRoom").onclick = () => action(() => host.request("roomCpu", { enabled: !host.room.cpu }));
   $("kickRoom").onclick = matchKick.onclick = () => action(() => host.request("roomKick"));
   if (new URLSearchParams(location.search).has("qa")) {
     const probe = document.createElement("aside");

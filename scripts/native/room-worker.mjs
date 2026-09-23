@@ -88,7 +88,7 @@ export class RoomWorker extends EventEmitter {
   rollback(action, options = {}) {
     return this.request("rollback", { action, ...options });
   }
-  async css() {
+  async css({ cpu = false } = {}) {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await this.request("start");
     let prepared = false,
@@ -109,11 +109,11 @@ export class RoomWorker extends EventEmitter {
       } else cssAt = 0;
       lastFrame = s.sceneFrame;
       if (cssAt && Date.now() - cssAt > 2000 && s.sceneFrame - cssFirstFrame >= 120 && s.cssReady) {
-        await this.request("meleeControl", { action: "lockCss", online: true });
+        await this.request("meleeControl", { action: "lockCss", online: true, cpu });
         return s;
       }
       if ([0, 24].includes(s.major) && s.sceneFrame > 10 && s.mainPointer !== "0" && !prepared) {
-        await this.request("meleeControl", { action: "prepare", online: true });
+        await this.request("meleeControl", { action: "prepare", online: true, cpu });
         prepared = true;
       }
       if (s.major === 1 && s.sceneKind === 1 && !menuAt) menuAt = Date.now();
@@ -124,7 +124,7 @@ export class RoomWorker extends EventEmitter {
         Date.now() - menuAt > 1500 &&
         Date.now() - entered > 4000
       ) {
-        await this.request("meleeControl", { action: "enterCss", online: true });
+        await this.request("meleeControl", { action: "enterCss", online: true, cpu });
         entered = Date.now();
       } else if (s.major !== 1 && s.major !== 2 && Date.now() - lastPulse > 1200) {
         lastPulse = Date.now();

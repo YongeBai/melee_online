@@ -27,6 +27,14 @@ const $ = (id) => document.getElementById(id);
 const status = $("status"),
   loading = $("loading"),
   keys = new Set();
+if (nativeEngine) {
+  void import("./room-ui.js").then(async ({ text }) => {
+    if (await text($("loadingLabel"), "Loading")) {
+      $("loadingLabel").hidden = false;
+      $("loadingFallback").hidden = true;
+    }
+  });
+}
 let paused = false,
   ready = false,
   tickBusy = false,
@@ -47,7 +55,7 @@ const actions = [];
 let testForms = [false, false];
 let nativeSceneKey = "",
   nativeSceneSince = 0;
-const audio = new AudioController({ outputEnabled: nativeEngine });
+const audio = new AudioController({ outputEnabled: false });
 // Start quietly, before the first user gesture enables the audio context.
 let volume = 0.25;
 try {
@@ -83,6 +91,9 @@ const host = new Host({
     if (nativeEngine && host.mode === "error") {
       status.textContent = message;
       loading.hidden = false;
+      ready = false;
+      $("begin").textContent = "Retry";
+      $("begin").hidden = false;
     }
   },
   onFrame: (frame) => {
@@ -109,6 +120,7 @@ if(host.online){
     ready = false;
     loading.hidden = false;
     status.textContent = 'The room owner removed you. Start a new room to play again.';
+    $('begin').textContent = 'Create new room';
     $('begin').hidden = false;
     $('begin').disabled = false;
     $('roomPanel').hidden = true;
@@ -117,6 +129,16 @@ if(host.online){
 }
 audio.setSource((frames) => host.mixAudio(frames));
 audio.setTransportBridge((config) => host.configureAudioWorklet(config));
+// Browser autoplay rules govern sound, never room creation or game startup.
+let unlockingAudio = false;
+async function unlockAudio(event) {
+  if (!event.isTrusted || unlockingAudio || audio.context?.state === "running") return;
+  unlockingAudio = true;
+  try { await audio.setMuted(false); } catch { /* Retry on the next interaction. */ }
+  finally { unlockingAudio = false; }
+}
+window.addEventListener("pointerdown", unlockAudio);
+window.addEventListener("keydown", unlockAudio);
 const neutral = () => ({
   mask: 0,
   stickX: 128,
@@ -200,8 +222,7 @@ function pollGamepad() {
     gamepadState.analogB = pad.buttons[2]?.pressed ? 255 : 0;
     const start = Boolean(pad.buttons[9]?.pressed);
     if (start && !padStartHeld && ready) {
-      if (gameState?.minor === 0 && !paused) void control("start").then(() => pulse(16));
-      else if (!paused) pulse(16);
+      void startButton();
     }
     padStartHeld = start;
   } else padStartHeld = false;
@@ -470,7 +491,9 @@ async function tick() {
     }
     if (state.major === 2) {
       bootStep = 2;
-      if (!ready && (nativeEngine || characterSelectReady(state))) {
+      const roomReady = host.online && host.room?.phase !== "loading" &&
+        host.room?.phase !== "error" && host.room && host.metrics.presented > bootPresented;
+      if (!ready && (host.online ? roomReady : characterSelectReady(state))) {
         ready = true;
         audio.setOutputEnabled(true);
         loading.hidden = true;
@@ -510,33 +533,32 @@ async function tick() {
   }
 }
 const begin = $("begin");
-const discPicker = document.createElement("input");
-discPicker.type = "file";
-discPicker.accept = ".iso,.gcm";
-discPicker.hidden = true;
-discPicker.setAttribute("aria-label", "Melee USA 1.02 disc");
-document.body.append(discPicker);
 let browserDisc;
 let capabilities;
-discPicker.onchange = () => {
-  browserDisc = discPicker.files?.[0];
-  if (browserDisc) begin.click();
-};
+let booting = false, tickTimer, bootPresented = 0;
 begin.onclick = async () => {
-  if (!nativeEngine && !browserDisc) {
-    discPicker.click();
-    return;
-  }
+  if (booting) return;
+  booting = true;
+  ready = false;
+  bootStep = 0;
+  bootPresented = host.metrics?.presented || 0;
+  clearInterval(tickTimer);
+  audio.setOutputEnabled(false);
+  loading.hidden = false;
   begin.hidden = true;
   try {
-    await audio.setMuted(false);
-    status.textContent = "Opening your local Melee disc…";
+    status.textContent = nativeEngine ? "Connecting to your room…" : "Loading Melee…";
     if (nativeEngine) {
       await host.mountFile();
     } else {
       const { browserCapabilities, requireBrowserBackend } = await import("./browser-capabilities.js");
       capabilities = await browserCapabilities();
       requireBrowserBackend(capabilities, host.videoBackend, host.oglProxyMode);
+      if (!browserDisc) {
+        const { loadHostedGame } = await import("./browser-hosted-game.js");
+        browserDisc = await loadHostedGame(document.documentElement.dataset.hostedGame || "/game/manifest.json",
+          (message) => { status.textContent = message; });
+      }
       const file = browserDisc;
       const header = new Uint8Array(await file.slice(0, 8).arrayBuffer());
       if (String.fromCharCode(...header.slice(0, 6)) !== "GALE01" || header[7] !== 2)
@@ -550,20 +572,20 @@ begin.onclick = async () => {
     if (host.mode !== "dolphin")
       throw new Error(browserStatus.at(-1) || "The Dolphin engine could not boot the disc.");
     host.start();
-    setInterval(tick, 150);
+    status.textContent = "Preparing character select…";
+    tickTimer = setInterval(tick, 150);
   } catch (error) {
     status.textContent = error.message;
     if (!nativeEngine) {
       browserDisc = undefined;
-      discPicker.value = "";
     }
     begin.hidden = false;
     begin.textContent = "Retry";
+  } finally {
+    booting = false;
   }
 };
-begin.hidden = false;
-if (!nativeEngine) begin.textContent = "Open Melee disc";
-status.textContent = "Your local copy · 4 stocks · 8 minutes · No items";
+begin.click();
 if (params.has("qa")) {
   const panel = document.createElement("div");
   panel.id = "qa";

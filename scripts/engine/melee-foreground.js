@@ -39,12 +39,22 @@ export function applyCssForeground(heap) {
   }
   emit(0x3860ffff);
   call(0x80361fc4); // Invalidate GX state caches before the native models.
-  for (const port of [0, 1])
+  for (const port of [0, 1]) {
+    let skip;
+    if (port === 1) {
+      // Only a human guest owns the second hand. Read native player kind on
+      // every draw so CPU transitions keep the original capture-ready gate.
+      emit(0x3d808048, 0x880c0845, 0x2c000000); // lis r12; lbz r0, P2.kind; cmpwi r0,0
+      skip = code.length;
+      emit(0); // bne past all three passes of the second hand
+    }
     for (const pass of [0, 1, 2]) {
       base();
       emit(0x806c0000 | (0x1b00 + port * 4), 0x38800000 | pass);
       call(0x80391070);
     }
+    if (skip !== undefined) code[skip] = 0x40820000 | ((code.length - skip) * 4);
+  }
   base();
   emit(0x38000001, 0x900c1b40); // Captured CSS is ready only after this pass actually rendered.
   emit(0x80010034, 0x7c0803a6, 0x38210030, 0x4e800020);

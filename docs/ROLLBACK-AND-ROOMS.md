@@ -1,12 +1,15 @@
 # Two-player rooms and server-side rollback
 
-The default `/play/` path now creates a private two-seat room. Share the six-character
+The default `/play/` path automatically creates a private two-seat room with
+Falco as P1 and a level 9 Fox CPU. The guest seat is unoccupied until a browser
+joins; joining at character select replaces the CPU automatically. Share the six-character
 code; the second browser enters it at character select. The room owner is always
 P1 (controller port 1), and the joining player is P2 (controller port 2), including
 after refreshes and rematches. Both players control native
-Melee character cursors. P1's card stays left, P2's original card moves right, and
+Melee character cursors. P1's card stays left, the opponent's original card moves right, and
 unused cards are hidden in the native render tree. The central room controls use
-Melee's extracted SIS lettering. Both players press Ready; P1 chooses the stage
+Melee's extracted SIS lettering. Both humans press Start in either order; the
+first sees “Waiting for other player.” P1 alone starts a CPU match. P1 chooses the stage
 on the original stage-select screen. Rules remain four stocks, eight minutes,
 no items. Each player has an independent tap-jump setting.
 
@@ -74,7 +77,8 @@ are sent even if rollback begins before the capture thread handles them.
 Each room has its own worker and user directory. Inputs are assigned to the
 socket's seat, never a client-supplied player number. Guests cannot issue native
 memory-edit commands, force opponents' selections, or quit their match. Start
-requires both occupied seats to be ready. Only P1 navigates stage select.
+requires both occupied human seats to be ready. Only P1 navigates stage select;
+P2 stage input is rejected before it can enter the shared controller state.
 
 Invite codes are public to participants; reconnect credentials are separate
 random 24-byte tokens kept in sessionStorage. Refresh resumes the same seat.

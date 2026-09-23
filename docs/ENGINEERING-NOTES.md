@@ -133,9 +133,15 @@ fields; validate actual fighter port, player ID and controller index after Start
   local pause/input state so the new-room Start action is accessible.
 - Reserve joins/mode changes across asynchronous calls. A rejected leave must
   retain membership; deleting it before checking a transition strands the seat.
-- CPU mode reloads CSS with P2 kind=1 and level=9. Human guest joins are excluded
-  until Remove CPU. CPU matches do not allocate rollback checkpoints. Both
+- New rooms default to Falco P1 against level 9 CPU Fox, with no guest seat.
+  A guest joining at CSS automatically replaces the CPU; reserve the join through
+  the native opponent reload and wait for initialized CSS before accepting Start.
+  Removing a guest restores CPU mode. CPU matches do not allocate rollback checkpoints. Both
   selected characters persist through opponent changes and results.
+- Human matches require Start from both seats. Reject guest stage input before
+  storing it in the shared pads, or a later owner update can forward that input.
+  The foreground renderer checks P2's native player kind on each draw and skips
+  its three hand passes for a CPU; the capture-ready marker must still be written.
 - A scene number can change before its objects and frame counter are ready.
   Require valid objects and scene progress, not just a fixed timer. The room
   monitor waits for CSS progression before enabling Ready and reapplying layout.

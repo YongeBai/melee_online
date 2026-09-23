@@ -28,12 +28,15 @@ class FakeWorker extends EventEmitter {
   state = { major: 2, minor: 0, sceneKind: 8, sceneFrame: 300, cssReady: true };
   calls = [];
   async open() {}
-  async css() {
+  async css(options) {
+    this.calls.push({css: options});
     return this.state;
   }
   close() {}
   async request(type, payload) {
     this.calls.push({ type, payload });
+    if (type === "meleeControl" && payload?.action === "start")
+      this.state = {major:2, minor:1, sceneKind:9, sceneFrame:1};
     return this.state;
   }
   async rollback(action, payload) {
@@ -92,10 +95,17 @@ test("room protocol isolates seats, rejects a third player and resumes private s
     await b.request("boot");
     await c.request("boot");
     assert.notEqual(a.room.code, b.room.code);
+    assert.equal(a.room.cpu, true);
+    assert.equal(a.room.hasGuest, false);
+    assert.deepEqual(a.room.connected, [true, false]);
+    assert.deepEqual(workers[0].calls.find(c => c.css).css, {cpu:true});
     await b.request("roomJoin", { code: a.room.code.toLowerCase() });
     assert.equal(a.room.seat, 0, "Room owner is P1");
     assert.equal(b.room.seat, 1, "Joining player is P2");
     assert.equal(b.room.code, a.room.code);
+    assert.equal(b.room.cpu, false, "Guest replaces CPU automatically");
+    assert.deepEqual(workers[0].calls.find(c => c.payload?.action === "opponent").payload,
+      {action:"opponent", cpu:false});
     await assert.rejects(c.request("roomJoin", { code: a.room.code }), /full/);
     await assert.rejects(c.request("roomJoin", { code: "ZZZZZZ" }), /not found/);
     b.send(JSON.stringify({ type: "input", payload: { ...neutralPad(), mask: 1, port: 0 } }));
@@ -105,9 +115,26 @@ test("room protocol isolates seats, rejects a third player and resumes private s
     assert.equal(padCall.payload.pads[1].mask, 1);
     await assert.rejects(b.request("meleeControl", { action: "quit" }), /not available/);
     await a.request("meleeControl", { action: "start" });
+    assert.deepEqual(a.room.ready, [true, false]);
     assert.equal(workers[0].calls.filter((x) => x.payload?.action === "start").length, 0);
+    await a.request("meleeControl", { action: "start" });
+    assert.deepEqual(a.room.ready, [false, false], "Start can cancel readiness");
     await b.request("meleeControl", { action: "start" });
+    assert.deepEqual(b.room.ready, [false, true]);
+    assert.equal(workers[0].calls.filter((x) => x.payload?.action === "start").length, 0,
+      "P2 starting first also waits for P1");
+    await a.request("meleeControl", { action: "start" });
     assert.equal(workers[0].calls.filter((x) => x.payload?.action === "start").length, 1);
+    const beforeGuestStageInput = workers[0].calls.filter(c => c.action === "pads").length;
+    b.send(JSON.stringify({type:"input",payload:{...neutralPad(),stickX:224,mask:1}}));
+    await b.request("roomPing");
+    assert.equal(workers[0].calls.filter(c => c.action === "pads").length, beforeGuestStageInput,
+      "P2 cannot move or confirm the stage cursor");
+    a.send(JSON.stringify({type:"input",payload:{...neutralPad(),stickY:224}}));
+    await a.request("roomPing");
+    const stagePads = workers[0].calls.filter(c => c.action === "pads").at(-1).payload.pads;
+    assert.equal(stagePads[0].stickY,224);
+    assert.deepEqual(stagePads[1],neutralPad(),"P1 updates cannot relay P2 stage input");
     const token = b.token;
     b.close();
     await once(b, "close");
@@ -117,7 +144,8 @@ test("room protocol isolates seats, rejects a third player and resumes private s
     await resumed.request("boot", { token });
     assert.equal(resumed.room.seat, 1);
     assert.equal(resumed.room.code, a.room.code);
-    await assert.rejects(c.request("meleeControl", { action: "start" }), /Waiting/);
+    await c.request("meleeControl", { action: "start" });
+    assert.equal(c.room.phase, "stage", "Solo owner can start against CPU");
     const ownerToken = a.token;
     const roomCode = a.room.code;
     a.close();
@@ -237,7 +265,9 @@ test("owner can use a CPU, reopen the room, and revoke a guest seat", async () =
       action: "opponent",
       cpu: true,
     });
+    service.rooms.get(code).starting = true;
     await assert.rejects(guest.request("roomJoin", { code }), /full/);
+    service.rooms.get(code).starting = false;
     worker.state.sceneFrame += 120;
     await new Promise((r) => setTimeout(r, 1700));
     await owner.request("meleeControl", { action: "start" });
@@ -267,7 +297,8 @@ test("owner can use a CPU, reopen the room, and revoke a guest seat", async () =
     await owner.request("roomKick");
     await closed;
     assert.equal(owner.room.hasGuest, false);
-    assert.equal(owner.room.phase, "selecting");
+    assert.equal(owner.room.phase, "loading");
+    assert.equal(owner.room.cpu, true, "CPU returns when guest is removed");
     const resumed = await connect(server.address().port);
     clients.push(resumed);
     await resumed.request("boot", { token });
@@ -279,7 +310,8 @@ test("owner can use a CPU, reopen the room, and revoke a guest seat", async () =
     await new Promise((r) => setTimeout(r, 30));
     await owner.request("roomKick");
     assert.equal(owner.room.hasGuest, false, "Disconnected guest can be removed");
-    assert.equal(owner.room.phase, "selecting");
+    assert.equal(owner.room.phase, "loading");
+    assert.equal(owner.room.cpu, true, "CPU returns when guest is removed");
   } finally {
     for (const c of clients) c.close();
     service.close();

@@ -50,3 +50,30 @@ test("foreground rejects unexpected callbacks before mutating the game", () => {
   assert.throws(() => applyCssForeground(heap), /Unexpected/);
   assert.deepEqual(heap, before);
 });
+
+test("native foreground draws the guest hand only for a human opponent", () => {
+  for (const kind of [0, 1, 3]) {
+    const { heap, u, objects } = fixture();
+    heap[0x480845] = kind;
+    applyCssForeground(heap);
+    let pc = u(objects[0] + 28) + 8, r12 = 0, r0 = 0, equal = false;
+    let handPasses = 0, ready = false, steps = 0;
+    while (u(pc) !== 0x4e800020) {
+      assert.ok(++steps < 200, "foreground must terminate");
+      const op = u(pc);
+      if ((op >>> 16) === 0x3d80) r12 = (op & 0xffff) * 0x10000;
+      else if ((op >>> 16) === 0x880c) r0 = heap[r12 + (op & 0xffff) - 0x80000000];
+      else if (op === 0x2c000000) equal = r0 === 0;
+      else if ((op >>> 16) === 0x4082 && !equal) { pc += op & 0xfffc; continue; }
+      else if (op === 0x900c1b40) ready = true;
+      else if (op >>> 26 === 18) {
+        let d = op & 0x3fffffc;
+        if (d & 0x2000000) d -= 0x4000000;
+        if (((pc + d) >>> 0) === 0x80391070) handPasses++;
+      }
+      pc += 4;
+    }
+    assert.equal(handPasses, kind === 0 ? 6 : 3);
+    assert.equal(ready, true, "CPU mode must still release the native frame gate");
+  }
+});

@@ -32,9 +32,12 @@
       </div>
     </main>
     <div id="loading">
-      <h1>SUPER SMASH BROS. Melee</h1>
-      <p id="status" role="status">Loading your local game disc…</p>
-      <button id="begin" hidden>Start Melee</button>
+      <section class="loading-card" aria-label="Starting Melee">
+        <div class="loading-label"><span id="loadingFallback">Loading</span><canvas id="loadingLabel" hidden aria-label="Loading"></canvas></div>
+        <div class="loading-track" aria-hidden="true"><span></span></div>
+        <p id="status" role="status">Preparing your room…</p>
+        <button id="begin" hidden>Retry</button>
+      </section>
     </div>
     <dialog id="controls" aria-label="Player 1 keyboard controls">
       <div class="controls-surface">

@@ -1,5 +1,39 @@
 # Validation — September 8–9, 2026
 
+## CPU defaults and compact loading revision — September 20, 2026
+
+Fresh native rooms now initialize Falco P1 and level 9 CPU Fox with an empty
+guest seat. A join replaces the CPU through the native opponent reload; Start
+is blocked during that transition. Both human seats must press Start, and guest
+stage input is rejected before updating shared pads. Removing a guest restores
+the CPU. The native foreground skips P2's hand passes for CPU player kind while
+still writing the capture-ready marker. Loading is a small beveled panel with
+native SIS “Loading” lettering and a gold activity line; boot status is available
+to assistive technology, with visible details only on errors.
+
+All 64 root tests passed, including guest replacement, readiness cancellation
+and either-player-first order, stage input isolation, and CPU hand rendering.
+Two Chromium clients on port 3188 visually verified the compact loader, Falco
+versus CPU Fox with no P2 hand, joining room 4257KN as human P2, the first Start
+remaining at character select with “Waiting for other player,” and the second
+Start reaching original stage select. P2's Back input left stage select intact.
+This is local native-room verification, not browser-WASM or WAN validation.
+
+## Automatic loading screen revision — September 19, 2026
+
+The default native `/play/` now boots a room automatically beneath an opaque
+Melee-styled loading screen. Browser audio unlock runs on a normal pointer or
+keyboard interaction independently of boot. The overlay waits for room readiness
+and a presented frame; the native capture gate remains unchanged.
+
+Verified in two in-app Chromium tabs on an isolated server at port 3188: both
+reached the customized two-card character select without input, and the second
+joined room MGDBT7 through the central room-code field as P2 with Ready available.
+Refreshing P2 automatically restored that seat and room without a start prompt.
+Visually reviewed the loading screen and native character select. All 63 root
+tests passed, as did JavaScript syntax and diff-whitespace checks. This check
+does not establish WAN performance or browser-WASM multiplayer support.
+
 Tested on the user's Linux machine in the Codex in-app Chromium browser at
 localhost:3000, with the supplied USA 1.02 disc.
 

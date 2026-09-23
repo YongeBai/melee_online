@@ -81,7 +81,7 @@ export function attachRooms(
       running: false,
       scene: "",
       emptySince: 0,
-      cpu: false,
+      cpu: true,
     };
     rooms.set(code, room);
     bind(room, 0, ws);
@@ -108,7 +108,7 @@ export function attachRooms(
     });
     room.boot = (async () => {
       await room.worker.open();
-      room.state = await room.worker.css();
+      room.state = await room.worker.css({ cpu: room.cpu });
       room.scene = `${room.state.major}:${room.state.minor}:${room.state.sceneKind}`;
       room.sceneAt = Date.now() - 2000;
       room.sceneFirstFrame = room.state.sceneFrame - 120;
@@ -145,6 +145,7 @@ export function attachRooms(
         room.rollback ||
         room.starting ||
         room.changing ||
+        room.joining ||
         ["disconnected", "error"].includes(room.phase)
       )
         return;
@@ -187,6 +188,15 @@ export function attachRooms(
       if (state.major === 2 && state.minor === 1) room.phase = "stage";
       if (state.major === 2 && state.minor === 0 && state.sceneKind === 8) {
         const settled = state.cssReady && sceneProgress >= 90 && Date.now() - room.sceneAt > 1500;
+        if (settled && room.restoreCpu) {
+          await room.worker.request("meleeControl", { action: "opponent", cpu: true });
+          room.restoreCpu = false;
+          room.phase = "loading";
+          room.sceneAt = Date.now();
+          room.sceneFirstFrame = state.sceneFrame;
+          publish(room);
+          return;
+        }
         room.phase = settled ? "selecting" : "loading";
         if (settled && Date.now() - (room.layoutAt || 0) > 1000) {
           await room.worker.request("meleeControl", { action: "roomLayout", online: true });
@@ -280,6 +290,8 @@ export function attachRooms(
     try {
       tokens.delete(guest.token);
       room.seats[1] = null;
+      room.cpu = true;
+      room.restoreCpu = true;
       room.pads = [neutralPad(), neutralPad()];
       room.seats[0].ready = false;
       if (guest.ws) {
@@ -301,7 +313,13 @@ export function attachRooms(
         await sleep(180);
         await room.worker.rollback("pads", { pads: room.pads });
         room.phase = "loading";
-      } else room.phase = "selecting";
+      } else {
+        await room.worker.request("meleeControl", { action: "opponent", cpu: true });
+        room.restoreCpu = false;
+        room.phase = "loading";
+        room.sceneAt = Date.now();
+        room.sceneFirstFrame = state.sceneFrame;
+      }
       await room.worker.request("start");
       publish(room);
     } finally {
@@ -331,6 +349,8 @@ export function attachRooms(
           if (!m) return;
           const { room, index } = m;
           if (room.seats[index]?.ws !== ws) return;
+          if (room.changing || room.joining || room.starting) return;
+          if (room.phase === "stage" && index !== 0) return;
           if (room.rollback && msg.epoch !== room.epoch) return;
           const pad = sanitizePad(msg.payload);
           room.pads[index] = pad;
@@ -392,7 +412,7 @@ export function attachRooms(
               } else {
                 if (
                   target.joining ||
-                  target.cpu ||
+                  target.starting ||
                   target.changing ||
                   target.seats[1] ||
                   !["selecting", "loading"].includes(target.phase)
@@ -405,6 +425,21 @@ export function attachRooms(
                   bind(target, 1, ws);
                   ws.needsKey = true;
                   await target.boot;
+                  if (target.cpu) {
+                    await target.worker.request("meleeControl", { action: "opponent", cpu: false });
+                    target.cpu = false;
+                    target.phase = "loading";
+                    publish(target);
+                    target.state = await target.worker.css({ cpu: false });
+                    target.scene = `${target.state.major}:${target.state.minor}:${target.state.sceneKind}`;
+                    target.sceneAt = Date.now() - 2000;
+                    target.sceneFirstFrame = target.state.sceneFrame - 120;
+                    target.lastSceneFrame = target.state.sceneFrame;
+                    target.lockedScene = target.sceneAt;
+                  }
+                  target.pads = [neutralPad(), neutralPad()];
+                  for (const seat of target.seats) if (seat) seat.ready = false;
+                  await target.worker.rollback("pads", { pads: target.pads });
                   await target.worker.request("start");
                   target.phase = "selecting";
                   publish(target);
@@ -454,6 +489,8 @@ export function attachRooms(
                 }
               } else if (msg.type === "meleeControl") {
                 if (p.action === "start") {
+                  if (room.starting || room.changing || room.joining)
+                    throw Error("Wait for the room transition");
                   if (room.phase !== "selecting") throw Error("Not at character select");
                   if (!room.cpu && !room.seats.every((s) => s?.ws?.readyState === 1))
                     throw Error("Waiting for the other player");
@@ -473,6 +510,7 @@ export function attachRooms(
                         online: true,
                         cpu: room.cpu,
                       });
+                      room.pads = [neutralPad(), neutralPad()];
                       await room.worker.rollback("pads", {
                         pads: [{ ...room.pads[0], mask: 16 }, room.pads[1]],
                       });

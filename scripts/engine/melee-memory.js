@@ -190,7 +190,7 @@ export function controlMelee(module, api, action, options = {}) {
         b(p + 4, 0); // Native automatic player ID uses the fighter slot.
         b(p + 7, i); // Controller/color index: owner P1, guest P2.
         if (i < 2) {
-          b(p, i === 0 ? 2 : 20);
+          b(p, i === 0 ? 20 : 2); // Falco P1, Fox opponent.
           b(p + 3, 0);
           b(p + 8, 9);
           b(p + 14, 4);
