@@ -124,6 +124,21 @@ page load. The probe now reloads once for that harness fault.
 Each match produced 170–420 sound-effect voice starts per peer, with no missing
 samples.
 
+Confirming run with the harness fixes (same build):
+
+| Emulated one-way | Stage / pair | Active sim FPS | Captured FPS | Local input p95 | One-way p95 | Est. remote latency p95 |
+|---|---|---|---|---|---|---|
+| 0 ms | Battlefield | 60.04 / 59.94 | 59.97 | 17.8 ms | 9.4 ms | 43.8 ms |
+| 20 ms | Final Destination, 20/2 | 59.91 / 59.91 | 59.97 | 17.4 ms | 39.0 ms | 73.1 ms |
+| 40 ms | Fountain, double Ice Climbers | 59.84 / 59.84 | 59.94 | 18.0 ms† | 64.9 ms† | 99.6 ms† |
+| 0 ms | Dream Land, 9/14 | 59.97 / 60.04 | 59.97 | 20.5 ms | 10.5 ms | 47.7 ms |
+| 20 ms | Yoshi's Story, 17/10 | 59.94 / 59.94 | 59.97 | 16.8 ms | 43.7 ms | 77.1 ms |
+| 40 ms | Stadium, 15/4 | 59.84 / 59.84 | 59.97 | 17.0 ms | 60.6 ms | 94.3 ms |
+
+† The keyboard-latency match for this row timed out while character-select
+steering overshot on the lagged lockstep menu. It was rerun on playmelee.com
+after the steering fix.
+
 ## Limits
 
 - Tests run two browsers on one machine; real WAN loss and reordering are not
