@@ -100,6 +100,30 @@ Sound effects on production (first iteration afterwards):
 Locally with sound, the 40 ms ± 10 ms rollback run passed at 59.52 / 59.64
 simulation FPS, with exact state convergence.
 
+### Catch-up build (sound effects, GameCube adapter, peer catch-up)
+
+Six-iteration production run, September 23, 2026. The "active" simulation rate
+excludes the pre-match barrier, which is time spent waiting for the slower
+browser to finish loading. That wait was 22–183 ms per seat and is reported
+separately. In matches, a peer whose opponent is demonstrably 2+ frames ahead,
+or whose clock owes a whole frame, takes one counted extra step. Every presented
+frame is still new.
+
+| Emulated one-way | Stage / pair | Active sim FPS | Captured FPS | Est. remote latency p95 |
+|---|---|---|---|---|
+| 0 ms | Battlefield | 60.04 / 59.97 | 59.97 | 43.9 ms |
+| 20 ms | Final Destination, 20/2 | 59.91 / 59.90 | 59.97 | 70.6 ms |
+| 40 ms | Fountain, double Ice Climbers | 59.81 / 59.81 | 59.94 | 98.7 ms |
+| 0 ms | Dream Land, 9/14 | 60.00 / 59.97 | 59.97 | 44.2 ms |
+| 20 ms | Yoshi's Story, 17/10 | 59.94 / 59.90 | 59.97 | 77.9 ms |
+| 40 ms | Stadium, 15/4 | harness failure* | | |
+
+\* The headless profile raised `ERR_CERT_VERIFIER_CHANGED` during the first
+page load. The probe now reloads once for that harness fault.
+
+Each match produced 170–420 sound-effect voice starts per peer, with no missing
+samples.
+
 ## Limits
 
 - Tests run two browsers on one machine; real WAN loss and reordering are not
@@ -114,3 +138,6 @@ simulation FPS, with exact state convergence.
   effects, because `ft_PlaySFX` consumes game RNG as on the console.
 - The GameCube adapter path is unit-tested against the protocol, but no
   physical adapter was available.
+- UCF 0.84, the tournament controller fixes used by Slippi online, is not
+  implemented. The reference is compiled PowerPC code (GPL-3.0) covering eight
+  patches; porting them is a separate decision and project.

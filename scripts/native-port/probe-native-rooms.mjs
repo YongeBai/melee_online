@@ -126,10 +126,13 @@ try{
  if(pair){
   for(const [seat,c] of [a,b].entries()){
    const target=await c.eval('nativeCharacterMenu.icons().find(i=>i.i==='+pair[seat]+')'),current=await c.eval('nativeCharacterMenu.read().players['+seat+']'),pickup=await c.eval('(()=>{const p=nativeCharacterMenu.read().players['+seat+'];return nativeCharacterMenu.icons().find(i=>i.character===p.character);})()');if(!target||target.state===0||!pickup)throw Error('Unavailable roster tile '+pair[seat]);if(target.character===current.character)continue;
-   async function steer(point){for(let i=0;i<220;i++){
-    const p=await c.eval('nativeCharacterMenu.read().players['+seat+']'),dx=point.x-p.x,dy=point.y-p.y;
-    if(Math.abs(dx)<(point.i===undefined?.7:.2)&&Math.abs(dy)<(point.i===undefined?.7:.2)||point.i!==undefined&&i>100&&p.icon===point.i){await c.keys([]);return;}
+   // Character select is lockstep: on a delayed link the hand keeps moving for
+   // a round trip after release. Near the target, pulse and let it settle.
+   async function steer(point){for(let i=0;i<400;i++){
+    const p=await c.eval('nativeCharacterMenu.read().players['+seat+']'),dx=point.x-p.x,dy=point.y-p.y,near=Math.max(Math.abs(dx),Math.abs(dy))<6;
+    if(Math.abs(dx)<(point.i===undefined?.7:.2)&&Math.abs(dy)<(point.i===undefined?.7:.2)||point.i!==undefined&&p.icon===point.i&&(i>100||near)){await c.keys([]);return;}
     const keys=[];if(Math.abs(dx)>=.7)keys.push(dx>0?'KeyD':'KeyA');if(Math.abs(dy)>=.7)keys.push(dy>0?'KeyW':'KeyS');if(Math.max(Math.abs(dx),Math.abs(dy))<3)keys.push('ShiftLeft');await c.keys(keys);await delay(16);
+    if(near&&p2pDelay){await c.keys([]);await delay(180);}
    }throw Error('Could not steer player '+seat+' to roster tile '+pair[seat]);}
    await steer({x:pickup.x-3.8,y:pickup.y+2.6});await c.press('KeyP');await c.wait('nativeCharacterMenu.read().players['+seat+'].token==='+String(seat+1));
    await steer(target);await c.press('KeyP');await c.wait('nativeCharacterMenu.read().players['+seat+'].token===0&&nativeCharacterMenu.read().players['+seat+'].character==='+target.character);
