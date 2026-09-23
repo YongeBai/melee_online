@@ -189,6 +189,7 @@ for (const name of ['stage-archive.mjs','stage-item-assets.mjs','common-item-ass
 for(const name of ['native-result-scene-preview.mjs','native-result-live.mjs','result-efb.mjs','result-scene.html'])
   fs.copyFileSync(path.join(root,'engines/browser-native',name),path.join(output,name));
 fs.copyFileSync(path.join(root,'engines/browser-native/native-rollback-driver.mjs'),path.join(output,'native-rollback-driver.mjs'));
+for(const name of ['room-core.mjs','native-p2p.mjs'])fs.copyFileSync(path.join(root,'engines/browser-native',name),path.join(output,name));
 fs.copyFileSync(path.join(root,'engines/browser-native/native-product-rollback.mjs'),path.join(output,'native-product-rollback.mjs'));
 const wasm = fs.readFileSync(path.join(output, moduleName+'.wasm'));
 const module = new WebAssembly.Module(wasm);

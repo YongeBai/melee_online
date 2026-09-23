@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": "public",
+  "cleanUrls": false,
+  "redirects": [
+    {"source": "/", "destination": "/play/?interactive=1", "permanent": false},
+    {"source": "/play", "destination": "/play/?interactive=1", "permanent": false},
+    {"source": "/play/", "missing": [{"type": "query", "key": "interactive"}], "destination": "/play/?interactive=1", "permanent": false}
+  ],
+  "rewrites": [
+    {"source": "/audio/:file", "destination": "/play/audio/:file"}
+  ],
+  "headers": [
+    {"source": "/(.*)", "headers": [
+      {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
+      {"key": "Cross-Origin-Embedder-Policy", "value": "require-corp"},
+      {"key": "Cross-Origin-Resource-Policy", "value": "same-origin"},
+      {"key": "X-Content-Type-Options", "value": "nosniff"},
+      {"key": "Cache-Control", "value": "public, max-age=0, must-revalidate"}
+    ]},
+    {"source": "/play/", "headers": [{"key": "Cache-Control", "value": "no-store"}]},
+    {"source": "/play/(.*)\\.html", "headers": [{"key": "Cache-Control", "value": "no-store"}]}
+  ]
+}
