@@ -139,6 +139,32 @@ Confirming run with the harness fixes (same build):
 steering overshot on the lagged lockstep menu. It was rerun on playmelee.com
 after the steering fix.
 
+## Load times on playmelee.com
+
+Measured with fresh browser profiles (`node scripts/netplay/measure-load.mjs
+https://playmelee.com 3` for the menu; the room probe's scene timestamps for
+matches), September 23, 2026:
+
+| Phase | Before | After |
+|---|---|---|
+| Page open to first menu frame | 27–33 s, sometimes over 60 s | 2.0–2.9 s |
+| Stage chosen to match start | 5.9–9.7 s, 5.2 MB over the network | 2.6–3.0 s, 0.44 MB |
+
+- The audited host modules are checked for integrity concurrently rather than
+  one fetch at a time; each file is still fetched exactly once.
+- The material-animation converter records packed byte ranges instead of a set
+  of every address, which makes it about 10× faster. It produces identical output
+  on all 156 public roots and every menu converter.
+- Character select prefetches the common match archives and the six legal
+  stages. Each chosen fighter's model and animation archives are prefetched as
+  soon as the fighter is picked.
+- Disc-extracted fixtures, sound banks and music are cached for a week. HTML
+  stays `no-store`, so releases still take effect immediately.
+
+In matches, a frame costs about 3.9 ms to draw, 1.2 ms to simulate, 0.55 ms to
+replicate and 0.12 ms to checkpoint. That leaves the 16.7 ms budget with room,
+so no in-match change was made.
+
 ## Limits
 
 - Tests run two browsers on one machine; real WAN loss and reordering are not
