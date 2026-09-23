@@ -26,6 +26,8 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  // and RTT probes. Relay messages keep their original JSON form.
  function link(pc,channel,side){
   const rpc=new Map();let nextRpc=0,ping=null;
+  // A reloading peer can close the channel while delayed work is still queued.
+  const post=value=>{if(channel.readyState==='open')channel.send(JSON.stringify(value));};
   const l={pc,channel,side,socket:null,peer:null,get open(){return channel.readyState==='open';},
    call(route,body){return new Promise((resolve,reject)=>{const id=++nextRpc;rpc.set(id,{resolve,reject});channel.send(JSON.stringify({rpc:id,route,body}));setTimeout(()=>{if(rpc.delete(id))reject(Error('Room host did not respond'));},10000);});},
    close(){clearInterval(ping);try{channel.close();}catch{}try{pc.close();}catch{}}};
@@ -33,15 +35,15 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
   // Measurement harnesses may emulate WAN delay by setting globalThis.__meleeP2PDelay
   // to {baseMs,jitterMs}; delivery stays ordered, like the data channel itself.
   let due=0,seq=0,timer=0;const queue=[];
-  const drain=()=>{timer=0;const now=performance.now();while(queue.length&&queue[0].at<=now+.5)queue.shift().run();if(queue.length)timer=setTimeout(drain,queue[0].at-now);};
+  const drain=()=>{timer=0;const now=performance.now();while(queue.length&&queue[0].at<=now+.5){try{queue.shift().run();}catch(e){log('delivery-error',{message:e.message});}}if(queue.length)timer=setTimeout(drain,queue[0].at-now);};
   const deliver=run=>{const d=globalThis.__meleeP2PDelay;if(!d&&!queue.length)return run();const now=performance.now(),jitter=d?.jitterMs?((seq++*7919)%1000)/1000*d.jitterMs:0;due=Math.max(due,now+(d?.baseMs??0)+jitter);queue.push({at:due,run});if(!timer)timer=setTimeout(drain,due-now);};
   const handle=({data})=>deliver(()=>receive(data));
   const receive=data=>{
    let m;try{m=JSON.parse(data);}catch{return;}
-   if(m.ping!==undefined){channel.send(JSON.stringify({pong:m.ping}));return;}
+   if(m.ping!==undefined){post({pong:m.ping});return;}
    if(m.pong!==undefined){rtt.push(performance.now()-m.pong);if(rtt.length>240)rtt.shift();return;}
    if(m.rpcReply!==undefined){log('rpc-reply',{status:m.status});const p=rpc.get(m.rpcReply);if(p){rpc.delete(m.rpcReply);if(m.status===200)p.resolve(m.body);else p.reject(Error(m.body?.error??'Room request failed'));}return;}
-   if(m.rpc!==undefined&&side==='host'){const result=core.request(m.route,m.body??{});log('rpc',{route:m.route,status:result.status});persist();channel.send(JSON.stringify({rpcReply:m.rpc,status:result.status,body:result.body}));return;}
+   if(m.rpc!==undefined&&side==='host'){const result=core.request(m.route,m.body??{});log('rpc',{route:m.route,status:result.status});persist();post({rpcReply:m.rpc,status:result.status,body:result.body});return;}
    if(side==='host'){if(!l.peer){l.peer=core.attach(l.hostPeer);}l.peer.message(data);return;}
    incoming(data);l.socket?.onmessage?.({data});
   };channel.addEventListener('message',handle);

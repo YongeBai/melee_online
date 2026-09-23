@@ -17,7 +17,7 @@ export async function createNativeProductRollback({source,wasmBytes,dirtyManifes
  const replicaAudio=createRollbackAudio(),target=await createSnapshotRuntime(create,wasmBytes,{dirtyManifest,memoryInitialPages:source.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}),dirty=!!dirtyManifest;
  const cache=presentationCache??createPresentationCache();if(dirty)cache.trackDirty(createDirtyRangeTracker(target));const replica=createRenderReplica(source,target,{sourceHost:audio,targetHost:replicaAudio,copyMode:dirty?'dirty':'full'});
  const store=createPagedWasmCheckpointStore({...source,host:audio,sparse:dirty,maxBytes:1024**3});let session,driver,closed=false,lastCoverage=null,lastDraw=null;const warmup={frames:30,cpuMs:0},rollbackConfig={predictionWindow:7,receiveWindow:16,acknowledgementWindow:30,checkpointInterval:3};
- let lastGpuCheck=null,gpuChecks=0;
+ let lastGpuCheck=null,gpuChecks=0,terminal=null;
  const validateGpu=()=>{if(!lastGpuCheck)throw Error('No GPU presentation to validate');const result=lastGpuCheck();gpuChecks++;return result;};
  // getError synchronizes with the browser GPU process. Keep explicit boundary
  // validation, not a round-trip on every live frame. The renderer's validator
@@ -25,8 +25,11 @@ export async function createNativeProductRollback({source,wasmBytes,dirtyManifes
  const present=()=>replica.present(module=>createPreview(cache,module),renderer=>{lastDraw=renderer.draw();lastGpuCheck=renderer.validateGpu;if(validateEveryFrame)validateGpu();lastCoverage=renderer.shaderCoverage?.()??null;return lastDraw;});
  try{
   const initial=store.capture(),began=performance.now();try{for(let frame=0;frame<warmup.frames;frame++){audio.beginFrame(frame);for(let seat=0;seat<2;seat++){source.module._portTapJumpSet(seat,1);source.module._portControllerSample(seat,0,0,0,0,0,0,0);}step();present();}}finally{store.restore(initial);store.release(initial);}warmup.cpuMs=performance.now()-began;
-  session=createRollbackSession({seat:network.seat,store,window:rollbackConfig.predictionWindow,receiveWindow:rollbackConfig.receiveWindow,acknowledgementWindow:rollbackConfig.acknowledgementWindow,checkpointInterval:rollbackConfig.checkpointInterval,requireAcknowledgement:true,step(inputs,{frame}){audio.beginFrame(frame);for(const [seat,input]of inputs.entries()){source.module._portTapJumpSet(seat,input.tap);source.module._portControllerSample(seat,...input.pad);}step();},onConfirm:frame=>audio.confirm(frame)});
-  validateGpu();driver=createNativeRollbackDriver({network,session});
+  session=createRollbackSession({seat:network.seat,store,window:rollbackConfig.predictionWindow,receiveWindow:rollbackConfig.receiveWindow,acknowledgementWindow:rollbackConfig.acknowledgementWindow,checkpointInterval:rollbackConfig.checkpointInterval,requireAcknowledgement:true,step(inputs,{frame}){audio.beginFrame(frame);for(const [seat,input]of inputs.entries()){source.module._portTapJumpSet(seat,input.tap);source.module._portControllerSample(seat,...input.pad);}step();
+   // Earliest frame whose state is terminal in the current timeline. A replay
+   // can create or erase the ending, so it is recomputed in frame order.
+   const ended=source.module._portTournamentRead(25,0)!==0;if(ended){if(terminal===null||frame<terminal)terminal=frame;}else if(terminal!==null&&frame<=terminal)terminal=null;},onConfirm:frame=>audio.confirm(frame)});
+  validateGpu();driver=createNativeRollbackDriver({network,session});Object.defineProperty(driver,'terminalFrame',{get:()=>terminal});
  }catch(error){session?.dispose();replica.dispose();cache.dispose();store.dispose();throw error;}
  const preview={
   resetImmediateStats(){},

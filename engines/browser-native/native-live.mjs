@@ -51,14 +51,14 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   const cursors=new Map();
   function sample(values,value){const index=cursors.get(values)??0;if(values.length<3600)values.push(value);else values[index%3600]=value;cursors.set(values,index+1);}
   function distribution(values){const v=[...values].sort((a,b)=>a-b);return {samples:v.length,meanMs:v.reduce((a,b)=>a+b,0)/(v.length||1),p50Ms:v[Math.floor((v.length-1)*.5)]??0,p95Ms:v[Math.floor((v.length-1)*.95)]??0,maxMs:v.at(-1)??0};}
-  function snapshot(){return {completionReason,match:readMatch?.()??null,frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard and standard gamepad samples',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,modelCache:lastRender?.modelCache??null,shaderCoverage:preview.shaderCoverage?.()??null};}
+  function snapshot(){return {completionReason,terminalFrame:rollback?.terminalFrame??null,match:readMatch?.()??null,frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard and standard gamepad samples',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,modelCache:lastRender?.modelCache??null,shaderCoverage:preview.shaderCoverage?.()??null};}
   function stop(){if(stopped)return;stopped=true;cancelAnimationFrame(raf);removeEventListener('keydown',input);removeEventListener('keyup',input);removeEventListener('blur',blur);removeEventListener('focus',focus);document.removeEventListener('visibilitychange',reset);rollback?.dispose();keys.clear();for(let i=0;i<objects.length;i++)module._portControllerSample(i,...neutralNativeSample());}
   function finish(reason="match-end"){final=readState();completionReason=reason;stop();onComplete(snapshot());}
   function frame(now){
     if(stopped)return;
     try {
       rollback?.reconcile();
-      if(shouldFinish()){if(!rollback||rollback.canFinish(frames-1)){finish();return;}raf=requestAnimationFrame(frame);return;}
+      if(shouldFinish()){if(!rollback||rollback.canFinish(rollback.terminalFrame??frames-1)){finish();return;}raf=requestAnimationFrame(frame);return;}
       if(document.hidden){reset();raf=requestAnimationFrame(frame);return;}
       // A second forward step in one callback cannot become a distinct browser
       // presentation. Retain clock debt and slow honestly after a late callback
@@ -80,7 +80,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         if(rollback){const before=performance.now(),didAdvance=rollback.advance(frames,samples);sample(stepTimes,performance.now()-before);if(!didAdvance){clock.reset(now);break;}}
         else {if(network?.active){samples=network.take(samples,module);if(!samples){clock.reset(now);break;}}if(samples.length!==objects.length)throw Error('Controller sample count differs from players');for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);const before=performance.now();step();sample(stepTimes,performance.now()-before);}
         frames++;advanced++;const pendingEnding=shouldFinish();
-        if(pendingEnding&&(!rollback||rollback.canFinish(frames-1))){finish();return;}
+        if(pendingEnding&&(!rollback||rollback.canFinish(rollback.terminalFrame??frames-1))){finish();return;}
         final=readState();
         if(!final.flat().every(Number.isFinite))throw Error('Nonfinite interactive fighter state');
         if(final.some(isNormalAttackState))workload.framesWithAttack++;

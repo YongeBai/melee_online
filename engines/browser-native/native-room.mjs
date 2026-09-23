@@ -39,7 +39,7 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
    const future=nextFrame+3;
    if(!sent.has(future)){
     const pad=[...samples[state.seat]];
-    if(key.startsWith('characters:')){if(pad[0]&0x1000)network.ready();pad[0]&=~0x1000;if(!state.seat&&state.ready.every(Boolean))pad[0]|=0x1000;}
+    if(key.startsWith('characters:')){if(pad[0]&0x1000)network.ready();pad[0]&=~0x1000;if(!state.seat&&state.ready.every(Boolean)&&future%20<2)pad[0]|=0x1000;}// Native CSS starts on a Start press after its ready banner; pulse, never hold.
     if(key.startsWith('stages:')&&state.seat===1)pad.fill(0);
     transmit(future,pad);
    }
