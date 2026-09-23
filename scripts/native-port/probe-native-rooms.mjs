@@ -92,7 +92,11 @@ async function client(capture=false){
  }
  await instrument(c);
  if(p2pDelay){await c.cmd('Page.enable');await c.cmd('Page.addScriptToEvaluateOnNewDocument',{source:'globalThis.__meleeP2PDelay='+JSON.stringify(p2pDelay)+';globalThis.__meleeP2PDebug=true;'});}
- await c.cmd('Page.navigate',{url:(remoteBase??'http://127.0.0.1:'+server.address().port)+(releaseEntry?'/play/':'/character-menu.html')+'?interactive=1'+(rollbackMode?'':'&lockstep=1')+(lifecycleMode?'':'&liveframes='+matchFrames+(capture?'&captureframes=1':'')+(combatMode?'&workload=1':''))});await c.wait('globalThis.characterMenuReport?.passed');return c;
+ await c.cmd('Page.navigate',{url:(remoteBase??'http://127.0.0.1:'+server.address().port)+(releaseEntry?'/play/':'/character-menu.html')+'?interactive=1'+(rollbackMode?'':'&lockstep=1')+(lifecycleMode?'':'&liveframes='+matchFrames+(capture?'&captureframes=1':'')+(combatMode?'&workload=1':''))});
+ // Fresh headless profiles can swap certificate verifiers mid-load and abort
+ // module fetches (ERR_CERT_VERIFIER_CHANGED). Reload once for that harness fault.
+ try{await c.wait('globalThis.characterMenuReport?.passed');}catch(e){if(!remoteBase||!c.log.some(l=>/ERR_CERT_VERIFIER_CHANGED/.test(l.error??l.text??'')))throw e;c.log.length=0;await c.cmd('Page.reload');await c.wait('globalThis.characterMenuReport?.passed');}
+ return c;
 }
 async function instrument(c){await c.cmd('Runtime.enable');await c.cmd('Log.enable');await c.cmd('Network.enable');}
 try{
