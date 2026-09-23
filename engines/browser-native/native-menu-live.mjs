@@ -7,7 +7,7 @@ export function startNativeMenuLive(menu,input,{onState=()=>{},onResults=()=>{},
   let scene='characters',active=menu,raf=0,stopped=false,busy=false,frames=0,draws=0,controller=0;
   const transitions=[];
   const snapshot=()=>({scene,frames,draws,busy,controller,transitions:[...transitions],state:active?.read()??null});
-  function publish(next){scene=next;transitions.push({scene,frames});onState(snapshot());}
+  function publish(next){scene=next;transitions.push({scene,frames,at:Math.round(performance.now())});onState(snapshot());}
   function reset(){clock.reset();}
   function stop(){if(stopped)return;stopped=true;cancelAnimationFrame(raf);document.removeEventListener('visibilitychange',reset);removeEventListener('blur',reset);removeEventListener('focus',reset);}
   function fail(error){stop();onError(error);}

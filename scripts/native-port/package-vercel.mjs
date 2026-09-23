@@ -9,6 +9,11 @@ import {nativePortFiles} from './serve.mjs';
 const root=path.resolve(import.meta.dirname,'../..');
 const source=path.resolve(process.argv[2]??path.join(root,'dist/native-port'));
 const out=path.resolve(process.argv[3]??path.join(root,'dist/playmelee-vercel'));
+// A pinned host file that does not match its audit hash makes the page refuse
+// to start; never package such a release.
+const {dirtyHostContract}=await import(path.join(source,'dirty-host-contract.mjs'));
+const unpinned=Object.entries(dirtyHostContract).filter(([name,hash])=>!fs.existsSync(path.join(source,name))||createHash('sha256').update(fs.readFileSync(path.join(source,name))).digest('hex')!==hash).map(([name])=>name);
+if(unpinned.length)throw Error('Pinned host files do not match their audit hashes: '+unpinned.join(', '));
 if(fs.existsSync(out))fs.rmSync(out,{recursive:true});
 fs.mkdirSync(path.join(out,'public/play'),{recursive:true});
 const inventory={};

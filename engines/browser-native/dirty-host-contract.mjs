@@ -60,7 +60,7 @@ export const dirtyHostContract = {
   "native-input.mjs": "9974f99c12a66b7dc04a28689964702f99ee61afcf029208adb8c5326e7173bd",
   "native-live.mjs": "e8d674f9ed5c10c10ee46b166de67293e49d7ef1ec8b45c750a4395fea8426a3",
   "native-match-preview.mjs": "bc2022da8e61fa42aa5b82cc96d1fe4a2680837055bd74c050f8cd59c367eede",
-  "native-menu-live.mjs": "88566de623f897b1906d065cc3deeb8c762ee3200aefba880f1de6c312d7dcec",
+  "native-menu-live.mjs": "a7deb771f10aa62535960db18dcfbb5869b2720b4e23ffee426193459e5ecf8b",
   "native-menu-preview.mjs": "16bd987f74783bca7fa14c36a702b513391718512d56f21a49921a63d8638336",
   "native-model.mjs": "dbb0654bc909eceea9a0a7e8d559977ac7844c767f0205ebce69de9f59578119",
   "native-music-worker.mjs": "2a81124399eb9794b15e5157990db2a9aca9729d0212af39be6283be35ca3abf",
