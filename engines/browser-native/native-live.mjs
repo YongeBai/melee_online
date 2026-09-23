@@ -37,8 +37,8 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   preview.resetImmediateStats?.();
   const slowDraws=[],shaderCompilations=[];
   const stateChanges=[],inputChanges=[],keys=new Set(),clock=createNativeFrameClock(performance.now(),60,{align:true,toleranceMs:.25}),stepTimes=[],drawTimes=[],intervals=[];
-  let raf=0,stopped=false,completionReason=null,frames=0,draws=0,started=performance.now(),lastDraw=null,lastCallback=null,lastRender=null;
-  const cadence={callbacks:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
+  let raf=0,stopped=false,completionReason=null,frames=0,draws=0,started=performance.now(),firstStep=null,lastDraw=null,lastCallback=null,lastRender=null;
+  const cadence={callbacks:0,catchUpSteps:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
   const readState=()=>{const current=resolveObjects?resolveObjects():objects;if(current.length!==objects.length||current.some(o=>!o))throw Error('Native player ownership changed unexpectedly');return current.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));};
   const initial=readState();
   const handled=nativeKeyboardCodes;let focused=true;
@@ -51,7 +51,9 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   const cursors=new Map();
   function sample(values,value){const index=cursors.get(values)??0;if(values.length<3600)values.push(value);else values[index%3600]=value;cursors.set(values,index+1);}
   function distribution(values){const v=[...values].sort((a,b)=>a-b);return {samples:v.length,meanMs:v.reduce((a,b)=>a+b,0)/(v.length||1),p50Ms:v[Math.floor((v.length-1)*.5)]??0,p95Ms:v[Math.floor((v.length-1)*.95)]??0,maxMs:v.at(-1)??0};}
-  function snapshot(){return {completionReason,terminalFrame:rollback?.terminalFrame??null,match:readMatch?.()??null,frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard and standard gamepad samples',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,modelCache:lastRender?.modelCache??null,shaderCoverage:preview.shaderCoverage?.()??null};}
+  // startWaitMs: time before the first simulated frame, e.g. the room barrier
+  // waiting for the opponent to finish loading. Not a simulation slowdown.
+  function snapshot(){return {completionReason,startWaitMs:firstStep===null?null:firstStep-started,terminalFrame:rollback?.terminalFrame??null,match:readMatch?.()??null,frames,draws,elapsedMs:performance.now()-started,initial,final,stateChanges,inputChanges,movement,jump,attack,inputSource:inputProvider?'scripted normalized controller samples':'browser keyboard and standard gamepad samples',workload,cadence,maxDebtMs:clock.maxDebtMs,stepCpu:distribution(stepTimes),drawSubmissionCpu:distribution(drawTimes),rafDrawIntervals:distribution(intervals),resolution:[960,720],gpuReadbacks:false,playable:false,performanceCertified:false,presentationFpsMeasured:false,inputToPhotonMeasured:false,immediateStats:lastRender?.immediateStats??null,particleStats:lastRender?.particleStats??null,afterimageStats:lastRender?.afterimageStats??null,slowDraws,shaderCompilations,modelCache:lastRender?.modelCache??null,shaderCoverage:preview.shaderCoverage?.()??null};}
   function stop(){if(stopped)return;stopped=true;cancelAnimationFrame(raf);removeEventListener('keydown',input);removeEventListener('keyup',input);removeEventListener('blur',blur);removeEventListener('focus',focus);document.removeEventListener('visibilitychange',reset);rollback?.dispose();keys.clear();for(let i=0;i<objects.length;i++)module._portControllerSample(i,...neutralNativeSample());}
   function finish(reason="match-end"){final=readState();completionReason=reason;stop();onComplete(snapshot());}
   function frame(now){
@@ -61,9 +63,16 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       if(shouldFinish()){if(!rollback||rollback.canFinish(rollback.terminalFrame??frames-1)){finish();return;}raf=requestAnimationFrame(frame);return;}
       if(document.hidden){reset();raf=requestAnimationFrame(frame);return;}
       // A second forward step in one callback cannot become a distinct browser
-      // presentation. Retain clock debt and slow honestly after a late callback
-      // instead of advancing an unpresented game frame.
-      const steps=clock.take(now,frameLimit?Math.min(1,frameLimit-frames):1);
+      // presentation, so solo play retains clock debt and slows honestly. Netplay
+      // must keep game time on the wall clock: a peer that loses frames to a late
+      // callback falls behind and forces its opponent to wait. Rollback matches
+      // repay a whole frame of debt with one extra (unpresented) step; every
+      // presented frame is still a new one and catch-up steps are counted.
+      // A peer that started later (slower loading) or lost frames catches up while
+      // the opponent's inputs show it two or more frames ahead, instead of
+      // making the opponent wait at its prediction window.
+      const perCallback=rollback?2:1;let steps=clock.take(now,frameLimit?Math.min(perCallback,frameLimit-frames):perCallback);
+      if(rollback&&steps===1&&rollback.remoteLead>=2&&(!frameLimit||frames+2<=frameLimit))steps=2;if(steps>1)cadence.catchUpSteps+=steps-1;
       cadence.callbacks++;if(!steps)cadence.zeroStepCallbacks++;if(steps>1)cadence.multiStepCallbacks++;
       if(cadence.timingSamples.length<128&&(cadence.callbacks<=8||steps!==1))cadence.timingSamples.push({callback:cadence.callbacks,frame:frames,steps,timestamp:now-started,callbackTime:performance.now()-started,interval:lastCallback===null?null:now-lastCallback,debt:clock.debtMs});
       if(lastCallback!==null&&now-lastCallback>25)cadence.rafGapsOver25Ms++;lastCallback=now;
@@ -79,7 +88,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
         // resets still use a fresh origin and never accumulate catch-up work.
         if(rollback){const before=performance.now(),didAdvance=rollback.advance(frames,samples);sample(stepTimes,performance.now()-before);if(!didAdvance){clock.reset(now);break;}}
         else {if(network?.active){samples=network.take(samples,module);if(!samples){clock.reset(now);break;}}if(samples.length!==objects.length)throw Error('Controller sample count differs from players');for(let i=0;i<objects.length;i++)module._portControllerSample(i,...samples[i]);const before=performance.now();step();sample(stepTimes,performance.now()-before);}
-        frames++;advanced++;const pendingEnding=shouldFinish();
+        frames++;advanced++;firstStep??=performance.now();const pendingEnding=shouldFinish();
         if(pendingEnding&&(!rollback||rollback.canFinish(rollback.terminalFrame??frames-1))){finish();return;}
         final=readState();
         if(!final.flat().every(Number.isFinite))throw Error('Nonfinite interactive fighter state');

@@ -40,7 +40,7 @@ function summarize(combat,keys){
  const input=keys?.timing?.map(t=>t.input.eventToNativeInputSubmission)??[];
  const summary={
   passed:combat.code===0&&!!combat.report?.passed,
-  simulationFps:s?.map(x=>round(x.simulationFps)),
+  simulationFps:s?.map(x=>round(x.activeSimulationFps)),rawSimulationFps:s?.map(x=>round(x.simulationFps)),startWaitMs:s?.map(x=>round(x.startWaitExcludedMs,0)),
   capturedFps:round(o?.cadence?.fps),captureP95Ms:round(o?.cadence?.p95Ms),captureMaxMs:round(o?.cadence?.maxMs),gapsOver25Ms:o?.cadence?.gapsOver25Ms,
   distinctFrames:o?`${o.distinctSampledImages}/${o.requested}`:null,
   drawP95Ms:s?.map(x=>round(x.drawSubmissionCpu?.p95Ms)),
@@ -49,6 +49,7 @@ function summarize(combat,keys){
   rttP50Ms:net?.link?.map(l=>round(l?.stats?.rttP50Ms)),
   oneWayP50Ms:net?.oneWayInputTransit?.map(x=>round(x.p50Ms)),oneWayP95Ms:net?.oneWayInputTransit?.map(x=>round(x.p95Ms)),
   localInputMeanMs:input.map(x=>round(x.meanMs)),localInputP95Ms:input.map(x=>round(x.p95Ms)),
+  catchUpSteps:s?.map(x=>x.catchUpSteps??0),
   sfxStarts:r?.final?.map(v=>v.sfx?.starts??null),sfxMissing:r?.final?.map(v=>v.sfx?.missingSamples??null),
   latencyRunPassed:keys?keys.code===0:null,
   error:combat.code===0?null:(combat.failure?.error??combat.output).split('\n')[0].slice(0,500),
