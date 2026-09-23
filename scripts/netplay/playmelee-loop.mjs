@@ -16,6 +16,8 @@ const root=path.resolve(import.meta.dirname,'../..');
 const arg=(name,fallback)=>process.argv.find(a=>a.startsWith('--'+name+'='))?.slice(name.length+3)??fallback;
 const url=arg('url','https://playmelee.com').replace(/\/+$/,''),iterations=Number(arg('iterations','1')),frames=Number(arg('frames','1800'));
 const latency=!process.argv.includes('--no-latency');
+// Emulated one-way WAN delays (ms, applied by both peers) cycled per iteration.
+const delays=arg('delays','0').split(',').map(Number);
 // Tournament stages and a rotating set of roster tiles (CSS tile indices).
 const stages=[31,32,2,3,8,28],pairs=[null,'20,2','12,12','9,14','17,10','15,4'];
 const outDir=path.join(root,'dist/netplay-loop');fs.mkdirSync(outDir,{recursive:true});
@@ -61,10 +63,10 @@ function summarize(combat,keys){
 }
 for(let i=0;i<iterations;i++){
  const stage=stages[i%stages.length],pair=pairs[i%pairs.length],stamp=new Date().toISOString().replace(/[:.]/g,'-').toLowerCase();
- const common=['--stage='+stage,...(pair?['--pair='+pair]:[])];
- console.error(`[${i+1}/${iterations}] ${url} stage ${stage} pair ${pair??'default'}`);
+ const delay=delays[i%delays.length],common=['--stage='+stage,...(pair?['--pair='+pair]:[]),...(delay?['--p2p-delay='+delay+','+Math.round(delay/4)]:[])];
+ console.error(`[${i+1}/${iterations}] ${url} stage ${stage} pair ${pair??'default'} delay ${delay}ms`);
  const combat=await probe(['--frames='+frames,'--capture-seat='+(i%2),'--combat','--timing',...common],'loop-'+stamp+'-combat');
  const keys=latency?await probe(['--frames='+Math.max(1800,frames),'--timing','--latency',...common],'loop-'+stamp+'-latency'):null;
- const entry={at:new Date().toISOString(),url,iteration:i,stage,pair,frames,...summarize(combat,keys)};
+ const entry={at:new Date().toISOString(),url,iteration:i,stage,pair,frames,emulatedOneWayMs:delay,...summarize(combat,keys)};
  fs.appendFileSync(log,JSON.stringify(entry)+'\n');console.log(JSON.stringify(entry));
 }

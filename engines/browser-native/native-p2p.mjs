@@ -17,7 +17,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  // arriving, so a harness on one machine can compute one-way transit.
  const stamp=(list,text)=>{if(list.length>=20000)return;const key=/"key":"(match:[0-9]+)"/.exec(text);if(!key)return;const frame=/"frame":([0-9]+)/.exec(text);if(frame)list.push([key[1],Number(frame[1]),performance.timeOrigin+performance.now()]);};
  const outgoing=text=>{if(text.startsWith('{"type":"input"'))stamp(timeline.sent,text);},incoming=text=>{if(text.startsWith('{"type":"peer-input"'))stamp(timeline.received,text);};
- const log=(event,detail={})=>{const e={t:Math.round(performance.now()),event,...detail};events.push(e);if(events.length>200)events.shift();onEvent(e);};
+ const log=(event,detail={})=>{const e={t:Math.round(performance.now()),event,...detail};events.push(e);if(events.length>200)events.shift();if(globalThis.__meleeP2PDebug)console.warn('[p2p]',JSON.stringify(e));onEvent(e);};
  const persist=()=>{try{if(!role){storage.removeItem(storageKey);return;}storage.setItem(storageKey,JSON.stringify({role,code,hostKey,core:role==='host'&&core?core.serialize():null}));}catch{}};
  addEventListener('pagehide',persist);
  async function signal(body){const response=await fetch(signalUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(6000),cache:'no-store'}),result=await response.json().catch(()=>({}));if(!response.ok){const e=Error(result.error??'Signaling unavailable');e.status=response.status;throw e;}return result;}
@@ -30,15 +30,23 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
    call(route,body){return new Promise((resolve,reject)=>{const id=++nextRpc;rpc.set(id,{resolve,reject});channel.send(JSON.stringify({rpc:id,route,body}));setTimeout(()=>{if(rpc.delete(id))reject(Error('Room host did not respond'));},10000);});},
    close(){clearInterval(ping);try{channel.close();}catch{}try{pc.close();}catch{}}};
   const startPing=()=>{clearInterval(ping);ping=setInterval(()=>{if(channel.readyState==='open')channel.send(JSON.stringify({ping:performance.now()}));},500);};if(channel.readyState==='open')startPing();else channel.addEventListener('open',startPing,{once:true});
-  channel.addEventListener('message',({data})=>{let m;try{m=JSON.parse(data);}catch{return;}
+  // Measurement harnesses may emulate WAN delay by setting globalThis.__meleeP2PDelay
+  // to {baseMs,jitterMs}; delivery stays ordered, like the data channel itself.
+  let due=0,seq=0,timer=0;const queue=[];
+  const drain=()=>{timer=0;const now=performance.now();while(queue.length&&queue[0].at<=now+.5)queue.shift().run();if(queue.length)timer=setTimeout(drain,queue[0].at-now);};
+  const deliver=run=>{const d=globalThis.__meleeP2PDelay;if(!d&&!queue.length)return run();const now=performance.now(),jitter=d?.jitterMs?((seq++*7919)%1000)/1000*d.jitterMs:0;due=Math.max(due,now+(d?.baseMs??0)+jitter);queue.push({at:due,run});if(!timer)timer=setTimeout(drain,due-now);};
+  const handle=({data})=>deliver(()=>receive(data));
+  const receive=data=>{
+   let m;try{m=JSON.parse(data);}catch{return;}
    if(m.ping!==undefined){channel.send(JSON.stringify({pong:m.ping}));return;}
    if(m.pong!==undefined){rtt.push(performance.now()-m.pong);if(rtt.length>240)rtt.shift();return;}
-   if(m.rpcReply!==undefined){const p=rpc.get(m.rpcReply);if(p){rpc.delete(m.rpcReply);if(m.status===200)p.resolve(m.body);else p.reject(Error(m.body?.error??'Room request failed'));}return;}
-   if(m.rpc!==undefined&&side==='host'){const result=core.request(m.route,m.body??{});persist();channel.send(JSON.stringify({rpcReply:m.rpc,status:result.status,body:result.body}));return;}
+   if(m.rpcReply!==undefined){log('rpc-reply',{status:m.status});const p=rpc.get(m.rpcReply);if(p){rpc.delete(m.rpcReply);if(m.status===200)p.resolve(m.body);else p.reject(Error(m.body?.error??'Room request failed'));}return;}
+   if(m.rpc!==undefined&&side==='host'){const result=core.request(m.route,m.body??{});log('rpc',{route:m.route,status:result.status});persist();channel.send(JSON.stringify({rpcReply:m.rpc,status:result.status,body:result.body}));return;}
    if(side==='host'){if(!l.peer){l.peer=core.attach(l.hostPeer);}l.peer.message(data);return;}
    incoming(data);l.socket?.onmessage?.({data});
-  });
-  channel.addEventListener('close',()=>{clearInterval(ping);for(const p of rpc.values())p.reject(Error('Room connection closed'));rpc.clear();if(side==='host'){hostLinks.delete(l);l.peer?.close();log('guest-disconnected');}else{if(guestLink===l)guestLink=null;l.socket?.closeFromLink();log('host-disconnected');}});
+  };channel.addEventListener('message',handle);
+  channel.addEventListener('close',()=>deliver(closed));
+  const closed=()=>{clearInterval(ping);for(const p of rpc.values())p.reject(Error('Room connection closed'));rpc.clear();if(side==='host'){hostLinks.delete(l);l.peer?.close();log('guest-disconnected');}else{if(guestLink===l)guestLink=null;l.socket?.closeFromLink();log('host-disconnected');}};
   // The core's view of a guest peer.
   l.hostPeer={rollback:false,get readyState(){return channel.readyState==='open'?1:3;},send:text=>{if(channel.readyState==='open')channel.send(text);},close:()=>l.close(),terminate:()=>l.close()};
   return l;
