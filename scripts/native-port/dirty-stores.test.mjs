@@ -31,5 +31,10 @@ test('aliased Emscripten import namespaces mark WASI outputs without invalidatin
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 test('dirty runtime rejects a changed host source before loading the instrumented core',async()=>{
- const {loadDirtyCore}=await import('../../engines/browser-native/dirty-runtime.mjs');const original=globalThis.fetch,seen=[];try{globalThis.fetch=async url=>{seen.push(url);return new Response(new Uint8Array([1,2,3]));};await assert.rejects(loadDirtyCore(),/Unaudited dirty host source/);assert.equal(seen.length,1);assert(!seen.includes('./melee-dirty.wasm'));}finally{globalThis.fetch=original;}
+ const {loadDirtyCore}=await import('../../engines/browser-native/dirty-runtime.mjs');const original=globalThis.fetch,seen=[];try{globalThis.fetch=async url=>{seen.push(url);return new Response(new Uint8Array([1,2,3]));};
+  // Audited files are fetched concurrently; a mismatch still rejects before any
+  // core bytes are returned for instantiation, and nothing unaudited is fetched.
+  await assert.rejects(loadDirtyCore(),/Unaudited dirty host source/);
+  const {dirtyHostContract}=await import('../../engines/browser-native/dirty-host-contract.mjs'),audited=new Set(Object.keys(dirtyHostContract).map(f=>'./'+f));
+  assert(seen.every(u=>audited.has(u)),'only audited files are requested');assert.equal(new Set(seen).size,seen.length,'each file is fetched once');}finally{globalThis.fetch=original;}
 });

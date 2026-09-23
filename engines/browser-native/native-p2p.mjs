@@ -16,7 +16,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  const iceConfig=()=>ice??=fetch(iceUrl,{cache:'no-store',signal:AbortSignal.timeout(4000)}).then(r=>r.ok?r.json():Promise.reject()).then(v=>{turn=!!v.turn;return Array.isArray(v.iceServers)&&v.iceServers.length?v.iceServers:defaultIce;}).catch(()=>defaultIce);
  let saved=null;try{saved=JSON.parse(storage.getItem(storageKey));}catch{}
  let role=saved?.role??null,code=saved?.code??null,hostKey=saved?.hostKey??null,core=null,listening=false,disposed=false,guestLink=null;
- const hostLinks=new Set(),rtt=[],events=[],timeline={sent:[],received:[]};
+ const hostLinks=new Set(),rtt=[],queueDelay=[],events=[],timeline={sent:[],received:[]};
  // Wall-clock stamps of match inputs leaving this page and peer inputs
  // arriving, so a harness on one machine can compute one-way transit.
  const stamp=(list,text)=>{if(list.length>=20000)return;const key=/"key":"(match:[0-9]+)"/.exec(text);if(!key)return;const frame=/"frame":([0-9]+)/.exec(text);if(frame)list.push([key[1],Number(frame[1]),performance.timeOrigin+performance.now()]);};
@@ -41,7 +41,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
   let due=0,seq=0,timer=0;const queue=[];
   const drain=()=>{timer=0;const now=performance.now();while(queue.length&&queue[0].at<=now+.5){try{queue.shift().run();}catch(e){log('delivery-error',{message:e.message});}}if(queue.length)timer=setTimeout(drain,queue[0].at-now);};
   const deliver=run=>{const d=globalThis.__meleeP2PDelay;if(!d&&!queue.length)return run();const now=performance.now(),jitter=d?.jitterMs?((seq++*7919)%1000)/1000*d.jitterMs:0;due=Math.max(due,now+(d?.baseMs??0)+jitter);queue.push({at:due,run});if(!timer)timer=setTimeout(drain,due-now);};
-  const handle=({data})=>deliver(()=>receive(data));
+  const handle=({data,timeStamp})=>{if(queueDelay.length<8000&&typeof data==='string'&&data.startsWith('{"type"'))queueDelay.push(performance.now()-timeStamp);deliver(()=>receive(data));};
   const receive=data=>{
    let m;try{m=JSON.parse(data);}catch{return;}
    if(m.ping!==undefined){post({pong:m.ping});return;}
@@ -138,7 +138,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
    throw Error('Unsupported room request');
   },
   socket(){return role==='host'?loopback():remoteSocket();},
-  stats(){const sorted=[...rtt].sort((a,b)=>a-b),q=p=>sorted.length?sorted[Math.min(sorted.length-1,Math.floor(p*sorted.length))]:null;return {kind:'webrtc-p2p',turn,role,code,links:role==='host'?hostLinks.size:guestLink?.open?1:0,rttSamples:rtt.length,rttMeanMs:rtt.length?rtt.reduce((a,b)=>a+b,0)/rtt.length:null,rttP50Ms:q(.5),rttP95Ms:q(.95),rttMaxMs:sorted.at(-1)??null,events:events.slice(-20)};},
+  stats(){const sorted=[...rtt].sort((a,b)=>a-b),q=p=>sorted.length?sorted[Math.min(sorted.length-1,Math.floor(p*sorted.length))]:null;return {kind:'webrtc-p2p',turn,role,code,links:role==='host'?hostLinks.size:guestLink?.open?1:0,rttSamples:rtt.length,rttMeanMs:rtt.length?rtt.reduce((a,b)=>a+b,0)/rtt.length:null,rttP50Ms:q(.5),rttP95Ms:q(.95),rttMaxMs:sorted.at(-1)??null,queueDelay:(()=>{const q=[...queueDelay].sort((a,b)=>a-b);return q.length?{samples:q.length,p50:q[q.length>>1],p95:q[Math.floor(q.length*.95)],max:q.at(-1)}:null;})(),events:events.slice(-20)};},
   timeline(){return {sent:timeline.sent.slice(),received:timeline.received.slice()};},
   async pair(){const l=role==='host'?[...hostLinks][0]:guestLink;return l?selectedPair(l.pc):null;},
   forget(){if(role==='host'&&code)void signal({op:'close',code,hostKey}).catch(()=>{});role=null;code=null;hostKey=null;core?.close();core=null;try{storage.removeItem(storageKey);}catch{}},

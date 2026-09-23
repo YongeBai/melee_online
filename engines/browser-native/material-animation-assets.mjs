@@ -7,13 +7,15 @@ export function convertMaterialAnimation(input) {
   if(archive.externs.size)throw Error('Material animation needs explicit external linking');
   const roots=[...archive.publics].filter(([name])=>name.endsWith('_Share_matanim_joint'));
   if(!roots.length)return null;if(roots.length!==1)throw Error('Ambiguous material animation root');
-  const [name,root]=roots[0],words=new Set(),halves=new Set(),pointers=new Set(),packed=new Set(),nodes=[],seen=new Set(),images=new Map(),palettes=new Map();
+  const [name,root]=roots[0],words=new Set(),halves=new Set(),pointers=new Set(),packedRanges=[],nodes=[],seen=new Set(),images=new Map(),palettes=new Map();
   const bounds=(at,size,align=4)=>{if(!Number.isInteger(at)||at<0||at%align||at+size>d.byteLength)throw Error('Material animation descriptor out of bounds');};
   function word(at){bounds(at,4);words.add(at);return d.getUint32(at);}
   function half(at){bounds(at,2,2);halves.add(at);return d.getUint16(at);}
   function ptr(at){const v=word(at);if(!archive.relocations.has(at)){if(v)throw Error('Unrelocated material animation pointer');return null;}bounds(v,1,1);pointers.add(at);return v;}
-  function aobj(at){if(at===null)return null;const a=readAnimationObject(archive,at);for(const x of a.words)words.add(x);for(const x of a.pointers)pointers.add(x);for(const x of a.packed)packed.add(x);return a;}
-  function raw(at,size){bounds(at,size,1);for(let i=0;i<size;i++)packed.add(at+i);}
+  function aobj(at){if(at===null)return null;const a=readAnimationObject(archive,at);for(const x of a.words)words.add(x);for(const x of a.pointers)pointers.add(x);for(const x of a.packed)packedRanges.push([x,x+1]);return a;}
+  // Raw texture/palette payloads are byte ranges; recording each byte made
+  // large animated textures dominate menu startup.
+  function raw(at,size){bounds(at,size,1);if(size)packedRanges.push([at,at+size]);}
   function image(at) {
     if(images.has(at))return images.get(at);bounds(at,24);
     const data=ptr(at),width=half(at+4),height=half(at+6),format=word(at+8),mipmap=word(at+12);
@@ -48,8 +50,13 @@ export function convertMaterialAnimation(input) {
     nodes.push({offset:at,parent,materials:materials(material)});visit(child,index);visit(next,parent);
   }
   visit(root,-1);
-  for(const at of packed)if(words.has(at&~3)||halves.has(at&~1)||archive.relocations.has(at&~3))throw Error('Material animation payload overlaps descriptors');
+  // No payload byte may share an aligned descriptor word, half or relocated slot.
+  const merged=packedRanges.sort((x,y)=>x[0]-y[0]).reduce((m,[lo,hi])=>{const last=m.at(-1);if(last&&lo<=last[1])last[1]=Math.max(last[1],hi);else m.push([lo,hi]);return m;},[]);
+  const covered=(lo,hi)=>{let a=0,b=merged.length;while(a<b){const c=(a+b)>>1;if(merged[c][1]<=lo)a=c+1;else b=c;}return a<merged.length&&merged[a][0]<hi;};
+  for(const at of words)if(covered(at,at+4))throw Error('Material animation payload overlaps descriptors');
+  for(const at of halves)if(covered(at,at+2))throw Error('Material animation payload overlaps descriptors');
+  for(const at of archive.relocations.keys?.()??archive.relocations)if(covered(at&~3,(at&~3)+4))throw Error('Material animation payload overlaps descriptors');
   const body=Uint8Array.from(archive.bytes.subarray(32,32+archive.dataSize)),out=new DataView(body.buffer);
   for(const at of words)out.setUint32(at,d.getUint32(at),true);for(const at of halves)out.setUint16(at,d.getUint16(at),true);
-  return {name,root,nodes,images,palettes,words,halves,pointers,packed,image:nativeSubgraphImage(body,pointers,new Map([[name,root]]))};
+  return {name,root,nodes,images,palettes,words,halves,pointers,packedRanges:merged,get packed(){const bytes=new Set();for(const [lo,hi] of merged)for(let i=lo;i<hi;i++)bytes.add(i);return bytes;},image:nativeSubgraphImage(body,pointers,new Map([[name,root]]))};
 }
