@@ -73,7 +73,7 @@ export const dirtyHostContract = {
   "native-results-ui.mjs": "3a8004aa2ec689e95b757d4114e1f0bd36ebf7fc629f835cb3f43f36792bbe2c",
   "native-results.mjs": "afa9dc67d6ec9c8a1dae5dc1e9f79bf011ab39a060190685d5c7891967c39ae8",
   "native-rollback-driver.mjs": "140d1eab40c28c2da67e1f001f033e46c3b43352d5487de34c7caf0c5217954d",
-  "native-room.mjs": "4954882a24881d8c2dbad6ee776f48a4022927466f6a33194580cb219362b0fe",
+  "native-room.mjs": "d8c446ec8f2759973567a371fe324c5a960d6356a86839013b6957912e6e91b5",
   "native-tev.mjs": "0e8eac65f284c0f646b09c75b6e0b3f7de6896addd81a15c302c6c1179fea68b",
   "native-texture.mjs": "c9d71852f6b691e8c4f6d51d148a06ac3b3a74f438c9bbdaf6864609fdfad452",
   "paged-snapshot.mjs": "8aeadeecdd2fba3dd570c0236f5204e5f32d6f5315b69e4fe17815fe234f9c0f",

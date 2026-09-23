@@ -117,7 +117,11 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
    }
    if(path==='/native-rooms/resume'){
     if(role==='host'){await becomeHost(saved?.core??[]);await claim();const result=core.request('resume',body);if(result.status!==200)throw Error(result.body.error);persist();listen();return result.body;}
-    if(role==='guest'&&code){const l=await guestLinkFor(code);return l.call('resume',body);}
+    if(role==='guest'&&code){
+     // The owner may reload between our offer and its reply; retry the RPC so
+     // a dropped reply never discards this seat.
+     for(let attempt=0;;attempt++){const l=await guestLinkFor(code);try{return await l.call('resume',body);}catch(e){if(!/closed|did not respond/.test(e.message)||attempt>=5)throw e;log('resume-retry',{attempt});await sleep(300);}}
+    }
     throw Error('Room session expired');
    }
    if(path==='/native-rooms/join'){

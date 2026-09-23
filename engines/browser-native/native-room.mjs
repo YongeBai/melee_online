@@ -77,7 +77,9 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
   }catch(e){onError(e);}};
   socket.onclose=()=>{clearTimeout(timeout);if(socket!==ws)return;if(!closed&&!reloading){state={...state,connected:[false,false]};onState(network);if(initialConnect&&!connected)reject(Error('Room connection closed'));else{const wait=Math.min(2000,250*2**Math.min(reconnectAttempt++,3));reconnectTimer=setTimeout(()=>{if(!closed&&!reloading)void open().catch(()=>{});},wait);}}};
  });}
- await open(true);
+ // A peer-hosted authority reloads on epoch changes, which can close the first
+ // connection before its state arrives. Relay sockets keep the original rule.
+ for(let attempt=0;;attempt++){try{await open(true);break;}catch(e){if(!transport||attempt>=8)throw e;await new Promise(r=>setTimeout(r,250*(attempt+1)));}}
  return network;
 }
 
