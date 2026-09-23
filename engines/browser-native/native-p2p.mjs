@@ -9,7 +9,11 @@ const defaultIce=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com
 const randomId=(n=18)=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(n)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl='/api/signal',iceServers=defaultIce,onEvent=()=>{}}={}){
+export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl='/api/signal',iceUrl='/api/ice',iceServers=null,onEvent=()=>{}}={}){
+ // Fetched once per page: STUN, plus short-lived TURN relays when the host
+ // deployment provides them. Failure falls back to public STUN.
+ let ice=iceServers?Promise.resolve(iceServers):null,turn=false;
+ const iceConfig=()=>ice??=fetch(iceUrl,{cache:'no-store',signal:AbortSignal.timeout(4000)}).then(r=>r.ok?r.json():Promise.reject()).then(v=>{turn=!!v.turn;return Array.isArray(v.iceServers)&&v.iceServers.length?v.iceServers:defaultIce;}).catch(()=>defaultIce);
  let saved=null;try{saved=JSON.parse(storage.getItem(storageKey));}catch{}
  let role=saved?.role??null,code=saved?.code??null,hostKey=saved?.hostKey??null,core=null,listening=false,disposed=false,guestLink=null;
  const hostLinks=new Set(),rtt=[],events=[],timeline={sent:[],received:[]};
@@ -63,7 +67,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
   listening=false;
  }
  async function answer(offer){
-  const pc=new RTCPeerConnection({iceServers});
+  const pc=new RTCPeerConnection({iceServers:await iceConfig()});
   const ready=new Promise(resolve=>pc.addEventListener('datachannel',({channel})=>resolve(channel),{once:true}));
   await pc.setRemoteDescription({type:'offer',sdp:offer.sdp});await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);
   await signal({op:'answer',code,hostKey,id:offer.id,sdp:pc.localDescription.sdp});log('answered',{id:offer.id});
@@ -76,7 +80,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  async function claim(){for(;;){try{await signal({op:'host',code,hostKey});return;}catch(e){if(e.status!==409)throw e;throw e;}}}
  async function connectHost(targetCode,attempts=12){
   for(let attempt=0;attempt<attempts&&!disposed;attempt++){
-   const pc=new RTCPeerConnection({iceServers}),channel=pc.createDataChannel('melee',{ordered:true}),id=randomId();
+   const pc=new RTCPeerConnection({iceServers:await iceConfig()}),channel=pc.createDataChannel('melee',{ordered:true}),id=randomId();
    try{
     await pc.setLocalDescription(await pc.createOffer());await gathered(pc);
     await signal({op:'offer',code:targetCode,id,sdp:pc.localDescription.sdp});log('offered',{attempt});
@@ -134,7 +138,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
    throw Error('Unsupported room request');
   },
   socket(){return role==='host'?loopback():remoteSocket();},
-  stats(){const sorted=[...rtt].sort((a,b)=>a-b),q=p=>sorted.length?sorted[Math.min(sorted.length-1,Math.floor(p*sorted.length))]:null;return {kind:'webrtc-p2p',role,code,links:role==='host'?hostLinks.size:guestLink?.open?1:0,rttSamples:rtt.length,rttMeanMs:rtt.length?rtt.reduce((a,b)=>a+b,0)/rtt.length:null,rttP50Ms:q(.5),rttP95Ms:q(.95),rttMaxMs:sorted.at(-1)??null,events:events.slice(-20)};},
+  stats(){const sorted=[...rtt].sort((a,b)=>a-b),q=p=>sorted.length?sorted[Math.min(sorted.length-1,Math.floor(p*sorted.length))]:null;return {kind:'webrtc-p2p',turn,role,code,links:role==='host'?hostLinks.size:guestLink?.open?1:0,rttSamples:rtt.length,rttMeanMs:rtt.length?rtt.reduce((a,b)=>a+b,0)/rtt.length:null,rttP50Ms:q(.5),rttP95Ms:q(.95),rttMaxMs:sorted.at(-1)??null,events:events.slice(-20)};},
   timeline(){return {sent:timeline.sent.slice(),received:timeline.received.slice()};},
   async pair(){const l=role==='host'?[...hostLinks][0]:guestLink;return l?selectedPair(l.pc):null;},
   forget(){if(role==='host'&&code)void signal({op:'close',code,hostKey}).catch(()=>{});role=null;code=null;hostKey=null;core?.close();core=null;try{storage.removeItem(storageKey);}catch{}},

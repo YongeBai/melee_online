@@ -15,6 +15,7 @@ export function createNativeRoomRelay(server,{maxRooms=64,expiryMs=30000,deliver
  const routes={'/native-rooms':'create','/native-rooms/join':'join','/native-rooms/resume':'resume'};
  return {close:stop,core,deliverySnapshot:core.deliverySnapshot,receiveSnapshot:core.receiveSnapshot,testDisconnectSeat:core.testDisconnectSeat,async handle(req,res){
   const pathname=new URL(req.url,'http://localhost').pathname;
+  if(pathname==='/api/ice'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify({iceServers:[],turn:false}));return true;}
   if(!routes[pathname]&&pathname!=='/api/signal')return false;
   const reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   if(!authorize(req)){reply(401,{error:'Authentication required'});return true;}
