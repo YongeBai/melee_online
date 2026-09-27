@@ -62,8 +62,8 @@ export function gameCubePart(code) {
     Comma: [0, 1],
     Period: [1, 0],
   };
-  if (directions[code] || code === "ShiftLeft") {
-    const cStick = ["KeyK", "KeyM", "Comma", "Period"].includes(code),
+  if (directions[code] || ["ShiftLeft", "Stick", "CStick"].includes(code)) {
+    const cStick = ["KeyK", "KeyM", "Comma", "Period", "CStick"].includes(code),
       color = cStick ? "#e5b728" : "#b5b7bc";
     cylinder(0.25, 0.31, 0.12, "#303038", -0.17, 8);
     cylinder(0.11, 0.14, 0.31, cStick ? "#bea019" : "#62636d", -0.01);
@@ -99,7 +99,7 @@ export function gameCubePart(code) {
       arrow.position.set(dir[0] * 0.42, 0.16, dir[1] * 0.42);
       // Shape +Y becomes world -Z after the extrusion is laid flat.
       arrow.rotation.y = Math.atan2(-dir[0], -dir[1]);
-    } else root.rotation.z = 0.23;
+    } else if (code === "ShiftLeft") root.rotation.z = 0.23;
     return root;
   }
   if (code === "KeyP" || code === "KeyO") {
@@ -123,8 +123,13 @@ export function gameCubePart(code) {
     cylinder(0.165, 0.18, 0.04, "#c3c4c8", 0.1);
     return root;
   }
-  if (code === "Space") {
-    // The X key is the silver, elongated bean beside the large green A button.
+  if (code === "DPad") {
+    mesh(new THREE.BoxGeometry(0.2, 0.1, 0.58), "#b5b7bc", 0, 0.05);
+    mesh(new THREE.BoxGeometry(0.58, 0.1, 0.2), "#b5b7bc", 0, 0.05);
+    return root;
+  }
+  if (code === "Space" || code === "GamepadY") {
+    // X and Y are the silver, elongated beans beside the large green A button.
     const points = [
       [-0.34, -0.11],
       [-0.28, -0.21],
@@ -136,8 +141,8 @@ export function gameCubePart(code) {
       [-0.31, 0.04],
     ];
     shape(points, 0.16, "#b8b9c0");
-    letter("X", "#55555c", 0.215, 0.37, 0.29);
-    root.rotation.y = -0.42;
+    letter(code === "Space" ? "X" : "Y", "#55555c", 0.215, 0.37, 0.29);
+    root.rotation.y = code === "Space" ? -0.42 : 0.3;
   } else if (code === "KeyU") {
     shape(
       [

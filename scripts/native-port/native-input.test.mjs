@@ -77,3 +77,23 @@ test('a guest uses its local first gamepad and keyboard only on its assigned sea
  const event=new Event('keydown',{cancelable:true});event.code='KeyP';target.dispatchEvent(event);assert.equal(input.samples()[1][0],256);assert.deepEqual(input.samples()[0],neutralNativeSample());
  }finally{input.dispose();}
 });
+
+test('the local device follows controller detection and the last device used',async()=>{
+ const {createBrowserNativeInput}=await import('../../engines/browser-native/browser-input.mjs');
+ const listeners=new Map(),target={addEventListener:(n,fn)=>listeners.set(n,fn),removeEventListener(){}},document={hidden:false,addEventListener(){},removeEventListener(){}};
+ let pads=[],adapter=[];const changes=[];
+ const input=createBrowserNativeInput({layout:'melee',target,document,getGamepads:()=>pads,getControllers:()=>adapter});
+ input.onDeviceChange(d=>changes.push(d));input.setNetworkSeat(1);
+ input.samples();assert.equal(input.device,'keyboard');assert.equal(input.controllerSample(),null);
+ const p=pad();p.axes=[0,0,0,0];p.id='Xbox';pads=[p];
+ input.samples();assert.equal(input.device,'standard','a detected controller takes over');assert.equal(input.controllerName(),'Xbox');
+ listeners.get('keydown')({type:'keydown',code:'KeyD',preventDefault(){}});assert.equal(input.device,'keyboard');
+ input.samples();assert.equal(input.device,'keyboard','an idle controller does not take back the seat');
+ listeners.get('keyup')({type:'keyup',code:'KeyD',preventDefault(){}});
+ p.buttons[0]={pressed:true,value:1};const [,seat]=input.samples();
+ assert.equal(input.device,'standard');assert.equal(seat[0],0x100,'the local seat reads the controller');
+ input.suspend(true);assert.equal(input.samples()[1][0],0);assert.equal(input.controllerSample()[0],0x100,'raw sample stays readable while suspended');input.suspend(false);
+ adapter=[[0x200,0,0,0,0,0,0]];input.samples();assert.equal(input.device,'gamecube','adapter controllers come first');
+ adapter=[];pads=[];input.samples();assert.equal(input.device,'keyboard','disconnecting returns to keyboard');
+ assert.deepEqual(changes,['standard','keyboard','standard','gamecube','keyboard']);
+});

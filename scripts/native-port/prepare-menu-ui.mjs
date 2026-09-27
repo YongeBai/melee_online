@@ -3,7 +3,7 @@ const root=path.resolve(import.meta.dirname,'../..'),out=path.join(root,'dist/na
 export function prepareMenuUI(assetRoot=path.join(root,'.melee-assets')){
  fs.mkdirSync(path.join(out,'vendor'),{recursive:true});fs.mkdirSync(path.join(out,'assets'),{recursive:true});
  fs.writeFileSync(path.join(out,'melee-ui.css'),fs.readFileSync(path.join(root,'scripts/engine/melee-ui.css'),'utf8').replaceAll('/play/assets/','./assets/'));
- for(const file of ['keyboard-model.js','gamecube-buttons.js'])fs.copyFileSync(path.join(root,'scripts/engine',file),path.join(out,file));
+ for(const file of ['keyboard-model.js','controller-model.js','gamecube-buttons.js'])fs.copyFileSync(path.join(root,'scripts/engine',file),path.join(out,file));
  for(const file of ['three.module.js','three.core.js'])if(fs.existsSync(path.join(root,'web/node_modules/three/build',file)))fs.copyFileSync(path.join(root,'web/node_modules/three/build',file),path.join(out,'vendor',file));
  if(!fs.existsSync(assetRoot))throw Error('Prepare extracted native menu UI assets first');
  const names=fs.readdirSync(assetRoot).filter(n=>/^(glyph-\d+|room-[a-z-]+|tap-jump|on|off|back|MnSlMap-860|MnSlChr-2f740|MnMaAll-(18580|f2c0|1bf200))\.png$/.test(n));

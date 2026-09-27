@@ -29,17 +29,19 @@ export function createRoomCore({maxRooms=64,expiryMs=30000,deliveryDelayMs=null,
   if(ws?.rollback&&m.type==='frame'&&m.key?.startsWith('match:'))return;
   if(ws?.readyState!==1)return;if(!deliveryDelayMs){ws.send(JSON.stringify(m));return;}schedule(ws,m,deliveryDelayMs,delivery,()=>{if(ws.readyState===1)ws.send(JSON.stringify(m));});
  }
- function view(r,seat){return {type:'state',code:r.code,seat,cpu:r.cpu,epoch:r.epoch,connected:r.players.map(p=>p?.ws?.readyState===1),hasGuest:!!r.players[1],ready:[...r.ready],phase:r.phase,selected:r.selected,returnTo:r.returnTo??null,rematchVotes:r.rematchVotes??[false,false]};}
+ function view(r,seat){return {type:'state',code:r.code,seat,cpu:r.cpu,epoch:r.epoch,connected:r.players.map(p=>p?.ws?.readyState===1),hasGuest:!!r.players[1],ready:[...r.ready],phase:r.phase,selected:r.selected,returnTo:r.returnTo??null,rematchVotes:r.rematchVotes??[false,false],devices:[...(r.devices??['keyboard','keyboard'])]};}
  function state(r){r.players.forEach((p,i)=>send(p?.ws,view(r,i)));changed();}
  function reset(r,returnTo=null){r.returnTo=returnTo;r.ended=[null,null];r.rematchVotes=[false,false];r.epoch++;r.ready=[false,false];r.phase='characters';r.barriers.clear();r.inputs.clear();r.history.clear();r.lastFrame=-1;r.phaseKey=null;r.sequence=-1;state(r);}
- function create(diagnosticCpu=false){if(rooms.size>=maxRooms)throw Error('Room service is full');let id;do{id=createCode();}while(rooms.has(id));const r={code:id,cpu:diagnosticCpu,diagnosticCpu,epoch:0,players:[null,null],ready:[false,false],phase:'characters',selected:[{character:20,costume:0},{character:2,costume:0}],barriers:new Map(),inputs:new Map(),history:new Map(),lastFrame:-1,phaseKey:null,sequence:-1,touched:Date.now(),ended:[null,null],rematchVotes:[false,false]};rooms.set(id,r);return r;}
+ function create(diagnosticCpu=false){if(rooms.size>=maxRooms)throw Error('Room service is full');let id;do{id=createCode();}while(rooms.has(id));const r={code:id,cpu:diagnosticCpu,diagnosticCpu,epoch:0,players:[null,null],ready:[false,false],phase:'characters',selected:[{character:20,costume:0},{character:2,costume:0}],barriers:new Map(),inputs:new Map(),history:new Map(),lastFrame:-1,phaseKey:null,sequence:-1,touched:Date.now(),ended:[null,null],rematchVotes:[false,false],devices:['keyboard','keyboard']};rooms.set(id,r);return r;}
  function reserve(r,seat){const key=token();r.players[seat]={token:key,ws:null};sessions.set(key,{r,seat});changed();return {token:key,...view(r,seat)};}
- function removeGuest(r){const p=r.players[1];if(p){sessions.delete(p.token);send(p.ws,{type:'removed'});p.ws?.close();r.players[1]=null;}reset(r);}
+ function removeGuest(r){const p=r.players[1];if(r.devices)r.devices[1]='keyboard';if(p){sessions.delete(p.token);send(p.ws,{type:'removed'});p.ws?.close();r.players[1]=null;}reset(r);}
  function action(session,m){const {r,seat}=session;r.touched=Date.now();
   if(m.type==='cpu'){if(m.enabled&&!r.diagnosticCpu)throw Error('CPU mode is unavailable in tournament rooms');if(seat||r.players[1]||r.phase!=='characters'||typeof m.enabled!=='boolean')throw Error('CPU changes require an empty guest seat at character select');r.cpu=m.enabled;r.ready=[false,false];state(r);}
   else if(m.type==='ready'){if(r.phase!=='characters'||r.cpu||!r.players[1]||!r.players.every(p=>p?.ws?.readyState===1))throw Error('Both players must be connected');r.ready[seat]=true;state(r);}
   else if(m.type==='kick'){if(seat)throw Error('Only P1 can remove a guest');removeGuest(r);}
   else if(m.type==='leave'){if(seat)removeGuest(r);else {removeGuest(r);sessions.delete(r.players[0].token);r.players[0].ws?.close();rooms.delete(r.code);changed();}}
+  // Shown on the opponent's character panel only; never affects inputs.
+  else if(m.type==='device'){if(!['keyboard','controller'].includes(m.value))throw Error('Invalid input device');r.devices??=['keyboard','keyboard'];if(r.devices[seat]!==m.value){r.devices[seat]=m.value;state(r);}}
   else if(m.type==='selection'){const p=m.value;if(!p||!Number.isInteger(p.character)||p.character<0||p.character>25||!Number.isInteger(p.costume)||p.costume<0||p.costume>5)throw Error('Invalid character selection');r.selected[seat]={character:p.character,costume:p.costume};changed();}
   else if(m.type==='phase'){
    if(m.epoch!==r.epoch||r.cpu||!r.players[1])return;

@@ -17,7 +17,7 @@ if(fs.existsSync(manifest))for(const name of JSON.parse(fs.readFileSync(manifest
   files.add('fixtures/'+name);
 }
 }
-for(const name of ['melee-ui.css','keyboard-model.js','gamecube-buttons.js','vendor/three.module.js','vendor/three.core.js'])files.add(name);
+for(const name of ['melee-ui.css','keyboard-model.js','controller-model.js','gamecube-buttons.js','vendor/three.module.js','vendor/three.core.js'])files.add(name);
 if(fs.existsSync(path.join(output,'ui-fixtures.json')))for(const name of JSON.parse(fs.readFileSync(path.join(output,'ui-fixtures.json')))){if(!/^[A-Za-z0-9-]+\.png$/.test(name))throw Error('Invalid UI fixture');files.add('assets/'+name);}
 files.add('music-fixtures.json');
 // Original sound-effect tables and banks (prepare-sfx.mjs).

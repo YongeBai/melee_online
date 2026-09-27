@@ -39,6 +39,15 @@ controller inputs over a direct WebRTC data channel.
 - **GameCube adapter** (`native-gc-adapter.mjs`): WebHID access to the Nintendo
   adapter (Wii U mode). Raw values take the SDK origin and Melee's
   `HSD_PadClamp`/`HSD_PadScale` path. Not tested with physical hardware.
+- **Controllers and the room UI**: browser gamepads with the standard mapping
+  (Xbox, PlayStation and similar) drive the local seat. The Xbox layout keeps
+  GameCube button positions: X is B, B is X, RB is Z, and the triggers are
+  analog L and R. Detecting a controller switches the player's panel icon and
+  controls screen to it. The controls screen is a 3D pad, with each button's
+  GameCube part floating above it, and it follows the live input. Pressing a
+  keyboard key switches back to the keyboard. Each seat reports keyboard or
+  controller through the room, so the opponent's panel shows the matching icon.
+  Browsers expose a gamepad only after one of its buttons is pressed on the page.
 
 ## Measurement loop
 

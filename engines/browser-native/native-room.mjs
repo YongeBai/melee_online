@@ -9,17 +9,20 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  else if(saved?.token)storage.removeItem(storageKey);
  if(!initial)transport?.forget?.();
  initial??=await post('/native-rooms',{diagnosticCpu:requestedDiagnostic});
- let state=initial,ws,closed=false,sequence=-1,key=null,phaseReady=false,nextFrame=0,reloading=false,localTapJump=1,lastSent=null,confirmedFrame=-1,rollbackSink,pendingEnding=null,reconnectTimer,reconnectAttempt=0;
+ let state=initial,ws,closed=false,sequence=-1,key=null,phaseReady=false,nextFrame=0,reloading=false,localTapJump=1,localDevice=null,lastSent=null,confirmedFrame=-1,rollbackSink,pendingEnding=null,reconnectTimer,reconnectAttempt=0;
  const frames=new Map(),sent=new Map(),rollbackEvents=[];
  let rollbackPhase=false;
  const persist=(value,syncedReload=false)=>storage.setItem(storageKey,JSON.stringify({token:value.token??initial.token,epoch:value.epoch,syncedReload,diagnosticCpu:requestedDiagnostic}));persist(initial);
  function send(value){if(ws?.readyState!==1)throw Error('Room connection unavailable');ws.send(JSON.stringify(value));}
+ // The opponent's panel shows this seat's device; older authorities omit it.
+ function syncDevice(){if(localDevice&&Array.isArray(state.devices)&&state.devices[state.seat]!==localDevice&&ws?.readyState===1)send({type:'device',value:localDevice});}
  function restart(value,syncedReload=true){if(reloading)return;reloading=true;persist(value,syncedReload);reload();}
  const network={
   get code(){return state.code;},get seat(){return state.seat;},get state(){return state;},get active(){return state.hasGuest&&!state.cpu;},
   get connected(){return state.connected.every(Boolean);},get cpu(){return state.cpu;},get tapJump(){return localTapJump;},get phaseReady(){return phaseReady;},
   snapshot(){return {code:state.code,seat:state.seat,epoch:state.epoch,phase:key,phaseReady,nextFrame,buffered:frames.size,bufferedSent:sent.size,lastSent,confirmedFrame,pendingEnding:pendingEnding&&{frame:pendingEnding.frame,sent:pendingEnding.sent},bufferedRollbackEvents:rollbackEvents.length,mode:network.active?(rollbackPhase?'rollback':'lockstep-3'):'solo',transport:network.active?'authenticated-inputs-v3':null,link:transport?.kind??'websocket-relay'};},
   async join(code){const result=await post('/native-rooms/join',{code});reloading=true;try{send({type:'leave'});}catch{}initial=result;persist(result,true);reloading=true;reload();},
+  setDevice(value){if(!['keyboard','controller'].includes(value))throw Error('Invalid input device');localDevice=value;syncDevice();},
   setTapJump(value){if(value!==0&&value!==1)throw Error('Invalid tap jump setting');localTapJump=value;},
   endMatch(value,frame=nextFrame-1){if(!Number.isSafeInteger(frame)||frame<0)throw Error('Invalid match ending frame');const ending={frame,value:structuredClone(value),sent:false};if(pendingEnding){if(JSON.stringify({...pendingEnding,sent:false})!==JSON.stringify(ending))throw Error('Conflicting match ending');return;}pendingEnding=ending;flushEnding();},chooseResult(action){send({type:'result-action',epoch:state.epoch,action});},
   cpuMode(enabled){send({type:'cpu',enabled});},ready(){if(!state.ready[state.seat])send({type:'ready'});},kick(){send({type:'kick'});},
@@ -66,7 +69,7 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
    const m=JSON.parse(event.data);
    if(m.type==='state'){
     if(m.epoch!==initial.epoch){restart({...m,token:initial.token});return;}
-    state=m;persist(m);flushEnding();onState(network);clearTimeout(timeout);connected=true;reconnectAttempt=0;resolve(network);
+    state=m;persist(m);flushEnding();syncDevice();onState(network);clearTimeout(timeout);connected=true;reconnectAttempt=0;resolve(network);
    }else if(m.type==='frame'&&m.epoch===state.epoch&&m.key===key){if(rollbackSink===undefined)frames.set(m.frame,m.inputs);}
    else if(m.type==='peer-input'&&m.epoch===state.epoch&&m.key===key&&m.seat===1-state.seat)queueRollback(m);
    else if(m.type==='confirmed-frame'&&m.epoch===state.epoch&&m.key===key){if(!Number.isSafeInteger(m.frame)||m.frame!==confirmedFrame+1)throw Error('Non-contiguous room confirmation');confirmedFrame=m.frame;if(rollbackSink!==undefined)sent.delete(m.frame);queueRollback(m);flushEnding();}
@@ -89,6 +92,6 @@ export function createLocalNativeRoom(reason='Room service unavailable',{diagnos
  const cpu=diagnosticCpu===true,state={seat:0,cpu,hasGuest:false,connected:[true,false],ready:[false,false]};
  const unavailable=()=>{throw Error(reason);};
  return {offline:true,reason,code:'',seat:0,cpu,active:false,connected:false,state,
-  tapJump:1,phaseReady:false,snapshot:()=>({mode:cpu?'diagnostic-cpu':'unavailable',offline:true}),begin(){},take:s=>cpu?s:s.map((v,i)=>i?[0,0,0,0,0,0,0]:[v[0]&~0x1000,...v.slice(1)]),setTapJump(){},bindRollback(){return ()=>{};},sendInput(){return false;},dispose(){},
+  tapJump:1,phaseReady:false,snapshot:()=>({mode:cpu?'diagnostic-cpu':'unavailable',offline:true}),begin(){},take:s=>cpu?s:s.map((v,i)=>i?[0,0,0,0,0,0,0]:[v[0]&~0x1000,...v.slice(1)]),setTapJump(){},setDevice(){},bindRollback(){return ()=>{};},sendInput(){return false;},dispose(){},
   newRoom:()=>location.reload(),join:unavailable,cpuMode:unavailable,ready:unavailable,kick:unavailable,leave:unavailable};
 }

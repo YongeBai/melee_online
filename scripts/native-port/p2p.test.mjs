@@ -51,3 +51,19 @@ test('an input repeated after reconnect is idempotent once confirmed, but confli
  input(a,3,-.5);assert.equal(errors(),1,'a changed confirmed input is rejected');
  core.close();
 });
+
+test('each seat reports its input device to the opponent and a new guest starts on keyboard',()=>{
+ const core=createRoomCore(),owner=core.request('create',{}).body,guest=core.request('join',{code:owner.code}).body;
+ const a=connect(core,owner.token),b=connect(core,guest.token),last=c=>c.ws.messages.filter(m=>m.type==='state').at(-1);
+ assert.deepEqual(last(a).devices,['keyboard','keyboard']);
+ b.h.message(JSON.stringify({type:'device',value:'controller'}));
+ assert.deepEqual(last(a).devices,['keyboard','controller']);
+ const count=a.ws.messages.length;b.h.message(JSON.stringify({type:'device',value:'controller'}));
+ assert.equal(a.ws.messages.length,count,'an unchanged device is not rebroadcast');
+ b.h.message(JSON.stringify({type:'device',value:'joystick'}));
+ assert.ok(b.ws.messages.some(m=>m.type==='error'));
+ const restored=createRoomCore();restored.restore(JSON.parse(JSON.stringify(core.serialize())));
+ assert.deepEqual(restored.request('resume',{token:owner.token}).body.devices,['keyboard','controller']);
+ a.h.message(JSON.stringify({type:'kick'}));
+ assert.deepEqual(last(a).devices,['keyboard','keyboard']);
+});

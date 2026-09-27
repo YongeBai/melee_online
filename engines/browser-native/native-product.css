@@ -65,3 +65,7 @@ body[data-error="true"] #result { display: block; position: fixed; inset: 10%; z
 .adapter-action { position: absolute; z-index: 3; top: 4%; left: 3%; height: 6%; min-width: 26%; padding: 0 28px; border: 0; border-top: 2px solid #9b9ba4; border-bottom: 2px solid #646572; background: linear-gradient(90deg,#454854,#202230); clip-path: polygon(6% 0,94% 0,100% 50%,94% 100%,6% 100%,0 50%); filter: drop-shadow(2px 2px 1px #000); cursor: pointer; }
 .adapter-action canvas { height: 62%; max-width: 100%; object-fit: contain; filter: drop-shadow(2px 2px 0 #000); }
 .adapter-action:hover, .adapter-action:focus-visible { background: linear-gradient(90deg,#766440,#332c24); outline: none; }
+/* The controls screen follows the local device (keyboard or controller). */
+#controllerModel { position: absolute; inset: 12% 1% 20%; touch-action: none; }
+#controllerModel canvas { display: block; width: 100%; height: 100%; }
+#keyboardModel[hidden], #controllerModel[hidden] { display: none; }
