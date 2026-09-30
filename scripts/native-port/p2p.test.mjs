@@ -67,3 +67,19 @@ test('each seat reports its input device to the opponent and a new guest starts 
  a.h.message(JSON.stringify({type:'kick'}));
  assert.deepEqual(last(a).devices,['keyboard','keyboard']);
 });
+
+test('a CPU room hands the CPU seat to a joining player and takes it back when they go',()=>{
+ const core=createRoomCore(),owner=core.request('create',{diagnosticCpu:true}).body;
+ assert.equal(owner.cpu,true,'a new room faces the CPU');
+ const guest=core.request('join',{code:owner.code}).body;
+ assert.equal(guest.cpu,false,'the joining player replaces the CPU');assert.equal(guest.hasGuest,true);
+ const a=connect(core,owner.token),b=connect(core,guest.token),last=c=>c.ws.messages.filter(m=>m.type==='state').at(-1);
+ assert.equal(last(a).cpu,false);
+ b.h.message(JSON.stringify({type:'leave'}));
+ assert.equal(last(a).cpu,true,'P1 is back against the CPU after the guest leaves');assert.equal(last(a).hasGuest,false);
+ const again=core.request('join',{code:owner.code}).body,c=connect(core,again.token);
+ assert.equal(last(c).cpu,false);a.h.message(JSON.stringify({type:'kick'}));
+ assert.equal(last(a).cpu,true,'kicking the guest restores the CPU');
+ const tournament=core.request('create',{}).body;core.request('join',{code:tournament.code});
+ assert.equal(core.request('join',{code:tournament.code}).body.error,'Room is full');
+});

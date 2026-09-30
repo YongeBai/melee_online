@@ -24,7 +24,7 @@ test('an invalid hello cannot poison a later valid session handshake',async t=>{
 });
 test('native rooms protect seats, require both Ready, and relay ordered immutable inputs',async t=>{
  const {post,socket}=await fixture(t),owner=await post('/native-rooms',{diagnosticCpu:true}),a=await socket(owner.token);
- assert.equal(owner.cpu,true);assert.equal(owner.seat,0);assert.equal((await post('/native-rooms/join',{code:owner.code})).status,400);
+ assert.equal(owner.cpu,true);assert.equal(owner.seat,0);
  a.send({type:'cpu',enabled:false});await a.take(m=>m.type==='state'&&!m.cpu);
  const guest=await post('/native-rooms/join',{code:owner.code}),b=await socket(guest.token);assert.equal(guest.seat,1);
  assert.equal((await post('/native-rooms/join',{code:owner.code})).status,400);

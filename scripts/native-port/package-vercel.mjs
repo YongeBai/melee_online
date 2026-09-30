@@ -14,7 +14,10 @@ const out=path.resolve(process.argv[3]??path.join(root,'dist/playmelee-vercel'))
 const {dirtyHostContract}=await import(path.join(source,'dirty-host-contract.mjs'));
 const unpinned=Object.entries(dirtyHostContract).filter(([name,hash])=>!fs.existsSync(path.join(source,name))||createHash('sha256').update(fs.readFileSync(path.join(source,name))).digest('hex')!==hash).map(([name])=>name);
 if(unpinned.length)throw Error('Pinned host files do not match their audit hashes: '+unpinned.join(', '));
+// Keep the Vercel project link: without it `vercel deploy` creates a new project.
+const link=path.join(out,'.vercel/project.json'),linked=fs.existsSync(link)?fs.readFileSync(link):null;
 if(fs.existsSync(out))fs.rmSync(out,{recursive:true});
+if(linked){fs.mkdirSync(path.dirname(link),{recursive:true});fs.writeFileSync(link,linked);}
 fs.mkdirSync(path.join(out,'public/play'),{recursive:true});
 const inventory={};
 for(const name of [...nativePortFiles].sort()){

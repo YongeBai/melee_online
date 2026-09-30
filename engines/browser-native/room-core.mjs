@@ -34,7 +34,8 @@ export function createRoomCore({maxRooms=64,expiryMs=30000,deliveryDelayMs=null,
  function reset(r,returnTo=null){r.returnTo=returnTo;r.ended=[null,null];r.rematchVotes=[false,false];r.epoch++;r.ready=[false,false];r.phase='characters';r.barriers.clear();r.inputs.clear();r.history.clear();r.lastFrame=-1;r.phaseKey=null;r.sequence=-1;state(r);}
  function create(diagnosticCpu=false){if(rooms.size>=maxRooms)throw Error('Room service is full');let id;do{id=createCode();}while(rooms.has(id));const r={code:id,cpu:diagnosticCpu,diagnosticCpu,epoch:0,players:[null,null],ready:[false,false],phase:'characters',selected:[{character:20,costume:0},{character:2,costume:0}],barriers:new Map(),inputs:new Map(),history:new Map(),lastFrame:-1,phaseKey:null,sequence:-1,touched:Date.now(),ended:[null,null],rematchVotes:[false,false],devices:['keyboard','keyboard']};rooms.set(id,r);return r;}
  function reserve(r,seat){const key=token();r.players[seat]={token:key,ws:null};sessions.set(key,{r,seat});changed();return {token:key,...view(r,seat)};}
- function removeGuest(r){const p=r.players[1];if(r.devices)r.devices[1]='keyboard';if(p){sessions.delete(p.token);send(p.ws,{type:'removed'});p.ws?.close();r.players[1]=null;}reset(r);}
+ function removeGuest(r){const p=r.players[1];if(r.devices)r.devices[1]='keyboard';// CPU rooms return to the CPU opponent once the guest is gone.
+ if(r.diagnosticCpu&&r.players[1])r.cpu=true;if(p){sessions.delete(p.token);send(p.ws,{type:'removed'});p.ws?.close();r.players[1]=null;}reset(r);}
  function action(session,m){const {r,seat}=session;r.touched=Date.now();
   if(m.type==='cpu'){if(m.enabled&&!r.diagnosticCpu)throw Error('CPU mode is unavailable in tournament rooms');if(seat||r.players[1]||r.phase!=='characters'||typeof m.enabled!=='boolean')throw Error('CPU changes require an empty guest seat at character select');r.cpu=m.enabled;r.ready=[false,false];state(r);}
   else if(m.type==='ready'){if(r.phase!=='characters'||r.cpu||!r.players[1]||!r.players.every(p=>p?.ws?.readyState===1))throw Error('Both players must be connected');r.ready[seat]=true;state(r);}
@@ -107,7 +108,8 @@ export function createRoomCore({maxRooms=64,expiryMs=30000,deliveryDelayMs=null,
  function request(route,m){
   try{
    if(route==='resume'){const s=sessions.get(m.token);if(!s)throw Error('Room session expired');if(s.r.players[1]&&!(m.syncedReload===true&&m.epoch===s.r.epoch))reset(s.r);return {status:200,body:{token:m.token,...view(s.r,s.seat)}};}
-   if(route==='join'){const r=rooms.get(m.code);if(!r)throw Error('Room not found');if(r.cpu)throw Error('P1 must remove the CPU first');if(r.players[1])throw Error('Room is full');const joined=reserve(r,1);reset(r);return {status:200,body:{...joined,...view(r,1)}};}
+   if(route==='join'){const r=rooms.get(m.code);if(!r)throw Error('Room not found');if(r.players[1])throw Error('Room is full');// A joining player replaces the CPU opponent.
+    r.cpu=false;const joined=reserve(r,1);reset(r);return {status:200,body:{...joined,...view(r,1)}};}
    if(route==='create'){if(m.diagnosticCpu!==undefined&&typeof m.diagnosticCpu!=='boolean')throw Error('Invalid diagnostic CPU option');if(m.diagnosticCpu&&!allowDiagnosticCpu)throw Error('CPU mode is unavailable on this server');const r=create(m.diagnosticCpu===true);return {status:200,body:reserve(r,0)};}
    throw Error('Unsupported room route');
   }catch(e){return {status:400,body:{error:e.message}};}
