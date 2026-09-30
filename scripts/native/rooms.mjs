@@ -14,14 +14,15 @@ export function attachRooms(
   const send = (ws, obj) => {
     if (ws?.readyState === 1) ws.send(JSON.stringify(obj));
   };
-  http.on("upgrade", (req, socket, head) => {
+  const upgrade = (req, socket, head) => {
     if (req.url !== "/room-session") return;
     if (!origins.includes(req.headers.origin) || !access.authorized(req)) {
       socket.end("HTTP/1.1 403 Forbidden\r\n\r\n");
       return;
     }
     wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
-  });
+  };
+  http.on("upgrade", upgrade);
   function view(room, seat) {
     return {
       code: room.code,
@@ -31,6 +32,8 @@ export function attachRooms(
       cpu: !!room.cpu,
       hasGuest: !!room.seats[1],
       phase: room.phase,
+      characterSelect: ["selecting", "disconnected"].includes(room.phase) &&
+        room.state?.major === 2 && room.state?.minor === 0 && room.state?.sceneKind === 8,
       epoch: room.epoch,
       frame: room.rollback?.frame ?? 0,
       rollback: room.rollback?.stats ?? null,
@@ -39,6 +42,7 @@ export function attachRooms(
     };
   }
   function publish(room) {
+    if (!rooms.has(room.code)) return;
     for (let i = 0; i < 2; i++) send(room.seats[i]?.ws, { type: "room", room: view(room, i) });
   }
   async function stopRollback(room) {
@@ -188,15 +192,6 @@ export function attachRooms(
       if (state.major === 2 && state.minor === 1) room.phase = "stage";
       if (state.major === 2 && state.minor === 0 && state.sceneKind === 8) {
         const settled = state.cssReady && sceneProgress >= 90 && Date.now() - room.sceneAt > 1500;
-        if (settled && room.restoreCpu) {
-          await room.worker.request("meleeControl", { action: "opponent", cpu: true });
-          room.restoreCpu = false;
-          room.phase = "loading";
-          room.sceneAt = Date.now();
-          room.sceneFirstFrame = state.sceneFrame;
-          publish(room);
-          return;
-        }
         room.phase = settled ? "selecting" : "loading";
         if (settled && Date.now() - (room.layoutAt || 0) > 1000) {
           await room.worker.request("meleeControl", { action: "roomLayout", online: true });
@@ -261,11 +256,41 @@ export function attachRooms(
       publish(room);
     }
   }
+  async function waitForTransition(room) {
+    await room.boot;
+    const deadline = Date.now() + 85000;
+    while (room.starting || room.changing || room.joining) {
+      if (Date.now() > deadline) throw Error("Room transition timed out. Please retry.");
+      await sleep(50);
+    }
+  }
+  async function requireCharacterSelect(room) {
+    await waitForTransition(room);
+    const state = await room.worker.request("meleeInspect");
+    if (!["selecting", "disconnected"].includes(room.phase) ||
+        state.major !== 2 || state.minor !== 0 || state.sceneKind !== 8)
+      throw Error("Leave and Kick are only available at character select");
+    return state;
+  }
   async function leave(ws) {
     const m = ws.membership;
     if (!m) return;
     const { room, index } = m;
+    await requireCharacterSelect(room);
     if (index === 1 && room.seats[0]) return kick(room, 0, false);
+    // The owner leaving ends this shared room. The remaining browser boots
+    // its own CPU room instead of retaining an orphaned P2 seat forever.
+    if (index === 0 && room.seats[1]) {
+      const peer = room.seats[1].ws;
+      if (peer) {
+        delete peer.membership;
+        send(peer, { type: "kicked", reason: "owner-left" });
+        peer.close(4003, "Room owner left");
+      }
+      delete ws.membership;
+      await destroy(room);
+      return;
+    }
     delete ws.membership;
     const seat = room.seats[index];
     if (seat?.ws !== ws) return;
@@ -283,7 +308,7 @@ export function attachRooms(
   }
   async function kick(room, index, notify = true) {
     if (index !== 0) throw Error("Only the room owner can kick a player");
-    if (room.starting || room.changing || room.joining) throw Error("Wait for the room transition");
+    const state = await requireCharacterSelect(room);
     const guest = room.seats[1];
     if (!guest) throw Error("There is no player to kick");
     room.changing = true;
@@ -291,7 +316,6 @@ export function attachRooms(
       tokens.delete(guest.token);
       room.seats[1] = null;
       room.cpu = true;
-      room.restoreCpu = true;
       room.pads = [neutralPad(), neutralPad()];
       room.seats[0].ready = false;
       if (guest.ws) {
@@ -303,23 +327,10 @@ export function attachRooms(
       }
       await stopRollback(room);
       await room.worker.rollback("pads", { pads: room.pads });
-      const state = await room.worker.request("meleeInspect");
-      if (state.major === 2 && state.minor === 2) {
-        await room.worker.request("meleeControl", { action: "quit" });
-        room.phase = "returning";
-      } else if (state.major === 2 && state.minor === 1) {
-        await room.worker.rollback("pads", { pads: [{ ...neutralPad(), mask: 2 }, neutralPad()] });
-        await room.worker.request("start");
-        await sleep(180);
-        await room.worker.rollback("pads", { pads: room.pads });
-        room.phase = "loading";
-      } else {
-        await room.worker.request("meleeControl", { action: "opponent", cpu: true });
-        room.restoreCpu = false;
-        room.phase = "loading";
-        room.sceneAt = Date.now();
-        room.sceneFirstFrame = state.sceneFrame;
-      }
+      await room.worker.request("meleeControl", { action: "opponent", cpu: true });
+      room.phase = "loading";
+      room.sceneAt = Date.now();
+      room.sceneFirstFrame = state.sceneFrame;
       await room.worker.request("start");
       publish(room);
     } finally {
@@ -363,7 +374,9 @@ export function attachRooms(
             (room.cpu && room.phase === "match")
           ) {
             if (room.phase === "stage" && index !== 0) return;
-            if (room.phase !== "match") pad.mask &= ~16;
+            // CSS Start goes through the two-seat readiness command. Once P1
+            // is choosing the stage, let native Start confirm that choice.
+            if (room.phase === "selecting") pad.mask &= ~16;
             void room.worker.rollback("pads", { pads: room.pads }).catch(() => {});
           }
         } catch (e) {
@@ -566,7 +579,12 @@ export function attachRooms(
       publish(room);
     });
   });
+  let closed = false;
   const close = () => {
+    if (closed) return;
+    closed = true;
+    process.removeListener("exit", close);
+    http.removeListener("upgrade", upgrade);
     for (const room of rooms.values()) void destroy(room);
     wss.close();
   };

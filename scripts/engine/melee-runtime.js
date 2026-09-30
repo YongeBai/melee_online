@@ -1,6 +1,8 @@
 import { AudioController } from "/engine/src/audio.js";
 import { characterSelectReady } from "./melee-startup.js";
-import { readGamepadInput, selectPreferredGamepad } from "/engine/src/input.js";
+import { createControllerStart } from "./controller-start.js";
+import { createActiveGamepad } from "./active-gamepad.js";
+import { readGamepadInput } from "/engine/src/input.js";
 
 const params = new URLSearchParams(location.search);
 const nativeEngine = params.get("engine") !== "wasm";
@@ -106,6 +108,24 @@ if(host.online){
   const {createRoomUI}=await import('./room-ui.js');
   createRoomUI(host);
   document.body.classList.add('online-room');
+  let previousRoomCode;
+  window.addEventListener('melee-room', ({detail: room}) => {
+    if (previousRoomCode && room.code !== previousRoomCode) {
+      paused = false;
+      controlsChanging = false;
+      keyboardModel?.setVisible(false);
+      $('controls').close();
+      document.body.classList.remove('controls-open');
+      keys.clear();
+      clearTimeout(pulseTimer);
+      pulseUntil = 0;
+      ready = false;
+      bootPresented = host.metrics.presented;
+      audio.setOutputEnabled(false);
+      loading.hidden = false;
+    }
+    previousRoomCode = room.code;
+  });
   window.addEventListener('melee-room-kicked', () => {
     paused = false;
     controlsChanging = false;
@@ -116,7 +136,6 @@ if(host.online){
     clearTimeout(pulseTimer);
     $('keyboardButton').hidden = true;
     $('peerKeyboard').hidden = true;
-    $('kickMatch').hidden = true;
     ready = false;
     loading.hidden = false;
     status.textContent = 'The room owner removed you. Start a new room to play again.';
@@ -125,6 +144,7 @@ if(host.online){
     $('begin').disabled = false;
     $('roomPanel').hidden = true;
     host.room = null;
+    setTimeout(() => $('begin').click(), 0);
   });
 }
 audio.setSource((frames) => host.mixAudio(frames));
@@ -196,10 +216,31 @@ function pulse(mask) {
   host.setInputState({ ...pad, mask: pad.mask | mask });
   pulseTimer = setTimeout(() => host.setInputState(sample()), 180);
 }
-let lastPadSignature = "",
-  padStartHeld = false;
+let lastPadSignature = "";
+let startBindings = {};
+try { startBindings = JSON.parse(localStorage.getItem("melee.controllerStart") || "{}"); } catch {}
+const controllerStart = createControllerStart(startBindings && typeof startBindings === "object" ? startBindings : {});
+const selectActiveGamepad = createActiveGamepad();
+let previousPadMask = 0;
+const mapStart = document.createElement("button");
+mapStart.textContent = "Map controller Start";
+mapStart.hidden = true;
+$("toolbar").append(mapStart);
+mapStart.onclick = () => {
+  controllerStart.learn(navigator.getGamepads?.() || []);
+  mapStart.textContent = "Press your controller Start button";
+  keys.clear();
+  host.setInputState(neutral());
+};
 function pollGamepad() {
-  const pad = selectPreferredGamepad(navigator.getGamepads?.() || []);
+  const pads = navigator.getGamepads?.() || [];
+  const startInput = controllerStart.poll(pads);
+  const pad = selectActiveGamepad(pads);
+  mapStart.hidden = !pad;
+  if (startInput.mapped) {
+    mapStart.textContent = "Map controller Start";
+    try { localStorage.setItem("melee.controllerStart", JSON.stringify(controllerStart.bindings)); } catch {}
+  }
   gamepadState = pad ? readGamepadInput(pad).state : null;
   if (gamepadState) {
     gamepadState.mask = 0;
@@ -217,15 +258,39 @@ function pollGamepad() {
       14: 1024,
       15: 2048,
     }))
-      if (pad.buttons[i]?.pressed) gamepadState.mask |= bit;
-    gamepadState.analogA = pad.buttons[0]?.pressed ? 255 : 0;
-    gamepadState.analogB = pad.buttons[2]?.pressed ? 255 : 0;
-    const start = Boolean(pad.buttons[9]?.pressed);
-    if (start && !padStartHeld && ready) {
-      void startButton();
+      if (Number(i) !== controllerStart.button(pad) && pad.buttons[i]?.pressed) gamepadState.mask |= bit;
+    gamepadState.analogA = controllerStart.button(pad) !== 0 && pad.buttons[0]?.pressed ? 255 : 0;
+    gamepadState.analogB = controllerStart.button(pad) !== 2 && pad.buttons[2]?.pressed ? 255 : 0;
+    if ([4, 6].includes(controllerStart.button(pad))) gamepadState.triggerLeft = 0;
+    if ([5, 7].includes(controllerStart.button(pad))) gamepadState.triggerRight = 0;
+  }
+  if (startInput.learning || startInput.mapped) gamepadState = neutral();
+  const padMask = gamepadState?.mask || 0;
+  const pressed = padMask & ~previousPadMask;
+  previousPadMask = padMask;
+  if (ready && !startInput.learning && !startInput.mapped) {
+    if (paused) {
+      if (pressed & 2) void setPaused(false);
+      else if (pressed & (256 | 512))
+        (document.activeElement === $("tapJump") ? $("closeControls") : $("tapJump")).focus();
+      else if (pressed & 1) {
+        if (document.activeElement === $("closeControls")) void setPaused(false);
+        else toggleTapJump();
+      }
+    } else if (gameState?.major === 2 && gameState.minor === 0 && gamepadState) {
+      // Route A through the same native-hand hit test as keyboard P. Do not
+      // also forward raw A, which could select a fighter beneath a room action.
+      gamepadState.mask &= ~1;
+      gamepadState.analogA = 0;
+      if (pressed & 1) void cssAttack().catch(console.error);
     }
-    padStartHeld = start;
-  } else padStartHeld = false;
+  }
+  if (startInput.start) {
+    if (!ready && !$("begin").hidden) $("begin").click();
+    else void startButton().catch(error => {
+      window.dispatchEvent(new CustomEvent("melee-room-error", {detail:error.message}));
+    });
+  }
   const signature = JSON.stringify(gamepadState);
   if (signature !== lastPadSignature && performance.now() > pulseUntil) {
     lastPadSignature = signature;
@@ -615,6 +680,7 @@ if (params.has("qa")) {
     ["O", "KeyO"],
     ["Space", "Space"],
     ["I", "KeyI"],
+    ["L", "KeyL"],
     ["U", "KeyU"],
     ["K", "KeyK"],
   ]) {

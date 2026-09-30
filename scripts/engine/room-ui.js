@@ -50,11 +50,6 @@ export function createRoomUI(host) {
   $("gameViewport").append(peerKeyboard);
   let busy = false,
     error = "";
-  const matchKick = document.createElement("button");
-  matchKick.id = "kickMatch";
-  matchKick.hidden = true;
-  matchKick.innerHTML = '<img src="/play/assets/room-kick.png" alt="Kick player">';
-  document.getElementById("toolbar").append(matchKick);
   const announce = (message) => {
     error = message;
     text($("roomStatus"), message.replace(/[^A-Za-z0-9 ]/g, ""));
@@ -79,11 +74,11 @@ export function createRoomUI(host) {
     $("copyRoom").setAttribute("aria-label", `Copy room code ${r.code}`);
     const connected = r.connected.every(Boolean);
     $("joinRoom").hidden = connected;
-    $("leaveRoom").hidden = !connected && r.seat === 0 && r.phase !== "disconnected";
+    $("leaveRoom").hidden = !r.characterSelect || (!connected && r.seat === 0 && r.phase !== "disconnected");
     $("readyRoom").hidden = !connected && !r.cpu;
-    $("kickRoom").hidden = r.seat !== 0 || !r.hasGuest;
-    matchKick.hidden = r.seat !== 0 || !r.hasGuest || !["match", "stage"].includes(r.phase);
-    for (const b of panel.querySelectorAll("button")) b.disabled = busy || r.phase === "loading";
+    $("kickRoom").hidden = !r.characterSelect || r.seat !== 0 || !r.hasGuest;
+    for (const b of panel.querySelectorAll("button")) b.disabled = busy;
+    $("joinSubmit").disabled = busy || r.phase !== "selecting";
     $("readyRoom").disabled = busy || r.phase !== "selecting";
     $("readyRoom").classList.toggle("selected", r.ready[r.seat]);
     $("readyRoom").setAttribute("aria-label", r.ready[r.seat] ? "Cancel start" : "Start");
@@ -139,7 +134,7 @@ export function createRoomUI(host) {
   };
   $("readyRoom").onclick = () => action(() => host.request("meleeControl", { action: "start" }));
   $("leaveRoom").onclick = () => action(() => host.request("roomLeave"));
-  $("kickRoom").onclick = matchKick.onclick = () => action(() => host.request("roomKick"));
+  $("kickRoom").onclick = () => action(() => host.request("roomKick"));
   if (new URLSearchParams(location.search).has("qa")) {
     const probe = document.createElement("aside");
     probe.id = "roomProbe";

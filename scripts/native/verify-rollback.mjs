@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 import { encodePNG } from "../assets/gx-textures.mjs";
 import { RoomWorker } from "./room-worker.mjs";
 import { RollbackSession, dolphinAdapter, neutralPad } from "./rollback.mjs";
-const worker = new RoomWorker("rollback-validation");
+const worker = new RoomWorker(`rollback-validation-${process.pid}`);
 const frameCount = Number(process.env.MELEE_VERIFY_FRAMES || 75);
 assert.ok(Number.isInteger(frameCount) && frameCount >= 75 && frameCount <= 3600);
 const reportName = process.env.MELEE_VERIFY_REPORT || "rollback-validation.json";

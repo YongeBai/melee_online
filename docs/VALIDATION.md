@@ -1,5 +1,74 @@
 # Validation — September 8–9, 2026
 
+## Controller Start and room exits — September 28, 2026
+
+Start now checks edges across connected controllers instead of only the preferred
+pad, and offers a saved per-device Start binding. Mapping consumes the binding
+press without starting a match. Raw Start remains suppressed at CSS for the
+two-human readiness handshake, but P1 Start now reaches native stage select.
+
+Leave and owner-only Kick are restricted to character select, in both the UI and
+server. Actions wait for active transitions and then inspect the native scene
+before changing membership. Owner departure sends the other browser to its own
+CPU room. Late messages from destroyed workers cannot overwrite a new room.
+
+The earlier 73-test revision allowed departures during gameplay; that behavior
+has been replaced. Tests now reject owner/guest departure and owner Kick from
+stage, match and results, while retaining membership. Controller activity
+arbitration and frame-queue resource ownership have additional regression tests.
+Physical controller hardware and the production Vercel build were not tested.
+
+### Full-flow playtest, local native server 3192
+
+Two in-app Chromium clients exercised fresh hosted-game boot, default Falco vs
+level 9 CPU Fox, an invalid invitation, a valid join replacing CPU, P2-only Start
+showing Waiting for other player, P1 Start entering stage select, and a human
+match. Native Start confirmed stages. Leave/Kick were absent during stages and
+matches; P2 had no Kick action at CSS. CPU stock loss returned to customized CSS.
+Multiple P1 refreshes resumed the same human match and seat. Native Start paused;
+L+R+A+Start quit back to CSS. CSS Kick restored CPU in room 6Q4RQZ and automatically
+booted the removed browser into CPU room 2Z9WKG. No file picker was required.
+The guest rejoined and used Leave at CSS: P1 retained CPU room 6Q4RQZ and the
+departing guest automatically reached a new CPU room L5GPXX.
+
+The playtest also found idle-controller selection stealing movement, controller A
+bypassing the native-hand room-control hit test, and room-service shutdown
+retaining process/HTTP listeners. These have been corrected. Input unit tests
+cover activity selection, releases, drift, disconnects, saved Start mappings and
+button edges; they do not substitute for physical adapter testing.
+
+Video buffering now avoids repeated three-frame refills on displays faster than
+the 60 Hz stream and sheds the backlog after corrections stop. A fixed three-frame
+cap was rejected: a 100 ms delayed-input Fourside sample discarded 162 frames.
+The final adaptive capacity retained all frames during 109 corrections/880 replayed
+frames over 20 seconds: 54.60 simulation FPS, 54.45 presented FPS, zero decoder
+errors, and 45.90 ms mean browser queue time. The server could not sustain 60 FPS
+in this workload; this remains a performance limitation, not a passing 60 FPS
+result. The next 20-second recovery sample presented 59.98 FPS with 40.93 ms mean
+queue time and eight frames discarded while clearing backlog, versus 78.97 ms
+with the fixed eight-frame buffer in a separate recovery sample. These are
+sequential local samples, not input-to-photon measurements or WAN validation.
+
+All 80 root tests passed, including 144 Hz display scheduling, frame resource
+cleanup, shrinking backlog capacity, native-scene departure policies and repeated
+room-service shutdown without accumulating listeners. JavaScript syntax and
+`git diff --check` passed.
+
+The broader `test:browser` suite is not green in this checkout: 41 passed, 12
+failed and three skipped. Eleven failures require missing vendored WASM Dolphin
+source files; the other expects a `browserRollback` worker branch absent from
+the checked-out WASM worker. These are separate from the native room tests above
+and do not validate browser-local netplay.
+
+An isolated native Battlefield regression ran 600 frames per trial with 60 input
+changes. On-time and 1/3/5/9-frame-late trials produced identical final hashes;
+the slowest trial achieved 62.67 simulation FPS with 60 corrections and 600
+replayed frames. Restored video, compiled-instruction invalidation and native
+rematch checks passed. See [rollback-qa-september28.json](rollback-qa-september28.json).
+The verifier now uses a process-specific runtime directory so concurrent checks
+cannot overwrite another run's state. Browser test rooms were disconnected and
+expired before the measured trials; no other native game worker was active.
+
 ## CPU defaults and compact loading revision — September 20, 2026
 
 Fresh native rooms now initialize Falco P1 and level 9 CPU Fox with an empty

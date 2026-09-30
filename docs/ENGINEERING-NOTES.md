@@ -142,6 +142,17 @@ fields; validate actual fighter port, player ID and controller index after Start
   storing it in the shared pads, or a later owner update can forward that input.
   The foreground renderer checks P2's native player kind on each draw and skips
   its three hand passes for a CPU; the capture-ready marker must still be written.
+- Strip raw Start only at character select. P1's native stage-select Start must
+  reach the engine. Controller Start is edge-triggered across connected pads;
+  adapters can save a per-device binding using Map controller Start.
+- Leave and owner-only Kick belong only on character select. Check both the
+  room phase and a fresh native scene inspection before changing membership;
+  stale scene/phase values must not permit removal during stage select or play.
+  Wait for active transitions before checking. Owner departure closes the shared
+  room; the other browser automatically boots its own CPU room.
+- Controller A must use the same native-hand hit test as keyboard P for room
+  controls. Select the controller with fresh activity, retaining it through
+  releases; an idle virtual device must not steal movement.
 - A scene number can change before its objects and frame counter are ready.
   Require valid objects and scene progress, not just a fixed timer. The room
   monitor waits for CSS progression before enabling Ready and reapplying layout.
@@ -164,7 +175,11 @@ the unchanged restored checkpoint again. Preserve compiled code only when cached
 instructions match restored RAM and the instruction cache is coherent. Changed
 code/BAT mappings must take normal invalidation. Do not trade determinism for FPS.
 
-Video presently starts with three decoded frames and caps room queues at eight.
+Video consumes the next available decoded frame without a refill threshold.
+Requiring three frames after each empty tick causes repeated buffering on
+120/144 Hz displays. Keep up to eight frames while rollback corrections arrive,
+then reduce capacity to three after 1.5 seconds without a correction so the burst
+backlog does not become permanent delay. Always close discarded VideoFrames.
 Prior stress runs averaged roughly 74 ms in this presentation queue alone. That
 is a concrete latency target, not proof that the whole pipeline is 74 ms. A
 server stream still incurs input transit, simulation, encoding, video transit,

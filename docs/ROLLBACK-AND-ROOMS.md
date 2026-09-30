@@ -63,11 +63,12 @@ compiled-instruction mutation/restore probe that requires this fallback.
 `MELEE_DISABLE_FAST_JIT=1` disables preservation for diagnosis, and
 `MELEE_PROFILE_STATE=1` emits save/load timings from the worker.
 
-The browser presents decoded frames in order, starting with three buffered frames
-and retaining at most eight. The final stressed browser measurement averaged
-74 ms in this presentation queue. This trades video delay for smoother delivery
-through correction bursts; it does not interpolate frames or change simulation
-speed. The room clock catches up after short bursts and resets its deadline only
+The browser presents decoded frames in order on the next available display tick.
+It retains at most three frames in steady play, expanding to eight during
+rollback corrections and for 1.5 seconds afterward. This absorbs correction
+bursts without keeping their backlog throughout the match; there is no refill
+threshold after an empty tick. It does not interpolate frames or change
+simulation speed. The room clock catches up after short bursts and resets its deadline only
 after a host stall exceeding 500 ms. Frames already captured before a correction
 are sent even if rollback begins before the capture thread handles them.
 
@@ -83,7 +84,12 @@ P2 stage input is rejected before it can enter the shared controller state.
 Invite codes are public to participants; reconnect credentials are separate
 random 24-byte tokens kept in sessionStorage. Refresh resumes the same seat.
 Disconnect pauses the room; both participants must reconnect to resume a match.
-Leaving explicitly discards the seat and creates a new private room. Rooms with
+Leaving explicitly discards the seat and creates a new private CPU room. When
+P1 leaves, the other browser automatically creates its own CPU room too; when
+P2 leaves, P1 returns to CPU character select in the existing room. Leave and
+owner-only Kick are available only at character select, with native-scene checks
+on the server as well as UI visibility checks.
+Rooms with
 no connected browsers expire after 30 seconds. The service limits concurrent
 rooms (four by default), message size and per-socket message rate. Concurrent
 joins reserve the guest seat before asynchronous worker changes.

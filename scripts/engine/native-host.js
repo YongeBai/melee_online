@@ -1,4 +1,5 @@
 import { createNativePresenter } from './native-presenter.js';
+import { FrameQueue } from './frame-queue.js';
 // Local native GPU renderer. The browser receives real encoded frames, not interpolation.
 export class NativeHost {
   constructor({ canvas, onStatus, onFrame }) {
@@ -11,18 +12,15 @@ export class NativeHost {
     this.inputDelayMs = options.has("qa")
       ? Math.max(0, Math.min(150, Number(options.get("inputdelay")) || 0))
       : 0;
-    this.presentationHeadroom = 3;
-    this.presentationLimit = this.online ? 8 : 6;
-    this.videoQueue = [];
-    this.decodedAt = new WeakMap();
-    this.videoStarted = false;
+    this.videoQueue = new FrameQueue();
+    this.lastRollbackAt = -Infinity;
     const paint = () => {
       // Rollback produces short bursts while simulation catches up. Retain a
       // bounded FIFO so those distinct frames can meet successive display ticks.
-      if (this.videoQueue.length >= this.presentationHeadroom) this.videoStarted = true;
-      if (this.videoStarted && this.videoQueue.length) {
-        const frame = this.videoQueue.shift();
-        const queueMs = performance.now() - this.decodedAt.get(frame);
+      const entry = this.videoQueue.take();
+      if (entry) {
+        const {frame, at} = entry;
+        const queueMs = performance.now() - at;
         this.metrics.presentationQueueMs += queueMs;
         this.metrics.maxPresentationQueueMs = Math.max(this.metrics.maxPresentationQueueMs, queueMs);
         this.presenter.draw(frame, !["match", "stage"].includes(this.room?.phase));
@@ -30,7 +28,6 @@ export class NativeHost {
         this.metrics.presented++;
         this.onFrame({ native: true, ...this.metrics });
       }
-      if (!this.videoQueue.length) this.videoStarted = false;
       requestAnimationFrame(paint);
     };
     requestAnimationFrame(paint);
@@ -57,6 +54,7 @@ export class NativeHost {
   }
   async mountFile() {
     this.kicked = false;
+    this.mode = "loading";
     if (!globalThis.VideoDecoder)
       throw Error(
         "This browser needs WebCodecs video decoding. Open this site in Chrome, Edge, or the Codex browser.",
@@ -64,9 +62,8 @@ export class NativeHost {
     this.socket?.close();
     this.decoder?.close();
     this.decoder = undefined;
-    for (const frame of this.videoQueue) frame.close();
-    this.videoQueue = [];
-    this.videoStarted = false;
+    this.videoQueue.clear();
+    this.lastRollbackAt = -Infinity;
     this.audio = [];
     this.audioLength = 0;
     this.onStatus("Starting the local GPU renderer…");
@@ -91,11 +88,12 @@ export class NativeHost {
           if (this.room && this.room.code !== m.room.code) {
             this.decoder?.close();
             this.decoder = undefined;
-            for (const frame of this.videoQueue) frame.close();
-            this.videoQueue = [];
+            this.videoQueue.clear();
             this.audio = [];
             this.audioLength = 0;
           }
+          if ((m.room.rollback?.rollbacks || 0) > (this.room?.rollback?.rollbacks || 0))
+            this.lastRollbackAt = performance.now();
           this.room = m.room;
           this.roomReceivedAt = performance.now();
           // Refresh held state so a release outside the rollback window cannot
@@ -159,12 +157,11 @@ export class NativeHost {
         this.decoder = new VideoDecoder({
           output: (frame) => {
             this.metrics.decoded++;
-            this.decodedAt.set(frame, performance.now());
-            this.videoQueue.push(frame);
-            while (this.videoQueue.length > this.presentationLimit) {
-              this.videoQueue.shift().close();
-              this.metrics.dropped = (this.metrics.dropped || 0) + 1;
-            }
+            // Give actual corrections room to arrive in bursts, then shed
+            // their backlog once play is steady instead of carrying it forever.
+            this.videoQueue.limit = this.online && performance.now() - this.lastRollbackAt < 1500 ? 8 : 3;
+            this.metrics.dropped = (this.metrics.dropped || 0) +
+              this.videoQueue.push(frame, performance.now());
           },
           error: (error) => {
             this.metrics.decodeErrors++;
@@ -211,7 +208,7 @@ export class NativeHost {
           this.pending.delete(id);
           reject(Error(`Native ${type} request timed out`));
         },
-        type === "boot" ? 90000 : 15000,
+        ["boot", "roomLeave", "roomKick"].includes(type) ? 90000 : 15000,
       );
       this.pending.set(id, {
         resolve: (value) => {

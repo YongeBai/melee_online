@@ -24,6 +24,18 @@ import { createServer } from "node:http";
 import { EventEmitter, once } from "node:events";
 import WebSocket from "../../web/node_modules/ws/wrapper.mjs";
 import { attachRooms } from "./rooms.mjs";
+test("closing room services releases process and HTTP listeners", () => {
+  const server = createServer(), exits = process.listenerCount("exit");
+  for (let i = 0; i < 12; i++) {
+    const service = attachRooms(server, {access:{authorized:()=>true}, origins:[]});
+    assert.equal(server.listenerCount("upgrade"), 1);
+    assert.equal(process.listenerCount("exit"), exits + 1);
+    service.close();
+    service.close();
+    assert.equal(server.listenerCount("upgrade"), 0);
+    assert.equal(process.listenerCount("exit"), exits);
+  }
+});
 class FakeWorker extends EventEmitter {
   state = { major: 2, minor: 0, sceneKind: 8, sceneFrame: 300, cssReady: true };
   calls = [];
@@ -130,10 +142,11 @@ test("room protocol isolates seats, rejects a third player and resumes private s
     await b.request("roomPing");
     assert.equal(workers[0].calls.filter(c => c.action === "pads").length, beforeGuestStageInput,
       "P2 cannot move or confirm the stage cursor");
-    a.send(JSON.stringify({type:"input",payload:{...neutralPad(),stickY:224}}));
+    a.send(JSON.stringify({type:"input",payload:{...neutralPad(),stickY:224,mask:16}}));
     await a.request("roomPing");
     const stagePads = workers[0].calls.filter(c => c.action === "pads").at(-1).payload.pads;
     assert.equal(stagePads[0].stickY,224);
+    assert.equal(stagePads[0].mask,16,"P1 Start can confirm the stage");
     assert.deepEqual(stagePads[1],neutralPad(),"P1 updates cannot relay P2 stage input");
     const token = b.token;
     b.close();
@@ -194,6 +207,58 @@ test("simultaneous guests cannot claim the same seat", async () => {
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+for (const minor of [0, 1, 2, 4]) for (const ownerLeaves of [false, true]) {
+  test(`${ownerLeaves ? 'owner' : 'guest'} departure policy in scene ${minor}`, async () => {
+    const server = createServer(), workers = [], clients = [];
+    const service = attachRooms(server, {access:{authorized:()=>true}, origins:['http://localhost:3000'],
+      makeWorker:()=>{const w=new FakeWorker();workers.push(w);return w;}});
+    server.listen(0,'127.0.0.1');
+    await once(server,'listening');
+    try {
+      const a=await connect(server.address().port), b=await connect(server.address().port);
+      clients.push(a,b);
+      await a.request('boot'); await b.request('boot');
+      const code=a.room.code;
+      await b.request('roomJoin',{code});
+      const room=service.rooms.get(code), guestToken=b.token;
+      workers[0].state={major:2,minor,sceneKind:minor===0?8:minor===1?9:minor===2?2:5,sceneFrame:300};
+      room.phase=minor===0?'selecting':minor===1?'stage':minor===2?'match':'returning';
+      room.rollback=minor===2?{frame:0,stats:{}}:null;
+      if (minor !== 0) {
+        await assert.rejects((ownerLeaves?a:b).request('roomLeave'),/only available at character select/);
+        await assert.rejects(a.request('roomKick'),/only available at character select/);
+        assert.equal(service.rooms.get(code),room);
+        assert.equal(room.cpu,false);
+        assert.equal(room.seats.filter(Boolean).length,2);
+        return;
+      }
+      if (ownerLeaves) {
+        const closed=once(b,'close');
+        await a.request('roomLeave'); await closed;
+        assert.equal(service.rooms.has(code),false,'old room cannot strand P2');
+        const newCode = a.room.code;
+        workers[0].emit('failure',new Error('Old worker closed'));
+        await a.request('roomPing');
+        assert.equal(a.room.code,newCode,'late events from the old worker cannot overwrite the new room');
+        const resumed=await connect(server.address().port);clients.push(resumed);
+        await resumed.request('boot',{token:guestToken});
+        assert.equal(resumed.room.seat,0);assert.equal(resumed.room.cpu,true);
+        assert.notEqual(resumed.room.code,code);
+      } else {
+        await b.request('roomLeave');
+        assert.equal(room.cpu,true);assert.equal(room.seats[1],null);assert.equal(room.rollback,null);
+        assert.equal(b.room.seat,0);assert.equal(b.room.cpu,true);
+        if (minor===2) assert.ok(workers[0].calls.some(c=>c.payload?.action==='quit'));
+        if (minor===4) assert.equal(workers[0].calls.filter(c=>c.payload?.action==='opponent'&&c.payload.cpu).length,0,
+          'results defer CPU reload until native CSS exists');
+      }
+      assert.equal(a.room.cpu,true);
+    } finally {
+      for(const c of clients)c.close();service.close();await new Promise(r=>server.close(r));
+    }
+  });
+}
 
 test("a stale CSS scene number cannot enable Ready before menu frames advance", async () => {
   const server = createServer();
@@ -286,14 +351,12 @@ test("owner can use a CPU, reopen the room, and revoke a guest seat", async () =
     await guest.request("roomJoin", { code });
     assert.equal(guest.room.seat, 1);
     const token = guest.token;
-    service.rooms.get(code).changing = true;
-    await assert.rejects(guest.request('roomLeave'), /transition/);
-    service.rooms.get(code).changing = false;
-    await guest.request('roomPing'); // A rejected transition must retain membership.
     await assert.rejects(guest.request("roomKick"), /Only the room owner/);
     await assert.rejects(guest.request("roomCpu", { enabled: true }), /Only the room owner/);
     await assert.rejects(owner.request("roomCpu", { enabled: true }), /Remove the other player/);
     const closed = once(guest, "close");
+    service.rooms.get(code).changing = true;
+    setTimeout(() => { service.rooms.get(code).changing = false; }, 80);
     await owner.request("roomKick");
     await closed;
     assert.equal(owner.room.hasGuest, false);
