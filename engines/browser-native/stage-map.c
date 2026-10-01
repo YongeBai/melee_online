@@ -440,6 +440,12 @@ void grStadium_801D2528(Ground_GObj* object,int mode,int duration)
      * create text/capture objects or change the gameplay camera. */
     g->u.display.xEA=g->u.display.xE4;g->u.display.xE4=mode;
 }
+/* The static display has no text window. The original mode-1 refresh writes
+ * VS player text into it at GAME! (gmvs fn_8016B88C), so it is accepted here. */
+void grStadium_801D39A0(Ground_GObj* object)
+{
+    if(stage_kind!=St_Kind_PStadium||!object||!object->user_data||((Ground*)object->user_data)->map_id!=1)abort();
+}
 
 /* Read-only frozen-profile assertions after original collision initialization. */
 void portStadiumFireworksOff(void)

@@ -154,6 +154,16 @@ void portTournamentBegin(void)
     fn_8016B784();started=1;
 }
 static void ready_complete(int status) { fn_8016B7F8(); }
+/* gmvs.c creates the background-flash owner and loads LbBf.dat during scene
+ * setup; this bring-up does neither and does not draw the flash overlay. Strong
+ * and elemental hits still request a flash, which would otherwise dereference
+ * the missing owner and corrupt low linear memory. */
+extern HSD_GObj* flash_gobj;
+extern void port_unlinked_lbBgFlash_80021C48(u32,u32);
+void lbBgFlash_80021C48(u32 kind,u32 priority)
+{
+    if(flash_gobj)port_unlinked_lbBgFlash_80021C48(kind,priority);
+}
 /* Supplied only by targets linked with the audio device boundary. */
 extern int portAudioEnabled(void) __attribute__((weak));
 extern void lbAudioAx_8002785C(void);
