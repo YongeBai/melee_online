@@ -91,6 +91,9 @@ async function client(capture=false){
   await c.cmd('Page.addScriptToEvaluateOnNewDocument',{source:`if(location.pathname==='/play/'){const u=new URL(location.href);u.searchParams.set('interactive','1');${rollbackMode?'':"u.searchParams.set('lockstep','1');"}${lifecycleMode?'':"u.searchParams.set('liveframes','"+matchFrames+"');"}${capture?"u.searchParams.set('captureframes','1');":''}${combatMode?"u.searchParams.set('workload','1');":''}${process.env.MELEE_EXTRA_QUERY?'for(const [k,v] of new URLSearchParams('+JSON.stringify(process.env.MELEE_EXTRA_QUERY)+'))u.searchParams.set(k,v);':''}history.replaceState(null,'',u);}`});
  }
  await instrument(c);
+ // Headless Chrome reads physical controllers on this machine; a person using
+ // one would inject inputs into the test. Probes drive input explicitly.
+ await c.cmd('Page.enable');await c.cmd('Page.addScriptToEvaluateOnNewDocument',{source:'Object.defineProperty(Navigator.prototype,"getGamepads",{configurable:true,value:()=>[null,null,null,null]});'});
  // Emulate a slower computer on one seat (MELEE_CPU_THROTTLE=seat:rate, e.g. 1:3).
  {const [seat,rate]=(process.env.MELEE_CPU_THROTTLE??'').split(':').map(Number);if(rate>1&&seat===clients.length-1)await c.cmd('Emulation.setCPUThrottlingRate',{rate});}
  await c.cmd('Page.enable');await c.cmd('Page.addScriptToEvaluateOnNewDocument',{source:'performance.setResourceTimingBufferSize(20000);'});
