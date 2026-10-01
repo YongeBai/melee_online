@@ -17,6 +17,11 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  let saved=null;try{saved=JSON.parse(storage.getItem(storageKey));}catch{}
  let role=saved?.role??null,code=saved?.code??null,hostKey=saved?.hostKey??null,core=null,listening=false,disposed=false,guestLink=null;
  const hostLinks=new Set(),rtt=[],queueDelay=[],events=[],timeline={sent:[],received:[]};
+ // Unordered, never-retransmitted channel for redundant match inputs
+ // (native-netcode.mjs). It follows whichever peer link is current.
+ let fastHandler=null;
+ const currentLink=()=>role==='host'?[...hostLinks].find(l=>l.open)??null:guestLink;
+ const fast={get open(){return currentLink()?.fast?.readyState==='open';},get bufferedAmount(){return currentLink()?.fast?.bufferedAmount??0;},send(buffer){const f=currentLink()?.fast;if(f?.readyState==='open')f.send(buffer);},get onmessage(){return fastHandler;},set onmessage(f){fastHandler=f;}};
  // Wall-clock stamps of match inputs leaving this page and peer inputs
  // arriving, so a harness on one machine can compute one-way transit.
  const stamp=(list,text)=>{if(list.length>=20000)return;const key=/"key":"(match:[0-9]+)"/.exec(text);if(!key)return;const frame=/"frame":([0-9]+)/.exec(text);if(frame)list.push([key[1],Number(frame[1]),performance.timeOrigin+performance.now()]);};
@@ -28,11 +33,11 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  function gathered(pc,ms=2500){return new Promise(resolve=>{if(pc.iceGatheringState==='complete')return resolve();const done=()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);resolve();}};const t=setTimeout(resolve,ms);pc.addEventListener('icegatheringstatechange',done);});}
  // One RTCDataChannel carries RPC (room create/join/resume), relay messages
  // and RTT probes. Relay messages keep their original JSON form.
- function link(pc,channel,side){
+ function link(pc,channel,side,fastChannel=null){
   const rpc=new Map();let nextRpc=0,ping=null;
   // A reloading peer can close the channel while delayed work is still queued.
   const post=value=>{if(channel.readyState==='open')channel.send(JSON.stringify(value));};
-  const l={pc,channel,side,socket:null,peer:null,get open(){return channel.readyState==='open';},
+  const l={pc,channel,side,socket:null,peer:null,fast:null,get open(){return channel.readyState==='open';},
    call(route,body){return new Promise((resolve,reject)=>{const id=++nextRpc;rpc.set(id,{resolve,reject});channel.send(JSON.stringify({rpc:id,route,body}));setTimeout(()=>{if(rpc.delete(id))reject(Error('Room host did not respond'));},10000);});},
    close(){clearInterval(ping);try{channel.close();}catch{}try{pc.close();}catch{}}};
   const startPing=()=>{clearInterval(ping);ping=setInterval(()=>{if(channel.readyState==='open')channel.send(JSON.stringify({ping:performance.now()}));},500);};if(channel.readyState==='open')startPing();else channel.addEventListener('open',startPing,{once:true});
@@ -41,6 +46,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
   let due=0,seq=0,timer=0;const queue=[];
   const drain=()=>{timer=0;const now=performance.now();while(queue.length&&queue[0].at<=now+.5){try{queue.shift().run();}catch(e){log('delivery-error',{message:e.message});}}if(queue.length)timer=setTimeout(drain,queue[0].at-now);};
   const deliver=run=>{const d=globalThis.__meleeP2PDelay;if(!d&&!queue.length)return run();const now=performance.now(),jitter=d?.jitterMs?((seq++*7919)%1000)/1000*d.jitterMs:0;due=Math.max(due,now+(d?.baseMs??0)+jitter);queue.push({at:due,run});if(!timer)timer=setTimeout(drain,due-now);};
+  l.attachFast=f=>{if(!f||l.fast)return;l.fast=f;f.binaryType='arraybuffer';f.addEventListener('message',({data})=>{if(data instanceof ArrayBuffer)fastHandler?.(data);});};l.attachFast(fastChannel??pc.__meleeFast);
   const handle=({data,timeStamp})=>{if(queueDelay.length<8000&&typeof data==='string'&&data.startsWith('{"type"'))queueDelay.push(performance.now()-timeStamp);deliver(()=>receive(data));};
   const receive=data=>{
    let m;try{m=JSON.parse(data);}catch{return;}
@@ -68,10 +74,10 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  }
  async function answer(offer){
   const pc=new RTCPeerConnection({iceServers:await iceConfig()});
-  const ready=new Promise(resolve=>pc.addEventListener('datachannel',({channel})=>resolve(channel),{once:true}));
+  let hostLink=null;const ready=new Promise(resolve=>pc.addEventListener('datachannel',({channel})=>{if(channel.label==='melee-fast'){pc.__meleeFast=channel;hostLink?.attachFast(channel);}else resolve(channel);}));
   await pc.setRemoteDescription({type:'offer',sdp:offer.sdp});await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);
   await signal({op:'answer',code,hostKey,id:offer.id,sdp:pc.localDescription.sdp});log('answered',{id:offer.id});
-  ready.then(channel=>{const l=link(pc,channel,'host');hostLinks.add(l);const opened=()=>log('guest-connected',{id:offer.id});if(channel.readyState==='open')opened();else channel.addEventListener('open',opened,{once:true});});
+  ready.then(channel=>{const l=hostLink=link(pc,channel,'host');hostLinks.add(l);const opened=()=>log('guest-connected',{id:offer.id});if(channel.readyState==='open')opened();else channel.addEventListener('open',opened,{once:true});});
   setTimeout(()=>{if(pc.connectionState!=='connected'&&![...hostLinks].some(l=>l.pc===pc))pc.close();},20000);
  }
  async function becomeHost(saveCore=null){
@@ -80,7 +86,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
  async function claim(){for(;;){try{await signal({op:'host',code,hostKey});return;}catch(e){if(e.status!==409)throw e;throw e;}}}
  async function connectHost(targetCode,attempts=12){
   for(let attempt=0;attempt<attempts&&!disposed;attempt++){
-   const pc=new RTCPeerConnection({iceServers:await iceConfig()}),channel=pc.createDataChannel('melee',{ordered:true}),id=randomId();
+   const pc=new RTCPeerConnection({iceServers:await iceConfig()}),channel=pc.createDataChannel('melee',{ordered:true}),fastChannel=pc.createDataChannel('melee-fast',{ordered:false,maxRetransmits:0}),id=randomId();
    try{
     await pc.setLocalDescription(await pc.createOffer());await gathered(pc);
     await signal({op:'offer',code:targetCode,id,sdp:pc.localDescription.sdp});log('offered',{attempt});
@@ -88,7 +94,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
     if(!reply)throw Error('Room host did not answer');
     await pc.setRemoteDescription({type:'answer',sdp:reply.sdp});
     await new Promise((resolve,reject)=>{if(channel.readyState==='open')return resolve();const t=setTimeout(()=>reject(Error('Peer connection timed out')),10000);channel.addEventListener('open',()=>{clearTimeout(t);resolve();},{once:true});channel.addEventListener('close',()=>{clearTimeout(t);reject(Error('Peer connection closed'));},{once:true});});
-    const l=link(pc,channel,'guest');log('host-connected',{attempt,candidate:await selectedPair(pc)});return l;
+    const l=link(pc,channel,'guest',fastChannel);log('host-connected',{attempt,candidate:await selectedPair(pc)});return l;
    }catch(e){pc.close();log('connect-failed',{attempt,message:e.message});if(e.status===404&&attempt>=3)throw Error('Room not found');await sleep(Math.min(1500,250*(attempt+1)));}
   }
   throw Error('Could not reach the room host');
@@ -112,7 +118,7 @@ export function createPeerTransport({storage=globalThis.sessionStorage,signalUrl
   return socket;
  }
  const transport={
-  kind:'webrtc-p2p',
+  kind:'webrtc-p2p',fast,
   get role(){return role;},get code(){return code;},
   async post(path,body={}){
    if(path==='/native-rooms'){

@@ -9,7 +9,7 @@ export async function loadDirtyCore(){
  const files=new Map(),bytesOf=file=>{let p=files.get(file);if(!p){p=fetch('./'+file).then(async r=>{if(!r.ok)throw Error('Unaudited dirty host source '+file);return new Uint8Array(await r.arrayBuffer());});files.set(file,p);}return p;};
  const wasm=bytesOf('melee-dirty.wasm'),manifestBytes=bytesOf('dirty-core.json');
  await Promise.all(Object.entries(dirtyHostContract).map(async([file,expected])=>{if(await sha(await bytesOf(file))!==expected)throw Error('Unaudited dirty host source '+file);}));
- const manifest=JSON.parse(new TextDecoder().decode(await manifestBytes));if(manifest.originalSha256!=='ce3f26e50af9ad8602ac8daebaecd1c652dd6e4975f21634b0ffb4e84cfe377f'||manifest.pageBytes!==4096||manifest.counts.stores!==111206||manifest.counts.copy!==175||manifest.counts.fill!==73||manifest.counts.tableMutations!==0)throw Error('Unaudited dirty core');
+ const manifest=JSON.parse(new TextDecoder().decode(await manifestBytes));if(manifest.originalSha256!=='4f741bce2fc3bc8673379535983a95503a7fb846be30ed832e6d31e9a1dc94d5'||manifest.pageBytes!==4096||manifest.counts.stores!==111174||manifest.counts.copy!==175||manifest.counts.fill!==73||manifest.counts.tableMutations!==0)throw Error('Unaudited dirty core');
  const bytes=await wasm;if(await sha(bytes)!==manifest.instrumentedSha256)throw Error('Dirty core integrity');return {bytes,manifest};
 }
 

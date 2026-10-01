@@ -38,7 +38,7 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
   const slowDraws=[],shaderCompilations=[];
   const stateChanges=[],inputChanges=[],keys=new Set(),clock=createNativeFrameClock(performance.now(),60,{align:true,toleranceMs:.25}),stepTimes=[],drawTimes=[],intervals=[];
   let raf=0,stopped=false,completionReason=null,frames=0,draws=0,started=performance.now(),firstStep=null,lastDraw=null,lastCallback=null,lastRender=null;
-  const cadence={callbacks:0,catchUpSteps:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
+  let lastSyncFrame=0;const cadence={callbacks:0,catchUpSteps:0,syncDroppedFrames:0,syncExtraFrames:0,zeroStepCallbacks:0,multiStepCallbacks:0,rafGapsOver25Ms:0,timingSamples:[]};
   const readState=()=>{const current=resolveObjects?resolveObjects():objects;if(current.length!==objects.length||current.some(o=>!o))throw Error('Native player ownership changed unexpectedly');return current.map(o=>Array.from({length:19},(_,i)=>module._portFighterConstructRead(o,i)));};
   const initial=readState();
   const handled=nativeKeyboardCodes;let focused=true;
@@ -72,7 +72,12 @@ export function startNativeLive(module,preview,objects,{frameLimit=0,onProgress=
       // the opponent's inputs show it two or more frames ahead, instead of
       // making the opponent wait at its prediction window.
       const perCallback=rollback?2:1;let steps=clock.take(now,frameLimit?Math.min(perCallback,frameLimit-frames):perCallback);
-      if(rollback&&steps===1&&rollback.remoteLead>=2&&(!frameLimit||frames+2<=frameLimit))steps=2;if(steps>1)cadence.catchUpSteps+=steps-1;
+      // Time sync (netcode s): the leading peer drops a frame, at most once per
+      // 20 frames, until advantage is near 0. When both peers share estimates
+      // only the leader acts; both acting at once would overshoot. Without a
+      // shared estimate the trailing peer also adds a frame.
+      if(rollback?.sync){if(steps===1&&frames>60&&frames-lastSyncFrame>=20){const advantage=rollback.frameAdvantage;if(advantage>.75){steps=0;lastSyncFrame=frames;cadence.syncDroppedFrames++;}else if(advantage<-.75&&!rollback.advantageShared&&(!frameLimit||frames+2<=frameLimit)){steps=2;lastSyncFrame=frames;cadence.syncExtraFrames++;}}}
+      else if(rollback&&steps===1&&rollback.remoteLead>=2&&(!frameLimit||frames+2<=frameLimit))steps=2;if(steps>1)cadence.catchUpSteps+=steps-1;
       cadence.callbacks++;if(!steps)cadence.zeroStepCallbacks++;if(steps>1)cadence.multiStepCallbacks++;
       if(cadence.timingSamples.length<128&&(cadence.callbacks<=8||steps!==1))cadence.timingSamples.push({callback:cadence.callbacks,frame:frames,steps,timestamp:now-started,callbackTime:performance.now()-started,interval:lastCallback===null?null:now-lastCallback,debt:clock.debtMs});
       if(lastCallback!==null&&now-lastCallback>25)cadence.rafGapsOver25Ms++;lastCallback=now;

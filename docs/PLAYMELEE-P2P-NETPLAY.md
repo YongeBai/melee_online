@@ -25,6 +25,18 @@ controller inputs over a direct WebRTC data channel.
   Cloudflare Realtime TURN credentials when `TURN_KEY_ID` and
   `TURN_KEY_API_TOKEN` are set in the Vercel project. TURN is not configured yet,
   so players behind symmetric NATs cannot connect.
+- **Netcode (October 1, 2026)**: the default is now `direct,d2,w10,s,mpa`.
+  - Inputs also travel peer to peer on an unordered, never-retransmitted channel
+    that repeats every unacknowledged input.
+  - Two frames of input delay and a 10-frame prediction window.
+  - Time sync from exchanged frame-advantage estimates.
+  - Menu lockstep built from both players' inputs, with a buffer sized from the
+    measured round trip.
+
+  See [NETCODE-LAB.md](NETCODE-LAB.md) for why the reliable-only design below
+  lagged on real connections, and for the comparison loop. The rest of this
+  section describes the room channel, which still carries every input for the
+  owner's authority.
 - **Rollback**: prediction covers seven frames of *one-way* peer delay
   (`native-product-rollback.mjs`). The owner's acknowledgement (a full round trip)
   gates only audio/result commitment, within a separate 30-frame bound. Matches

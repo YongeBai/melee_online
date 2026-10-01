@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {defaultNetcode} from '../../engines/browser-native/native-netcode.mjs';
 
 // Exercise the real bridge with isolated native/GPU dependencies: no generated
 // game core or proprietary fixture is needed to test validation scheduling.
@@ -8,7 +9,7 @@ const source=fs.readFileSync(new URL('../../engines/browser-native/native-produc
 function fixture(){
  let checks=0,fail=false,disposed=0;
  const module={HEAPU8:new Uint8Array(65536),_portTapJumpSet(){},_portControllerSample(){}},audio={beginFrame(){},confirm(){}},session={snapshot:()=>({}),dispose(){}},driver={dispose(){}},store={capture:()=>({}),restore(){},release(){},dispose(){},metrics:()=>({})};
- const dependencies={create(){},createSnapshotRuntime:async()=>({module}),createRollbackAudio:()=>audio,createPresentationCache:()=>({snapshot:()=>({}),dispose(){}}),createRenderReplica:()=>({present:(construct,draw)=>{const r=construct(module);try{return draw(r);}finally{r.dispose();}},metrics:()=>({}),dispose(){}}),createPagedWasmCheckpointStore:()=>store,createRollbackSession:()=>session,createNativeRollbackDriver:()=>driver};
+ const dependencies={defaultNetcode,create(){},createSnapshotRuntime:async()=>({module}),createRollbackAudio:()=>audio,createPresentationCache:()=>({snapshot:()=>({}),dispose(){}}),createRenderReplica:()=>({present:(construct,draw)=>{const r=construct(module);try{return draw(r);}finally{r.dispose();}},metrics:()=>({}),dispose(){}}),createPagedWasmCheckpointStore:()=>store,createRollbackSession:()=>session,createNativeRollbackDriver:()=>driver};
  const factory=new Function(...Object.keys(dependencies),source)(...Object.values(dependencies));
  return {factory,options:{source:{module},wasmBytes:new Uint8Array(),audio,network:{active:true,seat:0},step(){},createPreview:()=>({draw:()=>({}),validateGpu(){checks++;if(fail)throw Error('GPU failure');return true;},dispose(){disposed++;}})},get checks(){return checks;},get disposed(){return disposed;},set fail(value){fail=value;}};
 }

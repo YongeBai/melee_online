@@ -7,6 +7,7 @@ import {createNativeRollbackDriver} from './native-rollback-driver.mjs';
 import {createRollbackSession} from './rollback-session.mjs';
 import {createSnapshotRuntime} from './wasm-snapshot.mjs';
 import {createDirtyRangeTracker} from './dirty-runtime.mjs';
+import {defaultNetcode} from './native-netcode.mjs';
 
 // Correctness-first product bridge. Simulation/checkpoints stay in the menu
 // runtime; every visible frame is reconstructed in an independent WASM heap.
@@ -16,7 +17,7 @@ export async function createNativeProductRollback({source,wasmBytes,dirtyManifes
  if(!source?.module||!(wasmBytes instanceof Uint8Array)||!audio||!network?.active||typeof step!=='function'||typeof createPreview!=='function')throw Error('Incomplete product rollback boundary');
  const replicaAudio=createRollbackAudio(),target=await createSnapshotRuntime(create,wasmBytes,{dirtyManifest,memoryInitialPages:source.module.HEAPU8.length/65536,onNativeMusic:r=>replicaAudio.request(r),onNativeAudioMode:()=>true}),dirty=!!dirtyManifest;
  const cache=presentationCache??createPresentationCache();if(dirty)cache.trackDirty(createDirtyRangeTracker(target));const replica=createRenderReplica(source,target,{sourceHost:audio,targetHost:replicaAudio,copyMode:dirty?'dirty':'full'});
- const store=createPagedWasmCheckpointStore({...source,host:audio,sparse:dirty,maxBytes:1024**3});let session,driver,closed=false,lastCoverage=null,lastDraw=null;const warmup={frames:30,cpuMs:0},rollbackConfig={predictionWindow:7,receiveWindow:16,acknowledgementWindow:30,checkpointInterval:3};
+ const store=createPagedWasmCheckpointStore({...source,host:audio,sparse:dirty,maxBytes:1024**3});let session,driver,closed=false,lastCoverage=null,lastDraw=null;const warmup={frames:30,cpuMs:0},netcode=network.netcode??defaultNetcode,rollbackConfig={netcode:netcode.name,inputDelay:netcode.delay,timeSync:netcode.sync===true,predictionWindow:netcode.window,receiveWindow:Math.max(16,netcode.window+2*netcode.delay+4),acknowledgementWindow:30,checkpointInterval:3};
  let lastGpuCheck=null,gpuChecks=0,terminal=null;
  const validateGpu=()=>{if(!lastGpuCheck)throw Error('No GPU presentation to validate');const result=lastGpuCheck();gpuChecks++;return result;};
  // getError synchronizes with the browser GPU process. Keep explicit boundary
@@ -29,7 +30,7 @@ export async function createNativeProductRollback({source,wasmBytes,dirtyManifes
    // Earliest frame whose state is terminal in the current timeline. A replay
    // can create or erase the ending, so it is recomputed in frame order.
    const ended=source.module._portTournamentRead(25,0)!==0;if(ended){if(terminal===null||frame<terminal)terminal=frame;}else if(terminal!==null&&frame<=terminal)terminal=null;},onConfirm:frame=>audio.confirm(frame)});
-  validateGpu();driver=createNativeRollbackDriver({network,session});Object.defineProperty(driver,'terminalFrame',{get:()=>terminal});
+  validateGpu();driver=createNativeRollbackDriver({network,session,delay:rollbackConfig.inputDelay,sync:netcode.sync===true});Object.defineProperty(driver,'terminalFrame',{get:()=>terminal});
  }catch(error){session?.dispose();replica.dispose();cache.dispose();store.dispose();throw error;}
  const preview={
   resetImmediateStats(){},

@@ -30,3 +30,16 @@ test('rollback driver waits for the authenticated room phase before advancing ne
  const driver=createNativeRollbackDriver({network,session});assert.equal(driver.advance(0,[[0],[0]]),false);assert.equal(session.frame,0);assert.deepEqual(calls,[]);
  network.phaseReady=true;assert.equal(driver.advance(0,[[0],[0]]),true);assert.equal(session.frame,1);assert.equal(calls.length,1);driver.dispose();
 });
+
+test('rollback driver input delay plays each sample D frames later and sends it immediately',()=>{
+ const sends=[],played=[],session={frame:0,confirmed:-1,remoteKnown:9,receive(){},acknowledge(){},reconcile(){},advance(input){played.push(input.pad[0]);this.frame++;return true;},snapshot(){return {};}};
+ const network={active:true,seat:0,tapJump:1,begin(){},bindRollback(){return ()=>{};},sendInput(frame,pad){sends.push([frame,pad[0]]);return true;},snapshot(){return {};}};
+ const driver=createNativeRollbackDriver({network,session,delay:2});
+ for(let frame=0;frame<6;frame++)assert.equal(driver.advance(frame,[[0x100+frame,0,0],[0,0,0]]),true);
+ // Frames 3 and 4 were never sampled: neutral. Frame 3's sample plays at 5.
+ assert.deepEqual(played,[0,0,0,0,0,0x103]);
+ assert.deepEqual(sends,[[3,0],[4,0],[5,0x103],[6,0x104],[7,0x105]]);
+ // The opponent's lead discounts its own two frames of early input.
+ assert.equal(driver.remoteLead,9-2-6);
+ assert.throws(()=>createNativeRollbackDriver({network,session,delay:7}),/input delay/);
+});
