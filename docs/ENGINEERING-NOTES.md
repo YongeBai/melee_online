@@ -298,8 +298,12 @@ the original character-kind table, while runtime startup remains no-ISO.
 Post-match routing stops at the original scene-exit flag, then calls
 `gm_Scene_Vs_OnExit` once to read native rankings. Frame-limit/manual probe stops
 must never fabricate results. The browser tournament presentation is not the
-original `GmRst` 3D scene and must not be described as such. Rematch reloads a fresh
-WASM instance rather than reusing match statics. Restore only playable characters,
+original `GmRst` 3D scene and must not be described as such. The product no longer
+shows it: a finished match returns to character select in place by restoring a
+boot heap checkpoint taken before the menus first run, never by reusing match
+statics (see PLAYMELEE-P2P-NETPLAY.md, "Match end"). The match renames the
+shared canvas to `#native-preview`; the return renames it back. Resident archives
+installed after the checkpoint, such as `MnSlMap.usd`, must be installed again. Restore only playable characters,
 valid native costumes and the six legal stages; rules remain fixed. Apply forced
 rematch stage selection after SSS initialization so its original objects and
 archive cleanup exist. Room return requires matching end reports and two rematch

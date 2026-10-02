@@ -24,7 +24,10 @@ export function startNativeMenuLive(menu,input,{onState=()=>{},onResults=()=>{},
       // The match scheduler takes over after loading; keep the input owner alive
       // so held buttons and key-up events are sampled at native initialization.
       stop();const report=await promise;
-      if(report.error)throw Error(report.error);busy=false;publish(report.results?'results':'match-ended');input.dispose();if(report.results)await onResults(report);return;
+      if(report.error)throw Error(report.error);busy=false;publish(report.results?'results':'match-ended');
+      // A finished match hands the still-live input owner back to the page,
+      // which returns to character select with it.
+      if(report.results)await onResults(report);else input.dispose();return;
     }
     network?.begin(scene);busy=false;clock.reset();raf=requestAnimationFrame(frame);
   }

@@ -5,12 +5,17 @@ export async function createNativeMusic({resumeAfterNavigation=false}={}){
  let context,gain,analyser,node,worker,buffer,track=null,loopStart=null,offset=0,began=0,paused=false,unlocked=false,disposed=false,generation=0,error=null,status='idle';
  const events=[],listeners=new AbortController();
  function log(event){if(events.length===64)events.shift();events.push({event,track,time:performance.now()});}
- function setup(){if(context)return;context=new AudioContext({latencyHint:'interactive'});gain=context.createGain();analyser=context.createAnalyser();analyser.fftSize=256;gain.connect(analyser);analyser.connect(context.destination);if(resumeAfterNavigation)void unlock();}
+ // Try to start at once: browsers that allow autoplay for this site run the
+ // context without a gesture. Otherwise the first permitted gesture starts it.
+ function setup(){if(context)return;context=new AudioContext({latencyHint:'interactive'});gain=context.createGain();analyser=context.createAnalyser();analyser.fftSize=256;gain.connect(analyser);analyser.connect(context.destination);context.onstatechange=()=>{if(!disposed&&context.state==='running'&&!unlocked){unlocked=true;play();}};void unlock();}
  function position(){let p=offset+(node?context.currentTime-began:0);if(buffer&&loopStart!==null&&p>=buffer.duration)p=loopStart+(p-loopStart)%(buffer.duration-loopStart);return p;}
  function halt(){if(!node)return;offset=position();const old=node;node=null;old.onended=null;old.stop();old.disconnect();}
  function play(){if(!buffer||paused||document.hidden||!unlocked||context.state!=='running'||node||disposed)return;node=context.createBufferSource();node.buffer=buffer;node.loop=loopStart!==null;if(node.loop){node.loopStart=loopStart;node.loopEnd=buffer.duration;}node.connect(gain);began=context.currentTime;node.onended=()=>{node?.disconnect();node=null;buffer=null;status='ended';log('ended');};node.start(0,offset);status='playing';log('playing');}
  async function unlock(){if(disposed||unlocked&&context?.state==='running')return;setup();try{await context.resume();unlocked=context.state==='running';if(unlocked)play();}catch(e){error=String(e);}}
  for(const type of ['pointerdown','keydown'])addEventListener(type,unlock,{capture:true,signal:listeners.signal});
+ // Controller buttons are not user gestures, but browsers that allow autoplay
+ // after earlier interaction with the site accept a resume on any of them.
+ const padPoll=setInterval(()=>{if(unlocked&&context?.state==='running')return;for(const p of navigator.getGamepads?.()??[])if(p?.buttons.some(b=>b.pressed)){void unlock();return;}},250);listeners.signal.addEventListener('abort',()=>clearInterval(padPoll));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){halt();if(buffer)status='hidden';}else play();},{signal:listeners.signal});
  function stop(){generation++;worker?.terminate();worker=null;halt();buffer=null;track=null;loopStart=null;offset=0;paused=false;status='idle';}
  function request(r){

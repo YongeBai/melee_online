@@ -15,7 +15,8 @@ controller inputs over a direct WebRTC data channel.
   the owner's authority over an ordered, reliable RTCDataChannel. The same channel
   carries room RPCs (create/join/resume), relay messages and RTT probes. The owner
   serializes its authority to sessionStorage on page hide, because Melee rooms
-  reload both pages on every epoch change (join, rematch, return to menu).
+  reload both pages on most epoch changes (join, kick, CPU toggle, resync). A
+  finished match is the exception: see "Match end" below.
   Reconnects repeat pending scene barriers and unconfirmed inputs; the authority
   treats both idempotently.
 - **Signaling** (`deploy/playmelee/api/signal.js`): a Vercel function that pairs
@@ -60,6 +61,34 @@ controller inputs over a direct WebRTC data channel.
   keyboard key switches back to the keyboard. Each seat reports keyboard or
   controller through the room, so the opponent's panel shows the matching icon.
   Browsers expose a gamepad only after one of its buttons is pressed on the page.
+
+## Match end (October 1, 2026)
+
+There is no results screen. When a match ends, both pages go straight back to
+character select in the same page, with the room's peer connection kept open.
+
+- The page takes one copy of the WASM heap and globals before character select
+  first runs (`createBootCheckpoint` in `wasm-snapshot.mjs`). Restoring it gives
+  the native state a fresh page load would. Pages the heap grew by since then
+  are cleared.
+- The sound-effect audio RAM map and the rollback audio journal are restored
+  alongside the heap.
+- Each peer still sends its result. The room changes epoch only when both
+  results match: `network.returnToCharacters()` asks for character select once
+  the room reaches `results`. The new epoch then resets the client's scene
+  state instead of reloading.
+- If the checkpoint is missing or cannot be restored, the page falls back to the
+  old reload into the same epoch.
+- Verified with `probe-product-menu.mjs --results` (two CPU eliminations with a
+  match between), `probe-native-rooms.mjs --results` (lockstep) and
+  `probe-native-rooms.mjs --lras --rollback`. The rollback probe plays a second
+  rollback match from the restored heap, with movement and self-destructs, and
+  gets identical results on both peers.
+
+Music starts as soon as the browser allows it. It no longer waits for a key
+press or for the reload that used to follow the first match. Controller button
+presses also retry the audio resume. The page holds a screen wake lock while
+visible, because controller input does not keep the OS awake.
 
 ## Measurement loop
 

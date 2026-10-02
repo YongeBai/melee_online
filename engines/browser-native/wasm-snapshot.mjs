@@ -46,3 +46,20 @@ export function createWasmCheckpointStore({module,instance,audit,health={aborted
  function compare(a,b){const x=row(a),y=row(b);if(x.bytes.length!==y.bytes.length)throw Error('Snapshot sizes differ');let changedBytes=0;const pages=new Map();for(let i=0;i<x.bytes.length;i++)if(x.bytes[i]!==y.bytes[i]){changedBytes++;const page=Math.floor(i/65536);pages.set(page,(pages.get(page)??0)+1);}return {changedBytes,pages:[...pages].map(([page,bytes])=>({offset:page*65536,bytes})),globalsChanged:x.globals.map((v,i)=>v!==y.globals[i]),hostChanged:JSON.stringify(x.host)!==JSON.stringify(y.host)};}
  return {capture,restore,release,hash,compare,metrics:()=>({...metrics,retainedBytes,count:owned.size}),dispose(){owned.clear();retainedBytes=0;},get retainedBytes(){return retainedBytes;},get count(){return owned.size;}};
 }
+// Product return to character select without a page reload. One full copy of
+// the heap and globals is taken before the menus first run; restoring it gives
+// the next scenes the native state a fresh page load would. Pages grown since
+// the copy are cleared, as they would not exist in a fresh instance.
+export function createBootCheckpoint({module,instance,audit,health={aborted:false}}){
+ const table=instance.exports.__indirect_function_table,entries=Array.from({length:table.length},(_,i)=>table.get(i)),globals=audit.globals.map(g=>instance.exports[g.name]);
+ if(globals.some(g=>!(g instanceof WebAssembly.Global)))throw Error('Snapshot globals not exported');
+ if(instance.exports.memory.buffer!==module.HEAPU8.buffer)throw Error('Stale snapshot memory view');
+ const bytes=module.HEAPU8.slice(),values=globals.map(g=>g.value);
+ return {byteLength:bytes.length,restore(){
+  if(health.aborted)throw Error('Aborted runtime cannot be restored');
+  if(module.onNativeDraw||module.onNativeImmediate||module.onNativeObject)throw Error('Snapshot requires detached renderer');
+  if(table.length!==entries.length||entries.some((e,i)=>table.get(i)!==e))throw Error('Snapshot function table changed');
+  const heap=module.HEAPU8;if(instance.exports.memory.buffer!==heap.buffer)throw Error('Stale snapshot memory view');if(heap.length<bytes.length)throw Error('Heap shrank after boot checkpoint');
+  module.__dirtyMark?.(0,heap.length);heap.set(bytes);heap.fill(0,bytes.length);globals.forEach((g,i)=>g.value=values[i]);
+ }};
+}

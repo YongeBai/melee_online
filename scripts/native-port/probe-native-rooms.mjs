@@ -156,6 +156,7 @@ try{
  }
  if(resultsMode){await a.press('Space');await b.press('Space');await delay(150);}
  const selectedCostumes=await a.eval('nativeCharacterMenu.read().players.slice(0,2).map(p=>p.costume)');if(resultsMode&&selectedCostumes.some(c=>c===0))throw Error('Costume input was not exercised');
+ if(lifecycleMode)for(const c of [a,b])await c.eval('globalThis.__probeSamePage=1');// Survives only without a reload.
  await a.click('#readyRoom');await a.wait('nativeRoom.state.ready[0]');if(await a.eval('nativeMenuLive.snapshot().scene')!=='characters')throw Error('One Ready started match');await b.click('#readyRoom');
  await a.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');await b.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');
  const target=await a.eval('nativeStageMenu.icons().find(i=>i.stage==='+selectedStage+'&&i.unlocked===2)');
@@ -170,48 +171,67 @@ try{
   await Promise.all([a,b].map(c=>c.wait('nativeLive.snapshot().match.intro.gate===1')));
   for(let i=0;i<40;i++){const c=[a,b][i%2];await c.keys([i%4<2?'KeyD':'KeyA']);await delay(80);await c.keys([]);await delay(220+(i*17)%83);}
  }
+ // Both peers' matching results return both pages to character select without
+ // a reload or results screen, in the room's next epoch.
+ async function returnedInPlace(epoch){
+  await Promise.all([a,b].map(c=>c.wait('nativeRoom.snapshot().epoch>'+epoch+'&&nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90',120000)));
+  const reports=await Promise.all([a,b].map(c=>c.eval('({samePage:globalThis.__probeSamePage===1,results:nativeLastMatchResults,fallback:characterMenuReport.returnFallback??null,dialog:!!document.querySelector("#nativeResults"),room:nativeRoom.snapshot(),menu:nativeCharacterMenu.read()})')));
+  if(reports.some(r=>!r.samePage||r.fallback||r.dialog||r.room.code!==code))throw Error('Match did not return in place '+JSON.stringify(reports));
+  if(JSON.stringify(reports[0].results)!==JSON.stringify(reports[1].results))throw Error('Result divergence');
+  return reports;
+ }
  if(lrasMode){
   await a.eval('nativeMenuInput.pulse(0x1000)');await a.wait('nativeLive?.snapshot().match?.pause?.[0]===1');await a.wait('nativeLive.snapshot().match.pause[2]===0');
-  await a.eval('nativeMenuInput.pulse(0x1160)');
-  await Promise.all([a,b].map(c=>c.wait('globalThis.nativeMenuMatchReport?.results&&nativeRoom.state.phase==="results"',90000)));
-  await Promise.all([a,b].map(c=>c.wait('document.querySelector("#nativeResults")?.dataset.ready==="true"')));
-  const reports=await Promise.all([a,b].map(c=>c.eval('(()=>{const result=nativeMenuMatchReport.results,room=nativeRoom.snapshot(),dialog=document.querySelector("#nativeResults");return {result,room,scene:nativeMenuLive.snapshot().scene,presentation:{title:dialog.querySelector("h1").textContent,call:dialog.querySelector("header").textContent,nativeCanvas:!!dialog.querySelector(".native-result-canvas"),players:[...dialog.querySelectorAll(".results-player")].map(p=>p.textContent)}};})()')));
-  if(reports.some(r=>r.result.outcome!==7||r.result.winnerCount!==2||!r.result.players.every(p=>p.winner)||r.scene!=='results'||r.presentation.nativeCanvas||r.presentation.players.some(p=>!p.includes('NO CONTEST')||p.includes('WIN'))||!r.room.pendingEnding?.sent||r.room.pendingEnding.frame>r.room.confirmedFrame))throw Error('Invalid LRAS result '+JSON.stringify(reports));
-  if(JSON.stringify(reports[0].result)!==JSON.stringify(reports[1].result))throw Error('LRAS result divergence');
-  await b.click('#charactersButton');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90')));
-  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,productScope,initial,reports,rollback:rollbackMode,scope:'Two authenticated product browsers execute original pause and LRAS input; the native NO CONTEST result must be confirmed, identical on both peers and return both clients to character select.'},null,2));console.log(JSON.stringify({passed:true,lras:true,rollback:rollbackMode,outcome:reports[0].result.outcome,winnerCount:reports[0].result.winnerCount,confirmedFrame:reports[0].room.confirmedFrame}));
+  const lrasEpoch=await a.eval('nativeRoom.snapshot().epoch');await a.eval('nativeMenuInput.pulse(0x1160)');
+  const reports=await returnedInPlace(lrasEpoch);
+  if(reports.some(r=>r.results.outcome!==7||r.results.winnerCount!==2||!r.results.players.every(p=>p.winner)))throw Error('Invalid LRAS result '+JSON.stringify(reports));
+  // A second match from the restored heap, with movement, must agree on both peers.
+  await a.click('#readyRoom');await b.click('#readyRoom');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>90')));
+  const stageTarget=await a.eval('nativeStageMenu.icons().find(i=>i.stage==='+selectedStage+'&&i.unlocked===2)');
+  for(let i=0;i<100;i++){const cursor=await a.eval('nativeStageMenu.read()');if(cursor.hover===stageTarget.i){await a.keys([]);break;}const [x,y]=cursor.cursor,dx=stageTarget.x-x,dy=stageTarget.y-y;const keys=[Math.abs(dx)>.7?(dx>0?'KeyD':'KeyA'):(dy>0?'KeyW':'KeyS')];if(Math.max(Math.abs(dx),Math.abs(dy))<6)keys.push('ShiftLeft');await a.keys(keys);await delay(25);await a.keys([]);await delay(100);if(i===99)throw Error('Could not steer stage cursor');}
+  await delay(100);await a.press('KeyP');
+  await Promise.all([a,b].map(c=>c.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1',90000)));
+  await a.keys(['KeyD']);await b.keys(['KeyA','KeyP']);await delay(2500);await a.keys([]);await b.keys([]);await delay(1500);
+  await a.eval('nativeMenuInput.pulse(0x1000)');await a.wait('nativeLive?.snapshot().match?.pause?.[0]===1');await a.wait('nativeLive.snapshot().match.pause[2]===0');
+  const secondEpoch=await a.eval('nativeRoom.snapshot().epoch');await a.eval('nativeMenuInput.pulse(0x1160)');
+  const second=await returnedInPlace(secondEpoch);
+  if(second.some(r=>r.results.outcome!==7||r.results.frames<120))throw Error('Second match after in-place return '+JSON.stringify(second.map(r=>r.results)));
+  reports.push(...second);
+  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,productScope,initial,reports,rollback:rollbackMode,scope:'Two authenticated product browsers execute original pause and LRAS input; the native NO CONTEST result must be confirmed, identical on both peers and return both clients to character select.'},null,2));console.log(JSON.stringify({passed:true,lras:true,rollback:rollbackMode,outcome:reports[0].results.outcome,winnerCount:reports[0].results.winnerCount,confirmedFrame:reports[0].room.confirmedFrame}));
  }else if(resultsMode){
   const lifecycle=[];
-  async function ended(outcome){
-   await Promise.all([a,b].map(c=>c.wait('globalThis.nativeMenuMatchReport?.results&&nativeRoom.state.phase==="results"',90000)));
-   await Promise.all([a,b].map(c=>c.wait('nativeMusic.snapshot().track==="ff_fox.hps"&&nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001')));
-   await Promise.all([a,b].map(c=>c.wait('document.querySelector("#nativeResults")?.dataset.ready==="true"')));
-   const reports=await Promise.all([a,b].map(c=>c.eval('({results:nativeMenuMatchReport.results,selection:nativeMenuMatchReport.selection,room:nativeRoom.snapshot(),scene:nativeMenuLive.snapshot().scene})')));
-   if(reports.some(r=>r.results.outcome!==outcome||r.scene!=='results'))throw Error('Wrong result outcome '+JSON.stringify(reports));
-   if(JSON.stringify(reports[0].results)!==JSON.stringify(reports[1].results))throw Error('Result divergence');
-   if(reports.some(r=>!r.room.pendingEnding?.sent||r.room.pendingEnding.frame>r.room.confirmedFrame))throw Error('Unconfirmed result escaped '+JSON.stringify(reports));
-   const presentation=await Promise.all([a,b].map(c=>c.eval('(()=>{const d=document.querySelector("#nativeResults"),r=d.getBoundingClientRect(),audio=nativeMusic.snapshot();return {ready:d.dataset.ready,players:d.querySelectorAll(".results-player").length,temporary:d.textContent.includes("Temporary"),ratio:r.width/r.height,audio:{track:audio.track,status:audio.status,outputPeak:audio.outputPeak}};})()')));if(presentation.some(p=>p.ready!=="true"||p.players!==2||p.temporary||Math.abs(p.ratio-4/3)>.01||p.audio.track!=="ff_fox.hps"||p.audio.status!=="playing"||p.audio.outputPeak<=.001))throw Error('Invalid tournament results presentation '+JSON.stringify(presentation));
-   for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/result-'+outcome+'-'+i+'.png',Buffer.from(shot.data,'base64'));}
-   lifecycle.push(...reports.map((report,i)=>({...report,presentation:presentation[i]})));return reports;
+  async function pickStage(){
+   await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>90')));
+   const target=await a.eval('nativeStageMenu.icons().find(i=>i.stage==='+selectedStage+'&&i.unlocked===2)');
+   for(let i=0;i<100;i++){const cursor=await a.eval('nativeStageMenu.read()');if(cursor.hover===target.i){await a.keys([]);break;}const [x,y]=cursor.cursor,dx=target.x-x,dy=target.y-y;const keys=[Math.abs(dx)>.7?(dx>0?'KeyD':'KeyA'):(dy>0?'KeyW':'KeyS')];if(Math.max(Math.abs(dx),Math.abs(dy))<6)keys.push('ShiftLeft');await a.keys(keys);await delay(25);await a.keys([]);await delay(100);if(i===99)throw Error('Could not steer stage cursor');}
+   await delay(100);await a.press('KeyP');
   }
-  await a.keys(['KeyD']);const elimination=await ended(2);await a.keys([]);
+  async function ended(outcome,epoch){
+   const reports=await returnedInPlace(epoch);
+   if(reports.some(r=>r.results.outcome!==outcome))throw Error('Wrong result outcome '+JSON.stringify(reports));
+   await Promise.all([a,b].map(c=>c.wait('nativeMusic.snapshot().track==="menu01.hps"&&nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001')));
+   for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/returned-'+outcome+'-'+i+'.png',Buffer.from(shot.data,'base64'));}
+   lifecycle.push(...reports);return reports;
+  }
+  const firstEpoch=await a.eval('nativeRoom.snapshot().epoch');
+  await a.keys(['KeyD']);const elimination=await ended(2,firstEpoch);await a.keys([]);
   if(elimination[0].results.players[0].stocks!==0||!elimination[0].results.players[1].winner)throw Error('Elimination standings');
-  await a.click('#rematchButton');await delay(200);if(await a.eval('nativeMenuLive.snapshot().scene')!=='results')throw Error('One vote restarted room');await b.click('#rematchButton');
-  await Promise.all([a,b].map(c=>c.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1&&nativeRoom.snapshot().epoch>'+elimination[0].room.epoch,90000)));
+  // A second match after the in-place return: fresh rules on both peers.
+  await a.click('#readyRoom');await b.click('#readyRoom');await pickStage();
+  await Promise.all([a,b].map(c=>c.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1',90000)));
   await Promise.all([a,b].map(c=>c.wait('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001')));
   const restarted=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),selection:nativeCharacterMenu.matchSelection(),stocks:[0,1].map(p=>characterModule._portTournamentRead(10,p)),audio:nativeMusic.snapshot(),limit:characterModule._portTournamentRead(2,0)})')));
-  if(restarted.some(r=>JSON.stringify(r.selection.players.slice(0,2).map(p=>p.costume))!==JSON.stringify(selectedCostumes)||r.selection.stage!==31||r.stocks.some(n=>n!==4)||r.limit!==480||r.room.code!==code))throw Error('Fresh rematch rules/room');
+  if(restarted.some(r=>JSON.stringify(r.selection.players.slice(0,2).map(p=>p.costume))!==JSON.stringify(selectedCostumes)||r.selection.stage!==selectedStage||r.stocks.some(n=>n!==4)||r.limit!==480||r.room.code!==code))throw Error('Fresh match rules/room after return '+JSON.stringify(restarted));
   // Diagnostic acceleration executes every original simulation step. It does
   // not edit the timer/stocks/outcome and is not a presentation or latency test.
   for(const c of [a,b])await c.eval('(()=>{let n=0;while(!characterModule._portTournamentRead(25,0)&&n<30000){for(let p=0;p<2;p++)characterModule._portControllerSample(p,0,0,0,0,0,0,0);characterModule._portTournamentStep();n++;}return n;})()');
-  const timeout=await ended(1);if(timeout[0].results.frames!==28800)throw Error('Timeout was not eight native minutes');
-  await b.click('#charactersButton');await Promise.all([a,b].map(c=>c.wait('nativeRoom.snapshot().epoch>'+timeout[0].room.epoch+'&&nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90')));
-  const returned=await Promise.all([a,b].map(c=>c.eval('({room:nativeRoom.snapshot(),menu:nativeCharacterMenu.read()})')));
+  const timeout=await ended(1,restarted[0].room.epoch);if(timeout[0].results.frames!==28800)throw Error('Timeout was not eight native minutes');
+  const returned=timeout;
   if(returned.some(r=>r.room.code!==code||r.menu.players[0].character!==20||r.menu.players[1].character!==2)||returned[0].room.seat!==0||returned[1].room.seat!==1)throw Error('CSS restoration');
   await a.click('#readyRoom');await b.click('#readyRoom');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>90')));
   const legal=await a.eval('nativeStageMenu.icons().filter(i=>i.unlocked===2).map(i=>i.stage).sort((a,b)=>a-b)');if(JSON.stringify(legal)!=='[2,3,8,28,31,32]')throw Error('Return flow exposed non-tournament stages');
   await a.press('KeyO');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90')));
-  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,lifecycle,restarted,returned,legalStagesAfterReturn:legal,scope:'Elimination in real-time two-browser lockstep; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.'},null,2));console.log(JSON.stringify({passed:true,results:true,elimination:elimination[0].results,timeout:timeout[0].results}));
+  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,initial,lifecycle,restarted,legalStagesAfterReturn:legal,scope:'Elimination in real-time two-browser play returns both pages to character select in place; a second match then runs; timeout diagnostic executes all original simulation steps with neutral input, bypassing relay/presentation during acceleration; not FPS or latency certification.'},null,2));console.log(JSON.stringify({passed:true,results:true,elimination:elimination[0].results,timeout:timeout[0].results}));
  }else{
  if(!latencyMode){await a.keys(['KeyD','KeyP']);await b.keys(['KeyA','KeyP']);await delay(400);await a.keys([]);await b.keys([]);}
  await a.press('Space');await b.press('Space');await a.press('KeyO');await b.press('KeyO');

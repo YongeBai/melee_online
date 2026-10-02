@@ -10,7 +10,7 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  else if(saved?.token)storage.removeItem(storageKey);
  if(!initial)transport?.forget?.();
  initial??=await post('/native-rooms',{diagnosticCpu:requestedDiagnostic});
- let state=initial,ws,closed=false,sequence=-1,key=null,phaseReady=false,nextFrame=0,reloading=false,localTapJump=1,localDevice=null,lastSent=null,confirmedFrame=-1,rollbackSink,pendingEnding=null,reconnectTimer,reconnectAttempt=0;
+ let state=initial,ws,closed=false,sequence=-1,key=null,phaseReady=false,nextFrame=0,reloading=false,localTapJump=1,localDevice=null,lastSent=null,confirmedFrame=-1,rollbackSink,pendingEnding=null,reconnectTimer,reconnectAttempt=0,inPlace=null;
  const frames=new Map(),sent=new Map(),rollbackEvents=[];
  let rollbackPhase=false;
  // Rollback events can arrive over the room channel and the direct input link;
@@ -25,6 +25,10 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  // The opponent's panel shows this seat's device; older authorities omit it.
  function syncDevice(){if(localDevice&&Array.isArray(state.devices)&&state.devices[state.seat]!==localDevice&&ws?.readyState===1)send({type:'device',value:localDevice});}
  function restart(value,syncedReload=true){if(reloading)return;reloading=true;persist(value,syncedReload);reload();}
+ // A finished match returns both pages to character select without reloading.
+ // The new epoch then starts this client's scene state from the beginning.
+ function advanceEpoch(m){initial={...m,token:initial.token};sequence=-1;key=null;phaseReady=false;nextFrame=0;confirmedFrame=-1;lastSent=null;pendingEnding=null;rollbackPhase=false;frames.clear();sent.clear();rollbackEvents.length=0;peerInputs.clear();remoteDelivered=-1;ackDelivered=-1;remoteSeen.clear();queuedThrough=2;menuBuffer=3;direct?.end();}
+ function requestReturn(){if(inPlace&&!inPlace.sent&&state.phase==='results'&&state.epoch===initial.epoch&&network.connected){inPlace.sent=true;send({type:'result-action',epoch:state.epoch,action:'characters'});}}
  const network={
   get code(){return state.code;},get seat(){return state.seat;},get state(){return state;},get active(){return state.hasGuest&&!state.cpu;},
   get connected(){return state.connected.every(Boolean);},netcode,
@@ -37,6 +41,11 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
   setDevice(value){if(!['keyboard','controller'].includes(value))throw Error('Invalid input device');localDevice=value;syncDevice();},
   setTapJump(value){if(value!==0&&value!==1)throw Error('Invalid tap jump setting');localTapJump=value;},
   endMatch(value,frame=nextFrame-1){if(!Number.isSafeInteger(frame)||frame<0)throw Error('Invalid match ending frame');const ending={frame,value:structuredClone(value),sent:false};if(pendingEnding){if(JSON.stringify({...pendingEnding,sent:false})!==JSON.stringify(ending))throw Error('Conflicting match ending');return;}pendingEnding=ending;flushEnding();},chooseResult(action){send({type:'result-action',epoch:state.epoch,action});},
+  // Call before endMatch. Once both results match, asks the room for character
+  // select; resolves when that epoch arrives, which then does not reload.
+  returnToCharacters(){if(!network.active)throw Error('Room return requires a two-player match');return new Promise(resolve=>{inPlace={resolve,sent:false};});},
+  // Reload into the current epoch, as a reload-based return would have.
+  reload(){restart(state);},
   cpuMode(enabled){send({type:'cpu',enabled});},ready(){if(!state.ready[state.seat])send({type:'ready'});},kick(){send({type:'kick'});},
   newRoom(){reloading=true;try{send({type:'leave'});}catch{}storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();reload();},
   leave(){reloading=true;try{send({type:'leave'});}finally{storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();reload();}},
@@ -90,8 +99,10 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
   socket.onmessage=event=>{if(reloading||socket!==ws)return;try{
    const m=JSON.parse(event.data);
    if(m.type==='state'){
-    if(m.epoch!==initial.epoch){restart({...m,token:initial.token});return;}
-    state=m;persist(m);flushEnding();syncDevice();onState(network);clearTimeout(timeout);connected=true;reconnectAttempt=0;resolve(network);
+    const advanced=m.epoch!==initial.epoch;
+    if(advanced){if(!inPlace){restart({...m,token:initial.token});return;}advanceEpoch(m);}
+    state=m;persist(m);flushEnding();syncDevice();requestReturn();onState(network);clearTimeout(timeout);connected=true;reconnectAttempt=0;resolve(network);
+    if(advanced){const done=inPlace.resolve;inPlace=null;done(network);}
    }else if(m.type==='frame'&&m.epoch===state.epoch&&m.key===key){if(rollbackSink===undefined&&!peerMenus)frames.set(m.frame,m.inputs);}
    else if(m.type==='peer-input'&&m.epoch===state.epoch&&m.key===key&&m.seat===1-state.seat){if(rollbackSink===undefined&&peerMenus)peerInput(m.frame,m.value);else queueRollback(m);}
    else if(m.type==='confirmed-frame'&&m.epoch===state.epoch&&m.key===key){if(!Number.isSafeInteger(m.frame)||m.frame!==confirmedFrame+1)throw Error('Non-contiguous room confirmation');confirmedFrame=m.frame;if(rollbackPhase)sent.delete(m.frame);queueRollback(m);flushEnding();}

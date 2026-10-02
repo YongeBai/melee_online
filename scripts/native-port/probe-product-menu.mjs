@@ -100,20 +100,28 @@ try{testFlow:{
  await waitFor('nativeLive.snapshot().final[0][0]===14');
  if(process.argv.includes('--music-startup')){const music=await evaluate('nativeMusic.snapshot()'),match=await evaluate('nativeLive.snapshot().match');fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({passed:true,scope:'Native menu-to-stage music startup and browser stream transport only',stage:stageId,trace,music,match},null,2));console.log(JSON.stringify({passed:true,stage:stageId,track:music.track,scope:'music startup'}));break testFlow;}
  if(resultsMode){
-  const startSelection=await evaluate('nativeCharacterMenu.matchSelection()');
-  await keys(['KeyD']);await waitFor('globalThis.nativeMenuMatchReport?.results',90000);await keys([]);
-  const ended=await evaluate('({results:nativeMenuMatchReport.results,scene:nativeMenuLive.snapshot().scene,selection:nativeMenuMatchReport.selection})');if(ended.scene!=='results'||ended.results.outcome!==2)throw Error('CPU elimination did not reach results');
-  await waitFor('globalThis.nativeResultsUI?.nativeScene?.snapshot().draws>=120&&document.querySelector("#nativeResults")?.dataset.ready==="true"');const nativeResult=await evaluate('nativeResultsUI.nativeScene.snapshot()');if(nativeResult.width!==960||nativeResult.height!==720||nativeResult.simulationFps<59||nativeResult.presentationFps<59||nativeResult.winnerDraws<=0||nativeResult.portraitCopies?.length!==2||nativeResult.portraitCopies.some((copy,index)=>copy.copies!==1||copy.nativeCopies!==index+1||copy.draws<=0||copy.materialDraws<=0||copy.colored<=0))throw Error('Native result scene missed complete 720p60 composite '+JSON.stringify(nativeResult));
-  const shot=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/results.png',Buffer.from(shot.data,'base64'));
-  await press('Enter');await waitFor('globalThis.nativeLive?.snapshot().match?.intro?.gate===1&&!globalThis.nativeMenuMatchReport',90000);
-  await waitFor('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001');
-  const rematch=await evaluate('({selection:nativeCharacterMenu.matchSelection(),stocks:[0,1].map(p=>characterModule._portTournamentRead(10,p)),audio:nativeMusic.snapshot(),tap:characterModule._portTapJumpGet(0)})');
-  if(JSON.stringify(startSelection)!==JSON.stringify(rematch.selection)||rematch.stocks.some(s=>s!==4)||rematch.tap!==0)throw Error('CPU rematch did not retain rules, selection, or tap jump');
-  await keys(['KeyD']);await waitFor('globalThis.nativeMenuMatchReport?.results',90000);await keys([]);await waitFor('globalThis.nativeResultsUI?.nativeScene?.snapshot().draws>60&&document.querySelector("#nativeResults")?.dataset.ready==="true"');await press('KeyO');
-  await waitFor('globalThis.nativeCharacterMenu?.read().frames>90&&nativeMenuLive.snapshot().scene==="characters"&&!globalThis.nativeMenuMatchReport',90000);
-  const returned=await evaluate('({menu:nativeCharacterMenu.read(),cpu:nativeRoom.cpu,keyboardHidden:document.querySelector("#peerKeyboard").hidden})');
-  if(!returned.cpu||!returned.keyboardHidden||returned.menu.players[0].character!==startSelection.players[0].character||returned.menu.players[1].character!==startSelection.players[1].character)throw Error('CPU return selection/presentation');
-  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,scope:'CPU elimination to original native result panel at 720p60, keyboard rematch with fresh rules and return to character select',ended,nativeResult,rematch,returned},null,2));console.log(JSON.stringify({passed:true,results:true,solo:true,nativeResult,audio:rematch.audio.status}));break testFlow;
+  // A finished match returns to character select in the same page, with no
+  // results screen and no reload; a second match must then run normally.
+  await evaluate('globalThis.__probeSamePage=1');
+  const startSelection=await evaluate('nativeCharacterMenu.matchSelection()'),returns=[];
+  async function eliminateAndReturn(){
+   await evaluate('globalThis.__probeMenuBefore=nativeMenuLive');await keys(['KeyD']);
+   await waitFor('nativeMenuLive!==__probeMenuBefore&&nativeMenuLive.snapshot().scene==="characters"&&nativeCharacterMenu.read().frames>90',120000);await keys([]);
+   const returned=await evaluate('({samePage:globalThis.__probeSamePage===1,results:nativeLastMatchResults,results_dialog:!!document.querySelector("#nativeResults"),menu:nativeCharacterMenu.read(),cpu:nativeRoom.cpu,keyboardHidden:document.querySelector("#peerKeyboard").hidden,tap:characterModule._portTapJumpGet(0),fallback:characterMenuReport.returnFallback??null})');
+   if(!returned.samePage||returned.fallback||returned.results_dialog||returned.results.outcome!==2)throw Error('Match did not return in place '+JSON.stringify(returned));
+   if(!returned.cpu||!returned.keyboardHidden||returned.tap!==0||returned.menu.players[0].character!==startSelection.players[0].character||returned.menu.players[1].character!==startSelection.players[1].character)throw Error('CPU return selection/presentation/tap jump '+JSON.stringify(returned));
+   await waitFor('nativeMusic.snapshot().track==="menu01.hps"&&nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().outputPeak>0.001');
+   const shot=await cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/returned-'+returns.length+'.png',Buffer.from(shot.data,'base64'));returns.push(returned);
+  }
+  await eliminateAndReturn();
+  await evaluate('document.querySelector("#readyRoom").click()');await waitFor('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');
+  const again=await evaluate(`nativeStageMenu.icons().find(i=>i.stage===${stageId}&&i.unlocked===2)`);await steer('nativeStageMenu.read().cursor',[again.x,again.y],.6);await press('KeyP');
+  await waitFor('globalThis.nativeLive?.snapshot().match?.intro?.gate===1',90000);
+  await waitFor('nativeMusic.snapshot().status==="playing"&&nativeMusic.snapshot().track!=="menu01.hps"&&nativeMusic.snapshot().outputPeak>0.001');
+  const second=await evaluate('({selection:nativeCharacterMenu.matchSelection(),stocks:[0,1].map(p=>characterModule._portTournamentRead(10,p)),audio:nativeMusic.snapshot(),tap:characterModule._portTapJumpGet(0)})');
+  if(JSON.stringify(startSelection)!==JSON.stringify(second.selection)||second.stocks.some(s=>s!==4)||second.tap!==0)throw Error('Match after in-place return did not retain rules, selection, or tap jump '+JSON.stringify(second));
+  await eliminateAndReturn();
+  fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,scope:'CPU elimination returns straight to character select in the same page twice, with a full match between',returns,second},null,2));console.log(JSON.stringify({passed:true,results:true,solo:true,returns:returns.length,audio:second.audio.status}));break testFlow;
  }
  const tapStart=await evaluate('nativeLive.snapshot().frames');await keys(['KeyW']);await waitFor(`nativeLive.snapshot().frames>${tapStart+12}`);await keys([]);
  const tapJumped=await evaluate(`nativeLive.snapshot().stateChanges.some(s=>s.frame>${tapStart}&&s.state>=24&&s.state<=29)`);if(tapJumped!==tapOn)throw Error('Stick jump behavior differs from toggle: '+JSON.stringify({tapOn,tapJumped}));await waitFor('nativeLive.snapshot().final[0][0]===14&&nativeLive.snapshot().final[0][3]===0');

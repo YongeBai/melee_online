@@ -52,7 +52,9 @@ export async function createNativeSfx({module,base='./',context=null,volume=1}={
  const aram=[],aramLog=[],banks=new Map(),voices=new Map(),stats={starts:0,stops:0,updates:0,lateStarts:0,skippedStale:0,mispredictedStops:0,missingSamples:0,errors:0};
  let ctx=context,master=null,frame=null,replaying=false,replaySeen=null,replayFrom=0,live=0,muted=false;
  function audio(){if(ctx)return ctx;ctx=new AudioContext({latencyHint:'interactive'});master=ctx.createGain();master.gain.value=volume;master.connect(ctx.destination);
-  const unlock=()=>{if(ctx.state==='suspended')void ctx.resume().catch(()=>{});};addEventListener('pointerdown',unlock,{capture:true});addEventListener('keydown',unlock,{capture:true});return ctx;}
+  const unlock=()=>{if(ctx.state==='suspended')void ctx.resume().catch(()=>{});};addEventListener('pointerdown',unlock,{capture:true});addEventListener('keydown',unlock,{capture:true});
+  // As for music: start now where autoplay is allowed, or on a controller press.
+  unlock();const padPoll=setInterval(()=>{if(ctx.state!=='suspended'){clearInterval(padPoll);return;}if(Array.from(navigator.getGamepads?.()??[]).some(p=>p?.buttons.some(b=>b.pressed)))unlock();},250);return ctx;}
  // Banks decode in a worker as soon as they arrive; playback only wraps PCM.
  let worker=null,workerId=0;const pendingDecode=new Map();
  function decodeBank(b){try{worker??=new Worker(new URL('./native-sfx-worker.mjs',import.meta.url),{type:'module'});worker.onmessage??=({data})=>{const target=pendingDecode.get(data.id);pendingDecode.delete(data.id);if(!target)return;if(data.error){stats.errors++;stats.lastError=data.error;return;}for(const [key,pcm] of Object.entries(data.decoded))if(!target.pcm.has(key))target.pcm.set(key,pcm);stats.banksDecoded=(stats.banksDecoded??0)+1;};const id=++workerId;pendingDecode.set(id,b);const copy=b.bytes.slice();worker.postMessage({id,bytes:copy.buffer},[copy.buffer]);}catch(e){stats.errors++;stats.lastError=String(e);}}
@@ -104,6 +106,10 @@ export async function createNativeSfx({module,base='./',context=null,volume=1}={
   // Enable after the caller has installed this mixer as the event receiver,
   // so the boot-time bank transfers are recorded.
   enable(){if(!module._portAudioEnable())throw Error('Native audio device unavailable');},
+  // The audio RAM map that belongs with a boot heap checkpoint. Restoring it
+  // with that heap also silences the match and forgets its frame numbering.
+  checkpoint(){return aram.map(m=>({...m}));},
+  restore(saved){for(const serial of [...voices.keys()])stop(serial);aram.splice(0,aram.length,...saved.map(m=>({...m})));frame=null;live=0;replaying=false;replaySeen=null;muted=false;},
   dispose(){for(const serial of [...voices.keys()])stop(serial);},
  };
  return sfx;
