@@ -41,20 +41,25 @@ export function parseNetcode(text){
 // frame of margin, never below the original three frames.
 export function menuBufferFor(rttP95Ms){return Number.isFinite(rttP95Ms)?Math.max(3,Math.min(12,Math.ceil((rttP95Ms/2+8)/(1000/60))+1)):3;}
 
-// The game reads analog values as float32. Rounding them when the input is
-// made changes nothing in the simulation and lets every delivery path carry
-// the identical immutable value in four bytes.
-export const canonicalPad=pad=>[pad[0],...pad.slice(1,7).map(Math.fround)];
+// Analog values take the GameCube controller's resolution: whole steps of
+// 1/80 for sticks and 1/140 for shoulders, the units the original pad code
+// scales by. A browser gamepad otherwise reports sub-step jitter every frame,
+// and each jittered value mispredicts and forces a rollback. Values are then
+// float32, as the game reads them, so every delivery path carries the
+// identical immutable value in four bytes.
+const step=(value,units)=>Math.fround(Math.round(value*units)/units+0);
+export const canonicalPad=pad=>[pad[0],...pad.slice(1,5).map(v=>step(v,80)),...pad.slice(5,7).map(v=>step(v,140))];
 
 // Binary input packet: header, then every local input the peer has not yet
 // acknowledged (tap, buttons, six float32 analog values). 32 frames keep a
 // packet within one SCTP chunk (~0.9 KB), so a lost datagram never takes a
-// fragmented message with it.
-const MAGIC=0x4d,VERSION=2,HEADER=40,FRAME_BYTES=27,MAX_FRAMES=32;
-export function encodeInputPacket({epoch,sequence,seat,ack,first,frames,sentAt,echoSentAt,echoHoldMs,advantage=0}){
+// fragmented message with it. The header carries the sender's input delay:
+// each player chooses their own, and time sync needs the peer's.
+const MAGIC=0x4d,VERSION=3,HEADER=41,FRAME_BYTES=27,MAX_FRAMES=32;
+export function encodeInputPacket({epoch,sequence,seat,ack,first,frames,sentAt,echoSentAt,echoHoldMs,advantage=0,delay=0}){
  const count=Math.min(frames.length,MAX_FRAMES),buffer=new ArrayBuffer(HEADER+count*FRAME_BYTES),v=new DataView(buffer);
  v.setUint8(0,MAGIC);v.setUint8(1,VERSION);v.setUint16(2,epoch&0xffff);v.setUint16(4,sequence&0xffff);v.setUint8(6,seat);v.setUint8(7,count);
- v.setInt32(8,ack);v.setInt32(12,first);v.setFloat64(16,sentAt);v.setFloat64(24,echoSentAt);v.setFloat32(32,echoHoldMs);v.setFloat32(36,advantage);
+ v.setInt32(8,ack);v.setInt32(12,first);v.setFloat64(16,sentAt);v.setFloat64(24,echoSentAt);v.setFloat32(32,echoHoldMs);v.setFloat32(36,advantage);v.setUint8(40,delay);
  for(let i=0;i<count;i++){const at=HEADER+i*FRAME_BYTES,{pad,tap}=frames[i];v.setUint8(at,tap);v.setUint16(at+1,pad[0]);for(let k=1;k<7;k++)v.setFloat32(at+3+(k-1)*4,pad[k]);}
  return buffer;
 }
@@ -63,13 +68,13 @@ export function decodeInputPacket(buffer){
  const v=new DataView(buffer);if(v.getUint8(0)!==MAGIC||v.getUint8(1)!==VERSION)return null;
  const count=v.getUint8(7);if(buffer.byteLength!==HEADER+count*FRAME_BYTES)return null;
  const frames=[];for(let i=0;i<count;i++){const at=HEADER+i*FRAME_BYTES;frames.push({tap:v.getUint8(at),pad:[v.getUint16(at+1),...Array.from({length:6},(_,k)=>v.getFloat32(at+3+k*4))]});}
- return {epoch:v.getUint16(2),sequence:v.getUint16(4),seat:v.getUint8(6),ack:v.getInt32(8),first:v.getInt32(12),sentAt:v.getFloat64(16),echoSentAt:v.getFloat64(24),echoHoldMs:v.getFloat32(32),advantage:v.getFloat32(36),frames};
+ return {epoch:v.getUint16(2),sequence:v.getUint16(4),seat:v.getUint8(6),ack:v.getInt32(8),first:v.getInt32(12),sentAt:v.getFloat64(16),echoSentAt:v.getFloat64(24),echoHoldMs:v.getFloat32(32),advantage:v.getFloat32(36),delay:v.getUint8(40),frames};
 }
 
 // Direct peer input exchange for one match. Delivery is idempotent: callers get
 // each remote frame once and contiguous acknowledgements of local frames.
-export function createDirectInputLink({channel,seat,onInput,onAck,firstFrame=3,resendMs=20,maxBuffered=2048,now=()=>performance.now(),setInterval:every=globalThis.setInterval,clearInterval:cancel=globalThis.clearInterval}){
- let tag=null,advantage=0,peerAdvantage=null,local=new Map(),peerAck=firstFrame-1,remoteContiguous=firstFrame-1,seen=new Set(),lastSend=-Infinity,owesAck=false,echo=null,timer=0;
+export function createDirectInputLink({channel,seat,onInput,onAck,delay=()=>0,firstFrame=3,resendMs=20,maxBuffered=2048,now=()=>performance.now(),setInterval:every=globalThis.setInterval,clearInterval:cancel=globalThis.clearInterval}){
+ let tag=null,advantage=0,peerAdvantage=null,peerDelay=null,local=new Map(),peerAck=firstFrame-1,remoteContiguous=firstFrame-1,seen=new Set(),lastSend=-Infinity,owesAck=false,echo=null,timer=0;
  const stats={packetsSent:0,packetsReceived:0,stalePackets:0,framesReceived:0,duplicateFrames:0,resends:0,skippedBacklog:0,rtt:[]};
  function flush(){
   if(!tag||!channel.open)return;
@@ -79,15 +84,17 @@ export function createDirectInputLink({channel,seat,onInput,onAck,firstFrame=3,r
   // add to a backlog: the next packet repeats every unacknowledged frame.
   if((channel.bufferedAmount??0)>maxBuffered){stats.skippedBacklog++;return;}
   const t=now();
-  try{channel.send(encodeInputPacket({...tag,seat,ack:remoteContiguous,first:peerAck+1,frames,sentAt:t,echoSentAt:echo?.sentAt??0,echoHoldMs:echo?t-echo.receivedAt:0,advantage}));}catch{return;}
+  try{channel.send(encodeInputPacket({...tag,seat,ack:remoteContiguous,first:peerAck+1,frames,sentAt:t,echoSentAt:echo?.sentAt??0,echoHoldMs:echo?t-echo.receivedAt:0,advantage,delay:delay()}));}catch{return;}
   lastSend=t;owesAck=false;stats.packetsSent++;
  }
  function receive(buffer){
   const p=decodeInputPacket(buffer);if(!p||!tag)return;
   if(p.epoch!==(tag.epoch&0xffff)||p.sequence!==(tag.sequence&0xffff)||p.seat!==1-seat){stats.stalePackets++;return;}
   const t=now();stats.packetsReceived++;
-  if(p.echoSentAt>0&&stats.rtt.length<4096)stats.rtt.push(t-p.echoSentAt-p.echoHoldMs);
-  echo={sentAt:p.sentAt,receivedAt:t};peerAdvantage=p.advantage;
+  // A rolling window: time sync and the menu buffer need the current round
+  // trip, not the first minute of the session (Wi-Fi latency drifts).
+  if(p.echoSentAt>0){stats.rtt.push(t-p.echoSentAt-p.echoHoldMs);if(stats.rtt.length>300)stats.rtt.shift();}
+  echo={sentAt:p.sentAt,receivedAt:t};peerAdvantage=p.advantage;peerDelay=p.delay;
   // Cumulative acknowledgement of our inputs, delivered one frame at a time.
   if(p.ack>peerAck){for(let f=peerAck+1;f<=p.ack;f++){if(!local.has(f))break;onAck(f);local.delete(f);peerAck=f;}}
   p.frames.forEach((value,i)=>{const f=p.first+i;if(f<=remoteContiguous||seen.has(f)){stats.duplicateFrames++;return;}seen.add(f);stats.framesReceived++;onInput(f,value);});
@@ -98,11 +105,11 @@ export function createDirectInputLink({channel,seat,onInput,onAck,firstFrame=3,r
  // stalled and producing no new frames), and acknowledge received input.
  timer=every(()=>{if(now()-lastSend>=resendMs&&(local.size||owesAck)){if(local.size)stats.resends++;flush();}},Math.max(4,resendMs>>1));
  return {
-  begin(epoch,sequence){tag={epoch,sequence};advantage=0;peerAdvantage=null;local.clear();peerAck=firstFrame-1;remoteContiguous=firstFrame-1;seen.clear();owesAck=false;echo=null;},
+  begin(epoch,sequence){tag={epoch,sequence};advantage=0;peerAdvantage=null;peerDelay=null;local.clear();peerAck=firstFrame-1;remoteContiguous=firstFrame-1;seen.clear();owesAck=false;echo=null;},
   end(){tag=null;local.clear();seen.clear();},
   send(frame,value){if(!tag||frame<=peerAck||local.has(frame))return;local.set(frame,{pad:[...value.pad],tap:value.tap});flush();},
   // Our frame-advantage estimate, reported to the peer; and the peer's latest.
-  setAdvantage(value){advantage=Number.isFinite(value)?value:0;},get peerAdvantage(){return peerAdvantage;},
+  setAdvantage(value){advantage=Number.isFinite(value)?value:0;},get peerAdvantage(){return peerAdvantage;},get peerDelay(){return peerDelay;},
   get active(){return !!tag;},
   snapshot(){const r=[...stats.rtt].sort((a,b)=>a-b),q=x=>r.length?r[Math.min(r.length-1,Math.floor(x*r.length))]:null;return {packetsSent:stats.packetsSent,packetsReceived:stats.packetsReceived,stalePackets:stats.stalePackets,framesReceived:stats.framesReceived,duplicateFrames:stats.duplicateFrames,resends:stats.resends,skippedBacklog:stats.skippedBacklog,unacknowledged:local.size,peerAck,remoteContiguous,rttP50Ms:q(.5),rttP95Ms:q(.95)};},
   dispose(){cancel(timer);tag=null;channel.onmessage=null;},

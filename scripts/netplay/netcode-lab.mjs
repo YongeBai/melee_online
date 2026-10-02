@@ -24,6 +24,8 @@ const arg=(name,fallback)=>process.argv.find(a=>a.startsWith('--'+name+'='))?.sl
 const variants=arg('variants','room,d0,w7;direct,d0,w7;direct,d1,w7;direct,d2,w7;direct,d2,w10').split(';').map(s=>s.trim()).filter(Boolean);
 const profileNames=arg('profiles','regional,cross-country,home-wifi,bad-wifi').split(',').filter(Boolean);
 const cpuThrottle=arg('cpu-throttle','');if(cpuThrottle&&!/^[01]:[0-9.]+$/.test(cpuThrottle))throw Error('--cpu-throttle must be seat:rate');
+// --noise adds real-gamepad analog jitter to the scripted inputs.
+const noise=process.argv.includes('--noise');
 const frames=Number(arg('frames','1800')),trials=Number(arg('trials','1')),out=path.resolve(root,arg('out','dist/netplay-lab'));
 for(const p of profileNames)if(!profiles[p])throw Error('Unknown profile '+p+'; known: '+Object.keys(profiles).join(','));
 if(!Number.isSafeInteger(frames)||frames<600)throw Error('--frames must be at least 600');
@@ -36,7 +38,7 @@ const round=(x,d=1)=>x==null||!Number.isFinite(x)?x:Math.round(x*10**d)/10**d;
 function trial(variant,profile,label){
  return new Promise(resolve=>{
   const args=[path.join(root,'scripts/netplay/netem.mjs'),profile,'--',process.execPath,path.join(root,'scripts/native-port/probe-native-rooms.mjs'),'--rollback','--timing','--combat','--frames='+frames,'--label='+label];
-  const env={...process.env,MELEE_EXTRA_QUERY:variant==='default'?'':'netcode='+variant,MELEE_CHROME_ARGS:'--disable-features=WebRtcHideLocalIpsWithMdns',MELEE_CPU_THROTTLE:cpuThrottle};
+  const env={...process.env,MELEE_EXTRA_QUERY:[variant==='default'?'':'netcode='+variant,noise?'noise=1':''].filter(Boolean).join('&'),MELEE_CHROME_ARGS:'--disable-features=WebRtcHideLocalIpsWithMdns',MELEE_CPU_THROTTLE:cpuThrottle};
   const child=spawn(process.execPath,args,{cwd:root,env,stdio:['ignore','pipe','pipe']});
   let output='';child.stdout.on('data',d=>output=(output+d).slice(-20000));child.stderr.on('data',d=>output=(output+d).slice(-20000));
   const started=Date.now(),timer=setTimeout(()=>child.kill('SIGKILL'),12*60*1000);

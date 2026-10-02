@@ -37,6 +37,10 @@ if(disconnectSeat!==null&&(![0,1].includes(disconnectSeat)||!rollbackMode))throw
 const captureSeatArg=process.argv.find(arg=>arg.startsWith('--capture-seat=')),captureSeat=captureSeatArg===undefined?null:Number(captureSeatArg.slice('--capture-seat='.length));
 if(captureSeat!==null&&![0,1].includes(captureSeat))throw Error('--capture-seat must be 0 or 1');
 const captureSeats=new Set(captureSeat===null?(process.argv.includes('--capture')?[0,1]:[]):[captureSeat]),captureMode=captureSeats.size>0;
+// --seat-delay=seat:frames gives one player a different input delay;
+// --hud opens the netplay overlay on seat 0 and screenshots it mid-match.
+const seatDelayArg=process.argv.find(arg=>arg.startsWith('--seat-delay='))?.slice(13).split(':').map(Number)??null,hudMode=process.argv.includes('--hud');
+if(seatDelayArg&&(![0,1].includes(seatDelayArg[0])||!Number.isInteger(seatDelayArg[1])||seatDelayArg[1]<0||seatDelayArg[1]>4))throw Error('--seat-delay requires seat:frames (0-4)');
 const matchFrames=framesArg?Number(framesArg.slice('--frames='.length)):rollbackMode?60:600;
 if(!Number.isSafeInteger(matchFrames)||matchFrames<1)throw Error('--frames must be a positive integer');
 if(inputTape&&(!Array.isArray(inputTape)||inputTape.length!==2||inputTape.some(t=>!Array.isArray(t)||t.length!==matchFrames||t.some(p=>!Array.isArray(p)||p.length!==7||p.some(v=>!Number.isFinite(v))))))throw Error('Input tape must contain two complete normalized controller sequences');
@@ -156,6 +160,8 @@ try{
  }
  if(resultsMode){await a.press('Space');await b.press('Space');await delay(150);}
  const selectedCostumes=await a.eval('nativeCharacterMenu.read().players.slice(0,2).map(p=>p.costume)');if(resultsMode&&selectedCostumes.some(c=>c===0))throw Error('Costume input was not exercised');
+ if(seatDelayArg)await [a,b][seatDelayArg[0]].eval('nativeRoom.netcode.delay='+seatDelayArg[1]);
+ if(hudMode)await a.press('Backquote');
  if(lifecycleMode)for(const c of [a,b])await c.eval('globalThis.__probeSamePage=1');// Survives only without a reload.
  await a.click('#readyRoom');await a.wait('nativeRoom.state.ready[0]');if(await a.eval('nativeMenuLive.snapshot().scene')!=='characters')throw Error('One Ready started match');await b.click('#readyRoom');
  await a.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');await b.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>120');
@@ -185,18 +191,24 @@ try{
   const lrasEpoch=await a.eval('nativeRoom.snapshot().epoch');await a.eval('nativeMenuInput.pulse(0x1160)');
   const reports=await returnedInPlace(lrasEpoch);
   if(reports.some(r=>r.results.outcome!==7||r.results.winnerCount!==2||!r.results.players.every(p=>p.winner)))throw Error('Invalid LRAS result '+JSON.stringify(reports));
-  // A second match from the restored heap, with movement, must agree on both peers.
+  // Further matches from the restored heap, with movement, must agree on both
+  // peers; --matches=N repeats them to expose growth over a long session.
+  const extraMatches=Number(process.argv.find(x=>x.startsWith('--matches='))?.slice(10)??1),soak=[];
+  for(let match=0;match<extraMatches;match++){
   await a.click('#readyRoom');await b.click('#readyRoom');await Promise.all([a,b].map(c=>c.wait('nativeMenuLive.snapshot().scene==="stages"&&nativeStageMenu.read().frames>90')));
   const stageTarget=await a.eval('nativeStageMenu.icons().find(i=>i.stage==='+selectedStage+'&&i.unlocked===2)');
   for(let i=0;i<100;i++){const cursor=await a.eval('nativeStageMenu.read()');if(cursor.hover===stageTarget.i){await a.keys([]);break;}const [x,y]=cursor.cursor,dx=stageTarget.x-x,dy=stageTarget.y-y;const keys=[Math.abs(dx)>.7?(dx>0?'KeyD':'KeyA'):(dy>0?'KeyW':'KeyS')];if(Math.max(Math.abs(dx),Math.abs(dy))<6)keys.push('ShiftLeft');await a.keys(keys);await delay(25);await a.keys([]);await delay(100);if(i===99)throw Error('Could not steer stage cursor');}
   await delay(100);await a.press('KeyP');
   await Promise.all([a,b].map(c=>c.wait('globalThis.nativeLive?.snapshot().match?.intro?.gate===1',90000)));
-  await a.keys(['KeyD']);await b.keys(['KeyA','KeyP']);await delay(2500);await a.keys([]);await b.keys([]);await delay(1500);
+  await a.keys(['KeyD']);await b.keys(['KeyA','KeyP']);await delay(2500);await a.keys([]);await b.keys([]);await delay(extraMatches>1?6000:1500);
   await a.eval('nativeMenuInput.pulse(0x1000)');await a.wait('nativeLive?.snapshot().match?.pause?.[0]===1');await a.wait('nativeLive.snapshot().match.pause[2]===0');
   const secondEpoch=await a.eval('nativeRoom.snapshot().epoch');await a.eval('nativeMenuInput.pulse(0x1160)');
   const second=await returnedInPlace(secondEpoch);
   if(second.some(r=>r.results.outcome!==7||r.results.frames<120))throw Error('Second match after in-place return '+JSON.stringify(second.map(r=>r.results)));
   reports.push(...second);
+  soak.push(...await Promise.all([a,b].map(c=>c.eval('({match:'+match+',heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null,wasmMB:Math.round(characterModule.HEAPU8.length/1048576),draw:nativeLastLive?.drawSubmissionCpu,step:nativeLastLive?.stepCpu,fps:nativeLastLive&&nativeLastLive.frames*1000/nativeLastLive.elapsedMs})'))));
+  }
+  if(soak.length)fs.writeFileSync(output+'/soak.json',JSON.stringify(soak,null,1));
   fs.writeFileSync(output+'/report.json',JSON.stringify({passed:true,productScope,initial,reports,rollback:rollbackMode,scope:'Two authenticated product browsers execute original pause and LRAS input; the native NO CONTEST result must be confirmed, identical on both peers and return both clients to character select.'},null,2));console.log(JSON.stringify({passed:true,lras:true,rollback:rollbackMode,outcome:reports[0].results.outcome,winnerCount:reports[0].results.winnerCount,confirmedFrame:reports[0].room.confirmedFrame}));
  }else if(resultsMode){
   const lifecycle=[];
@@ -235,6 +247,7 @@ try{
  }else{
  if(!latencyMode){await a.keys(['KeyD','KeyP']);await b.keys(['KeyA','KeyP']);await delay(400);await a.keys([]);await b.keys([]);}
  await a.press('Space');await b.press('Space');await a.press('KeyO');await b.press('KeyO');
+ if(hudMode){await a.wait('globalThis.nativeLive?.snapshot().frames>'+Math.floor(matchFrames*.8),120000);await delay(600);const shot=await a.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/hud.png',Buffer.from(shot.data,'base64'));fs.writeFileSync(output+'/hud.txt',await a.eval('document.querySelector("#netHud").textContent'));}
  await a.wait('globalThis.nativeMenuMatchReport');await b.wait('globalThis.nativeMenuMatchReport');
  for(const [i,c] of [a,b].entries()){const shot=await c.cmd('Page.captureScreenshot',{format:'png'});fs.writeFileSync(output+'/player-'+i+'.png',Buffer.from(shot.data,'base64'));}
  if(timingMode){fs.writeFileSync(output+'/timing.json',JSON.stringify(await Promise.all([a,b].map(c=>c.eval('roomTimingReport()'))),null,2));if(recordInputs)fs.writeFileSync(output+'/inputs.json',JSON.stringify(await Promise.all([a,b].map(c=>c.eval('roomInputTape('+matchFrames+')')))));if(process.argv.includes('--profile'))for(const [i,c]of [a,b].entries())fs.writeFileSync(output+'/cpu-'+i+'.json',JSON.stringify(await c.cmd('Profiler.stop')));}
@@ -248,7 +261,9 @@ try{
  if(holdASeat!==null&&final.some(v=>v.report.live.initial[holdASeat][11]!==7))throw Error('Held-A Zelda did not start as Sheik '+JSON.stringify(final.map(v=>v.report.live.initial[holdASeat])));
  if(pair)for(const v of final)for(const [slot,tile] of pair.entries())if(tile===12){const forms=v.report.fighterForms.filter(f=>f.slot===slot);if(forms.length!==2||forms[0].code!=='Pp'||forms[1].code!=='Nn'||forms[0].owner===forms[1].owner)throw Error('Ice Climbers workload must retain distinct Popo and Nana owners in each selected seat');}
  if(rollbackMode&&final.some(v=>!v.report.rollback?.enabled||!v.report.rollback.productionDefault||v.report.rollback.metrics?.session?.forwardFrames!==matchFrames||v.report.rollback.metrics?.session?.confirmed!==matchFrames-1))throw Error('Default rollback product path was not confirmed '+JSON.stringify(final.map(v=>v.report.rollback)));
- if(rollbackMode&&final.some(v=>v.room.buffered!==0||v.room.bufferedSent!==0||v.room.mode!=='rollback'))throw Error('Rollback retained obsolete lockstep state '+JSON.stringify(final.map(v=>v.room)));
+ // A player with more input delay has sent frames past the opponent's last one;
+ // they stay unconfirmed until the next scene clears them.
+ if(rollbackMode&&final.some(v=>v.room.buffered!==0||v.room.bufferedSent>(seatDelayArg?4:0)||v.room.mode!=='rollback'))throw Error('Rollback retained obsolete lockstep state '+JSON.stringify(final.map(v=>v.room)));
  if(relayDelays&&(!transport||transport.scheduled<matchFrames||transport.delivered!==transport.scheduled||transport.configuredDelayMinMs!==Math.min(...relayDelays)||transport.configuredDelayMaxMs!==Math.max(...relayDelays)))throw Error('Relay delay injection was not exercised '+JSON.stringify(transport));
  if(clientDelays&&(!receiveTransport||receiveTransport.scheduled<matchFrames||receiveTransport.delivered!==receiveTransport.scheduled||receiveTransport.configuredDelayMinMs!==Math.min(...clientDelays)||receiveTransport.configuredDelayMaxMs!==Math.max(...clientDelays)))throw Error('Client delay injection was not exercised '+JSON.stringify(receiveTransport));
  if(combatMode&&final.some(v=>v.report.live.inputSource!=='scripted normalized controller samples'||!v.report.live.workload.framesWithAttack||!v.report.live.workload.framesWithHitlag||!v.report.live.workload.framesWithDamage||v.report.live.workload.windows.some(w=>w.frames===600&&(!w.attack||!w.hitlag))))throw Error('Combat workload did not sustain attack and contact '+JSON.stringify(final.map(v=>v.report.live.workload)));

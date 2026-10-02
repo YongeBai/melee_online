@@ -24,6 +24,8 @@ files.add('music-fixtures.json');
 files.add('native-sfx.mjs');files.add('native-sfx-worker.mjs');files.add('native-gc-adapter.mjs');files.add('sfx-fixtures.json');files.add('sfx/headers.bin');
 // First-party usage analytics (Vercel Web Analytics; inert off the public host).
 files.add('native-analytics.mjs');
+// Netplay overlay (backquote) with the per-player input delay setting.
+files.add('native-net-hud.mjs');
 if(fs.existsSync(path.join(output,'sfx-fixtures.json')))for(const f of Object.values(JSON.parse(fs.readFileSync(path.join(output,'sfx-fixtures.json'))).files)){if(!/^sfx\/[a-z0-9_]+\.(ssm|sem)$/.test(f.url))throw Error('Invalid sound fixture');files.add(f.url);}
 if(fs.existsSync(path.join(output,'music-fixtures.json')))for(const name of Object.keys(JSON.parse(fs.readFileSync(path.join(output,'music-fixtures.json'))))){if(!/^[a-z0-9_]+\.hps$/.test(name))throw Error('Invalid music fixture');files.add('audio/'+name);}
 const types={'.css':'text/css','.png':'image/png','.js':'text/javascript','.html':'text/html; charset=utf-8','.mjs':'text/javascript','.wasm':'application/wasm','.json':'application/json'};

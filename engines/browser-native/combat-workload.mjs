@@ -34,6 +34,13 @@ export function combatWorkload(frame,states) {
   });
 }
 
+// Netcode lab only: the same script with the per-frame analog jitter of a real
+// browser gamepad (sticks never report exactly the same float twice).
+const clampAxis=v=>Math.max(-1,Math.min(1,v));
+export function noisyCombatWorkload(frame,states,random=Math.random){
+  return combatWorkload(frame,states).map(([buttons,x,y])=>[buttons,clampAxis(x+(random()-.5)*.024),clampAxis(y+(random()-.5)*.024),clampAxis((random()-.5)*.016),clampAxis((random()-.5)*.016),0,0]);
+}
+
 // Run the identical controller sequence without rAF to find correctness faults
 // before spending a real-time performance run. This is not an FPS benchmark.
 export function verifyCombatWorkload(module,objects,report,frames) {

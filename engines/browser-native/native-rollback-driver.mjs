@@ -13,9 +13,10 @@ export function createNativeRollbackDriver({network,session,neutralFrames=3,dela
  if(!Number.isInteger(delay)||delay<0||delay>6)throw Error('Invalid rollback input delay');
  let closed=false,pendingFrame=-1,pending=null,sentThrough=neutralFrames-1,rttMs=null,advantage=0;const queued=new Map();
  // Frame advantage: how far our simulation is ahead of the peer's. The peer
- // sent its newest known input at its frame remoteKnown-delay, half a round
- // trip ago; smoothed so single late packets do not trigger adjustments.
- function measureAdvantage(){if(session.frame%30===1)rttMs=network.rtt?.()??rttMs;if(session.remoteKnown<neutralFrames+delay)return;const peer=session.remoteKnown-delay+(rttMs??0)/2/(1000/60);advantage+=(session.frame-peer-advantage)*.1;network.setFrameAdvantage?.(advantage);}const stalls={phase:0,transport:0,window:0};const transportEvents=[];
+ // sent its newest known input at its frame remoteKnown minus its own input
+ // delay, half a round trip ago; smoothed so single late packets do not
+ // trigger adjustments. Players may choose different delays.
+ function measureAdvantage(){if(session.frame%30===1)rttMs=network.rtt?.()??rttMs;const peerDelay=network.peerInputDelay??delay;if(session.remoteKnown<neutralFrames+peerDelay)return;const peer=session.remoteKnown-peerDelay+(rttMs??0)/2/(1000/60);advantage+=(session.frame-peer-advantage)*.1;network.setFrameAdvantage?.(advantage);}const stalls={phase:0,transport:0,window:0};const transportEvents=[];
  const transportSink={
   receive(frame,value){if(closed)throw Error('Rollback driver closed');if(transportEvents.length>=4096)throw Error('Rollback transport backlog');transportEvents.push({type:'input',frame,value});},
   acknowledge(frame){if(closed)throw Error('Rollback driver closed');if(transportEvents.length>=4096)throw Error('Rollback transport backlog');transportEvents.push({type:'ack',frame});}

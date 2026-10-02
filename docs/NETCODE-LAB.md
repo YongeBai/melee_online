@@ -189,6 +189,51 @@ below used the product default (no `?netcode=`):
 about 2.4 s/min at 57.7 FPS. Such links would need more input delay, chosen
 from the measured round trip.
 
+## Real-play follow-up (October 2, 2026)
+
+Players nearby on Wi-Fi still reported snapping and late-feeling inputs. The
+lab missed three things:
+
+- **Analog noise.** The scripted workload holds exact stick values; a browser
+  gamepad reports a slightly different float every frame. `--noise` adds that
+  jitter (`?noise=1`, `noisyCombatWorkload`). On `far`, noisy input
+  mispredicted on 1,737 of 1,800 frames and replayed 186 frames/s, against about
+  11 replayed frames/s with exact values on `far-wifi`. On `regional` the 2-frame
+  input delay hides it completely. `canonicalPad` now snaps analog values to
+  GameCube steps (1/80 sticks, 1/140 shoulders), as a real controller reports
+  them, which removes sub-step noise (1,623 corrections on the same run). A
+  thumb really moves by more than a step, so frequent rollbacks with real
+  players remain, as in Slippi.
+- **Long sessions.** The direct link kept only its first 4,096 round-trip
+  samples (about 68 seconds) for the whole page. Time sync and the menu buffer
+  then used a stale round trip, biasing time sync by half the change. It is
+  now a rolling window of the last 300. Lab trials are fresh pages of about a
+  minute, so they never reached the cutoff. A six-match soak in one page
+  (`probe-native-rooms.mjs --lras --rollback --matches=6`) showed no growth in
+  draw time, step time or heap.
+- **Input delay is a trade-off on Wi-Fi.** `wifi-spikes` with noisy input:
+
+  | Delay | Own-input delay p50 | Stutter | Replayed f/s | Corrections per seat |
+  |---|---|---|---|---|
+  | 2 frames (default) | 34 ms | 576 ms/min | 18.7 | 109 / 49 |
+  | 1 frame | 17 ms | 906 ms/min | 120.8 | 1,548 / 1,603 |
+
+  Each player now chooses their own delay (0–4 frames). Each direct packet
+  carries the sender's delay, so time sync estimates the peer's frame correctly
+  when the two differ; a 1-frame vs 2-frame run under `regional` converged
+  exactly with no time-sync drift (`--seat-delay=1:1`).
+
+The netplay overlay (backquote) shows ping and its p95, both players' input
+delay, rollbacks per second and their length, frames frozen waiting for the
+opponent, frame advantage with time-sync corrections, and simulation and draw
+cost. `[` and `]` set this player's delay from the next character select; it
+is remembered per browser.
+
+`home-wifi` (1.5% loss, 25% correlated) failed to join in 3 of 4 attempts
+today, before any match code runs: the guest's WebRTC connection never formed.
+It passed 2 of 2 in round 3, so connection setup under bursty loss needs its
+own investigation.
+
 ## Limits
 
 - Both browsers run on one machine. They share its CPU and display clock, so

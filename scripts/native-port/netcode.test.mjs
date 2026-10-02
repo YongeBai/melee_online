@@ -17,9 +17,15 @@ test('menu buffer covers half the round trip plus margin within 3-12 frames',()=
  assert.equal(menuBufferFor(100),5);assert.equal(menuBufferFor(2000),12);
 });
 
+test('analog values snap to GameCube steps, so sub-step jitter is one input',()=>{
+ const rest=canonicalPad([0,0.004,-0.006,0.003,0,0.002,0]);assert.deepEqual(rest,[0,0,0,0,0,0,0]);assert(!Object.is(canonicalPad([0,-0.001,0,0,0,0,0])[1],-0));
+ assert.deepEqual(canonicalPad([0,0.5012,0,0,0,0,0]),canonicalPad([0,0.4991,0,0,0,0,0]));
+ assert.deepEqual(canonicalPad([0,1,-1,1,-1,1,1]),[0,1,-1,1,-1,1,1]);
+});
 test('input packets round-trip canonical (float32) analog values exactly',()=>{
  const frames=[{pad:canonicalPad([0x1f7f,0.123456789,-1,Math.SQRT1_2,-0.25,0.7,0]),tap:1},{pad:[0,0,0,0,0,0,0],tap:0}];
- assert.equal(frames[0].pad[3],Math.fround(Math.SQRT1_2));
+ // GameCube resolution: 57/80 for the stick, 98/140 for the shoulder.
+ assert.equal(frames[0].pad[3],Math.fround(57/80));assert.equal(frames[0].pad[5],Math.fround(98/140));
  const packet=decodeInputPacket(encodeInputPacket({epoch:70000,sequence:3,seat:1,ack:41,first:40,frames,sentAt:12.5,echoSentAt:3.25,echoHoldMs:1.5,advantage:-1.25}));
  assert.equal(packet.advantage,-1.25);assert.equal(packet.epoch,70000&0xffff);assert.equal(packet.seat,1);assert.equal(packet.ack,41);assert.equal(packet.first,40);
  assert.deepEqual(packet.frames,frames);assert.equal(decodeInputPacket(new ArrayBuffer(10)),null);

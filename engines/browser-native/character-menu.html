@@ -84,6 +84,7 @@ try{
   for(let port=0;port<2;port++){const button=document.createElement('button');button.textContent='Keyboard: P'+(port+1);button.id='keyboard-p'+(port+1);button.addEventListener('click',()=>{input.setKeyboardPort(port);for(const b of controls.querySelectorAll('button[data-seat]'))b.setAttribute('aria-pressed',String(b===button));});button.dataset.seat=port;button.setAttribute('aria-pressed',String(port===0));controls.append(button);}
   const restart=document.createElement('button');restart.textContent='Return to character select';restart.hidden=true;controls.append(restart);document.querySelector('#picture').after(controls);
   globalThis.nativeMenuInput=input;
+  import('./native-net-hud.mjs').then(m=>{globalThis.nativeNetHud=m.installNetHud();}).catch(e=>{report.netHudError=String(e);});
   // Controller play generates no OS input, so keep the display awake while the
   // game is visible. The browser drops the lock when the tab is hidden.
   let wakeLock=null,requesting=false;const keepAwake=async()=>{if(wakeLock||requesting||document.visibilityState!=='visible'||!navigator.wakeLock)return;requesting=true;try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;});}catch{}finally{requesting=false;}};
@@ -93,7 +94,7 @@ try{
   async function returnToCharacters(match){
    let ticket=null;try{ticket=returnTicket('characters',match.selection);}catch{}
    if(network.active){const back=network.returnToCharacters();network.endMatch({results:match.results,selection:returnTicket('rematch',match.selection)},match.live.terminalFrame??match.live.frames-1);await back;ticket=network.state.returnTo;}
-   globalThis.nativeLastMatchResults=match.results;
+   globalThis.nativeLastMatchResults=match.results;globalThis.nativeLastLive=match.live;
    try{if(!boot)throw Error(report.bootCheckpointError??'No boot checkpoint');boot.heap.restore();}catch(e){report.returnFallback=String(e);if(network.active)network.reload();else{saveReturn(ticket);location.reload();}return;}
    if(boot.sfx)globalThis.nativeSfx?.restore(boot.sfx);rollbackAudio=createAudio();if(boot.audio)rollbackAudio?.restore(boot.audio);globalThis.nativeRollbackAudio=rollbackAudio;
    globalThis.nativeLive=undefined;globalThis.nativeProductRollback=undefined;globalThis.nativeMenuMatchReport=undefined;globalThis.nativeStageMenu=undefined;
@@ -102,7 +103,7 @@ try{
    const canvas=document.querySelector('#native-preview');if(canvas)canvas.id='picture';
    stageInstalled=false;enterCharacterMenu();module._portTapJumpSet(input.keyboardPort,+document.querySelector('#tapJump').checked);startMenu();
   }
-  const startMenu=()=>{globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{network,module,matchParams:{gpuerrors:'deferred',...(pageParams.has('liveframes')?{liveframes:pageParams.get('liveframes')}:{}) ,...(rollbackDefault?{rollback:1}:{}),...(pageParams.has('captureframes')?{captureframes:1}:{}) ,...(pageParams.has('workload')?{workload:1}:{})},onResults:returnToCharacters,onState:s=>{if(s.state?.players&&(s.scene==='characters'||s.scene==='stages'))prefetchFighters(s.state.players);if(returning?.action==='rematch'&&s.scene==='characters'&&s.state.frames>=60&&s.state.gate===0){if(network.active)network.ready();else input.pulse(0x1000);}productUI.update(s);globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;document.body.dataset.error='true';}});};
+  const startMenu=()=>{globalThis.nativeMenuLive=startNativeMenuLive(nativeCharacterMenu,input,{network,module,matchParams:{gpuerrors:'deferred',...(pageParams.has('liveframes')?{liveframes:pageParams.get('liveframes')}:{}) ,...(rollbackDefault?{rollback:1}:{}),...(pageParams.has('captureframes')?{captureframes:1}:{}) ,...(pageParams.has('workload')?{workload:1}:{}),...(pageParams.has('noise')?{noise:1}:{})},onResults:returnToCharacters,onState:s=>{if(s.state?.players&&(s.scene==='characters'||s.scene==='stages'))prefetchFighters(s.state.players);if(returning?.action==='rematch'&&s.scene==='characters'&&s.state.frames>=60&&s.state.gate===0){if(network.active)network.ready();else input.pulse(0x1000);}productUI.update(s);globalThis.nativeMenuLiveState=s;restart.hidden=s.scene!=='exited';document.querySelector('#result').textContent=JSON.stringify(s,null,2);},onError:e=>{input.dispose();globalThis.nativeMenuLiveError=String(e.stack??e);document.querySelector('#result').textContent=nativeMenuLiveError;document.body.dataset.error='true';}});};
   startMenu();
   restart.addEventListener('click',()=>nativeMenuLive.restart());
  }
