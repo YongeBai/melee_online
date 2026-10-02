@@ -1,4 +1,15 @@
 <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Melee Online</title>
+<script>// The product page is black from the first paint: no browser-default white
+// page, status text or unplaced canvas while the game loads or reloads.
+// The written link is parser-inserted, so nothing paints before the product
+// stylesheet applies (the product UI links the same, cached, file later).
+if(new URLSearchParams(location.search).has('interactive')){document.documentElement.dataset.product='';document.write('<link rel="stylesheet" href="./native-product.css">');}</script>
+<style>
+html[data-product],html[data-product] body{margin:0;background:#000;color:#fff}
+html[data-product] #result{display:none}
+html[data-product] body:not(.online-room) #picture{visibility:hidden}
+html[data-product] body[data-error="true"] #result{display:block;position:fixed;inset:10%;z-index:20;overflow:auto;background:#210e12;color:#fff;padding:20px;white-space:pre-wrap;font:14px/1.4 monospace}
+</style>
 <script type="module" async src="./native-analytics.mjs"></script>
 <canvas id="picture" width="960" height="720"></canvas>
 <pre id="result">Loading original character-select assets…</pre>
