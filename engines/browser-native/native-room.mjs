@@ -1,14 +1,21 @@
 import {createDirectInputLink,defaultNetcode,menuBufferFor,canonicalPad} from './native-netcode.mjs';
 // An input-only relay: each browser runs the original C game. The relay carries
 // immutable inputs and confirmations for either lockstep or local rollback.
+// The address bar carries the room code, so a copied URL joins that room.
+const roomCode=/^[A-HJ-NP-Z2-9]{6}$/;
+function linkedRoom(){const code=new URLSearchParams(location.search).get('room')?.toUpperCase();return roomCode.test(code??'')?code:null;}
+function showRoom(code){try{const url=new URL(location.href);if(code)url.searchParams.set('room',code);else url.searchParams.delete('room');if(url.href!==location.href)history.replaceState(history.state,'',url);}catch{}}
 export async function connectNativeRoom({storage=globalThis.sessionStorage,onState=()=>{},onError=()=>{},reload=()=>location.reload(),diagnosticCpu=false,transport=null,netcode=defaultNetcode}={}) {
- const storageKey='native-melee-room-v1',requestedDiagnostic=diagnosticCpu===true;
+ const storageKey='native-melee-room-v1',requestedDiagnostic=diagnosticCpu===true,linked=linkedRoom();
  const post=transport?(path,body={})=>transport.post(path,body):async(path,body={})=>{const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),result=await response.json().catch(()=>({}));if(!response.ok)throw Error(result.error??'Room service unavailable');return result;};
  let saved;try{saved=JSON.parse(storage.getItem(storageKey));}catch{}
  let initial;
  if(saved?.token&&saved.diagnosticCpu===requestedDiagnostic){try{initial=await post('/native-rooms/resume',saved);}catch{storage.removeItem(storageKey);}}
  else if(saved?.token)storage.removeItem(storageKey);
  if(!initial)transport?.forget?.();
+ // A shared room URL joins that room instead of creating one.
+ let linkError=null;
+ if(!initial&&linked){try{initial=await post('/native-rooms/join',{code:linked});}catch(e){linkError=e.message;}}
  initial??=await post('/native-rooms',{diagnosticCpu:requestedDiagnostic});
  let state=initial,ws,closed=false,sequence=-1,key=null,phaseReady=false,nextFrame=0,reloading=false,localTapJump=1,localDevice=null,lastSent=null,confirmedFrame=-1,rollbackSink,pendingEnding=null,reconnectTimer,reconnectAttempt=0,inPlace=null;
  const frames=new Map(),sent=new Map(),rollbackEvents=[];
@@ -32,12 +39,14 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  const network={
   get code(){return state.code;},get seat(){return state.seat;},get state(){return state;},get active(){return state.hasGuest&&!state.cpu;},
   get connected(){return state.connected.every(Boolean);},netcode,
+  // Why the room named by the opened URL could not be joined; read once.
+  takeLinkError(){const e=linkError;linkError=null;return e;},
   // Median peer round trip, from the direct link when active, else room pings.
   rtt(){return direct?.active?direct.snapshot().rttP50Ms:transport?.stats?.().rttP50Ms??null;},
   // Frame-advantage exchange for time sync; null without a direct link.
   setFrameAdvantage(value){direct?.setAdvantage(value);},get peerFrameAdvantage(){return direct?.active?direct.peerAdvantage:null;},get peerInputDelay(){return direct?.active?direct.peerDelay:null;},get cpu(){return state.cpu;},get tapJump(){return localTapJump;},get phaseReady(){return phaseReady;},
   snapshot(){return {code:state.code,seat:state.seat,epoch:state.epoch,phase:key,phaseReady,nextFrame,buffered:frames.size,bufferedSent:sent.size,lastSent,confirmedFrame,pendingEnding:pendingEnding&&{frame:pendingEnding.frame,sent:pendingEnding.sent},bufferedRollbackEvents:rollbackEvents.length,mode:network.active?(rollbackPhase?'rollback':peerMenus?'peer-lockstep-'+menuBuffer:'lockstep-3'):'solo',netcode:netcode.name,direct:direct?.active?direct.snapshot():null,transport:network.active?'authenticated-inputs-v3':null,link:transport?.kind??'websocket-relay'};},
-  async join(code){const result=await post('/native-rooms/join',{code});reloading=true;try{send({type:'leave'});}catch{}initial=result;persist(result,true);reloading=true;reload();},
+  async join(code){const result=await post('/native-rooms/join',{code});showRoom(result.code);reloading=true;try{send({type:'leave'});}catch{}initial=result;persist(result,true);reloading=true;reload();},
   setDevice(value){if(!['keyboard','controller'].includes(value))throw Error('Invalid input device');localDevice=value;syncDevice();},
   setTapJump(value){if(value!==0&&value!==1)throw Error('Invalid tap jump setting');localTapJump=value;},
   endMatch(value,frame=nextFrame-1){if(!Number.isSafeInteger(frame)||frame<0)throw Error('Invalid match ending frame');const ending={frame,value:structuredClone(value),sent:false};if(pendingEnding){if(JSON.stringify({...pendingEnding,sent:false})!==JSON.stringify(ending))throw Error('Conflicting match ending');return;}pendingEnding=ending;flushEnding();},chooseResult(action){send({type:'result-action',epoch:state.epoch,action});},
@@ -47,8 +56,8 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
   // Reload into the current epoch, as a reload-based return would have.
   reload(){restart(state);},
   cpuMode(enabled){send({type:'cpu',enabled});},ready(){if(!state.ready[state.seat])send({type:'ready'});},kick(){send({type:'kick'});},
-  newRoom(){reloading=true;try{send({type:'leave'});}catch{}storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();reload();},
-  leave(){reloading=true;try{send({type:'leave'});}finally{storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();reload();}},
+  newRoom(){showRoom(null);reloading=true;try{send({type:'leave'});}catch{}storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();reload();},
+  leave(){showRoom(null);reloading=true;try{send({type:'leave'});}finally{storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();reload();}},
   begin(scene){if(!network.active)return;rollbackPhase=rollbackSink!==undefined;key=scene+':'+(++sequence);nextFrame=0;confirmedFrame=-1;pendingEnding=null;phaseReady=false;frames.clear();sent.clear();rollbackEvents.length=0;remoteDelivered=-1;ackDelivered=-1;remoteSeen.clear();peerInputs.clear();queuedThrough=2;menuBuffer=3;
    if((rollbackPhase||peerMenus)&&netcode.transport==='direct'&&transport?.fast){direct??=createDirectInputLink({channel:transport.fast,seat:state.seat,delay:()=>netcode.delay,onInput:(frame,value)=>rollbackPhase?queueRollback({type:'peer-input',frame,value}):peerInput(frame,value),onAck:frame=>{if(rollbackPhase)queueRollback({type:'confirmed-frame',frame});}});direct.begin(state.epoch,sequence);}else direct?.end();
    if(ws?.readyState===1)send({type:'phase',key,epoch:state.epoch,rollback:rollbackPhase});},// Otherwise sent on reconnect.
@@ -101,14 +110,14 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
    if(m.type==='state'){
     const advanced=m.epoch!==initial.epoch;
     if(advanced){if(!inPlace){restart({...m,token:initial.token});return;}advanceEpoch(m);}
-    state=m;persist(m);flushEnding();syncDevice();requestReturn();onState(network);clearTimeout(timeout);connected=true;reconnectAttempt=0;resolve(network);
+    state=m;persist(m);showRoom(m.code);flushEnding();syncDevice();requestReturn();onState(network);clearTimeout(timeout);connected=true;reconnectAttempt=0;resolve(network);
     if(advanced){const done=inPlace.resolve;inPlace=null;done(network);}
    }else if(m.type==='frame'&&m.epoch===state.epoch&&m.key===key){if(rollbackSink===undefined&&!peerMenus)frames.set(m.frame,m.inputs);}
    else if(m.type==='peer-input'&&m.epoch===state.epoch&&m.key===key&&m.seat===1-state.seat){if(rollbackSink===undefined&&peerMenus)peerInput(m.frame,m.value);else queueRollback(m);}
    else if(m.type==='confirmed-frame'&&m.epoch===state.epoch&&m.key===key){if(!Number.isSafeInteger(m.frame)||m.frame!==confirmedFrame+1)throw Error('Non-contiguous room confirmation');confirmedFrame=m.frame;if(rollbackPhase)sent.delete(m.frame);queueRollback(m);flushEnding();}
    else if(m.type==='phase-ready'&&m.epoch===state.epoch&&m.key===key)phaseReady=true;
    else if(m.type==='resync-required')restart(state,false);
-   else if(m.type==='removed'){state={...state,connected:[false,false]};storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();onError(Error('You were removed from the room. Reload to start a new room.'));}
+   else if(m.type==='removed'){showRoom(null);state={...state,connected:[false,false]};storage.removeItem(storageKey);transport?.forget?.();closed=true;ws.close();onError(Error('You were removed from the room. Reload to start a new room.'));}
    else if(m.type==='error')onError(Error(m.message));
   }catch(e){onError(e);}};
   socket.onclose=()=>{clearTimeout(timeout);if(socket!==ws)return;if(!closed&&!reloading){state={...state,connected:[false,false]};onState(network);if(initialConnect&&!connected)reject(Error('Room connection closed'));else{const wait=Math.min(2000,250*2**Math.min(reconnectAttempt++,3));reconnectTimer=setTimeout(()=>{if(!closed&&!reloading)void open().catch(()=>{});},wait);}}};
@@ -116,6 +125,8 @@ export async function connectNativeRoom({storage=globalThis.sessionStorage,onSta
  // A peer-hosted authority reloads on epoch changes, which can close the first
  // connection before its state arrives. Relay sockets keep the original rule.
  for(let attempt=0;;attempt++){try{await open(true);break;}catch(e){if(!transport||attempt>=8)throw e;await new Promise(r=>setTimeout(r,250*(attempt+1)));}}
+ // A page resumed into another room follows the link with a normal join.
+ if(linked&&!linkError&&linked!==state.code)await network.join(linked).catch(e=>{linkError=e.message;});
  return network;
 }
 
